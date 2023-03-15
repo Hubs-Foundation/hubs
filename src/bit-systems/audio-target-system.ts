@@ -1,8 +1,10 @@
+import { AComponent, AElement } from "aframe";
 import { addComponent, defineQuery, enterQuery, exitQuery } from "bitecs";
 import { Vector3, Object3D, LineSegments, WireframeGeometry, SphereBufferGeometry, PositionalAudio } from "three";
 import { HubsWorld } from "../app";
-import { AudioEmitter, AudioSettingsChanged, AudioSource, AudioTarget } from "../bit-components";
+import { AudioSettingsChanged, AudioSource, AudioTarget } from "../bit-components";
 import { SourceType } from "../components/audio-params";
+import { getMediaStream } from "../components/avatar-audio-source";
 import { AUDIO_SOURCE_FLAGS } from "../inflators/audio-source";
 import { AudioSystem } from "../systems/audio-system";
 import { Emitter2Audio, makeAudioEntity } from "./audio-emitter-system";
@@ -23,7 +25,7 @@ const createWhiteNoise = (audioContext: AudioContext, gain: number): AudioBuffer
   return whiteNoise;
 };
 
-const addSourceToAudioTarget = (audioSourceEid: number, source: AudioBufferSourceNode) => {
+const addSourceToAudioTarget = (audioSourceEid: number, source: AudioNode) => {
   const audioTargetEids = source2Target.get(audioSourceEid);
   audioTargetEids?.forEach(audioTargetEid => {
     const audioEid = Emitter2Audio.get(audioTargetEid)!;
@@ -34,7 +36,7 @@ const addSourceToAudioTarget = (audioSourceEid: number, source: AudioBufferSourc
     if (targetAudio instanceof PositionalAudio) {
       targetAudio.panner.connect(targetAudio.gain);
     }
-    targetAudio.setNodeSource(source);
+    targetAudio.setNodeSource(source as AudioBufferSourceNode);
     targetAudio.connect();
   });
 };
@@ -69,14 +71,11 @@ const connectSourceToTarget = (audioSourceEid: number, audioTargetEid: number) =
 
 const source2Noise = new Map<number, AudioBufferSourceNode>();
 const source2Target = new Map<number, Array<number>>();
-const source2Emitter = new Map<number, number>();
+const source2Emitter = new Map<number, AElement>();
 const source2Radius = new Map<number, number>();
 const source2Debug = new Map<number, Object3D>();
 const sourceWorldPos = new Vector3();
-const emitterWorldPos = new Vector3();
 
-const audioEmitterQuery = defineQuery([AudioEmitter]);
-const audioEmitterExitQuery = exitQuery(audioEmitterQuery);
 const audioTargetQuery = defineQuery([AudioTarget]);
 const audioTargetEnterQuery = enterQuery(audioTargetQuery);
 const audioTargetExitQuery = exitQuery(audioTargetQuery);
@@ -86,16 +85,6 @@ const audioSourceExitQuery = exitQuery(audioSourceQuery);
 export function audioTargetSystem(world: HubsWorld, audioSystem: AudioSystem) {
   const audioTargetEids = audioTargetQuery(world);
   const audioSourceEids = audioSourceQuery(world);
-  audioEmitterExitQuery(world).forEach(audioEmitterEid => {
-    const audioSourceEids = [...source2Emitter]
-      .filter(([_, emitterEid]) => emitterEid === audioEmitterEid)
-      .map(([audioSourceEid, _]) => audioSourceEid);
-    audioSourceEids.forEach(audioSourceEid => {
-      source2Emitter.delete(audioSourceEid)!;
-      const whiteNoise = source2Noise.get(audioSourceEid)!;
-      addSourceToAudioTarget(audioSourceEid, whiteNoise);
-    });
-  });
   audioTargetEnterQuery(world).forEach(audioTargetEid => {
     const ctx = APP.audioListener.context;
     const audioEid = makeAudioEntity(world, audioTargetEid, SourceType.AUDIO_TARGET, audioSystem);
@@ -162,45 +151,59 @@ export function audioTargetSystem(world: HubsWorld, audioSystem: AudioSystem) {
     }
   });
   audioSourceEids.forEach(audioSourceEid => {
-    const obj = APP.world.eid2obj.get(audioSourceEid)!;
-    obj.updateMatrixWorld();
-    obj.getWorldPosition(sourceWorldPos);
-    const radius = source2Radius.get(audioSourceEid)!;
-    const currentEmitterEid = source2Emitter.get(audioSourceEid)!;
-    if (currentEmitterEid) {
-      const currentEmitterAudio = APP.audios.get(currentEmitterEid)!;
-      currentEmitterAudio.getWorldPosition(emitterWorldPos);
-      const distanceSquared = emitterWorldPos.distanceToSquared(sourceWorldPos);
-      if (distanceSquared > radius) {
+    const playerInfos = APP.componentRegistry["player-info"];
+    if (source2Emitter.has(audioSourceEid)) {
+      const emitterId = source2Emitter.get(audioSourceEid)!;
+      const playerInfoExists = playerInfos.find((playerInfo: AComponent) => playerInfo.el === emitterId);
+      if (playerInfoExists) {
+        const distanceSquared = emitterId.object3D.position.distanceToSquared(sourceWorldPos);
+        const radius = source2Radius.get(audioSourceEid)!;
+        if (distanceSquared > radius) {
+          source2Emitter.delete(audioSourceEid);
+          if (AudioSource.flags[audioSourceEid] & AUDIO_SOURCE_FLAGS.DEBUG) {
+            const whiteNoise = source2Noise.get(audioSourceEid)!;
+            addSourceToAudioTarget(audioSourceEid, whiteNoise);
+          }
+        }
+      } else {
         source2Emitter.delete(audioSourceEid);
         if (AudioSource.flags[audioSourceEid] & AUDIO_SOURCE_FLAGS.DEBUG) {
           const whiteNoise = source2Noise.get(audioSourceEid)!;
           addSourceToAudioTarget(audioSourceEid, whiteNoise);
         }
-        APP.mutedState.delete(currentEmitterEid);
-        addComponent(world, AudioSettingsChanged, currentEmitterEid);
       }
     } else {
-      audioEmitterQuery(world).every(audioEmitterEid => {
-        const sourceType = APP.sourceType.get(audioEmitterEid);
-        if (sourceType === SourceType.AUDIO_TARGET) return true;
-        if (sourceType === SourceType.AVATAR_AUDIO_SOURCE) {
-          // Check permissions
-        }
-        const emitterAudio = APP.audios.get(audioEmitterEid)!;
-        emitterAudio.getWorldPosition(emitterWorldPos);
-        const distanceSquared = emitterWorldPos.distanceToSquared(sourceWorldPos);
+      for (let i = 0; i < playerInfos.length; i++) {
+        const playerInfo = playerInfos[i];
+        const avatar = playerInfo.el;
+
+        if (
+          AudioSource.flags[audioSourceEid] & AUDIO_SOURCE_FLAGS.ONLY_MODS &&
+          !(playerInfo as any).can("amplify_audio")
+        )
+          continue;
+
+        // don't use avatar-rig if not entering scene yet.
+        if (avatar.id === "avatar-rig" && !APP.scene!.is("entered")) continue;
+
+        const distanceSquared = avatar.object3D.position.distanceToSquared(sourceWorldPos);
+        const radius = source2Radius.get(audioSourceEid)!;
         if (distanceSquared < radius) {
-          source2Emitter.set(audioSourceEid, audioEmitterEid);
-          if (AudioSource.flags[audioSourceEid] & AUDIO_SOURCE_FLAGS.MUTE_SELF) {
-            APP.mutedState.add(audioEmitterEid);
-            addComponent(world, AudioSettingsChanged, audioEmitterEid);
+          source2Emitter.set(audioSourceEid, avatar);
+          const muteSelf = AudioSource.flags[audioSourceEid] & AUDIO_SOURCE_FLAGS.MUTE_SELF;
+          const isOwnAvatar = avatar.id === "avatar-rig";
+          if (muteSelf && isOwnAvatar) {
+            removeSourceFromAudioTarget(audioSourceEid);
+          } else {
+            getMediaStream(avatar).then(stream => {
+              const audioListener = APP.audioListener;
+              const ctx = audioListener.context;
+              const node = ctx.createMediaStreamSource(stream);
+              addSourceToAudioTarget(audioSourceEid, node);
+            });
           }
-          emitterAudio.source && addSourceToAudioTarget(audioSourceEid, emitterAudio.source);
-          return false;
         }
-        return true;
-      });
+      }
     }
   });
 }

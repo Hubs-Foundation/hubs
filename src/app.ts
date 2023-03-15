@@ -5,7 +5,7 @@ import MediaSearchStore from "./storage/media-search-store";
 import Store from "./storage/store";
 import qsTruthy from "./utils/qs_truthy";
 
-import type { AElement, AScene } from "aframe";
+import type { AComponent, AScene } from "aframe";
 import HubChannel from "./utils/hub-channel";
 import MediaDevicesManager from "./utils/media-devices-manager";
 
@@ -75,6 +75,7 @@ export class App {
   entryManager?: SceneEntryManager;
   messageDispatch?: any;
   store: Store;
+  componentRegistry: { [key: string]: AComponent[] };
 
   mediaSearchStore = new MediaSearchStore();
 

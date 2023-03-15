@@ -9,6 +9,8 @@ declare module "aframe" {
     };
     getObject3D(string): Object3D?;
     components: { [s: string]: AComponent };
+    eid: number;
+    isPlaying: boolean;
   }
 
   type FnTick = (t: number, dt: number) => void;
@@ -18,7 +20,7 @@ declare module "aframe" {
     tick: FnTick;
     tock: FnTick;
     remove();
-    el: AScene;
+    el: Scene;
   }
 
   interface AComponent {
@@ -27,7 +29,7 @@ declare module "aframe" {
     tick: FnTick;
     tock: FnTick;
     remove();
-    el: AScene;
+    el: AElement;
   }
 
   interface HubsSystems extends ASystem {
@@ -99,7 +101,6 @@ declare module "aframe" {
     renderStarted: boolean;
     renderer: WebGLRenderer;
     tick(time: number, delta: number): void;
-    isPlaying: boolean;
     behaviors: {
       tick: AComponent[];
       tock: AComponent[];
