@@ -33,7 +33,7 @@ export const MediaFrame = defineComponent({
   preview: Types.eid,
   previewingNid: Types.eid
 });
-export const Text = defineComponent();
+export const TextTag = defineComponent();
 export const ReflectionProbe = defineComponent();
 export const Slice9 = defineComponent({
   insets: [Types.ui32, 4],

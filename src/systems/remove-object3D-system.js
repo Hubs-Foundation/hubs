@@ -13,7 +13,7 @@ import {
   SimpleWater,
   Skybox,
   Slice9,
-  Text,
+  TextTag,
   VideoMenu,
   ParticleEmitterTag,
   NavMesh
@@ -50,7 +50,7 @@ const cleanupGLTFs = cleanupObjOnExit(GLTFModel, obj => {
   }
 });
 const cleanupLights = cleanupObjOnExit(LightTag, obj => obj.dispose());
-const cleanupTexts = cleanupObjOnExit(Text, obj => obj.dispose());
+const cleanupTexts = cleanupObjOnExit(TextTag, obj => obj.dispose());
 const cleanupMediaFrames = cleanupObjOnExit(MediaFrame, obj => obj.geometry.dispose());
 const cleanupAudioEmitters = cleanupObjOnExit(AudioEmitter, obj => cleanupAudio(obj));
 const cleanupImages = cleanupObjOnExit(MediaImage, obj => {
