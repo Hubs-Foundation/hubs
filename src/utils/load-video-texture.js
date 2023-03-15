@@ -33,11 +33,11 @@ export async function loadVideoTexture(src, contentType) {
     if (contentType.startsWith("application/dash")) {
       texture = new DashVideoTexture(videoEl);
       texture.player = createDashPlayer(src, videoEl, failLoad);
-    // TODO: Remove the dependency with AFRAME
+      // TODO: Remove the dependency with AFRAME
     } else if (AFRAME.utils.material.isHLS(src, contentType)) {
       texture = new HLSVideoTexture(videoEl);
       if (HLS.isSupported()) {
-        texture.setPlayer(createHLSPlayer(src, videoEl, failLoad));
+        texture.player = createHLSPlayer(src, videoEl, failLoad);
       } else if (!videoEl.canPlayType(contentType)) {
         failLoad("HLS unsupported");
       }

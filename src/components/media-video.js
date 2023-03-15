@@ -1,9 +1,14 @@
 import audioIcon from "../assets/images/audio.png";
 import { paths } from "../systems/userinput/paths";
 import HLS from "hls.js";
-import { addAndArrangeMedia, createVideoOrAudioEl, createDashPlayer, createHLSPlayer, hasAudioTracks } from "../utils/media-utils";
+import {
+  addAndArrangeMedia,
+  createVideoOrAudioEl,
+  createDashPlayer,
+  createHLSPlayer,
+  hasAudioTracks
+} from "../utils/media-utils";
 import { disposeTexture } from "../utils/material-utils";
-import { proxiedUrlFor } from "../utils/media-url-utils";
 import { SOUND_CAMERA_TOOL_TOOK_SNAPSHOT } from "../systems/sound-effects-system";
 import { applyPersistentSync } from "../utils/permissions-utils";
 import { refreshMediaMirror, getCurrentMirroredMedia } from "../utils/mirror-utils";

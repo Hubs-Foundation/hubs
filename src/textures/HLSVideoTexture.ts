@@ -29,12 +29,7 @@ export class HLSVideoTexture extends VideoTexture {
   ) {
     super(video, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy);
     this.isHLSVideoTexture = true;
-    this.player = null; // Set via setPlayer()
-  }
-
-  setPlayer(player: HLSPlayer): HLSVideoTexture {
-    this.player = player;
-    return this;
+    this.player = null; // Set by user later
   }
 
   dispose() {
@@ -43,6 +38,7 @@ export class HLSVideoTexture extends VideoTexture {
       this.player.stopLoad();
       this.player.detachMedia();
       this.player.destroy();
+      this.player = null;
     }
   }
 }
