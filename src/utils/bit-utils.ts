@@ -1,8 +1,11 @@
+import { AElement } from "aframe";
 import { Component, defineQuery, hasComponent, Query } from "bitecs";
 import { Object3D } from "three";
 import { HubsWorld } from "../app";
 import { EntityID } from "./networking-types";
 import { findAncestor } from "./three-utils";
+
+export type ElOrEid = EntityID | AElement;
 
 const queries = new Map<Component, Query>();
 export function anyEntityWith(world: HubsWorld, component: Component) {

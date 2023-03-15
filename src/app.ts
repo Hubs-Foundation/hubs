@@ -29,6 +29,7 @@ import { waitForPreloads } from "./utils/preload";
 import SceneEntryManager from "./scene-entry-manager";
 import { store } from "./utils/store-instance";
 import { addObject3DComponent } from "./utils/jsx-entity";
+import { ElOrEid } from "./utils/bit-utils";
 
 declare global {
   interface Window {
@@ -77,18 +78,18 @@ export class App {
 
   mediaSearchStore = new MediaSearchStore();
 
-  audios = new Map<AElement | number, PositionalAudio | Audio>();
-  sourceType = new Map<AElement | number, SourceType>();
-  audioOverrides = new Map<AElement | number, Partial<AudioSettings>>();
-  zoneOverrides = new Map<AElement | number, Partial<AudioSettings>>();
-  gainMultipliers = new Map<AElement | number, number>();
-  supplementaryAttenuation = new Map<AElement | number, number>();
-  clippingState = new Set<AElement | number>();
-  mutedState = new Set<AElement | number>();
-  isAudioPaused = new Set<AElement | number>();
+  audios = new Map<ElOrEid, PositionalAudio | Audio>();
+  sourceType = new Map<ElOrEid, SourceType>();
+  audioOverrides = new Map<ElOrEid, Partial<AudioSettings>>();
+  zoneOverrides = new Map<ElOrEid, Partial<AudioSettings>>();
+  gainMultipliers = new Map<ElOrEid, number>();
+  supplementaryAttenuation = new Map<ElOrEid, number>();
+  clippingState = new Set<ElOrEid>();
+  mutedState = new Set<ElOrEid>();
+  isAudioPaused = new Set<ElOrEid>();
   audioDebugPanelOverrides = new Map<SourceType, Partial<AudioSettings>>();
   sceneAudioDefaults = new Map<SourceType, Partial<AudioSettings>>();
-  moderatorAudioSource = new Set<AElement | number>();
+  moderatorAudioSource = new Set<ElOrEid>();
 
   world: HubsWorld = createWorld();
 
