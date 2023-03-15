@@ -21,7 +21,7 @@ export async function loadVideoTexture(src, contentType) {
 
     if (contentType.startsWith("application/dash")) {
       texture = new DashVideoTexture(videoEl);
-      texture.setPlayer(createDashPlayer(src, videoEl, failLoad));
+      texture.player = createDashPlayer(src, videoEl, failLoad);
     } else {
       texture = new VideoTexture(videoEl);
       videoEl.src = src;

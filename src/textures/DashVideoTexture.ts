@@ -34,18 +34,14 @@ export class DashVideoTexture extends VideoTexture {
   ) { 
     super(video, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy);
     this.isDashVideoTexture = true;
-    this.player = null; // Set via setPlayer()
-  }
-
-  setPlayer(player: MediaPlayer) : DashVideoTexture {
-    this.player = player;
-    return this;
+    this.player = null; // Set by user later
   }
 
   dispose() {
     super.dispose();
     if (this.player !== null) {
       this.player.reset();
+      this.player = null;
     }
   }
 }
