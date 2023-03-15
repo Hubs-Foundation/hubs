@@ -414,11 +414,17 @@ class ConfigurationEditor extends Component {
     }
   }
 
-  renderThemeSection(theme, config) {
-    const configurables = getDescriptors(theme)
+  getFilteredDescriptors(category) {
+    return getDescriptors(category)
       .filter(([, descriptor]) => qs.get("show_internal_configs") !== null || descriptor.internal !== "true")
       .filter(([, descriptor]) => qs.get("show_deprecated_configs") !== null || descriptor.deprecated !== "true");
+  }
 
+  /**
+   * Theme Tab Section
+   */
+  renderThemeSection(theme, config) {
+    const configurables = this.getFilteredDescriptors(theme);
     const getInput = ([path, descriptor]) => this.renderConfigurable(path, descriptor, getConfigValue(config, path));
 
     return (
@@ -459,11 +465,13 @@ class ConfigurationEditor extends Component {
     );
   }
 
+  /**
+   * General Render Tree
+   */
   renderTree(schema, category, config) {
-    const configurables = getDescriptors(schema[category])
-      .filter(([, descriptor]) => qs.get("show_internal_configs") !== null || descriptor.internal !== "true")
-      .filter(([, descriptor]) => qs.get("show_deprecated_configs") !== null || descriptor.deprecated !== "true")
-      .map(([path, descriptor]) => this.renderConfigurable(path, descriptor, getConfigValue(config, path)));
+    const configurables = this.getFilteredDescriptors(schema[category]).map(([path, descriptor]) =>
+      this.renderConfigurable(path, descriptor, getConfigValue(config, path))
+    );
 
     return (
       <form onSubmit={this.onSubmit.bind(this)}>
