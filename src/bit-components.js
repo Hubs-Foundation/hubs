@@ -50,6 +50,7 @@ export const GLTFModel = defineComponent();
 export const LightTag = defineComponent();
 export const AmbientLightTag = defineComponent();
 export const DirectionalLight = defineComponent();
+export const PointLightTag = defineComponent();
 export const SpotLightTag = defineComponent();
 export const CursorRaycastable = defineComponent();
 export const RemoteHoverTarget = defineComponent();
