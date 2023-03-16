@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect } from "react";
 import { AuthContext } from "./AuthContext";
 import { VerifyModal, VerificationError, EmailVerified, VerifyingEmail } from "./VerifyModal";
+import jwtDecode from "jwt-decode";
 
 const VerificationStep = {
   verifying: "verifying",
@@ -18,12 +19,28 @@ function useVerify() {
       try {
         const qs = new URLSearchParams(location.search);
 
-        const authParams = {
-          topic: qs.get("auth_topic"),
-          token: qs.get("auth_token"),
-          origin: qs.get("auth_origin"),
-          payload: qs.get("auth_payload")
-        };
+        if (qs.get("error")) {
+          throw new Error(`${qs.get("error")}: ${qs.get("error_description")}`);
+        }
+
+        let authParams;
+        if (qs.get("code")) {
+          const state = qs.get("state");
+          const topic_key = jwtDecode(state).topic_key;
+          authParams = {
+            topic: `oidc:${topic_key}`,
+            token: qs.get("code"),
+            origin: "oidc",
+            payload: qs.get("state")
+          };
+        } else {
+          authParams = {
+            topic: qs.get("auth_topic"),
+            token: qs.get("auth_token"),
+            origin: qs.get("auth_origin"),
+            payload: qs.get("auth_payload")
+          };
+        }
 
         await verify(authParams);
         setStep(VerificationStep.complete);
@@ -48,7 +65,8 @@ export function VerifyModalContainer() {
     content = <VerificationError error={error} />;
   } else if (step === VerificationStep.complete) {
     const qs = new URLSearchParams(location.search);
-    const origin = qs.get("auth_origin");
+    // auth_origin is not set when using OIDC flow so use a neutral default
+    const origin = qs.get("auth_origin") || "Hubs";
     content = <EmailVerified origin={origin} />;
   } else {
     content = <VerifyingEmail />;

@@ -3,10 +3,11 @@ import PropTypes from "prop-types";
 import { CloseButton } from "../input/CloseButton";
 import { Modal } from "../modal/Modal";
 import { FormattedMessage, useIntl, defineMessages } from "react-intl";
-import { CancelButton, NextButton, ContinueButton } from "../input/Button";
+import { CancelButton, NextButton, ContinueButton, Button } from "../input/Button";
 import { TextInputField } from "../input/TextInputField";
 import { Column } from "../layout/Column";
 import { LegalMessage } from "./LegalMessage";
+import configs from "../../utils/configs";
 
 export const SignInStep = {
   submit: "submit",
@@ -136,15 +137,57 @@ SubmitEmail.propTypes = {
   onSubmitEmail: PropTypes.func.isRequired
 };
 
+export function SubmitOIDC({ onSubmitOIDC, privacyUrl, termsUrl, message }) {
+  const intl = useIntl();
+  
+  const onSubmitForm = useCallback(
+    e => {
+      e.preventDefault();
+      onSubmitOIDC();
+    },
+    [onSubmitOIDC]
+  );
+
+  return (
+    <Column center padding as="form" onSubmit={onSubmitForm}>
+      <p>
+        {message ? (
+          intl.formatMessage(message)
+        ) : (
+          <FormattedMessage id="sign-in-modal.prompt" defaultMessage="Please Sign In" />
+        )}
+      </p>
+      <p>
+        <small>
+          <LegalMessage termsUrl={termsUrl} privacyUrl={privacyUrl} />
+        </small>
+      </p>
+      <Button preset="accept" type="submit">{configs.APP_CONFIG.auth.oidc_button_label || "Sign In With SSO"}</Button>
+    </Column>
+  );
+}
+SubmitOIDC.propTypes = {
+  onSubmitOIDC: PropTypes.func.isRequired,
+  message: PropTypes.object,
+  termsUrl: PropTypes.string,
+  privacyUrl: PropTypes.string
+};
+
 export function WaitForVerification({ email, onCancel, showNewsletterSignup }) {
   return (
     <Column center padding>
-      <FormattedMessage
-        id="sign-in-modal.wait-for-verification"
-        defaultMessage="<p>Email sent to {email}!</p><p>To continue, click on the link in the email using your phone, tablet, or PC.</p><p>No email? You may not be able to create an account.</p>"
-        // eslint-disable-next-line react/display-name
-        values={{ email, p: chunks => <p>{chunks}</p> }}
-      />
+      {email ? (
+        <FormattedMessage
+          id="sign-in-modal.wait-for-verification"
+          defaultMessage="<p>Email sent to {email}!</p><p>To continue, click on the link in the email using your phone, tablet, or PC.</p><p>No email? You may not be able to create an account.</p>"
+          // eslint-disable-next-line react/display-name
+          values={{ email, p: chunks => <p>{chunks}</p> }}
+        />
+      ) : (
+        <p>
+          <FormattedMessage id="sign-in.oidc-auth-started" defaultMessage="Waiting for signin..."/>
+        </p>
+      )}
       {showNewsletterSignup && (
         <p>
           <small>
@@ -166,7 +209,7 @@ export function WaitForVerification({ email, onCancel, showNewsletterSignup }) {
 
 WaitForVerification.propTypes = {
   showNewsletterSignup: PropTypes.bool,
-  email: PropTypes.string.isRequired,
+  email: PropTypes.string,
   onCancel: PropTypes.func.isRequired
 };
 

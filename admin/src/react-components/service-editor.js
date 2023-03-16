@@ -127,6 +127,14 @@ function isEmptyObject(obj) {
   return true;
 }
 
+function getConfigurables(categorySchema) {
+  return getDescriptors(categorySchema).filter(
+    ([path, descriptor]) =>
+    (qs.get("show_internal_configs") !== null || descriptor.internal !== "true") &&
+    (qs.get("show_deprecated_configs") !== null || descriptor.deprecated !== "true")
+  );
+}
+
 class ConfigurationEditor extends Component {
   constructor(props) {
     super(props);
@@ -220,6 +228,23 @@ class ConfigurationEditor extends Component {
         onChange={ev => this.onChange(path, ev.target.value)}
         helperText={descriptor.description}
         type={inputType}
+        fullWidth
+        margin="normal"
+      />
+    );
+  }
+
+  renderListInput(path, descriptor, currentValue) {
+    const displayPath = path.join(" > ");
+    return (
+      <TextField
+        key={displayPath}
+        id={displayPath}
+        label={descriptor.name || displayPath}
+        value={((currentValue && Object.values(currentValue)) || []).join(",")}
+        onChange={ev => this.onChange(path, ev.target.value.split(",").map(v => v.trim()))}
+        helperText={descriptor.description}
+        type="text"
         fullWidth
         margin="normal"
       />
@@ -342,7 +367,7 @@ class ConfigurationEditor extends Component {
   renderConfigurable(path, descriptor, currentValue) {
     switch (descriptor.type) {
       case "list":
-        return null;
+        return descriptor.of === "string" ? this.renderListInput(path, descriptor, currentValue) : null;
       case "file":
         return this.renderFileInput(path, descriptor, currentValue);
       case "boolean":
@@ -360,10 +385,9 @@ class ConfigurationEditor extends Component {
   }
 
   renderTree(schema, category, config) {
-    const configurables = getDescriptors(schema[category])
-      .filter(([, descriptor]) => qs.get("show_internal_configs") !== null || descriptor.internal !== "true")
-      .filter(([, descriptor]) => qs.get("show_deprecated_configs") !== null || descriptor.deprecated !== "true")
-      .map(([path, descriptor]) => this.renderConfigurable(path, descriptor, getConfigValue(config, path)));
+    const configurables = getConfigurables(schema[category]).map(([path, descriptor]) =>
+      this.renderConfigurable(path, descriptor, getConfigValue(config, path))
+    );
 
     return (
       <form onSubmit={this.onSubmit.bind(this)}>
@@ -403,7 +427,7 @@ class ConfigurationEditor extends Component {
             onChange={this.handleTabChange.bind(this)}
           >
             {schemaCategories
-              .filter(c => this.props.schema[c] && !isEmptyObject(this.props.schema[c]))
+              .filter(c => this.props.schema[c] && !isEmptyObject(getConfigurables(this.props.schema[c])))
               .map(c => (
                 <Tab label={getCategoryDisplayName(c)} key={c} value={c} />
               ))}

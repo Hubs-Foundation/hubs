@@ -70,11 +70,13 @@ StorybookAuthContextProvider.propTypes = {
 
 export function AuthContextProvider({ children, store }) {
   const signIn = useCallback(
-    async email => {
+    async authPayload => {
       const authChannel = new AuthChannel(store);
       const socket = await connectToReticulum();
       authChannel.setSocket(socket);
-      const { authComplete } = await authChannel.startAuthentication(email);
+      const { authComplete } = await (authPayload == "oidc"
+        ? authChannel.startOIDCAuthentication()
+        : authChannel.startAuthentication(authPayload));
       await authComplete;
       await checkIsAdmin(socket, store);
     },
@@ -86,14 +88,14 @@ export function AuthContextProvider({ children, store }) {
       const authChannel = new AuthChannel(store);
       const socket = await connectToReticulum();
       authChannel.setSocket(socket);
-      await authChannel.verifyAuthentication(authParams.topic, authParams.token, authParams.payload);
+      await authChannel.verifyAuthentication(authParams.topic, authParams.token, authParams.payload, authParams.origin);
     },
     [store]
   );
 
   const signOut = useCallback(async () => {
     configs.setIsAdmin(false);
-    store.update({ credentials: { token: null, email: null } });
+    store.update({ credentials: { token: null, email: null, extras: null } });
     await store.resetToRandomDefaultAvatar();
   }, [store]);
 

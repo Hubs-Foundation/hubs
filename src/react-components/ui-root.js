@@ -424,8 +424,10 @@ class UIRoot extends Component {
     this.showNonHistoriedDialog(RoomSignInModalContainer, {
       step: SignInStep.submit,
       message: signInMessage,
-      onSubmitEmail: async email => {
-        const { authComplete } = await authChannel.startAuthentication(email, this.props.hubChannel);
+      onSignIn: async authPayload => {
+        const { authComplete } = await (authPayload == "oidc"
+          ? authChannel.startOIDCAuthentication(this.props.hubChannel)
+          : authChannel.startAuthentication(authPayload, this.props.hubChannel));
 
         this.showNonHistoriedDialog(RoomSignInModalContainer, {
           step: SignInStep.waitForVerification,
