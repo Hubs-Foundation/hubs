@@ -8,8 +8,8 @@ export type ModelLoaderParams = {
 export function inflateModelLoader(world: HubsWorld, eid: number, params: ModelLoaderParams) {
   inflateMediaLoader(world, eid, {
     src: params.src,
-    recenter: false,
-    resize: false,
+    recenter: true,
+    resize: true,
     animateLoad: false,
     isObjectMenuTarget: false
   });
