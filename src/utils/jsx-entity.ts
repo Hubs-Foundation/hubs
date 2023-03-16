@@ -250,6 +250,7 @@ export interface ComponentData {
   mirror?: MirrorParams;
   audioZone?: AudioZoneParams;
   audioParams?: AudioSettings;
+  mediaFrame?: any;
 }
 
 type OptionalParams<T> = Partial<T> | true;
@@ -347,7 +348,6 @@ export interface JSXComponentData extends ComponentData {
   mediaLoader?: MediaLoaderParams;
   sceneRoot?: boolean;
   sceneLoader?: { src: string };
-  mediaFrame?: any;
   object3D?: any;
   text?: TextParams;
   model?: ModelParams;
@@ -412,7 +412,8 @@ export const commonInflators: Required<{ [K in keyof ComponentData]: InflatorFn 
   spotLight: inflateSpotLight,
   mirror: inflateMirror,
   audioZone: inflateAudioZone,
-  audioParams: inflateAudioParams
+  audioParams: inflateAudioParams,
+  mediaFrame: inflateMediaFrame
 };
 
 const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
@@ -454,7 +455,6 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   mediaLoader: inflateMediaLoader,
 
   // inflators that create Object3Ds
-  mediaFrame: inflateMediaFrame,
   object3D: addObject3DComponent,
   slice9: inflateSlice9,
   text: inflateText,
