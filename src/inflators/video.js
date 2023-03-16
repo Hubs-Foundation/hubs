@@ -12,5 +12,6 @@ export function inflateVideo(world, eid, { texture, ratio, projection, autoPlay 
   addObject3DComponent(world, eid, mesh);
   addComponent(world, MediaVideo, eid);
   MediaVideo.autoPlay[eid] = autoPlay ? 1 : 0;
+  MediaVideo.ratio[eid] = ratio;
   return eid;
 }
