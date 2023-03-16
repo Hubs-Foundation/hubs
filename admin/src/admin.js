@@ -254,10 +254,35 @@ document.addEventListener("DOMContentLoaded", async () => {
     const appConfigSchema = schemaByCategories({
       hubs: toml.parse(await fetch("/hubs/schema.toml").then(r => r.text()))
     });
+
+    const appConfigSchemaCopy = { ...appConfigSchema };
+
+    /**
+     * Note: we are removing the "images" and "theme" tab from the app settings tabs and making a new page,
+     * these pages are intended to be blocked in free tier.
+     */
+    delete appConfigSchema.images;
+    delete appConfigSchema.theme;
+
+    const imagesRoute = (
+      <Route
+        path="/images-settings"
+        render={props => <AppConfigEditor {...props} schema={{ images: appConfigSchemaCopy.images }} />}
+      />
+    );
+
+    const themeRoute = (
+      <Route
+        path="/theme-settings"
+        render={props => <AppConfigEditor {...props} schema={{ theme: appConfigSchemaCopy.theme }} />}
+      />
+    );
+
     const appConfigRoute = (
       <Route path="/app-settings" render={props => <AppConfigEditor {...props} schema={appConfigSchema} />} />
     );
-    customRoutes.push(appConfigRoute);
+
+    customRoutes.push(appConfigRoute, themeRoute, imagesRoute);
   } catch (e) {
     console.error("Could not initialize app config.", e);
   }

@@ -185,6 +185,36 @@ class Menu extends Component {
                 </ListItemIcon>
                 <ListItemText className={this.props.classes.text} primary="App Settings" />
               </ListItem>
+
+              {configs.TIER !== "free" && (
+                <>
+                  {/* IMAGE SETTING  */}
+                  <ListItem
+                    className={classNames(this.props.classes.item, this.props.classes.nested)}
+                    component={NavLink}
+                    key="images-settings"
+                    to="/images-settings"
+                  >
+                    <ListItemIcon className={this.props.classes.icon}>
+                      <ViewIcon />
+                    </ListItemIcon>
+                    <ListItemText className={this.props.classes.text} primary="Images Settings" />
+                  </ListItem>
+
+                  {/* THEME SETTINGS  */}
+                  <ListItem
+                    className={classNames(this.props.classes.item, this.props.classes.nested)}
+                    component={NavLink}
+                    key="theme-settings"
+                    to="/theme-settings"
+                  >
+                    <ListItemIcon className={this.props.classes.icon}>
+                      <ViewIcon />
+                    </ListItemIcon>
+                    <ListItemText className={this.props.classes.text} primary="Theme Settings" />
+                  </ListItem>
+                </>
+              )}
             </List>
           </Collapse>
         </List>
