@@ -62,6 +62,7 @@ export function CameraPrefab() {
       offersHandConstraint
       makeKinematicOnRelease
       holdable
+      floatyObject
       rigidbody={{ collisionGroup: COLLISION_LAYERS.INTERACTABLES, collisionMask: COLLISION_LAYERS.HANDS }}
       physicsShape={{ halfExtents: [0.22, 0.14, 0.1] }}
       cameraTool={{

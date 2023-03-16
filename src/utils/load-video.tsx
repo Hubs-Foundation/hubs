@@ -15,7 +15,6 @@ export function* loadVideo(world: HubsWorld, url: string, contentType: string) {
       name="Video"
       networked
       networkedVideo
-      grabbable={{ cursor: true, hand: false }}
       video={{
         texture,
         ratio,
