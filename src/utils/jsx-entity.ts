@@ -344,6 +344,7 @@ export interface JSXComponentData extends ComponentData {
 
 export interface GLTFComponentData extends ComponentData {
   pdf?: PDFLoaderParams;
+  audio?: VideoLoaderParams;
   video?: VideoLoaderParams;
   image?: ImageLoaderParams;
   model?: ModelLoaderParams;
@@ -444,6 +445,11 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
 export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorFn }> = {
   ...commonInflators,
   pdf: inflatePDFLoader,
+  // Temporarily reuse video loader for audio because of
+  // their processings are similar.
+  // TODO: Write separated audio loader properly because
+  //       their processings are not perfectly indentical.
+  audio: inflateVideoLoader,
   video: inflateVideoLoader,
   image: inflateImageLoader,
   model: inflateModelLoader,
