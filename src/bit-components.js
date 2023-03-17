@@ -198,7 +198,7 @@ export const ObjectMenu = defineComponent({
 });
 // TODO: Store this data elsewhere, since only one or two will ever exist.
 export const LinkHoverMenu = defineComponent({
-  targetObject: Types.eid,
+  targetObjectRef: Types.eid,
   linkButtonRef: Types.eid
 });
 export const LinkHoverMenuItem = defineComponent();
