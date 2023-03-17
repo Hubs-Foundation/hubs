@@ -189,6 +189,7 @@ import { platformUnsupported } from "./support";
 import { renderAsEntity } from "./utils/jsx-entity";
 import { VideoMenuPrefab } from "./prefabs/video-menu";
 import { ObjectMenuPrefab } from "./prefabs/object-menu";
+import { LinkHoverMenuPrefab } from "./prefabs/link-hover-menu";
 import { PDFMenuPrefab } from "./prefabs/pdf-menu";
 import { loadWaypointPreviewModel, WaypointPreview } from "./prefabs/waypoint-preview";
 import { preload } from "./utils/preload";
@@ -207,6 +208,7 @@ function addToScene(entityDef, visible) {
 preload(addToScene(PDFMenuPrefab(), false));
 preload(addToScene(ObjectMenuPrefab(), false));
 preload(addToScene(ObjectMenuPrefab(), false));
+preload(addToScene(LinkHoverMenuPrefab(), false));
 preload(loadWaypointPreviewModel().then(() => addToScene(WaypointPreview(), false)));
 
 const store = window.APP.store;
