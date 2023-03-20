@@ -1,7 +1,7 @@
-import { addComponent, defineQuery, exitQuery, hasComponent, removeEntity } from "bitecs";
+import { defineQuery, exitQuery, hasComponent, removeEntity } from "bitecs";
 import { Vector3 } from "three";
 import { HubsWorld } from "../app";
-import { Deletable, Deleting, HoveredRemoteLeft, HoveredRemoteRight } from "../bit-components";
+import { Deletable, HoveredRemoteLeft, HoveredRemoteRight } from "../bit-components";
 import { paths } from "../systems/userinput/paths";
 import { animate } from "../utils/animate";
 import { findAncestorEntity } from "../utils/bit-utils";
@@ -18,7 +18,6 @@ function* animateThenRemoveEntity(world: HubsWorld, eid: number): Coroutine {
   if (hasSavedEntityState(world, eid)) {
     deleteEntityState(APP.hubChannel!, world, eid);
   }
-  addComponent(world, Deleting, eid);
   const obj = world.eid2obj.get(eid)!;
   yield* animate({
     properties: [[obj.scale.clone(), END_SCALE]],
