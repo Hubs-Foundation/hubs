@@ -1,12 +1,12 @@
 import { addObject3DComponent } from "../utils/jsx-entity";
 import { NetworkedMediaFrame, MediaFrame, Networked } from "../bit-components";
-import { addComponent, addEntity, hasComponent } from "bitecs";
+import { addComponent, hasComponent } from "bitecs";
 import { MediaType } from "../utils/media-utils";
 import { COLLISION_LAYERS } from "../constants";
 import { Layers } from "../camera-layers";
 import { inflateRigidBody, Type } from "./rigid-body";
 import { Fit, inflatePhysicsShape, Shape } from "./physics-shape";
-import { Mesh, BoxBufferGeometry, ShaderMaterial, Color, DoubleSide } from "three";
+import { Mesh, BoxBufferGeometry, ShaderMaterial, Color, DoubleSide, Group } from "three";
 
 const DEFAULTS = {
   bounds: { x: 1, y: 1, z: 1 },
@@ -51,8 +51,9 @@ export function inflateMediaFrame(world, eid, componentProps) {
     })
   );
   guide.layers.set(Layers.CAMERA_LAYER_UI);
-  const guideEid = addEntity(world);
-  addObject3DComponent(world, guideEid, guide);
+  // TODO: This is a hack around the physics system addBody call requiring its body to have parent
+  guide.parent = new Group();
+  addObject3DComponent(world, eid, guide);
   addComponent(world, MediaFrame, eid, true);
   addComponent(world, NetworkedMediaFrame, eid, true);
 
@@ -67,7 +68,6 @@ export function inflateMediaFrame(world, eid, componentProps) {
     pdf: MediaType.PDF
   }[componentProps.mediaType];
   MediaFrame.bounds[eid].set([componentProps.bounds.x, componentProps.bounds.y, componentProps.bounds.z]);
-  MediaFrame.guide[eid] = guideEid;
 
   inflateRigidBody(world, eid, {
     type: Type.KINEMATIC,

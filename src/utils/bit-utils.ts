@@ -1,7 +1,7 @@
 import { Component, defineQuery, hasComponent, Query } from "bitecs";
 import { Object3D } from "three";
 import { HubsWorld } from "../app";
-import { findAncestor, traverseSome } from "./three-utils";
+import { findAncestor } from "./three-utils";
 
 const queries = new Map<Component, Query>();
 export function anyEntityWith(world: HubsWorld, component: Component) {
@@ -27,20 +27,4 @@ export function findAncestorEntity(world: HubsWorld, eid: number, predicate: (ei
 
 export function findAncestorWithComponent(world: HubsWorld, component: Component, eid: number) {
   return findAncestorEntity(world, eid, otherId => hasComponent(world, component, otherId));
-}
-
-export function findChildWithComponent(world: HubsWorld, component: Component, eid: number) {
-  const obj = world.eid2obj.get(eid);
-  if (obj) {
-    let childEid;
-    traverseSome(obj, (otherObj: Object3D) => {
-      if (otherObj.eid && hasComponent(world, component, otherObj.eid)) {
-        childEid = otherObj.eid;
-        return false;
-      } else {
-        return true;
-      }
-    });
-    return childEid;
-  }
 }

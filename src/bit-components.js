@@ -30,7 +30,6 @@ export const MediaFrame = defineComponent({
   scale: [Types.f32, 3],
   mediaType: Types.ui8,
   bounds: [Types.f32, 3],
-  guide: Types.eid,
   preview: Types.eid,
   previewingNid: Types.eid
 });
@@ -157,7 +156,6 @@ export const MediaLoader = defineComponent({
 });
 MediaLoader.src[$isStringType] = true;
 export const MediaLoaded = defineComponent();
-MediaLoaded.contentBounds = new Map();
 
 export const SceneRoot = defineComponent();
 export const NavMesh = defineComponent();
@@ -178,8 +176,7 @@ export const MediaPDF = defineComponent({
 MediaPDF.map = new Map();
 
 export const MediaVideo = defineComponent({
-  autoPlay: Types.ui8,
-  ratio: Types.f32
+  autoPlay: Types.ui8
 });
 export const AnimationMixer = defineComponent();
 export const NetworkedVideo = defineComponent({
@@ -202,7 +199,6 @@ AudioEmitter.audios = new Map();
 AudioEmitter.params = new Map();
 export const AudioSettingsChanged = defineComponent();
 export const Deletable = defineComponent();
-export const Deleting = defineComponent();
 export const EnvironmentSettings = defineComponent();
 EnvironmentSettings.map = new Map();
 

@@ -246,7 +246,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   pdfMenuSystem(world, sceneEl.is("frozen"));
   linkHoverMenuSystem(world);
   pdfSystem(world);
-  mediaFramesSystem(world, hubsSystems.physicsSystem);
+  mediaFramesSystem(world);
   hubsSystems.audioZonesSystem.tick(hubsSystems.el);
   audioZoneSystem(world);
   audioEmitterSystem(world, hubsSystems.audioSystem);
