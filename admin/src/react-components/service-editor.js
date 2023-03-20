@@ -36,6 +36,7 @@ import {
   getAdminInfo
 } from "../utils/ita";
 import * as AppConfigUtils from "../utils/app-config";
+import configs from "../utils/configs";
 
 const qs = new URLSearchParams(location.hash.split("?")[1]);
 
@@ -428,6 +429,12 @@ class ConfigurationEditor extends Component {
 
     return (
       <form onSubmit={this.onSubmit.bind(this)}>
+        <div>
+          test
+          {configs.TIER}
+          {configs.TIER == "free"}
+          {configs.TIER !== "free"}
+        </div>
         <h3 className="heading-sm mb-24">Nametags</h3>
         {getInput(configurables[0])}
         {getInput(configurables[1])}
