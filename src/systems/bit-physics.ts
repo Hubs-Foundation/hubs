@@ -30,13 +30,13 @@ export const physicsCompatSystem = (world: HubsWorld, physicsSystem: PhysicsSyst
   });
 
   shapeEnterQuery(world).forEach(eid => {
-    if (hasComponent(world, Rigidbody, eid)) {
-      PhysicsShape.bodyId[eid] = Rigidbody.bodyId[eid];
+    const bodyEid = findAncestorWithComponent(world, Rigidbody, eid);
+    if (bodyEid) {
+      PhysicsShape.bodyId[eid] = Rigidbody.bodyId[bodyEid];
+      addPhysicsShapes(world, physicsSystem, eid);
     } else {
-      const bodyEid = findAncestorWithComponent(world, Rigidbody, eid);
-      bodyEid && (PhysicsShape.bodyId[eid] = Rigidbody.bodyId[bodyEid]);
+      console.warn(`Could find a body for shape in entity ${eid}`);
     }
-    PhysicsShape.bodyId[eid] && addPhysicsShapes(world, physicsSystem, eid);
   });
 
   shapeExitQuery(world).forEach(eid => physicsSystem.removeShapes(PhysicsShape.bodyId[eid], PhysicsShape.shapeId[eid]));
