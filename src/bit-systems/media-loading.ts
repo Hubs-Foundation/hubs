@@ -1,7 +1,7 @@
 import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
 import { Vector3 } from "three";
 import { HubsWorld } from "../app";
-import { GLTFModel, MediaLoaded, MediaLoader, Networked, ObjectMenuTarget, PhysicsShape } from "../bit-components";
+import { GLTFModel, MediaLoaded, MediaLoader, Networked, ObjectMenuTarget } from "../bit-components";
 import { inflatePhysicsShape, Shape } from "../inflators/physics-shape";
 import { ErrorObject } from "../prefabs/error-object";
 import { LoadingObject } from "../prefabs/loading-object";
@@ -18,14 +18,6 @@ import { loadVideo } from "../utils/load-video";
 import { loadAudio } from "../utils/load-audio";
 import { MediaType, mediaTypeName, resolveMediaInfo } from "../utils/media-utils";
 import { EntityID } from "../utils/networking-types";
-
-function addMediaPhysicsShape(world: HubsWorld, eid: number) {
-  // TODO update scale?
-  inflatePhysicsShape(world, eid, {
-    type: hasComponent(world, GLTFModel, eid) ? Shape.HULL : Shape.BOX,
-    minHalfExtent: 0.04
-  });
-}
 
 export function* waitForMediaLoaded(world: HubsWorld, eid: EntityID) {
   while (hasComponent(world, MediaLoader, eid)) {
@@ -185,7 +177,11 @@ function* loadAndAnimateMedia(world: HubsWorld, eid: EntityID, clearRollbacks: C
   removeComponent(world, MediaLoader, eid);
 
   if (media) {
-    addMediaPhysicsShape(world, media);
+    // TODO update scale?
+    inflatePhysicsShape(world, eid, {
+      type: hasComponent(world, GLTFModel, eid) ? Shape.HULL : Shape.BOX,
+      minHalfExtent: 0.04
+    });
   }
 }
 
@@ -193,7 +189,6 @@ const jobs = new JobRunner();
 const mediaLoaderQuery = defineQuery([MediaLoader]);
 const mediaLoaderEnterQuery = enterQuery(mediaLoaderQuery);
 const mediaLoaderExitQuery = exitQuery(mediaLoaderQuery);
-const mediaLoadedQuery = defineQuery([MediaLoaded]);
 export function mediaLoadingSystem(world: HubsWorld) {
   mediaLoaderEnterQuery(world).forEach(function (eid) {
     jobs.add(eid, clearRollbacks => loadAndAnimateMedia(world, eid, clearRollbacks));
