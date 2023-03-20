@@ -32,15 +32,14 @@ const loaderForMediaType = {
   ) => loadImage(world, accessibleUrl, contentType),
   [MediaType.VIDEO]: (
     world: HubsWorld,
-	{ accessibleUrl, contentType }: { accessibleUrl: string, contentType: string }
+    { accessibleUrl, contentType }: { accessibleUrl: string; contentType: string }
   ) => loadVideo(world, accessibleUrl, contentType),
   [MediaType.MODEL]: (
     world: HubsWorld,
     { accessibleUrl, contentType }: { accessibleUrl: string; contentType: string }
   ) => loadModel(world, accessibleUrl, contentType, true),
   [MediaType.PDF]: (world: HubsWorld, { accessibleUrl }: { accessibleUrl: string }) => loadPDF(world, accessibleUrl),
-  [MediaType.AUDIO]: (world: HubsWorld, { accessibleUrl }: { accessibleUrl: string }) =>
-    loadAudio(world, accessibleUrl),
+  [MediaType.AUDIO]: (world: HubsWorld, { accessibleUrl }: { accessibleUrl: string }) => loadAudio(world, accessibleUrl)
 };
 
 export const MEDIA_LOADER_FLAGS = {
@@ -178,8 +177,8 @@ function* loadAndAnimateMedia(world: HubsWorld, eid: EntityID, clearRollbacks: C
 
   if (media) {
     // TODO update scale?
-    inflatePhysicsShape(world, eid, {
-      type: hasComponent(world, GLTFModel, eid) ? Shape.HULL : Shape.BOX,
+    inflatePhysicsShape(world, media, {
+      type: hasComponent(world, GLTFModel, media) ? Shape.HULL : Shape.BOX,
       minHalfExtent: 0.04
     });
   }
