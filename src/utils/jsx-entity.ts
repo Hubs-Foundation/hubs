@@ -88,7 +88,7 @@ import { inflateAudioParams } from "../inflators/audio-params";
 import { PhysicsShapeParams, inflatePhysicsShape } from "../inflators/physics-shape";
 import { inflateRigidBody, RigiBodyParams } from "../inflators/rigid-body";
 import { AmmoShapeParams, inflateAmmoShape } from "../inflators/ammo-shape";
-import { inflateBoxCollider } from "../inflators/box-collider";
+import { BoxColliderParams, inflateBoxCollider } from "../inflators/box-collider";
 import { inflateTrimesh } from "../inflators/trimesh";
 import { HeightFieldParams, inflateHeightField } from "../inflators/heightfield";
 
@@ -379,7 +379,7 @@ export interface GLTFComponentData extends ComponentData {
   simpleWater?: SimpleWaterParams;
   particleEmitter?: ParticleEmitterParams;
   ammoShape?: AmmoShapeParams;
-  boxCollider?: true;
+  boxCollider?: BoxColliderParams;
   trimesh?: true;
   heightfield?: HeightFieldParams;
 }
