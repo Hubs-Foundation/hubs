@@ -186,7 +186,7 @@ class Menu extends Component {
                 <ListItemText className={this.props.classes.text} primary="App Settings" />
               </ListItem>
 
-              {configs.TIER !== "free" && (
+              {configs.TIER != "free" && (
                 <>
                   {/* IMAGE SETTING  */}
                   <ListItem
