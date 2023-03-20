@@ -212,7 +212,7 @@ function rotateWithRightClick(world, camera) {
     userinput.get(paths.device.mouse.buttonRight)
   ) {
     const rightCursor = anyEntityWith(world, RemoteRight);
-    physicsSystem.updateRigidBodyOptions(camera, { type: "kinematic" });
+    physicsSystem.updateBodyOptions(Rigidbody.bodyId[camera], { type: "kinematic" });
     transformSystem.startTransform(world.eid2obj.get(camera), world.eid2obj.get(rightCursor), {
       mode: "cursor"
     });

@@ -46,7 +46,7 @@ function add(world, physicsSystem, interactor, constraintComponent, entities) {
   for (let i = 0; i < entities.length; i++) {
     const eid = findAncestorEntity(world, entities[i], ancestor => hasComponent(world, Rigidbody, ancestor));
     takeOwnership(world, eid);
-    physicsSystem.updateRigidBodyOptions(eid, grabBodyOptions);
+    physicsSystem.updateBodyOptions(Rigidbody.bodyId[eid], grabBodyOptions);
     physicsSystem.addConstraint(interactor, Rigidbody.bodyId[eid], Rigidbody.bodyId[interactor], {});
     addComponent(world, Constraint, eid);
     addComponent(world, constraintComponent, eid);
@@ -58,7 +58,7 @@ function remove(world, offersConstraint, constraintComponent, physicsSystem, int
     const eid = findAncestorEntity(world, entities[i], ancestor => hasComponent(world, Rigidbody, ancestor));
     if (!entityExists(world, eid)) continue;
     if (hasComponent(world, offersConstraint, entities[i]) && hasComponent(world, Rigidbody, eid)) {
-      physicsSystem.updateRigidBodyOptions(eid, releaseBodyOptions);
+      physicsSystem.updateBodyOptions(Rigidbody.bodyId[eid], releaseBodyOptions);
       physicsSystem.removeConstraint(interactor);
       removeComponent(world, constraintComponent, eid);
       if (

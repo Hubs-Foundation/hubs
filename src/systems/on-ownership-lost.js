@@ -27,7 +27,7 @@ export function onOwnershipLost(world) {
     }
 
     if (hasComponent(world, Rigidbody, eid)) {
-      physicsSystem.updateRigidBodyOptions(eid, kinematicOptions);
+      physicsSystem.updateBodyOptions(Rigidbody.bodyId[eid], kinematicOptions);
     }
   }
 }
