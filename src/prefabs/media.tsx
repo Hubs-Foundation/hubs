@@ -27,6 +27,7 @@ export function MediaPrefab(params: MediaLoaderParams): EntityDef {
         collisionGroup: COLLISION_LAYERS.INTERACTABLES,
         collisionMask: COLLISION_LAYERS.HANDS
       }}
+      physicsShape
       scale={[1, 1, 1]}
     />
   );

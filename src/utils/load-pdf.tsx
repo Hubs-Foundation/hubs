@@ -30,6 +30,7 @@ export function* loadPDF(world: HubsWorld, url: string) {
       name="PDF"
       scale={[Math.min(1.0, width / height), Math.min(1.0, height / width), 1.0]}
       networked
+      grabbable={{ cursor: true, hand: false }}
       pdf={{ pageNumber, ...resources }}
     ></entity>
   );

@@ -86,7 +86,7 @@ import { AudioZoneParams, inflateAudioZone } from "../inflators/audio-zone";
 import { AudioSettings } from "../components/audio-params";
 import { inflateAudioParams } from "../inflators/audio-params";
 import { PhysicsShapeParams, inflatePhysicsShape } from "../inflators/physics-shape";
-import { inflateRigidBody, RigidBodyParams } from "../inflators/rigid-body";
+import { inflateRigidBody, RigiBodyParams } from "../inflators/rigid-body";
 import { AmmoShapeParams, inflateAmmoShape } from "../inflators/ammo-shape";
 import { inflateBoxCollider } from "../inflators/box-collider";
 import { inflateTrimesh } from "../inflators/trimesh";
@@ -299,7 +299,7 @@ export interface JSXComponentData extends ComponentData {
   networked?: any;
   textButton?: any;
   hoverButton?: any;
-  rigidbody?: OptionalParams<RigidBodyParams>;
+  rigidbody?: OptionalParams<RigiBodyParams>;
   physicsShape?: OptionalParams<PhysicsShapeParams>;
   floatyObject?: any;
   networkedFloatyObject?: any;

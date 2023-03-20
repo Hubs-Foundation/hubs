@@ -79,7 +79,7 @@ export function inflateModel(world: HubsWorld, rootEid: number, { model }: Model
 
     const replacement = world.eid2obj.get(eid);
     if (replacement) {
-      if (!(obj instanceof Object3D)) {
+      if (obj.type !== "Object3D") {
         console.error(obj, replacement);
         throw new Error("Failed to inflate model. Unexpected object type found before swap.");
       }

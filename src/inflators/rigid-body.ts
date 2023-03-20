@@ -17,7 +17,7 @@ export enum ActivationState {
   DISABLE_SIMULATION = 4
 }
 
-export type RigidBodyParams = {
+export type RigiBodyParams = {
   type: Type;
   mass: number;
   gravity: [number, number, number];
@@ -88,34 +88,25 @@ export const getBodyFromRigidBody = (eid: number) => {
   };
 };
 
-const updateRigidBody = (eid: number, params: RigidBodyParams) => {
-  Rigidbody.type[eid] = params.type;
-  Rigidbody.mass[eid] = params.mass;
-  Rigidbody.gravity[eid].set(params.gravity);
-  Rigidbody.linearDamping[eid] = params.linearDamping;
-  Rigidbody.angularDamping[eid] = params.angularDamping;
-  Rigidbody.linearSleepingThreshold[eid] = params.linearSleepingThreshold;
-  Rigidbody.angularSleepingThreshold[eid] = params.angularSleepingThreshold;
-  Rigidbody.angularFactor[eid].set(params.angularFactor);
-  Rigidbody.activationState[eid] = params.activationState;
-  params.emitCollisionEvents && (Rigidbody.flags[eid] |= RIGID_BODY_FLAGS.EMIT_COLLISION_EVENTS);
-  params.disableCollision && (Rigidbody.flags[eid] |= RIGID_BODY_FLAGS.DISABLE_COLLISION);
-  Rigidbody.collisionFilterGroup[eid] = params.collisionGroup;
-  Rigidbody.collisionFilterMask[eid] = params.collisionMask;
-  params.scaleAutoUpdate && (Rigidbody.flags[eid] |= RIGID_BODY_FLAGS.SCALE_AUTO_UPDATE);
-};
-
-export const updateRigiBodyParams = (eid: number, params: Partial<RigidBodyParams>) => {
-  const currentParams = getBodyFromRigidBody(eid);
-  const bodyParams = Object.assign({}, currentParams, params);
-  updateRigidBody(eid, bodyParams);
-};
-
-export function inflateRigidBody(world: HubsWorld, eid: number, params: Partial<RigidBodyParams>) {
+export function inflateRigidBody(world: HubsWorld, eid: number, params: Partial<RigiBodyParams>) {
   const bodyParams = Object.assign({}, DEFAULTS, params);
 
   addComponent(world, Rigidbody, eid);
-  updateRigidBody(eid, bodyParams);
+
+  Rigidbody.type[eid] = bodyParams.type;
+  Rigidbody.mass[eid] = bodyParams.mass;
+  Rigidbody.gravity[eid].set(bodyParams.gravity);
+  Rigidbody.linearDamping[eid] = bodyParams.linearDamping;
+  Rigidbody.angularDamping[eid] = bodyParams.angularDamping;
+  Rigidbody.linearSleepingThreshold[eid] = bodyParams.linearSleepingThreshold;
+  Rigidbody.angularSleepingThreshold[eid] = bodyParams.angularSleepingThreshold;
+  Rigidbody.angularFactor[eid].set(bodyParams.angularFactor);
+  Rigidbody.activationState[eid] = bodyParams.activationState;
+  params.emitCollisionEvents && (Rigidbody.flags[eid] |= RIGID_BODY_FLAGS.EMIT_COLLISION_EVENTS);
+  params.disableCollision && (Rigidbody.flags[eid] |= RIGID_BODY_FLAGS.DISABLE_COLLISION);
+  Rigidbody.collisionFilterGroup[eid] = bodyParams.collisionGroup;
+  Rigidbody.collisionFilterMask[eid] = bodyParams.collisionMask;
+  bodyParams.scaleAutoUpdate && (Rigidbody.flags[eid] |= RIGID_BODY_FLAGS.SCALE_AUTO_UPDATE);
 
   return eid;
 }
