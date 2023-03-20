@@ -19,11 +19,12 @@ import { ExitReason } from "../react-components/room/ExitedRoomScreen";
 import { CharacterControllerSystem } from "../systems/character-controller-system";
 import { EnvironmentSystem } from "../systems/environment-system";
 import { setInitialNetworkedData, setNetworkedDataWithoutRoot } from "../utils/assign-network-ids";
-import { anyEntityWith } from "../utils/bit-utils";
+import { anyEntityWith, findChildWithComponent } from "../utils/bit-utils";
 import { ClearFunction, JobRunner } from "../utils/coroutine-utils";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { loadModel } from "../utils/load-model";
 import { EntityID } from "../utils/networking-types";
+import { isGeometryHighDensity } from "../utils/physics-utils";
 import { add } from "./media-loading";
 import { moveToSpawnPoint } from "./waypoint";
 
@@ -60,6 +61,7 @@ function* loadScene(
     setNetworkedDataWithoutRoot(world, APP.getString(Networked.id[loaderEid])!, scene);
 
     let sceneEl = APP.scene!;
+    let isHighDensity = false;
     let skybox: Sky | undefined;
     world.eid2obj.get(scene)!.traverse(o => {
       if ((o as Mesh).isMesh) {
@@ -84,16 +86,51 @@ function* loadScene(
       if (!skybox && hasComponent(world, Skybox, o.eid!)) {
         skybox = o as Sky;
       }
+
+      if (
+        (o as Mesh).isMesh &&
+        !(o instanceof Sky) &&
+        !o.name.startsWith("Floor_Plan") &&
+        !o.name.startsWith("Ground_Plane") &&
+        ((o as Mesh).geometry as any).boundsTree
+      ) {
+        if (isGeometryHighDensity((o as Mesh).geometry)) {
+          isHighDensity = true;
+        }
+      }
     });
 
-    if (!hasComponent(world, PhysicsShape, scene)) {
-      inflatePhysicsShape(world, scene, {
-        type: Shape.BOX,
-        margin: 0.01,
-        fit: Fit.MANUAL,
-        halfExtents: [4000, 0.5, 4000],
-        offset: [0, -0.5, 0]
-      });
+    if (!findChildWithComponent(world, PhysicsShape, scene)) {
+      let navMeshEid;
+      if (isHighDensity) {
+        navMeshEid = findChildWithComponent(world, NavMesh, scene);
+      }
+
+      if (navMeshEid) {
+        console.log(`Mesh density exceeded, using floor plan only`);
+        inflatePhysicsShape(world, navMeshEid, {
+          type: Shape.MESH,
+          margin: 0.01,
+          fit: Fit.ALL,
+          includeInvisible: true
+        });
+      } else if (!isHighDensity) {
+        inflatePhysicsShape(world, scene, {
+          type: Shape.MESH,
+          margin: 0.01,
+          fit: Fit.ALL
+        });
+        console.log("Adding mesh shape for all visible meshes");
+      } else {
+        inflatePhysicsShape(world, scene, {
+          type: Shape.BOX,
+          margin: 0.01,
+          fit: Fit.MANUAL,
+          halfExtents: [4000, 0.5, 4000],
+          offset: [0, -0.5, 0]
+        });
+        console.log("Adding default floor collision");
+      }
     }
 
     const envSettings = { skybox };
