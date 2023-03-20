@@ -30,9 +30,8 @@ export const physicsCompatSystem = (world: HubsWorld, physicsSystem: PhysicsSyst
   });
 
   shapeEnterQuery(world).forEach(eid => {
-    const bodyId = Rigidbody.bodyId[eid];
-    if (bodyId) {
-      PhysicsShape.bodyId[eid] = bodyId;
+    if (hasComponent(world, Rigidbody, eid)) {
+      PhysicsShape.bodyId[eid] = Rigidbody.bodyId[eid];
     } else {
       const bodyEid = findAncestorWithComponent(world, Rigidbody, eid);
       bodyEid && (PhysicsShape.bodyId[eid] = Rigidbody.bodyId[bodyEid]);
