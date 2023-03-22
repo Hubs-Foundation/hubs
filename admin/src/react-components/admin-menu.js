@@ -125,6 +125,11 @@ class Menu extends Component {
     );
   }
 
+  hasFeature(tier) {
+    const authorizedTiers = ["p1", "b1"];
+    return authorizedTiers.includes(tier);
+  }
+
   render() {
     if (configs.ITA_SERVER == "turkey") {
       return (
@@ -186,7 +191,7 @@ class Menu extends Component {
                 <ListItemText className={this.props.classes.text} primary="App Settings" />
               </ListItem>
 
-              {configs.TIER != "free" && (
+              {this.hasFeature(configs.TIER) && (
                 <>
                   {/* IMAGE SETTING  */}
                   <ListItem
