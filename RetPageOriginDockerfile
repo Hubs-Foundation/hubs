@@ -1,4 +1,3 @@
-
 # syntax=docker/dockerfile:1
 from node:16.16 as builder
 run mkdir -p /hubs/admin/ && cd /hubs
