@@ -9,7 +9,8 @@ import { ExitReason } from "./react-components/room/ExitedRoomScreen";
 import { LogMessageType } from "./react-components/room/ChatSidebar";
 import { createNetworkedEntity } from "./utils/create-networked-entity";
 import qsTruthy from "./utils/qs_truthy";
-import { add, testAsset, respawn ,downloadScene} from "./utils/chat-commands";
+import { add, testAsset, respawn } from "./utils/chat-commands";
+import deleteAllEntityStates from "./utils/entity-state-utils"
 
 let uiRoot;
 // Handles user-entered messages
