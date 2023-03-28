@@ -260,7 +260,6 @@ export default class MessageDispatch extends EventTarget {
       case "download":
         {
           deleteAllEntityStates(APP.hubChannel!, APP.world);
-          console.log("Downloading Scene from command")
         }
         break;
     }
