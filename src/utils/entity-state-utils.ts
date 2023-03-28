@@ -164,7 +164,7 @@ async function deleteAllEntityStates(hubChannel: HubChannel, world: HubsWorld) {
   deleteAllEntityStates(APP.hubChannel!, APP.world);
 };
 
-function downloadAsJson(exportObj: any, exportName: string) {
+export function downloadAsJson(exportObj: any, exportName: string) {
   var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
   var downloadAnchorNode = document.createElement("a");
   downloadAnchorNode.setAttribute("href", dataStr);
@@ -174,7 +174,7 @@ function downloadAsJson(exportObj: any, exportName: string) {
   downloadAnchorNode.remove();
 }
 
-async function downloadSavedEntityStates(hubChannel: HubChannel) {
+ export async function downloadSavedEntityStates(hubChannel: HubChannel) {
   listEntityStates(hubChannel).then(list => {
     downloadAsJson(list, `hub-${hubChannel.hubId}`);
   });
