@@ -258,7 +258,7 @@ export default class MessageDispatch extends EventTarget {
           testAsset(APP.world, avatarPov, args);
         }
         break;
-      case "download":
+      case "download";
         {
           deleteAllEntityStates(APP.hubChannel!, APP.world);
         }
