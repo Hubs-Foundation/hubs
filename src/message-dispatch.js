@@ -263,7 +263,7 @@ export default class MessageDispatch extends EventTarget {
         {
           
           const avatarPov =  document.querySelector("#avatar-pov-node").object3D;
-          downloadSavedEntityStates(avatarPov)
+          downloadSavedEntityStates(avatarPov);
         }
         break;
     }
