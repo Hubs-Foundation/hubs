@@ -11,6 +11,7 @@ import { createNetworkedEntity } from "./utils/create-networked-entity";
 import qsTruthy from "./utils/qs_truthy";
 import { add, testAsset, respawn } from "./utils/chat-commands";
 import downloadSavedEntityStates from "./utils/entity-state-utils";
+import HubChannel from "./hub-channel";
 
 let uiRoot;
 // Handles user-entered messages
@@ -254,14 +255,15 @@ export default class MessageDispatch extends EventTarget {
         break;
       case "test":
         {
-         const avatarPov =  document.querySelector("#avatar-pov-node").object3D;
+          const avatarPov =  document.querySelector("#avatar-pov-node").object3D;
           testAsset(APP.world, avatarPov, args);
         }
         break;
       case "download":
         {
+          console.log(this.hubChannel)
           const avatarPov =  document.querySelector("#avatar-pov-node").object3D;
-          downloadSavedEntityStates(APP.hubChannel,avatarPov);
+          downloadSavedEntityStates(hubChannel, avatarPov,);
         }
         break;
     }
