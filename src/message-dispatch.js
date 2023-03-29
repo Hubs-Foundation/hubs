@@ -11,7 +11,7 @@ import { createNetworkedEntity } from "./utils/create-networked-entity";
 import qsTruthy from "./utils/qs_truthy";
 import { add, testAsset, respawn } from "./utils/chat-commands";
 import downloadSavedEntityStates from "./utils/entity-state-utils";
-import HubChannel from "./hub-channel";
+
 
 let uiRoot;
 // Handles user-entered messages
