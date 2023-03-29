@@ -260,7 +260,8 @@ export default class MessageDispatch extends EventTarget {
         break;
       case "download":
         {
-          downloadSavedEntityStates(APP.hubChannel);
+          const avatarPov =  document.querySelector("#avatar-pov-node").object3D;
+          downloadSavedEntityStates(APP.hubChannel,avatarPov);
         }
         break;
     }
