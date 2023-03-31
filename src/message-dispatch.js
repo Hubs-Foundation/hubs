@@ -261,7 +261,7 @@ export default class MessageDispatch extends EventTarget {
         break;
       case "download":
         {
-          console.log[this.hubChannel]
+          console.log9gthis.hubChannel)
           downloadSavedEntityStates(this.hubChannel);
         }
         break;
