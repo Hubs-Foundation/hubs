@@ -264,16 +264,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     delete appConfigSchema.images;
     delete appConfigSchema.theme;
 
-    const imagesRoute = (
+    const BrandRoute = (
       <Route
-        path="/images-settings"
+        path="/brand"
         render={props => <AppConfigEditor {...props} schema={{ images: appConfigSchemaCopy.images }} />}
       />
     );
 
     const themeRoute = (
       <Route
-        path="/theme-settings"
+        path="/themes"
         render={props => <AppConfigEditor {...props} schema={{ theme: appConfigSchemaCopy.theme }} />}
       />
     );
@@ -282,7 +282,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       <Route path="/app-settings" render={props => <AppConfigEditor {...props} schema={appConfigSchema} />} />
     );
 
-    customRoutes.push(appConfigRoute, themeRoute, imagesRoute);
+    customRoutes.push(appConfigRoute, themeRoute, BrandRoute);
   } catch (e) {
     console.error("Could not initialize app config.", e);
   }

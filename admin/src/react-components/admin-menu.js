@@ -18,6 +18,7 @@ import SettingsIcon from "@material-ui/icons/Settings";
 import Collapse from "@material-ui/core/Collapse";
 import { getServiceDisplayName } from "../utils/ita";
 import configs from "../utils/configs";
+import { hasPaidFeature } from "../utils/feature_flags";
 import HubsLogo from "../assets/images/hubs_logo.png";
 
 const mapStateToProps = state => ({
@@ -125,11 +126,6 @@ class Menu extends Component {
     );
   }
 
-  hasFeature(tier) {
-    const authorizedTiers = ["p1", "b1"];
-    return authorizedTiers.includes(tier);
-  }
-
   render() {
     if (configs.ITA_SERVER == "turkey") {
       return (
@@ -191,32 +187,32 @@ class Menu extends Component {
                 <ListItemText className={this.props.classes.text} primary="App Settings" />
               </ListItem>
 
-              {this.hasFeature(configs.TIER) && (
+              {hasPaidFeature() && (
                 <>
                   {/* IMAGE SETTING  */}
                   <ListItem
                     className={classNames(this.props.classes.item, this.props.classes.nested)}
                     component={NavLink}
-                    key="images-settings"
-                    to="/images-settings"
+                    key="brand"
+                    to="/brand"
                   >
                     <ListItemIcon className={this.props.classes.icon}>
                       <ViewIcon />
                     </ListItemIcon>
-                    <ListItemText className={this.props.classes.text} primary="Images Settings" />
+                    <ListItemText className={this.props.classes.text} primary="Brand" />
                   </ListItem>
 
-                  {/* THEME SETTINGS  */}
+                  {/* THEMES  */}
                   <ListItem
                     className={classNames(this.props.classes.item, this.props.classes.nested)}
                     component={NavLink}
-                    key="theme-settings"
-                    to="/theme-settings"
+                    key="themes"
+                    to="/themes"
                   >
                     <ListItemIcon className={this.props.classes.icon}>
                       <ViewIcon />
                     </ListItemIcon>
-                    <ListItemText className={this.props.classes.text} primary="Theme Settings" />
+                    <ListItemText className={this.props.classes.text} primary="Themes" />
                   </ListItem>
                 </>
               )}
@@ -287,26 +283,26 @@ class Menu extends Component {
               <ListItem
                 className={classNames(this.props.classes.item, this.props.classes.nested)}
                 component={NavLink}
-                key="images-settings"
-                to="/images-settings"
+                key="brand"
+                to="/brand"
               >
                 <ListItemIcon className={this.props.classes.icon}>
                   <ViewIcon />
                 </ListItemIcon>
-                <ListItemText className={this.props.classes.text} primary="Images Settings" />
+                <ListItemText className={this.props.classes.text} primary="Brand" />
               </ListItem>
 
-              {/* THEME SETTINGS  */}
+              {/* THEMES  */}
               <ListItem
                 className={classNames(this.props.classes.item, this.props.classes.nested)}
                 component={NavLink}
-                key="theme-settings"
-                to="/theme-settings"
+                key="themes"
+                to="/themes"
               >
                 <ListItemIcon className={this.props.classes.icon}>
                   <ViewIcon />
                 </ListItemIcon>
-                <ListItemText className={this.props.classes.text} primary="Theme Settings" />
+                <ListItemText className={this.props.classes.text} primary="Themes" />
               </ListItem>
 
               <ListItem

@@ -5,6 +5,8 @@ import React, { Component } from "react";
 import { withStyles } from "@material-ui/core/styles";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import RefreshIcon from "@material-ui/icons/Refresh";
+import ExpandIcon from "./shared/icons/ExpandIcon";
+import PictureIcon from "./shared/icons/PictureIcon";
 import Card from "@material-ui/core/Card";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
@@ -408,6 +410,8 @@ class ConfigurationEditor extends Component {
     switch (category) {
       case "theme":
         return this.renderThemeSection(schema.theme, config);
+      case "images":
+        return this.renderImagesSection(schema.images, config);
       default:
         return this.renderTree(schema, category, config);
     }
@@ -434,16 +438,17 @@ class ConfigurationEditor extends Component {
         <h3 className="heading-sm mb-24 mt-40">Theme Data</h3>
         <p className="body-md">
           This section contains the code which generates the available themes a user can choose from when in your
-          hub&#39;s rooms (More &gt; Preferences &gt; Misc &gt; Theme). More information about{" "}
+          hub&#39;s rooms (More &gt; Preferences &gt; Misc &gt; Theme).More information about customizing your hubs&#39;
+          themes can be found in our{" "}
           <a
             href="https://hubs.mozilla.com/docs/hubs-cloud-customizing-themes.html"
             target="_blank"
             rel="noopener noreferrer"
             className="link"
           >
-            customising you hubs&#39; themes
+            documentation pages
           </a>{" "}
-          can be found in our documentation pages.
+          .
         </p>
         {getInput(configurables[2])}
         <div>
@@ -460,6 +465,63 @@ class ConfigurationEditor extends Component {
             </Button>
           )}
         </div>
+      </form>
+    );
+  }
+
+  /**
+   * Images AKA Brand Tab Section
+   */
+  renderImagesSection(images, config) {
+    const configurables = this.getFilteredDescriptors(images);
+    const getInput = ([path, descriptor]) => this.renderConfigurable(path, descriptor, getConfigValue(config, path));
+
+    const AdditionalInfo = ({ size, format }) => {
+      return (
+        <div className="flex-align-items-center">
+          <ExpandIcon />
+          <span className="ml-10 mr-20">{size}</span>
+          <PictureIcon />
+          <span className="ml-10">{format}</span>
+        </div>
+      );
+    };
+
+    return (
+      <form onSubmit={this.onSubmit.bind(this)}>
+        <h3 className="heading-sm mb-24">Hub</h3>
+
+        {/* HUB LOGO  */}
+        {getInput(configurables[0])}
+        <AdditionalInfo size="250px x 250px" format="JPG, GIF, PNG, SVG" />
+
+        {/* HUB LOGO DARK MODE  */}
+        {getInput(configurables[1])}
+        <AdditionalInfo size="250px x 250px" format="JPG, GIF, PNG, SVG" />
+
+        {/* FAVICON */}
+        {getInput(configurables[2])}
+        <AdditionalInfo size="96px x 96px" format="JPG, GIF, PNG, SVG" />
+
+        <h3 className="heading-sm mb-24 mt-40">Hub Home Page</h3>
+
+        {/* HOMEPAGE IMAGE  */}
+        {getInput(configurables[3])}
+        <AdditionalInfo size="1000px x 1000px" format="JPG, GIF, PNG, SVG" />
+
+        {/* COMPANY LOGO  */}
+        {getInput(configurables[4])}
+        <AdditionalInfo size="250px x 250px" format="JPG, GIF, PNG, SVG" />
+
+        <h3 className="heading-sm mb-24 mt-40">Sharing and Social Media</h3>
+
+        {/* SHORTCUT ICON */}
+        {getInput(configurables[5])}
+        <AdditionalInfo size="512px x 512px" format="JPG, GIF, PNG" />
+
+        {/* SOCIAL MEDIA CARD */}
+        {getInput(configurables[6])}
+        <AdditionalInfo size="1024px x 576px" format="JPG, GIF, PNG" />
       </form>
     );
   }

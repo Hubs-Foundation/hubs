@@ -67,8 +67,6 @@ function getCategoryDescription(category, provider) {
       return "Text that you can change.";
     case "features":
       return "Features that you can toggle.";
-    case "images":
-      return "Replace images in the app.";
     case "colors":
       return "Replace colors in the app.";
     case "links":

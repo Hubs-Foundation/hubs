@@ -79,8 +79,8 @@ module.exports = (env, argv) => {
       BASE_ASSETS_PATH: "https://hubs.local:8989/",
       RETICULUM_SERVER: "hubs.local:4000",
       POSTGREST_SERVER: "",
-      ITA_SERVER: "",
-      TIER: ""
+      ITA_SERVER: "turkey",
+      TIER: "p0"
     });
   }
 
