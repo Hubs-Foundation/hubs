@@ -73,6 +73,7 @@ import { audioEmitterSystem } from "../bit-systems/audio-emitter-system";
 import { audioZoneSystem } from "../bit-systems/audio-zone-system";
 import { audioDebugSystem } from "../bit-systems/audio-debug-system";
 import { textSystem } from "../bit-systems/text";
+import { behaviorGraphSystem } from "../bit-systems/behavior-graph";
 
 declare global {
   interface Window {
@@ -253,6 +254,8 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   hubsSystems.gainSystem.tick();
   hubsSystems.nameTagSystem.tick();
   simpleWaterSystem(world);
+
+  behaviorGraphSystem(world);
 
   // All systems that update text properties should run before this
   textSystem(world);

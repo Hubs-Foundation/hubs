@@ -370,6 +370,7 @@ export interface GLTFComponentData extends ComponentData {
   uvScroll: UVScrollParams;
   videoTextureTarget: VideoTextureTargetParams;
   videoTextureSource: { fps: number; resolution: [x: number, y: number] };
+  interactable: true;
 
   // deprecated
   spawnPoint?: true;
@@ -491,7 +492,8 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
   ammoShape: inflateAmmoShape,
   boxCollider: inflateBoxCollider,
   trimesh: inflateTrimesh,
-  heightfield: inflateHeightField
+  heightfield: inflateHeightField,
+  interactable: createDefaultInflator(SingleActionButton)
 };
 
 function jsxInflatorExists(name: string): name is keyof JSXComponentData {

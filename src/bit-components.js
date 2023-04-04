@@ -281,3 +281,6 @@ export const AudioZone = defineComponent({
   flags: Types.ui8
 });
 export const AudioParams = defineComponent();
+export const BehaviorGraph = defineComponent();
+export const LocalAvatar = defineComponent();
+export const RemoteAvatar = defineComponent();
