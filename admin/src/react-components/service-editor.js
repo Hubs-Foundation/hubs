@@ -501,7 +501,7 @@ class ConfigurationEditor extends Component {
 
         {/* FAVICON */}
         {getInput(configurables[2])}
-        <AdditionalInfo size="96px x 96px" format="JPG, GIF, PNG, SVG" />
+        <AdditionalInfo size="96px x 96px" format="JPG, GIF, PNG" />
 
         <h3 className="heading-sm mb-24 mt-40">Hub Home Page</h3>
 
@@ -521,7 +521,7 @@ class ConfigurationEditor extends Component {
 
         {/* SOCIAL MEDIA CARD */}
         {getInput(configurables[6])}
-        <AdditionalInfo size="1024px x 576px" format="JPG, GIF, PNG" />
+        <AdditionalInfo size="1024px x 576px (max)" format="JPG, GIF, PNG" />
       </form>
     );
   }
