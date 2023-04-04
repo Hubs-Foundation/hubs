@@ -110,6 +110,7 @@ function onDrop(e: DragEvent) {
   if (qsTruthy("debugLocalScene")) {
     URL.revokeObjectURL(lastDebugScene);
     if (!e.dataTransfer?.files.length) return;
+    e.preventDefault();
     const url = URL.createObjectURL(e.dataTransfer.files[0]);
     APP.hubChannel!.updateScene(url);
     lastDebugScene = url;

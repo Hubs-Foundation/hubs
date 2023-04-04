@@ -79,6 +79,7 @@
     "@fortawesome/react-fontawesome": "^0.1.0",
     "@mozilla/lilypad-ui": "1.8.6",
     "@mozillareality/easing-functions": "^0.1.1",
+    "@oveddan-behave-graph/core": "^0.11.1",
     "@popperjs/core": "^2.4.4",
     "aframe": "github:mozillareality/aframe#hubs/master",
     "ammo-debug-drawer": "github:infinitelee/ammo-debug-drawer",

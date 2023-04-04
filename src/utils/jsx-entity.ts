@@ -379,6 +379,7 @@ export interface GLTFComponentData extends ComponentData {
   zoneAudioSource: AudioSourceParams;
   audioTarget: AudioTargetParams;
   audioSettings: SceneAudioSettings;
+  interactable: true;
 
   // deprecated
   spawnPoint?: true;
@@ -505,7 +506,8 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
   boxCollider: inflateBoxCollider,
   trimesh: inflateTrimesh,
   heightfield: inflateHeightField,
-  audioSettings: inflateAudioSettings
+  audioSettings: inflateAudioSettings,
+  interactable: createDefaultInflator(SingleActionButton)
 };
 
 function jsxInflatorExists(name: string): name is keyof JSXComponentData {

@@ -1,7 +1,8 @@
+import { GraphJSON } from "@oveddan-behave-graph/core";
 import { addComponent, addEntity, hasComponent } from "bitecs";
 import { Material, Mesh, Object3D } from "three";
 import { HubsWorld } from "../app";
-import { GLTFModel, MaterialTag, MixerAnimatableInitialize } from "../bit-components";
+import { GLTFModel, MaterialTag, MixerAnimatableInitialize, BehaviorGraph } from "../bit-components";
 import { addMaterialComponent, addObject3DComponent, gltfInflatorExists, gltfInflators } from "../utils/jsx-entity";
 import { mapMaterials } from "../utils/material-utils";
 import { EntityID } from "../utils/networking-types";
@@ -164,6 +165,33 @@ export function inflateModel(world: HubsWorld, rootEid: number, { model }: Model
   if (model.animations !== undefined && model.animations.length > 0) {
     addComponent(world, MixerAnimatableInitialize, rootEid);
     inflateLoopAnimationInitialize(world, rootEid, loopAnimationParams);
+  }
+
+  if (model.userData.behaviorGraph) {
+    const graph = model.userData.behaviorGraph as GraphJSON;
+    for (const node of graph.nodes!) {
+      if (node.configuration) {
+        for (const propName in node.configuration) {
+          const value = node.configuration[propName] as any;
+          if (value.__mhc_link_type === "node") {
+            node.configuration[propName] = idx2eid.get(value.index)!;
+          }
+        }
+      }
+      if (node.parameters) {
+        for (const propName in node.parameters) {
+          const param = node.parameters[propName];
+          if ("value" in param) {
+            const value = param.value as any;
+            if (value.__mhc_link_type === "node") {
+              param.value = idx2eid.get(value.index)!;
+            }
+          }
+        }
+      }
+    }
+    console.log("FOUND BG", model.userData.behaviorGraph);
+    addComponent(world, BehaviorGraph, rootEid);
   }
 
   addComponent(world, GLTFModel, rootEid);

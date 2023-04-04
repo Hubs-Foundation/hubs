@@ -821,7 +821,10 @@
                 </template>
 
                 <template data-name="Spine">
-                    <a-entity>
+                    <a-entity
+                        body-helper="type: kinematic; collisionFilterGroup: 4; collisionFilterMask: 32;"
+                        shape-helper="type: box; fit: manual; halfExtents: 0.15 0.35 0.15; offset: 0 0.0 0.0;"
+                    >
                         <a-entity class="chest-image" scale="0.18 0.18 0.18" position="0 -0.025 0.13"></a-entity>
                     </a-entity>
                 </template>

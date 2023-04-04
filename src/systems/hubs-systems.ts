@@ -80,6 +80,7 @@ import { quackSystem } from "../bit-systems/quack";
 import { mixerAnimatableSystem } from "../bit-systems/mixer-animatable";
 import { loopAnimationSystem } from "../bit-systems/loop-animation";
 import { linkSystem } from "../bit-systems/link-system";
+import { behaviorGraphSystem } from "../bit-systems/behavior-graph";
 
 declare global {
   interface Window {
@@ -267,6 +268,8 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
 
   mixerAnimatableSystem(world);
   loopAnimationSystem(world);
+
+  behaviorGraphSystem(world);
 
   // All systems that update text properties should run before this
   textSystem(world);
