@@ -18,6 +18,7 @@ import SettingsIcon from "@material-ui/icons/Settings";
 import Collapse from "@material-ui/core/Collapse";
 import { getServiceDisplayName } from "../utils/ita";
 import configs from "../utils/configs";
+import { hasPaidFeature } from "../utils/feature_flags";
 import HubsLogo from "../assets/images/hubs_logo.png";
 
 const mapStateToProps = state => ({
@@ -185,6 +186,36 @@ class Menu extends Component {
                 </ListItemIcon>
                 <ListItemText className={this.props.classes.text} primary="App Settings" />
               </ListItem>
+
+              {hasPaidFeature() && (
+                <>
+                  {/* IMAGE SETTING  */}
+                  <ListItem
+                    className={classNames(this.props.classes.item, this.props.classes.nested)}
+                    component={NavLink}
+                    key="brand"
+                    to="/brand"
+                  >
+                    <ListItemIcon className={this.props.classes.icon}>
+                      <ViewIcon />
+                    </ListItemIcon>
+                    <ListItemText className={this.props.classes.text} primary="Brand" />
+                  </ListItem>
+
+                  {/* THEMES  */}
+                  <ListItem
+                    className={classNames(this.props.classes.item, this.props.classes.nested)}
+                    component={NavLink}
+                    key="themes"
+                    to="/themes"
+                  >
+                    <ListItemIcon className={this.props.classes.icon}>
+                      <ViewIcon />
+                    </ListItemIcon>
+                    <ListItemText className={this.props.classes.text} primary="Themes" />
+                  </ListItem>
+                </>
+              )}
             </List>
           </Collapse>
         </List>
@@ -248,6 +279,32 @@ class Menu extends Component {
                 </ListItemIcon>
                 <ListItemText className={this.props.classes.text} primary="App Settings" />
               </ListItem>
+
+              <ListItem
+                className={classNames(this.props.classes.item, this.props.classes.nested)}
+                component={NavLink}
+                key="brand"
+                to="/brand"
+              >
+                <ListItemIcon className={this.props.classes.icon}>
+                  <ViewIcon />
+                </ListItemIcon>
+                <ListItemText className={this.props.classes.text} primary="Brand" />
+              </ListItem>
+
+              {/* THEMES  */}
+              <ListItem
+                className={classNames(this.props.classes.item, this.props.classes.nested)}
+                component={NavLink}
+                key="themes"
+                to="/themes"
+              >
+                <ListItemIcon className={this.props.classes.icon}>
+                  <ViewIcon />
+                </ListItemIcon>
+                <ListItemText className={this.props.classes.text} primary="Themes" />
+              </ListItem>
+
               <ListItem
                 className={classNames(this.props.classes.item, this.props.classes.nested)}
                 component={NavLink}

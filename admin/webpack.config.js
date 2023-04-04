@@ -79,7 +79,8 @@ module.exports = (env, argv) => {
       BASE_ASSETS_PATH: "https://hubs.local:8989/",
       RETICULUM_SERVER: "hubs.local:4000",
       POSTGREST_SERVER: "",
-      ITA_SERVER: ""
+      ITA_SERVER: "turkey",
+      TIER: "p0"
     });
   }
 
@@ -298,6 +299,7 @@ module.exports = (env, argv) => {
           BUILD_VERSION: process.env.BUILD_VERSION,
           CONFIGURABLE_SERVICES: process.env.CONFIGURABLE_SERVICES,
           ITA_SERVER: process.env.ITA_SERVER,
+          TIER: process.env.TIER,
           RETICULUM_SERVER: process.env.RETICULUM_SERVER,
           CORS_PROXY_SERVER: process.env.CORS_PROXY_SERVER,
           POSTGREST_SERVER: process.env.POSTGREST_SERVER,
