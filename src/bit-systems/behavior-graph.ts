@@ -16,11 +16,13 @@ import {
   readGraphFromJSON,
   validateGraph,
   validateRegistry,
-  ValueType
+  ValueType,
+  writeNodeSpecsToJSON
 } from "@oveddan-behave-graph/core";
 import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, IComponent } from "bitecs";
-import { BoxGeometry, Mesh, MeshStandardMaterial, Object3D, Vector3 } from "three";
+import { BoxGeometry, Euler, Mesh, MeshStandardMaterial, Object3D, Quaternion, Vector3 } from "three";
 import { HubsWorld } from "../app";
+import * as bitComponents from "../bit-components";
 import {
   BehaviorGraph,
   CursorRaycastable,
@@ -34,8 +36,6 @@ import { Fit, inflatePhysicsShape, Shape } from "../inflators/physics-shape";
 import { inflateRigidBody, Type } from "../inflators/rigid-body";
 import { findAncestorWithComponent } from "../utils/bit-utils";
 import { EntityID } from "../utils/networking-types";
-import { findComponentsInNearestAncestor } from "../utils/scene-graph";
-import * as bitComponents from "../bit-components";
 
 const coreValues = getCoreValueTypes();
 const coreNodes = getCoreNodeDefinitions(coreValues);
@@ -93,7 +93,7 @@ function makeObjectPropertyFlowNode<T extends keyof Object3D>(property: T, value
   return {
     [typeName]: makeFlowNodeDefinition({
       typeName,
-      category: NodeCategory.Action,
+      category: "Entity" as any,
       label: `Set ${property}`,
       in: () => [
         { key: "flow", valueType: "flow" },
@@ -139,6 +139,17 @@ export const Vector3Value = new ValueType(
   (value: Vector3) => ({ x: value.x, y: value.y, z: value.z }),
   (start: Vector3, end: Vector3, t: number) => start.lerp(end, t)
 );
+type EulerJSON = { x: number; y: number; z: number };
+const tmpQuat1 = new Quaternion();
+const tmpQuat2 = new Quaternion();
+export const EurlerValue = new ValueType(
+  "euler",
+  () => new Euler(),
+  (value: Euler | EulerJSON) => (value instanceof Euler ? value : new Euler(value.x, value.y, value.z)),
+  (value: Euler) => ({ x: value.x, y: value.y, z: value.z }),
+  (start: Euler, end: Euler, t: number) =>
+    start.setFromQuaternion(tmpQuat1.setFromEuler(start).slerp(tmpQuat2.setFromEuler(end), t))
+);
 
 const registry = {
   nodes: {
@@ -170,6 +181,7 @@ const registry = {
     "hubs/entity/toString": makeInNOutFunctionDesc({
       name: "hubs/entity/toString",
       label: "Entity toString",
+      category: "Entity" as any,
       in: [{ entity: "entity" }],
       out: "string",
       exec: (entity: EntityID) => {
@@ -179,7 +191,8 @@ const registry = {
     }),
     "hubs/entity/hasComponent": makeInNOutFunctionDesc({
       name: "hubs/entity/hasComponent",
-      label: "Entity toString",
+      label: "Entity Has Component",
+      category: "Entity" as any,
       in: [{ entity: "entity" }, { name: "string" }, { includeAncestors: "boolean" }],
       out: "boolean",
       exec: (entity: EntityID, name: string, includeAncestors: boolean) => {
@@ -198,16 +211,32 @@ const registry = {
     "hubs/entity/properties": makeInNOutFunctionDesc({
       name: "hubs/entity/properties",
       label: "Get Entity Properties",
+      category: "Entity" as any,
       in: [{ entity: "entity" }],
-      out: [{ entity: "entity" }, { name: "string" }, { visible: "boolean" }, { position: "vec3" }],
+      out: [
+        { entity: "entity" },
+        { name: "string" },
+        { visible: "boolean" },
+        { position: "vec3" },
+        { rotation: "euler" },
+        { scale: "vec3" }
+      ],
       exec: (eid: EntityID) => {
         const obj = APP.world.eid2obj.get(eid)!;
-        return { entity: eid, name: obj.name, visible: obj.visible, position: obj.position };
+        return {
+          entity: eid,
+          name: obj.name,
+          visible: obj.visible,
+          position: obj.position,
+          rotation: obj.rotation,
+          scale: obj.scale
+        };
       }
     }),
     "math/vec3/combine": makeInNOutFunctionDesc({
       name: "math/vec3/combine",
-      label: "Combine XYZ",
+      label: "Combine Vec3",
+      category: "Vec3 Math" as any,
       in: [{ x: "float" }, { y: "float" }, { z: "float" }],
       out: [{ v: "vec3" }],
       exec: (x: number, y: number, z: number) => {
@@ -217,22 +246,107 @@ const registry = {
     "math/vec3/separate": makeInNOutFunctionDesc({
       name: "math/vec3/separate",
       label: "Separate Vec3",
+      category: "Vec3 Math" as any,
       in: [{ v: "vec3" }],
       out: [{ x: "float" }, { y: "float" }, { z: "float" }],
       exec: (v: Vector3) => {
         return { x: v.x, y: v.y, z: v.z };
       }
     }),
+    "math/vec3/toEuler": makeInNOutFunctionDesc({
+      name: "math/vec3/toEuler",
+      label: "to Euler",
+      category: "Vec3 Math" as any,
+      in: [{ v: "vec3" }],
+      out: [{ v: "euler" }],
+      exec: (v: Vector3) => {
+        return { v: new Euler().setFromVector3(v) };
+      }
+    }),
+    "math/euler/combine": makeInNOutFunctionDesc({
+      name: "math/euler/combine",
+      label: "Combine Euler",
+      category: "Eueler Math" as any,
+      in: [{ x: "float" }, { y: "float" }, { z: "float" }],
+      out: [{ v: "euler" }],
+      exec: (x: number, y: number, z: number) => {
+        return { v: new Euler(x, y, z) };
+      }
+    }),
+    "math/euler/separate": makeInNOutFunctionDesc({
+      name: "math/euler/separate",
+      label: "Separate Eueler",
+      category: "Eueler Math" as any,
+      in: [{ v: "euler" }],
+      out: [{ x: "float" }, { y: "float" }, { z: "float" }],
+      exec: (v: Euler) => {
+        return { x: v.x, y: v.y, z: v.z };
+      }
+    }),
+    "math/euler/toVec3": makeInNOutFunctionDesc({
+      name: "math/euler/toVec3",
+      label: "to Vec3",
+      category: "Eueler Math" as any,
+      in: [{ v: "euler" }],
+      out: [{ v: "vec3" }],
+      exec: (v: Euler) => {
+        return { v: new Vector3().setFromEuler(v) };
+      }
+    }),
     ...makeObjectPropertyFlowNode("visible", "boolean"),
-    ...makeObjectPropertyFlowNode("position", "vec3")
+    ...makeObjectPropertyFlowNode("position", "vec3"),
+    ...makeObjectPropertyFlowNode("rotation", "euler"),
+    ...makeObjectPropertyFlowNode("scale", "vec3")
   },
   values: {
     ...coreValues,
     entity: EntityValue,
-    vec3: Vector3Value
+    vec3: Vector3Value,
+    euler: EurlerValue
   }
 } as IRegistry;
-console.log("registry", registry);
+
+const skipExport = [
+  "customEvent/onTriggered",
+  "customEvent/trigger",
+  "math/easing",
+  "debug/expectTrue",
+  "flow/sequence",
+  "flow/waitAll"
+];
+const nodeSpec = writeNodeSpecsToJSON({ ...registry, dependencies: {} }).filter(node => {
+  return !(
+    node.type.startsWith("hubs/entity/set/") ||
+    node.type.startsWith("flow/switch/") ||
+    skipExport.includes(node.type)
+  );
+});
+for (const node of nodeSpec) {
+  let cat = node.category as string;
+  if (cat === NodeCategory.Logic && node.type.endsWith("string")) {
+    cat = "String Logic";
+  }
+  if (cat === NodeCategory.None) {
+    if (node.type.startsWith("math") && node.type.endsWith("float")) cat = "Float Math";
+    else if (node.type.startsWith("math") && node.type.endsWith("boolean")) cat = "Bool Math";
+    else if (node.type.startsWith("math") && node.type.endsWith("integer")) cat = "Int Math";
+    else if (node.type.startsWith("math") && node.type.endsWith("string")) cat = "String Math";
+    else if (node.type.startsWith("logic") && node.type.endsWith("string")) cat = "String Util";
+    else {
+      cat = node.type.split("/")[0];
+      cat = cat.charAt(0).toUpperCase() + cat.slice(1);
+    }
+  }
+  node.category = cat as any;
+  if (node.type === "math/and/boolean") node.label = "AND";
+  else if (node.type === "math/or/boolean") node.label = "OR";
+  else if (node.type.startsWith("math/negate")) node.label = "Negate";
+  else if (node.type.startsWith("math/subtract")) node.label = "Subtract";
+  else if (node.type === "hubs/entity/hasComponent") node.inputs[2].defaultValue = true;
+}
+
+console.log("registry", registry, nodeSpec);
+console.log(JSON.stringify(nodeSpec, null, 2));
 // const registry = createRegistry();
 
 // registerCoreProfile(registry, logger, manualLifecycleEventEmitter);
