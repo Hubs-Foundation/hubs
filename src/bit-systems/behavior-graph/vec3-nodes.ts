@@ -35,7 +35,7 @@ export const Vector3Nodes = {
   }),
   "math/vec3/toEuler": makeInNOutFunctionDesc({
     name: "math/vec3/toEuler",
-    label: "to Euler",
+    label: "To Euler",
     category: "Vec3 Math" as any,
     in: [{ v: "vec3" }],
     out: [{ v: "euler" }],
@@ -43,7 +43,6 @@ export const Vector3Nodes = {
       return { v: new Euler().setFromVector3(v) };
     }
   }),
-
   "math/vec3": makeInNOutFunctionDesc({
     name: "math/vec3",
     label: "Vec3",
@@ -54,15 +53,15 @@ export const Vector3Nodes = {
   }),
   "math/toVec3/float": makeInNOutFunctionDesc({
     name: "math/toVec3/float",
-    label: "Float to Vec3",
-    category: "Vec3 Math" as any,
+    label: "to Vec3",
+    category: "Float Math" as any,
     in: [{ x: "float" }, { y: "float" }, { z: "float" }],
     out: "vec3",
     exec: (x: number, y: number, z: number) => new Vector3(x, y, z)
   }),
   "math/toFloat/vec3": makeInNOutFunctionDesc({
     name: "math/toFloat/vec3",
-    label: "Vec3 To Float",
+    label: "To Float",
     category: "Vec3 Math" as any,
     in: ["vec3"],
     out: [{ x: "float" }, { y: "float" }, { z: "float" }],

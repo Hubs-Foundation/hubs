@@ -2,7 +2,7 @@ import { GraphJSON } from "@oveddan-behave-graph/core";
 import { addComponent, addEntity, hasComponent } from "bitecs";
 import { Material, Object3D } from "three";
 import { HubsWorld } from "../app";
-import { BehaviorGraph, GLTFModel, MaterialTag } from "../bit-components";
+import { BehaviorGraph, GLTFModel, MaterialTag, MixerAnimatable } from "../bit-components";
 import { addMaterialComponent, addObject3DComponent, gltfInflatorExists, gltfInflators } from "../utils/jsx-entity";
 import { mapMaterials } from "../utils/material-utils";
 import { EntityID } from "../utils/networking-types";
@@ -169,4 +169,6 @@ export function inflateModel(world: HubsWorld, rootEid: number, { model }: Model
 
   addComponent(world, GLTFModel, rootEid);
   // TODO Animation Mixer
+
+  addComponent(world, MixerAnimatable, rootEid);
 }

@@ -159,6 +159,7 @@ function ECSDebugSidebar({
     .map(eid => APP.world.eid2obj.get(eid))
     .filter(o => !o.parent);
   const materials = materialQuery(APP.world).map(eid => APP.world.eid2mat.get(eid));
+  const envRoot = document.getElementById("environment-root").object3D;
   return (
     <Sidebar
       title="ECS Debug"
@@ -173,6 +174,15 @@ function ECSDebugSidebar({
               obj={rootObj}
               toggleObjExpand={toggleObjExpand}
               expanded={expandedIds.has(rootObj.uuid)}
+              expandedIds={expandedIds}
+              setSelectedObj={setSelectedObj}
+            />
+          </section>
+          <section>
+            <Object3DItem
+              obj={envRoot}
+              toggleObjExpand={toggleObjExpand}
+              expanded={expandedIds.has(envRoot.uuid)}
               expandedIds={expandedIds}
               setSelectedObj={setSelectedObj}
             />
