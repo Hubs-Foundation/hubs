@@ -36,6 +36,7 @@ import { Fit, inflatePhysicsShape, Shape } from "../inflators/physics-shape";
 import { inflateRigidBody, Type } from "../inflators/rigid-body";
 import { findAncestorWithComponent } from "../utils/bit-utils";
 import { EntityID } from "../utils/networking-types";
+import { Vector3Nodes, Vector3Value } from "./behavior-graph/vec3-nodes";
 
 const coreValues = getCoreValueTypes();
 const coreNodes = getCoreNodeDefinitions(coreValues);
@@ -131,14 +132,6 @@ export const EntityValue = new ValueType(
   (start: EntityID, end: EntityID, t: number) => (t < 0.5 ? start : end)
 );
 
-type Vec3JSON = { x: number; y: number; z: number };
-export const Vector3Value = new ValueType(
-  "vec3",
-  () => new Vector3(),
-  (value: Vector3 | Vec3JSON) => (value instanceof Vector3 ? value : new Vector3(value.x, value.y, value.z)),
-  (value: Vector3) => ({ x: value.x, y: value.y, z: value.z }),
-  (start: Vector3, end: Vector3, t: number) => start.lerp(end, t)
-);
 type EulerJSON = { x: number; y: number; z: number };
 const tmpQuat1 = new Quaternion();
 const tmpQuat2 = new Quaternion();
@@ -233,36 +226,7 @@ const registry = {
         };
       }
     }),
-    "math/vec3/combine": makeInNOutFunctionDesc({
-      name: "math/vec3/combine",
-      label: "Combine Vec3",
-      category: "Vec3 Math" as any,
-      in: [{ x: "float" }, { y: "float" }, { z: "float" }],
-      out: [{ v: "vec3" }],
-      exec: (x: number, y: number, z: number) => {
-        return { v: new Vector3(x, y, z) };
-      }
-    }),
-    "math/vec3/separate": makeInNOutFunctionDesc({
-      name: "math/vec3/separate",
-      label: "Separate Vec3",
-      category: "Vec3 Math" as any,
-      in: [{ v: "vec3" }],
-      out: [{ x: "float" }, { y: "float" }, { z: "float" }],
-      exec: (v: Vector3) => {
-        return { x: v.x, y: v.y, z: v.z };
-      }
-    }),
-    "math/vec3/toEuler": makeInNOutFunctionDesc({
-      name: "math/vec3/toEuler",
-      label: "to Euler",
-      category: "Vec3 Math" as any,
-      in: [{ v: "vec3" }],
-      out: [{ v: "euler" }],
-      exec: (v: Vector3) => {
-        return { v: new Euler().setFromVector3(v) };
-      }
-    }),
+
     "math/euler/combine": makeInNOutFunctionDesc({
       name: "math/euler/combine",
       label: "Combine Euler",
@@ -293,6 +257,7 @@ const registry = {
         return { v: new Vector3().setFromEuler(v) };
       }
     }),
+    ...Vector3Nodes,
     ...makeObjectPropertyFlowNode("visible", "boolean"),
     ...makeObjectPropertyFlowNode("position", "vec3"),
     ...makeObjectPropertyFlowNode("rotation", "euler"),
@@ -300,8 +265,8 @@ const registry = {
   },
   values: {
     ...coreValues,
+    ...Vector3Value,
     entity: EntityValue,
-    vec3: Vector3Value,
     euler: EurlerValue
   }
 } as IRegistry;
@@ -326,12 +291,13 @@ for (const node of nodeSpec) {
   if (cat === NodeCategory.Logic && node.type.endsWith("string")) {
     cat = "String Logic";
   }
+  if (node.type.startsWith("debug/")) cat = "Debug";
   if (cat === NodeCategory.None) {
-    if (node.type.startsWith("math") && node.type.endsWith("float")) cat = "Float Math";
-    else if (node.type.startsWith("math") && node.type.endsWith("boolean")) cat = "Bool Math";
-    else if (node.type.startsWith("math") && node.type.endsWith("integer")) cat = "Int Math";
-    else if (node.type.startsWith("math") && node.type.endsWith("string")) cat = "String Math";
-    else if (node.type.startsWith("logic") && node.type.endsWith("string")) cat = "String Util";
+    if (node.type.startsWith("math/") && node.type.endsWith("float")) cat = "Float Math";
+    else if (node.type.startsWith("math/") && node.type.endsWith("boolean")) cat = "Bool Math";
+    else if (node.type.startsWith("math/") && node.type.endsWith("integer")) cat = "Int Math";
+    else if (node.type.startsWith("math/") && node.type.endsWith("string")) cat = "String Math";
+    else if (node.type.startsWith("logic/") && node.type.endsWith("string")) cat = "String Util";
     else {
       cat = node.type.split("/")[0];
       cat = cat.charAt(0).toUpperCase() + cat.slice(1);
@@ -380,7 +346,16 @@ export function behaviorGraphSystem(world: HubsWorld) {
       dependencies
     });
     graph.name = `Test ${eid}`;
-    console.log(validateRegistry(registry), validateGraph(graph), graph);
+
+    console.log("Loaded graph", graph);
+    const registryErrors = validateRegistry(registry);
+    registryErrors.forEach(e => {
+      console.error("Graph Registry Error", e);
+    });
+    const graphErrors = validateGraph(graph);
+    graphErrors.forEach(e => {
+      console.error("Graph Validation Error", e);
+    });
 
     const engine = new Engine(graph.nodes);
     engines.set(eid, { engine, lifecycleEmitter });
