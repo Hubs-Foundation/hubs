@@ -15,7 +15,7 @@ type UploadResponse = {
   origin: string;
 };
 
-function spawnFromUrl(text: string) {
+export function spawnFromUrl(text: string) {
   if (!text) {
     return;
   }
@@ -26,7 +26,7 @@ function spawnFromUrl(text: string) {
   const eid = createNetworkedEntity(APP.world, "media", {
     src: text,
     recenter: true,
-    resize: true,
+    resize: !qsTruthy("noResize"),
     animateLoad: true,
     isObjectMenuTarget: true
   });
@@ -36,7 +36,7 @@ function spawnFromUrl(text: string) {
   obj.lookAt(avatarPov.getWorldPosition(new Vector3()));
 }
 
-async function spawnFromFileList(files: FileList) {
+export async function spawnFromFileList(files: FileList) {
   for (const file of files) {
     const desiredContentType = file.type || guessContentType(file.name);
     const params = await upload(file, desiredContentType)
@@ -49,7 +49,7 @@ async function spawnFromFileList(files: FileList) {
         return {
           src: srcUrl.href,
           recenter: true,
-          resize: true,
+          resize: !qsTruthy("noResize"),
           animateLoad: true,
           isObjectMenuTarget: true
         };
@@ -59,7 +59,7 @@ async function spawnFromFileList(files: FileList) {
         return {
           src: "error",
           recenter: true,
-          resize: true,
+          resize: !qsTruthy("noResize"),
           animateLoad: true,
           isObjectMenuTarget: true
         };
@@ -94,10 +94,21 @@ async function onPaste(e: ClipboardEvent) {
   spawnFromUrl(text);
 }
 
+let lastDebugScene: string;
 function onDrop(e: DragEvent) {
   if (!(AFRAME as any).scenes[0].is("entered")) {
     return;
   }
+
+  if (qsTruthy("debugLocalScene")) {
+    URL.revokeObjectURL(lastDebugScene);
+    if (!e.dataTransfer?.files.length) return;
+    const url = URL.createObjectURL(e.dataTransfer.files[0]);
+    APP.hubChannel!.updateScene(url);
+    lastDebugScene = url;
+    return;
+  }
+
   const files = e.dataTransfer?.files;
   if (files && files.length) {
     e.preventDefault();

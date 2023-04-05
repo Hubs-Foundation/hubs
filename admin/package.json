@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@iarna/toml": "^2.2.3",
+    "@mozilla/lilypad-ui": "^1.7.7",
     "aframe": "github:mozillareality/aframe#hubs/master",
     "bitecs": "github:mozilla/bitECS#hubs-patches",
     "classnames": "^2.2.5",

@@ -10,6 +10,11 @@ import { isIOS as detectIOS } from "./is-mobile";
 import Linkify from "linkify-it";
 import tlds from "tlds";
 import { mediaTypeFor } from "./media-type";
+import { MediaPlayer } from "dashjs";
+import { buildAbsoluteURL } from "url-toolkit";
+import HLS from "hls.js";
+import configs from "../utils/configs";
+import qsTruthy from "../utils/qs_truthy";
 
 import anime from "animejs";
 
@@ -654,4 +659,64 @@ export async function resolveMediaInfo(urlString) {
     mediaType,
     thumbnail
   };
+}
+
+export function createDashPlayer(url, videoEl, failLoad) {
+  const player = MediaPlayer().create();
+  player.extend("RequestModifier", function () {
+    return { modifyRequestHeader: xhr => xhr, modifyRequestURL: proxiedUrlFor };
+  });
+  player.on(MediaPlayer.events.ERROR, failLoad);
+  player.initialize(videoEl, url);
+  player.setTextDefaultEnabled(false);
+
+  // TODO this countinously pings to get updated time, unclear if this is actually needed, but this preserves the default behavior
+  player.clearDefaultUTCTimingSources();
+  player.addUTCTimingSource("urn:mpeg:dash:utc:http-xsdate:2014", proxiedUrlFor("https://time.akamai.com/?iso"));
+  // We can also use our own HEAD request method like we use to sync NAF
+  // dashPlayer.addUTCTimingSource("urn:mpeg:dash:utc:http-head:2014", location.href);
+  return player;
+}
+
+export function createHLSPlayer(url, videoEl, failLoad) {
+  const corsProxyPrefix = `https://${configs.CORS_PROXY_SERVER}/`;
+  const baseUrl = url.startsWith(corsProxyPrefix) ? url.substring(corsProxyPrefix.length) : url;
+  const hls = new HLS({
+    debug: qsTruthy("hlsDebug"),
+    xhrSetup: (xhr, u) => {
+      if (u.startsWith(corsProxyPrefix)) {
+        u = u.substring(corsProxyPrefix.length);
+      }
+
+      // HACK HLS.js resolves relative urls internally, but our CORS proxying screws it up. Resolve relative to the original unproxied url.
+      // TODO extend HLS.js to allow overriding of its internal resolving instead
+      if (!u.startsWith("http")) {
+        u = buildAbsoluteURL(baseUrl, u.startsWith("/") ? u : `/${u}`);
+      }
+
+      xhr.open("GET", proxiedUrlFor(u), true);
+    }
+  });
+
+  hls.loadSource(url);
+  hls.attachMedia(videoEl);
+
+  hls.on(HLS.Events.ERROR, function (event, data) {
+    if (data.fatal) {
+      switch (data.type) {
+        case HLS.ErrorTypes.NETWORK_ERROR:
+          // try to recover network error
+          hls.startLoad();
+          break;
+        case HLS.ErrorTypes.MEDIA_ERROR:
+          hls.recoverMediaError();
+          break;
+        default:
+          failLoad(event);
+          return;
+      }
+    }
+  });
+
+  return hls;
 }

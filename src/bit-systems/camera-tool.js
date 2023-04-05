@@ -19,6 +19,7 @@ import { SOUND_CAMERA_TOOL_COUNTDOWN, SOUND_CAMERA_TOOL_TOOK_SNAPSHOT } from "..
 import { paths } from "../systems/userinput/paths";
 import { ObjectTypes } from "../object-types";
 import { anyEntityWith } from "../utils/bit-utils";
+import { updateRenderTarget } from "./video-texture";
 
 // Prefer h264 if available due to faster decoding speec on most platforms
 const videoCodec = ["h264", "vp9,opus", "vp8,opus", "vp9", "vp8"].find(
@@ -129,64 +130,6 @@ function endRecording(world, camera, cancel) {
   APP.hubChannel.endRecording();
 }
 
-function updateRenderTarget(world, camera) {
-  const sceneEl = AFRAME.scenes[0];
-  const renderer = AFRAME.scenes[0].renderer;
-
-  const tmpVRFlag = renderer.xr.enabled;
-  renderer.xr.enabled = false;
-
-  // TODO we are doing this because aframe uses this hook for tock.
-  // Namely to capture what camera was rendering. We don't actually use that in any of our tocks.
-  // Also tock can likely go away as a concept since we can just direclty order things after render in raf if we want to.
-  const tmpOnAfterRender = sceneEl.object3D.onAfterRender;
-  delete sceneEl.object3D.onAfterRender;
-
-  // TODO this assumption is now not true since we are not running after render. We should probably just permentently turn of autoUpdate and run matrix updates at a point we wnat to.
-  // The entire scene graph matrices should already be updated
-  // in tick(). They don't need to be recomputed again in tock().
-  const tmpAutoUpdate = sceneEl.object3D.autoUpdate;
-  sceneEl.object3D.autoUpdate = false;
-
-  const bubbleSystem = AFRAME.scenes[0].systems["personal-space-bubble"];
-  const boneVisibilitySystem = AFRAME.scenes[0].systems["hubs-systems"].boneVisibilitySystem;
-
-  if (bubbleSystem) {
-    for (let i = 0, l = bubbleSystem.invaders.length; i < l; i++) {
-      bubbleSystem.invaders[i].disable();
-    }
-    // HACK, bone visibility typically takes a tick to update, but since we want to be able
-    // to have enable() and disable() be reflected this frame, we need to do it immediately.
-    boneVisibilitySystem.tick();
-    // scene.autoUpdate will be false so explicitly update the world matrices
-    boneVisibilitySystem.updateMatrices();
-  }
-
-  const renderTarget = renderTargets.get(camera);
-  renderTarget.needsUpdate = false;
-  renderTarget.lastUpdated = world.time.elapsed;
-
-  const tmpRenderTarget = renderer.getRenderTarget();
-  renderer.setRenderTarget(renderTarget);
-  renderer.clearDepth();
-  renderer.render(sceneEl.object3D, world.eid2obj.get(CameraTool.cameraRef[camera]));
-  renderer.setRenderTarget(tmpRenderTarget);
-
-  renderer.xr.enabled = tmpVRFlag;
-  sceneEl.object3D.onAfterRender = tmpOnAfterRender;
-  sceneEl.object3D.autoUpdate = tmpAutoUpdate;
-
-  if (bubbleSystem) {
-    for (let i = 0, l = bubbleSystem.invaders.length; i < l; i++) {
-      bubbleSystem.invaders[i].enable();
-    }
-    // HACK, bone visibility typically takes a tick to update, but since we want to be able
-    // to have enable() and disable() be reflected this frame, we need to do it immediately.
-    boneVisibilitySystem.tick();
-    boneVisibilitySystem.updateMatrices();
-  }
-}
-
 function updateUI(world, camera) {
   const snapMenuObj = world.eid2obj.get(CameraTool.snapMenuRef[camera]);
   const snapBtnObj = world.eid2obj.get(CameraTool.snapRef[camera]);
@@ -235,17 +178,14 @@ function updateUI(world, camera) {
   if (countdownLblObj.visible) {
     const timeLeftSec = Math.ceil((CameraTool.snapTime[camera] - world.time.elapsed) / 1000);
     countdownLblObj.text = timeLeftSec;
-    countdownLblObj.sync(); // TODO this should probably happen in 1 spot per frame for all Texts
   }
 
   if (captureDurLblObj.visible) {
     captureDurLblObj.text = CAPTURE_DURATIONS[CameraTool.captureDurIdx[camera]];
-    captureDurLblObj.sync(); // TODO this should probably happen in 1 spot per frame for all Texts
   }
 
   if (sndToggleBtnObj.visible) {
     sndToggleLblObj.text = captureAudio ? "Sound ON" : "Sound OFF";
-    sndToggleLblObj.sync();
   }
 }
 
@@ -404,7 +344,10 @@ export function cameraToolSystem(world) {
         world.time.tick % allCameras.length === i &&
         elapsed > renderTarget.lastUpdated + VIEWFINDER_UPDATE_RATE)
     ) {
-      updateRenderTarget(world, camera);
+      // TODO camera tool may be able to just direclty use video-texture-target/source
+      updateRenderTarget(world, renderTarget, CameraTool.cameraRef[camera]);
+      renderTarget.needsUpdate = false;
+      renderTarget.lastUpdated = world.time.elapsed;
       if (CameraTool.state[camera] === CAMERA_STATE.RECORDING_VIDEO) {
         videoRecorders.get(camera).captureFrame(renderTargets.get(camera));
       }

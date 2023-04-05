@@ -48,7 +48,7 @@ const onboardingMessages = defineMessages({
   },
   "tips.mobile.turning": {
     id: "tips.mobile.turning",
-    defaultMessage: "Tap and drag to turn"
+    defaultMessage: "Tap and drag to look around"
   },
   "tips.desktop.locomotion": {
     id: "tips.desktop.locomotion2",
@@ -56,7 +56,7 @@ const onboardingMessages = defineMessages({
   },
   "tips.desktop.turning": {
     id: "tips.desktop.turning2",
-    defaultMessage: "Use {left} or {right} or click and drag"
+    defaultMessage: "Use {left} or {right} or click and drag to look around"
   },
   "tips.desktop.invite": {
     id: "tips.desktop.invite2",

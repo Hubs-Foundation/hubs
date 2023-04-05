@@ -4,6 +4,9 @@
 import React, { Component } from "react";
 import { withStyles } from "@material-ui/core/styles";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import RefreshIcon from "@material-ui/icons/Refresh";
+import ExpandIcon from "./shared/icons/ExpandIcon";
+import PictureIcon from "./shared/icons/PictureIcon";
 import Card from "@material-ui/core/Card";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
@@ -20,7 +23,7 @@ import Button from "@material-ui/core/Button";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import clsx from "classnames";
 import { Title } from "react-admin";
-
+import theme from "../utils/sample-theme";
 import { store } from "hubs/src/utils/store-instance";
 import withCommonStyles from "../utils/with-common-styles";
 import {
@@ -39,6 +42,13 @@ import * as AppConfigUtils from "../utils/app-config";
 const qs = new URLSearchParams(location.hash.split("?")[1]);
 
 const styles = withCommonStyles(theme => {
+  const swatch = {
+    borderRadius: "22px",
+    border: "solid 1px #000000",
+    width: "40px",
+    height: "40px"
+  };
+
   return {
     inputDescription: {
       display: "block",
@@ -75,6 +85,11 @@ const styles = withCommonStyles(theme => {
         marginTop: "-0.1em"
       }
     },
+    longInput: {
+      "& textarea": {
+        backgroundColor: "#E9E9E9"
+      }
+    },
     colorInput: {
       margin: "2em 0",
       "& label": {
@@ -83,12 +98,16 @@ const styles = withCommonStyles(theme => {
       "& input": {
         margin: 0,
         marginRight: "1em",
+        marginBottom: "10px",
         padding: "4px",
-        border: "1px solid hsl(0, 0%, 90%)",
-        backgroundColor: "hsl(0, 0%, 90%)",
+        backgroundColor: "transparent",
+        border: "0px solid hsl(0, 0%, 90%)",
         borderRadius: "3px",
-        height: "32px",
-        verticalAlign: "middle"
+        verticalAlign: "middle",
+        height: "40px",
+        width: "40px",
+        "&::-webkit-color-swatch": swatch,
+        "&::-moz-color-swatch": swatch
       }
     }
   };
@@ -137,7 +156,8 @@ class ConfigurationEditor extends Component {
       saving: false,
       saved: false,
       saveError: null,
-      warningMessage: null
+      warningMessage: null,
+      isDirty: false
     };
   }
 
@@ -182,6 +202,7 @@ class ConfigurationEditor extends Component {
     const config = this.state.config;
     setConfigValue(config, path, val);
     this.setState({ config: config });
+    this.setState({ isDirty: true });
   }
 
   onSubmit(e) {
@@ -226,8 +247,10 @@ class ConfigurationEditor extends Component {
     );
   }
 
-  renderLongTextInput(path, descriptor, currentValue) {
+  renderLongTextInput(path, { type, name, description }, currentValue) {
     const displayPath = path.join(" > ");
+    const isTheme = name === "Themes";
+    const isJson = type === "json";
 
     function isValidJSON(s) {
       try {
@@ -240,42 +263,66 @@ class ConfigurationEditor extends Component {
     }
 
     return (
-      <TextField
-        key={displayPath}
-        id={displayPath}
-        label={descriptor.name || displayPath}
-        inputProps={{ maxLength: 4096 }}
-        value={currentValue || ""}
-        onChange={ev => {
-          if (descriptor.type === "json") {
-            if (!isValidJSON(ev.target.value)) {
-              const warningMessage = `Invalid JSON for ${descriptor.name || displayPath}. See console for details.`;
-              if (this.state.warningMessage !== warningMessage) {
-                this.setState({ warningMessage });
-              }
-              console.error(`Invalid JSON for ${descriptor.name || displayPath}.`);
-              console.error(ev.target.value);
-            } else {
-              if (this.state.warningMessage !== null) {
-                this.setState({ warningMessage: null });
+      <div className={this.props.classes.longInput} key={displayPath}>
+        <TextField
+          multiline
+          rows={20}
+          key={displayPath}
+          id={displayPath}
+          label={name || displayPath}
+          inputProps={{ maxLength: 4096 }}
+          value={currentValue || (isTheme && !this.state.isDirty && JSON.stringify(theme, null, 2)) || ""}
+          onChange={ev => {
+            const value = ev.target.value;
+            if (isJson) {
+              if (!isValidJSON(value)) {
+                const warningMessage = `Invalid JSON for ${name || displayPath}. See console for details.`;
+                if (this.state.warningMessage !== warningMessage) {
+                  this.setState({ warningMessage });
+                }
+                console.error(`Invalid JSON for ${name || displayPath}.`);
+                console.error(value);
+              } else {
+                if (this.state.warningMessage !== null) {
+                  this.setState({ warningMessage: null });
+                }
               }
             }
-          }
-          this.onChange(path, ev.target.value);
-        }}
-        onBlur={ev => {
-          if (descriptor.type === "json" && isValidJSON(ev.target.value)) {
-            // Pretty print json strings
-            const pretty = JSON.stringify(JSON.parse(ev.target.value), null, 2);
-            this.onChange(path, pretty);
-          }
-        }}
-        helperText={descriptor.description}
-        type="text"
-        fullWidth
-        multiline
-        margin="normal"
-      />
+            this.onChange(path, value);
+          }}
+          onBlur={ev => {
+            const value = ev.target.value;
+            if (isJson && isValidJSON(value)) {
+              // Pretty print json strings
+              const pretty = JSON.stringify(JSON.parse(value), null, 2);
+              this.onChange(path, pretty);
+            }
+          }}
+          helperText={description}
+          type="text"
+          fullWidth
+          margin="normal"
+        />
+
+        {isTheme && (
+          <div className="flex-end">
+            <Button
+              variant="outlined"
+              color="secondary"
+              onClick={() => {
+                this.onChange(path, JSON.stringify(theme, null, 2));
+                const warningMessage = `Make sure to save your updates`;
+                if (this.state.warningMessage !== warningMessage) {
+                  this.setState({ warningMessage });
+                }
+              }}
+            >
+              <RefreshIcon />
+              Revert to original theme data
+            </Button>
+          </div>
+        )}
+      </div>
     );
   }
 
@@ -359,11 +406,133 @@ class ConfigurationEditor extends Component {
     }
   }
 
-  renderTree(schema, category, config) {
-    const configurables = getDescriptors(schema[category])
+  renderCategory(schema, category, config) {
+    switch (category) {
+      case "theme":
+        return this.renderThemeSection(schema.theme, config);
+      case "images":
+        return this.renderImagesSection(schema.images, config);
+      default:
+        return this.renderTree(schema, category, config);
+    }
+  }
+
+  getFilteredDescriptors(category) {
+    return getDescriptors(category)
       .filter(([, descriptor]) => qs.get("show_internal_configs") !== null || descriptor.internal !== "true")
-      .filter(([, descriptor]) => qs.get("show_deprecated_configs") !== null || descriptor.deprecated !== "true")
-      .map(([path, descriptor]) => this.renderConfigurable(path, descriptor, getConfigValue(config, path)));
+      .filter(([, descriptor]) => qs.get("show_deprecated_configs") !== null || descriptor.deprecated !== "true");
+  }
+
+  /**
+   * Theme Tab Section
+   */
+  renderThemeSection(theme, config) {
+    const configurables = this.getFilteredDescriptors(theme);
+    const getInput = ([path, descriptor]) => this.renderConfigurable(path, descriptor, getConfigValue(config, path));
+
+    return (
+      <form onSubmit={this.onSubmit.bind(this)}>
+        <h3 className="heading-sm mb-24">Nametags</h3>
+        {getInput(configurables[0])}
+        {getInput(configurables[1])}
+        <h3 className="heading-sm mb-24 mt-40">Theme Data</h3>
+        <p className="body-md">
+          This section contains the code which generates the available themes a user can choose from when in your
+          hub&#39;s rooms (More &gt; Preferences &gt; Misc &gt; Theme).More information about customizing your hubs&#39;
+          themes can be found in our{" "}
+          <a
+            href="https://hubs.mozilla.com/docs/hubs-cloud-customizing-themes.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="link"
+          >
+            documentation pages
+          </a>{" "}
+          .
+        </p>
+        {getInput(configurables[2])}
+        <div>
+          {this.state.saving ? (
+            <CircularProgress />
+          ) : (
+            <Button
+              onClick={this.onSubmit.bind(this)}
+              className={this.props.classes.button}
+              variant="contained"
+              color="primary"
+            >
+              Save
+            </Button>
+          )}
+        </div>
+      </form>
+    );
+  }
+
+  /**
+   * Images AKA Brand Tab Section
+   */
+  renderImagesSection(images, config) {
+    const configurables = this.getFilteredDescriptors(images);
+    const getInput = ([path, descriptor]) => this.renderConfigurable(path, descriptor, getConfigValue(config, path));
+
+    const AdditionalInfo = ({ size, format }) => {
+      return (
+        <div className="flex-align-items-center">
+          <ExpandIcon />
+          <span className="ml-10 mr-20">{size}</span>
+          <PictureIcon />
+          <span className="ml-10">{format}</span>
+        </div>
+      );
+    };
+
+    return (
+      <form onSubmit={this.onSubmit.bind(this)}>
+        <h3 className="heading-sm mb-24">Hub</h3>
+
+        {/* HUB LOGO  */}
+        {getInput(configurables[0])}
+        <AdditionalInfo size="250px x 250px" format="JPG, GIF, PNG, SVG" />
+
+        {/* HUB LOGO DARK MODE  */}
+        {getInput(configurables[1])}
+        <AdditionalInfo size="250px x 250px" format="JPG, GIF, PNG, SVG" />
+
+        {/* FAVICON */}
+        {getInput(configurables[2])}
+        <AdditionalInfo size="96px x 96px" format="JPG, GIF, PNG" />
+
+        <h3 className="heading-sm mb-24 mt-40">Hub Home Page</h3>
+
+        {/* HOMEPAGE IMAGE  */}
+        {getInput(configurables[3])}
+        <AdditionalInfo size="1000px x 1000px" format="JPG, GIF, PNG, SVG" />
+
+        {/* COMPANY LOGO  */}
+        {getInput(configurables[4])}
+        <AdditionalInfo size="250px x 250px" format="JPG, GIF, PNG, SVG" />
+
+        <h3 className="heading-sm mb-24 mt-40">Sharing and Social Media</h3>
+
+        {/* SHORTCUT ICON */}
+        {getInput(configurables[5])}
+        <AdditionalInfo size="512px x 512px" format="JPG, GIF, PNG" />
+
+        {/* SOCIAL MEDIA CARD */}
+        {getInput(configurables[6])}
+        <AdditionalInfo size="1024px x 576px (max)" format="JPG, GIF, PNG" />
+      </form>
+    );
+  }
+
+  /**
+   * General Render Tree
+   */
+  renderTree(schema, category, config) {
+    const configurables = this.getFilteredDescriptors(schema[category]).map(([path, descriptor]) =>
+      this.renderConfigurable(path, descriptor, getConfigValue(config, path))
+    );
 
     return (
       <form onSubmit={this.onSubmit.bind(this)}>
@@ -412,7 +581,8 @@ class ConfigurationEditor extends Component {
             <Typography variant="body2" gutterBottom>
               {getCategoryDescription(this.state.category, this.state.provider)}
             </Typography>
-            {schema && config ? this.renderTree(schema, category, config) : <LinearProgress />}
+
+            {schema && config ? this.renderCategory(schema, category, config) : <LinearProgress />}
           </TabContainer>
         </CardContent>
         <Snackbar

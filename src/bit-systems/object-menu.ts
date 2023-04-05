@@ -1,10 +1,20 @@
-import { UserInputSystem } from "aframe";
-import { defineQuery, hasComponent } from "bitecs";
+import { defineQuery, entityExists, hasComponent } from "bitecs";
+import { Matrix4, Vector3 } from "three";
 import type { HubsWorld } from "../app";
 import { HoveredRemoteRight, Interacted, ObjectMenu, ObjectMenuTarget } from "../bit-components";
 import { anyEntityWith, findAncestorWithComponent } from "../utils/bit-utils";
+import { createNetworkedEntity } from "../utils/create-networked-entity";
+import { createEntityState, deleteEntityState } from "../utils/entity-state-utils";
+import HubChannel from "../utils/hub-channel";
 import type { EntityID } from "../utils/networking-types";
 import { setMatrixWorld } from "../utils/three-utils";
+import { deleteTheDeletableAncestor } from "./delete-entity-system";
+import { createMessageDatas, isPinned } from "./networking";
+
+// Working variables.
+const _vec1 = new Vector3();
+const _vec2 = new Vector3();
+const _mat4 = new Matrix4();
 
 function clicked(world: HubsWorld, eid: EntityID) {
   return hasComponent(world, Interacted, eid);
@@ -15,9 +25,14 @@ function objectMenuTarget(world: HubsWorld, menu: EntityID, sceneIsFrozen: boole
     return 0;
   }
 
-  const hovered = hoveredQuery(world);
-  const target = hovered.find(eid => findAncestorWithComponent(world, ObjectMenuTarget, eid));
-  return target || ObjectMenu.targetRef[menu];
+  const target = hoveredQuery(world).map(eid => findAncestorWithComponent(world, ObjectMenuTarget, eid))[0];
+  if (target) return target;
+
+  if (entityExists(world, ObjectMenu.targetRef[menu])) {
+    return ObjectMenu.targetRef[menu];
+  }
+
+  return 0;
 }
 
 function moveToTarget(world: HubsWorld, menu: EntityID) {
@@ -30,15 +45,50 @@ function moveToTarget(world: HubsWorld, menu: EntityID) {
   setMatrixWorld(menuObj, targetObj.matrixWorld);
 }
 
-function handleClicks(world: HubsWorld, menu: EntityID) {
+function openLink(world: HubsWorld, eid: EntityID) {
+  const { initialData } = createMessageDatas.get(eid)!;
+  const src = initialData.src;
+  // TODO: Currently only accounts for the simple case of an external url
+  //       but should support other type actions(eg: avatar update for avatar
+  //       url, room switch for Hubs room url).
+  //       See src/components/open-media-button.js
+  window.open(src);
+}
+
+function cloneObject(world: HubsWorld, sourceEid: EntityID) {
+  // Cloning by creating a networked entity from initial data.
+  // Probably it would be easier than copying Component data and
+  // Object3D.
+  const { prefabName, initialData } = createMessageDatas.get(sourceEid)!;
+  const clonedEid = createNetworkedEntity(world, prefabName, initialData);
+  const clonedObj = world.eid2obj.get(clonedEid)!;
+
+  // Place the cloned object a little bit closer to the camera in the scene
+  // TODO: Remove the dependency with AFRAME
+  const camera = AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.viewingCamera;
+  camera.updateMatrices();
+
+  const sourceObj = world.eid2obj.get(sourceEid)!;
+  sourceObj.updateMatrices();
+
+  const objPos = _vec1.setFromMatrixPosition(sourceObj.matrixWorld);
+  const cameraPos = _vec2.setFromMatrixPosition(camera.matrixWorld);
+  objPos.add(cameraPos.sub(objPos).normalize().multiplyScalar(0.2));
+  const clonedMatrixWorld = _mat4.copy(sourceObj.matrixWorld).setPosition(objPos);
+  setMatrixWorld(clonedObj, clonedMatrixWorld);
+}
+
+function handleClicks(world: HubsWorld, menu: EntityID, hubChannel: HubChannel) {
   if (clicked(world, ObjectMenu.pinButtonRef[menu])) {
-    console.log("Clicked pin");
+    createEntityState(hubChannel, world, ObjectMenu.targetRef[menu]);
+  } else if (clicked(world, ObjectMenu.unpinButtonRef[menu])) {
+    deleteEntityState(hubChannel, world, ObjectMenu.targetRef[menu]);
   } else if (clicked(world, ObjectMenu.cameraFocusButtonRef[menu])) {
     console.log("Clicked focus");
   } else if (clicked(world, ObjectMenu.cameraTrackButtonRef[menu])) {
     console.log("Clicked track");
   } else if (clicked(world, ObjectMenu.removeButtonRef[menu])) {
-    console.log("Clicked remove");
+    deleteTheDeletableAncestor(world, ObjectMenu.targetRef[menu]);
   } else if (clicked(world, ObjectMenu.dropButtonRef[menu])) {
     console.log("Clicked drop");
   } else if (clicked(world, ObjectMenu.inspectButtonRef[menu])) {
@@ -46,11 +96,11 @@ function handleClicks(world: HubsWorld, menu: EntityID) {
   } else if (clicked(world, ObjectMenu.deserializeDrawingButtonRef[menu])) {
     console.log("Clicked deserialize drawing");
   } else if (clicked(world, ObjectMenu.openLinkButtonRef[menu])) {
-    console.log("Clicked open link");
+    openLink(world, ObjectMenu.targetRef[menu]);
   } else if (clicked(world, ObjectMenu.refreshButtonRef[menu])) {
     console.log("Clicked refresh");
   } else if (clicked(world, ObjectMenu.cloneButtonRef[menu])) {
-    console.log("Clicked clone");
+    cloneObject(world, ObjectMenu.targetRef[menu]);
   } else if (clicked(world, ObjectMenu.rotateButtonRef[menu])) {
     console.log("Clicked rotate");
   } else if (clicked(world, ObjectMenu.mirrorButtonRef[menu])) {
@@ -60,14 +110,17 @@ function handleClicks(world: HubsWorld, menu: EntityID) {
   }
 }
 
-function render(world: HubsWorld, menu: EntityID, frozen: boolean) {
-  const visible = !!(ObjectMenu.targetRef[menu] && frozen);
+function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
+  const target = ObjectMenu.targetRef[menu];
+  const visible = !!(target && frozen);
 
-  const obj = world.eid2obj.get(ObjectMenu.pinButtonRef[menu])!.parent!;
+  const obj = world.eid2obj.get(menu)!;
   obj.visible = visible;
 
+  world.eid2obj.get(ObjectMenu.pinButtonRef[menu])!.visible = visible && !isPinned(target);
+  world.eid2obj.get(ObjectMenu.unpinButtonRef[menu])!.visible = visible && isPinned(target);
+
   [
-    ObjectMenu.pinButtonRef[menu],
     ObjectMenu.cameraFocusButtonRef[menu],
     ObjectMenu.cameraTrackButtonRef[menu],
     ObjectMenu.removeButtonRef[menu],
@@ -89,16 +142,13 @@ function render(world: HubsWorld, menu: EntityID, frozen: boolean) {
 }
 
 const hoveredQuery = defineQuery([HoveredRemoteRight]);
-export function objectMenuSystem(world: HubsWorld, sceneIsFrozen: boolean, userinput: UserInputSystem) {
-  const menu = anyEntityWith(world, ObjectMenu) as EntityID | null;
-  if (!menu) {
-    return; // TODO: Fix initialization so that this is assigned via preload.
-  }
+export function objectMenuSystem(world: HubsWorld, sceneIsFrozen: boolean, hubChannel: HubChannel) {
+  const menu = anyEntityWith(world, ObjectMenu)!;
 
   ObjectMenu.targetRef[menu] = objectMenuTarget(world, menu, sceneIsFrozen);
   if (ObjectMenu.targetRef[menu]) {
     moveToTarget(world, menu);
-    handleClicks(world, menu);
+    handleClicks(world, menu, hubChannel);
   }
-  render(world, menu, sceneIsFrozen);
+  updateVisibility(world, menu, sceneIsFrozen);
 }

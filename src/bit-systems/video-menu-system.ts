@@ -4,7 +4,9 @@ import { clamp, mapLinear } from "three/src/math/MathUtils";
 import { Text as TroikaText } from "troika-three-text";
 import { HubsWorld } from "../app";
 import {
+  AudioEmitter,
   CursorRaycastable,
+  EntityStateDirty,
   Held,
   HeldRemoteRight,
   HoveredRemoteRight,
@@ -20,6 +22,7 @@ import { animate } from "../utils/animate";
 import { coroutine } from "../utils/coroutine";
 import { easeOutQuadratic } from "../utils/easing";
 import { isFacingCamera } from "../utils/three-utils";
+import { Emitter2Audio, EMITTER_FLAGS } from "./audio-emitter-system";
 
 const videoMenuQuery = defineQuery([VideoMenu]);
 const hoverRightVideoQuery = defineQuery([HoveredRemoteRight, MediaVideo]);
@@ -85,18 +88,22 @@ export function videoMenuSystem(world: HubsWorld, userinput: any) {
     if (togglePlayVideo) {
       if (hasComponent(world, NetworkedVideo, videoEid)) {
         takeOwnership(world, videoEid);
+        addComponent(world, EntityStateDirty, videoEid);
       }
 
       const playIndicatorObj = world.eid2obj.get(VideoMenu.playIndicatorRef[eid])!;
       const pauseIndicatorObj = world.eid2obj.get(VideoMenu.pauseIndicatorRef[eid])!;
 
+      const audioEid = Emitter2Audio.get(videoEid)!;
       if (video.paused) {
         video.play();
+        AudioEmitter.flags[audioEid] &= ~EMITTER_FLAGS.PAUSED;
         playIndicatorObj.visible = true;
         pauseIndicatorObj.visible = false;
         rightMenuIndicatorCoroutine = coroutine(animateIndicator(world, VideoMenu.playIndicatorRef[eid]));
       } else {
         video.pause();
+        AudioEmitter.flags[audioEid] |= EMITTER_FLAGS.PAUSED;
         playIndicatorObj.visible = false;
         pauseIndicatorObj.visible = true;
         rightMenuIndicatorCoroutine = coroutine(animateIndicator(world, VideoMenu.pauseIndicatorRef[eid]));
@@ -122,6 +129,7 @@ export function videoMenuSystem(world: HubsWorld, userinput: any) {
       }
       if (hasComponent(world, NetworkedVideo, videoEid)) {
         takeOwnership(world, videoEid);
+        addComponent(world, EntityStateDirty, videoEid);
       }
     }
     headObj.position.x = mapLinear(video.currentTime, 0, video.duration, -sliderHalfWidth, sliderHalfWidth);
@@ -129,7 +137,6 @@ export function videoMenuSystem(world: HubsWorld, userinput: any) {
 
     const timeLabelRef = world.eid2obj.get(VideoMenu.timeLabelRef[eid])! as TroikaText;
     timeLabelRef.text = `${timeFmt(video.currentTime)} / ${timeFmt(video.duration)}`;
-    timeLabelRef.sync();
 
     if (rightMenuIndicatorCoroutine && rightMenuIndicatorCoroutine().done) {
       rightMenuIndicatorCoroutine = null;

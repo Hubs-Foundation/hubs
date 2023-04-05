@@ -1,0 +1,511 @@
+@use "../tools/media-queries.scss" as *;
+@use "../tools/mixins.scss" as *;
+@use "../core/variables.scss" as *;
+
+// ---------------------------------
+//   Quick Typograpjhy
+// ---------------------------------
+$fontSizes: 12, 14, 16, 18, 20;
+
+@each $fontSize in $fontSizes {
+  .font-#{$fontSize} {
+    @include font-size($fontSize);
+  }
+}
+
+// Body XS Text
+.body-xs {
+  @include body-xs();
+}
+
+// Body SM Text
+.body-sm {
+  @include body-sm();
+}
+
+// Body Text
+.body-md {
+  @include body-md();
+}
+
+.body-md-bold {
+  @include body-md-bold();
+}
+
+// Heading
+.heading-xxl {
+  @include heading-xxl();
+}
+
+.heading-xl {
+  @include heading-xl();
+}
+
+.heading-lg {
+  @include heading-lg();
+}
+
+.heading-md {
+  @include heading-md();
+}
+
+.heading-sm {
+  @include heading-sm();
+}
+
+.heading-xs {
+  @include heading-xs();
+}
+
+.heading-xxs {
+  @include heading-xxs();
+}
+
+.capitalize {
+  text-transform: capitalize;
+}
+
+.link {
+  @include primary-font();
+  @include font-size(16);
+  line-height: 24px;
+  color: $color-interaction-primary;
+  text-decoration-line: underline;
+}
+
+// ---------------------------------
+//   Quick Media-Q
+// ---------------------------------
+.no-mobile {
+  @include mobile-down {
+    display: none !important;
+  }
+}
+
+// ---------------------------------
+//   Colors
+// ---------------------------------
+.color-text-main {
+  color: $color-text-main;
+}
+
+// ---------------------------------
+//   Visibility
+// ---------------------------------
+
+.hidden {
+  display: none !important;
+}
+
+.hidden-mobile-only {
+  @include mobile-only {
+    display: none !important;
+  }
+}
+
+.hidden-tablet-up {
+  @include tablet-up {
+    display: none !important;
+  }
+}
+
+.hidden-tablet-only {
+  @include tablet-only {
+    display: none !important;
+  }
+}
+
+.hidden-desktop-up {
+  @include desktop-up {
+    display: none !important;
+  }
+}
+
+.hidden-desktop-only {
+  @include desktop-only {
+    display: none !important;
+  }
+}
+
+.hidden-hd-up {
+  @include hd-up {
+    display: none !important;
+  }
+}
+
+// ---------------------------------
+//   Misc
+// ---------------------------------
+
+.sr-only {
+  border: 0 !important;
+  clip: rect(1px, 1px, 1px, 1px) !important;
+  -webkit-clip-path: inset(50%) !important;
+  clip-path: inset(50%) !important;
+  height: 1px !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  position: absolute !important;
+  width: 1px !important;
+  white-space: nowrap !important;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.clear-button {
+  cursor: pointer;
+  border: none;
+  background-color: transparent;
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+}
+
+.block {
+  display: block;
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+.no-link {
+  &,
+  &:hover {
+    text-decoration: none;
+    color: inherit;
+  }
+}
+
+.overflow-x-hidden {
+  overflow-x: hidden;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.uppercase {
+  text-transform: uppercase;
+}
+
+.title-case {
+  text-transform: capitalize;
+}
+
+.left-absolute {
+  position: absolute;
+  left: 0;
+}
+
+.right-absolute {
+  position: absolute;
+  right: 0;
+}
+
+.left-absolute {
+  position: absolute;
+  left: 0;
+}
+
+.right-absolute {
+  position: absolute;
+  right: 0;
+}
+
+.width-100 {
+  width: 100%;
+}
+
+.content-box {
+  &,
+  & * {
+    box-sizing: content-box;
+  }
+}
+
+.button-wrapper {
+  border: 0;
+  background: transparent;
+  padding: 0;
+}
+
+// ---------------------------------
+//  Layout
+// ---------------------------------
+
+$percentWidths: 10, 20, 30, 40, 50, 60, 70, 80, 90, 100;
+$percent: "%";
+$unit: "px";
+
+@each $percentWidth in $percentWidths {
+  .max-w-#{$percentWidth}-percent {
+    max-width: #{$percentWidth}#{$percent};
+  }
+}
+
+$pxWidths: 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000;
+@each $pxWidth in $pxWidths {
+  .max-w-#{$pxWidth}-px {
+    max-width: #{$pxWidth}#{$unit};
+  }
+}
+
+@each $pxWidth in $pxWidths {
+  .w-#{$pxWidth}-px {
+    width: #{$pxWidth}#{$unit};
+  }
+}
+
+// Create Size Value Array
+$start: 0;
+$end: 100;
+$array: "";
+
+@for $i from $start + 1 through $end {
+  $array: append($array, $i, comma);
+  $array: set-nth($array, 1, $start);
+}
+
+@each $size in $array {
+  /**
+  PADDING
+  **/
+
+  // Padding: General
+  .p-#{$size} {
+    padding: #{$size}#{$unit};
+    &-dt {
+      @include mobile-up {
+        padding: #{$size}#{$unit};
+      }
+    }
+    &-mb {
+      @include mobile-down {
+        padding: #{$size}#{$unit};
+      }
+    }
+  }
+
+  // Padding: Horizontal
+  .px-#{$size} {
+    padding-left: #{$size}#{$unit};
+    padding-right: #{$size}#{$unit};
+    &-dt {
+      @include mobile-up {
+        padding-left: #{$size}#{$unit};
+        padding-right: #{$size}#{$unit};
+      }
+    }
+    &-mb {
+      @include mobile-down {
+        padding-left: #{$size}#{$unit};
+        padding-right: #{$size}#{$unit};
+      }
+    }
+  }
+
+  // Padding: Vertical
+  .py-#{$size} {
+    padding-top: #{$size}#{$unit};
+    padding-bottom: #{$size}#{$unit};
+    &-dt {
+      @include mobile-up {
+        padding-top: #{$size}#{$unit};
+        padding-bottom: #{$size}#{$unit};
+      }
+    }
+    &-mb {
+      @include mobile-down {
+        padding-top: #{$size}#{$unit};
+        padding-bottom: #{$size}#{$unit};
+      }
+    }
+  }
+
+  // Padding: Top
+  .pt-#{$size} {
+    padding-top: #{$size}#{$unit};
+    &-dt {
+      @include mobile-up {
+        padding-top: #{$size}#{$unit};
+      }
+    }
+    &-mb {
+      @include mobile-down {
+        padding-top: #{$size}#{$unit};
+      }
+    }
+  }
+
+  // Padding: Top
+  .pb-#{$size} {
+    padding-bottom: #{$size}#{$unit};
+    &-dt {
+      @include mobile-up {
+        padding-bottom: #{$size}#{$unit};
+      }
+    }
+    &-mb {
+      @include mobile-down {
+        padding-bottom: #{$size}#{$unit};
+      }
+    }
+  }
+
+  // Margin: Right
+  .pr-#{$size} {
+    padding-right: #{$size}#{$unit};
+    &-dt {
+      @include mobile-up {
+        padding-right: #{$size}#{$unit};
+      }
+    }
+    &-mb {
+      @include mobile-down {
+        padding-right: #{$size}#{$unit};
+      }
+    }
+  }
+
+  // Margin: Left
+  .pl-#{$size} {
+    padding-left: #{$size}#{$unit};
+    &-dt {
+      @include mobile-up {
+        padding-left: #{$size}#{$unit};
+      }
+    }
+    &-mb {
+      @include mobile-down {
+        padding-left: #{$size}#{$unit};
+      }
+    }
+  }
+
+  /**
+  MARGIN
+  **/
+
+  // Margin: General
+  .m-#{$size} {
+    margin: #{$size}#{$unit};
+    &-dt {
+      @include mobile-up {
+        margin: #{$size}#{$unit};
+      }
+    }
+    &-mb {
+      @include mobile-down {
+        margin: #{$size}#{$unit};
+      }
+    }
+  }
+
+  // Margin: Horizontal
+  .mx-#{$size} {
+    margin-left: #{$size}#{$unit};
+    margin-right: #{$size}#{$unit};
+    &-dt {
+      @include mobile-up {
+        margin-left: #{$size}#{$unit};
+        margin-right: #{$size}#{$unit};
+      }
+    }
+    &-mb {
+      @include mobile-down {
+        margin-left: #{$size}#{$unit};
+        margin-right: #{$size}#{$unit};
+      }
+    }
+  }
+
+  // Margin: Vertical
+  .my-#{$size} {
+    margin-top: #{$size}#{$unit};
+    margin-bottom: #{$size}#{$unit};
+    &-dt {
+      @include mobile-up {
+        margin-top: #{$size}#{$unit};
+        margin-bottom: #{$size}#{$unit};
+      }
+    }
+    &-mb {
+      @include mobile-down {
+        margin-top: #{$size}#{$unit};
+        margin-bottom: #{$size}#{$unit};
+      }
+    }
+  }
+
+  // Margin: Top
+  .mt-#{$size} {
+    margin-top: #{$size}#{$unit};
+    &-dt {
+      @include mobile-up {
+        margin-top: #{$size}#{$unit};
+      }
+    }
+    &-mb {
+      @include mobile-down {
+        margin-top: #{$size}#{$unit};
+      }
+    }
+  }
+
+  // Margin: Bottom
+  .mb-#{$size} {
+    margin-bottom: #{$size}#{$unit} !important;
+    &-dt {
+      @include mobile-up {
+        margin-bottom: #{$size}#{$unit};
+      }
+    }
+    &-mb {
+      @include mobile-down {
+        margin-bottom: #{$size}#{$unit};
+      }
+    }
+  }
+
+  // Margin: Right
+  .mr-#{$size} {
+    margin-right: #{$size}#{$unit};
+    &-dt {
+      @include mobile-up {
+        margin-right: #{$size}#{$unit};
+      }
+    }
+    &-mb {
+      @include mobile-down {
+        margin-right: #{$size}#{$unit};
+      }
+    }
+  }
+
+  // Margin: Left
+  .ml-#{$size} {
+    margin-left: #{$size}#{$unit};
+    &-dt {
+      @include mobile-up {
+        margin-left: #{$size}#{$unit};
+      }
+    }
+    &-mb {
+      @include mobile-down {
+        margin-left: #{$size}#{$unit};
+      }
+    }
+  }
+}

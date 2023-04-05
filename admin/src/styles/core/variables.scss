@@ -1,0 +1,162 @@
+// -----------------
+//   Font Setup
+// -----------------
+$font-size-base: 16; // base size in px
+$primary-font: 'Inter';
+$secondary-font: 'Space Grotesk';
+$backup-font: 'Arial';
+
+// ---------------------------------
+//  Colors
+// ---------------------------------
+/**
+  PRIMARY INTERACTION
+  **/
+$color-interaction-primary: var(--color-interaction-primary);
+$color-interaction-primary-hover: var(--color-interaction-primary-hover);
+$color-interaction-primary-active: var(--color-interaction-primary-active);
+$color-interaction-primary-disabled: var(--color-interaction-primary-disabled);
+$color-interaction-primary-alt: var(--color-interaction-primary-alt);
+$color-interaction-primary-alt-hover: var(
+  --color-interaction-primary-alt-hover
+);
+$color-interaction-primary-alt-active: var(
+  --color-interaction-primary-alt-active
+);
+$color-interaction-primary-alt-disabled: var(
+  --color-interaction-primary-alt-disabled
+);
+
+/**
+  SECONDARY INTERACTION
+  **/
+$color-interaction-secondary: var(--color-interaction-secondary);
+$color-interaction-secondary-hover: var(--color-interaction-secondary-hover);
+$color-interaction-secondary-active: var(--color-interaction-secondary-active);
+$color-interaction-secondary-disabled: var(
+  --color-interaction-secondary-disabled
+);
+$color-interaction-secondary-alt: var(--color-interaction-secondary-alt);
+$color-interaction-secondary-alt-hover: var(
+  --color-interaction-secondary-alt-hover
+);
+$color-interaction-secondary-alt-active: var(
+  --color-interaction-secondary-alt-active
+);
+$color-interaction-secondary-alt-disabled: var(
+  --color-interaction-secondary-alt-disabled
+);
+
+/**
+  SEMANTIC
+  **/
+
+$color-semantic-info: var(--color-semantic-info);
+$color-semantic-info-hover: var(--color-semantic-info-hover);
+$color-semantic-info-active: var(--color-semantic-info-active);
+$color-semantic-disabled: var(--color-semantic-disabled);
+$color-semantic-success: var(--color-semantic-success);
+$color-semantic-success-hover: var(--color-semantic-success-hover);
+$color-semantic-success-active: var(--color-semantic-success-active);
+$color-semantic-success-disabled: var(--color-semantic-success-disabled);
+$color-semantic-warning: var(--color-semantic-warning);
+$color-semantic-warning-hover: var(--color-semantic-warning-hover);
+$color-semantic-warning-active: var(--color-semantic-warning-active);
+$color-semantic-warning-disabled: var(--color-semantic-warning-disabled);
+$color-semantic-critical: var(--color-semantic-critical);
+$color-semantic-critical-hover: var(--color-semantic-critical-hover);
+$color-semantic-critical-active: var(--color-semantic-critical-active);
+$color-semantic-critical-disabled: var(--color-semantic-critical-disabled);
+$color-semantic-critical-bg-alt: var(--color-semantic-critical-bg-alt);
+$color-semantic-neutral: var(--color-semantic-neutral);
+$color-semantic-neutral-hover: var(--color-semantic-neutral-hover);
+$color-semantic-neutral-active: var(--color-semantic-neutral-active);
+$color-semantic-neutral-inactive: var(--color-semantic-neutral-inactive);
+
+/**
+  TEXT
+  **/
+$color-text-main: var(--color-text-main);
+$color-text-subtle: var(--color-text-subtle);
+$color-text-reverse: var(--color-text-reverse);
+$color-text-reverse-subtle: var(--color-text-reverse-subtle);
+$color-text-disabled: var(--color-text-disabled);
+$color-text-info: var(--color-text-info);
+$color-text-success: var(--color-text-success);
+$color-text-warning: var(--color-text-warning);
+$color-text-critical: var(--color-text-critical);
+
+/**
+  BORDER
+  **/
+$color-border-1: var(--color-border-1);
+$color-border-2: var(--color-border-2);
+$color-border-3: var(--color-border-3);
+
+/**
+  NEUTRALS
+  **/
+$color-neutral-0: var(--color-neutral-0);
+$color-neutral-1: var(--color-neutral-1);
+$color-neutral-2: var(--color-neutral-2);
+$color-neutral-3: var(--color-neutral-3);
+
+/**
+  STATUS
+  **/
+$color-status-ready: var(--color-status-ready);
+$color-status-busy: var(--color-status-busy);
+$color-status-offline: var(--color-status-offline);
+
+/**
+  BACKGROUNDS
+  **/
+$color-background-overlay: var(--color-background-overlay);
+$color-background-modal-overlay: var(--color-background-modal-overlay);
+$color-interactions-menu: var(--color-interactions-menu);
+$color-background-neutral-0: var(--color-background-neutral-0);
+$color-background-critical: var(--color-background-critical);
+$color-background-subtle-callout: var(--color-background-subtle-callout);
+
+/**
+  MENU
+  **/
+$color-interactions-menu: var(--color-interactions-menu);
+$color-interactions-menu-hover: var(--color-interactions-menu-hover);
+$color-interactions-menu-inactive: var(--color-interactions-menu-inactive);
+
+// ---- Primary Brand Colors ---------------------
+$black: #231f20;
+$blue: #0d73a6;
+$gradient-warm: radial-gradient(
+  147.61% 1186.51% at 110.24% -15.63%,
+  #ff806f 36.82%,
+  #ffff98 100%
+);
+$gradient-rainbow: linear-gradient(
+  107.97deg,
+  #489cbe 6.73%,
+  #5427c9 39.4%,
+  #a8527c 77.18%,
+  #a67878 104.75%
+);
+
+// ---- Utility Colors  ---------------------
+$white: #ffffff;
+$off-white: #ddd;
+$grey: #868686;
+$accent-grey: #e0e0e0;
+
+// ---- Break Points ---------------------
+$breakpoint-mobile: 580px;
+$breakpoint-tablet: 768px;
+$breakpoint-tablet-large: 992px;
+$breakpoint-desktop: 1024px;
+$breakpoint-desktop-large: 1220px;
+$breakpoint-hd: 1312px;
+$container-max-width: 1440px;
+
+// ---- Misc ---------------------
+$drop-shadow: 0 3px 8px rgba($black, 0.3);
+$drop-shadow-right: 3px 3px 8px rgba($black, 0.3);
+$drop-shadow-light: 0 3px 8px rgba($black, 0.05);

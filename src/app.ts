@@ -1,4 +1,3 @@
-import * as bitecs from "bitecs";
 import { addEntity, createWorld, IWorld } from "bitecs";
 import "./aframe-to-bit-components";
 import { AEntity, Networked, Object3DTag, Owned } from "./bit-components";
@@ -14,6 +13,7 @@ import { EffectComposer, EffectPass } from "postprocessing";
 import {
   Audio,
   AudioListener,
+  Material,
   Object3D,
   PerspectiveCamera,
   PositionalAudio,
@@ -28,6 +28,7 @@ import { mainTick } from "./systems/hubs-systems";
 import { waitForPreloads } from "./utils/preload";
 import SceneEntryManager from "./scene-entry-manager";
 import { store } from "./utils/store-instance";
+import { addObject3DComponent } from "./utils/jsx-entity";
 
 declare global {
   interface Window {
@@ -49,6 +50,7 @@ export interface HubsWorld extends IWorld {
   deletedNids: Set<number>;
   nid2eid: Map<number, number>;
   eid2obj: Map<number, Object3D>;
+  eid2mat: Map<number, Material>;
   time: { delta: number; elapsed: number; tick: number };
 }
 
@@ -60,9 +62,14 @@ export function getScene() {
   return promiseToScene;
 }
 
+interface HubDescription {
+  hub_id: string;
+}
+
 export class App {
   scene?: AScene;
   hubChannel?: HubChannel;
+  hub?: HubDescription;
   mediaDevicesManager?: MediaDevicesManager;
   entryManager?: SceneEntryManager;
   messageDispatch?: any;
@@ -72,15 +79,15 @@ export class App {
 
   audios = new Map<AElement | number, PositionalAudio | Audio>();
   sourceType = new Map<AElement | number, SourceType>();
-  audioOverrides = new Map<AElement | number, AudioSettings>();
-  zoneOverrides = new Map<AElement | number, AudioSettings>();
+  audioOverrides = new Map<AElement | number, Partial<AudioSettings>>();
+  zoneOverrides = new Map<AElement | number, Partial<AudioSettings>>();
   gainMultipliers = new Map<AElement | number, number>();
   supplementaryAttenuation = new Map<AElement | number, number>();
   clippingState = new Set<AElement | number>();
   mutedState = new Set<AElement | number>();
   isAudioPaused = new Set<AElement | number>();
-  audioDebugPanelOverrides = new Map<SourceType, AudioSettings>();
-  sceneAudioDefaults = new Map<SourceType, AudioSettings>();
+  audioDebugPanelOverrides = new Map<SourceType, Partial<AudioSettings>>();
+  sceneAudioDefaults = new Map<SourceType, Partial<AudioSettings>>();
   moderatorAudioSource = new Set<AElement | number>();
 
   world: HubsWorld = createWorld();
@@ -109,6 +116,7 @@ export class App {
     this.store = store;
     // TODO: Create accessor / update methods for these maps / set
     this.world.eid2obj = new Map();
+    this.world.eid2mat = new Map();
 
     this.world.nid2eid = new Map();
     this.world.deletedNids = new Set();
@@ -189,6 +197,9 @@ export class App {
 
     const audioListener = new AudioListener();
     this.audioListener = audioListener;
+    const audioListenerEid = addEntity(this.world);
+    addObject3DComponent(this.world, audioListenerEid, this.audioListener);
+
     camera.add(audioListener);
 
     this.world.time = {

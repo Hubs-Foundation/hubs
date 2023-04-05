@@ -10,7 +10,14 @@ import {
   Not,
   entityExists
 } from "bitecs";
-import { FloatyObject, Owned, Rigidbody, MakeKinematicOnRelease, Constraint } from "../bit-components";
+import {
+  FloatyObject,
+  Owned,
+  Rigidbody,
+  MakeKinematicOnRelease,
+  Constraint,
+  NetworkedFloatyObject
+} from "../bit-components";
 
 export const MakeStaticWhenAtRest = defineComponent();
 
@@ -60,6 +67,7 @@ const enteredFloatyObjectsQuery = enterQuery(defineQuery([FloatyObject, Rigidbod
 const heldFloatyObjectsQuery = defineQuery([FloatyObject, Rigidbody, Constraint]);
 const exitedHeldFloatyObjectsQuery = exitQuery(heldFloatyObjectsQuery);
 const enterHeldFloatyObjectsQuery = enterQuery(heldFloatyObjectsQuery);
+const networkedFloatyObjectsQuery = defineQuery([FloatyObject, NetworkedFloatyObject]);
 export const floatyObjectSystem = world => {
   const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
 
@@ -111,6 +119,14 @@ export const floatyObjectSystem = world => {
         collisionFilterMask: COLLISION_LAYERS.DEFAULT_INTERACTABLE,
         gravity: { x: 0, y: -9.8, z: 0 }
       });
+    }
+  });
+
+  networkedFloatyObjectsQuery(world).forEach(eid => {
+    if (hasComponent(world, Owned, eid)) {
+      NetworkedFloatyObject.flags[eid] = FloatyObject.flags[eid];
+    } else {
+      FloatyObject.flags[eid] = NetworkedFloatyObject.flags[eid];
     }
   });
 

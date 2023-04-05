@@ -407,7 +407,6 @@
   "preferences-screen.preference.enable-gyro": "Habilitar giroscópio (quando suportado pelo navegador/dispositivo)",
   "preferences-screen.preference.enable-on-screen-joystick-left": "Habilitar Joystick no canto esquerdo da tela para se mover",
   "preferences-screen.preference.enable-on-screen-joystick-right": "Habilitar Joystick no canto direito da tela para se mover",
-  "preferences-screen.preference.fast-room-switching": "Habilitar Salas Dinâmicas (Experimental)",
   "preferences-screen.preference.global-media-volume": "volume de mídia",
   "preferences-screen.preference.global-sfx-volume": "SFX Volume",
   "preferences-screen.preference.global-voice-volume": "Volume de entrada de voz",

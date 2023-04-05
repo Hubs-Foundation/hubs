@@ -3,12 +3,12 @@ import { HubsWorld } from "../app";
 import { AEntity, Networked, Owned } from "../bit-components";
 import type { EntityID } from "./networking-types";
 
-export function takeOwnershipWithTime(world: HubsWorld, eid: EntityID, timestamp: number) {
+export function takeSoftOwnership(world: HubsWorld, eid: EntityID) {
   if (hasComponent(world, AEntity, eid)) {
-    throw new Error("Cannot take ownership of AEntities with a specific timestamp.");
+    throw new Error("Cannot take soft ownership of AEntities.");
   }
 
   addComponent(world, Owned, eid);
-  Networked.lastOwnerTime[eid] = timestamp;
+  Networked.lastOwnerTime[eid] = Networked.timestamp[eid] + 1;
   Networked.owner[eid] = APP.getSid(NAF.clientId);
 }

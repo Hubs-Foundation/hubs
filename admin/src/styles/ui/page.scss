@@ -1,0 +1,30 @@
+@use '../core/boilerplate.scss' as *;
+
+.page_wrapper {
+  @include primary-font();
+  padding: 0;
+  margin: 0;
+  font-size: 16px;
+}
+
+.global_background {
+  // need to override material
+  background-color: $color-neutral-1 !important;
+}
+
+.card_section {
+  &_wrapper {
+    display: flex;
+    justify-content: space-between;
+
+    @include tablet-large-down {
+      flex-direction: column;
+    }
+  }
+}
+
+.card {
+  box-shadow: $drop-shadow;
+  padding: 24px;
+  margin: 12px;
+}

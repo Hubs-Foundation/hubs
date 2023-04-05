@@ -116,6 +116,7 @@ import "./components/emit-scene-event-on-remove";
 import "./components/follow-in-fov";
 import "./components/clone-media-button";
 import "./components/open-media-button";
+import "./components/change-hub-when-near";
 import "./components/refresh-media-button";
 import "./components/tweet-media-button";
 import "./components/remix-avatar-button";
@@ -178,7 +179,6 @@ import "./systems/listed-media";
 import "./systems/linked-media";
 import "./systems/audio-debug-system";
 import "./systems/audio-gain-system";
-
 import "./gltf-component-mappings";
 
 import { App, getScene } from "./app";
@@ -189,6 +189,9 @@ import { platformUnsupported } from "./support";
 import { renderAsEntity } from "./utils/jsx-entity";
 import { VideoMenuPrefab } from "./prefabs/video-menu";
 import { ObjectMenuPrefab } from "./prefabs/object-menu";
+import { LinkHoverMenuPrefab } from "./prefabs/link-hover-menu";
+import { PDFMenuPrefab } from "./prefabs/pdf-menu";
+import { loadWaypointPreviewModel, WaypointPreview } from "./prefabs/waypoint-preview";
 import { preload } from "./utils/preload";
 
 window.APP = new App();
@@ -202,8 +205,11 @@ function addToScene(entityDef, visible) {
     obj.visible = !!visible;
   });
 }
+preload(addToScene(PDFMenuPrefab(), false));
 preload(addToScene(ObjectMenuPrefab(), false));
 preload(addToScene(ObjectMenuPrefab(), false));
+preload(addToScene(LinkHoverMenuPrefab(), false));
+preload(loadWaypointPreviewModel().then(() => addToScene(WaypointPreview(), false)));
 
 const store = window.APP.store;
 store.update({ preferences: { shouldPromptForRefresh: false } }); // Clear flag that prompts for refresh from preference screen
@@ -253,9 +259,11 @@ import { ThemeProvider } from "./react-components/styles/theme";
 import { LogMessageType } from "./react-components/room/ChatSidebar";
 import "./load-media-on-paste-or-drop";
 import { swapActiveScene } from "./bit-systems/scene-loading";
-import { setLocalClientID } from "./bit-systems/networking";
+import { localClientID, setLocalClientID } from "./bit-systems/networking";
 import { listenForNetworkMessages } from "./utils/listen-for-network-messages";
 import { exposeBitECSDebugHelpers } from "./bitecs-debug-helpers";
+import { loadLegacyRoomObjects } from "./utils/load-legacy-room-objects";
+import { loadSavedEntityStates } from "./utils/entity-state-utils";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -493,6 +501,11 @@ export async function updateEnvironmentForHub(hub, entryManager) {
           { once: true }
         );
 
+        // If we had a loop-animation component on the environment, we need to remove it
+        // before loading a new model with gltf-model-plus, or else the component won't
+        // find and play animations in the new scene.
+        environmentEl.removeAttribute("loop-animation");
+
         sceneEl.emit("leaving_loading_environment");
         if (environmentEl.components["gltf-model-plus"].data.src === sceneUrl) {
           console.warn("Updating environment to the same url.");
@@ -591,15 +604,19 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
   scene.addEventListener(
     "didConnectToNetworkedScene",
     () => {
-      // Append objects once we are in the NAF room since ownership may be taken.
-      const objectsScene = document.querySelector("#objects-scene");
-      const objectsUrl = getReticulumFetchUrl(`/${hub.hub_id}/objects.gltf`);
-      const objectsEl = document.createElement("a-entity");
+      if (qsTruthy("newLoader")) {
+        loadSavedEntityStates(APP.hubChannel);
+        loadLegacyRoomObjects(hub.hub_id);
+      } else {
+        // Append objects once we are in the NAF room since ownership may be taken.
+        const objectsScene = document.querySelector("#objects-scene");
+        const objectsUrl = getReticulumFetchUrl(`/${hub.hub_id}/objects.gltf`);
+        const objectsEl = document.createElement("a-entity");
+        objectsEl.setAttribute("gltf-model-plus", { src: objectsUrl, useCache: false, inflate: true });
 
-      objectsEl.setAttribute("gltf-model-plus", { src: objectsUrl, useCache: false, inflate: true });
-
-      if (!isBotMode) {
-        objectsScene.appendChild(objectsEl);
+        if (!isBotMode) {
+          objectsScene.appendChild(objectsEl);
+        }
       }
     },
     { once: true }
@@ -1256,7 +1273,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   hubPhxChannel
     .join()
     .receive("ok", async data => {
-      setLocalClientID(data.session_id);
+      setLocalClientID(APP.getSid(data.session_id));
       APP.hideHubPresenceEvents = true;
       presenceSync.promise = new Promise(resolve => {
         presenceSync.resolve = resolve;
@@ -1381,6 +1398,27 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     scene.emit("hub_updated", { hub });
+  });
+
+  hubPhxChannel.on("host_changed", ({ host, port, turn }) => {
+    console.log("Dialog host changed. Disconnecting from current host and connecting to the new one.", {
+      hub_id: APP.hub.hub_id,
+      host,
+      port,
+      turn
+    });
+
+    APP.dialog.disconnect();
+    APP.dialog.connect({
+      serverUrl: `wss://${host}:${port}`,
+      roomId: APP.hub.hub_id,
+      serverParams: { host, port, turn },
+      scene,
+      clientId: APP.getString(localClientID),
+      forceTcp: qs.get("force_tcp"),
+      forceTurn: qs.get("force_turn"),
+      iceTransportPolicy: qs.get("force_tcp") || qs.get("force_turn") ? "relay" : "all"
+    });
   });
 
   hubPhxChannel.on("permissions_updated", () => hubChannel.fetchPermissions());

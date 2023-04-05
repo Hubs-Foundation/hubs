@@ -1,6 +1,7 @@
 import { Component, defineQuery, hasComponent, Query } from "bitecs";
 import { Object3D } from "three";
 import { HubsWorld } from "../app";
+import { EntityID } from "./networking-types";
 import { findAncestor } from "./three-utils";
 
 const queries = new Map<Component, Query>();
