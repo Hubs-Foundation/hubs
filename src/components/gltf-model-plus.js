@@ -704,7 +704,7 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
     .register(parser => new GLTFHubsLightMapExtension(parser))
     .register(parser => new GLTFHubsTextureBasisExtension(parser))
     .register(parser => new GLTFMozTextureRGBE(parser, new RGBELoader().setDataType(THREE.HalfFloatType)))
-    .register(_parser => new GLTFKHRBehaviorExtension())
+    .register(() => new GLTFKHRBehaviorExtension())
     .register(
       parser =>
         new GLTFLodExtension(parser, {
