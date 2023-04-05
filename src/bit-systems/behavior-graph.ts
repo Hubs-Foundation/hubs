@@ -20,7 +20,20 @@ import {
   writeNodeSpecsToJSON
 } from "@oveddan-behave-graph/core";
 import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, IComponent } from "bitecs";
-import { BoxGeometry, Euler, Mesh, MeshStandardMaterial, Object3D, Quaternion, Vector3 } from "three";
+import {
+  AnimationAction,
+  AnimationClip,
+  AnimationMixer,
+  BoxGeometry,
+  Euler,
+  LoopOnce,
+  LoopRepeat,
+  Mesh,
+  MeshStandardMaterial,
+  Object3D,
+  Quaternion,
+  Vector3
+} from "three";
 import { HubsWorld } from "../app";
 import * as bitComponents from "../bit-components";
 import {
@@ -123,6 +136,91 @@ function makeObjectPropertyFlowNode<T extends keyof Object3D>(property: T, value
     })
   };
 }
+
+const createAnimationActionDef = makeFlowNodeDefinition({
+  typeName: "animation/createAnimationAction",
+  category: "Animation" as any,
+  label: "Create AnimationAction",
+  in: () => [
+    { key: "flow", valueType: "flow" },
+    { key: "clipName", valueType: "string" },
+    { key: "loop", valueType: "boolean", defaultValue: true }
+  ],
+  initialState: undefined,
+  out: { flow: "flow", action: "animationAction" },
+  triggered: ({ read, write, commit, graph }) => {
+    const clipName = read("clipName") as string;
+    const loop = read("loop") as boolean;
+    const rootEid = graph.getDependency("rootEntity") as EntityID;
+    const world = graph.getDependency("world") as HubsWorld;
+
+    const obj = world.eid2obj.get(rootEid)!;
+    const mixer = mixers.get(rootEid)!;
+    const action = mixer.clipAction(AnimationClip.findByName(obj.animations, clipName));
+    action.setLoop(loop ? LoopRepeat : LoopOnce, Infinity);
+    action.clampWhenFinished = !loop;
+    write("action", action);
+    commit("flow");
+  }
+});
+
+const playAnimationDef = makeFlowNodeDefinition({
+  typeName: "animation/play",
+  category: "Animation" as any,
+  label: "Play Animation",
+  in: () => [
+    { key: "flow", valueType: "flow" },
+    { key: "action", valueType: "animationAction" },
+    { key: "reset", valueType: "boolean", defaultValue: true }
+  ],
+  initialState: undefined,
+  out: { flow: "flow" },
+  triggered: ({ read, commit }) => {
+    const action = read("action") as AnimationAction;
+    const reset = read("reset") as boolean;
+    if (reset) action.reset();
+    action.play();
+    commit("flow");
+  }
+});
+const stopAnimationDef = makeFlowNodeDefinition({
+  typeName: "animation/stop",
+  category: "Animation" as any,
+  label: "Stop Animation",
+  in: () => [
+    { key: "flow", valueType: "flow" },
+    { key: "action", valueType: "animationAction" }
+  ],
+  initialState: undefined,
+  out: { flow: "flow" },
+  triggered: ({ read, commit }) => {
+    const action = read("action") as AnimationAction;
+    action.stop();
+    commit("flow");
+  }
+});
+const crossfadeToAnimationDef = makeFlowNodeDefinition({
+  typeName: "animation/crossfadeTo",
+  category: "Animation" as any,
+  label: "Crossfade To Animation",
+  in: () => [
+    { key: "flow", valueType: "flow" },
+    { key: "action", valueType: "animationAction" },
+    { key: "toAction", valueType: "animationAction" },
+    { key: "duration", valueType: "float" },
+    { key: "warp", valueType: "boolean" }
+  ],
+  initialState: undefined,
+  out: { flow: "flow" },
+  triggered: ({ read, commit }) => {
+    const action = read("action") as AnimationAction;
+    const toAction = read("toAction") as AnimationAction;
+    const duration = read("duration") as number;
+    const warp = read("warp") as boolean;
+    action.crossFadeTo(toAction, duration, warp);
+    commit("flow");
+  }
+});
 
 export const EntityValue = new ValueType(
   "entity",
@@ -257,6 +355,20 @@ const registry = {
         return { v: new Vector3().setFromEuler(v) };
       }
     }),
+    "animation/createAnimationAction": createAnimationActionDef,
+    "animation/play": playAnimationDef,
+    "animation/stop": stopAnimationDef,
+    "animation/crossfadeTo": crossfadeToAnimationDef,
+    "animation/isRunning": makeInNOutFunctionDesc({
+      name: "animation/isRunning",
+      label: "Is Animation Running?",
+      category: "Animation" as any,
+      in: [{ action: "animationAction" }],
+      out: "boolean",
+      exec: (action: AnimationAction) => {
+        return action.isRunning();
+      }
+    }),
     ...Vector3Nodes,
     ...makeObjectPropertyFlowNode("visible", "boolean"),
     ...makeObjectPropertyFlowNode("position", "vec3"),
@@ -267,7 +379,14 @@ const registry = {
     ...coreValues,
     ...Vector3Value,
     entity: EntityValue,
-    euler: EurlerValue
+    euler: EurlerValue,
+    animationAction: new ValueType(
+      "animationAction",
+      () => null,
+      (value: AnimationAction) => value,
+      (value: AnimationAction) => value,
+      (start: AnimationAction, _end: AnimationAction, _t: number) => start
+    )
   }
 } as IRegistry;
 
@@ -322,22 +441,54 @@ type EngineState = {
   lifecycleEmitter: ManualLifecycleEventEmitter;
 };
 
+const mixers = new Map<EntityID, AnimationMixer>();
+const mixerAnimatableQuery = defineQuery([bitComponents.MixerAnimatable]);
+const mixerAnimatableEnteryQuery = enterQuery(mixerAnimatableQuery);
+const mixerAnimatableExitQuery = exitQuery(mixerAnimatableQuery);
+function stubAnimationMixerSystem(world: HubsWorld) {
+  mixerAnimatableEnteryQuery(world).forEach(eid => {
+    const obj = world.eid2obj.get(eid)!;
+    const mixer = new AnimationMixer(obj);
+    mixers.set(eid, mixer);
+
+    // TODO remove, only for debug
+    (obj as any).mixer = mixer;
+  });
+
+  mixerAnimatableExitQuery(world).forEach(eid => {
+    const mixer = mixers.get(eid)!;
+    mixer.stopAllAction();
+    mixers.delete(eid);
+  });
+
+  mixerAnimatableQuery(world).forEach(eid => {
+    mixers.get(eid)!.update(world.time.delta / 1000);
+  });
+}
+
 const collidingEntities: EntityID[] = [];
 const engines = new Map<EntityID, EngineState>();
 const behaviorGraphsQuery = defineQuery([BehaviorGraph]);
 const behaviorGraphEnterQuery = enterQuery(behaviorGraphsQuery);
 const behaviorGraphExitQuery = exitQuery(behaviorGraphsQuery);
 const interactedQuery = defineQuery([Interacted]);
+
 export function behaviorGraphSystem(world: HubsWorld) {
+  stubAnimationMixerSystem(world);
+
   behaviorGraphEnterQuery(world).forEach(function (eid) {
     const obj = world.eid2obj.get(eid)!;
     const graphJson = obj.userData.behaviorGraph as GraphJSON;
 
     const lifecycleEmitter = new ManualLifecycleEventEmitter();
-    const dependencies = makeCoreDependencies({
-      lifecyleEmitter: lifecycleEmitter,
-      logger
-    });
+    const dependencies = {
+      world,
+      rootEntity: eid,
+      ...makeCoreDependencies({
+        lifecyleEmitter: lifecycleEmitter,
+        logger
+      })
+    };
 
     const graph = readGraphFromJSON({
       graphJson,

@@ -2,7 +2,7 @@ import { GraphJSON } from "@oveddan-behave-graph/core";
 import { addComponent, addEntity, hasComponent } from "bitecs";
 import { Material, Mesh, Object3D } from "three";
 import { HubsWorld } from "../app";
-import { GLTFModel, MaterialTag, MixerAnimatableInitialize, BehaviorGraph } from "../bit-components";
+import { GLTFModel, MaterialTag, MixerAnimatableInitialize, BehaviorGraph, MixerAnimatable } from "../bit-components";
 import { addMaterialComponent, addObject3DComponent, gltfInflatorExists, gltfInflators } from "../utils/jsx-entity";
 import { mapMaterials } from "../utils/material-utils";
 import { EntityID } from "../utils/networking-types";
