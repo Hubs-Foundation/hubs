@@ -21,6 +21,7 @@ import {
 } from "@oveddan-behave-graph/core";
 import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, IComponent } from "bitecs";
 import {
+  AdditiveAnimationBlendMode,
   AnimationAction,
   AnimationClip,
   AnimationMixer,
@@ -30,6 +31,7 @@ import {
   LoopRepeat,
   Mesh,
   MeshStandardMaterial,
+  NormalAnimationBlendMode,
   Object3D,
   Quaternion,
   Vector3
@@ -144,21 +146,34 @@ const createAnimationActionDef = makeFlowNodeDefinition({
   in: () => [
     { key: "flow", valueType: "flow" },
     { key: "clipName", valueType: "string" },
-    { key: "loop", valueType: "boolean", defaultValue: true }
+    { key: "loop", valueType: "boolean", defaultValue: true },
+    { key: "clampWhenFinished", valueType: "boolean", defaultValue: false },
+    { key: "weight", valueType: "float", defaultValue: 1 },
+    { key: "timeScale", valueType: "float", defaultValue: 1 },
+    { key: "additiveBlending", valueType: "boolean", defaultValue: false }
   ],
   initialState: undefined,
   out: { flow: "flow", action: "animationAction" },
   triggered: ({ read, write, commit, graph }) => {
     const clipName = read("clipName") as string;
     const loop = read("loop") as boolean;
+    const clampWhenFinished = read("clampWhenFinished") as boolean;
+    const weight = read("weight") as number;
+    const timeScale = read("timeScale") as number;
+    const additiveBlending = read("additiveBlending") as boolean;
+
     const rootEid = graph.getDependency("rootEntity") as EntityID;
     const world = graph.getDependency("world") as HubsWorld;
-
     const obj = world.eid2obj.get(rootEid)!;
     const mixer = mixers.get(rootEid)!;
+
     const action = mixer.clipAction(AnimationClip.findByName(obj.animations, clipName));
+    action.blendMode = additiveBlending ? AdditiveAnimationBlendMode : NormalAnimationBlendMode;
     action.setLoop(loop ? LoopRepeat : LoopOnce, Infinity);
-    action.clampWhenFinished = !loop;
+    action.clampWhenFinished = clampWhenFinished;
+    action.weight = weight;
+    action.timeScale = timeScale;
+
     write("action", action);
     commit("flow");
   }
