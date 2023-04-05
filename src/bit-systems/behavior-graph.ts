@@ -318,9 +318,10 @@ const registry = {
           entity: eid,
           name: obj.name,
           visible: obj.visible,
-          position: obj.position,
-          rotation: obj.rotation,
-          scale: obj.scale
+          // TODO this is largely so that variables work since they are set using =. We can add support for .copy()-able things
+          position: obj.position.clone(),
+          rotation: obj.rotation.clone(),
+          scale: obj.scale.clone()
         };
       }
     }),
