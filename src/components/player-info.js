@@ -73,11 +73,7 @@ AFRAME.registerComponent("player-info", {
     const avatarEl = this.el.querySelector("[avatar-audio-source]");
     APP.isAudioPaused.delete(avatarEl);
     deregisterComponentInstance(this, "player-info");
-    removeComponent(world, component, eid)(
-      APP.world,
-      this.isLocalPlayerInfo ? LocalAvatar : RemoteAvatar,
-      this.el.object3D.eid
-    );
+    removeComponent(APP.world, this.isLocalPlayerInfo ? LocalAvatar : RemoteAvatar, this.el.object3D.eid);
   },
 
   onAvatarModelLoaded(e) {
