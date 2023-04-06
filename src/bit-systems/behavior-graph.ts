@@ -471,6 +471,19 @@ const registry = {
         return { v: new Vector3().setFromEuler(v) };
       }
     }),
+
+    "hubs/displayMessage": makeFlowNodeDefinition({
+      typeName: "hubs/displayMessage",
+      category: "Misc" as any,
+      label: "Display Notification Message",
+      in: { flow: "flow", text: "string" },
+      out: { flow: "flow" },
+      initialState: undefined,
+      triggered: ({ read, commit }) => {
+        APP.messageDispatch.receive({ type: "script_message", msg: read<string>("text") });
+        commit("flow");
+      }
+    }),
     "animation/createAnimationAction": createAnimationActionDef,
     "animation/play": playAnimationDef,
     "animation/stop": stopAnimationDef,

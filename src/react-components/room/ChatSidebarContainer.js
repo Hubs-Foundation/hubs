@@ -50,6 +50,7 @@ const chatSidebarMessages = defineMessages({
 });
 
 // NOTE: context and related functions moved to ChatContext
+
 export function ChatSidebarContainer({
   scene,
   canSpawnMessages,
