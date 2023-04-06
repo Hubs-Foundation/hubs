@@ -2,20 +2,29 @@ import { AElement } from "aframe";
 import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
 import { Mesh } from "three";
 import { HubsWorld } from "../app";
-import { EnvironmentSettings, NavMesh, Networked, SceneLoader, SceneRoot, Skybox } from "../bit-components";
+import {
+  EnvironmentSettings,
+  NavMesh,
+  Networked,
+  SceneLoader,
+  ScenePreviewCamera,
+  SceneRoot,
+  Skybox
+} from "../bit-components";
 import Sky from "../components/skybox";
 import { ScenePrefab } from "../prefabs/scene";
 import { ExitReason } from "../react-components/room/ExitedRoomScreen";
 import { CharacterControllerSystem } from "../systems/character-controller-system";
 import { EnvironmentSystem } from "../systems/environment-system";
 import { setInitialNetworkedData, setNetworkedDataWithoutRoot } from "../utils/assign-network-ids";
-import { anyEntityWith } from "../utils/bit-utils";
+import { anyEntityWith, findChildWithComponent } from "../utils/bit-utils";
 import { ClearFunction, JobRunner } from "../utils/coroutine-utils";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { loadModel } from "../utils/load-model";
 import { EntityID } from "../utils/networking-types";
 import { add } from "./media-loading";
 import { moveToSpawnPoint } from "./waypoint";
+import { SCENE_PREVIEW_CAMERA_FLAGS } from "../inflators/scene-preview-camera";
 
 export function swapActiveScene(world: HubsWorld, src: string) {
   const currentScene = anyEntityWith(APP.world, SceneRoot);
@@ -49,6 +58,7 @@ function* loadScene(
     add(world, scene, loaderEid);
     setNetworkedDataWithoutRoot(world, APP.getString(Networked.id[loaderEid])!, scene);
 
+    let sceneEl = APP.scene!;
     let skybox: Sky | undefined;
     world.eid2obj.get(scene)!.traverse(o => {
       if ((o as Mesh).isMesh) {
@@ -67,7 +77,7 @@ function* loadScene(
         if (navMesh !== o) {
           console.warn("The `nav-mesh` component should be placed directly on a mesh.");
         }
-        AFRAME.scenes[0].systems.nav.loadMesh(navMesh, "character");
+        sceneEl.systems.nav.loadMesh(navMesh, "character");
       }
 
       if (!skybox && hasComponent(world, Skybox, o.eid!)) {
@@ -81,7 +91,26 @@ function* loadScene(
     }
     environmentSystem.updateEnvironmentSettings(envSettings);
 
-    const sceneEl = AFRAME.scenes[0];
+    const cameraNode = (document.getElementById("scene-preview-node") as AElement).object3D!;
+    removeComponent(world, ScenePreviewCamera, cameraNode.eid!);
+    const scenePreviewComponent = findChildWithComponent(world, ScenePreviewCamera, scene);
+    if (!scenePreviewComponent) {
+      const sceneObj = world.eid2obj.get(scene)!;
+      const previewCamera = sceneObj.getObjectByName("scene-preview-camera");
+      if (previewCamera) {
+        cameraNode.position.copy(previewCamera.position);
+        cameraNode.rotation.copy(previewCamera.rotation);
+        cameraNode.rotation.reorder("YXZ");
+      } else {
+        const cameraPos = cameraNode.position;
+        cameraNode.position.set(cameraPos.x, 2.5, cameraPos.z);
+      }
+      cameraNode.matrixNeedsUpdate = true;
+      addComponent(world, ScenePreviewCamera, cameraNode.eid!);
+      ScenePreviewCamera.duration[cameraNode.eid!] = 60;
+      ScenePreviewCamera.flags[cameraNode.eid!] |= SCENE_PREVIEW_CAMERA_FLAGS.POSITION_ONLY;
+    }
+
     sceneEl.emit("environment-scene-loaded", scene);
     document.querySelector(".a-canvas")!.classList.remove("a-hidden");
     sceneEl.addState("visible");
