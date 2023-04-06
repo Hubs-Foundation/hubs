@@ -1,10 +1,12 @@
 import {
+  AsyncNode,
   DefaultLogger,
   Engine,
   EventEmitter,
   getCoreNodeDefinitions,
   getCoreValueTypes,
   GraphJSON,
+  IGraphApi,
   IRegistry,
   Logger,
   makeCoreDependencies,
@@ -13,7 +15,10 @@ import {
   makeInNOutFunctionDesc,
   ManualLifecycleEventEmitter,
   NodeCategory,
+  NodeDescription,
+  NodeDescription2,
   readGraphFromJSON,
+  Socket,
   validateGraph,
   validateRegistry,
   ValueType,
@@ -179,25 +184,96 @@ const createAnimationActionDef = makeFlowNodeDefinition({
   }
 });
 
-const playAnimationDef = makeFlowNodeDefinition({
-  typeName: "animation/play",
-  category: "Animation" as any,
-  label: "Play Animation",
-  in: () => [
-    { key: "flow", valueType: "flow" },
-    { key: "action", valueType: "animationAction" },
-    { key: "reset", valueType: "boolean", defaultValue: true }
-  ],
-  initialState: undefined,
-  out: { flow: "flow" },
-  triggered: ({ read, commit }) => {
-    const action = read("action") as AnimationAction;
-    const reset = read("reset") as boolean;
-    if (reset) action.reset();
-    action.play();
-    commit("flow");
+type ActionEventListener = (e: { action: AnimationAction }) => void;
+export class PlayAnimationNode extends AsyncNode {
+  public static Description = new NodeDescription2({
+    typeName: "animation/play",
+    otherTypeNames: ["flow/delay"],
+    category: "Animation",
+    label: "Play Animation",
+    factory: (description, graph) => new PlayAnimationNode(description, graph)
+  });
+
+  constructor(description: NodeDescription, graph: IGraphApi) {
+    super(
+      description,
+      graph,
+      [
+        new Socket("flow", "flow"), //
+        new Socket("animationAction", "action"),
+        new Socket("boolean", "reset", true)
+      ],
+      [
+        new Socket("flow", "flow"), //
+        new Socket("flow", "finished"),
+        new Socket("flow", "loop"),
+        new Socket("flow", "stopped")
+      ]
+    );
   }
-});
+
+  private state: {
+    action?: AnimationAction;
+    onLoop?: ActionEventListener;
+    onFinished?: ActionEventListener;
+    onStop?: ActionEventListener;
+  } = {};
+
+  clearState() {
+    if (this.state.action) {
+      this.state.action.getMixer().removeEventListener("finished", this.state.onFinished as any);
+      this.state.action.getMixer().removeEventListener("loop", this.state.onLoop as any);
+      this.state.action.getMixer().removeEventListener("hubs_stopped", this.state.onLoop as any);
+      this.state = {};
+    }
+  }
+
+  triggered(engine: Engine, _triggeringSocketName: string, finished: () => void) {
+    if (this.state.action) {
+      console.warn("already playing", this.state.action);
+      this.clearState();
+    }
+
+    const action = this.readInput("action") as AnimationAction;
+    const reset = this.readInput("reset") as boolean;
+
+    this.state.action = action;
+    this.state.onFinished = (e: { action: AnimationAction }) => {
+      if (e.action != this.state.action) return;
+      console.log("FINISH", e.action.getClip().name, APP.world.time.tick);
+      this.clearState();
+      engine.commitToNewFiber(this, "finished");
+    };
+    this.state.onLoop = (e: { action: AnimationAction }) => {
+      if (e.action != this.state.action) return;
+      engine.commitToNewFiber(this, "loop");
+    };
+    this.state.onStop = (e: { action: AnimationAction }) => {
+      if (e.action != this.state.action) return;
+      this.clearState();
+      engine.commitToNewFiber(this, "stopped");
+    };
+
+    action.getMixer().addEventListener("finished", this.state.onFinished as any);
+    action.getMixer().addEventListener("loop", this.state.onLoop as any);
+    action.getMixer().addEventListener("hubs_stopped", this.state.onStop as any);
+
+    if (reset) action.reset();
+    action.paused = false;
+    action.play();
+    console.log("PLAY", action.getClip().name, APP.world.time.tick);
+
+    engine.commitToNewFiber(this, "flow");
+    finished();
+  }
+
+  // NOTE this does not get called if the AsyncNode has finished()
+  dispose() {
+    this.clearState();
+  }
+}
+
+const playAnimationDef = PlayAnimationNode.Description;
 const stopAnimationDef = makeFlowNodeDefinition({
   typeName: "animation/stop",
   category: "Animation" as any,
@@ -211,6 +287,9 @@ const stopAnimationDef = makeFlowNodeDefinition({
   triggered: ({ read, commit }) => {
     const action = read("action") as AnimationAction;
     action.stop();
+
+    console.log("STOP", action.getClip().name, APP.world.time.tick);
+    action.getMixer().dispatchEvent({ type: "hubs_stopped", action });
     commit("flow");
   }
 });
@@ -233,6 +312,24 @@ const crossfadeToAnimationDef = makeFlowNodeDefinition({
     const duration = read("duration") as number;
     const warp = read("warp") as boolean;
     action.crossFadeTo(toAction, duration, warp);
+    commit("flow");
+  }
+});
+const setAnimationTimeScaleDef = makeFlowNodeDefinition({
+  typeName: "three/animation/setTimescale",
+  category: "Animation" as any,
+  label: "Set timeScale",
+  in: () => [
+    { key: "flow", valueType: "flow" },
+    { key: "action", valueType: "animationAction" },
+    { key: "timeScale", valueType: "float" }
+  ],
+  initialState: undefined,
+  out: { flow: "flow" },
+  triggered: ({ read, commit }) => {
+    const action = read("action") as AnimationAction;
+    const timeScale = read("timeScale") as number;
+    action.timeScale = timeScale;
     commit("flow");
   }
 });
@@ -375,6 +472,7 @@ const registry = {
     "animation/play": playAnimationDef,
     "animation/stop": stopAnimationDef,
     "animation/crossfadeTo": crossfadeToAnimationDef,
+    "three/animation/setTimescale": setAnimationTimeScaleDef,
     "animation/isRunning": makeInNOutFunctionDesc({
       name: "animation/isRunning",
       label: "Is Animation Running?",
