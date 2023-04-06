@@ -324,6 +324,8 @@ export function formatSystemMessage(entry, intl) {
           values={{ hubName: <b>{entry.hubName}</b> }}
         />
       );
+    case "script_message":
+      return "script: " + entry.msg;
     case "log":
       return intl.formatMessage(logMessages[entry.messageType], entry.props);
     default:
