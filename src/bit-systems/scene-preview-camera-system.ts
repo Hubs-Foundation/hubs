@@ -6,7 +6,6 @@ import { CAMERA_MODE_INSPECT, CAMERA_MODE_SCENE_PREVIEW, CameraSystem } from "..
 import { setMatrixWorld } from "../utils/three-utils";
 import { getStreamerCamera } from "../components/scene-preview-camera";
 import { lerp } from "three/src/math/MathUtils";
-import { SCENE_PREVIEW_CAMERA_FLAGS } from "../inflators/scene-preview-camera";
 
 const startPositions = new Map<number, Vector3>();
 const startRotations = new Map<number, Quaternion>();
@@ -52,8 +51,7 @@ const updatePreviewCamera = (eid: number, previewCamera: Camera, cameraSystem: C
 
     previewCamera.position.set(lerp(from.x, to.x, t), lerp(from.y, to.y, t), lerp(from.z, to.z, t));
 
-    const positionOnly = ScenePreviewCamera.flags[eid] & SCENE_PREVIEW_CAMERA_FLAGS.POSITION_ONLY;
-    if (!positionOnly) {
+    if (!ScenePreviewCamera.positionOnly[eid]) {
       previewCamera.rotation.setFromQuaternion(newRot);
     }
 

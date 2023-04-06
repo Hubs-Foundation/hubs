@@ -87,7 +87,6 @@ import { inflateParticleEmitter, ParticleEmitterParams } from "../inflators/part
 import { AudioZoneParams, inflateAudioZone } from "../inflators/audio-zone";
 import { AudioSettings } from "../components/audio-params";
 import { inflateAudioParams } from "../inflators/audio-params";
-import { inflateScenePreviewCamera, ScenePreviewCameraParams } from "../inflators/scene-preview-camera";
 
 preload(
   new Promise(resolve => {
@@ -365,7 +364,6 @@ export interface GLTFComponentData extends ComponentData {
   uvScroll: UVScrollParams;
   videoTextureTarget: VideoTextureTargetParams;
   videoTextureSource: { fps: number; resolution: [x: number, y: number] };
-  scenePreviewCamera: ScenePreviewCameraParams;
 
   // deprecated
   spawnPoint?: true;
@@ -479,8 +477,7 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
   videoTextureSource: createDefaultInflator(VideoTextureSource),
   uvScroll: inflateUVScroll,
   simpleWater: inflateSimpleWater,
-  particleEmitter: inflateParticleEmitter,
-  scenePreviewCamera: inflateScenePreviewCamera
+  particleEmitter: inflateParticleEmitter
 };
 
 function jsxInflatorExists(name: string): name is keyof JSXComponentData {

@@ -17,14 +17,13 @@ import { ExitReason } from "../react-components/room/ExitedRoomScreen";
 import { CharacterControllerSystem } from "../systems/character-controller-system";
 import { EnvironmentSystem } from "../systems/environment-system";
 import { setInitialNetworkedData, setNetworkedDataWithoutRoot } from "../utils/assign-network-ids";
-import { anyEntityWith, findChildWithComponent } from "../utils/bit-utils";
+import { anyEntityWith } from "../utils/bit-utils";
 import { ClearFunction, JobRunner } from "../utils/coroutine-utils";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { loadModel } from "../utils/load-model";
 import { EntityID } from "../utils/networking-types";
 import { add } from "./media-loading";
 import { moveToSpawnPoint } from "./waypoint";
-import { SCENE_PREVIEW_CAMERA_FLAGS } from "../inflators/scene-preview-camera";
 
 export function swapActiveScene(world: HubsWorld, src: string) {
   const currentScene = anyEntityWith(APP.world, SceneRoot);
@@ -93,23 +92,20 @@ function* loadScene(
 
     const cameraNode = (document.getElementById("scene-preview-node") as AElement).object3D!;
     removeComponent(world, ScenePreviewCamera, cameraNode.eid!);
-    const scenePreviewComponent = findChildWithComponent(world, ScenePreviewCamera, scene);
-    if (!scenePreviewComponent) {
-      const sceneObj = world.eid2obj.get(scene)!;
-      const previewCamera = sceneObj.getObjectByName("scene-preview-camera");
-      if (previewCamera) {
-        cameraNode.position.copy(previewCamera.position);
-        cameraNode.rotation.copy(previewCamera.rotation);
-        cameraNode.rotation.reorder("YXZ");
-      } else {
-        const cameraPos = cameraNode.position;
-        cameraNode.position.set(cameraPos.x, 2.5, cameraPos.z);
-      }
-      cameraNode.matrixNeedsUpdate = true;
-      addComponent(world, ScenePreviewCamera, cameraNode.eid!);
-      ScenePreviewCamera.duration[cameraNode.eid!] = 60;
-      ScenePreviewCamera.flags[cameraNode.eid!] |= SCENE_PREVIEW_CAMERA_FLAGS.POSITION_ONLY;
+    const sceneObj = world.eid2obj.get(scene)!;
+    const previewCamera = sceneObj.getObjectByName("scene-preview-camera");
+    if (previewCamera) {
+      cameraNode.position.copy(previewCamera.position);
+      cameraNode.rotation.copy(previewCamera.rotation);
+      cameraNode.rotation.reorder("YXZ");
+    } else {
+      const cameraPos = cameraNode.position;
+      cameraNode.position.set(cameraPos.x, 2.5, cameraPos.z);
     }
+    cameraNode.matrixNeedsUpdate = true;
+    addComponent(world, ScenePreviewCamera, cameraNode.eid!);
+    ScenePreviewCamera.duration[cameraNode.eid!] = 60;
+    ScenePreviewCamera.positionOnly[cameraNode.eid!] = 1;
 
     sceneEl.emit("environment-scene-loaded", scene);
     document.querySelector(".a-canvas")!.classList.remove("a-hidden");
