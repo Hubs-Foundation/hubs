@@ -241,6 +241,8 @@ export class PlayAnimationNode extends AsyncNode {
     this.state.onFinished = (e: { action: AnimationAction }) => {
       if (e.action != this.state.action) return;
       console.log("FINISH", e.action.getClip().name, APP.world.time.tick);
+      // TODO HACK when transitioning to another animation in this event, even on the same frame, the object seems to reset to its base pisition momentarily without this
+      e.action.enabled = true;
       this.clearState();
       engine.commitToNewFiber(this, "finished");
     };
