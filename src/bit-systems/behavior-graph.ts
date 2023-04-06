@@ -30,12 +30,11 @@ import {
   AnimationAction,
   AnimationClip,
   AnimationMixer,
-  BoxGeometry,
+  Box3,
+  Box3Helper,
   Euler,
   LoopOnce,
   LoopRepeat,
-  Mesh,
-  MeshStandardMaterial,
   NormalAnimationBlendMode,
   Object3D,
   Quaternion,
@@ -366,7 +365,8 @@ const registry = {
       addComponent(APP.world, RemoteHoverTarget, target);
     }),
     "hubs/onCollisionEnter": makeEntityEventNode("onCollisionEnter", function (target) {
-      // TODO should be added in blender
+      // TODO should be added in blender, hacking assuming a blender box empty with scale to adjust size
+      const obj = APP.world.eid2obj.get(target)!;
       inflateRigidBody(APP.world, target, {
         // emitCollisionEvents: true,
         type: Type.STATIC,
@@ -377,10 +377,11 @@ const registry = {
       inflatePhysicsShape(APP.world, target, {
         type: Shape.BOX,
         fit: Fit.MANUAL,
-        halfExtents: [0.5, 0.5, 0.5]
+        halfExtents: obj.scale.toArray()
       });
-      const obj = APP.world.eid2obj.get(target)!;
-      obj.add(new Mesh(new BoxGeometry(), new MeshStandardMaterial()));
+      obj.scale.multiplyScalar(2);
+      obj.matrixNeedsUpdate = true;
+      obj.add(new Box3Helper(new Box3(new Vector3(-0.5, -0.5, -0.5), new Vector3(0.5, 0.5, 0.5))));
     }),
     "hubs/onCollisionExit": makeEntityEventNode("onCollisionExit"),
     "hubs/entity/toString": makeInNOutFunctionDesc({
@@ -672,7 +673,7 @@ export function behaviorGraphSystem(world: HubsWorld) {
       const collisions = physicsSystem.getCollisions(collidingBody) as EntityID[];
       if (!collisions.length || !collisions.includes(triggerBody)) {
         collidingEntities.splice(collidingEntities.indexOf(collidingEid));
-        entityEvents.onCollisionExit.get(eid)!.emit(collidingEid);
+        if (entityEvents.onCollisionExit.has(eid)) entityEvents.onCollisionExit.get(eid)!.emit(collidingEid);
       }
     });
 
