@@ -14,12 +14,11 @@ import {
   validateRegistry,
   writeNodeSpecsToJSON
 } from "@oveddan-behave-graph/core";
-import { AElement } from "aframe";
 import { defineQuery, enterQuery, exitQuery, hasComponent } from "bitecs";
 import { AnimationMixer } from "three";
 import { HubsWorld } from "../app";
 import { BehaviorGraph, Interacted, LocalAvatar, MixerAnimatable, RemoteAvatar, Rigidbody } from "../bit-components";
-import { findAncestorEntity, findAncestorWithComponent, hasAnyComponent } from "../utils/bit-utils";
+import { findAncestorEntity } from "../utils/bit-utils";
 import { ClientID, EntityID } from "../utils/networking-types";
 import { AnimationNodes, animationValueDefs } from "./behavior-graph/animation-nodes";
 import { entityEvents, EntityNodes, EntityValue as entityValueDefs } from "./behavior-graph/entity-nodes";
