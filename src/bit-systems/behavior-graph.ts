@@ -1,600 +1,95 @@
 import {
-  AsyncNode,
   DefaultLogger,
   Engine,
-  EventEmitter,
   getCoreNodeDefinitions,
   getCoreValueTypes,
   GraphJSON,
-  IGraphApi,
   IRegistry,
   Logger,
   makeCoreDependencies,
-  makeEventNodeDefinition,
   makeFlowNodeDefinition,
-  makeInNOutFunctionDesc,
   ManualLifecycleEventEmitter,
-  NodeCategory,
-  NodeDescription,
-  NodeDescription2,
   readGraphFromJSON,
-  Socket,
   validateGraph,
   validateRegistry,
-  ValueType,
   writeNodeSpecsToJSON
 } from "@oveddan-behave-graph/core";
-import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, IComponent } from "bitecs";
-import {
-  AdditiveAnimationBlendMode,
-  AnimationAction,
-  AnimationClip,
-  AnimationMixer,
-  Box3,
-  Box3Helper,
-  Euler,
-  LoopOnce,
-  LoopRepeat,
-  NormalAnimationBlendMode,
-  Object3D,
-  Quaternion,
-  Vector3
-} from "three";
+import { defineQuery, enterQuery, exitQuery, hasComponent } from "bitecs";
+import { AnimationMixer } from "three";
 import { HubsWorld } from "../app";
-import * as bitComponents from "../bit-components";
-import {
-  BehaviorGraph,
-  CursorRaycastable,
-  Interacted,
-  RemoteHoverTarget,
-  Rigidbody,
-  SingleActionButton
-} from "../bit-components";
-import { COLLISION_LAYERS } from "../constants";
-import { Fit, inflatePhysicsShape, Shape } from "../inflators/physics-shape";
-import { inflateRigidBody, Type } from "../inflators/rigid-body";
-import { findAncestorWithComponent } from "../utils/bit-utils";
+import { BehaviorGraph, Interacted, MixerAnimatable, Rigidbody } from "../bit-components";
 import { EntityID } from "../utils/networking-types";
-import { Vector3Nodes, Vector3Value } from "./behavior-graph/vec3-nodes";
+import { AnimationNodes, animationValueDefs } from "./behavior-graph/animation-nodes";
+import { entityEvents, EntityNodes, EntityValue as entityValueDefs } from "./behavior-graph/entity-nodes";
+import { EulerNodes, eulerValueDefs } from "./behavior-graph/euler-nodes";
+import { cleanupNodespac, definitionListToMap } from "./behavior-graph/utils";
+import { Vector3Nodes, Vector3Value as vec3ValueDefs } from "./behavior-graph/vec3-nodes";
 
 const coreValues = getCoreValueTypes();
-const coreNodes = getCoreNodeDefinitions(coreValues);
 const logger = new DefaultLogger();
-
-type EntityEventCallback = (eid: EntityID) => void;
-
-const entityEvents = {
-  onInteract: new Map<EntityID, EventEmitter<EntityID>>(),
-  onCollisionEnter: new Map<EntityID, EventEmitter<EntityID>>(),
-  onCollisionExit: new Map<EntityID, EventEmitter<EntityID>>()
-};
-type EntityEventState = {
-  target?: EntityID;
-  callback?: (target: EntityID) => void;
-};
-function makeEntityEventNode(event: keyof typeof entityEvents, hackySetup?: (target: EntityID) => void) {
-  return makeEventNodeDefinition({
-    typeName: `hubs/${event}`,
-    category: NodeCategory.Event,
-    in: {},
-    out: {
-      flow: "flow",
-      entity: "entity"
-    },
-    configuration: {
-      target: { valueType: "entity" }
-    },
-    initialState: {} as EntityEventState,
-    init: ({ write, commit, configuration }) => {
-      const target = configuration["target"] as EntityID;
-      if (!target) throw new Error(`hubs/${event} must have a target`);
-      hackySetup && hackySetup(target);
-      const callback: EntityEventCallback = eid => {
-        console.log(event, eid, APP.world.eid2obj.get(eid));
-        write("entity", eid);
-        commit("flow");
-      };
-      const emitter = entityEvents[event].get(target) || new EventEmitter();
-      emitter.addListener(callback);
-      entityEvents[event].set(target, emitter);
-      return { target, callback };
-    },
-    dispose: ({ state: { callback, target } }) => {
-      const emitter = entityEvents[event].get(target!)!;
-      emitter.removeListener(callback!);
-      if (!emitter.listenerCount) entityEvents[event].delete(target!);
-      return {};
-    }
-  });
-}
-
-function makeObjectPropertyFlowNode<T extends keyof Object3D>(property: T, valueType: string) {
-  const typeName = `hubs/entity/set/${property}`;
-  return {
-    [typeName]: makeFlowNodeDefinition({
-      typeName,
-      category: "Entity" as any,
-      label: `Set ${property}`,
-      in: () => [
-        { key: "flow", valueType: "flow" },
-        { key: "entity", valueType: "entity" },
-        { key: property, valueType }
-      ],
-      initialState: undefined,
-      out: { flow: "flow" },
-      triggered: ({ read, commit }) => {
-        const eid = read("entity") as EntityID;
-        const obj = APP.world.eid2obj.get(eid);
-        if (!obj) {
-          console.error(`${typeName} could not find entity`, eid);
-          return;
-        }
-        const value = read(property) as Object3D[T];
-        const prop = obj[property];
-        if (typeof prop === "object" && "copy" in prop) {
-          prop.copy(value);
-          if (["position", "rotation", "scale"].includes(property)) obj.matrixNeedsUpdate = true;
-        } else {
-          obj[property] = value;
-        }
-        commit("flow");
-      }
-    })
-  };
-}
-
-const createAnimationActionDef = makeFlowNodeDefinition({
-  typeName: "animation/createAnimationAction",
-  category: "Animation" as any,
-  label: "Create AnimationAction",
-  in: () => [
-    { key: "flow", valueType: "flow" },
-    { key: "clipName", valueType: "string" },
-    { key: "loop", valueType: "boolean", defaultValue: true },
-    { key: "clampWhenFinished", valueType: "boolean", defaultValue: false },
-    { key: "weight", valueType: "float", defaultValue: 1 },
-    { key: "timeScale", valueType: "float", defaultValue: 1 },
-    { key: "additiveBlending", valueType: "boolean", defaultValue: false }
-  ],
-  initialState: undefined,
-  out: { flow: "flow", action: "animationAction" },
-  triggered: ({ read, write, commit, graph }) => {
-    const clipName = read("clipName") as string;
-    const loop = read("loop") as boolean;
-    const clampWhenFinished = read("clampWhenFinished") as boolean;
-    const weight = read("weight") as number;
-    const timeScale = read("timeScale") as number;
-    const additiveBlending = read("additiveBlending") as boolean;
-
-    const rootEid = graph.getDependency("rootEntity") as EntityID;
-    const world = graph.getDependency("world") as HubsWorld;
-    const obj = world.eid2obj.get(rootEid)!;
-    const mixer = mixers.get(rootEid)!;
-
-    const action = mixer.clipAction(AnimationClip.findByName(obj.animations, clipName));
-    action.blendMode = additiveBlending ? AdditiveAnimationBlendMode : NormalAnimationBlendMode;
-    action.setLoop(loop ? LoopRepeat : LoopOnce, Infinity);
-    action.clampWhenFinished = clampWhenFinished;
-    action.weight = weight;
-    action.timeScale = timeScale;
-
-    write("action", action);
-    commit("flow");
-  }
-});
-
-type ActionEventListener = (e: { action: AnimationAction }) => void;
-export class PlayAnimationNode extends AsyncNode {
-  public static Description = new NodeDescription2({
-    typeName: "animation/play",
-    otherTypeNames: ["flow/delay"],
-    category: "Animation",
-    label: "Play Animation",
-    factory: (description, graph) => new PlayAnimationNode(description, graph)
-  });
-
-  constructor(description: NodeDescription, graph: IGraphApi) {
-    super(
-      description,
-      graph,
-      [
-        new Socket("flow", "flow"), //
-        new Socket("animationAction", "action"),
-        new Socket("boolean", "reset", true)
-      ],
-      [
-        new Socket("flow", "flow"), //
-        new Socket("flow", "finished"),
-        new Socket("flow", "loop"),
-        new Socket("flow", "stopped")
-      ]
-    );
-  }
-
-  private state: {
-    action?: AnimationAction;
-    onLoop?: ActionEventListener;
-    onFinished?: ActionEventListener;
-    onStop?: ActionEventListener;
-  } = {};
-
-  clearState() {
-    if (this.state.action) {
-      this.state.action.getMixer().removeEventListener("finished", this.state.onFinished as any);
-      this.state.action.getMixer().removeEventListener("loop", this.state.onLoop as any);
-      this.state.action.getMixer().removeEventListener("hubs_stopped", this.state.onLoop as any);
-      this.state = {};
-    }
-  }
-
-  triggered(engine: Engine, _triggeringSocketName: string, finished: () => void) {
-    if (this.state.action) {
-      console.warn("already playing", this.state.action);
-      this.clearState();
-    }
-
-    const action = this.readInput("action") as AnimationAction;
-    const reset = this.readInput("reset") as boolean;
-
-    this.state.action = action;
-    this.state.onFinished = (e: { action: AnimationAction }) => {
-      if (e.action != this.state.action) return;
-      console.log("FINISH", e.action.getClip().name, APP.world.time.tick);
-      // TODO HACK when transitioning to another animation in this event, even on the same frame, the object seems to reset to its base pisition momentarily without this
-      e.action.enabled = true;
-      this.clearState();
-      engine.commitToNewFiber(this, "finished");
-    };
-    this.state.onLoop = (e: { action: AnimationAction }) => {
-      if (e.action != this.state.action) return;
-      engine.commitToNewFiber(this, "loop");
-    };
-    this.state.onStop = (e: { action: AnimationAction }) => {
-      if (e.action != this.state.action) return;
-      this.clearState();
-      engine.commitToNewFiber(this, "stopped");
-    };
-
-    action.getMixer().addEventListener("finished", this.state.onFinished as any);
-    action.getMixer().addEventListener("loop", this.state.onLoop as any);
-    action.getMixer().addEventListener("hubs_stopped", this.state.onStop as any);
-
-    if (reset) action.reset();
-    action.paused = false;
-    action.play();
-    console.log("PLAY", action.getClip().name, APP.world.time.tick);
-
-    engine.commitToNewFiber(this, "flow");
-    finished();
-  }
-
-  // NOTE this does not get called if the AsyncNode has finished()
-  dispose() {
-    this.clearState();
-  }
-}
-
-const playAnimationDef = PlayAnimationNode.Description;
-const stopAnimationDef = makeFlowNodeDefinition({
-  typeName: "animation/stop",
-  category: "Animation" as any,
-  label: "Stop Animation",
-  in: () => [
-    { key: "flow", valueType: "flow" },
-    { key: "action", valueType: "animationAction" }
-  ],
-  initialState: undefined,
-  out: { flow: "flow" },
-  triggered: ({ read, commit }) => {
-    const action = read("action") as AnimationAction;
-    action.stop();
-
-    console.log("STOP", action.getClip().name, APP.world.time.tick);
-    action.getMixer().dispatchEvent({ type: "hubs_stopped", action });
-    commit("flow");
-  }
-});
-const crossfadeToAnimationDef = makeFlowNodeDefinition({
-  typeName: "animation/crossfadeTo",
-  category: "Animation" as any,
-  label: "Crossfade To Animation",
-  in: () => [
-    { key: "flow", valueType: "flow" },
-    { key: "action", valueType: "animationAction" },
-    { key: "toAction", valueType: "animationAction" },
-    { key: "duration", valueType: "float" },
-    { key: "warp", valueType: "boolean" }
-  ],
-  initialState: undefined,
-  out: { flow: "flow" },
-  triggered: ({ read, commit }) => {
-    const action = read("action") as AnimationAction;
-    const toAction = read("toAction") as AnimationAction;
-    const duration = read("duration") as number;
-    const warp = read("warp") as boolean;
-    action.crossFadeTo(toAction, duration, warp);
-    commit("flow");
-  }
-});
-const setAnimationTimeScaleDef = makeFlowNodeDefinition({
-  typeName: "three/animation/setTimescale",
-  category: "Animation" as any,
-  label: "Set timeScale",
-  in: () => [
-    { key: "flow", valueType: "flow" },
-    { key: "action", valueType: "animationAction" },
-    { key: "timeScale", valueType: "float" }
-  ],
-  initialState: undefined,
-  out: { flow: "flow" },
-  triggered: ({ read, commit }) => {
-    const action = read("action") as AnimationAction;
-    const timeScale = read("timeScale") as number;
-    action.timeScale = timeScale;
-    commit("flow");
-  }
-});
-
-export const EntityValue = new ValueType(
-  "entity",
-  () => 0,
-  (value: EntityID) => value,
-  (value: EntityID) => value,
-  (start: EntityID, end: EntityID, t: number) => (t < 0.5 ? start : end)
-);
-
-type EulerJSON = { x: number; y: number; z: number };
-const tmpQuat1 = new Quaternion();
-const tmpQuat2 = new Quaternion();
-export const EurlerValue = new ValueType(
-  "euler",
-  () => new Euler(),
-  (value: Euler | EulerJSON) => (value instanceof Euler ? value : new Euler(value.x, value.y, value.z)),
-  (value: Euler) => ({ x: value.x, y: value.y, z: value.z }),
-  (start: Euler, end: Euler, t: number) =>
-    start.setFromQuaternion(tmpQuat1.setFromEuler(start).slerp(tmpQuat2.setFromEuler(end), t))
-);
-
-const registry = {
+const registry: IRegistry = {
   nodes: {
-    ...coreNodes,
-    "hubs/onInteract": makeEntityEventNode("onInteract", function (target) {
-      // TODO should be added in blender
-      addComponent(APP.world, SingleActionButton, target);
-      addComponent(APP.world, CursorRaycastable, target);
-      addComponent(APP.world, RemoteHoverTarget, target);
-    }),
-    "hubs/onCollisionEnter": makeEntityEventNode("onCollisionEnter", function (target) {
-      // TODO should be added in blender, hacking assuming a blender box empty with scale to adjust size
-      const obj = APP.world.eid2obj.get(target)!;
-      inflateRigidBody(APP.world, target, {
-        // emitCollisionEvents: true,
-        type: Type.STATIC,
-        collisionGroup: COLLISION_LAYERS.TRIGGERS,
-        collisionMask: COLLISION_LAYERS.INTERACTABLES | COLLISION_LAYERS.AVATAR,
-        disableCollision: true
-      });
-      inflatePhysicsShape(APP.world, target, {
-        type: Shape.BOX,
-        fit: Fit.MANUAL,
-        halfExtents: obj.scale.toArray()
-      });
-      obj.scale.multiplyScalar(2);
-      obj.matrixNeedsUpdate = true;
-      obj.add(new Box3Helper(new Box3(new Vector3(-0.5, -0.5, -0.5), new Vector3(0.5, 0.5, 0.5))));
-    }),
-    "hubs/onCollisionExit": makeEntityEventNode("onCollisionExit"),
-    "hubs/entity/toString": makeInNOutFunctionDesc({
-      name: "hubs/entity/toString",
-      label: "Entity toString",
-      category: "Entity" as any,
-      in: [{ entity: "entity" }],
-      out: "string",
-      exec: (entity: EntityID) => {
-        const obj = APP.world.eid2obj.get(entity)!;
-        return `Entity ${obj.name}`;
-      }
-    }),
-    "hubs/entity/hasComponent": makeInNOutFunctionDesc({
-      name: "hubs/entity/hasComponent",
-      label: "Entity Has Component",
-      category: "Entity" as any,
-      in: [{ entity: "entity" }, { name: "string" }, { includeAncestors: "boolean" }],
-      out: "boolean",
-      exec: (entity: EntityID, name: string, includeAncestors: boolean) => {
-        const Component = (bitComponents as any)[name] as IComponent | undefined;
-        if (!Component) {
-          console.error(`Invalid component name ${name} in hubs/entity/hasComponent node`);
-          return false;
-        }
-        if (includeAncestors) {
-          return !!findAncestorWithComponent(APP.world, Component, entity);
-        } else {
-          return hasComponent(APP.world, Component, entity);
-        }
-      }
-    }),
-    "hubs/entity/properties": makeInNOutFunctionDesc({
-      name: "hubs/entity/properties",
-      label: "Get Entity Properties",
-      category: "Entity" as any,
-      in: [{ entity: "entity" }],
-      out: [
-        { entity: "entity" },
-        { name: "string" },
-        { visible: "boolean" },
-        { position: "vec3" },
-        { rotation: "euler" },
-        { scale: "vec3" }
-      ],
-      exec: (eid: EntityID) => {
-        const obj = APP.world.eid2obj.get(eid)!;
-        return {
-          entity: eid,
-          name: obj.name,
-          visible: obj.visible,
-          // TODO this is largely so that variables work since they are set using =. We can add support for .copy()-able things
-          position: obj.position.clone(),
-          rotation: obj.rotation.clone(),
-          scale: obj.scale.clone()
-        };
-      }
-    }),
-
-    "math/euler/combine": makeInNOutFunctionDesc({
-      name: "math/euler/combine",
-      label: "Combine Euler",
-      category: "Eueler Math" as any,
-      in: [{ x: "float" }, { y: "float" }, { z: "float" }],
-      out: [{ v: "euler" }],
-      exec: (x: number, y: number, z: number) => {
-        return { v: new Euler(x, y, z) };
-      }
-    }),
-    "math/euler/separate": makeInNOutFunctionDesc({
-      name: "math/euler/separate",
-      label: "Separate Eueler",
-      category: "Eueler Math" as any,
-      in: [{ v: "euler" }],
-      out: [{ x: "float" }, { y: "float" }, { z: "float" }],
-      exec: (v: Euler) => {
-        return { x: v.x, y: v.y, z: v.z };
-      }
-    }),
-    "math/euler/toVec3": makeInNOutFunctionDesc({
-      name: "math/euler/toVec3",
-      label: "to Vec3",
-      category: "Eueler Math" as any,
-      in: [{ v: "euler" }],
-      out: [{ v: "vec3" }],
-      exec: (v: Euler) => {
-        return { v: new Vector3().setFromEuler(v) };
-      }
-    }),
-
-    "hubs/displayMessage": makeFlowNodeDefinition({
-      typeName: "hubs/displayMessage",
-      category: "Misc" as any,
-      label: "Display Notification Message",
-      in: { flow: "flow", text: "string" },
-      out: { flow: "flow" },
-      initialState: undefined,
-      triggered: ({ read, commit }) => {
-        APP.messageDispatch.receive({ type: "script_message", msg: read<string>("text") });
-        commit("flow");
-      }
-    }),
-    "animation/createAnimationAction": createAnimationActionDef,
-    "animation/play": playAnimationDef,
-    "animation/stop": stopAnimationDef,
-    "animation/crossfadeTo": crossfadeToAnimationDef,
-    "three/animation/setTimescale": setAnimationTimeScaleDef,
-    "animation/isRunning": makeInNOutFunctionDesc({
-      name: "animation/isRunning",
-      label: "Is Animation Running?",
-      category: "Animation" as any,
-      in: [{ action: "animationAction" }],
-      out: "boolean",
-      exec: (action: AnimationAction) => {
-        return action.isRunning();
-      }
-    }),
+    ...getCoreNodeDefinitions(coreValues),
+    ...EntityNodes,
     ...Vector3Nodes,
-    ...makeObjectPropertyFlowNode("visible", "boolean"),
-    ...makeObjectPropertyFlowNode("position", "vec3"),
-    ...makeObjectPropertyFlowNode("rotation", "euler"),
-    ...makeObjectPropertyFlowNode("scale", "vec3")
+    ...EulerNodes,
+    ...AnimationNodes,
+    ...definitionListToMap([
+      makeFlowNodeDefinition({
+        typeName: "hubs/displayMessage",
+        category: "Misc" as any,
+        label: "Display Notification Message",
+        in: { flow: "flow", text: "string" },
+        out: { flow: "flow" },
+        initialState: undefined,
+        triggered: ({ read, commit }) => {
+          APP.messageDispatch.receive({ type: "script_message", msg: read<string>("text") });
+          commit("flow");
+        }
+      })
+    ])
   },
   values: {
     ...coreValues,
-    ...Vector3Value,
-    entity: EntityValue,
-    euler: EurlerValue,
-    animationAction: new ValueType(
-      "animationAction",
-      () => null,
-      (value: AnimationAction) => value,
-      (value: AnimationAction) => value,
-      (start: AnimationAction, _end: AnimationAction, _t: number) => start
-    )
+    ...vec3ValueDefs,
+    ...entityValueDefs,
+    ...eulerValueDefs,
+    ...animationValueDefs
   }
-} as IRegistry;
-
-const skipExport = [
-  "customEvent/onTriggered",
-  "customEvent/trigger",
-  "math/easing",
-  "debug/expectTrue",
-  "flow/sequence",
-  "flow/waitAll"
-];
-const nodeSpec = writeNodeSpecsToJSON({ ...registry, dependencies: {} }).filter(node => {
-  return !(
-    node.type.startsWith("hubs/entity/set/") ||
-    node.type.startsWith("flow/switch/") ||
-    skipExport.includes(node.type)
-  );
-});
-for (const node of nodeSpec) {
-  let cat = node.category as string;
-  if (cat === NodeCategory.Logic && node.type.endsWith("string")) {
-    cat = "String Logic";
-  }
-  if (node.type.startsWith("debug/")) cat = "Debug";
-  if (cat === NodeCategory.None) {
-    if (node.type.startsWith("math/") && node.type.endsWith("float")) cat = "Float Math";
-    else if (node.type.startsWith("math/") && node.type.endsWith("boolean")) cat = "Bool Math";
-    else if (node.type.startsWith("math/") && node.type.endsWith("integer")) cat = "Int Math";
-    else if (node.type.startsWith("math/") && node.type.endsWith("string")) cat = "String Math";
-    else if (node.type.startsWith("logic/") && node.type.endsWith("string")) cat = "String Util";
-    else {
-      cat = node.type.split("/")[0];
-      cat = cat.charAt(0).toUpperCase() + cat.slice(1);
-    }
-  }
-  node.category = cat as any;
-  if (node.type === "math/and/boolean") node.label = "AND";
-  else if (node.type === "math/or/boolean") node.label = "OR";
-  else if (node.type.startsWith("math/negate")) node.label = "Negate";
-  else if (node.type.startsWith("math/subtract")) node.label = "Subtract";
-  else if (node.type === "hubs/entity/hasComponent") node.inputs[2].defaultValue = true;
-}
-
-console.log("registry", registry, nodeSpec);
-console.log(JSON.stringify(nodeSpec, null, 2));
-// const registry = createRegistry();
-
-// registerCoreProfile(registry, logger, manualLifecycleEventEmitter);
-//
-type EngineState = {
-  engine: Engine;
-  lifecycleEmitter: ManualLifecycleEventEmitter;
 };
 
-const mixers = new Map<EntityID, AnimationMixer>();
-const mixerAnimatableQuery = defineQuery([bitComponents.MixerAnimatable]);
+const nodeSpec = cleanupNodespac(writeNodeSpecsToJSON({ ...registry, dependencies: {} }));
+console.log("registry", registry, nodeSpec);
+console.log(JSON.stringify(nodeSpec, null, 2));
+
+const mixerAnimatableQuery = defineQuery([MixerAnimatable]);
 const mixerAnimatableEnteryQuery = enterQuery(mixerAnimatableQuery);
 const mixerAnimatableExitQuery = exitQuery(mixerAnimatableQuery);
 function stubAnimationMixerSystem(world: HubsWorld) {
   mixerAnimatableEnteryQuery(world).forEach(eid => {
     const obj = world.eid2obj.get(eid)!;
     const mixer = new AnimationMixer(obj);
-    mixers.set(eid, mixer);
+    MixerAnimatable.mixers.set(eid, mixer);
 
     // TODO remove, only for debug
     (obj as any).mixer = mixer;
   });
 
   mixerAnimatableExitQuery(world).forEach(eid => {
-    const mixer = mixers.get(eid)!;
+    const mixer = MixerAnimatable.mixers.get(eid)!;
     mixer.stopAllAction();
-    mixers.delete(eid);
+    MixerAnimatable.mixers.delete(eid);
   });
 
   mixerAnimatableQuery(world).forEach(eid => {
-    mixers.get(eid)!.update(world.time.delta / 1000);
+    MixerAnimatable.mixers.get(eid)!.update(world.time.delta / 1000);
   });
 }
+
+type EngineState = {
+  engine: Engine;
+  lifecycleEmitter: ManualLifecycleEventEmitter;
+};
 
 const collidingEntities: EntityID[] = [];
 const engines = new Map<EntityID, EngineState>();

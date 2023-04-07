@@ -1,5 +1,9 @@
 import { defineComponent, setDefaultSize, setRemovedRecycleThreshold, Types } from "bitecs";
 
+/**
+ * @typedef {import("./utils/networking-types").EntityID} EntityID
+ */
+
 // TODO this has to happen before all components are defined. Is there a better spot to be doing this?
 setDefaultSize(10000);
 setRemovedRecycleThreshold(0.2);
@@ -178,7 +182,12 @@ MediaPDF.map = new Map();
 export const MediaVideo = defineComponent({
   autoPlay: Types.ui8
 });
-export const MixerAnimatable = defineComponent();
+const _MixerAnimatable = defineComponent();
+/**
+ * @type {typeof _MixerAnimatable & { mixers: Map<EntityID, import("three").AnimationMixer> }}
+ */
+export const MixerAnimatable = _MixerAnimatable;
+MixerAnimatable.mixers = new Map();
 export const NetworkedVideo = defineComponent({
   time: Types.f32,
   flags: Types.ui8
