@@ -26,3 +26,6 @@ export function isPinned(eid: EntityID) {
 export function isCreatedByMe(eid: EntityID) {
   return Networked.creator[eid] === APP.getSid(NAF.clientId);
 }
+
+const ticksPerSecond = 12;
+export const millisecondsBetweenTicks = 1000 / ticksPerSecond;
