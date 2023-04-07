@@ -22,6 +22,7 @@ import { EntityID } from "../utils/networking-types";
 import { AnimationNodes, animationValueDefs } from "./behavior-graph/animation-nodes";
 import { entityEvents, EntityNodes, EntityValue as entityValueDefs } from "./behavior-graph/entity-nodes";
 import { EulerNodes, eulerValueDefs } from "./behavior-graph/euler-nodes";
+import { playerNodedefs, playerValueDefs } from "./behavior-graph/player-nodes";
 import { cleanupNodespac, definitionListToMap } from "./behavior-graph/utils";
 import { Vector3Nodes, Vector3Value as vec3ValueDefs } from "./behavior-graph/vec3-nodes";
 
@@ -34,6 +35,7 @@ const registry: IRegistry = {
     ...Vector3Nodes,
     ...EulerNodes,
     ...AnimationNodes,
+    ...playerNodedefs,
     ...definitionListToMap([
       makeFlowNodeDefinition({
         typeName: "hubs/displayMessage",
@@ -54,7 +56,8 @@ const registry: IRegistry = {
     ...vec3ValueDefs,
     ...entityValueDefs,
     ...eulerValueDefs,
-    ...animationValueDefs
+    ...animationValueDefs,
+    ...playerValueDefs
   }
 };
 
