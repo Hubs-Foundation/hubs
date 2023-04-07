@@ -14,11 +14,13 @@ import {
   validateRegistry,
   writeNodeSpecsToJSON
 } from "@oveddan-behave-graph/core";
+import { AElement } from "aframe";
 import { defineQuery, enterQuery, exitQuery, hasComponent } from "bitecs";
 import { AnimationMixer } from "three";
 import { HubsWorld } from "../app";
-import { BehaviorGraph, Interacted, MixerAnimatable, Rigidbody } from "../bit-components";
-import { EntityID } from "../utils/networking-types";
+import { BehaviorGraph, Interacted, LocalAvatar, MixerAnimatable, RemoteAvatar, Rigidbody } from "../bit-components";
+import { findAncestorEntity, findAncestorWithComponent, hasAnyComponent } from "../utils/bit-utils";
+import { ClientID, EntityID } from "../utils/networking-types";
 import { AnimationNodes, animationValueDefs } from "./behavior-graph/animation-nodes";
 import { entityEvents, EntityNodes, EntityValue as entityValueDefs } from "./behavior-graph/entity-nodes";
 import { EulerNodes, eulerValueDefs } from "./behavior-graph/euler-nodes";
@@ -163,10 +165,15 @@ export function behaviorGraphSystem(world: HubsWorld) {
     entityEvents.onInteract.get(eid)?.emit(eid);
   });
 
+  // TODO allocations
   const collisionCheckEntiteis = new Set([
     ...entityEvents.onCollisionEnter.keys(),
-    ...entityEvents.onCollisionExit.keys()
+    ...entityEvents.onCollisionExit.keys(),
+    ...entityEvents.onPlayerCollisionEnter.keys(),
+    ...entityEvents.onPlayerCollisionExit.keys()
   ]);
+
+  // TODO lots of traversal and can probably be simplified a good deal
   for (const eid of collisionCheckEntiteis) {
     const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
     if (!hasComponent(world, Rigidbody, eid)) {
@@ -184,7 +191,14 @@ export function behaviorGraphSystem(world: HubsWorld) {
       const collisions = physicsSystem.getCollisions(collidingBody) as EntityID[];
       if (!collisions.length || !collisions.includes(triggerBody)) {
         collidingEntities.splice(collidingEntities.indexOf(collidingEid));
-        if (entityEvents.onCollisionExit.has(eid)) entityEvents.onCollisionExit.get(eid)!.emit(collidingEid);
+        const playerEid = findAncestorEntity(world, collidingEid, isPlayerEntity);
+        if (playerEid) {
+          const emitter = entityEvents.onPlayerCollisionExit.get(eid);
+          emitter && emitter.emit(clientIdForEntity(world, playerEid));
+        } else {
+          const emitter = entityEvents.onCollisionExit.get(eid);
+          emitter && emitter.emit(collidingEid);
+        }
       }
     });
 
@@ -195,7 +209,14 @@ export function behaviorGraphSystem(world: HubsWorld) {
         const collidingEid = bodyData.object3D.eid;
         if (!collidingEntities.includes(collidingEid)) {
           collidingEntities.push(collidingEid);
-          entityEvents.onCollisionEnter.get(eid)!.emit(collidingEid);
+          const playerEid = findAncestorEntity(world, collidingEid, isPlayerEntity);
+          if (playerEid) {
+            const emitter = entityEvents.onPlayerCollisionEnter.get(eid);
+            emitter && emitter.emit(clientIdForEntity(world, playerEid));
+          } else {
+            const emitter = entityEvents.onCollisionEnter.get(eid);
+            emitter && emitter.emit(collidingEid);
+          }
         }
       }
     }
@@ -206,4 +227,11 @@ export function behaviorGraphSystem(world: HubsWorld) {
     lifecycleEmitter.tickEvent.emit();
     engine.executeAllSync(0.1, 100);
   });
+}
+function isPlayerEntity(eid: EntityID, world: HubsWorld) {
+  return hasComponent(world, RemoteAvatar, eid) || hasComponent(world, LocalAvatar, eid);
+}
+
+function clientIdForEntity(world: HubsWorld, playerEid: number): ClientID {
+  return world.eid2obj.get(playerEid)!.el!.components["player-info"].playerSessionId;
 }
