@@ -69,6 +69,26 @@ export default class HubChannel extends EventTarget {
     return !!presenceState.metas[0].permissions[permission];
   }
 
+  isRoomOwner(clientId) {
+    const presenceState = this.presence.state[clientId];
+    if (!presenceState) {
+      console.warn(`isRoomOwner: Had no presence state for ${clientId}`);
+      return false;
+    }
+
+    return !!presenceState.metas[0].roles.owner;
+  }
+
+  isRoomCreator(clientId) {
+    const presenceState = this.presence.state[clientId];
+    if (!presenceState) {
+      console.warn(`isRoomCreator: Had no presence state for ${clientId}`);
+      return false;
+    }
+
+    return !!presenceState.metas[0].roles.isCreator;
+  }
+
   // Returns true if the current session has the given permission, *or* will get the permission
   // if they sign in and become the creator.
   canOrWillIfCreator(permission) {
