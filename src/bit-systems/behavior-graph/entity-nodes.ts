@@ -15,25 +15,33 @@ import { Fit, inflatePhysicsShape, Shape } from "../../inflators/physics-shape";
 import { definitionListToMap } from "./utils";
 import { findAncestorWithComponent } from "../../utils/bit-utils";
 import { inflateRigidBody, Type } from "../../inflators/rigid-body";
+import { ClientID } from "../../utils/networking-types";
 
-type EntityEventCallback = (eid: EntityID) => void;
 export const entityEvents = {
   onInteract: new Map<EntityID, EventEmitter<EntityID>>(),
   onCollisionEnter: new Map<EntityID, EventEmitter<EntityID>>(),
-  onCollisionExit: new Map<EntityID, EventEmitter<EntityID>>()
+  onCollisionExit: new Map<EntityID, EventEmitter<EntityID>>(),
+  onPlayerCollisionEnter: new Map<EntityID, EventEmitter<ClientID>>(),
+  onPlayerCollisionExit: new Map<EntityID, EventEmitter<ClientID>>()
 };
 type EntityEventState = {
   target?: EntityID;
   callback?: (target: EntityID) => void;
 };
-function makeEntityEventNode(event: keyof typeof entityEvents, hackySetup?: (target: EntityID) => void) {
+function makeEntityEventNode(
+  event: keyof typeof entityEvents,
+  outputType: "player" | "entity",
+  label: string,
+  hackySetup?: (target: EntityID) => void
+) {
   return makeEventNodeDefinition({
     typeName: `hubs/${event}`,
     category: NodeCategory.Event,
+    label,
     in: {},
     out: {
       flow: "flow",
-      entity: "entity"
+      [outputType]: outputType
     },
     configuration: {
       target: { valueType: "entity" }
@@ -43,19 +51,19 @@ function makeEntityEventNode(event: keyof typeof entityEvents, hackySetup?: (tar
       const target = configuration["target"] as EntityID;
       if (!target) throw new Error(`hubs/${event} must have a target`);
       hackySetup && hackySetup(target);
-      const callback: EntityEventCallback = eid => {
-        console.log(event, eid, APP.world.eid2obj.get(eid));
-        write("entity", eid);
+      const callback = (data: any) => {
+        console.log(event, data);
+        write(outputType, data);
         commit("flow");
       };
       const emitter = entityEvents[event].get(target) || new EventEmitter();
       emitter.addListener(callback);
-      entityEvents[event].set(target, emitter);
+      entityEvents[event].set(target, emitter as any);
       return { target, callback };
     },
     dispose: ({ state: { callback, target } }) => {
       const emitter = entityEvents[event].get(target!)!;
-      emitter.removeListener(callback!);
+      emitter.removeListener(callback as any);
       if (!emitter.listenerCount) entityEvents[event].delete(target!);
       return {};
     }
@@ -105,15 +113,9 @@ export const EntityValue = {
   )
 };
 
-export const EntityNodes = definitionListToMap([
-  makeEntityEventNode("onInteract", function (target) {
-    // TODO should be added in blender
-    addComponent(APP.world, SingleActionButton, target);
-    addComponent(APP.world, CursorRaycastable, target);
-    addComponent(APP.world, RemoteHoverTarget, target);
-  }),
-  makeEntityEventNode("onCollisionEnter", function (target) {
-    // TODO should be added in blender, hacking assuming a blender box empty with scale to adjust size
+function hackyColliderSetup(target: EntityID) {
+  // TODO should be added in blender, hacking assuming a blender box empty with scale to adjust size
+  if (!hasComponent(APP.world, bitComponents.Rigidbody, target)) {
     const obj = APP.world.eid2obj.get(target)!;
     inflateRigidBody(APP.world, target, {
       // emitCollisionEvents: true,
@@ -130,8 +132,21 @@ export const EntityNodes = definitionListToMap([
     obj.scale.multiplyScalar(2);
     obj.matrixNeedsUpdate = true;
     obj.add(new Box3Helper(new Box3(new Vector3(-0.5, -0.5, -0.5), new Vector3(0.5, 0.5, 0.5))));
+  }
+}
+
+export const EntityNodes = definitionListToMap([
+  makeEntityEventNode("onInteract", "entity", "On Interact", function (target) {
+    // TODO should be added in blender
+    addComponent(APP.world, SingleActionButton, target);
+    addComponent(APP.world, CursorRaycastable, target);
+    addComponent(APP.world, RemoteHoverTarget, target);
   }),
-  makeEntityEventNode("onCollisionExit"),
+
+  makeEntityEventNode("onCollisionEnter", "entity", "On Collision Enter", hackyColliderSetup),
+  makeEntityEventNode("onCollisionExit", "entity", "On Collision Exit"),
+  makeEntityEventNode("onPlayerCollisionEnter", "player", "On Player Collision Enter", hackyColliderSetup),
+  makeEntityEventNode("onPlayerCollisionExit", "player", "On Player Collision Exit"),
 
   makeInNOutFunctionDesc({
     name: "hubs/entity/toString",

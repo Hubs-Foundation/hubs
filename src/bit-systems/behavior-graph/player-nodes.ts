@@ -24,6 +24,16 @@ export const playerNodedefs = definitionListToMap([
     }
   }),
   makeInNOutFunctionDesc({
+    name: "hubs/player/isLocalPlayer",
+    label: "Is Local Player?",
+    category: "Player" as any,
+    in: [{ player: "player" }],
+    out: [{ result: "bool" }],
+    exec: (player: ClientID) => {
+      return { result: player === NAF.clientId };
+    }
+  }),
+  makeInNOutFunctionDesc({
     name: "hubs/player/equal",
     label: "=",
     category: "Player" as any,
