@@ -16,7 +16,7 @@ const skipExport = [
   "flow/waitAll"
 ];
 export function cleanupNodespac(nodeSpec: NodeSpecJSON[]) {
-  return nodeSpec.filter(node => {
+  nodeSpec = nodeSpec.filter(node => {
     return !(
       node.type.startsWith("hubs/entity/set/") ||
       node.type.startsWith("flow/switch/") ||
@@ -47,4 +47,5 @@ export function cleanupNodespac(nodeSpec: NodeSpecJSON[]) {
     else if (node.type.startsWith("math/subtract")) node.label = "Subtract";
     else if (node.type === "hubs/entity/hasComponent") node.inputs[2].defaultValue = true;
   }
+  return nodeSpec;
 }
