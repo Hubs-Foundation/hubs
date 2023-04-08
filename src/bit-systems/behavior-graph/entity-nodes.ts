@@ -204,6 +204,16 @@ export const EntityNodes = definitionListToMap([
       };
     }
   }),
+  makeInNOutFunctionDesc({
+    name: "hubs/entity/equal",
+    label: "=",
+    category: "Entity" as any,
+    in: ["entity", "entity"],
+    out: [{ result: "boolean" }],
+    exec: (a: EntityID, b: EntityID) => {
+      return a === b;
+    }
+  }),
   makeObjectPropertyFlowNode("visible", "boolean"),
   makeObjectPropertyFlowNode("position", "vec3"),
   makeObjectPropertyFlowNode("rotation", "euler"),
