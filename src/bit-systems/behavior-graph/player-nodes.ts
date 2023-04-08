@@ -37,7 +37,7 @@ export const playerNodedefs = definitionListToMap([
     in: [{ player: "player" }],
     out: [{ result: "boolean" }],
     exec: (player: ClientID) => {
-      return { result: player === NAF.clientId };
+      return player === NAF.clientId;
     }
   }),
   makeInNOutFunctionDesc({
@@ -47,7 +47,7 @@ export const playerNodedefs = definitionListToMap([
     in: [{ player: "player" }],
     out: [{ result: "boolean" }],
     exec: (player: ClientID) => {
-      return { result: APP.hubChannel!.isRoomOwner(player) };
+      return APP.hubChannel!.isRoomOwner(player);
     }
   }),
   makeInNOutFunctionDesc({
@@ -57,7 +57,7 @@ export const playerNodedefs = definitionListToMap([
     in: [{ player: "player" }],
     out: [{ result: "boolean" }],
     exec: (player: ClientID) => {
-      return { result: APP.hubChannel!.isRoomCreator(player) };
+      return APP.hubChannel!.isRoomCreator(player);
     }
   }),
   makeFunctionNodeDefinition({
@@ -105,9 +105,9 @@ export const playerNodedefs = definitionListToMap([
     label: "=",
     category: "Player" as any,
     in: ["player", "player"],
-    out: [{ result: "player" }],
+    out: [{ result: "boolean" }],
     exec: (a: ClientID, b: ClientID) => {
-      return { result: a === b };
+      return a === b;
     }
   }),
   makeInNOutFunctionDesc({
