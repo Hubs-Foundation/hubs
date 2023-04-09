@@ -898,6 +898,12 @@ class PreferencesScreen extends Component {
     };
   }
 
+  onKeyDown = (e) => {
+    if (e.key === "Escape") {
+      this.props.onClose();
+    }
+  }
+
   onMediaDevicesUpdated = () => {
     const currentSpeakers = this.mediaDevicesManager.selectedSpeakersDeviceId;
     if (this.props.store.state.preferences.preferredSpeakers !== currentSpeakers) {
@@ -971,18 +977,20 @@ class PreferencesScreen extends Component {
     this.props.store.addEventListener("statechanged", this.storeUpdated);
     this.mediaDevicesManager.on(MediaDevicesEvents.DEVICE_CHANGE, this.onMediaDevicesUpdated);
     APP.hubChannel.addEventListener("permissions_updated", this.permissionsUpdated);
-
+    window.addEventListener("keydown", this.onKeyDown);
+    
     if (this.state.canVoiceChat) {
       this.mediaDevicesManager.startMicShare({ updatePrefs: false }).then(this.updateMediaDevices);
     } else {
       this.updateMediaDevices();
     }
   }
-
+  
   componentWillUnmount() {
     this.props.store.removeEventListener("statechanged", this.storeUpdated);
     this.mediaDevicesManager.off(MediaDevicesEvents.DEVICE_CHANGE, this.onMediaDevicesUpdated);
     APP.hubChannel.removeEventListener("permissions_updated", this.permissionsUpdated);
+    window.removeEventListener("keydown", this.onKeyDown);
   }
 
   permissionsUpdated() {
