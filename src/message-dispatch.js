@@ -262,7 +262,7 @@ export default class MessageDispatch extends EventTarget {
       case "download":
         {
           console.log(hubChannel);
-          downloadSavedEntityStates(hubChannel);
+          downloadSavedEntityStates();
           console.log("printing saved scene")
         }
         break;
