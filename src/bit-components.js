@@ -258,6 +258,6 @@ export const AudioZone = defineComponent({
 });
 export const AudioParams = defineComponent();
 export const ScenePreviewCamera = defineComponent({
-  duration: Types.ui32,
+  duration: Types.f32,
   positionOnly: Types.ui8
 });
