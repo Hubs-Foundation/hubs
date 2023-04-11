@@ -19,7 +19,8 @@ import {
   ConstraintHandLeft,
   ConstraintHandRight,
   ConstraintRemoteLeft,
-  ConstraintRemoteRight
+  ConstraintRemoteRight,
+  NetworkedTransform
 } from "../bit-components";
 import { takeOwnership } from "../utils/take-ownership";
 
@@ -39,14 +40,17 @@ const queryHandLeft = defineQuery([HeldHandLeft, OffersHandConstraint]);
 const queryEnterHandLeft = enterQuery(queryHandLeft);
 const queryExitHandLeft = exitQuery(queryHandLeft);
 
+const savedBodyType = new Map();
 const grabBodyOptions = { type: "dynamic", activationState: DISABLE_DEACTIVATION };
 const releaseBodyOptions = { activationState: ACTIVE_TAG };
 
 function add(world, physicsSystem, interactor, constraintComponent, entities) {
   for (let i = 0; i < entities.length; i++) {
     const eid = findAncestorEntity(world, entities[i], ancestor => hasComponent(world, Rigidbody, ancestor));
-    takeOwnership(world, eid);
-    physicsSystem.updateBodyOptions(Rigidbody.bodyId[eid], grabBodyOptions);
+    if (hasComponent(world, NetworkedTransform, eid)) takeOwnership(world, eid);
+    const bodyId = Rigidbody.bodyId[eid];
+    savedBodyType.set(Rigidbody.bodyId[eid], physicsSystem.bodyUuidToData.get(bodyId).options.type);
+    physicsSystem.updateBodyOptions(bodyId, grabBodyOptions);
     physicsSystem.addConstraint(interactor, Rigidbody.bodyId[eid], Rigidbody.bodyId[interactor], {});
     addComponent(world, Constraint, eid);
     addComponent(world, constraintComponent, eid);
@@ -58,7 +62,9 @@ function remove(world, offersConstraint, constraintComponent, physicsSystem, int
     const eid = findAncestorEntity(world, entities[i], ancestor => hasComponent(world, Rigidbody, ancestor));
     if (!entityExists(world, eid)) continue;
     if (hasComponent(world, offersConstraint, entities[i]) && hasComponent(world, Rigidbody, eid)) {
-      physicsSystem.updateBodyOptions(Rigidbody.bodyId[eid], releaseBodyOptions);
+      const bodyId = Rigidbody.bodyId[eid];
+      physicsSystem.updateBodyOptions(bodyId, { ...releaseBodyOptions, type: savedBodyType.get(bodyId) });
+      savedBodyType.delete(bodyId);
       physicsSystem.removeConstraint(interactor);
       removeComponent(world, constraintComponent, eid);
       if (

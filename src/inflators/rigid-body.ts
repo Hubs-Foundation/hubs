@@ -2,6 +2,7 @@ import { addComponent } from "bitecs";
 import { Rigidbody } from "../bit-components";
 import { HubsWorld } from "../app";
 import { CONSTANTS } from "three-ammo";
+import { COLLISION_LAYERS } from "../constants";
 
 export enum Type {
   STATIC = 0,
@@ -17,7 +18,7 @@ export enum ActivationState {
   DISABLE_SIMULATION = 4
 }
 
-export type RigiBodyParams = {
+export interface RigiBodyParams {
   type: Type;
   mass: number;
   gravity: [number, number, number];
@@ -32,7 +33,7 @@ export type RigiBodyParams = {
   collisionGroup: number;
   collisionMask: number;
   scaleAutoUpdate: boolean;
-};
+}
 
 const DEFAULTS = {
   type: Type.DYNAMIC,
@@ -107,6 +108,54 @@ export function inflateRigidBody(world: HubsWorld, eid: number, params: Partial<
   Rigidbody.collisionFilterGroup[eid] = bodyParams.collisionGroup;
   Rigidbody.collisionFilterMask[eid] = bodyParams.collisionMask;
   bodyParams.scaleAutoUpdate && (Rigidbody.flags[eid] |= RIGID_BODY_FLAGS.SCALE_AUTO_UPDATE);
+
+  return eid;
+}
+
+export enum GLTFRigidBodyType {
+  STATIC = "static",
+  DYNAMIC = "dynamic",
+  KINEMATIC = "kinematic"
+}
+
+export enum GLTFRigidBodyCollisionGroup {
+  OBJECTS = "objects",
+  ENVIRONMENT = "environment",
+  TRIGGERS = "triggers",
+  AVATARS = "avatars"
+}
+
+const GLTF_DEFAULTS = {
+  ...DEFAULTS,
+  type: GLTFRigidBodyType.DYNAMIC,
+  collisionGroup: GLTFRigidBodyCollisionGroup.OBJECTS,
+  collisionMask: [GLTFRigidBodyCollisionGroup.AVATARS]
+};
+
+const gltfGroupToLayer = {
+  [GLTFRigidBodyCollisionGroup.OBJECTS]: COLLISION_LAYERS.INTERACTABLES,
+  [GLTFRigidBodyCollisionGroup.ENVIRONMENT]: COLLISION_LAYERS.ENVIRONMENT,
+  [GLTFRigidBodyCollisionGroup.TRIGGERS]: COLLISION_LAYERS.TRIGGERS,
+  [GLTFRigidBodyCollisionGroup.AVATARS]: COLLISION_LAYERS.AVATAR
+} as const;
+
+export interface GLTFRigidBodyParams
+  extends Partial<Omit<RigiBodyParams, "type" | "collisionGroup" | "collisionMask">> {
+  type?: GLTFRigidBodyType;
+  collisionGroup?: GLTFRigidBodyCollisionGroup;
+  collisionMask?: GLTFRigidBodyCollisionGroup[];
+}
+
+export function inflateGLTFRigidBody(world: HubsWorld, eid: number, params: GLTFRigidBodyParams) {
+  const bodyParams = Object.assign({}, GLTF_DEFAULTS, params);
+
+  addComponent(world, Rigidbody, eid);
+  inflateRigidBody(world, eid, {
+    ...bodyParams,
+    type: Object.values(GLTFRigidBodyType).indexOf(bodyParams.type),
+    collisionGroup: gltfGroupToLayer[bodyParams.collisionGroup],
+    collisionMask: bodyParams.collisionMask.reduce((acc, m) => acc | gltfGroupToLayer[m], 0)
+  });
 
   return eid;
 }
