@@ -68,6 +68,7 @@ const updatePreviewCamera = (world: HubsWorld, eid: number, previewCamera: Camer
 const scenePreviewCameraQuery = defineQuery([ScenePreviewCamera, Object3DTag]);
 const scenePreviewCameraEnterQuery = enterQuery(scenePreviewCameraQuery);
 const scenePreviewCameraExitQuery = exitQuery(scenePreviewCameraQuery);
+// TODO Decouple this system from CameraSystem when that's migrated.
 export function scenePreviewCameraSystem(world: HubsWorld, cameraSystem: CameraSystem) {
   scenePreviewCameraExitQuery(world).forEach(eid => {
     startPositions.delete(eid);
