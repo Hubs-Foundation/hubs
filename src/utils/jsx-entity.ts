@@ -85,7 +85,7 @@ import { AudioZoneParams, inflateAudioZone } from "../inflators/audio-zone";
 import { AudioSettings } from "../components/audio-params";
 import { inflateAudioParams } from "../inflators/audio-params";
 import { PhysicsShapeParams, inflatePhysicsShape } from "../inflators/physics-shape";
-import { inflateRigidBody, RigiBodyParams } from "../inflators/rigid-body";
+import { GLTFRigidBodyParams, inflateGLTFRigidBody, inflateRigidBody, RigiBodyParams } from "../inflators/rigid-body";
 import { AmmoShapeParams, inflateAmmoShape } from "../inflators/ammo-shape";
 import { BoxColliderParams, inflateBoxCollider } from "../inflators/box-collider";
 import { inflateTrimesh } from "../inflators/trimesh";
@@ -369,6 +369,9 @@ export interface GLTFComponentData extends ComponentData {
   videoTextureTarget: VideoTextureTargetParams;
   videoTextureSource: { fps: number; resolution: [x: number, y: number] };
   interactable: true;
+  rigidbody?: OptionalParams<GLTFRigidBodyParams>;
+  // TODO GLTFPhysicsShapeParams
+  physicsShape?: AmmoShapeParams;
 
   // deprecated
   spawnPoint?: true;
@@ -490,7 +493,10 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
   boxCollider: inflateBoxCollider,
   trimesh: inflateTrimesh,
   heightfield: inflateHeightField,
-  interactable: createDefaultInflator(SingleActionButton)
+  interactable: createDefaultInflator(SingleActionButton),
+  rigidbody: inflateGLTFRigidBody,
+  // TODO inflateGLTFPhysicsShape
+  physicsShape: inflateAmmoShape
 };
 
 function jsxInflatorExists(name: string): name is keyof JSXComponentData {
