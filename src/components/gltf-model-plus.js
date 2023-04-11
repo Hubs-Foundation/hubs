@@ -843,6 +843,7 @@ class GLTFHubsLoopAnimationComponent {
   }
 }
 
+// TODO remove and use MOZ_behavior until spec is finalized
 class GLTFKHRBehaviorExtension {
   constructor() {
     this.name = "KHR_behavior";
@@ -853,6 +854,19 @@ class GLTFKHRBehaviorExtension {
     if (ext) {
       // TODO we can probably actually create the behavior graph here but doing it later to keep
       // code localized to one spot for this spike
+      scenes[0].userData.behaviorGraph = ext.behaviors[0];
+    }
+  }
+}
+
+class GLTFMozBehaviorExtension {
+  constructor() {
+    this.name = "MOZ_behavior";
+  }
+
+  afterRoot({ scenes, parser }) {
+    const ext = parser.json.extensions?.[this.name];
+    if (ext) {
       scenes[0].userData.behaviorGraph = ext.behaviors[0];
     }
   }
@@ -879,6 +893,7 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
     .register(parser => new GLTFMozTextureRGBE(parser, new RGBELoader().setDataType(THREE.HalfFloatType)))
     .register(parser => new GLTFHubsLoopAnimationComponent(parser))
     .register(() => new GLTFKHRBehaviorExtension())
+    .register(() => new GLTFMozBehaviorExtension())
     .register(
       parser =>
         new GLTFLodExtension(parser, {

@@ -231,6 +231,7 @@ export class PhysicsSystem {
     const bodyId = this.nextBodyUuid;
     this.nextBodyUuid += 1;
 
+    object3D.updateMatrices();
     this.workerHelpers.addBody(bodyId, object3D, options);
 
     this.bodyUuidToData.set(bodyId, {
