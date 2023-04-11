@@ -1,6 +1,6 @@
 import { defineQuery, enterQuery, exitQuery } from "bitecs";
 import { HubsWorld } from "../app";
-import { ScenePreviewCamera } from "../bit-components";
+import { Object3DTag, ScenePreviewCamera } from "../bit-components";
 import { Quaternion, Vector3, Euler, Camera } from "three";
 import { CAMERA_MODE_INSPECT, CAMERA_MODE_SCENE_PREVIEW, CameraSystem } from "../systems/camera-system";
 import { setMatrixWorld } from "../utils/three-utils";
@@ -65,7 +65,7 @@ const updatePreviewCamera = (world: HubsWorld, eid: number, previewCamera: Camer
   }
 };
 
-const scenePreviewCameraQuery = defineQuery([ScenePreviewCamera]);
+const scenePreviewCameraQuery = defineQuery([ScenePreviewCamera, Object3DTag]);
 const scenePreviewCameraEnterQuery = enterQuery(scenePreviewCameraQuery);
 const scenePreviewCameraExitQuery = exitQuery(scenePreviewCameraQuery);
 export function scenePreviewCameraSystem(world: HubsWorld, cameraSystem: CameraSystem) {
