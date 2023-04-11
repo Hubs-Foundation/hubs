@@ -380,6 +380,9 @@ export interface GLTFComponentData extends ComponentData {
   audioTarget: AudioTargetParams;
   audioSettings: SceneAudioSettings;
   interactable: true;
+  rigidbody?: OptionalParams<RigidBodyParams>;
+  // TODO GLTFPhysicsShapeParams
+  physicsShape?: AmmoShapeParams;
 
   // deprecated
   spawnPoint?: true;
