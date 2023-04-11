@@ -16,7 +16,7 @@ const backwards = new Map<number, boolean>();
 const ranOnePass = new Map<number, boolean>();
 const newRot = new Quaternion();
 
-const updatePreviewCamera = (eid: number, previewCamera: Camera, cameraSystem: CameraSystem) => {
+const updatePreviewCamera = (world: HubsWorld, eid: number, previewCamera: Camera, cameraSystem: CameraSystem) => {
   cameraSystem.mode = CAMERA_MODE_SCENE_PREVIEW;
   const streamerCamera = getStreamerCamera();
   if (streamerCamera) {
@@ -27,7 +27,7 @@ const updatePreviewCamera = (eid: number, previewCamera: Camera, cameraSystem: C
   } else {
     const startTime = startTimes.get(eid)!;
     const duration = ScenePreviewCamera.duration[eid];
-    let t = (performance.now() - startTime) / (1000.0 * duration);
+    let t = (world.time.elapsed - startTime) / (1000.0 * duration);
     t = Math.min(1.0, Math.max(0.0, t));
 
     if (!ranOnePass.get(eid)) {
@@ -60,7 +60,7 @@ const updatePreviewCamera = (eid: number, previewCamera: Camera, cameraSystem: C
     if (t >= 0.9999) {
       ranOnePass.set(eid, true);
       backwards.set(eid, !back);
-      startTimes.set(eid, performance.now());
+      startTimes.set(eid, world.time.elapsed);
     }
   }
 };
@@ -102,7 +102,7 @@ export function scenePreviewCameraSystem(world: HubsWorld, cameraSystem: CameraS
     targetRotation.premultiply(startRotation);
     targetRotations.set(eid, targetRotation);
 
-    startTimes.set(eid, performance.now());
+    startTimes.set(eid, world.time.elapsed);
     backwards.set(eid, false);
     ranOnePass.set(eid, false);
   });
@@ -112,7 +112,7 @@ export function scenePreviewCameraSystem(world: HubsWorld, cameraSystem: CameraS
 
   scenePreviewCameraQuery(world).forEach(eid => {
     const previewCamera = world.eid2obj.get(eid)! as Camera;
-    updatePreviewCamera(eid, previewCamera, cameraSystem);
+    updatePreviewCamera(world, eid, previewCamera, cameraSystem);
     previewCamera.updateMatrices();
     setMatrixWorld(cameraSystem.viewingCamera, previewCamera.matrixWorld);
   });
