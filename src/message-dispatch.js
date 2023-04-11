@@ -10,8 +10,9 @@ import { LogMessageType } from "./react-components/room/ChatSidebar";
 import { createNetworkedEntity } from "./utils/create-networked-entity";
 import qsTruthy from "./utils/qs_truthy";
 import { add, testAsset, respawn } from "./utils/chat-commands";
-import downloadSavedEntityStates from "./utils/entity-state-utils";
+import download from "./utils/entity-state-utils";
 import HubChannel from "./utils/hub-channel";
+import { downloadSavedEntityStates } from "./utils/entity-state-utils";
 
 
 let uiRoot;
@@ -262,8 +263,9 @@ export default class MessageDispatch extends EventTarget {
         break;
       case "download":
         {
-          console.log(hubChannel);
-          const downloadFile = await downloadSavedEntityStates(hubChannel);
+          console.log(this.hubChannel);
+          x = this.hubChannel
+          const downloadFile = await downloadSavedEntityStates(x);
           console.log(downloadFile);
           
         }
