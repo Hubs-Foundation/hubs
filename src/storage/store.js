@@ -294,6 +294,7 @@ export default class Store extends EventTarget {
           this.dispatchEvent(new CustomEvent("themechanged", { detail: { current, previous } }));
         }
         previous = current;
+        console.log("Theme updated to: ", current);
       };
     })();
     this.addEventListener("statechanged", maybeDispatchThemeChanged);
