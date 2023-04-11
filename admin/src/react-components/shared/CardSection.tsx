@@ -12,7 +12,7 @@ type CardSectionPropsT = {
 const CardSection = ({ cta, ctaLabel, ctaCallback, body, className }: CardSectionPropsT) => {
   return (
     <div className={`card_section_wrapper ${className}`}>
-      <div className="flex-align-items-center max-w-600-px">
+      <div className="flex-align-items-center max-w-800-px">
         <div>
           <Icon name="arrow-right-circle" size={30} classProp="mr-20" />
         </div>
