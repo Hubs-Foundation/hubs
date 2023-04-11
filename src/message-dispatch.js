@@ -11,6 +11,7 @@ import { createNetworkedEntity } from "./utils/create-networked-entity";
 import qsTruthy from "./utils/qs_truthy";
 import { add, testAsset, respawn } from "./utils/chat-commands";
 import downloadSavedEntityStates from "./utils/entity-state-utils";
+import HubChannel from "./utils/hub-channel";
 
 
 let uiRoot;
@@ -262,8 +263,9 @@ export default class MessageDispatch extends EventTarget {
       case "download":
         {
           console.log(hubChannel);
-          downloadSavedEntityStates();
-          console.log("printing saved scene")
+          const downloadFile = await downloadSavedEntityStates(hubChannel);
+          console.log(downloadFile);
+          
         }
         break;
     }
