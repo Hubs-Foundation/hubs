@@ -436,7 +436,7 @@
   "revoke-token-modal.title": "Token widerrufen",
   "room-entry-modal.enter-on-device-button": "In VR betreten",
   "room-entry-modal.join-room-button": "Raum betreten",
-  "room-entry-modal.options-button": "Optionen",
+  "room-entry-modal.room-settings-button": "Raumeinstellungen",
   "room-entry-modal.room-name-label": "Raumname",
   "room-entry-modal.spectate-button": "Zuschauen",
   "room-settings-sidebar.access-invite": "Nur mit Einladung",

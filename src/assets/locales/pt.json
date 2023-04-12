@@ -459,7 +459,7 @@
   "revoke-token-modal.title": "Revogar token",
   "room-entry-modal.enter-on-device-button": "Entrar remoto",
   "room-entry-modal.join-room-button": "Entrar",
-  "room-entry-modal.options-button": "Opções",
+  "room-entry-modal.room-settings-button": "Configurações do quarto",
   "room-entry-modal.room-name-label": "Sala",
   "room-entry-modal.spectate-button": "Espiar",
   "room-settings-sidebar.access-invite": "Apenas convite",
