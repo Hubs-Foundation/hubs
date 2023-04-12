@@ -1,5 +1,5 @@
 import { defineQuery, enterQuery, entityExists, exitQuery, hasComponent, Not } from "bitecs";
-import { Object3DTag, Rigidbody, PhysicsShape, AEntity } from "../bit-components";
+import { Object3DTag, Rigidbody, PhysicsShape, AEntity, SceneRoot } from "../bit-components";
 import { getShapeFromPhysicsShape } from "../inflators/physics-shape";
 import { findAncestorWithComponent } from "../utils/bit-utils";
 import { getBodyFromRigidBody } from "../inflators/rigid-body";
@@ -21,7 +21,8 @@ function addPhysicsShapes(world: HubsWorld, physicsSystem: PhysicsSystem, eid: n
   const shape = getShapeFromPhysicsShape(eid);
 
   // TODO HACK this should be handled in shape generation code or just be unsupported
-  if (!hasComponent(world, Rigidbody, eid) && shape.fit === CONSTANTS.FIT.ALL) {
+  const isSceneObject = !!findAncestorWithComponent(world, SceneRoot, eid);
+  if (isSceneObject && !hasComponent(world, Rigidbody, eid) && shape.fit === CONSTANTS.FIT.ALL) {
     obj.updateMatrices();
     const offset = new Vector3().copy(shape.offset as Vector3);
     const orientation = new Quaternion().copy(shape.orientation as Quaternion);

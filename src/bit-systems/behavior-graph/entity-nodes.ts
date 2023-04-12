@@ -19,21 +19,27 @@ import { ClientID } from "../../utils/networking-types";
 import { HubsWorld } from "../../app";
 import { Text } from "troika-three-text";
 
-export const entityEvents = {
-  onInteract: new Map<EntityID, EventEmitter<EntityID>>(),
-  onCollisionEnter: new Map<EntityID, EventEmitter<EntityID>>(),
-  onCollisionStay: new Map<EntityID, EventEmitter<EntityID>>(),
-  onCollisionExit: new Map<EntityID, EventEmitter<EntityID>>(),
-  onPlayerCollisionEnter: new Map<EntityID, EventEmitter<ClientID>>(),
-  onPlayerCollisionStay: new Map<EntityID, EventEmitter<ClientID>>(),
-  onPlayerCollisionExit: new Map<EntityID, EventEmitter<ClientID>>()
-};
 type EntityEventState = {
+  emitters: {
+    onInteract: EventEmitter<EntityID>;
+    onCollisionEnter: EventEmitter<EntityID>;
+    onCollisionStay: EventEmitter<EntityID>;
+    onCollisionExit: EventEmitter<EntityID>;
+    onPlayerCollisionEnter: EventEmitter<ClientID>;
+    onPlayerCollisionStay: EventEmitter<ClientID>;
+    onPlayerCollisionExit: EventEmitter<ClientID>;
+  };
+  listenerCount: number;
+  collidingEntities: Set<EntityID>;
+};
+export const entityEvents = new Map<EntityID, EntityEventState>();
+
+type EntityEventData = {
   target?: EntityID;
   callback?: (target: EntityID) => void;
 };
 function makeEntityEventNode(
-  event: keyof typeof entityEvents,
+  event: keyof EntityEventState["emitters"],
   outputType: "player" | "entity",
   label: string,
   hackySetup?: (target: EntityID) => void
@@ -50,25 +56,48 @@ function makeEntityEventNode(
     configuration: {
       target: { valueType: "entity" }
     },
-    initialState: {} as EntityEventState,
+    initialState: {} as EntityEventData,
     init: ({ write, commit, configuration }) => {
       const target = configuration["target"] as EntityID;
       if (!target) throw new Error(`hubs/${event} must have a target`);
+
       hackySetup && hackySetup(target);
+
       const callback = (data: any) => {
-        if (!event.toLowerCase().includes("stay")) console.log(event, data);
+        if (!event.toLowerCase().includes("stay")) console.log(event, target, data);
         write(outputType, data);
         commit("flow");
       };
-      const emitter = entityEvents[event].get(target) || new EventEmitter();
-      emitter.addListener(callback);
-      entityEvents[event].set(target, emitter as any);
+
+      if (!entityEvents.has(target)) {
+        entityEvents.set(target, {
+          emitters: {
+            onInteract: new EventEmitter<EntityID>(),
+            onCollisionEnter: new EventEmitter<EntityID>(),
+            onCollisionStay: new EventEmitter<EntityID>(),
+            onCollisionExit: new EventEmitter<EntityID>(),
+            onPlayerCollisionEnter: new EventEmitter<ClientID>(),
+            onPlayerCollisionStay: new EventEmitter<ClientID>(),
+            onPlayerCollisionExit: new EventEmitter<ClientID>()
+          },
+          listenerCount: 0,
+          collidingEntities: new Set<EntityID>()
+        });
+        console.log("Generating entity event state for", target, entityEvents.get(target));
+      }
+
+      const entityState = entityEvents.get(target)!;
+      entityState.emitters[event].addListener(callback);
+      entityState.listenerCount++;
+      console.log("added listener for", target, entityState.listenerCount);
+
       return { target, callback };
     },
     dispose: ({ state: { callback, target } }) => {
-      const emitter = entityEvents[event].get(target!)!;
-      emitter.removeListener(callback as any);
-      if (!emitter.listenerCount) entityEvents[event].delete(target!);
+      const entityState = entityEvents.get(target!)!;
+      entityState.emitters[event].removeListener(callback as any);
+      entityState.listenerCount--;
+      if (entityState.listenerCount === 0) entityEvents.delete(target!);
       return {};
     }
   });
