@@ -167,8 +167,10 @@ export function behaviorGraphSystem(world: HubsWorld) {
   // TODO allocations
   const collisionCheckEntiteis = new Set([
     ...entityEvents.onCollisionEnter.keys(),
+    ...entityEvents.onCollisionStay.keys(),
     ...entityEvents.onCollisionExit.keys(),
     ...entityEvents.onPlayerCollisionEnter.keys(),
+    ...entityEvents.onPlayerCollisionStay.keys(),
     ...entityEvents.onPlayerCollisionExit.keys()
   ]);
 
@@ -206,15 +208,19 @@ export function behaviorGraphSystem(world: HubsWorld) {
       for (let i = 0; i < collisions.length; i++) {
         const bodyData = physicsSystem.bodyUuidToData.get(collisions[i]);
         const collidingEid = bodyData.object3D.eid;
-        if (!collidingEntities.includes(collidingEid)) {
-          collidingEntities.push(collidingEid);
-          const playerEid = findAncestorEntity(world, collidingEid, isPlayerEntity);
+        const playerEid = findAncestorEntity(world, collidingEid, isPlayerEntity);
+        if (collidingEntities.includes(collidingEid)) {
           if (playerEid) {
-            const emitter = entityEvents.onPlayerCollisionEnter.get(eid);
-            emitter && emitter.emit(clientIdForEntity(world, playerEid));
+            entityEvents.onPlayerCollisionStay.get(eid)?.emit(clientIdForEntity(world, playerEid));
           } else {
-            const emitter = entityEvents.onCollisionEnter.get(eid);
-            emitter && emitter.emit(collidingEid);
+            entityEvents.onCollisionStay.get(eid)?.emit(collidingEid);
+          }
+        } else {
+          collidingEntities.push(collidingEid);
+          if (playerEid) {
+            entityEvents.onPlayerCollisionEnter.get(eid)?.emit(clientIdForEntity(world, playerEid));
+          } else {
+            entityEvents.onCollisionEnter.get(eid)?.emit(collidingEid);
           }
         }
       }

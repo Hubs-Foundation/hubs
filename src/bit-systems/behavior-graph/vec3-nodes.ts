@@ -69,6 +69,14 @@ export const Vector3Nodes = definitionListToMap([
     exec: (v: Vector3) => ({ x: v.x, y: v.y, z: v.z })
   }),
   makeInNOutFunctionDesc({
+    name: "math/toString/vec3",
+    label: "To String",
+    category: "Vec3 Math" as any,
+    in: ["vec3"],
+    out: "string",
+    exec: (v: Vector3) => `${v.x.toFixed(4)}, ${v.y.toFixed(4)}, ${v.z.toFixed(4)}`
+  }),
+  makeInNOutFunctionDesc({
     name: "math/add/vec3",
     label: "+",
     category: "Vec3 Math" as any,

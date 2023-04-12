@@ -20,7 +20,7 @@ export const EulerNodes = definitionListToMap([
   makeInNOutFunctionDesc({
     name: "math/euler/combine",
     label: "Combine Euler",
-    category: "Eueler Math" as any,
+    category: "Euler Math" as any,
     in: [{ x: "float" }, { y: "float" }, { z: "float" }],
     out: [{ v: "euler" }],
     exec: (x: number, y: number, z: number) => {
@@ -29,8 +29,8 @@ export const EulerNodes = definitionListToMap([
   }),
   makeInNOutFunctionDesc({
     name: "math/euler/separate",
-    label: "Separate Eueler",
-    category: "Eueler Math" as any,
+    label: "Separate Euler",
+    category: "Euler Math" as any,
     in: [{ v: "euler" }],
     out: [{ x: "float" }, { y: "float" }, { z: "float" }],
     exec: (v: Euler) => {
@@ -40,7 +40,7 @@ export const EulerNodes = definitionListToMap([
   makeInNOutFunctionDesc({
     name: "math/euler/toVec3",
     label: "to Vec3",
-    category: "Eueler Math" as any,
+    category: "Euler Math" as any,
     in: [{ v: "euler" }],
     out: [{ v: "vec3" }],
     exec: (v: Euler) => {

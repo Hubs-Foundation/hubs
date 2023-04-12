@@ -3,8 +3,17 @@ declare module "troika-three-text" {
 
   export class Text extends Mesh {
     text: string;
-    anchorX: number | `${number}%` | 'left' | 'center' | 'right';
-    anchorY: number | `${number}%` | 'top' | 'top-baseline' | 'top-cap' | 'top-ex' | 'middle' | 'bottom-baseline' | 'bottom';
+    anchorX: number | `${number}%` | "left" | "center" | "right";
+    anchorY:
+      | number
+      | `${number}%`
+      | "top"
+      | "top-baseline"
+      | "top-cap"
+      | "top-ex"
+      | "middle"
+      | "bottom-baseline"
+      | "bottom";
     clipRect: [number, number, number, number] | null;
     color: string | number | Color | null;
     curveRadius: number;
@@ -16,7 +25,7 @@ declare module "troika-three-text" {
     glyphGeometryDetail: number;
     gpuAccelerateSDF: boolean;
     letterSpacing: number;
-    lineHeight: number | 'normal';
+    lineHeight: number | "normal";
     material: Material | null;
     maxWidth: number;
     outlineBlur: number | `${number}%`;
@@ -25,15 +34,16 @@ declare module "troika-three-text" {
     outlineOffsetY: number | `${number}%`;
     outlineOpacity: number;
     outlineWidth: number | `${number}%`;
-    overflowWrap: 'normal' | 'break-word';
+    overflowWrap: "normal" | "break-word";
     sdfGlyphSize: number | null;
     strokeColor: string | number | Color;
     strokeOpacity: number;
     strokeWidth: number | `${number}%`;
-    textAlign: 'left' | 'right' | 'center' | 'justify';
+    textAlign: "left" | "right" | "center" | "justify";
     textIndent: number;
-    whiteSpace: 'normal' | 'nowrap';
+    whiteSpace: "normal" | "nowrap";
     sync(callback?: () => void): void;
+    isTroikaText: true;
   }
 
   export const preloadFont: (

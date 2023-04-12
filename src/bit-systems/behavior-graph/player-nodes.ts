@@ -5,7 +5,8 @@ import {
   makeInNOutFunctionDesc,
   ValueType
 } from "@oveddan-behave-graph/core";
-import { Euler, Matrix4, Quaternion, Vector3 } from "three";
+import { Euler, Matrix4, Object3D, Quaternion, Vector3 } from "three";
+import { getPlayerInfo } from "../../utils/component-utils";
 import { ClientID } from "../../utils/networking-types";
 import { definitionListToMap } from "./utils";
 
@@ -155,6 +156,61 @@ export const playerNodedefs = definitionListToMap([
         console.warn("tried to teleport a remote player");
       }
       commit("flow");
+    }
+  }),
+  makeInNOutFunctionDesc({
+    name: "hubs/player/getTransform",
+    label: "Get Transform",
+    category: "Player" as any,
+    in: [{ player: "player" }],
+    out: [{ position: "vec3" }, { rotation: "euler" }, { scale: "vec3" }],
+    exec: (player: ClientID) => {
+      const info = getPlayerInfo(player);
+      const obj = info.el.object3D as Object3D;
+      return {
+        // TODO this is largely so that variables work since they are set using =. We can add support for .copy()-able things
+        position: obj.position.clone(),
+        rotation: obj.rotation.clone(),
+        scale: obj.scale.clone()
+      };
+    }
+  }),
+  makeInNOutFunctionDesc({
+    name: "hubs/player/getHeadTransform",
+    label: "Get Head Transform",
+    category: "Player" as any,
+    in: [{ player: "player" }],
+    out: [{ position: "vec3" }, { rotation: "euler" }, { scale: "vec3" }],
+    exec: (player: ClientID) => {
+      const info = getPlayerInfo(player);
+      const obj = info.el.querySelector(".camera").object3D as Object3D;
+      return {
+        // TODO this is largely so that variables work since they are set using =. We can add support for .copy()-able things
+        position: obj.position.clone(),
+        rotation: obj.rotation.clone(),
+        scale: obj.scale.clone()
+      };
+    }
+  }),
+  makeInNOutFunctionDesc({
+    name: "hubs/player/getWorldHeadTransform",
+    label: "Get World Head Transform",
+    category: "Player" as any,
+    in: [{ player: "player" }],
+    out: [{ position: "vec3" }, { rotation: "euler" }, { scale: "vec3" }],
+    exec: (player: ClientID) => {
+      const info = getPlayerInfo(player);
+      const obj = info.el.querySelector(".camera").object3D as Object3D;
+      obj.updateMatrices();
+      const position = new Vector3();
+      const rotation = new Quaternion();
+      const scale = new Vector3();
+      obj.matrixWorld.decompose(position, rotation, scale);
+      return {
+        position,
+        rotation: new Euler().setFromQuaternion(rotation),
+        scale
+      };
     }
   })
 ]);
