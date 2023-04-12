@@ -95,7 +95,6 @@ type EngineState = {
   lifecycleEmitter: ManualLifecycleEventEmitter;
 };
 
-const collidingEntities: EntityID[] = [];
 const engines = new Map<EntityID, EngineState>();
 const behaviorGraphsQuery = defineQuery([BehaviorGraph]);
 const behaviorGraphEnterQuery = enterQuery(behaviorGraphsQuery);
@@ -160,67 +159,57 @@ export function behaviorGraphSystem(world: HubsWorld) {
   });
 
   interactedQuery(world).forEach(function (eid) {
-    console.log("interact", eid, entityEvents.onInteract.get(eid));
-    entityEvents.onInteract.get(eid)?.emit(eid);
+    entityEvents.get(eid)!.emitters.onInteract.emit(eid);
   });
 
   // TODO allocations
-  const collisionCheckEntiteis = new Set([
-    ...entityEvents.onCollisionEnter.keys(),
-    ...entityEvents.onCollisionStay.keys(),
-    ...entityEvents.onCollisionExit.keys(),
-    ...entityEvents.onPlayerCollisionEnter.keys(),
-    ...entityEvents.onPlayerCollisionStay.keys(),
-    ...entityEvents.onPlayerCollisionExit.keys()
-  ]);
-
+  const collisionCheckEntiteis = entityEvents.keys();
   // TODO lots of traversal and can probably be simplified a good deal
   for (const eid of collisionCheckEntiteis) {
+    const triggerState = entityEvents.get(eid)!;
+
     const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
     if (!hasComponent(world, Rigidbody, eid)) {
-      console.warn("no rigidbody");
-      return;
+      continue;
     }
     const triggerBody = Rigidbody.bodyId[eid];
     if (!physicsSystem.bodyUuidToData.has(triggerBody)) {
-      console.warn("no body data");
-      return;
+      continue;
     }
 
-    collidingEntities.forEach(function (collidingEid) {
+    triggerState.collidingEntities.forEach(function (collidingEid) {
       const collidingBody = Rigidbody.bodyId[collidingEid];
       const collisions = physicsSystem.getCollisions(collidingBody) as EntityID[];
       if (!collisions.length || !collisions.includes(triggerBody)) {
-        collidingEntities.splice(collidingEntities.indexOf(collidingEid));
+        triggerState.collidingEntities.delete(collidingEid);
         const playerEid = findAncestorEntity(world, collidingEid, isPlayerEntity);
+        console.log("firingOnCollisionExit on", eid, "with", collidingEid);
         if (playerEid) {
-          const emitter = entityEvents.onPlayerCollisionExit.get(eid);
-          emitter && emitter.emit(clientIdForEntity(world, playerEid));
+          triggerState.emitters.onPlayerCollisionExit.emit(clientIdForEntity(world, playerEid));
         } else {
-          const emitter = entityEvents.onCollisionExit.get(eid);
-          emitter && emitter.emit(collidingEid);
+          triggerState.emitters.onCollisionExit.emit(collidingEid);
         }
       }
     });
 
-    const collisions = physicsSystem.getCollisions(Rigidbody.bodyId[eid]) as EntityID[];
-    if (collisions.length) {
-      for (let i = 0; i < collisions.length; i++) {
-        const bodyData = physicsSystem.bodyUuidToData.get(collisions[i]);
-        const collidingEid = bodyData.object3D.eid;
+    const collisionBodies = physicsSystem.getCollisions(Rigidbody.bodyId[eid]) as number[];
+    if (collisionBodies.length) {
+      for (let i = 0; i < collisionBodies.length; i++) {
+        const collidingEid = physicsSystem.bodyUuidToData.get(collisionBodies[i]).object3D.eid as EntityID;
         const playerEid = findAncestorEntity(world, collidingEid, isPlayerEntity);
-        if (collidingEntities.includes(collidingEid)) {
+        if (triggerState.collidingEntities.has(collidingEid)) {
           if (playerEid) {
-            entityEvents.onPlayerCollisionStay.get(eid)?.emit(clientIdForEntity(world, playerEid));
+            triggerState.emitters.onPlayerCollisionStay.emit(clientIdForEntity(world, playerEid));
           } else {
-            entityEvents.onCollisionStay.get(eid)?.emit(collidingEid);
+            triggerState.emitters.onCollisionStay.emit(collidingEid);
           }
         } else {
-          collidingEntities.push(collidingEid);
+          triggerState.collidingEntities.add(collidingEid);
+          console.log("firingOnCollisionEnter on", eid, "with", collidingEid);
           if (playerEid) {
-            entityEvents.onPlayerCollisionEnter.get(eid)?.emit(clientIdForEntity(world, playerEid));
+            triggerState.emitters.onPlayerCollisionEnter.emit(clientIdForEntity(world, playerEid));
           } else {
-            entityEvents.onCollisionEnter.get(eid)?.emit(collidingEid);
+            triggerState.emitters.onCollisionEnter.emit(collidingEid);
           }
         }
       }
