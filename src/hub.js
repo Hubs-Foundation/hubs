@@ -764,7 +764,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // If the stored avatar doesn't have a valid src, reset to a legacy avatar.
   const avatarSrc = await getAvatarSrc(store.state.profile.avatarId);
-  if (!avatarSrc) {
+  if (!avatarSrc || configs.feature("is_locked_down_demo_room") === hubId) {
     await store.resetToRandomDefaultAvatar();
   }
 

@@ -817,7 +817,11 @@ class UIRoot extends Component {
 
   renderEntryStartPanel = () => {
     const { hasAcceptedProfile, hasChangedName } = this.props.store.state.activity;
-    const promptForNameAndAvatarBeforeEntry = this.props.hubIsBound ? !hasAcceptedProfile : !hasChangedName;
+    //const isLockedDownDemo = configs.feature("is_locked_down_demo_room") === this.props.hub.hub_id;
+    const isLockedDownDemo = true;
+    const promptForNameAndAvatarBeforeEntry = this.props.hubIsBound
+      ? !hasAcceptedProfile && !isLockedDownDemo
+      : !hasChangedName && !isLockedDownDemo;
 
     // TODO: What does onEnteringCanceled do?
     return (
@@ -1099,7 +1103,9 @@ class UIRoot extends Component {
 
     const streaming = this.state.isStreaming;
 
-    const showObjectList = enteredOrWatching;
+    const isLockedDownDemo = configs.feature('is_locked_down_demo_room') === this.props.hub.hub_id;
+
+    const showObjectList = enteredOrWatching && !isLockedDownDemo;
     const showECSObjectsMenuButton = qsTruthy("ecsDebug");
 
     const streamer = getCurrentStreamer();
@@ -1150,7 +1156,7 @@ class UIRoot extends Component {
                 reason: LeaveReason.createRoom
               })
           },
-          {
+          !isLockedDownDemo && {
             id: "user-profile",
             label: <FormattedMessage id="more-menu.profile" defaultMessage="Change Name & Avatar" />,
             icon: AvatarIcon,
@@ -1391,7 +1397,8 @@ class UIRoot extends Component {
                         )}
                         <PeopleMenuButton
                           active={this.state.sidebarId === "people"}
-                          onClick={() => this.toggleSidebar("people")}
+                          disabled={isLockedDownDemo}
+                          onClick={!isLockedDownDemo ? () => this.toggleSidebar("people") : null}
                           presencecount={this.state.presenceCount}
                         />
                         {showECSObjectsMenuButton && (
@@ -1593,14 +1600,18 @@ class UIRoot extends Component {
                     )}
                     {entered && (
                       <>
-                        <AudioPopoverContainer scene={this.props.scene} />
-                        <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel} />
-                        <PlacePopoverContainer
-                          scene={this.props.scene}
-                          hubChannel={this.props.hubChannel}
-                          mediaSearchStore={this.props.mediaSearchStore}
-                          showNonHistoriedDialog={this.showNonHistoriedDialog}
-                        />
+                        {!isLockedDownDemo && (
+                          <>
+                            <AudioPopoverContainer scene={this.props.scene} />
+                            <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel} />
+                            <PlacePopoverContainer
+                              scene={this.props.scene}
+                              hubChannel={this.props.hubChannel}
+                              mediaSearchStore={this.props.mediaSearchStore}
+                              showNonHistoriedDialog={this.showNonHistoriedDialog}
+                            />
+                          </>
+                        )}
                         {this.props.hubChannel.can("spawn_emoji") && (
                           <ReactionPopoverContainer
                             scene={this.props.scene}
@@ -1609,9 +1620,11 @@ class UIRoot extends Component {
                         )}
                       </>
                     )}
-                    <ChatToolbarButtonContainer
-                      onClick={() => this.toggleSidebar("chat", { chatPrefix: "", chatAutofocus: false })}
-                    />
+                    {!isLockedDownDemo && (
+                      <ChatToolbarButtonContainer
+                        onClick={() => this.toggleSidebar("chat", { chatPrefix: "", chatAutofocus: false })}
+                      />
+                    )}
                     {entered && isMobileVR && (
                       <ToolbarButton
                         className={styleUtils.hideLg}

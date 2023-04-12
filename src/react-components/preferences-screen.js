@@ -22,6 +22,8 @@ import {
   setMaxResolution
 } from "../utils/screen-orientation-utils";
 import { AAModes } from "../constants";
+import configs from "../utils/configs";
+import { getCurrentHubId } from "../utils/hub-utils";
 
 import dropdownArrowUrl from "../assets/images/dropdown_arrow.png";
 import dropdownArrow2xUrl from "../assets/images/dropdown_arrow@2x.png";
@@ -1210,55 +1212,63 @@ class PreferencesScreen extends Component {
             prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
             options: availableThemes
           },
-          {
-            key: "nametagVisibility",
-            prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
-            options: [
-              {
-                value: "showAll",
-                text: intl.formatMessage({
-                  id: "preferences-screen.nametag-visibility.show-all",
-                  defaultMessage: "Always"
-                })
-              },
-              {
-                value: "showNone",
-                text: intl.formatMessage({
-                  id: "preferences-screen.nametag-visibility.show-none",
-                  defaultMessage: "Never"
-                })
-              },
-              {
-                value: "showFrozen",
-                text: intl.formatMessage({
-                  id: "preferences-screen.nametag-visibility.show-frozen",
-                  defaultMessage: "Only in Frozen state"
-                })
-              },
-              {
-                value: "showSpeaking",
-                text: intl.formatMessage({
-                  id: "preferences-screen.nametag-visibility.show-speaking",
-                  defaultMessage: "Only speaking"
-                })
-              },
-              {
-                value: "showClose",
-                text: intl.formatMessage({
-                  id: "preferences-screen.nametag-visibility.show-close",
-                  defaultMessage: "Close to me"
-                })
-              }
-            ]
-          },
-          {
-            key: "nametagVisibilityDistance",
-            prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
-            min: 1,
-            max: 20,
-            step: 1,
-            digits: 2
-          },
+          ...(configs.feature("is_locked_down_demo_room") !== getCurrentHubId()
+            ? [
+                {
+                  key: "nametagVisibility",
+                  prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
+                  options: [
+                    {
+                      value: "showAll",
+                      text: intl.formatMessage({
+                        id: "preferences-screen.nametag-visibility.show-all",
+                        defaultMessage: "Always"
+                      })
+                    },
+                    {
+                      value: "showNone",
+                      text: intl.formatMessage({
+                        id: "preferences-screen.nametag-visibility.show-none",
+                        defaultMessage: "Never"
+                      })
+                    },
+                    {
+                      value: "showFrozen",
+                      text: intl.formatMessage({
+                        id: "preferences-screen.nametag-visibility.show-frozen",
+                        defaultMessage: "Only in Frozen state"
+                      })
+                    },
+                    {
+                      value: "showSpeaking",
+                      text: intl.formatMessage({
+                        id: "preferences-screen.nametag-visibility.show-speaking",
+                        defaultMessage: "Only speaking"
+                      })
+                    },
+                    {
+                      value: "showClose",
+                      text: intl.formatMessage({
+                        id: "preferences-screen.nametag-visibility.show-close",
+                        defaultMessage: "Close to me"
+                      })
+                    }
+                  ]
+                }
+              ]
+            : []),
+          ...(configs.feature("is_locked_down_demo_room") !== getCurrentHubId()
+            ? [
+                {
+                  key: "nametagVisibilityDistance",
+                  prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
+                  min: 1,
+                  max: 20,
+                  step: 1,
+                  digits: 2
+                }
+              ]
+            : []),
           this.state.preferredCamera,
           {
             key: "allowMultipleHubsInstances",
