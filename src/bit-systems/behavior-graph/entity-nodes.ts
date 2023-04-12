@@ -7,7 +7,7 @@ import {
   ValueType
 } from "@oveddan-behave-graph/core";
 import { addComponent, hasComponent, IComponent } from "bitecs";
-import { Box3, Box3Helper, Object3D, Vector3 } from "three";
+import { Box3, Box3Helper, Euler, Object3D, Quaternion, Vector3 } from "three";
 import { CursorRaycastable, EntityID, RemoteHoverTarget, SingleActionButton } from "../../bit-components";
 import * as bitComponents from "../../bit-components";
 import { COLLISION_LAYERS } from "../../constants";
@@ -16,12 +16,16 @@ import { definitionListToMap } from "./utils";
 import { findAncestorWithComponent } from "../../utils/bit-utils";
 import { inflateRigidBody, Type } from "../../inflators/rigid-body";
 import { ClientID } from "../../utils/networking-types";
+import { HubsWorld } from "../../app";
+import { Text } from "troika-three-text";
 
 export const entityEvents = {
   onInteract: new Map<EntityID, EventEmitter<EntityID>>(),
   onCollisionEnter: new Map<EntityID, EventEmitter<EntityID>>(),
+  onCollisionStay: new Map<EntityID, EventEmitter<EntityID>>(),
   onCollisionExit: new Map<EntityID, EventEmitter<EntityID>>(),
   onPlayerCollisionEnter: new Map<EntityID, EventEmitter<ClientID>>(),
+  onPlayerCollisionStay: new Map<EntityID, EventEmitter<ClientID>>(),
   onPlayerCollisionExit: new Map<EntityID, EventEmitter<ClientID>>()
 };
 type EntityEventState = {
@@ -52,7 +56,7 @@ function makeEntityEventNode(
       if (!target) throw new Error(`hubs/${event} must have a target`);
       hackySetup && hackySetup(target);
       const callback = (data: any) => {
-        console.log(event, data);
+        if (!event.toLowerCase().includes("stay")) console.log(event, data);
         write(outputType, data);
         commit("flow");
       };
@@ -121,8 +125,10 @@ export const EntityNodes = definitionListToMap([
     addComponent(APP.world, RemoteHoverTarget, target);
   }),
   makeEntityEventNode("onCollisionEnter", "entity", "On Collision Enter"),
+  makeEntityEventNode("onCollisionStay", "entity", "On Collision Stay"),
   makeEntityEventNode("onCollisionExit", "entity", "On Collision Exit"),
   makeEntityEventNode("onPlayerCollisionEnter", "player", "On Player Collision Enter"),
+  makeEntityEventNode("onPlayerCollisionStay", "player", "On Player Collision Stay"),
   makeEntityEventNode("onPlayerCollisionExit", "player", "On Player Collision Exit"),
   makeInNOutFunctionDesc({
     name: "hubs/entity/toString",
@@ -188,6 +194,64 @@ export const EntityNodes = definitionListToMap([
     out: [{ result: "boolean" }],
     exec: (a: EntityID, b: EntityID) => {
       return a === b;
+    }
+  }),
+  makeFlowNodeDefinition({
+    typeName: "hubs/components/text/setText",
+    category: "Components" as any,
+    label: "Text: Set Text",
+    in: {
+      flow: "flow",
+      entity: "entity",
+      text: "string"
+    },
+    out: { flow: "flow" },
+    initialState: undefined,
+    triggered: ({ read, commit, graph }) => {
+      const world = graph.getDependency<HubsWorld>("world")!;
+      const eid = read<EntityID>("entity");
+      const obj = world.eid2obj.get(eid);
+      if (!obj || !(obj as Text).isTroikaText) {
+        console.error(`Text: Set Text, could not find entity with text`, eid);
+        return;
+      }
+      const text = obj as Text;
+      text.text = read("text");
+      commit("flow");
+    }
+  }),
+  makeInNOutFunctionDesc({
+    name: "hubs/entity/localToWorld/vec3",
+    label: "Local to World",
+    category: "Vec3 Math" as any,
+    in: [{ position: "vec3" }, { entity: "entity" }],
+    out: "vec3",
+    exec: (position: Vector3, entity: EntityID) => {
+      const obj = APP.world.eid2obj.get(entity);
+      if (!obj || !(obj as Text).isTroikaText) {
+        console.error(`vec3 localToWorld, could not find entity`, entity);
+        return position.clone();
+      }
+      obj.updateMatrices();
+      return obj.localToWorld(position);
+    }
+  }),
+  makeInNOutFunctionDesc({
+    name: "hubs/entity/localToWorld/euler",
+    label: "Local to World",
+    category: "Euler Math" as any,
+    in: [{ rotation: "euler" }, { entity: "entity" }],
+    out: "euler",
+    exec: (rotation: Euler, entity: EntityID) => {
+      const obj = APP.world.eid2obj.get(entity);
+      if (!obj || !(obj as Text).isTroikaText) {
+        console.error(`euler localToWorld, could not find entity`, entity);
+        return rotation.clone();
+      }
+      obj.updateMatrices();
+      const q = obj.getWorldQuaternion(new Quaternion());
+      // TODO allocations
+      return new Euler().setFromQuaternion(new Quaternion().setFromEuler(rotation).multiply(q));
     }
   }),
   makeObjectPropertyFlowNode("visible", "boolean"),
