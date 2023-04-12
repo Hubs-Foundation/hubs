@@ -844,7 +844,7 @@ class UIRoot extends Component {
           onEnterOnDevice={() => this.attemptLink()}
           showSpectate={!this.state.waitingOnAudio}
           onSpectate={() => this.setState({ watching: true })}
-          showOptions={this.props.hubChannel.canOrWillIfCreator("update_hub")}
+          showRoomSettings={this.props.hubChannel.canOrWillIfCreator("update_hub")}
           onRoomSettings={() => {
             this.props.performConditionalSignIn(
               () => this.props.hubChannel.can("update_hub"),

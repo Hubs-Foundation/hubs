@@ -23,7 +23,7 @@ export function RoomEntryModal({
   onEnterOnDevice,
   showSpectate,
   onSpectate,
-  showOptions,
+  showRoomSettings,
   onRoomSettings,
   ...rest
 }) {
@@ -67,7 +67,7 @@ export function RoomEntryModal({
               </span>
             </Button>
           )}
-          {showOptions && breakpoint !== "sm" && (
+          {showRoomSettings && breakpoint !== "sm" && (
             <>
               <hr className={styleUtils.showLg} />
               <Button preset="transparent" className={styleUtils.showLg} onClick={onRoomSettings}>
@@ -93,7 +93,7 @@ RoomEntryModal.propTypes = {
   onEnterOnDevice: PropTypes.func,
   showSpectate: PropTypes.bool,
   onSpectate: PropTypes.func,
-  showOptions: PropTypes.bool,
+  showRoomSettings: PropTypes.bool,
   onRoomSettings: PropTypes.func
 };
 
@@ -101,5 +101,5 @@ RoomEntryModal.defaultProps = {
   showJoinRoom: true,
   showEnterOnDevice: true,
   showSpectate: true,
-  showOptions: true
+  showRoomSettings: true
 };
