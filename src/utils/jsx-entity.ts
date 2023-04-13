@@ -21,9 +21,7 @@ import {
   Object3DTag,
   OffersHandConstraint,
   OffersRemoteConstraint,
-  PhysicsShape,
   RemoteHoverTarget,
-  Rigidbody,
   SingleActionButton,
   TextButton,
   NetworkedVideo,
@@ -87,6 +85,12 @@ import { inflateParticleEmitter, ParticleEmitterParams } from "../inflators/part
 import { AudioZoneParams, inflateAudioZone } from "../inflators/audio-zone";
 import { AudioSettings } from "../components/audio-params";
 import { inflateAudioParams } from "../inflators/audio-params";
+import { PhysicsShapeParams, inflatePhysicsShape } from "../inflators/physics-shape";
+import { inflateRigidBody, RigiBodyParams } from "../inflators/rigid-body";
+import { AmmoShapeParams, inflateAmmoShape } from "../inflators/ammo-shape";
+import { BoxColliderParams, inflateBoxCollider } from "../inflators/box-collider";
+import { inflateTrimesh } from "../inflators/trimesh";
+import { HeightFieldParams, inflateHeightField } from "../inflators/heightfield";
 
 preload(
   new Promise(resolve => {
@@ -248,6 +252,8 @@ export interface ComponentData {
   audioParams?: AudioSettings;
 }
 
+type OptionalParams<T> = Partial<T> | true;
+
 export interface JSXComponentData extends ComponentData {
   slice9?: {
     size: [width: number, height: number];
@@ -293,8 +299,8 @@ export interface JSXComponentData extends ComponentData {
   networked?: any;
   textButton?: any;
   hoverButton?: any;
-  rigidbody?: any;
-  physicsShape?: any;
+  rigidbody?: OptionalParams<RigiBodyParams>;
+  physicsShape?: OptionalParams<PhysicsShapeParams>;
   floatyObject?: any;
   networkedFloatyObject?: any;
   networkedTransform?: any;
@@ -372,6 +378,10 @@ export interface GLTFComponentData extends ComponentData {
   background: BackgroundParams;
   simpleWater?: SimpleWaterParams;
   particleEmitter?: ParticleEmitterParams;
+  ammoShape?: AmmoShapeParams;
+  boxCollider?: BoxColliderParams;
+  trimesh?: true;
+  heightfield?: HeightFieldParams;
 }
 
 declare global {
@@ -419,8 +429,8 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   hoverButton: createDefaultInflator(HoverButton),
   holdable: createDefaultInflator(Holdable),
   deletable: createDefaultInflator(Deletable),
-  rigidbody: createDefaultInflator(Rigidbody),
-  physicsShape: createDefaultInflator(PhysicsShape),
+  rigidbody: inflateRigidBody,
+  physicsShape: inflatePhysicsShape,
   floatyObject: createDefaultInflator(FloatyObject),
   networkedFloatyObject: createDefaultInflator(NetworkedFloatyObject),
   makeKinematicOnRelease: createDefaultInflator(MakeKinematicOnRelease),
@@ -477,7 +487,11 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
   videoTextureSource: createDefaultInflator(VideoTextureSource),
   uvScroll: inflateUVScroll,
   simpleWater: inflateSimpleWater,
-  particleEmitter: inflateParticleEmitter
+  particleEmitter: inflateParticleEmitter,
+  ammoShape: inflateAmmoShape,
+  boxCollider: inflateBoxCollider,
+  trimesh: inflateTrimesh,
+  heightfield: inflateHeightField
 };
 
 function jsxInflatorExists(name: string): name is keyof JSXComponentData {
