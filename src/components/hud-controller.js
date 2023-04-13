@@ -76,8 +76,6 @@ AFRAME.registerComponent("hud-controller", {
       hud.rotation.x = 0;
       hud.rotation.z = 0;
     }
-    const hubId = getCurrentHubId();
-
     hud.visible =
       (!hudOutOfView || forceHudVisible) &&
       this.el.sceneEl.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_FIRST_PERSON &&
