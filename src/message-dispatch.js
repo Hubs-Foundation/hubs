@@ -10,6 +10,8 @@ import { LogMessageType } from "./react-components/room/ChatSidebar";
 import { createNetworkedEntity } from "./utils/create-networked-entity";
 import qsTruthy from "./utils/qs_truthy";
 import { add, testAsset, respawn } from "./utils/chat-commands";
+import { downloadSavedEntityStates } from "./utils/entity-state-utils";
+
 
 let uiRoot;
 // Handles user-entered messages
@@ -25,7 +27,8 @@ export default class MessageDispatch extends EventTarget {
   }
 
   addToPresenceLog(entry) {
-    entry.key = Date.now().toString();
+    entry.key = Date.now().to
+    String();
 
     const lastEntry = this.presenceLogEntries.length > 0 && this.presenceLogEntries[this.presenceLogEntries.length - 1];
     if (lastEntry && entry.type === "permission" && lastEntry.type === "permission") {
@@ -252,8 +255,13 @@ export default class MessageDispatch extends EventTarget {
         break;
       case "test":
         {
-          const avatarPov = document.querySelector("#avatar-pov-node").object3D;
+          const avatarPov =  document.querySelector("#avatar-pov-node").object3D;
           testAsset(APP.world, avatarPov, args);
+        }
+        break;
+      case "download":
+        {
+          downloadSavedEntityStates(this.hubChannel);
         }
         break;
     }
