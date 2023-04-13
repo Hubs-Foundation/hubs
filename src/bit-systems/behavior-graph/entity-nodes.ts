@@ -285,7 +285,7 @@ export const EntityNodes = definitionListToMap([
     }
   }),
   makeInNOutFunctionDesc({
-    name: "hubs/entity/components/custom-tags/hasTag",
+    name: "hubs/entity/components/custom_tags/hasTag",
     label: "CustomTags: Has Tag?",
     category: "Components" as any,
     in: [{ entity: "entity" }, { tag: "string" }],
@@ -295,7 +295,7 @@ export const EntityNodes = definitionListToMap([
     }
   }),
   makeFlowNodeDefinition({
-    typeName: "hubs/entity/components/custom-tags/addTag",
+    typeName: "hubs/entity/components/custom_tags/addTag",
     category: "Components" as any,
     label: "CustomTags: Add Tag",
     in: {
@@ -321,7 +321,7 @@ export const EntityNodes = definitionListToMap([
     }
   }),
   makeFlowNodeDefinition({
-    typeName: "hubs/entity/components/custom-tags/removeTag",
+    typeName: "hubs/entity/components/custom_tags/removeTag",
     category: "Components" as any,
     label: "CustomTags: Remove Tag",
     in: {
