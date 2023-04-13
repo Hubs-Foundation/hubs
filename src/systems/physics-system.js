@@ -2,6 +2,8 @@ import { AmmoWorker, WorkerHelpers, CONSTANTS } from "three-ammo";
 import { AmmoDebugConstants, DefaultBufferSize } from "ammo-debug-drawer";
 import configs from "../utils/configs";
 import ammoWasmUrl from "ammo.js/builds/ammo.wasm.wasm";
+import { Rigidbody } from "../bit-components";
+import { updateRigiBodyParams } from "../inflators/rigid-body";
 
 const MESSAGE_TYPES = CONSTANTS.MESSAGE_TYPES,
   TYPE = CONSTANTS.TYPE,
@@ -241,6 +243,12 @@ export class PhysicsSystem {
     return bodyId;
   }
 
+  updateRigidBody(eid, options) {
+    const bodyId = Rigidbody.bodyId[eid];
+    updateRigiBodyParams(eid, options);
+    this.updateBody(bodyId, options);
+  }
+
   updateBody(uuid, options) {
     if (this.bodyUuidToData.has(uuid)) {
       this.bodyUuidToData.get(uuid).options = options;
@@ -248,6 +256,12 @@ export class PhysicsSystem {
     } else {
       console.warn(`updateBody called for uuid: ${uuid} but body missing.`);
     }
+  }
+
+  updateRigidBodyOptions(eid, options) {
+    const bodyId = Rigidbody.bodyId[eid];
+    updateRigiBodyParams(eid, options);
+    this.updateBodyOptions(bodyId, options);
   }
 
   // TODO inline updateBody

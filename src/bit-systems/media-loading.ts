@@ -1,12 +1,13 @@
 import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
 import { Vector3 } from "three";
 import { HubsWorld } from "../app";
-import { GLTFModel, MediaLoaded, MediaLoader, Networked, ObjectMenuTarget } from "../bit-components";
+import { GLTFModel, MediaLoaded, MediaLoader, Networked, ObjectMenuTarget, PhysicsShape } from "../bit-components";
 import { inflatePhysicsShape, Shape } from "../inflators/physics-shape";
 import { ErrorObject } from "../prefabs/error-object";
 import { LoadingObject } from "../prefabs/loading-object";
 import { animate } from "../utils/animate";
 import { setNetworkedDataWithoutRoot } from "../utils/assign-network-ids";
+import { computeObjectAABB } from "../utils/auto-box-collider";
 import { crClearTimeout, crNextFrame, crTimeout } from "../utils/coroutine";
 import { ClearFunction, JobRunner, withRollback } from "../utils/coroutine-utils";
 import { easeOutQuadratic } from "../utils/easing";
@@ -18,6 +19,39 @@ import { loadVideo } from "../utils/load-video";
 import { loadAudio } from "../utils/load-audio";
 import { MediaType, mediaTypeName, resolveMediaInfo } from "../utils/media-utils";
 import { EntityID } from "../utils/networking-types";
+
+export const MediaContentBounds = (MediaLoaded as any).contentBounds as Map<EntityID, Vector3>;
+
+const getBox = (() => {
+  const rotation = new THREE.Euler();
+  return (world: HubsWorld, eid: EntityID, rootEid: EntityID, worldSpace?: boolean) => {
+    const box = new THREE.Box3();
+    const obj = world.eid2obj.get(eid)!;
+    const rootObj = world.eid2obj.get(rootEid)!;
+
+    rotation.copy(obj.rotation);
+    obj.rotation.set(0, 0, 0);
+    obj.updateMatrices(true, true);
+    rootObj.updateMatrices(true, true);
+    rootObj.updateMatrixWorld(true);
+
+    computeObjectAABB(rootObj, box, false);
+
+    if (!box.isEmpty()) {
+      if (!worldSpace) {
+        obj.worldToLocal(box.min);
+        obj.worldToLocal(box.max);
+      }
+      obj.rotation.copy(rotation);
+      obj.matrixNeedsUpdate = true;
+    }
+
+    rootObj.matrixWorldNeedsUpdate = true;
+    rootObj.updateMatrices();
+
+    return box;
+  };
+})();
 
 export function* waitForMediaLoaded(world: HubsWorld, eid: EntityID) {
   while (hasComponent(world, MediaLoader, eid)) {
@@ -176,8 +210,11 @@ function* loadAndAnimateMedia(world: HubsWorld, eid: EntityID, clearRollbacks: C
   removeComponent(world, MediaLoader, eid);
 
   if (media) {
+    const box = getBox(world, eid, media);
+    MediaContentBounds.set(media, box.getSize(new Vector3()));
     // TODO update scale?
-    inflatePhysicsShape(world, media, {
+    removeComponent(world, PhysicsShape, eid);
+    inflatePhysicsShape(world, eid, {
       type: hasComponent(world, GLTFModel, media) ? Shape.HULL : Shape.BOX,
       minHalfExtent: 0.04
     });
@@ -188,6 +225,8 @@ const jobs = new JobRunner();
 const mediaLoaderQuery = defineQuery([MediaLoader]);
 const mediaLoaderEnterQuery = enterQuery(mediaLoaderQuery);
 const mediaLoaderExitQuery = exitQuery(mediaLoaderQuery);
+const mediaLoadedQuery = defineQuery([MediaLoaded]);
+const mediaLoadedExitQuery = exitQuery(mediaLoadedQuery);
 export function mediaLoadingSystem(world: HubsWorld) {
   mediaLoaderEnterQuery(world).forEach(function (eid) {
     jobs.add(eid, clearRollbacks => loadAndAnimateMedia(world, eid, clearRollbacks));
@@ -196,6 +235,8 @@ export function mediaLoadingSystem(world: HubsWorld) {
   mediaLoaderExitQuery(world).forEach(function (eid) {
     jobs.stop(eid);
   });
+
+  mediaLoadedExitQuery(world).forEach(eid => MediaContentBounds.delete(eid));
 
   jobs.tick();
 }
