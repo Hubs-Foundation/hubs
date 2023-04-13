@@ -8,13 +8,12 @@ import {
   isCreatedByMe,
   isNetworkInstantiated,
   localClientID,
+  millisecondsBetweenTicks,
   networkedQuery,
   pendingJoins,
   softRemovedEntities
 } from "./networking";
 
-const ticksPerSecond = 12;
-const millisecondsBetweenTicks = 1000 / ticksPerSecond;
 let nextTick = 0;
 
 const ownedNetworkedQuery = defineQuery([Owned, Networked]);
