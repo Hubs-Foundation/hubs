@@ -159,7 +159,7 @@ export function behaviorGraphSystem(world: HubsWorld) {
   });
 
   interactedQuery(world).forEach(function (eid) {
-    entityEvents.get(eid)!.emitters.onInteract.emit(eid);
+    entityEvents.get(eid)?.emitters.onInteract.emit(eid);
   });
 
   // TODO allocations
