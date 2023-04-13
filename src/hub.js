@@ -2,7 +2,8 @@ import {
   getCurrentHubId,
   updateVRHudPresenceCount,
   updateSceneCopresentState,
-  createHubChannelParams
+  createHubChannelParams,
+  isLockedDownDemoRoom
 } from "./utils/hub-utils";
 import "./utils/debug-log";
 import configs from "./utils/configs";
@@ -764,7 +765,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // If the stored avatar doesn't have a valid src, reset to a legacy avatar.
   const avatarSrc = await getAvatarSrc(store.state.profile.avatarId);
-  if (!avatarSrc || configs.feature("is_locked_down_demo_room") === hubId) {
+  if (!avatarSrc || isLockedDownDemoRoom(hubId)) {
     await store.resetToRandomDefaultAvatar();
   }
 

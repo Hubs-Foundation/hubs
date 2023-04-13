@@ -9,7 +9,10 @@ import { FormattedMessage } from "react-intl";
 
 export function ContentMenuButton({ active, disabled, children, ...props }) {
   return (
-    <button className={className(styles.contentMenuButton, { [styles.active]: active, [styles.disabled]: disabled })} {...props}>
+    <button
+      className={className(styles.contentMenuButton, { [styles.active]: active, [styles.disabled]: disabled })}
+      {...props}
+    >
       {children}
     </button>
   );
@@ -17,7 +20,8 @@ export function ContentMenuButton({ active, disabled, children, ...props }) {
 
 ContentMenuButton.propTypes = {
   children: PropTypes.node,
-  active: PropTypes.bool
+  active: PropTypes.bool,
+  disabled: PropTypes.bool
 };
 
 export function ECSDebugMenuButton(props) {

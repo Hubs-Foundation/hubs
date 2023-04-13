@@ -1,7 +1,6 @@
 import { paths } from "./userinput/paths";
 import { SOURCES } from "../storage/media-search-store";
-import configs from "../utils/configs";
-import { getCurrentHubId } from "../utils/hub-utils";
+import { isLockedDownDemoRoom } from "../utils/hub-utils";
 
 const MEDIA_SEARCH_PATHS = [
   paths.actions.mediaSearch1,
@@ -18,7 +17,6 @@ const MEDIA_SEARCH_PATHS = [
 AFRAME.registerSystem("ui-hotkeys", {
   init() {
     this.mediaSearchStore = window.APP.mediaSearchStore;
-    this.hubId = getCurrentHubId();
   },
 
   tick: function () {
@@ -26,11 +24,11 @@ AFRAME.registerSystem("ui-hotkeys", {
       this.userinput = this.el.systems.userinput;
     }
 
-    if (this.userinput.get(paths.actions.focusChat) && configs.feature("is_locked_down_demo_room") !== this.hubId) {
+    if (this.userinput.get(paths.actions.focusChat) && isLockedDownDemoRoom()) {
       window.dispatchEvent(new CustomEvent("focus_chat", { detail: { prefix: "" } }));
     }
 
-    if (this.userinput.get(paths.actions.focusChatCommand) && configs.feature("is_locked_down_demo_room") !== this.hubId) {
+    if (this.userinput.get(paths.actions.focusChatCommand) && isLockedDownDemoRoom()) {
       window.dispatchEvent(new CustomEvent("focus_chat", { detail: { prefix: "/" } }));
     }
 

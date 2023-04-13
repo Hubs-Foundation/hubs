@@ -22,8 +22,7 @@ import {
   setMaxResolution
 } from "../utils/screen-orientation-utils";
 import { AAModes } from "../constants";
-import configs from "../utils/configs";
-import { getCurrentHubId } from "../utils/hub-utils";
+import { isLockedDownDemoRoom } from "../utils/hub-utils";
 
 import dropdownArrowUrl from "../assets/images/dropdown_arrow.png";
 import dropdownArrow2xUrl from "../assets/images/dropdown_arrow@2x.png";
@@ -1212,7 +1211,7 @@ class PreferencesScreen extends Component {
             prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
             options: availableThemes
           },
-          ...(configs.feature("is_locked_down_demo_room") !== getCurrentHubId()
+          ...(isLockedDownDemoRoom()
             ? [
                 {
                   key: "nametagVisibility",
@@ -1257,7 +1256,7 @@ class PreferencesScreen extends Component {
                 }
               ]
             : []),
-          ...(configs.feature("is_locked_down_demo_room") !== getCurrentHubId()
+          ...(isLockedDownDemoRoom()
             ? [
                 {
                   key: "nametagVisibilityDistance",

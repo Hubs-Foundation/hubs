@@ -6,6 +6,7 @@ import { FormattedMessage } from "react-intl";
 import screenfull from "screenfull";
 
 import configs from "../utils/configs";
+import { isLockedDownDemoRoom } from "../utils/hub-utils";
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
 import { canShare } from "../utils/share";
 import styles from "../assets/stylesheets/ui-root.scss";
@@ -817,8 +818,7 @@ class UIRoot extends Component {
 
   renderEntryStartPanel = () => {
     const { hasAcceptedProfile, hasChangedName } = this.props.store.state.activity;
-    //const isLockedDownDemo = configs.feature("is_locked_down_demo_room") === this.props.hub.hub_id;
-    const isLockedDownDemo = true;
+    const isLockedDownDemo = isLockedDownDemoRoom(this.props.hub.hub_id);
     const promptForNameAndAvatarBeforeEntry = this.props.hubIsBound
       ? !hasAcceptedProfile && !isLockedDownDemo
       : !hasChangedName && !isLockedDownDemo;
@@ -1103,7 +1103,7 @@ class UIRoot extends Component {
 
     const streaming = this.state.isStreaming;
 
-    const isLockedDownDemo = configs.feature('is_locked_down_demo_room') === this.props.hub.hub_id;
+    const isLockedDownDemo = isLockedDownDemoRoom(this.props.hub.hub_id);
 
     const showObjectList = enteredOrWatching && !isLockedDownDemo;
     const showECSObjectsMenuButton = qsTruthy("ecsDebug");

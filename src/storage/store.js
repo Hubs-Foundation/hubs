@@ -4,8 +4,7 @@ import Cookies from "js-cookie";
 import jwtDecode from "jwt-decode";
 import { qsGet } from "../utils/qs_truthy.js";
 import detectMobile, { isAndroid, isMobileVR } from "../utils/is-mobile";
-import configs from "../utils/configs";
-import { getCurrentHubId } from "../utils/hub-utils";
+import { isLockedDownDemoRoom } from "../utils/hub-utils";
 
 const LOCAL_STORE_KEY = "___hubs_store";
 const STORE_STATE_CACHE_KEY = Symbol();
@@ -320,7 +319,7 @@ export default class Store extends EventTarget {
     }
 
     // Regenerate name to encourage users to change it.
-    if (!this.state.activity.hasChangedName || configs.feature("is_locked_down_demo_room") === getCurrentHubId()) {
+    if (!this.state.activity.hasChangedName || isLockedDownDemoRoom()) {
       this.update({ profile: { displayName: generateRandomName() } });
     }
   };
@@ -406,10 +405,15 @@ export default class Store extends EventTarget {
     // Check if in demo room before changing avatar. This feature is meant to prevent any avatarID changes triggered from an avatar.js panel ONLY. "Change Name & Avatar" button in More Menu is disabled at a UI level.
     // Waiting for scene to load allows for avatarID to be set from default on scene load.
     // TODO: Will need update with switch to bitECS loader
-    if (newState.profile !== undefined && newState.profile.avatarId !== undefined && configs.feature("is_locked_down_demo_room") === getCurrentHubId() && AFRAME !== undefined && AFRAME.scenes[0].is("loaded")) {
-      console.log('cannot change avatar in demo room');
+    if (
+      newState.profile !== undefined &&
+      newState.profile.avatarId !== undefined &&
+      isLockedDownDemoRoom() &&
+      AFRAME !== undefined &&
+      AFRAME.scenes[0].is("loaded")
+    ) {
       return;
-    };
+    }
 
     const finalState = merge({ ...this.state, preferences: this._preferences }, newState, mergeOpts);
     const { valid, errors } = validator.validate(finalState, SCHEMA);

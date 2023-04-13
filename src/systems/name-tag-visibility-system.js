@@ -1,6 +1,5 @@
 import { waitForDOMContentLoaded } from "../utils/async-utils";
-import configs from "../utils/configs";
-import { getCurrentHubId } from "../utils/hub-utils";
+import { isLockedDownDemoRoom } from "../utils/hub-utils";
 
 export class NameTagVisibilitySystem {
   constructor(sceneEl) {
@@ -10,8 +9,7 @@ export class NameTagVisibilitySystem {
     this.lastUpdateTime = Date.now();
     this.tick = this.tick.bind(this);
     this.onStateChanged = this.onStateChanged.bind(this);
-    this.hubId = getCurrentHubId();
-    this.nametagVisibility = configs.feature("is_locked_down_demo_room") === this.hubId ? "showNone" : this.store.state.preferences.nametagVisibility;
+    this.nametagVisibility = isLockedDownDemoRoom() ? "showNone" : this.store.state.preferences.nametagVisibility;
     this.nametagVisibilityDistance = Math.pow(this.store.state.preferences.nametagVisibilityDistance, 2);
     waitForDOMContentLoaded().then(() => {
       this.avatarRig = document.getElementById("avatar-rig").object3D;
@@ -65,6 +63,6 @@ export class NameTagVisibilitySystem {
 
   onStateChanged() {
     this.nametagVisibilityDistance = Math.pow(this.store.state.preferences.nametagVisibilityDistance, 2);
-    this.nametagVisibility = configs.feature("is_locked_down_demo_room") === this.hubId ? "showNone" : this.store.state.preferences.nametagVisibility;
+    this.nametagVisibility = isLockedDownDemoRoom() ? "showNone" : this.store.state.preferences.nametagVisibility;
   }
 }
