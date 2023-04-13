@@ -2,6 +2,7 @@ import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeC
 import { Vector3 } from "three";
 import { HubsWorld } from "../app";
 import { GLTFModel, MediaLoaded, MediaLoader, Networked, ObjectMenuTarget } from "../bit-components";
+import { inflatePhysicsShape, Shape } from "../inflators/physics-shape";
 import { ErrorObject } from "../prefabs/error-object";
 import { LoadingObject } from "../prefabs/loading-object";
 import { animate } from "../utils/animate";
@@ -31,15 +32,14 @@ const loaderForMediaType = {
   ) => loadImage(world, accessibleUrl, contentType),
   [MediaType.VIDEO]: (
     world: HubsWorld,
-	{ accessibleUrl, contentType }: { accessibleUrl: string, contentType: string }
+    { accessibleUrl, contentType }: { accessibleUrl: string; contentType: string }
   ) => loadVideo(world, accessibleUrl, contentType),
   [MediaType.MODEL]: (
     world: HubsWorld,
     { accessibleUrl, contentType }: { accessibleUrl: string; contentType: string }
   ) => loadModel(world, accessibleUrl, contentType, true),
   [MediaType.PDF]: (world: HubsWorld, { accessibleUrl }: { accessibleUrl: string }) => loadPDF(world, accessibleUrl),
-  [MediaType.AUDIO]: (world: HubsWorld, { accessibleUrl }: { accessibleUrl: string }) =>
-    loadAudio(world, accessibleUrl),
+  [MediaType.AUDIO]: (world: HubsWorld, { accessibleUrl }: { accessibleUrl: string }) => loadAudio(world, accessibleUrl)
 };
 
 export const MEDIA_LOADER_FLAGS = {
@@ -174,6 +174,14 @@ function* loadAndAnimateMedia(world: HubsWorld, eid: EntityID, clearRollbacks: C
     yield* animateScale(world, media);
   }
   removeComponent(world, MediaLoader, eid);
+
+  if (media) {
+    // TODO update scale?
+    inflatePhysicsShape(world, media, {
+      type: hasComponent(world, GLTFModel, media) ? Shape.HULL : Shape.BOX,
+      minHalfExtent: 0.04
+    });
+  }
 }
 
 const jobs = new JobRunner();
