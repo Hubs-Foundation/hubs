@@ -98,6 +98,7 @@ import { inflateTrimesh } from "../inflators/trimesh";
 import { HeightFieldParams, inflateHeightField } from "../inflators/heightfield";
 import { inflateAudioSettings } from "../inflators/audio-settings";
 import { HubsVideoTexture } from "../textures/HubsVideoTexture";
+import { CustomTagParams, inflateCustomTags } from "../inflators/custom-tags";
 
 preload(
   new Promise(resolve => {
@@ -383,6 +384,7 @@ export interface GLTFComponentData extends ComponentData {
   rigidbody?: OptionalParams<RigidBodyParams>;
   // TODO GLTFPhysicsShapeParams
   physicsShape?: AmmoShapeParams;
+  customTags?: CustomTagParams;
 
   // deprecated
   spawnPoint?: true;
@@ -510,7 +512,10 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
   trimesh: inflateTrimesh,
   heightfield: inflateHeightField,
   audioSettings: inflateAudioSettings,
-  interactable: createDefaultInflator(SingleActionButton)
+  interactable: createDefaultInflator(SingleActionButton),
+  rigidbody: inflateRigidBody,
+  physicsShape: inflateAmmoShape,
+  customTags: inflateCustomTags
 };
 
 function jsxInflatorExists(name: string): name is keyof JSXComponentData {

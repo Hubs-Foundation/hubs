@@ -72,7 +72,7 @@ function MaterialItem(props) {
 
 export function formatComponentProps(eid, component) {
   const formatted = Object.keys(component).reduce((str, k, i, arr) => {
-    const val = component[k][eid];
+    const val = component[k] instanceof Map ? component[k].get(eid) : component[k][eid];
     const isStr = component[k][bitComponents.$isStringType];
     str += `  ${k}: `;
     if (ArrayBuffer.isView(val)) {
