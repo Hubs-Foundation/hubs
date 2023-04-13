@@ -183,7 +183,7 @@ AFRAME.GLTFModelPlus.registerComponent("media", "media", (el, componentName, com
   }
 });
 
-async function mediaInflator(el, componentName, componentData, components) {
+async function mediaInflator(el, componentName, componentData, components, fitToBox = true) {
   let isControlled = true;
 
   if (componentName === "link" && (components.video || components.image)) {
@@ -266,7 +266,7 @@ async function mediaInflator(el, componentName, componentData, components) {
 
   el.setAttribute("media-loader", {
     src: sanitizeUrl(src),
-    fitToBox: true,
+    fitToBox,
     resolve: true,
     fileIsOwned: true,
     animate: false,
@@ -275,23 +275,26 @@ async function mediaInflator(el, componentName, componentData, components) {
   });
 }
 
-AFRAME.GLTFModelPlus.registerComponent("model", "model", mediaInflator);
-AFRAME.GLTFModelPlus.registerComponent("image", "image", mediaInflator);
-AFRAME.GLTFModelPlus.registerComponent("audio", "audio", mediaInflator, (name, property, value) => {
+const mediaInflatorNoResize = (el, componentName, componentData, components) =>
+  mediaInflator(el, componentName, componentData, components, false);
+
+AFRAME.GLTFModelPlus.registerComponent("model", "model", mediaInflatorNoResize);
+AFRAME.GLTFModelPlus.registerComponent("image", "image", mediaInflatorNoResize);
+AFRAME.GLTFModelPlus.registerComponent("audio", "audio", mediaInflatorNoResize, (name, property, value) => {
   if (property === "paused") {
     return { name: "video-pause-state", property, value };
   } else {
     return null;
   }
 });
-AFRAME.GLTFModelPlus.registerComponent("video", "video", mediaInflator, (name, property, value) => {
+AFRAME.GLTFModelPlus.registerComponent("video", "video", mediaInflatorNoResize, (name, property, value) => {
   if (property === "paused") {
     return { name: "video-pause-state", property, value };
   } else {
     return null;
   }
 });
-AFRAME.GLTFModelPlus.registerComponent("link", "link", mediaInflator);
+AFRAME.GLTFModelPlus.registerComponent("link", "link", mediaInflatorNoResize);
 
 AFRAME.GLTFModelPlus.registerComponent("hoverable", "is-remote-hover-target", el => {
   el.setAttribute("is-remote-hover-target", "");

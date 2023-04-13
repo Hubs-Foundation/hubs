@@ -50,6 +50,9 @@ export const GLTFModel = defineComponent();
 export const LightTag = defineComponent();
 export const AmbientLightTag = defineComponent();
 export const DirectionalLight = defineComponent();
+export const HemisphereLightTag = defineComponent();
+export const PointLightTag = defineComponent();
+export const SpotLightTag = defineComponent();
 export const CursorRaycastable = defineComponent();
 export const RemoteHoverTarget = defineComponent();
 export const NotRemoteHoverTarget = defineComponent();
@@ -90,12 +93,36 @@ export const PreventAudioBoost = defineComponent();
 export const IgnoreSpaceBubble = defineComponent();
 export const Rigidbody = defineComponent({
   bodyId: Types.ui16,
-  collisionGroup: Types.ui32,
-  collisionMask: Types.ui32,
-  flags: Types.ui8,
-  gravity: Types.f32
+  mass: Types.f32,
+  gravity: [Types.f32, 3],
+  linearDamping: Types.f32,
+  angularDamping: Types.f32,
+  linearSleepingThreshold: Types.f32,
+  angularSleepingThreshold: Types.f32,
+  angularFactor: [Types.f32, 3],
+  type: Types.ui8,
+  activationState: Types.ui8,
+  collisionFilterGroup: Types.ui32,
+  collisionFilterMask: Types.ui32,
+  flags: Types.ui8
 });
-export const PhysicsShape = defineComponent({ bodyId: Types.ui16, shapeId: Types.ui16, halfExtents: [Types.f32, 3] });
+export const PhysicsShape = defineComponent({
+  bodyId: Types.ui16,
+  shapeId: Types.ui16,
+  type: Types.ui8,
+  fit: Types.ui8,
+  halfExtents: [Types.f32, 3],
+  minHalfExtent: Types.f32,
+  maxHalfExtent: Types.f32,
+  sphereRadius: Types.f32,
+  cylinderAxis: Types.ui8,
+  margin: Types.f32,
+  offset: [Types.f32, 3],
+  orientation: [Types.f32, 4],
+  heightfieldData: [Types.f32],
+  heightfieldDistance: Types.f32,
+  flags: Types.ui8
+});
 export const Pinnable = defineComponent();
 export const Pinned = defineComponent();
 export const DestroyAtExtremeDistance = defineComponent();
@@ -194,6 +221,16 @@ export const ObjectMenu = defineComponent({
   targetRef: Types.eid
 });
 // TODO: Store this data elsewhere, since only one or two will ever exist.
+export const LinkHoverMenu = defineComponent({
+  targetObjectRef: Types.eid,
+  linkButtonRef: Types.eid
+});
+export const LinkHoverMenuItem = defineComponent();
+export const Link = defineComponent({
+  url: Types.ui32
+});
+Link.url[$isStringType] = true;
+// TODO: Store this data elsewhere, since only one or two will ever exist.
 export const PDFMenu = defineComponent({
   prevButtonRef: Types.eid,
   nextButtonRef: Types.eid,
@@ -253,3 +290,7 @@ export const AudioSource = defineComponent({
   flags: Types.ui8
 });
 export const AudioParams = defineComponent();
+export const ScenePreviewCamera = defineComponent({
+  duration: Types.f32,
+  positionOnly: Types.ui8
+});

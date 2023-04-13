@@ -4,6 +4,8 @@ import {
   $isStringType,
   CameraTool,
   ObjectMenu,
+  LinkHoverMenu,
+  LinkHoverMenuItem,
   PDFMenu,
   CursorRaycastable,
   DestroyAtExtremeDistance,
@@ -19,9 +21,7 @@ import {
   Object3DTag,
   OffersHandConstraint,
   OffersRemoteConstraint,
-  PhysicsShape,
   RemoteHoverTarget,
-  Rigidbody,
   SingleActionButton,
   TextButton,
   NetworkedVideo,
@@ -45,10 +45,12 @@ import { inflateMediaFrame } from "../inflators/media-frame";
 import { GrabbableParams, inflateGrabbable } from "../inflators/grabbable";
 import { inflateImage } from "../inflators/image";
 import { inflateVideo } from "../inflators/video";
+import { inflateModel, ModelParams } from "../inflators/model";
 import { inflatePDFLoader, PDFLoaderParams } from "../inflators/pdf-loader";
 import { inflateVideoLoader, VideoLoaderParams } from "../inflators/video-loader";
 import { inflateImageLoader, ImageLoaderParams } from "../inflators/image-loader";
-import { inflateModel, ModelParams } from "../inflators/model";
+import { inflateModelLoader, ModelLoaderParams } from "../inflators/model-loader";
+import { inflateLink, LinkParams } from "../inflators/link";
 import { inflateSlice9 } from "../inflators/slice9";
 import { TextParams, inflateText } from "../inflators/text";
 import {
@@ -68,6 +70,9 @@ import { MediaLoaderParams } from "../inflators/media-loader";
 import { preload } from "./preload";
 import { DirectionalLightParams, inflateDirectionalLight } from "../inflators/directional-light";
 import { AmbientLightParams, inflateAmbientLight } from "../inflators/ambient-light";
+import { HemisphereLightParams, inflateHemisphereLight } from "../inflators/hemisphere-light";
+import { PointLightParams, inflatePointLight } from "../inflators/point-light";
+import { SpotLightParams, inflateSpotLight } from "../inflators/spot-light";
 import { ProjectionMode } from "./projection-mode";
 import { inflateSkybox, SkyboxParams } from "../inflators/skybox";
 import { inflateSpawner, SpawnerParams } from "../inflators/spawner";
@@ -82,6 +87,12 @@ import { AudioSettings } from "../components/audio-params";
 import { inflateAudioParams } from "../inflators/audio-params";
 import { AudioSourceParams, inflateAudioSource } from "../inflators/audio-source";
 import { AudioTargetParams, inflateAudioTarget } from "../inflators/audio-target";
+import { PhysicsShapeParams, inflatePhysicsShape } from "../inflators/physics-shape";
+import { inflateRigidBody, RigiBodyParams } from "../inflators/rigid-body";
+import { AmmoShapeParams, inflateAmmoShape } from "../inflators/ammo-shape";
+import { BoxColliderParams, inflateBoxCollider } from "../inflators/box-collider";
+import { inflateTrimesh } from "../inflators/trimesh";
+import { HeightFieldParams, inflateHeightField } from "../inflators/heightfield";
 
 preload(
   new Promise(resolve => {
@@ -232,12 +243,18 @@ interface InflatorFn {
 export interface ComponentData {
   ambientLight?: AmbientLightParams;
   directionalLight?: DirectionalLightParams;
+  hemisphereLight?: HemisphereLightParams;
+  pointLight?: PointLightParams;
+  spotLight?: SpotLightParams;
   grabbable?: GrabbableParams;
   billboard?: { onlyY: boolean };
+  link?: LinkParams;
   mirror?: MirrorParams;
   audioZone?: AudioZoneParams;
   audioParams?: AudioSettings;
 }
+
+type OptionalParams<T> = Partial<T> | true;
 
 export interface JSXComponentData extends ComponentData {
   slice9?: {
@@ -284,8 +301,8 @@ export interface JSXComponentData extends ComponentData {
   networked?: any;
   textButton?: any;
   hoverButton?: any;
-  rigidbody?: any;
-  physicsShape?: any;
+  rigidbody?: OptionalParams<RigiBodyParams>;
+  physicsShape?: OptionalParams<PhysicsShapeParams>;
   floatyObject?: any;
   networkedFloatyObject?: any;
   networkedTransform?: any;
@@ -305,6 +322,10 @@ export interface JSXComponentData extends ComponentData {
     mirrorButtonRef: Ref;
     scaleButtonRef: Ref;
   };
+  linkHoverMenu?: {
+    linkButtonRef: Ref;
+  };
+  linkHoverMenuItem?: boolean;
   pdfMenu?: {
     prevButtonRef: Ref;
     nextButtonRef: Ref;
@@ -339,8 +360,10 @@ export interface JSXComponentData extends ComponentData {
 
 export interface GLTFComponentData extends ComponentData {
   pdf?: PDFLoaderParams;
+  audio?: VideoLoaderParams;
   video?: VideoLoaderParams;
   image?: ImageLoaderParams;
+  model?: ModelLoaderParams;
   environmentSettings?: EnvironmentSettingsParams;
   reflectionProbe?: ReflectionProbeParams;
   navMesh?: true;
@@ -359,6 +382,10 @@ export interface GLTFComponentData extends ComponentData {
   background: BackgroundParams;
   simpleWater?: SimpleWaterParams;
   particleEmitter?: ParticleEmitterParams;
+  ammoShape?: AmmoShapeParams;
+  boxCollider?: BoxColliderParams;
+  trimesh?: true;
+  heightfield?: HeightFieldParams;
 }
 
 declare global {
@@ -379,10 +406,14 @@ declare global {
 export const commonInflators: Required<{ [K in keyof ComponentData]: InflatorFn }> = {
   grabbable: inflateGrabbable,
   billboard: createDefaultInflator(Billboard),
+  link: inflateLink,
 
   // inflators that create Object3Ds
   ambientLight: inflateAmbientLight,
   directionalLight: inflateDirectionalLight,
+  hemisphereLight: inflateHemisphereLight,
+  pointLight: inflatePointLight,
+  spotLight: inflateSpotLight,
   mirror: inflateMirror,
   audioZone: inflateAudioZone,
   audioParams: inflateAudioParams
@@ -402,8 +433,8 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   hoverButton: createDefaultInflator(HoverButton),
   holdable: createDefaultInflator(Holdable),
   deletable: createDefaultInflator(Deletable),
-  rigidbody: createDefaultInflator(Rigidbody),
-  physicsShape: createDefaultInflator(PhysicsShape),
+  rigidbody: inflateRigidBody,
+  physicsShape: inflatePhysicsShape,
   floatyObject: createDefaultInflator(FloatyObject),
   networkedFloatyObject: createDefaultInflator(NetworkedFloatyObject),
   makeKinematicOnRelease: createDefaultInflator(MakeKinematicOnRelease),
@@ -411,6 +442,8 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   networkedTransform: createDefaultInflator(NetworkedTransform),
   networked: createDefaultInflator(Networked),
   objectMenu: createDefaultInflator(ObjectMenu),
+  linkHoverMenu: createDefaultInflator(LinkHoverMenu),
+  linkHoverMenuItem: createDefaultInflator(LinkHoverMenuItem),
   pdfMenu: createDefaultInflator(PDFMenu),
   cameraTool: createDefaultInflator(CameraTool, { captureDurIdx: 1 }),
   animationMixer: createDefaultInflator(AnimationMixer),
@@ -437,8 +470,14 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
 export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorFn }> = {
   ...commonInflators,
   pdf: inflatePDFLoader,
+  // Temporarily reuse video loader for audio because of
+  // their processings are similar.
+  // TODO: Write separated audio loader properly because
+  //       their processings are not perfectly indentical.
+  audio: inflateVideoLoader,
   video: inflateVideoLoader,
   image: inflateImageLoader,
+  model: inflateModelLoader,
   reflectionProbe: inflateReflectionProbe,
   navMesh: createDefaultInflator(NavMesh),
   waypoint: inflateWaypoint,
@@ -455,6 +494,10 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
   particleEmitter: inflateParticleEmitter,
   zoneAudioSource: inflateAudioSource,
   audioTarget: inflateAudioTarget
+  ammoShape: inflateAmmoShape,
+  boxCollider: inflateBoxCollider,
+  trimesh: inflateTrimesh,
+  heightfield: inflateHeightField
 };
 
 function jsxInflatorExists(name: string): name is keyof JSXComponentData {

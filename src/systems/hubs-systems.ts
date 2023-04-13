@@ -53,6 +53,7 @@ import { destroyAtExtremeDistanceSystem } from "./bit-destroy-at-extreme-distanc
 import { videoMenuSystem } from "../bit-systems/video-menu-system";
 import { objectMenuSystem } from "../bit-systems/object-menu";
 import { pdfMenuSystem } from "../bit-systems/pdf-menu-system";
+import { linkHoverMenuSystem } from "../bit-systems/link-hover-menu";
 import { deleteEntitySystem } from "../bit-systems/delete-entity-system";
 import type { HubsSystems } from "aframe";
 import { Camera, Scene, WebGLRenderer } from "three";
@@ -73,6 +74,7 @@ import { audioZoneSystem } from "../bit-systems/audio-zone-system";
 import { audioDebugSystem } from "../bit-systems/audio-debug-system";
 import { textSystem } from "../bit-systems/text";
 import { audioTargetSystem } from "../bit-systems/audio-target-system";
+import { scenePreviewCameraSystem } from "../bit-systems/scene-preview-camera-system";
 
 declare global {
   interface Window {
@@ -183,7 +185,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   sceneLoadingSystem(world, hubsSystems.environmentSystem, hubsSystems.characterController);
   mediaLoadingSystem(world);
 
-  physicsCompatSystem(world);
+  physicsCompatSystem(world, hubsSystems.physicsSystem);
 
   networkedTransformSystem(world);
 
@@ -230,6 +232,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   );
   hubsSystems.soundEffectsSystem.tick();
   hubsSystems.scenePreviewCameraSystem.tick();
+  scenePreviewCameraSystem(world, hubsSystems.cameraSystem);
   hubsSystems.physicsSystem.tick(dt);
   hubsSystems.inspectYourselfSystem.tick(hubsSystems.el, aframeSystems.userinput, hubsSystems.cameraSystem);
   hubsSystems.cameraSystem.tick(hubsSystems.el, dt);
@@ -244,6 +247,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   videoMenuSystem(world, aframeSystems.userinput);
   videoSystem(world, hubsSystems.audioSystem);
   pdfMenuSystem(world, sceneEl.is("frozen"));
+  linkHoverMenuSystem(world);
   pdfSystem(world);
   mediaFramesSystem(world);
   hubsSystems.audioZonesSystem.tick(hubsSystems.el);

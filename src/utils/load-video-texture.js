@@ -1,24 +1,56 @@
-import { createVideoOrAudioEl } from "../utils/media-utils";
-export async function loadVideoTexture(src) {
+import { LinearFilter, VideoTexture, sRGBEncoding } from "three";
+import HLS from "hls.js";
+import { DashVideoTexture } from "../textures/DashVideoTexture";
+import { HLSVideoTexture } from "../textures/HLSVideoTexture";
+import { createDashPlayer, createHLSPlayer, createVideoOrAudioEl } from "./media-utils";
+
+export async function loadVideoTexture(src, contentType) {
   const videoEl = createVideoOrAudioEl("video");
-  const texture = new THREE.VideoTexture(videoEl);
-  texture.minFilter = THREE.LinearFilter;
-  texture.encoding = THREE.sRGBEncoding;
+  let texture = null;
 
   const isReady = () => {
+    // HLS audio only special path. TODO: Revisit later for properer handling.
+    if (texture.isHLSVideoTexture === true) {
+      if (texture.player.streamController.audioOnly === true) {
+        texture.image.videoWidth = 1;
+        texture.image.videoHeight = 1;
+        return true;
+      }
+    }
+
     return (texture.image.videoHeight || texture.image.height) && (texture.image.videoWidth || texture.image.width);
   };
 
   return new Promise((resolve, reject) => {
     let pollTimeout;
+
     const failLoad = function (e) {
       videoEl.onerror = null;
       clearTimeout(pollTimeout);
       reject(e);
     };
 
-    videoEl.src = src;
-    videoEl.onerror = failLoad;
+    if (contentType.startsWith("application/dash")) {
+      texture = new DashVideoTexture(videoEl);
+      texture.player = createDashPlayer(src, videoEl, failLoad);
+      // TODO: Remove the dependency with AFRAME
+    } else if (AFRAME.utils.material.isHLS(src, contentType)) {
+      texture = new HLSVideoTexture(videoEl);
+      if (HLS.isSupported()) {
+        texture.player = createHLSPlayer(src, videoEl, failLoad);
+      } else if (!videoEl.canPlayType(contentType)) {
+        failLoad("HLS unsupported");
+      }
+    }
+
+    if (texture === null) {
+      texture = new VideoTexture(videoEl);
+      videoEl.src = src;
+      videoEl.onerror = failLoad;
+    }
+
+    texture.minFilter = LinearFilter;
+    texture.encoding = sRGBEncoding;
 
     // NOTE: We used to use the canplay event here to yield the texture, but that fails to fire on iOS Safari
     // and also sometimes in Chrome it seems.

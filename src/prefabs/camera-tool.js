@@ -4,6 +4,7 @@ import cameraModelSrc from "../assets/camera_tool.glb";
 import { Layers } from "../camera-layers";
 import { cloneModelFromCache, loadModel } from "../components/gltf-model-plus";
 import { COLLISION_LAYERS } from "../constants";
+import { Fit, Shape } from "../inflators/physics-shape";
 import { createElementEntity, createRef } from "../utils/jsx-entity";
 import { preload } from "../utils/preload";
 import { Button3D, BUTTON_TYPES } from "./button3D";
@@ -61,6 +62,7 @@ export function CameraPrefab() {
       offersHandConstraint
       makeKinematicOnRelease
       holdable
+      floatyObject
       rigidbody={{ collisionGroup: COLLISION_LAYERS.INTERACTABLES, collisionMask: COLLISION_LAYERS.HANDS }}
       physicsShape={{ halfExtents: [0.22, 0.14, 0.1] }}
       cameraTool={{
@@ -181,7 +183,7 @@ export function CubeMediaFramePrefab() {
           COLLISION_LAYERS.INTERACTABLES |
           COLLISION_LAYERS.AVATAR
       }}
-      physicsShape={{ halfExtents: [0.5, 0.5, 0.5] }}
+      physicsShape={{ fit: Fit.MANUAL, type: Shape.BOX, halfExtents: [0.5, 0.5, 0.5] }}
       object3D={new THREE.Mesh(new THREE.BoxBufferGeometry(), new THREE.MeshStandardMaterial())}
     >
       <entity mediaFrame position={[0, 1, 0]} />

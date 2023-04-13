@@ -10,6 +10,7 @@ import CardSection from "../shared/CardSection";
 import { Icon } from "@mozilla/lilypad-ui";
 import { DiscordIcon, BookIcon, QuestionIcon, GithubIcon } from "../shared/icons";
 import Card from "../shared/Card";
+import { hasPaidFeature } from "../../utils/feature_flags";
 
 const styles = withCommonStyles(() => ({}));
 
@@ -107,14 +108,16 @@ const SystemEditorComponent = ({ classes }) => {
         <section className="mb-40">
           <h3 className="heading-sm mb-28">Customize the look of your hub</h3>
 
-          <CardSection
-            className="mb-20"
-            ctaCallback={() => {
-              window.location.href = "#/app-settings";
-            }}
-            cta="apply my window"
-            body="Apply your branding to the hub’s website and lobby."
-          />
+          {hasPaidFeature() && (
+            <CardSection
+              className="mb-20"
+              ctaCallback={() => {
+                window.location.href = "#/brand";
+              }}
+              cta="Add my Logo"
+              body="Apply your branding to the hub’s website and lobby."
+            />
+          )}
 
           <CardSection
             className="mb-20"
@@ -292,7 +295,7 @@ const SystemEditorComponent = ({ classes }) => {
             >
               Hubs Documentation
             </a>{" "}
-            Contain a Getting Started guide and other resources.
+            contains a Getting Started guide and other resources.
           </p>
         </div>
 
