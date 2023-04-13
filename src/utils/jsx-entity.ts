@@ -493,7 +493,7 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
   simpleWater: inflateSimpleWater,
   particleEmitter: inflateParticleEmitter,
   zoneAudioSource: inflateAudioSource,
-  audioTarget: inflateAudioTarget
+  audioTarget: inflateAudioTarget,
   ammoShape: inflateAmmoShape,
   boxCollider: inflateBoxCollider,
   trimesh: inflateTrimesh,

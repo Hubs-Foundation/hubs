@@ -3,6 +3,7 @@ import { Component, defineQuery, hasComponent, Query } from "bitecs";
 import { Object3D } from "three";
 import { HubsWorld } from "../app";
 import { findAncestor, traverseSome } from "./three-utils";
+import { EntityID } from "./networking-types";
 
 export type ElOrEid = EntityID | AElement;
 
