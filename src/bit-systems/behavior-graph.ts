@@ -17,7 +17,7 @@ import {
 import { defineQuery, enterQuery, exitQuery, hasComponent } from "bitecs";
 import { AnimationMixer } from "three";
 import { HubsWorld } from "../app";
-import { BehaviorGraph, Interacted, LocalAvatar, MixerAnimatable, RemoteAvatar, Rigidbody } from "../bit-components";
+import { BehaviorGraph, CustomTags, Interacted, LocalAvatar, MixerAnimatable, RemoteAvatar, Rigidbody } from "../bit-components";
 import { findAncestorEntity } from "../utils/bit-utils";
 import { ClientID, EntityID } from "../utils/networking-types";
 import { AnimationNodes, animationValueDefs } from "./behavior-graph/animation-nodes";
@@ -100,6 +100,7 @@ const behaviorGraphsQuery = defineQuery([BehaviorGraph]);
 const behaviorGraphEnterQuery = enterQuery(behaviorGraphsQuery);
 const behaviorGraphExitQuery = exitQuery(behaviorGraphsQuery);
 const interactedQuery = defineQuery([Interacted]);
+const customTagsExitQuery = exitQuery(defineQuery([CustomTags]));
 
 export function behaviorGraphSystem(world: HubsWorld) {
   stubAnimationMixerSystem(world);
@@ -161,6 +162,10 @@ export function behaviorGraphSystem(world: HubsWorld) {
   interactedQuery(world).forEach(function (eid) {
     entityEvents.get(eid)?.emitters.onInteract.emit(eid);
   });
+
+  customTagsExitQuery(world).forEach(function (eid) {
+    CustomTags.tags.delete(eid)
+  })
 
   // TODO allocations
   const collisionCheckEntiteis = entityEvents.keys();

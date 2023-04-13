@@ -8,7 +8,7 @@ import {
 } from "@oveddan-behave-graph/core";
 import { addComponent, hasComponent, IComponent } from "bitecs";
 import { Box3, Box3Helper, Euler, Object3D, Quaternion, Vector3 } from "three";
-import { CursorRaycastable, EntityID, RemoteHoverTarget, SingleActionButton } from "../../bit-components";
+import { CursorRaycastable, CustomTags, EntityID, RemoteHoverTarget, SingleActionButton } from "../../bit-components";
 import * as bitComponents from "../../bit-components";
 import { COLLISION_LAYERS } from "../../constants";
 import { Fit, inflatePhysicsShape, Shape } from "../../inflators/physics-shape";
@@ -18,6 +18,7 @@ import { inflateRigidBody, Type } from "../../inflators/rigid-body";
 import { ClientID } from "../../utils/networking-types";
 import { HubsWorld } from "../../app";
 import { Text } from "troika-three-text";
+import { inflateCustomTags } from "../../inflators/custom-tags";
 
 type EntityEventState = {
   emitters: {
@@ -281,6 +282,74 @@ export const EntityNodes = definitionListToMap([
       const q = obj.getWorldQuaternion(new Quaternion());
       // TODO allocations
       return new Euler().setFromQuaternion(new Quaternion().setFromEuler(rotation).multiply(q));
+    }
+  }),
+  makeInNOutFunctionDesc({
+    name: "hubs/entity/components/custom-tags/hasTag",
+    label: "CustomTags: Has Tag?",
+    category: "Components" as any,
+    in: [{ entity: "entity" }, { tag: "string" }],
+    out: "boolean",
+    exec: (entity: EntityID, tag: string) => {
+      return hasComponent(APP.world, CustomTags, entity) && CustomTags.tags.get(entity)!.includes(tag);
+    }
+  }),
+  makeFlowNodeDefinition({
+    typeName: "hubs/entity/components/custom-tags/addTag",
+    category: "Components" as any,
+    label: "CustomTags: Add Tag",
+    in: {
+      flow: "flow",
+      entity: "entity",
+      tag: "string"
+    },
+    out: { flow: "flow" },
+    initialState: undefined,
+    triggered: ({ read, commit, graph }) => {
+      const world = graph.getDependency<HubsWorld>("world")!;
+      const entity = read<EntityID>("entity");
+      const tag = read<string>("tag");
+
+      if (!hasComponent(world, CustomTags, entity)) {
+        inflateCustomTags(world, entity);
+      }
+
+      const tags = CustomTags.tags.get(entity)!;
+      if (!tags.includes(tag)) tags.push(tag);
+
+      commit("flow");
+    }
+  }),
+  makeFlowNodeDefinition({
+    typeName: "hubs/entity/components/custom-tags/removeTag",
+    category: "Components" as any,
+    label: "CustomTags: Remove Tag",
+    in: {
+      flow: "flow",
+      entity: "entity",
+      tag: "string"
+    },
+    out: { flow: "flow" },
+    initialState: undefined,
+    triggered: ({ read, commit, graph }) => {
+      const world = graph.getDependency<HubsWorld>("world")!;
+      const entity = read<EntityID>("entity");
+      const tag = read<string>("tag");
+
+      if (!hasComponent(world, CustomTags, entity)) {
+        console.warn(`CustomTags: Remove Tag, entity did not have tag ${tag}`, entity);
+        return;
+      }
+
+      const tags = CustomTags.tags.get(entity)!;
+      const idx = tags.indexOf(tag);
+      if (idx === -1) {
+        console.warn(`CustomTags: Remove Tag, entity did not have tag ${tag}`, entity);
+      } else {
+        tags.splice(idx, 1);
+      }
+
+      commit("flow");
     }
   }),
   makeObjectPropertyFlowNode("visible", "boolean"),

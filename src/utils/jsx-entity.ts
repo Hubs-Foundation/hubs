@@ -90,6 +90,7 @@ import { AmmoShapeParams, inflateAmmoShape } from "../inflators/ammo-shape";
 import { BoxColliderParams, inflateBoxCollider } from "../inflators/box-collider";
 import { inflateTrimesh } from "../inflators/trimesh";
 import { HeightFieldParams, inflateHeightField } from "../inflators/heightfield";
+import { CustomTagParams, inflateCustomTags } from "../inflators/custom-tags";
 
 preload(
   new Promise(resolve => {
@@ -372,6 +373,7 @@ export interface GLTFComponentData extends ComponentData {
   rigidbody?: OptionalParams<GLTFRigidBodyParams>;
   // TODO GLTFPhysicsShapeParams
   physicsShape?: AmmoShapeParams;
+  customTags?: CustomTagParams;
 
   // deprecated
   spawnPoint?: true;
@@ -496,7 +498,8 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
   interactable: createDefaultInflator(SingleActionButton),
   rigidbody: inflateGLTFRigidBody,
   // TODO inflateGLTFPhysicsShape
-  physicsShape: inflateAmmoShape
+  physicsShape: inflateAmmoShape,
+  customTags: inflateCustomTags
 };
 
 function jsxInflatorExists(name: string): name is keyof JSXComponentData {
