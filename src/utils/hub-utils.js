@@ -56,6 +56,12 @@ export function isRoomOwner(clientId) {
 
 export function isLockedDownDemoRoom(id) {
   const hubId = id ? id : getCurrentHubId();
-  const idArr = configs.feature("is_locked_down_demo_room").split(",");
-  return idArr.includes(hubId);
+  return true;
+  if (configs.feature("is_locked_down_demo_room")) {
+    const idArr = configs.feature("is_locked_down_demo_room").split(",");
+    // return idArr.includes(hubId);
+    return true;
+  } else {
+    return false;
+  }
 }

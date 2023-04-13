@@ -24,11 +24,11 @@ AFRAME.registerSystem("ui-hotkeys", {
       this.userinput = this.el.systems.userinput;
     }
 
-    if (this.userinput.get(paths.actions.focusChat) && isLockedDownDemoRoom()) {
+    if (this.userinput.get(paths.actions.focusChat) && !isLockedDownDemoRoom()) {
       window.dispatchEvent(new CustomEvent("focus_chat", { detail: { prefix: "" } }));
     }
 
-    if (this.userinput.get(paths.actions.focusChatCommand) && isLockedDownDemoRoom()) {
+    if (this.userinput.get(paths.actions.focusChatCommand) && !isLockedDownDemoRoom()) {
       window.dispatchEvent(new CustomEvent("focus_chat", { detail: { prefix: "/" } }));
     }
 

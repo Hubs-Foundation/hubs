@@ -1211,7 +1211,7 @@ class PreferencesScreen extends Component {
             prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
             options: availableThemes
           },
-          ...(isLockedDownDemoRoom()
+          ...(!isLockedDownDemoRoom()
             ? [
                 {
                   key: "nametagVisibility",
@@ -1256,7 +1256,7 @@ class PreferencesScreen extends Component {
                 }
               ]
             : []),
-          ...(isLockedDownDemoRoom()
+          ...(!isLockedDownDemoRoom()
             ? [
                 {
                   key: "nametagVisibilityDistance",
