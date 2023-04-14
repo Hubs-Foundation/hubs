@@ -112,7 +112,7 @@
   "room-entry-modal.join-room-button": "입장하기",
   "room-entry-modal.enter-on-device-button": "다른 장치를 이용하기",
   "room-entry-modal.spectate-button": "관전하기",
-  "room-entry-modal.options-button": "설정",
+  "room-entry-modal.room-settings-button": "방 설정",
   "content-menu.objects-menu-button": "Objects",
   "content-menu.people-menu-button": "참가자 ({presenceCount})",
   "back-button": "뒤로가기",
