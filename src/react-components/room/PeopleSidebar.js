@@ -95,7 +95,7 @@ function PersonListItem({ person, onSelectPerson }) {
   const intl = useIntl();
   const DeviceIcon = getDeviceIconComponent(person.context);
   const VoiceIcon = getVoiceIconComponent(person.micPresence);
-
+  console.log(person);
   return (
     <ButtonListItem className={styles.person} key={person.id} type="button" onClick={e => onSelectPerson(person, e)}>
       {person.hand_raised && <HandRaisedIcon />}
@@ -114,6 +114,29 @@ function PersonListItem({ person, onSelectPerson }) {
     </ButtonListItem>
   );
 }
+
+PersonListItem.propTypes = {
+  person: PropTypes.shape({
+    context: PropTypes.shape({
+      embed: PropTypes.bool,
+      hmd: PropTypes.bool,
+      mobile: PropTypes.bool,
+      discord: PropTypes.bool
+    }),
+    id: PropTypes.string,
+    micPresence: PropTypes.shape({
+      muted: PropTypes.bool,
+      talking: PropTypes.bool
+    }),
+    roles: PropTypes.shape({
+      creator: PropTypes.bool,
+      owner: PropTypes.bool,
+      signed_in: PropTypes.bool
+    }),
+    hand_raised: PropTypes.bool
+  }),
+  onSelectPerson: PropTypes.func
+};
 
 export function PeopleSidebar({
   people,
@@ -152,7 +175,7 @@ export function PeopleSidebar({
         {people
           .filter(person => !person.isMe)
           .map(person => (
-            <PersonListItem person={person} onSelectPerson={onSelectPerson} />
+            <PersonListItem key={person.id} person={person} onSelectPerson={onSelectPerson} />
           ))}
       </List>
     </Sidebar>
