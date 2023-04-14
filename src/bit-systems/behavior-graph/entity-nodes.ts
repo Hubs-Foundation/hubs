@@ -7,7 +7,7 @@ import {
   ValueType
 } from "@oveddan-behave-graph/core";
 import { addComponent, hasComponent, IComponent } from "bitecs";
-import { Color, Euler, Mesh, MeshStandardMaterial, Object3D, Quaternion, Vector3 } from "three";
+import { Color, Euler, Mesh, MeshStandardMaterial, Object3D, Quaternion, Texture, Vector3 } from "three";
 import { Text } from "troika-three-text";
 import { HubsWorld } from "../../app";
 import * as bitComponents from "../../bit-components";
@@ -34,7 +34,8 @@ type SocketTypeName =
   | "player"
   | "color"
   | "vec3"
-  | "euler";
+  | "euler"
+  | "texture";
 
 type EntityEventState = {
   emitters: {
@@ -168,6 +169,13 @@ export const EntityValue = {
     (value: GLTFMaterial) => value,
     (value: GLTFMaterial) => value,
     (start: GLTFMaterial, end: GLTFMaterial, t: number) => (t < 0.5 ? start : end)
+  ),
+  texture: new ValueType(
+    "texture",
+    () => null,
+    (value: Texture) => value,
+    (value: Texture) => value,
+    (start: Texture, end: Texture, t: number) => (t < 0.5 ? start : end)
   ),
   color: new ValueType(
     "color",
@@ -456,42 +464,31 @@ export const EntityNodes = definitionListToMap([
     }
   }),
 
-  ...makeMaterialPropertyNodes("opacity", "Opacity", "Opacity", "float"),
-  ...makeMaterialPropertyNodes("transparent", "Transparent", "Is Transparent", "boolean"),
-  ...makeMaterialPropertyNodes("toneMapped", "ToneMapped", "Is Tone Mapped", "boolean"),
-  ...makeMaterialPropertyNodes("flatShading", "FlatShading", "Is Flat Shaded", "boolean"),
-  ...makeMaterialPropertyNodes("wireframe", "Wireframe", "Is Wireframe", "boolean"),
-  ...makeMaterialPropertyNodes("fog", "Fog", "Is Effected By Fog", "boolean"),
   ...makeMaterialPropertyNodes("color", "Color", "Color", "color"),
+  ...makeMaterialPropertyNodes("map", "Map", "Diffuse Map", "texture", "texture"),
+  ...makeMaterialPropertyNodes("transparent", "Transparent", "Is Transparent", "boolean"),
+  ...makeMaterialPropertyNodes("opacity", "Opacity", "Opacity", "float"),
+  ...makeMaterialPropertyNodes("alphaMap", "AlphaMap", "Alpha Map", "texture", "texture"),
+  ...makeMaterialPropertyNodes("toneMapped", "ToneMapped", "Is Tone Mapped", "boolean"),
   ...makeMaterialPropertyNodes("emissive", "Emissive", "Emissive Color", "color", "color"),
-  ...makeMaterialPropertyNodes("roughness", "Roughness", "Roughness", "float"),
-  ...makeMaterialPropertyNodes("metalness", "Metalness", "Metalness", "float"),
-  ...makeMaterialPropertyNodes("lightMapIntensity", "LightMapIntensity", "Lightmap Intensity", "float", "intensity"),
-  ...makeMaterialPropertyNodes("aoMapIntensity", "AOMapIntensity", "AO Map Intensity", "float", "intensity"),
+  ...makeMaterialPropertyNodes("emissiveMap", "EmissiveMap", "Emissive Map", "texture", "texture"),
   ...makeMaterialPropertyNodes("emissiveIntensity", "EmissiveIntensity", "Emissive Intensity", "float", "intensity"),
+  ...makeMaterialPropertyNodes("roughness", "Roughness", "Roughness", "float"),
+  ...makeMaterialPropertyNodes("roughnessMap", "RoughnessMap", "Roughness Map", "texture", "texture"),
+  ...makeMaterialPropertyNodes("metalness", "Metalness", "Metalness", "float"),
+  ...makeMaterialPropertyNodes("metalnessMap", "MetalnessMap", "Metalness Map", "texture", "texture"),
+  ...makeMaterialPropertyNodes("lightMap", "LightMap", "Light Map", "texture", "texture"),
+  ...makeMaterialPropertyNodes("lightMapIntensity", "LightMapIntensity", "Lightmap Intensity", "float", "intensity"),
+  ...makeMaterialPropertyNodes("aoMap", "AOMap", "AO Map", "texture", "texture"),
+  ...makeMaterialPropertyNodes("aoMapIntensity", "AOMapIntensity", "AO Map Intensity", "float", "intensity"),
+  ...makeMaterialPropertyNodes("normalMap", "NormalMap", "Normal Map", "texture", "texture"),
+  ...makeMaterialPropertyNodes("wireframe", "Wireframe", "Is Wireframe", "boolean"),
+  ...makeMaterialPropertyNodes("flatShading", "FlatShading", "Is Flat Shaded", "boolean"),
+  ...makeMaterialPropertyNodes("fog", "Fog", "Is Effected By Fog", "boolean"),
 
   // TODO
-  // this.map = source.map;
-  // this.lightMap = source.lightMap;
-  // this.aoMap = source.aoMap;
-  // this.emissiveMap = source.emissiveMap;
-  // this.bumpMap = source.bumpMap;
-  // this.bumpScale = source.bumpScale;
-  // this.normalMap = source.normalMap;
   // this.normalMapType = source.normalMapType;
   // this.normalScale.copy( source.normalScale );
-  // this.displacementMap = source.displacementMap;
-  // this.displacementScale = source.displacementScale;
-  // this.displacementBias = source.displacementBias;
-  // this.roughnessMap = source.roughnessMap;
-  // this.metalnessMap = source.metalnessMap;
-  // this.alphaMap = source.alphaMap;
-  // this.envMap = source.envMap;
-  // this.envMapIntensity = source.envMapIntensity;
-  // this.wireframeLinewidth = source.wireframeLinewidth;
-  // this.wireframeLinecap = source.wireframeLinecap;
-  // this.wireframeLinejoin = source.wireframeLinejoin;
-  // this.fog = source.fog;
 
   makeObjectPropertyFlowNode("visible", "boolean"),
   makeObjectPropertyFlowNode("position", "vec3"),
@@ -512,9 +509,28 @@ type SettableMaterialProperties =
   | "metalness"
   | "lightMapIntensity"
   | "aoMapIntensity"
-  | "emissiveIntensity";
+  | "emissiveIntensity"
+  | "map"
+  | "lightMap"
+  | "aoMap"
+  | "emissiveMap"
+  | "normalMap"
+  | "roughnessMap"
+  | "metalnessMap"
+  | "alphaMap";
 
-const NEEDS_UPDATE_PROPERTIES: (keyof GLTFMaterial)[] = ["flatShading", "map"];
+const NEEDS_UPDATE_PROPERTIES: (keyof GLTFMaterial)[] = [
+  "flatShading",
+  "map",
+  "lightMap",
+  "aoMap",
+  "emissiveMap",
+  "normalMap",
+  "roughnessMap",
+  "metalnessMap",
+  "alphaMap"
+];
+
 function makeMaterialPropertyNodes<T extends SettableMaterialProperties, S extends SocketTypeName>(
   property: T,
   nodeName: string,
@@ -548,12 +564,12 @@ function makeMaterialPropertyNodes<T extends SettableMaterialProperties, S exten
         const material = read<GLTFMaterial>("material");
         const value = read(socketName) as any;
         const prop = material[property];
-        if (typeof prop === "object" && "copy" in material[property]) {
-          prop.copy(value);
-          if (NEEDS_UPDATE_PROPERTIES.includes(property)) material.needsUpdate;
+        if (socketType === "color" || socketType === "euler" || socketType === "vec3") {
+          (prop as any).copy(value);
         } else {
           material[property] = value;
         }
+        if (NEEDS_UPDATE_PROPERTIES.includes(property)) material.needsUpdate = true;
         commit("flow");
       }
     })
