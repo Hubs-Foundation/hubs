@@ -123,11 +123,12 @@ PersonListItem.propTypes = {
       mobile: PropTypes.bool,
       discord: PropTypes.bool
     }),
-    id: PropTypes.string,
+    id: PropTypes.string.isRequired,
     micPresence: PropTypes.shape({
       muted: PropTypes.bool,
       talking: PropTypes.bool
     }),
+    presence: PropTypes.string.isRequired,
     roles: PropTypes.shape({
       creator: PropTypes.bool,
       owner: PropTypes.bool,
