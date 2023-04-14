@@ -104,7 +104,7 @@ export function inflateModel(world: HubsWorld, rootEid: number, { model }: Model
     }
   });
 
-  swap.forEach(([old, replacement]) => {
+  for (const [old, replacement] of swap) {
     for (let i = old.children.length - 1; i >= 0; i--) {
       replacement.add(old.children[i]);
     }
@@ -118,7 +118,7 @@ export function inflateModel(world: HubsWorld, rootEid: number, { model }: Model
 
     old.parent!.add(replacement);
     old.removeFromParent();
-  });
+  }
 
   // These components are special because we want to do a one-off action
   // that we can't do in a regular inflator (because they depend on the object3D).
@@ -173,7 +173,7 @@ export function inflateModel(world: HubsWorld, rootEid: number, { model }: Model
       if (node.configuration) {
         for (const propName in node.configuration) {
           const value = node.configuration[propName] as any;
-          if (value.isObject3D) node.configuration[propName] = value.eid;
+          if (value.isObject3D) node.configuration[propName] = swap.get(value)?.eid || value.eid;
         }
       }
       if (node.parameters) {
@@ -181,7 +181,7 @@ export function inflateModel(world: HubsWorld, rootEid: number, { model }: Model
           const param = node.parameters[propName];
           if ("value" in param) {
             const value = param.value as any;
-            if (value.isObject3D) param.value = value.eid;
+            if (value.isObject3D) param.value = swap.get(value)?.eid || value.eid;
           }
         }
       }
