@@ -174,7 +174,7 @@ function downloadAsJson(exportObj: any, exportName: string) {
   downloadAnchorNode.remove();
 }
 
-async function downloadSavedEntityStates(hubChannel: HubChannel) {
+export async function downloadSavedEntityStates(hubChannel: HubChannel) {
   listEntityStates(hubChannel).then(list => {
     downloadAsJson(list, `hub-${hubChannel.hubId}`);
   });
@@ -210,7 +210,7 @@ function rewriteNidsForEntityState(entityState: EntityState) {
   });
 }
 
-function loadFromJson(hubChannel: HubChannel) {
+export function loadFromJson(hubChannel: HubChannel) {
   const fileSelector = document.createElement("input");
   fileSelector.setAttribute("type", "file");
   fileSelector.setAttribute("multiple", "");
