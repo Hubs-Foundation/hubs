@@ -7,7 +7,7 @@ import {
   ValueType
 } from "@oveddan-behave-graph/core";
 import { addComponent, hasComponent, IComponent } from "bitecs";
-import { Euler, Object3D, Quaternion, Vector3 } from "three";
+import { Euler, Material, Mesh, MeshBasicMaterial, MeshStandardMaterial, Object3D, Quaternion, Vector3 } from "three";
 import { Text } from "troika-three-text";
 import { HubsWorld } from "../../app";
 import * as bitComponents from "../../bit-components";
@@ -141,6 +141,7 @@ function makeObjectPropertyFlowNode<T extends keyof Object3D>(property: T, value
   });
 }
 
+type GLTFMaterial = MeshStandardMaterial | MeshBasicMaterial;
 export const EntityValue = {
   entity: new ValueType(
     "entity",
@@ -148,6 +149,13 @@ export const EntityValue = {
     (value: EntityID) => value,
     (value: EntityID) => value,
     (start: EntityID, end: EntityID, t: number) => (t < 0.5 ? start : end)
+  ),
+  material: new ValueType(
+    "material",
+    () => null,
+    (value: GLTFMaterial) => value,
+    (value: GLTFMaterial) => value,
+    (start: GLTFMaterial, end: GLTFMaterial, t: number) => (t < 0.5 ? start : end)
   )
 };
 
@@ -375,6 +383,57 @@ export const EntityNodes = definitionListToMap([
       return obj.name === "Interactable Media" && hasComponent(world, GLTFModel, obj.children[0]?.eid!)
         ? obj.children[0].eid
         : entity;
+    }
+  }),
+  makeInNOutFunctionDesc({
+    name: "hubs/material/get",
+    label: "Get Material",
+    category: "Materials" as any,
+    in: [{ entity: "entity" }],
+    out: "material",
+    exec: (entity: EntityID) => {
+      const world = APP.world;
+      const obj = world.eid2obj.get(entity);
+      if (!obj) {
+        console.error(`get material: could not find entity`, entity);
+        return;
+      }
+      const mesh = obj as Mesh;
+      if (!mesh.isMesh) {
+        console.error(`get material: called on a non meh`, entity);
+        return;
+      }
+      return mesh.material as GLTFMaterial;
+    }
+  }),
+  makeFlowNodeDefinition({
+    typeName: "hubs/material/set",
+    category: "Materials" as any,
+    label: "Set Material",
+    in: {
+      flow: "flow",
+      entity: "entity",
+      material: "material"
+    },
+    out: { flow: "flow" },
+    initialState: undefined,
+    triggered: ({ read, commit, graph }) => {
+      const world = graph.getDependency<HubsWorld>("world")!;
+      const entity = read<EntityID>("entity");
+      const material = read<GLTFMaterial>("material");
+      const obj = world.eid2obj.get(entity);
+
+      if (!obj) {
+        console.error(`set material: could not find entity`, entity);
+        return;
+      }
+      const mesh = obj as Mesh;
+      if (!mesh.isMesh) {
+        console.error(`set material: called on a non meh`, entity);
+        return;
+      }
+      mesh.material = material;
+      commit("flow");
     }
   }),
   makeObjectPropertyFlowNode("visible", "boolean"),

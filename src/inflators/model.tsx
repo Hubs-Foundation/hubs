@@ -173,9 +173,7 @@ export function inflateModel(world: HubsWorld, rootEid: number, { model }: Model
       if (node.configuration) {
         for (const propName in node.configuration) {
           const value = node.configuration[propName] as any;
-          if (value.__mhc_link_type === "node") {
-            node.configuration[propName] = idx2eid.get(value.index)!;
-          }
+          if (value.isObject3D) node.configuration[propName] = value.eid;
         }
       }
       if (node.parameters) {
@@ -183,14 +181,11 @@ export function inflateModel(world: HubsWorld, rootEid: number, { model }: Model
           const param = node.parameters[propName];
           if ("value" in param) {
             const value = param.value as any;
-            if (value.__mhc_link_type === "node") {
-              param.value = idx2eid.get(value.index)!;
-            }
+            if (value.isObject3D) param.value = value.eid;
           }
         }
       }
     }
-    console.log("FOUND BG", model.userData.behaviorGraph);
     addComponent(world, BehaviorGraph, rootEid);
   }
 

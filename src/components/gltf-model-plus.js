@@ -844,30 +844,58 @@ class GLTFHubsLoopAnimationComponent {
 }
 
 // TODO remove and use MOZ_behavior until spec is finalized
-class GLTFKHRBehaviorExtension {
-  constructor() {
-    this.name = "KHR_behavior";
-  }
-
-  afterRoot({ scenes, parser }) {
-    const ext = parser.json.extensions?.[this.name];
-    if (ext) {
-      // TODO we can probably actually create the behavior graph here but doing it later to keep
-      // code localized to one spot for this spike
-      scenes[0].userData.behaviorGraph = ext.behaviors[0];
-    }
-  }
-}
-
 class GLTFMozBehaviorExtension {
-  constructor() {
-    this.name = "MOZ_behavior";
+  constructor(name = "MOZ_behavior") {
+    this.name = name;
   }
 
+  // TODO we can probably actually create the behavior graph here but doing it later to keep
+  // code localized to one spot for this spike
   afterRoot({ scenes, parser }) {
     const ext = parser.json.extensions?.[this.name];
     if (ext) {
-      scenes[0].userData.behaviorGraph = ext.behaviors[0];
+      const deps = [];
+      const graph = ext.behaviors[0];
+      // TODO we can probably resolve __mhc_link_type in the whole GLTF file in 1 spot, we may also use JSON pointers instead
+      for (const node of graph.nodes) {
+        if (node.configuration) {
+          for (const propName in node.configuration) {
+            const value = node.configuration[propName];
+            const type = value?.__mhc_link_type;
+            if (type && value.index !== undefined) {
+              deps.push(
+                parser.getDependency(type, value.index).then(loadedDep => {
+                  if (type === "texture" && !parser.json.textures[value.index].extensions?.MOZ_texture_rgbe) {
+                    loadedDep.encoding = THREE.sRGBEncoding;
+                  }
+                  node.configuration[propName] = loadedDep;
+                  return loadedDep;
+                })
+              );
+            }
+          }
+        }
+        if (node.parameters) {
+          for (const propName in node.parameters) {
+            const value = node.parameters[propName].value;
+            const type = value?.__mhc_link_type;
+            if (type && value.index !== undefined) {
+              deps.push(
+                parser.getDependency(type, value.index).then(loadedDep => {
+                  if (type === "texture" && !parser.json.textures[value.index].extensions?.MOZ_texture_rgbe) {
+                    loadedDep.encoding = THREE.sRGBEncoding;
+                  }
+                  node.parameters[propName].value = loadedDep;
+                  return loadedDep;
+                })
+              );
+            }
+          }
+        }
+      }
+
+      scenes[0].userData.behaviorGraph = graph;
+      return Promise.all(deps);
     }
   }
 }
@@ -892,7 +920,8 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
     .register(parser => new GLTFHubsTextureBasisExtension(parser))
     .register(parser => new GLTFMozTextureRGBE(parser, new RGBELoader().setDataType(THREE.HalfFloatType)))
     .register(parser => new GLTFHubsLoopAnimationComponent(parser))
-    .register(() => new GLTFKHRBehaviorExtension())
+    // TODO remove and use MOZ_behavior until spec is finalized
+    // .register(() => new GLTFMozBehaviorExtension("KHR_behavior"))
     .register(() => new GLTFMozBehaviorExtension())
     .register(
       parser =>
