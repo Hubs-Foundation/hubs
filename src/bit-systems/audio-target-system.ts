@@ -125,18 +125,18 @@ export function audioTargetSystem(world: HubsWorld, audioSystem: AudioSystem) {
     );
     audioTargetEid && connectSourceToTarget(audioSourceEid, audioTargetEid);
 
-    const obj = APP.world.eid2obj.get(audioSourceEid)!;
-    if (AudioSource.flags[audioSourceEid] & AUDIO_SOURCE_FLAGS.DEBUG) {
-      const debugObj = new LineSegments(new WireframeGeometry(new SphereBufferGeometry(1, 10, 10)));
-      source2Debug.set(audioSourceEid, debugObj);
-      obj.add(debugObj);
-    }
-
     // TODO this should probably be using bounds similar to media-frames and trigger-volume.
     // Doing the simple thing for now since we only support avatar audio sources currently
+    const obj = APP.world.eid2obj.get(audioSourceEid)!;
     obj.updateMatrixWorld();
     const radius = obj.matrixWorld.getMaxScaleOnAxis();
     source2Radius.set(audioSourceEid, radius * radius);
+
+    if (AudioSource.flags[audioSourceEid] & AUDIO_SOURCE_FLAGS.DEBUG) {
+      const debugObj = new LineSegments(new WireframeGeometry(new SphereBufferGeometry(radius, 10, 10)));
+      source2Debug.set(audioSourceEid, debugObj);
+      obj.add(debugObj);
+    }
   });
   audioSourceExitQuery(world).forEach(audioSourceEid => {
     removeSourceFromAudioTarget(audioSourceEid);
