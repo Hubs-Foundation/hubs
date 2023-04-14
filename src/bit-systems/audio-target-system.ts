@@ -31,6 +31,7 @@ const addSourceToAudioTarget = (audioSourceEid: number, source: AudioNode) => {
     const audioEid = Emitter2Audio.get(audioTargetEid)!;
     const targetAudio = APP.audios.get(audioEid)!;
     try {
+      // The WebAudio API doesn't support checking if an audio node is already connected so we always disconnect it but don't log as it's an expected behavior and the error is not meaningful.
       targetAudio.disconnect();
     } catch (e) {}
     if (targetAudio instanceof PositionalAudio) {
@@ -47,6 +48,7 @@ const removeSourceFromAudioTarget = (audioSourceEid: number) => {
     const audioEid = Emitter2Audio.get(audioTargetEid)!;
     const targetAudio = APP.audios.get(audioEid)!;
     try {
+      // The WebAudio API doesn't support checking if an audio node is already connected so we always disconnect it but don't log as it's an expected behavior and the error is not meaningful.
       targetAudio.disconnect();
     } catch (e) {}
     if (targetAudio instanceof PositionalAudio) {
