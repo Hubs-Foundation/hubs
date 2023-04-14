@@ -158,6 +158,8 @@ export function audioTargetSystem(world: HubsWorld, audioSystem: AudioSystem) {
       const emitterId = source2Emitter.get(audioSourceEid)!;
       const playerInfoExists = playerInfos.find((playerInfo: AComponent) => playerInfo.el === emitterId);
       if (playerInfoExists) {
+        const sourceObj = world.eid2obj.get(audioSourceEid)!;
+        sourceObj.getWorldPosition(sourceWorldPos);
         const distanceSquared = emitterId.object3D.position.distanceToSquared(sourceWorldPos);
         const radius = source2Radius.get(audioSourceEid)!;
         if (distanceSquared > radius) {
@@ -188,6 +190,8 @@ export function audioTargetSystem(world: HubsWorld, audioSystem: AudioSystem) {
         // don't use avatar-rig if not entering scene yet.
         if (avatar.id === "avatar-rig" && !APP.scene!.is("entered")) continue;
 
+        const sourceObj = world.eid2obj.get(audioSourceEid)!;
+        sourceObj.getWorldPosition(sourceWorldPos);
         const distanceSquared = avatar.object3D.position.distanceToSquared(sourceWorldPos);
         const radius = source2Radius.get(audioSourceEid)!;
         if (distanceSquared < radius) {
