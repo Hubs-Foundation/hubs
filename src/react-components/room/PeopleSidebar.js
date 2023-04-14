@@ -95,7 +95,7 @@ function PersonListItem({ person, onSelectPerson }) {
   const intl = useIntl();
   const DeviceIcon = getDeviceIconComponent(person.context);
   const VoiceIcon = getVoiceIconComponent(person.micPresence);
-  console.log(person);
+
   return (
     <ButtonListItem className={styles.person} key={person.id} type="button" onClick={e => onSelectPerson(person, e)}>
       {person.hand_raised && <HandRaisedIcon />}
