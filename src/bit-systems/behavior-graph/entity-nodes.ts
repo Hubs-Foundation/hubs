@@ -7,7 +7,7 @@ import {
   ValueType
 } from "@oveddan-behave-graph/core";
 import { addComponent, hasComponent, IComponent } from "bitecs";
-import { Euler, Material, Mesh, MeshBasicMaterial, MeshStandardMaterial, Object3D, Quaternion, Vector3 } from "three";
+import { Color, Euler, Mesh, MeshStandardMaterial, Object3D, Quaternion, Vector3 } from "three";
 import { Text } from "troika-three-text";
 import { HubsWorld } from "../../app";
 import * as bitComponents from "../../bit-components";
@@ -23,6 +23,18 @@ import { inflateCustomTags } from "../../inflators/custom-tags";
 import { findAncestorWithComponent } from "../../utils/bit-utils";
 import { ClientID } from "../../utils/networking-types";
 import { definitionListToMap } from "./utils";
+
+type SocketTypeName =
+  | "string"
+  | "float"
+  | "integer"
+  | "material"
+  | "boolean"
+  | "entity"
+  | "player"
+  | "color"
+  | "vec3"
+  | "euler";
 
 type EntityEventState = {
   emitters: {
@@ -108,7 +120,7 @@ function makeEntityEventNode(
   });
 }
 
-function makeObjectPropertyFlowNode<T extends keyof Object3D>(property: T, valueType: string) {
+function makeObjectPropertyFlowNode<T extends keyof Object3D>(property: T, valueType: SocketTypeName) {
   const typeName = `hubs/entity/set/${property}`;
   return makeFlowNodeDefinition({
     typeName,
@@ -141,7 +153,7 @@ function makeObjectPropertyFlowNode<T extends keyof Object3D>(property: T, value
   });
 }
 
-type GLTFMaterial = MeshStandardMaterial | MeshBasicMaterial;
+type GLTFMaterial = MeshStandardMaterial;
 export const EntityValue = {
   entity: new ValueType(
     "entity",
@@ -156,6 +168,13 @@ export const EntityValue = {
     (value: GLTFMaterial) => value,
     (value: GLTFMaterial) => value,
     (start: GLTFMaterial, end: GLTFMaterial, t: number) => (t < 0.5 ? start : end)
+  ),
+  color: new ValueType(
+    "color",
+    () => new Color(),
+    (value: Color | number[]) => (value instanceof Color ? value : new Color().fromArray(value)),
+    (value: Color) => [value.r, value.g, value.b, 1.0],
+    (start: Color, end: Color, t: number) => new Color().copy(start).lerp(end, t)
   )
 };
 
@@ -436,8 +455,107 @@ export const EntityNodes = definitionListToMap([
       commit("flow");
     }
   }),
+
+  ...makeMaterialPropertyNodes("opacity", "Opacity", "Opacity", "float"),
+  ...makeMaterialPropertyNodes("transparent", "Transparent", "Is Transparent", "boolean"),
+  ...makeMaterialPropertyNodes("toneMapped", "ToneMapped", "Is Tone Mapped", "boolean"),
+  ...makeMaterialPropertyNodes("flatShading", "FlatShading", "Is Flat Shaded", "boolean"),
+  ...makeMaterialPropertyNodes("wireframe", "Wireframe", "Is Wireframe", "boolean"),
+  ...makeMaterialPropertyNodes("fog", "Fog", "Is Effected By Fog", "boolean"),
+  ...makeMaterialPropertyNodes("color", "Color", "Color", "color"),
+  ...makeMaterialPropertyNodes("emissive", "Emissive", "Emissive Color", "color", "color"),
+  ...makeMaterialPropertyNodes("roughness", "Roughness", "Roughness", "float"),
+  ...makeMaterialPropertyNodes("metalness", "Metalness", "Metalness", "float"),
+  ...makeMaterialPropertyNodes("lightMapIntensity", "LightMapIntensity", "Lightmap Intensity", "float", "intensity"),
+  ...makeMaterialPropertyNodes("aoMapIntensity", "AOMapIntensity", "AO Map Intensity", "float", "intensity"),
+  ...makeMaterialPropertyNodes("emissiveIntensity", "EmissiveIntensity", "Emissive Intensity", "float", "intensity"),
+
+  // TODO
+  // this.map = source.map;
+  // this.lightMap = source.lightMap;
+  // this.aoMap = source.aoMap;
+  // this.emissiveMap = source.emissiveMap;
+  // this.bumpMap = source.bumpMap;
+  // this.bumpScale = source.bumpScale;
+  // this.normalMap = source.normalMap;
+  // this.normalMapType = source.normalMapType;
+  // this.normalScale.copy( source.normalScale );
+  // this.displacementMap = source.displacementMap;
+  // this.displacementScale = source.displacementScale;
+  // this.displacementBias = source.displacementBias;
+  // this.roughnessMap = source.roughnessMap;
+  // this.metalnessMap = source.metalnessMap;
+  // this.alphaMap = source.alphaMap;
+  // this.envMap = source.envMap;
+  // this.envMapIntensity = source.envMapIntensity;
+  // this.wireframeLinewidth = source.wireframeLinewidth;
+  // this.wireframeLinecap = source.wireframeLinecap;
+  // this.wireframeLinejoin = source.wireframeLinejoin;
+  // this.fog = source.fog;
+
   makeObjectPropertyFlowNode("visible", "boolean"),
   makeObjectPropertyFlowNode("position", "vec3"),
   makeObjectPropertyFlowNode("rotation", "euler"),
   makeObjectPropertyFlowNode("scale", "vec3")
 ]);
+
+type SettableMaterialProperties =
+  | "opacity"
+  | "color"
+  | "emissive"
+  | "transparent"
+  | "toneMapped"
+  | "flatShading"
+  | "wireframe"
+  | "fog"
+  | "roughness"
+  | "metalness"
+  | "lightMapIntensity"
+  | "aoMapIntensity"
+  | "emissiveIntensity";
+
+const NEEDS_UPDATE_PROPERTIES: (keyof GLTFMaterial)[] = ["flatShading", "map"];
+function makeMaterialPropertyNodes<T extends SettableMaterialProperties, S extends SocketTypeName>(
+  property: T,
+  nodeName: string,
+  nodeLabel: string,
+  socketType: S,
+  socketName: string = property
+) {
+  return [
+    makeInNOutFunctionDesc({
+      name: `hubs/material/get${nodeName}`,
+      label: `Get Material ${nodeLabel}`,
+      category: "Materials" as any,
+      in: [{ material: "material" }],
+      out: socketType,
+      exec: (material: GLTFMaterial) => {
+        return material.color.clone();
+      }
+    }),
+    makeFlowNodeDefinition({
+      typeName: `hubs/material/set${nodeName}`,
+      category: "Materials" as any,
+      label: `Set Material ${nodeLabel}`,
+      in: {
+        flow: "flow",
+        material: "material",
+        [socketName]: socketType
+      },
+      out: { flow: "flow" },
+      initialState: undefined,
+      triggered: ({ read, commit }) => {
+        const material = read<GLTFMaterial>("material");
+        const value = read(socketName) as any;
+        const prop = material[property];
+        if (typeof prop === "object" && "copy" in material[property]) {
+          prop.copy(value);
+          if (NEEDS_UPDATE_PROPERTIES.includes(property)) material.needsUpdate;
+        } else {
+          material[property] = value;
+        }
+        commit("flow");
+      }
+    })
+  ];
+}
