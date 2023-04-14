@@ -280,6 +280,15 @@ export const ParticleEmitterTag = defineComponent({
 export const AudioZone = defineComponent({
   flags: Types.ui8
 });
+export const AudioTarget = defineComponent({
+  minDelay: Types.ui32,
+  maxDelay: Types.ui32,
+  source: Types.eid,
+  flags: Types.ui8
+});
+export const AudioSource = defineComponent({
+  flags: Types.ui8
+});
 export const AudioParams = defineComponent();
 export const ScenePreviewCamera = defineComponent({
   duration: Types.f32,

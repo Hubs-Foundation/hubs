@@ -85,6 +85,8 @@ import { inflateParticleEmitter, ParticleEmitterParams } from "../inflators/part
 import { AudioZoneParams, inflateAudioZone } from "../inflators/audio-zone";
 import { AudioSettings } from "../components/audio-params";
 import { inflateAudioParams } from "../inflators/audio-params";
+import { AudioSourceParams, inflateAudioSource } from "../inflators/audio-source";
+import { AudioTargetParams, inflateAudioTarget } from "../inflators/audio-target";
 import { PhysicsShapeParams, inflatePhysicsShape } from "../inflators/physics-shape";
 import { inflateRigidBody, RigiBodyParams } from "../inflators/rigid-body";
 import { AmmoShapeParams, inflateAmmoShape } from "../inflators/ammo-shape";
@@ -370,6 +372,8 @@ export interface GLTFComponentData extends ComponentData {
   uvScroll: UVScrollParams;
   videoTextureTarget: VideoTextureTargetParams;
   videoTextureSource: { fps: number; resolution: [x: number, y: number] };
+  zoneAudioSource: AudioSourceParams;
+  audioTarget: AudioTargetParams;
 
   // deprecated
   spawnPoint?: true;
@@ -488,6 +492,8 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
   uvScroll: inflateUVScroll,
   simpleWater: inflateSimpleWater,
   particleEmitter: inflateParticleEmitter,
+  zoneAudioSource: inflateAudioSource,
+  audioTarget: inflateAudioTarget,
   ammoShape: inflateAmmoShape,
   boxCollider: inflateBoxCollider,
   trimesh: inflateTrimesh,
