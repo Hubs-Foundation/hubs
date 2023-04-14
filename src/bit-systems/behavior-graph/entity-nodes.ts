@@ -7,18 +7,22 @@ import {
   ValueType
 } from "@oveddan-behave-graph/core";
 import { addComponent, hasComponent, IComponent } from "bitecs";
-import { Box3, Box3Helper, Euler, Object3D, Quaternion, Vector3 } from "three";
-import { CursorRaycastable, CustomTags, EntityID, RemoteHoverTarget, SingleActionButton } from "../../bit-components";
-import * as bitComponents from "../../bit-components";
-import { COLLISION_LAYERS } from "../../constants";
-import { Fit, inflatePhysicsShape, Shape } from "../../inflators/physics-shape";
-import { definitionListToMap } from "./utils";
-import { findAncestorWithComponent } from "../../utils/bit-utils";
-import { inflateRigidBody, Type } from "../../inflators/rigid-body";
-import { ClientID } from "../../utils/networking-types";
-import { HubsWorld } from "../../app";
+import { Euler, Object3D, Quaternion, Vector3 } from "three";
 import { Text } from "troika-three-text";
+import { HubsWorld } from "../../app";
+import * as bitComponents from "../../bit-components";
+import {
+  CursorRaycastable,
+  CustomTags,
+  EntityID,
+  GLTFModel,
+  RemoteHoverTarget,
+  SingleActionButton
+} from "../../bit-components";
 import { inflateCustomTags } from "../../inflators/custom-tags";
+import { findAncestorWithComponent } from "../../utils/bit-utils";
+import { ClientID } from "../../utils/networking-types";
+import { definitionListToMap } from "./utils";
 
 type EntityEventState = {
   emitters: {
@@ -350,6 +354,27 @@ export const EntityNodes = definitionListToMap([
       }
 
       commit("flow");
+    }
+  }),
+  makeInNOutFunctionDesc({
+    name: "hubs/entity/unwrapMedia",
+    label: "Unwrap Media",
+    category: "Entity" as any,
+    in: [{ entity: "entity" }],
+    out: "entity",
+    exec: (entity: EntityID) => {
+      const world = APP.world;
+      const obj = world.eid2obj.get(entity);
+
+      if (!obj) {
+        console.error(`unwrapMedia: could not find entity`, entity);
+        return;
+      }
+
+      // TODO shouldn't use name to check this and shouldn't be directly referencing child like this
+      return obj.name === "Interactable Media" && hasComponent(world, GLTFModel, obj.children[0]?.eid!)
+        ? obj.children[0].eid
+        : entity;
     }
   }),
   makeObjectPropertyFlowNode("visible", "boolean"),
