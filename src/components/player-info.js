@@ -55,7 +55,7 @@ AFRAME.registerComponent("player-info", {
         this.playerSessionId = NAF.utils.getCreator(networkedEntity);
         const playerPresence = window.APP.hubChannel.presence.state[this.playerSessionId];
         if (playerPresence) {
-          this.updateFromPresenceMeta(playerPresence.metas[0]);
+          this.permissions = playerPresence.metas[0].permissions;
         }
       });
     }
@@ -137,8 +137,7 @@ AFRAME.registerComponent("player-info", {
     if (!this.playerSessionId && this.isLocalPlayerInfo) {
       this.playerSessionId = NAF.clientId;
     }
-    if (!this.playerSessionId) return;
-    if (this.playerSessionId !== presenceMeta.sessionId) return;
+    if (!this.playerSessionId || this.playerSessionId !== presenceMeta.sessionId) return;
 
     this.permissions = presenceMeta.permissions;
   },
