@@ -72,7 +72,9 @@ const isZoneEnabled = (zoneEid: number): boolean => {
 const getZoneBoundingBox = (zoneEid: number) => {
   if (AudioZone.flags[zoneEid] & AUDIO_ZONE_FLAGS.DYNAMIC) {
     const obj = APP.world.eid2obj.get(zoneEid)!;
-    return aabbs.get(zoneEid)!.setFromObject(obj);
+    obj.getWorldPosition(tmpPos);
+    obj.getWorldScale(tmpScale);
+    return aabbs.get(zoneEid)!.setFromCenterAndSize(tmpPos, tmpScale);
   } else {
     return aabbs.get(zoneEid)!;
   }
@@ -257,6 +259,8 @@ const prevZones = new Map<ElOrEid, Set<number>>();
 const aabbs = new Map<ElOrEid, Box3>();
 
 const listenerPos = new Vector3();
+const tmpPos = new Vector3();
+const tmpScale = new Vector3();
 const audioZoneQuery = defineQuery([AudioZone]);
 const audioZoneEnterQuery = enterQuery(audioZoneQuery);
 const audioZoneExitQuery = exitQuery(audioZoneQuery);
@@ -265,7 +269,9 @@ export function audioZoneSystem(world: HubsWorld) {
   audioZoneEnterQuery(world).forEach(zoneEid => {
     const obj = APP.world.eid2obj.get(zoneEid)!;
     const aabb = new Box3();
-    aabb.setFromObject(obj);
+    obj.getWorldPosition(tmpPos);
+    obj.getWorldScale(tmpScale);
+    aabb.setFromCenterAndSize(tmpPos, tmpScale);
     aabbs.set(zoneEid, aabb);
 
     const isDebugEnabled = APP.store.state.preferences.showAudioDebugPanel;
