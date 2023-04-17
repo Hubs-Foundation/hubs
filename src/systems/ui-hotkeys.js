@@ -24,12 +24,14 @@ AFRAME.registerSystem("ui-hotkeys", {
       this.userinput = this.el.systems.userinput;
     }
 
-    if (this.userinput.get(paths.actions.focusChat) && !isLockedDownDemoRoom()) {
-      window.dispatchEvent(new CustomEvent("focus_chat", { detail: { prefix: "" } }));
-    }
+    if (!isLockedDownDemoRoom()) {
+      if (this.userinput.get(paths.actions.focusChat)) {
+        window.dispatchEvent(new CustomEvent("focus_chat", { detail: { prefix: "" } }));
+      }
 
-    if (this.userinput.get(paths.actions.focusChatCommand) && !isLockedDownDemoRoom()) {
-      window.dispatchEvent(new CustomEvent("focus_chat", { detail: { prefix: "/" } }));
+      if (this.userinput.get(paths.actions.focusChatCommand)) {
+        window.dispatchEvent(new CustomEvent("focus_chat", { detail: { prefix: "/" } }));
+      }
     }
 
     if (this.userinput.get(paths.actions.mediaExit)) {

@@ -409,9 +409,10 @@ export default class Store extends EventTarget {
       newState.profile !== undefined &&
       newState.profile.avatarId !== undefined &&
       isLockedDownDemoRoom() &&
-      AFRAME !== undefined &&
-      AFRAME.scenes[0].is("loaded")
+      APP !== undefined &&
+      APP.scene.is("loaded")
     ) {
+      console.log("preventing avatarID");
       return;
     }
 

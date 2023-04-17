@@ -76,8 +76,4 @@
 :local(.disabled) {
   pointer-events: none;
   background-color: theme.$transparent;
-
-  svg {
-    color: theme.$text5-color;
-  }
 }

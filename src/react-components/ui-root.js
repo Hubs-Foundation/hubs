@@ -819,9 +819,7 @@ class UIRoot extends Component {
   renderEntryStartPanel = () => {
     const { hasAcceptedProfile, hasChangedName } = this.props.store.state.activity;
     const isLockedDownDemo = isLockedDownDemoRoom(this.props.hub.hub_id);
-    const promptForNameAndAvatarBeforeEntry = this.props.hubIsBound
-      ? !hasAcceptedProfile && !isLockedDownDemo
-      : !hasChangedName && !isLockedDownDemo;
+    const promptForNameAndAvatarBeforeEntry = this.props.hubIsBound ? !hasAcceptedProfile : !hasChangedName;
 
     // TODO: What does onEnteringCanceled do?
     return (
@@ -830,10 +828,16 @@ class UIRoot extends Component {
           roomName={this.props.hub.name}
           showJoinRoom={!this.state.waitingOnAudio && !this.props.entryDisallowed}
           onJoinRoom={() => {
+            if (isLockedDownDemo) {
+              if (this.props.forcedVREntryType.startsWith("vr")) {
+                this.setState({ enterInVR: true }, this.onAudioReadyButton);
+                return;
+              }
+              return this.onAudioReadyButton();
+            }
             if (promptForNameAndAvatarBeforeEntry || !this.props.forcedVREntryType) {
               this.setState({ entering: true });
               this.props.hubChannel.sendEnteringEvent();
-
               if (promptForNameAndAvatarBeforeEntry) {
                 this.pushHistoryState("entry_step", "profile");
               } else {
@@ -1422,7 +1426,7 @@ class UIRoot extends Component {
                         }}
                       />
                     )}
-                    {this.state.sidebarId !== "chat" && this.props.hub && (
+                    {!isLockedDownDemo && this.state.sidebarId !== "chat" && this.props.hub && (
                       <PresenceLog
                         preset={"InRoom"}
                         exclude={isMobile ? [] : ["permission"]}
@@ -1446,7 +1450,7 @@ class UIRoot extends Component {
                           store={this.props.store}
                         />
                       )}
-                      {!isMobile && !this.state.hide && (
+                      {!isLockedDownDemo && !isMobile && !this.state.hide && (
                         <PresenceLog
                           preset={"Notifications"}
                           include={["permission"]}

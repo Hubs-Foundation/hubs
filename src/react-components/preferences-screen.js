@@ -1253,11 +1253,7 @@ class PreferencesScreen extends Component {
                       })
                     }
                   ]
-                }
-              ]
-            : []),
-          ...(!isLockedDownDemoRoom()
-            ? [
+                },
                 {
                   key: "nametagVisibilityDistance",
                   prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,

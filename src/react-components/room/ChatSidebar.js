@@ -17,7 +17,6 @@ import styles from "./ChatSidebar.scss";
 import { formatMessageBody } from "../../utils/chat-message";
 import { FormattedMessage, useIntl, defineMessages, FormattedRelativeTime } from "react-intl";
 import { permissionMessage } from "./PermissionNotifications";
-import { isLockedDownDemoRoom } from "../../utils/hub-utils";
 
 export function SpawnMessageButton(props) {
   return (
@@ -280,9 +279,6 @@ const logMessages = defineMessages({
 
 // TODO: use react-intl's defineMessages to get proper extraction
 export function formatSystemMessage(entry, intl) {
-  if (isLockedDownDemoRoom()) {
-    return null;
-  }
   switch (entry.type) {
     case "join":
       return intl.formatMessage(joinedMessages[entry.presence], { name: <b>{entry.name}</b> });
