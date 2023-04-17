@@ -10,8 +10,12 @@ import { LogMessageType } from "./react-components/room/ChatSidebar";
 import { createNetworkedEntity } from "./utils/create-networked-entity";
 import qsTruthy from "./utils/qs_truthy";
 import { add, testAsset, respawn } from "./utils/chat-commands";
+<<<<<<< HEAD
 import { isLockedDownDemoRoom } from "./utils/hub-utils";
 import { loadFromJson, downloadSavedEntityStates } from "./utils/entity-state-utils";
+=======
+import { loadState, downloadSavedEntityStates } from "./utils/entity-state-utils";
+>>>>>>> e95fe000e (Add support for loading entity state from github)
 
 let uiRoot;
 // Handles user-entered messages
@@ -262,7 +266,11 @@ export default class MessageDispatch extends EventTarget {
         break;
       case "load":
         {
+<<<<<<< HEAD
           loadFromJson(this.hubChannel);
+=======
+          loadState(this.hubChannel, args);
+>>>>>>> e95fe000e (Add support for loading entity state from github)
         }
         break;
       case "download":

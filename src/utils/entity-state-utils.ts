@@ -233,3 +233,16 @@ export function loadFromJson(hubChannel: HubChannel) {
 (window as any).loadFromJson = () => {
   loadFromJson(APP.hubChannel!);
 };
+
+const TEST_ASSET_STATE = "https://raw.githubusercontent.com/mozilla/hubs-sample-assets/main/Hubs%20Components/test_json/__NAME__";
+
+export async function loadState(hubChannel: HubChannel, state: string){
+  const stateUrl =  TEST_ASSET_STATE.replace("__NAME__", state);  
+
+  const resp = await fetch(stateUrl);
+  const entityStates: EntityStateList = await resp.json();
+  entityStates.data.forEach(entityState => {
+    rewriteNidsForEntityState(entityState);
+    rebroadcastEntityState(hubChannel, entityState);
+  });
+}
