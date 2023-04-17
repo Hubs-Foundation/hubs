@@ -166,9 +166,9 @@ export const EntityValue = {
   material: new ValueType(
     "material",
     () => null,
-    (value: GLTFMaterial) => value,
-    (value: GLTFMaterial) => value,
-    (start: GLTFMaterial, end: GLTFMaterial, t: number) => (t < 0.5 ? start : end)
+    (value: EntityID) => value,
+    (value: EntityID) => value,
+    (start: EntityID, end: EntityID, t: number) => (t < 0.5 ? start : end)
   ),
   texture: new ValueType(
     "texture",
@@ -430,7 +430,7 @@ export const EntityNodes = definitionListToMap([
         console.error(`get material: called on a non meh`, entity);
         return;
       }
-      return mesh.material as GLTFMaterial;
+      return Array.isArray(mesh.material) ? mesh.material[0].eid : mesh.material.eid;
     }
   }),
   makeFlowNodeDefinition({
@@ -447,11 +447,15 @@ export const EntityNodes = definitionListToMap([
     triggered: ({ read, commit, graph }) => {
       const world = graph.getDependency<HubsWorld>("world")!;
       const entity = read<EntityID>("entity");
-      const material = read<GLTFMaterial>("material");
+      const material = world.eid2mat.get(read<EntityID>("material"));
       const obj = world.eid2obj.get(entity);
 
       if (!obj) {
         console.error(`set material: could not find entity`, entity);
+        return;
+      }
+      if (!material) {
+        console.error(`set material: could not find material`, entity);
         return;
       }
       const mesh = obj as Mesh;
@@ -545,7 +549,8 @@ function makeMaterialPropertyNodes<T extends SettableMaterialProperties, S exten
       category: "Materials" as any,
       in: [{ material: "material" }],
       out: socketType,
-      exec: (material: GLTFMaterial) => {
+      exec: (matEid: EntityID) => {
+        const material = APP.world.eid2mat.get(matEid) as GLTFMaterial;
         return material.color.clone();
       }
     }),
@@ -560,10 +565,13 @@ function makeMaterialPropertyNodes<T extends SettableMaterialProperties, S exten
       },
       out: { flow: "flow" },
       initialState: undefined,
-      triggered: ({ read, commit }) => {
-        const material = read<GLTFMaterial>("material");
+      triggered: ({ read, commit, graph }) => {
+        const world = graph.getDependency<HubsWorld>("world")!;
+        const matEid = read<EntityID>("material");
+        const material = world.eid2mat.get(matEid) as GLTFMaterial;
         const value = read(socketName) as any;
         const prop = material[property];
+        console.log(`setting material ${property}`, material, value);
         if (socketType === "color" || socketType === "euler" || socketType === "vec3") {
           (prop as any).copy(value);
         } else {
