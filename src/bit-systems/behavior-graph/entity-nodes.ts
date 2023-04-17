@@ -489,6 +489,8 @@ export const EntityNodes = definitionListToMap([
   ...makeMaterialPropertyNodes("wireframe", "Wireframe", "Is Wireframe", "boolean"),
   ...makeMaterialPropertyNodes("flatShading", "FlatShading", "Is Flat Shaded", "boolean"),
   ...makeMaterialPropertyNodes("fog", "Fog", "Is Effected By Fog", "boolean"),
+  ...makeMaterialPropertyNodes("depthWrite", "DepthWrite", "Depth Write", "boolean"),
+  ...makeMaterialPropertyNodes("alphaTest", "alphaTest", "Alpha Cutoff", "float", "cutoff"),
 
   // TODO
   // this.normalMapType = source.normalMapType;
@@ -521,7 +523,9 @@ type SettableMaterialProperties =
   | "normalMap"
   | "roughnessMap"
   | "metalnessMap"
-  | "alphaMap";
+  | "alphaMap"
+  | "depthWrite"
+  | "alphaTest";
 
 const NEEDS_UPDATE_PROPERTIES: (keyof GLTFMaterial)[] = [
   "flatShading",
