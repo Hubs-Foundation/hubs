@@ -1,5 +1,6 @@
-import { defineQuery, hasComponent } from "bitecs";
-import { NetworkedTransform, Owned } from "../bit-components";
+import { addComponent, defineQuery, hasComponent } from "bitecs";
+import { LinearRotate, LinearScale, LinearTranslate, NetworkedTransform, Owned } from "../bit-components";
+import { millisecondsBetweenTicks } from "../bit-systems/networking";
 
 const query = defineQuery([NetworkedTransform]);
 
@@ -27,23 +28,31 @@ export function networkedTransformSystem(world) {
     } else {
       tmpVec.fromArray(NetworkedTransform.position[eid]);
       if (!tmpVec.near(obj.position)) {
-        obj.position.copy(tmpVec);
-        obj.matrixNeedsUpdate = true;
+        addComponent(world, LinearTranslate, eid);
+        LinearTranslate.duration[eid] = millisecondsBetweenTicks;
+        LinearTranslate.targetX[eid] = tmpVec.x;
+        LinearTranslate.targetY[eid] = tmpVec.y;
+        LinearTranslate.targetZ[eid] = tmpVec.z;
       }
 
       tmpQuat.fromArray(NetworkedTransform.rotation[eid]);
       if (!tmpQuat.near(obj.quaternion)) {
-        obj.quaternion.copy(tmpQuat);
-        obj.matrixNeedsUpdate = true;
+        addComponent(world, LinearRotate, eid);
+        LinearRotate.duration[eid] = millisecondsBetweenTicks;
+        LinearRotate.targetX[eid] = tmpQuat.x;
+        LinearRotate.targetY[eid] = tmpQuat.y;
+        LinearRotate.targetZ[eid] = tmpQuat.z;
+        LinearRotate.targetW[eid] = tmpQuat.w;
       }
 
       tmpVec.fromArray(NetworkedTransform.scale[eid]);
       if (!tmpVec.near(obj.scale)) {
-        obj.scale.copy(tmpVec);
-        obj.matrixNeedsUpdate = true;
+        addComponent(world, LinearScale, eid);
+        LinearScale.duration[eid] = millisecondsBetweenTicks;
+        LinearScale.targetX[eid] = tmpVec.x;
+        LinearScale.targetY[eid] = tmpVec.y;
+        LinearScale.targetZ[eid] = tmpVec.z;
       }
     }
   }
 }
-
-// TODO lerping

@@ -73,6 +73,9 @@ import { audioEmitterSystem } from "../bit-systems/audio-emitter-system";
 import { audioZoneSystem } from "../bit-systems/audio-zone-system";
 import { audioDebugSystem } from "../bit-systems/audio-debug-system";
 import { textSystem } from "../bit-systems/text";
+import { audioTargetSystem } from "../bit-systems/audio-target-system";
+import { scenePreviewCameraSystem } from "../bit-systems/scene-preview-camera-system";
+import { linearTransformSystem } from "../bit-systems/linear-transform";
 
 declare global {
   interface Window {
@@ -183,7 +186,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   sceneLoadingSystem(world, hubsSystems.environmentSystem, hubsSystems.characterController);
   mediaLoadingSystem(world);
 
-  physicsCompatSystem(world);
+  physicsCompatSystem(world, hubsSystems.physicsSystem);
 
   networkedTransformSystem(world);
 
@@ -230,6 +233,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   );
   hubsSystems.soundEffectsSystem.tick();
   hubsSystems.scenePreviewCameraSystem.tick();
+  scenePreviewCameraSystem(world, hubsSystems.cameraSystem);
   hubsSystems.physicsSystem.tick(dt);
   hubsSystems.inspectYourselfSystem.tick(hubsSystems.el, aframeSystems.userinput, hubsSystems.cameraSystem);
   hubsSystems.cameraSystem.tick(hubsSystems.el, dt);
@@ -250,9 +254,11 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   hubsSystems.audioZonesSystem.tick(hubsSystems.el);
   audioZoneSystem(world);
   audioEmitterSystem(world, hubsSystems.audioSystem);
+  audioTargetSystem(world, hubsSystems.audioSystem);
   hubsSystems.gainSystem.tick();
   hubsSystems.nameTagSystem.tick();
   simpleWaterSystem(world);
+  linearTransformSystem(world);
 
   // All systems that update text properties should run before this
   textSystem(world);
