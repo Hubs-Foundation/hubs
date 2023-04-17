@@ -103,7 +103,7 @@ export function PeopleSidebar({
 }) {
   const me = people.find(person => !!person.isMe);
   const filteredPeople = people.filter(person => !person.isMe);
-  filteredPeople && filteredPeople.unshift(me);
+  me && filteredPeople.unshift(me);
 
   return (
     <Sidebar
