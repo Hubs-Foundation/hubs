@@ -101,6 +101,7 @@ export function PeopleSidebar({
   voiceChatEnabled,
   isMod
 }) {
+  const intl = useIntl();
   const me = people.find(person => !!person.isMe);
   const filteredPeople = people.filter(person => !person.isMe);
   me && filteredPeople.unshift(me);
@@ -128,7 +129,6 @@ export function PeopleSidebar({
       <List>
         {!!people.length &&
           filteredPeople.map(person => {
-            const intl = useIntl();
             const DeviceIcon = getDeviceIconComponent(person.context);
             const VoiceIcon = getVoiceIconComponent(person.micPresence);
 
