@@ -1,4 +1,4 @@
-import { GraphJSON } from "@oveddan-behave-graph/core";
+import { GraphJSON, ValueJSON } from "@oveddan-behave-graph/core";
 import { addComponent, addEntity, hasComponent } from "bitecs";
 import { Material, Mesh, Object3D } from "three";
 import { HubsWorld } from "../app";
@@ -60,9 +60,31 @@ function inflateComponents(
   });
 }
 
+// TODO we are doing this in a bunch of different ways. It should all be able to be unified. For BG though this will likely be JSON paths
+type MHCLink = { __mhc_link_type?: "node" | "material"; index: number };
+function resolveBGMHCLink(
+  value: MHCLink,
+  idx2eid: Map<number, EntityID>,
+  matIdx2eid: Map<number, EntityID>
+): ValueJSON {
+  const linkType = value?.__mhc_link_type;
+  if (linkType) {
+    if (linkType === "node") {
+      return idx2eid.get(value.index)!;
+    } else if (linkType === "material") {
+      return matIdx2eid.get(value.index)!;
+    } else {
+      throw new Error(`${linkType} links not suppoerted`);
+    }
+  } else {
+    return value as any;
+  }
+}
+
 export function inflateModel(world: HubsWorld, rootEid: number, { model }: ModelParams) {
   const swap: [old: Object3D, replacement: Object3D][] = [];
   const idx2eid = new Map<number, number>();
+  const matIdx2eid = new Map<number, number>();
   model.traverse(obj => {
     const gltfIndex: number | undefined = obj.userData.gltfIndex;
 
@@ -82,6 +104,7 @@ export function inflateModel(world: HubsWorld, rootEid: number, { model }: Model
 
     mapMaterials(obj, function (mat: Material) {
       const eid = mat.eid || addEntity(world);
+      matIdx2eid.set(mat.userData.gltfIndex, eid);
       if (!hasComponent(world, MaterialTag, eid)) addMaterialComponent(world, eid, mat);
       const components = mat.userData.gltfExtensions?.MOZ_hubs_components;
       if (components) inflateComponents(world, eid, components, idx2eid);
@@ -172,16 +195,14 @@ export function inflateModel(world: HubsWorld, rootEid: number, { model }: Model
     for (const node of graph.nodes!) {
       if (node.configuration) {
         for (const propName in node.configuration) {
-          const value = node.configuration[propName] as any;
-          if (value.isObject3D) node.configuration[propName] = swap.get(value)?.eid || value.eid;
+          node.configuration[propName] = resolveBGMHCLink(node.configuration[propName] as any, idx2eid, matIdx2eid);
         }
       }
       if (node.parameters) {
         for (const propName in node.parameters) {
           const param = node.parameters[propName];
           if ("value" in param) {
-            const value = param.value as any;
-            if (value.isObject3D) param.value = swap.get(value)?.eid || value.eid;
+            param.value = resolveBGMHCLink(param.value as any, idx2eid, matIdx2eid);
           }
         }
       }

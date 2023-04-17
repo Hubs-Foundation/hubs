@@ -508,6 +508,18 @@ class GLTFHubsPlugin {
         }
       }
     }
+    const materials = parser.json.materials;
+    if (materials) {
+      for (let i = 0; i < materials.length; i++) {
+        const mat = materials[i];
+
+        if (!mat.extras) {
+          mat.extras = {};
+        }
+
+        mat.extras.gltfIndex = i;
+      }
+    }
   }
 
   afterRoot(gltf) {
@@ -868,7 +880,6 @@ class GLTFMozBehaviorExtension {
                   if (type === "texture" && !parser.json.textures[value.index].extensions?.MOZ_texture_rgbe) {
                     loadedDep.encoding = THREE.sRGBEncoding;
                   }
-                  node.configuration[propName] = loadedDep;
                   return loadedDep;
                 })
               );
@@ -885,7 +896,6 @@ class GLTFMozBehaviorExtension {
                   if (type === "texture" && !parser.json.textures[value.index].extensions?.MOZ_texture_rgbe) {
                     loadedDep.encoding = THREE.sRGBEncoding;
                   }
-                  node.parameters[propName].value = loadedDep;
                   return loadedDep;
                 })
               );
