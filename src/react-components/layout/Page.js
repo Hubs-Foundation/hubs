@@ -51,7 +51,7 @@ export function Page({
         onSignOut={onSignOut}
         isHmc={isHmc}
       />
-      <main {...rest}>
+      <main data-theme="light" {...rest}>
         <MobileNav
           showDocsLink={showDocsLink}
           showSourceLink={showSourceLink}

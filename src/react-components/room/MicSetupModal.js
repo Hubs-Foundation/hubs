@@ -15,6 +15,7 @@ import { defineMessages, FormattedMessage, useIntl } from "react-intl";
 import { Popover } from "../popover/Popover";
 import { PermissionStatus } from "../../utils/media-devices-utils";
 import { Spinner } from "../misc/Spinner";
+import { ToolTip } from "@mozilla/lilypad-ui";
 
 export const tittleMessages = defineMessages({
   microphoneSetup: {
@@ -90,32 +91,14 @@ export function MicSetupModal({
                         checked={isMicrophoneMuted}
                         onChange={onChangeMicrophoneMuted}
                       />
-                      <Popover
-                        title="Info"
-                        content={
-                          <Column className={styles.popoverContent}>
-                            <FormattedMessage
-                              id="mic-setup-modal.mute-mic-info"
-                              defaultMessage="You can mute anytime after you enter the room"
-                            />
-                          </Column>
-                        }
-                        placement="top"
-                        showHeader={false}
-                        disableFullscreen
-                        popoverClass={styles.popover}
-                        arrowClass={styles.popoverArrow}
+                      <ToolTip
+                        // classProp="tooltip"
+                        category="primary"
+                        // location="top"
+                        description="You can mute anytime after you enter the room"
                       >
-                        {({ openPopover, closePopover, triggerRef }) => (
-                          <div ref={triggerRef}>
-                            <InfoIcon
-                              className={styles.infoIcon}
-                              onMouseEnter={openPopover}
-                              onMouseLeave={closePopover}
-                            />
-                          </div>
-                        )}
-                      </Popover>
+                        <InfoIcon className={styles.infoIcon} />
+                      </ToolTip>
                     </>
                   ) : (
                     (permissionStatus === PermissionStatus.PROMPT && (

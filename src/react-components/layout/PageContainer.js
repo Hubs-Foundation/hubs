@@ -10,6 +10,8 @@ import { TERMS, PRIVACY } from "../../constants";
 export function PageContainer({ children, ...rest }) {
   const auth = useContext(AuthContext);
   useAccessibleOutlineStyle();
+  console.log("************");
+  console.log(window.APP.store);
   return (
     <Page
       showCloud={configs.feature("show_cloud")}
