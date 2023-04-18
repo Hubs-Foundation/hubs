@@ -10,7 +10,6 @@ export function definitionListToMap(list: NodeDefinition[]): NodeDefinitionsMap 
 const skipExport = [
   "customEvent/onTriggered",
   "customEvent/trigger",
-  "math/easing",
   "debug/expectTrue",
   "flow/sequence",
   "flow/waitAll"

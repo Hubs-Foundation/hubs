@@ -62,6 +62,11 @@ const registry: IRegistry = {
   }
 };
 
+
+  const easingNode = registry.nodes["math/easing"] as any; 
+  easingNode.in.easingMode.choices = easingNode.in.easingMode.options.map((v: any) => ({ text: v, value: v }));
+  easingNode.in.easingFunction.choices = easingNode.in.easingFunction.options.map((v: any) => ({ text: v, value: v }));
+
 const nodeSpec = cleanupNodespac(writeNodeSpecsToJSON({ ...registry, dependencies: {} }));
 console.log("registry", registry, nodeSpec);
 console.log(JSON.stringify(nodeSpec, null, 2));
