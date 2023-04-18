@@ -26,7 +26,7 @@ export class PhysicsSystem {
     this.indexToUuid = {};
     this.bodyUuidToData = new Map();
 
-    this.debug = false;
+    this.debug = true;
     this.debugRequested = false;
     this.debugEnabled = false;
     this.scene = scene;
@@ -286,8 +286,10 @@ export class PhysicsSystem {
     if (bodyData.isInitialized) {
       delete this.indexToUuid[bodyData.index];
       bodyData.collisions.forEach(otherId => {
-        const otherData = this.bodyUuidToData.get(otherId).collisions;
-        otherData.splice(otherData.indexOf(uuid), 1);
+        const collisions = this.bodyUuidToData.get(otherId)?.collisions;
+        // This can happen when removing multiple bodies in a frame
+        if (!collisions) return;
+        collisions.splice(collisions.indexOf(uuid), 1);
       });
       this.bodyUuids.splice(this.bodyUuids.indexOf(uuid), 1);
       this.bodyUuidToData.delete(uuid);
