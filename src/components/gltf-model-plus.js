@@ -880,6 +880,7 @@ class GLTFMozBehaviorExtension {
                   if (type === "texture" && !parser.json.textures[value.index].extensions?.MOZ_texture_rgbe) {
                     loadedDep.encoding = THREE.sRGBEncoding;
                   }
+                  value.dep = loadedDep;
                   return loadedDep;
                 })
               );
@@ -896,6 +897,7 @@ class GLTFMozBehaviorExtension {
                   if (type === "texture" && !parser.json.textures[value.index].extensions?.MOZ_texture_rgbe) {
                     loadedDep.encoding = THREE.sRGBEncoding;
                   }
+                  value.dep = loadedDep;
                   return loadedDep;
                 })
               );

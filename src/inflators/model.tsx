@@ -61,8 +61,9 @@ function inflateComponents(
 }
 
 // TODO we are doing this in a bunch of different ways. It should all be able to be unified. For BG though this will likely be JSON paths
-type MHCLink = { __mhc_link_type?: "node" | "material"; index: number };
+type MHCLink = { __mhc_link_type?: "node" | "material"; index: number; dep: Material };
 function resolveBGMHCLink(
+  world: HubsWorld,
   value: MHCLink,
   idx2eid: Map<number, EntityID>,
   matIdx2eid: Map<number, EntityID>
@@ -72,6 +73,16 @@ function resolveBGMHCLink(
     if (linkType === "node") {
       return idx2eid.get(value.index)!;
     } else if (linkType === "material") {
+      if (!matIdx2eid.has(value.index)) {
+        const mat = value.dep;
+        if (!mat.eid) {
+          mat.eid = addEntity(world);
+          addMaterialComponent(world, mat.eid, mat);
+          const components = mat.userData.gltfExtensions?.MOZ_hubs_components;
+          if (components) inflateComponents(world, mat.eid, components, idx2eid);
+        }
+        matIdx2eid.set(mat.userData.gltfIndex, mat.eid);
+      }
       return matIdx2eid.get(value.index)!;
     } else {
       throw new Error(`${linkType} links not suppoerted`);
@@ -195,14 +206,19 @@ export function inflateModel(world: HubsWorld, rootEid: number, { model }: Model
     for (const node of graph.nodes!) {
       if (node.configuration) {
         for (const propName in node.configuration) {
-          node.configuration[propName] = resolveBGMHCLink(node.configuration[propName] as any, idx2eid, matIdx2eid);
+          node.configuration[propName] = resolveBGMHCLink(
+            world,
+            node.configuration[propName] as any,
+            idx2eid,
+            matIdx2eid
+          );
         }
       }
       if (node.parameters) {
         for (const propName in node.parameters) {
           const param = node.parameters[propName];
           if ("value" in param) {
-            param.value = resolveBGMHCLink(param.value as any, idx2eid, matIdx2eid);
+            param.value = resolveBGMHCLink(world, param.value as any, idx2eid, matIdx2eid);
           }
         }
       }
