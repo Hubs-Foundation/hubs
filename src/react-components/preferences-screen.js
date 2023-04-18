@@ -1106,7 +1106,9 @@ class PreferencesScreen extends Component {
                 }
               ]
             : []),
-          ...(MediaDevicesManager.isAudioInputSelectEnabled ? [this.state.preferredMic] : []),
+          ...(MediaDevicesManager.isAudioInputSelectEnabled && !isLockedDownDemoRoom()
+            ? [this.state.preferredMic]
+            : []),
           ...(MediaDevicesManager.isAudioOutputSelectEnabled ? [this.state.preferredSpeakers] : []),
           {
             key: "globalVoiceVolume",

@@ -402,20 +402,6 @@ export default class Store extends EventTarget {
   }
 
   update(newState, mergeOpts) {
-    // Check if in demo room before changing avatar. This feature is meant to prevent any avatarID changes triggered from an avatar.js panel ONLY. "Change Name & Avatar" button in More Menu is disabled at a UI level.
-    // Waiting for scene to load allows for avatarID to be set from default on scene load.
-    // TODO: Will need update with switch to bitECS loader
-    if (
-      newState.profile !== undefined &&
-      newState.profile.avatarId !== undefined &&
-      isLockedDownDemoRoom() &&
-      APP !== undefined &&
-      APP.scene.is("loaded")
-    ) {
-      console.log("preventing avatarID");
-      return;
-    }
-
     const finalState = merge({ ...this.state, preferences: this._preferences }, newState, mergeOpts);
     const { valid, errors } = validator.validate(finalState, SCHEMA);
 

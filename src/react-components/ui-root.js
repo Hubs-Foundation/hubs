@@ -829,7 +829,7 @@ class UIRoot extends Component {
           showJoinRoom={!this.state.waitingOnAudio && !this.props.entryDisallowed}
           onJoinRoom={() => {
             if (isLockedDownDemo) {
-              if (this.props.forcedVREntryType.startsWith("vr")) {
+              if (this.props.forcedVREntryType?.startsWith("vr")) {
                 this.setState({ enterInVR: true }, this.onAudioReadyButton);
                 return;
               }
