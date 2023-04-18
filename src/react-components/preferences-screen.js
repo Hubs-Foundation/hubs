@@ -973,7 +973,7 @@ class PreferencesScreen extends Component {
     this.mediaDevicesManager.on(MediaDevicesEvents.DEVICE_CHANGE, this.onMediaDevicesUpdated);
     APP.hubChannel.addEventListener("permissions_updated", this.permissionsUpdated);
 
-    if (this.state.canVoiceChat) {
+    if (this.state.canVoiceChat && !isLockedDownDemoRoom()) {
       this.mediaDevicesManager.startMicShare({ updatePrefs: false }).then(this.updateMediaDevices);
     } else {
       this.updateMediaDevices();
