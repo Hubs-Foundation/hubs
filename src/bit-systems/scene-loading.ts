@@ -27,6 +27,8 @@ import { EntityID } from "../utils/networking-types";
 import { isGeometryHighDensity } from "../utils/physics-utils";
 import { add } from "./media-loading";
 import { moveToSpawnPoint } from "./waypoint";
+import { inflateAudioSettings } from "../inflators/audio-settings";
+import { SourceType } from "../components/audio-params";
 
 export function swapActiveScene(world: HubsWorld, src: string) {
   const currentScene = anyEntityWith(APP.world, SceneRoot);
@@ -54,6 +56,9 @@ function* loadScene(
     if (!src) {
       throw new Error("Scene loading failed. No src url provided to load.");
     }
+
+    APP.sceneAudioDefaults.delete(SourceType.AVATAR_AUDIO_SOURCE);
+    APP.sceneAudioDefaults.delete(SourceType.MEDIA_VIDEO);
 
     const scene = yield* loadModel(world, src, "model/gltf", false);
     clearRollbacks(); // After this point, normal entity cleanup will takes care of things
