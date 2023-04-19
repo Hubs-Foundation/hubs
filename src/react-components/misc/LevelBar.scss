@@ -1,4 +1,4 @@
-@use '../styles/theme';
+@use "../styles/theme";
 
 :local(.level-bar-container) {
   position: relative;
@@ -10,6 +10,7 @@
   width: 100%;
   border: 1px solid var(--toolbar-basic-border-color);
   border-radius: theme.$border-radius-small;
+  z-index: -1;
 }
 
 :local(.level-bar) {
@@ -19,4 +20,5 @@
   background-color: theme.$green;
   margin-left: 4px;
   margin-top: 4px;
+  z-index: -1;
 }
