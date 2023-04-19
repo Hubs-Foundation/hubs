@@ -2,7 +2,6 @@ import { paths } from "../paths";
 import { sets } from "../sets";
 import { xforms } from "./xforms";
 import { addSetsToBindings } from "./utils";
-import qsTruthy from "../../../utils/qs_truthy";
 
 // import { Pose } from "../pose";
 
