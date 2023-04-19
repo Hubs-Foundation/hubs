@@ -27,7 +27,6 @@ import { EntityID } from "../utils/networking-types";
 import { isGeometryHighDensity } from "../utils/physics-utils";
 import { add } from "./media-loading";
 import { moveToSpawnPoint } from "./waypoint";
-import { inflateAudioSettings } from "../inflators/audio-settings";
 import { SourceType } from "../components/audio-params";
 
 export function swapActiveScene(world: HubsWorld, src: string) {
