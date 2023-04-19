@@ -4,6 +4,7 @@ import { Object3D } from "three";
 import { HubsWorld } from "../app";
 import { findAncestor, traverseSome } from "./three-utils";
 import { EntityID } from "./networking-types";
+import qsTruthy from "./qs_truthy";
 
 export type ElOrEid = EntityID | AElement;
 
@@ -47,4 +48,9 @@ export function findChildWithComponent(world: HubsWorld, component: Component, e
     });
     return childEid;
   }
+}
+
+const forceNewLoader = qsTruthy("newLoader");
+export function shouldUseNewLoader() {
+  return forceNewLoader;
 }
