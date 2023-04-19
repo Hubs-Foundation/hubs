@@ -147,6 +147,11 @@ function updateTextButtonColors() {
   }
 }
 
+function applyThemeToBody() {
+  const theme = getCurrentTheme();
+  document.body.setAttribute("data-theme", theme.name.toLowerCase().includes("dark") ? "dark" : "light");
+}
+
 function onThemeChanged(listener) {
   store.addEventListener("themechanged", listener);
   const [_darkModeQuery, removeDarkModeListener] = registerDarkModeQuery(listener);
@@ -164,13 +169,19 @@ waitForDOMContentLoaded().then(() => {
     return;
   }
 
-  if (configs.APP_CONFIG && configs.APP_CONFIG.theme && configs.APP_CONFIG.theme["dark-theme"]) {
-    document.body.classList.add("dark-theme");
+  // Set initial theme
+  const theme = getCurrentTheme();
+  if (theme && theme.name.toLowerCase().includes("dark")) {
+    document.body.setAttribute("data-theme", "dark");
   } else {
-    document.body.classList.add("light-theme");
+    document.body.setAttribute("data-theme", "light");
   }
+
   updateTextButtonColors();
-  onThemeChanged(updateTextButtonColors);
+  onThemeChanged(() => {
+    updateTextButtonColors();
+    applyThemeToBody();
+  });
 });
 
 function applyThemeToTextButton(el, highlighted) {
@@ -192,6 +203,7 @@ export {
   getDefaultTheme,
   getThemeColor,
   onThemeChanged,
+  applyThemeToBody,
   registerDarkModeQuery,
   themes,
   tryGetTheme
