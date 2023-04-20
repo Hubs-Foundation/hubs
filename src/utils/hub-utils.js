@@ -54,9 +54,9 @@ export function isRoomOwner(clientId) {
   return presences && presences[clientId] && presences[clientId].metas[0].roles.owner;
 }
 
-export function isLockedDownDemoRoom(id) {
-  const hubId = id ? id : getCurrentHubId();
-  if (configs.feature("is_locked_down_demo_room")) {
+export function isLockedDownDemoRoom() {
+  const hubId = getCurrentHubId();
+  if (configs.feature("is_locked_down_demo_room") || true) {
     const idArr = configs.feature("is_locked_down_demo_room").replace(/\s/g, "").split(",");
     return idArr.includes(hubId);
   } else {

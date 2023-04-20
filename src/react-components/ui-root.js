@@ -818,7 +818,7 @@ class UIRoot extends Component {
 
   renderEntryStartPanel = () => {
     const { hasAcceptedProfile, hasChangedName } = this.props.store.state.activity;
-    const isLockedDownDemo = isLockedDownDemoRoom(this.props.hub.hub_id);
+    const isLockedDownDemo = isLockedDownDemoRoom();
     const promptForNameAndAvatarBeforeEntry = this.props.hubIsBound ? !hasAcceptedProfile : !hasChangedName;
 
     // TODO: What does onEnteringCanceled do?
@@ -1107,7 +1107,7 @@ class UIRoot extends Component {
 
     const streaming = this.state.isStreaming;
 
-    const isLockedDownDemo = isLockedDownDemoRoom(this.props.hub.hub_id);
+    const isLockedDownDemo = isLockedDownDemoRoom();
 
     const showObjectList = enteredOrWatching && !isLockedDownDemo;
     const showECSObjectsMenuButton = qsTruthy("ecsDebug");

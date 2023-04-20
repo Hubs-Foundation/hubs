@@ -159,6 +159,7 @@ import MessageDispatch from "./message-dispatch";
 import SceneEntryManager from "./scene-entry-manager";
 import Subscriptions from "./subscriptions";
 import { createInWorldLogMessage } from "./react-components/chat-message";
+import { fetchRandomDefaultAvatarId } from "./utils/identity.js";
 
 import "./systems/nav";
 import "./systems/frame-scheduler";
@@ -444,7 +445,7 @@ export async function updateEnvironmentForHub(hub, entryManager) {
 
     environmentEl.addEventListener(
       "model-loaded",
-      () => {
+      async () => {
         environmentEl.removeEventListener("model-error", sceneErrorHandler);
 
         console.log(`Scene file initial load took ${Math.round(performance.now() - loadStart)}ms`);
@@ -458,6 +459,12 @@ export async function updateEnvironmentForHub(hub, entryManager) {
 
         //TODO: check if the environment was made with spoke to determine if a shape should be added
         traverseMeshesAndAddShapes(environmentEl);
+
+        if (isLockedDownDemoRoom()) {
+          const avatarRig = document.querySelector("#avatar-rig");
+          const avatarId = await fetchRandomDefaultAvatarId();
+          avatarRig.setAttribute("player-info", { avatarSrc: await getAvatarSrc(avatarId) });
+        }
       },
       { once: true }
     );
@@ -480,7 +487,7 @@ export async function updateEnvironmentForHub(hub, entryManager) {
       () => {
         environmentEl.addEventListener(
           "model-loaded",
-          () => {
+          async () => {
             environmentEl.removeEventListener("model-error", sceneErrorHandler);
 
             envSystem.updateEnvironment(environmentEl);
@@ -495,6 +502,12 @@ export async function updateEnvironmentForHub(hub, entryManager) {
             }
 
             const fader = document.getElementById("viewing-camera").components["fader"];
+
+            if (isLockedDownDemoRoom()) {
+              const avatarRig = document.querySelector("#avatar-rig");
+              const avatarId = await fetchRandomDefaultAvatarId();
+              avatarRig.setAttribute("player-info", { avatarSrc: await getAvatarSrc(avatarId) });
+            }
 
             // Add a slight delay before de-in to reduce hitching.
             setTimeout(() => fader.fadeIn(), 2000);
@@ -765,7 +778,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // If the stored avatar doesn't have a valid src, reset to a legacy avatar.
   const avatarSrc = await getAvatarSrc(store.state.profile.avatarId);
-  if (!avatarSrc || isLockedDownDemoRoom(hubId)) {
+  if (!avatarSrc) {
     await store.resetToRandomDefaultAvatar();
   }
 

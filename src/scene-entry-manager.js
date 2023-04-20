@@ -164,13 +164,12 @@ export default class SceneEntryManager {
   };
 
   _setupPlayerRig = () => {
-    this._setPlayerInfoFromProfile();
-
     // Explict user action changed avatar or updated existing avatar.
     this.scene.addEventListener("avatar_updated", () => this._setPlayerInfoFromProfile(true));
 
     // Store updates can occur to avatar id in cases like error, auth reset, etc.
     if (!isLockedDownDemoRoom()) {
+      this._setPlayerInfoFromProfile();
       this.store.addEventListener("statechanged", () => this._setPlayerInfoFromProfile());
     }
 
