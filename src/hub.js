@@ -459,12 +459,6 @@ export async function updateEnvironmentForHub(hub, entryManager) {
 
         //TODO: check if the environment was made with spoke to determine if a shape should be added
         traverseMeshesAndAddShapes(environmentEl);
-
-        if (isLockedDownDemoRoom()) {
-          const avatarRig = document.querySelector("#avatar-rig");
-          const avatarId = await fetchRandomDefaultAvatarId();
-          avatarRig.setAttribute("player-info", { avatarSrc: await getAvatarSrc(avatarId) });
-        }
       },
       { once: true }
     );
@@ -502,12 +496,6 @@ export async function updateEnvironmentForHub(hub, entryManager) {
             }
 
             const fader = document.getElementById("viewing-camera").components["fader"];
-
-            if (isLockedDownDemoRoom()) {
-              const avatarRig = document.querySelector("#avatar-rig");
-              const avatarId = await fetchRandomDefaultAvatarId();
-              avatarRig.setAttribute("player-info", { avatarSrc: await getAvatarSrc(avatarId) });
-            }
 
             // Add a slight delay before de-in to reduce hitching.
             setTimeout(() => fader.fadeIn(), 2000);
@@ -847,6 +835,18 @@ document.addEventListener("DOMContentLoaded", async () => {
       () => hubChannel.updateScene(sceneInfo),
       SignInMessages.changeScene
     );
+  });
+
+  scene.addEventListener("hub_updated", async () => {
+    if (isLockedDownDemoRoom()) {
+      const avatarRig = document.querySelector("#avatar-rig");
+      const avatarId = await fetchRandomDefaultAvatarId();
+      avatarRig.setAttribute("player-info", { avatarSrc: await getAvatarSrc(avatarId) });
+    } else {
+      if (scene.is("entered")) {
+        entryManager._setPlayerInfoFromProfile(true);
+      }
+    }
   });
 
   remountUI({

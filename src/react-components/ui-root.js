@@ -1426,7 +1426,7 @@ class UIRoot extends Component {
                         }}
                       />
                     )}
-                    {!isLockedDownDemo && this.state.sidebarId !== "chat" && this.props.hub && (
+                    {this.state.sidebarId !== "chat" && this.props.hub && (
                       <PresenceLog
                         preset={"InRoom"}
                         exclude={isMobile ? [] : ["permission"]}
@@ -1450,7 +1450,7 @@ class UIRoot extends Component {
                           store={this.props.store}
                         />
                       )}
-                      {!isLockedDownDemo && !isMobile && !this.state.hide && (
+                      {!isMobile && !this.state.hide && (
                         <PresenceLog
                           preset={"Notifications"}
                           include={["permission"]}
