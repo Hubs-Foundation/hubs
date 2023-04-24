@@ -445,7 +445,7 @@ export async function updateEnvironmentForHub(hub, entryManager) {
 
     environmentEl.addEventListener(
       "model-loaded",
-      async () => {
+      () => {
         environmentEl.removeEventListener("model-error", sceneErrorHandler);
 
         console.log(`Scene file initial load took ${Math.round(performance.now() - loadStart)}ms`);
@@ -481,7 +481,7 @@ export async function updateEnvironmentForHub(hub, entryManager) {
       () => {
         environmentEl.addEventListener(
           "model-loaded",
-          async () => {
+          () => {
             environmentEl.removeEventListener("model-error", sceneErrorHandler);
 
             envSystem.updateEnvironment(environmentEl);
