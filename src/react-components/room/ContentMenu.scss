@@ -72,3 +72,8 @@
   margin: 0 8px;
   background-color: theme.$border1-color;
 }
+
+:local(.disabled) {
+  pointer-events: none;
+  background-color: theme.$transparent;
+}
