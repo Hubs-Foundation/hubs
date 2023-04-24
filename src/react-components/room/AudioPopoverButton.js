@@ -5,6 +5,7 @@ import { Popover } from "../popover/Popover";
 import { ToolbarButton } from "../input/ToolbarButton";
 import { ReactComponent as ArrowIcon } from "../icons/Arrow.svg";
 import { defineMessage, useIntl } from "react-intl";
+import { ToolTip } from "@mozilla/lilypad-ui";
 
 const invitePopoverTitle = defineMessage({
   id: "audio-toolbar-popover.title",
@@ -26,20 +27,21 @@ export const AudioPopoverButton = ({ initiallyVisible, content, micButton, disab
       popoverApiRef={popoverApiRef}
     >
       {({ togglePopover, popoverVisible, triggerRef }) => (
-        <div className={styles.buttonsContainer}>
-          <ToolbarButton
-            ref={triggerRef}
-            icon={<ArrowIcon />}
-            preset="basic"
-            selected={popoverVisible}
-            onClick={togglePopover}
-            type={"left"}
-            className={popoverVisible ? styles.arrowButton : styles.arrowButtonSelected}
-            title={title}
-            disabled={disabled}
-          />
-          {micButton}
-        </div>
+        <ToolTip description={title}>
+          <div className={styles.buttonsContainer}>
+            <ToolbarButton
+              ref={triggerRef}
+              icon={<ArrowIcon />}
+              preset="basic"
+              selected={popoverVisible}
+              onClick={togglePopover}
+              type={"left"}
+              className={popoverVisible ? styles.arrowButton : styles.arrowButtonSelected}
+              disabled={disabled}
+            />
+            {micButton}
+          </div>
+        </ToolTip>
       )}
     </Popover>
   );
