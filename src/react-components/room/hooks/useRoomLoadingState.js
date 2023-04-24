@@ -1,7 +1,7 @@
 import { useEffect, useReducer, useRef, useCallback } from "react";
 import { useIntl, defineMessages } from "react-intl";
-import { waitForPreloads } from "../../utils/preload";
-import qsTruthy from "../../utils/qs_truthy";
+import { waitForPreloads } from "../../../utils/preload";
+import qsTruthy from "../../../utils/qs_truthy";
 
 function reducer(state, action) {
   switch (action.type) {

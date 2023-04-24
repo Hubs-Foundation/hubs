@@ -6,7 +6,7 @@ import {
   removeOrientationChangeListener,
   getMaxResolutionWidth,
   getMaxResolutionHeight
-} from "../../utils/screen-orientation-utils";
+} from "../../../utils/screen-orientation-utils";
 
 function calculateRendererSize(canvasRect, maxResolution, isVR) {
   if (isVR) {

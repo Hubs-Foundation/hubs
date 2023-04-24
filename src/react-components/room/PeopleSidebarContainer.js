@@ -4,9 +4,9 @@ import { PeopleSidebar } from "./PeopleSidebar";
 import { getMicrophonePresences } from "../../utils/microphone-presence";
 import ProfileEntryPanel from "../profile-entry-panel";
 import { UserProfileSidebarContainer } from "./UserProfileSidebarContainer";
-import { useCan } from "./useCan";
-import { useRoomPermissions } from "./useRoomPermissions";
-import { useRole } from "./useRole";
+import { useCan } from "./hooks/useCan";
+import { useRoomPermissions } from "./hooks/useRoomPermissions";
+import { useRole } from "./hooks/useRole";
 
 export function userFromPresence(sessionId, presence, micPresences, mySessionId, voiceEnabled) {
   const meta = presence.metas[presence.metas.length - 1];

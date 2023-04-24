@@ -4,7 +4,7 @@ import configs from "../../utils/configs";
 import { hubUrl } from "../../utils/phoenix-utils";
 import { InvitePopoverButton } from "./InvitePopover";
 import { handleExitTo2DInterstitial } from "../../utils/vr-interstitial";
-import { useInviteUrl } from "./useInviteUrl";
+import { useInviteUrl } from "./hooks/useInviteUrl";
 
 export function InvitePopoverContainer({ hub, hubChannel, scene, store, ...rest }) {
   // TODO: Move to Hub class

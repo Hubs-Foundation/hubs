@@ -11,7 +11,7 @@ import { Slider } from "../input/Slider";
 import { ToolbarButton } from "../input/ToolbarButton";
 import { ReactComponent as VolumeHigh } from "../icons/VolumeHigh.svg";
 import { ReactComponent as VolumeMuted } from "../icons/VolumeMuted.svg";
-import useAvatarVolume from "./useAvatarVolume";
+import useAvatarVolume from "./hooks/useAvatarVolume";
 import { calcLevel, calcGainMultiplier, MAX_VOLUME_LABELS } from "../../utils/avatar-volume-utils";
 
 const MIN = 0;

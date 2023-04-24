@@ -1,12 +1,12 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { AudioPopoverButton } from "./AudioPopoverButton";
-import { useMicrophoneStatus } from "./useMicrophoneStatus";
+import { useMicrophoneStatus } from "./hooks/useMicrophoneStatus";
 import { ToolbarMicButton } from "../input/ToolbarMicButton";
 import { ReactComponent as MicrophoneIcon } from "../icons/Microphone.svg";
 import { ReactComponent as MicrophoneMutedIcon } from "../icons/MicrophoneMuted.svg";
 import { FormattedMessage } from "react-intl";
-import { useCan } from "./useCan";
+import { useCan } from "./hooks/useCan";
 import { PermissionStatus } from "../../utils/media-devices-utils";
 import { AudioPopoverContentContainer } from "./AudioPopoverContentContainer";
 
