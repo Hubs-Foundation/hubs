@@ -49,7 +49,7 @@ import { EnterOnDeviceModal } from "./room/EnterOnDeviceModal";
 import { MicSetupModalContainer } from "./room/MicSetupModalContainer";
 import { InvitePopoverContainer } from "./room/InvitePopoverContainer";
 import { MoreMenuPopoverButton, CompactMoreMenuButton, MoreMenuContextProvider } from "./room/MoreMenuPopover";
-import { ChatSidebarContainer, ChatToolbarButtonContainer } from "./room/ChatSidebarContainer";
+import { ChatSidebarContainer } from "./room/ChatSidebarContainer";
 import { ContentMenu, PeopleMenuButton, ObjectsMenuButton, ECSDebugMenuButton } from "./room/ContentMenu";
 import { ReactComponent as CameraIcon } from "./icons/Camera.svg";
 import { ReactComponent as AvatarIcon } from "./icons/Avatar.svg";
@@ -100,6 +100,7 @@ import { NotificationsContainer } from "./room/NotificationsContainer";
 import { usePermissions } from "./room/hooks/usePermissions";
 import { ToolTip } from "@mozilla/lilypad-ui";
 import { ChatContextProvider } from "./room/contexts/ChatContext";
+import ChatToolbarButton from "./room/components/ChatToolbarButton/ChatToolbarButton";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -1613,11 +1614,9 @@ class UIRoot extends Component {
                         )}
                       </>
                     )}
-                    <ToolTip description="Open chat sidebar">
-                      <ChatToolbarButtonContainer
-                        onClick={() => this.toggleSidebar("chat", { chatPrefix: "", chatAutofocus: false })}
-                      />
-                    </ToolTip>
+                    <ChatToolbarButton
+                      onClick={() => this.toggleSidebar("chat", { chatPrefix: "", chatAutofocus: false })}
+                    />
                     {entered && isMobileVR && (
                       <ToolbarButton
                         className={styleUtils.hideLg}

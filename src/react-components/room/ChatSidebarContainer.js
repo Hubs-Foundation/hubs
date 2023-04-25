@@ -8,7 +8,6 @@ import {
   ChatInput,
   MessageAttachmentButton,
   SpawnMessageButton,
-  ChatToolbarButton,
   SendMessageButton,
   EmojiPickerPopoverButton,
   ChatLengthWarning,
@@ -238,8 +237,3 @@ ChatSidebarContainer.propTypes = {
   autoFocus: PropTypes.bool,
   initialValue: PropTypes.string
 };
-
-export function ChatToolbarButtonContainer(props) {
-  const { unreadMessages } = useContext(ChatContext);
-  return <ChatToolbarButton {...props} statusColor={unreadMessages ? "unread" : undefined} />;
-}
