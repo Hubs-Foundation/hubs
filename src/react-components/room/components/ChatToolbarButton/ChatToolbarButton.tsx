@@ -2,10 +2,15 @@ import { ToolbarButton } from "../../../input/ToolbarButton";
 // TO DO: look into changing icon theme handling to work with TS
 // @ts-ignore
 import { ReactComponent as ChatIcon } from "../../../icons/Chat.svg";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, defineMessage, useIntl } from "react-intl";
 import React, { RefAttributes, useContext } from "react";
 import { ChatContext } from "../../contexts/ChatContext";
 import { ToolTip } from "@mozilla/lilypad-ui";
+
+const chatTooltipDescription = defineMessage({
+  id: "chat-tooltip.description",
+  defaultMessage: "Open chat sidebar"
+});
 
 interface ChatToolbarButtonProps extends RefAttributes<any> {
   onClick: () => void;
@@ -13,9 +18,11 @@ interface ChatToolbarButtonProps extends RefAttributes<any> {
 
 const ChatToolbarButton = ({ onClick }: ChatToolbarButtonProps) => {
   const { unreadMessages } = useContext(ChatContext);
+  const intl = useIntl();
+  const description = intl.formatMessage(chatTooltipDescription);
 
   return (
-    <ToolTip description="Open chat sidebar">
+    <ToolTip description={description}>
       <ToolbarButton
         // Ignore type lint error as we will be redoing ToolbarButton in the future
         // @ts-ignore

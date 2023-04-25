@@ -1565,14 +1565,12 @@ class UIRoot extends Component {
                 }
                 modal={this.state.dialog}
                 toolbarLeft={
-                  <ToolTip description="View invite links">
-                    <InvitePopoverContainer
-                      hub={this.props.hub}
-                      hubChannel={this.props.hubChannel}
-                      scene={this.props.scene}
-                      store={this.props.store}
-                    />
-                  </ToolTip>
+                  <InvitePopoverContainer
+                    hub={this.props.hub}
+                    hubChannel={this.props.hubChannel}
+                    scene={this.props.scene}
+                    store={this.props.store}
+                  />
                 }
                 toolbarCenter={
                   <>

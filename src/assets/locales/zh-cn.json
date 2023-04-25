@@ -18,6 +18,7 @@
   "chat-sidebar.system-message.leave": "{name} 离开",
   "chat-sidebar.system-message.name-change": "{oldName} 被称为 {newName}",
   "chat-sidebar.system-message.scene-change": "{name} 更换场景 {sceneName}",
+  "chat-tooltip.description": "打开聊天侧边栏",
   "close-room-modal.confirm": "是的，关闭房间",
   "close-room-modal.message": "关闭这个房间会把你与朋友都移除这个房间，会永久关闭.{linebreak}确定? 该操作不能撤销",
   "create-room-button": "新建房间",
@@ -160,8 +161,7 @@
   "sign-in-modal.signin-message.room-settings": "只有登陆才可以改变房间设置。",
   "sign-in-modal.signin-message.tweet": "只有登陆才可以发送信息。",
   "sign-in-modal.signin-message.unpin": "只有登陆才可以在房间移除物品。",
-  "sign-in-modal.wait-for-verification":
-    "<p>邮件已发送!</p><p>下一步, 用你的手机，平板电脑或是个人电脑进入邮箱点击链接。</p><p>未收到邮件? 你可能无法创建账户。</p>",
+  "sign-in-modal.wait-for-verification": "<p>邮件已发送!</p><p>下一步, 用你的手机，平板电脑或是个人电脑进入邮箱点击链接。</p><p>未收到邮件? 你可能无法创建账户。</p>",
   "spectating-label.label": "看",
   "tips.desktop.invite": "没人在这里。 使用顶部的按钮分享此房间",
   "tips.desktop.locomotion": "使用 {moveKeys} 键来移动。 按shift键快速移动",
