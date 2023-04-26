@@ -522,6 +522,20 @@ class ConfigurationEditor extends Component {
         {/* SOCIAL MEDIA CARD */}
         {getInput(configurables[6])}
         <AdditionalInfo size="1024px x 576px (max)" format="JPG, GIF, PNG" />
+        <div>
+          {this.state.saving ? (
+            <CircularProgress />
+          ) : (
+            <Button
+              onClick={this.onSubmit.bind(this)}
+              className={this.props.classes.button}
+              variant="contained"
+              color="primary"
+            >
+              Save
+            </Button>
+          )}
+        </div>
       </form>
     );
   }

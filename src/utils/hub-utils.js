@@ -53,3 +53,13 @@ export function isRoomOwner(clientId) {
   const presences = APP.hubChannel.presence.state;
   return presences && presences[clientId] && presences[clientId].metas[0].roles.owner;
 }
+
+export function isLockedDownDemoRoom() {
+  const hubId = getCurrentHubId();
+  if (configs.feature("is_locked_down_demo_room")) {
+    const idArr = configs.feature("is_locked_down_demo_room").replace(/\s/g, "").split(",");
+    return idArr.includes(hubId);
+  } else {
+    return false;
+  }
+}

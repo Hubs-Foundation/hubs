@@ -47,6 +47,7 @@ features.show_issue_report_dialog = { category = "features", type = "boolean", i
 features.show_cloud = { category = "features", type = "boolean", internal = "true" }
 features.show_newsletter_signup = { category = "features", type = "boolean", internal = "true" }
 features.change_hub_near_room_links = { category = "features", type = "boolean", internal = "true" }
+features.is_locked_down_demo_room = { category = "features", type = "string", internal = "true", description = "A comma separated list of hubIds to be designated as demo rooms with simplified UI." }
 
 images.logo = { category = "images", type = "file", name = "Hub Logo", description = "Appears throughout your hub including lobby and loading screens." }
 images.logo_dark = { category = "images", type = "file", name = "Hub logo for dark mode", description = "The hub logo which appears for visitors who have dark mode enabled." }
