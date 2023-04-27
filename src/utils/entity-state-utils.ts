@@ -1,4 +1,4 @@
-import { defineQuery, hasComponent } from "bitecs";
+import { defineQuery, getWorldComponents, hasComponent, removeEntity, resetWorld } from "bitecs";
 import { HubsWorld } from "../app";
 import { Networked } from "../bit-components";
 import { createMessageDatas, isNetworkInstantiated, isPinned, localClientID } from "../bit-systems/networking";
@@ -8,6 +8,9 @@ import { queueEntityStateAsMessage } from "./listen-for-network-messages";
 import { networkableComponents, schemas } from "./network-schemas";
 import { CreateMessage, EntityID, NetworkID, StorableUpdateMessage } from "./networking-types";
 import qsTruthy from "./qs_truthy";
+import { deleteTheDeletableAncestor } from "../bit-systems/delete-entity-system";
+
+
 
 export type EntityState = {
   create_message: CreateMessage;
@@ -233,16 +236,31 @@ export function loadFromJson(hubChannel: HubChannel) {
 (window as any).loadFromJson = () => {
   loadFromJson(APP.hubChannel!);
 };
+(window as any).loadState = (state: string) => {
+  loadState(APP.hubChannel!, state);
+};
+(window as any).clearState = () => {
+  clearState(APP.hubChannel!);
+};
 
 const TEST_ASSET_STATE = "https://raw.githubusercontent.com/mozilla/hubs-sample-assets/main/Hubs%20Components/test_json/__NAME__";
 
-export async function loadState(hubChannel: HubChannel, state: string){
-  const stateUrl =  TEST_ASSET_STATE.replace("__NAME__", state);  
+export async function loadState(hubChannel: HubChannel, state: string) {
+  clearState(hubChannel);
 
+  const stateUrl = TEST_ASSET_STATE.replace("__NAME__", state);
   const resp = await fetch(stateUrl);
   const entityStates: EntityStateList = await resp.json();
   entityStates.data.forEach(entityState => {
     rewriteNidsForEntityState(entityState);
     rebroadcastEntityState(hubChannel, entityState);
+  })
+};
+
+export function clearState(hubChannel: HubChannel) {
+  networkedQuery(APP.world).forEach(eid => {
+    if (isNetworkInstantiated(eid) && isPinned(eid)) {
+      deleteTheDeletableAncestor(APP.world, eid);
+    }
   });
 }

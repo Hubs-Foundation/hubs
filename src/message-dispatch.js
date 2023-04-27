@@ -10,7 +10,7 @@ import { LogMessageType } from "./react-components/room/ChatSidebar";
 import { createNetworkedEntity } from "./utils/create-networked-entity";
 import qsTruthy from "./utils/qs_truthy";
 import { add, testAsset, respawn } from "./utils/chat-commands";
-import { loadState, downloadSavedEntityStates } from "./utils/entity-state-utils";
+import { loadState, downloadSavedEntityStates, clearState } from "./utils/entity-state-utils";
 
 let uiRoot;
 // Handles user-entered messages
@@ -265,6 +265,11 @@ export default class MessageDispatch extends EventTarget {
       case "download":
         {
           downloadSavedEntityStates(this.hubChannel);
+        }
+        break;
+      case "clear":
+        {
+          clearState(this.hubChannel);
         }
         break;
     }
