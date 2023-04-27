@@ -11,11 +11,15 @@ import { createNetworkedEntity } from "./utils/create-networked-entity";
 import qsTruthy from "./utils/qs_truthy";
 import { add, testAsset, respawn } from "./utils/chat-commands";
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { isLockedDownDemoRoom } from "./utils/hub-utils";
 import { loadFromJson, downloadSavedEntityStates } from "./utils/entity-state-utils";
 =======
 import { loadState, downloadSavedEntityStates } from "./utils/entity-state-utils";
 >>>>>>> e95fe000e (Add support for loading entity state from github)
+=======
+import { loadState, downloadSavedEntityStates, clearState } from "./utils/entity-state-utils";
+>>>>>>> 6ff8d9ed9 (Set function to clear scene)
 
 let uiRoot;
 // Handles user-entered messages
@@ -276,6 +280,11 @@ export default class MessageDispatch extends EventTarget {
       case "download":
         {
           downloadSavedEntityStates(this.hubChannel);
+        }
+        break;
+      case "clear":
+        {
+          clearState(this.hubChannel);
         }
         break;
     }
