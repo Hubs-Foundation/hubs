@@ -322,6 +322,11 @@ export default class HubChannel extends EventTarget {
     this.channel.push("message", { body, type });
   };
 
+  sendCommand = (body, type = "command") => {
+    if (!body) return;
+    this.channel.push("message", { body, type });
+  };
+
   _getCreatorAssignmentToken = () => {
     const creatorAssignmentTokenEntry =
       this.store.state.creatorAssignmentTokens &&

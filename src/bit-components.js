@@ -248,6 +248,15 @@ export const ObjectMenu = defineComponent({
   scaleButtonRef: Types.eid,
   targetRef: Types.eid
 });
+export const GameMenu = defineComponent({
+  AButtonRef: Types.eid,
+  BButtonRef: Types.eid,
+  CButtonRef: Types.eid,
+  DButtonRef: Types.eid,
+  StartButtonRef: Types.eid,
+  EndButtonRef: Types.eid,
+  TextRef: Types.eid
+});
 // TODO: Store this data elsewhere, since only one or two will ever exist.
 export const LinkHoverMenu = defineComponent({
   targetObjectRef: Types.eid,

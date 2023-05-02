@@ -39,6 +39,7 @@ import {
   VideoTextureSource,
   Mirror,
   MixerAnimatableInitialize
+  GameMenu
 } from "../bit-components";
 import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
@@ -327,6 +328,15 @@ export interface JSXComponentData extends ComponentData {
     mirrorButtonRef: Ref;
     scaleButtonRef: Ref;
   };
+  gameMenu?: {
+    TextRef: Ref;
+    AButtonRef: Ref;
+    BButtonRef: Ref;
+    CButtonRef: Ref;
+    DButtonRef: Ref;
+    StartButtonRef: Ref;
+    EndButtonRef: Ref;
+  };
   linkHoverMenu?: {
     linkButtonRef: Ref;
   };
@@ -449,6 +459,7 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   networkedTransform: createDefaultInflator(NetworkedTransform),
   networked: createDefaultInflator(Networked),
   objectMenu: createDefaultInflator(ObjectMenu),
+  gameMenu: createDefaultInflator(GameMenu),
   linkHoverMenu: createDefaultInflator(LinkHoverMenu),
   linkHoverMenuItem: createDefaultInflator(LinkHoverMenuItem),
   pdfMenu: createDefaultInflator(PDFMenu),

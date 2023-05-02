@@ -28,6 +28,8 @@ export function textSystem(world: HubsWorld) {
     // Assumes it is safe even if text object is
     // disposed before the async processing is done
     // because TroikaText properly handles
-    text.sync();
+    text.sync(() => {
+      text.dispatchEvent({ type: "text-updated" });
+    });
   });
 }

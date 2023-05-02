@@ -259,6 +259,9 @@ export default class MessageDispatch extends EventTarget {
           testAsset(APP.world, avatarPov, args);
         }
         break;
+      default: {
+        this.hubChannel.sendCommand({ command, args });
+      }
     }
   };
 }

@@ -7,6 +7,7 @@ declare global {
       takeOwnership: (el: AElement) => boolean;
       createNetworkId: () => string;
       getNetworkedEntity: (el: AElement) => Promise<AElement>;
+      getCreator: (el: AElement) => string;
     };
     connection: {
       getServerTime: () => number;
