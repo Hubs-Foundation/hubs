@@ -2,7 +2,8 @@ import {
   getCurrentHubId,
   updateVRHudPresenceCount,
   updateSceneCopresentState,
-  createHubChannelParams
+  createHubChannelParams,
+  isLockedDownDemoRoom
 } from "./utils/hub-utils";
 import "./utils/debug-log";
 import configs from "./utils/configs";
@@ -158,6 +159,7 @@ import MessageDispatch from "./message-dispatch";
 import SceneEntryManager from "./scene-entry-manager";
 import Subscriptions from "./subscriptions";
 import { createInWorldLogMessage } from "./react-components/chat-message";
+import { fetchRandomDefaultAvatarId } from "./utils/identity.js";
 
 import "./systems/nav";
 import "./systems/frame-scheduler";
@@ -833,6 +835,18 @@ document.addEventListener("DOMContentLoaded", async () => {
       () => hubChannel.updateScene(sceneInfo),
       SignInMessages.changeScene
     );
+  });
+
+  scene.addEventListener("hub_updated", async () => {
+    if (isLockedDownDemoRoom()) {
+      const avatarRig = document.querySelector("#avatar-rig");
+      const avatarId = await fetchRandomDefaultAvatarId();
+      avatarRig.setAttribute("player-info", { avatarSrc: await getAvatarSrc(avatarId) });
+    } else {
+      if (scene.is("entered")) {
+        entryManager._setPlayerInfoFromProfile(true);
+      }
+    }
   });
 
   remountUI({

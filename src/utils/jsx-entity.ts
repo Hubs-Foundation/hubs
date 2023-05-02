@@ -83,7 +83,7 @@ import { inflatePDF, PDFParams } from "../inflators/pdf";
 import { MirrorParams, inflateMirror } from "../inflators/mirror";
 import { inflateParticleEmitter, ParticleEmitterParams } from "../inflators/particle-emitter";
 import { AudioZoneParams, inflateAudioZone } from "../inflators/audio-zone";
-import { AudioSettings } from "../components/audio-params";
+import { AudioSettings, SceneAudioSettings } from "../components/audio-params";
 import { inflateAudioParams } from "../inflators/audio-params";
 import { AudioSourceParams, inflateAudioSource } from "../inflators/audio-source";
 import { AudioTargetParams, inflateAudioTarget } from "../inflators/audio-target";
@@ -93,6 +93,7 @@ import { AmmoShapeParams, inflateAmmoShape } from "../inflators/ammo-shape";
 import { BoxColliderParams, inflateBoxCollider } from "../inflators/box-collider";
 import { inflateTrimesh } from "../inflators/trimesh";
 import { HeightFieldParams, inflateHeightField } from "../inflators/heightfield";
+import { inflateAudioSettings } from "../inflators/audio-settings";
 
 preload(
   new Promise(resolve => {
@@ -374,6 +375,7 @@ export interface GLTFComponentData extends ComponentData {
   videoTextureSource: { fps: number; resolution: [x: number, y: number] };
   zoneAudioSource: AudioSourceParams;
   audioTarget: AudioTargetParams;
+  audioSettings: SceneAudioSettings;
 
   // deprecated
   spawnPoint?: true;
@@ -497,7 +499,8 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
   ammoShape: inflateAmmoShape,
   boxCollider: inflateBoxCollider,
   trimesh: inflateTrimesh,
-  heightfield: inflateHeightField
+  heightfield: inflateHeightField,
+  audioSettings: inflateAudioSettings
 };
 
 function jsxInflatorExists(name: string): name is keyof JSXComponentData {
