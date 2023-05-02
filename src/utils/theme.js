@@ -1,5 +1,4 @@
 import { waitForDOMContentLoaded } from "./async-utils";
-import configs from "./configs";
 import { store } from "./store-instance";
 
 // NOTE these should be synchronized with the top of shared.scss
