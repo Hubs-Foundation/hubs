@@ -10,7 +10,7 @@ import { useCan } from "./hooks/useCan";
 import { PermissionStatus } from "../../utils/media-devices-utils";
 import { AudioPopoverContentContainer } from "./AudioPopoverContentContainer";
 
-export const AudioPopoverButtonContainer = ({ scene, initiallyVisible, content }) => {
+export const AudioPopoverButtonContainer = ({ scene, initiallyVisible }) => {
   const { isMicMuted, toggleMute, permissionStatus } = useMicrophoneStatus(scene);
   const micPermissionDenied = permissionStatus === PermissionStatus.DENIED;
   const canVoiceChat = useCan("voice_chat");
@@ -38,6 +38,5 @@ export const AudioPopoverButtonContainer = ({ scene, initiallyVisible, content }
 
 AudioPopoverButtonContainer.propTypes = {
   scene: PropTypes.object.isRequired,
-  initiallyVisible: PropTypes.bool,
-  content: PropTypes.element
+  initiallyVisible: PropTypes.bool
 };

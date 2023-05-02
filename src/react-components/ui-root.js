@@ -98,7 +98,6 @@ import { TERMS, PRIVACY } from "../constants";
 import { ECSDebugSidebarContainer } from "./debug-panel/ECSSidebar";
 import { NotificationsContainer } from "./room/NotificationsContainer";
 import { usePermissions } from "./room/hooks/usePermissions";
-import { ToolTip } from "@mozilla/lilypad-ui";
 import { ChatContextProvider } from "./room/contexts/ChatContext";
 import ChatToolbarButton from "./room/components/ChatToolbarButton/ChatToolbarButton";
 
