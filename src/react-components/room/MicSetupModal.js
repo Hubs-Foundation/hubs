@@ -16,7 +16,7 @@ import { PermissionStatus } from "../../utils/media-devices-utils";
 import { Spinner } from "../misc/Spinner";
 import { ToolTip } from "@mozilla/lilypad-ui";
 
-export const tittleMessages = defineMessages({
+export const titleMessages = defineMessages({
   microphoneSetup: {
     id: "mic-setup-modal.title",
     defaultMessage: "Microphone Setup"
@@ -51,7 +51,7 @@ export function MicSetupModal({
   const intl = useIntl();
   return (
     <Modal
-      title={intl.formatMessage(tittleMessages[canVoiceChat ? "microphoneSetup" : "audioSetup"])}
+      title={intl.formatMessage(titleMessages[canVoiceChat ? "microphoneSetup" : "audioSetup"])}
       beforeTitle={<BackButton onClick={onBack} />}
       className={className}
       {...rest}
