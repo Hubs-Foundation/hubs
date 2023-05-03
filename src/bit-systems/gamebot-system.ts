@@ -315,7 +315,7 @@ function handleClicks(world: HubsWorld, menu: EntityID) {
     updateText(world, menu, WAITING_MSG);
     APP.hubChannel?.sendCommand({
       command: "game",
-      args: ["start", "es"]
+      args: ["start", ["es", "hp", "es", "lotr", "sw"][Math.floor(Math.random() * 4)]]
     });
     updateStartVisibility(world, menu, false);
   } else if (clicked(world, GameMenu.EndButtonRef[menu])) {
