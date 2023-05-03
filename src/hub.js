@@ -1376,12 +1376,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         updateEnvironmentForHub(hub, entryManager);
       });
 
-      console.log(`Entering new scene: ${hub.scene?.name}`);
+      const sceneName = hub.scene ? hub.scene.name : "a custom URL";
+
+      console.log(`Entering new scene: ${sceneName}`);
 
       messageDispatch.receive({
         type: "scene_changed",
         name: displayName,
-        sceneName: hub.scene ? hub.scene.name : "a custom URL"
+        sceneName
       });
     }
 
