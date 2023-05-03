@@ -92,7 +92,7 @@ export function GameMenuPrefab() {
       }}
       billboard={{ onlyY: true }}
     >
-      <Text3D ref={refs.text} position={position.text} text={"Text"} width={2} height={0.75} />
+      <Text3D ref={refs.text} position={position.text} text={""} width={2} height={0.75} />
       <GameButton ref={refs.A} position={position.A} text={"A"} />
       <GameButton ref={refs.B} position={position.B} text={"B"} />
       <GameButton ref={refs.C} position={position.C} text={"C"} />
