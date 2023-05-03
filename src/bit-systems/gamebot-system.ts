@@ -5,10 +5,11 @@ import { EntityID } from "../utils/networking-types";
 import { EnvironmentSettings, GameMenu, Interacted, Slice9, TextTag } from "../bit-components";
 import { Text as TroikaText } from "troika-three-text";
 import { updateSlice9Geometry } from "../update-slice9-geometry";
-import { Vector3 } from "three";
-import { inflateEnvironmentSettings } from "../inflators/environment-settings";
+import { Color, Vector3 } from "three";
+import { EnvironmentSettingsParams, inflateEnvironmentSettings } from "../inflators/environment-settings";
 import { loadTexture } from "../utils/load-texture";
 import { proxiedUrlFor } from "../utils/media-url-utils";
+import { EnvironmentSystem } from "../systems/environment-system";
 
 const textSize = new Vector3();
 const getTextSize = (function () {
@@ -80,69 +81,85 @@ const options = (options: OptionsResponse) => {
   console.log(options);
   if (menu) {
     updateStartVisibility(APP.world, menu, false);
-    updateEndVisibility(APP.world, menu, true);
-    updateText(APP.world, menu, options.prompt);
-    setTimeout(() => {
+    updateText(APP.world, menu, options.prompt, () => {
+      updateEndVisibility(APP.world, menu, true);
       updateOptions(APP.world, menu, options.options);
-    }, TYPEWRITER_SPEED * options.prompt.length);
+    });
   }
 };
 
-const end = (msg?: string) => {
-  console.log(msg);
+const end = (options: OptionsResponse) => {
+  console.log(options);
   if (menu) {
+    fadeOut();
     updateEndVisibility(APP.world, menu, false);
     updateOptionsVisibility(APP.world, menu, false);
-    if (msg) {
-      updateText(APP.world, menu, msg);
-      setTimeout(() => {
-        updateStartVisibility(APP.world, menu, true);
-      }, TYPEWRITER_SPEED * msg.length);
-    }
+    updateText(APP.world, menu, options.prompt, () => {
+      updateStartVisibility(APP.world, menu, true);
+    });
   }
+};
+
+const updateExp = (envSettingsEid: EntityID, envSettings: EnvironmentSettingsParams, exp: number) => {
+  inflateEnvironmentSettings(APP.world, envSettingsEid, { toneMappingExposure: exp });
+  environmentSystem.updateEnvironmentSettings(envSettings);
 };
 
 let expHandler: NodeJS.Timer | null;
 const skybox = async (skybox: string) => {
   const skyboxProxied = proxiedUrlFor(skybox);
   console.log(skyboxProxied);
-  const envSettingsEid = anyEntityWith(APP.world, EnvironmentSettings);
-  if (envSettingsEid) {
-    const environmentSystem = APP.scene?.systems["hubs-systems"].environmentSystem;
-    const { texture } = await loadTexture(skyboxProxied, 1, "image/jpeg");
-    const envMap = texture.clone();
-    envMap.flipY = true;
-    if (expHandler) {
-      clearInterval(expHandler);
-    }
-    const envSettings = (EnvironmentSettings as any).map.get(envSettingsEid);
-    const updateExp = (exp: number) => {
-      inflateEnvironmentSettings(APP.world, envSettingsEid, { toneMappingExposure: exp });
-      environmentSystem.updateEnvironmentSettings(envSettings);
-    };
-    let exp = envSettings.toneMappingExposure;
-    expHandler = setInterval(() => {
-      if (exp > 0) {
-        exp -= 0.01;
-        updateExp(exp);
-      } else {
-        clearInterval(expHandler!);
-        inflateEnvironmentSettings(APP.world, envSettingsEid, {
-          backgroundTexture: texture,
-          envMapTexture: envMap
-        });
-        environmentSystem.updateEnvironmentSettings((EnvironmentSettings as any).map.get(envSettingsEid));
-        expHandler = setInterval(() => {
-          if (exp < 1) {
-            exp += 0.01;
-            updateExp(exp);
-          } else {
-            clearInterval(expHandler!);
-          }
-        }, 10);
-      }
-    }, 10);
+  const envSettingsEid = anyEntityWith(APP.world, EnvironmentSettings)!;
+  const { texture } = await loadTexture(skyboxProxied, 1, "image/jpeg");
+  const envMap = texture.clone();
+  envMap.flipY = true;
+
+  fadeOut(() => {
+    inflateEnvironmentSettings(APP.world, envSettingsEid, {
+      backgroundTexture: texture,
+      envMapTexture: envMap
+    });
+    environmentSystem.updateEnvironmentSettings((EnvironmentSettings as any).map.get(envSettingsEid));
+    fadeIn();
+  });
+};
+
+const fadeIn = (callback?: Function) => {
+  const envSettingsEid = anyEntityWith(APP.world, EnvironmentSettings)!;
+  const envSettings = (EnvironmentSettings as any).map.get(envSettingsEid);
+  let exp = envSettings.toneMappingExposure;
+  if (expHandler) {
+    clearInterval(expHandler);
   }
+  expHandler = setInterval(() => {
+    if (exp < 1) {
+      exp += 0.01;
+      updateExp(envSettingsEid, envSettings, exp);
+    } else {
+      updateExp(envSettingsEid, envSettings, 1);
+      clearInterval(expHandler!);
+      callback && callback();
+    }
+  }, 10);
+};
+
+const fadeOut = (callback?: Function) => {
+  const envSettingsEid = anyEntityWith(APP.world, EnvironmentSettings)!;
+  const envSettings = (EnvironmentSettings as any).map.get(envSettingsEid);
+  let exp = envSettings.toneMappingExposure;
+  if (expHandler) {
+    clearInterval(expHandler);
+  }
+  expHandler = setInterval(() => {
+    if (exp > 0) {
+      exp -= 0.01;
+      updateExp(envSettingsEid, envSettings, exp);
+    } else {
+      updateExp(envSettingsEid, envSettings, 0);
+      clearInterval(expHandler!);
+      callback && callback();
+    }
+  }, 10);
 };
 
 const connect = () => {
@@ -157,6 +174,8 @@ const connect = () => {
   updateEndVisibility(APP.world, menu, false);
   updateOptionsVisibility(APP.world, menu, false);
   updateText(APP.world, menu, "");
+
+  fadeOut();
 };
 
 const disconnect = () => {
@@ -165,6 +184,8 @@ const disconnect = () => {
 
   const obj = APP.world.eid2obj.get(menu)!;
   obj.visible = false;
+
+  fadeOut();
 };
 
 const game = (data: any[]) => {
@@ -226,14 +247,16 @@ function updateEndVisibility(world: HubsWorld, menu: EntityID, visible: boolean)
 }
 
 const TYPEWRITER_SPEED = 100;
-let handler: NodeJS.Timeout | null;
-function updateText(world: HubsWorld, menu: EntityID, msg: string) {
+let textHandler: NodeJS.Timeout | null;
+function updateText(world: HubsWorld, menu: EntityID, msg?: string, callback?: Function) {
+  if (!msg) return;
+
   const textRef = GameMenu.TextRef[menu];
   const text = findChildWithComponent(world, TextTag, textRef)!;
   const textObj = world.eid2obj.get(text)! as TroikaText;
 
-  if (handler) {
-    clearTimeout(handler);
+  if (textHandler) {
+    clearTimeout(textHandler);
   }
 
   let i = 1;
@@ -241,12 +264,24 @@ function updateText(world: HubsWorld, menu: EntityID, msg: string) {
     if (i <= msg.length) {
       textObj.text = wordWrap(msg.slice(0, i), 50);
       i++;
-      handler = setTimeout(typewriter, TYPEWRITER_SPEED);
+      textHandler = setTimeout(typewriter, TYPEWRITER_SPEED);
     } else {
-      handler = null;
+      callback && callback();
+      textHandler = null;
     }
   };
-  handler = setTimeout(typewriter, TYPEWRITER_SPEED);
+  textHandler = setTimeout(typewriter, TYPEWRITER_SPEED);
+}
+
+function clearText(world: HubsWorld) {
+  if (textHandler) {
+    clearTimeout(textHandler);
+  }
+
+  const textRef = GameMenu.TextRef[menu];
+  const text = findChildWithComponent(world, TextTag, textRef)!;
+  const textObj = world.eid2obj.get(text)! as TroikaText;
+  textObj.text = "";
 }
 
 function updateButton(world: HubsWorld, buttonRef: EntityID, msg: string) {
@@ -285,6 +320,7 @@ function setupButtons(world: HubsWorld, menu: EntityID) {
 }
 
 function handleClicks(world: HubsWorld, menu: EntityID) {
+  clearText(world);
   if (clicked(world, GameMenu.StartButtonRef[menu])) {
     APP.hubChannel?.sendCommand({
       command: "game",
@@ -296,40 +332,61 @@ function handleClicks(world: HubsWorld, menu: EntityID) {
       command: "game",
       args: ["end"]
     });
+    updateEndVisibility(world, menu, false);
+    updateOptionsVisibility(world, menu, false);
   } else if (clicked(world, GameMenu.AButtonRef[menu])) {
     APP.hubChannel?.sendCommand({
       command: "game",
       args: ["option", "A"]
     });
+    updateEndVisibility(world, menu, false);
     updateOptionsVisibility(world, menu, false);
   } else if (clicked(world, GameMenu.BButtonRef[menu])) {
     APP.hubChannel?.sendCommand({
       command: "game",
       args: ["option", "B"]
     });
+    updateEndVisibility(world, menu, false);
     updateOptionsVisibility(world, menu, false);
   } else if (clicked(world, GameMenu.CButtonRef[menu])) {
     APP.hubChannel?.sendCommand({
       command: "game",
       args: ["option", "C"]
     });
+    clearText(world);
+    updateEndVisibility(world, menu, false);
     updateOptionsVisibility(world, menu, false);
   } else if (clicked(world, GameMenu.DButtonRef[menu])) {
     APP.hubChannel?.sendCommand({
       command: "game",
       args: ["option", "D"]
     });
+    updateEndVisibility(world, menu, false);
     updateOptionsVisibility(world, menu, false);
+    clearText(world);
   }
 }
 
 let initialized = false;
 let menu: EntityID;
+let environmentSystem: EnvironmentSystem;
 export function gameBotSystem(world: HubsWorld) {
   if (!initialized && APP.messageDispatch) {
+    environmentSystem = APP.scene?.systems["hubs-systems"].environmentSystem;
+    APP.scene?.addEventListener("environment-scene-loaded", event => {
+      const scene = (event as any).detail;
+      if (!hasComponent(world, EnvironmentSettings, scene)) {
+        inflateEnvironmentSettings(world, scene, {
+          backgroundColor: new Color("#222222"),
+          toneMappingExposure: 1,
+          enableHDRPipeline: true
+        });
+        environmentSystem.updateEnvironmentSettings((EnvironmentSettings as any).map.get(scene));
+      }
+    });
     APP.messageDispatch!.addEventListener("message", (event: CustomEvent) => {
-      const { body, type, session } = event.detail;
-      if (type === "command" && body.command === "game") {
+      const { body, type, sessionId } = event.detail;
+      if (sessionId !== NAF.clientId && type === "command" && body.command === "game") {
         game(body.args);
       }
     });
