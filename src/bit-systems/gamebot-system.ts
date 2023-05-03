@@ -11,6 +11,8 @@ import { loadTexture } from "../utils/load-texture";
 import { proxiedUrlFor } from "../utils/media-url-utils";
 import { EnvironmentSystem } from "../systems/environment-system";
 
+const WAITING_MSG = ".".repeat(100);
+
 const textSize = new Vector3();
 const getTextSize = (function () {
   const size = new THREE.Vector3();
@@ -273,17 +275,6 @@ function updateText(world: HubsWorld, menu: EntityID, msg?: string, callback?: F
   textHandler = setTimeout(typewriter, TYPEWRITER_SPEED);
 }
 
-function clearText(world: HubsWorld) {
-  if (textHandler) {
-    clearTimeout(textHandler);
-  }
-
-  const textRef = GameMenu.TextRef[menu];
-  const text = findChildWithComponent(world, TextTag, textRef)!;
-  const textObj = world.eid2obj.get(text)! as TroikaText;
-  textObj.text = "";
-}
-
 function updateButton(world: HubsWorld, buttonRef: EntityID, msg: string) {
   if (msg) {
     let text = findChildWithComponent(world, TextTag, buttonRef)!;
@@ -320,14 +311,15 @@ function setupButtons(world: HubsWorld, menu: EntityID) {
 }
 
 function handleClicks(world: HubsWorld, menu: EntityID) {
-  menu && clearText(world);
   if (clicked(world, GameMenu.StartButtonRef[menu])) {
+    updateText(world, menu, WAITING_MSG);
     APP.hubChannel?.sendCommand({
       command: "game",
       args: ["start", "es"]
     });
     updateStartVisibility(world, menu, false);
   } else if (clicked(world, GameMenu.EndButtonRef[menu])) {
+    updateText(world, menu, WAITING_MSG);
     APP.hubChannel?.sendCommand({
       command: "game",
       args: ["end"]
@@ -335,6 +327,7 @@ function handleClicks(world: HubsWorld, menu: EntityID) {
     updateEndVisibility(world, menu, false);
     updateOptionsVisibility(world, menu, false);
   } else if (clicked(world, GameMenu.AButtonRef[menu])) {
+    updateText(world, menu, WAITING_MSG);
     APP.hubChannel?.sendCommand({
       command: "game",
       args: ["option", "A"]
@@ -342,6 +335,7 @@ function handleClicks(world: HubsWorld, menu: EntityID) {
     updateEndVisibility(world, menu, false);
     updateOptionsVisibility(world, menu, false);
   } else if (clicked(world, GameMenu.BButtonRef[menu])) {
+    updateText(world, menu, WAITING_MSG);
     APP.hubChannel?.sendCommand({
       command: "game",
       args: ["option", "B"]
@@ -349,21 +343,21 @@ function handleClicks(world: HubsWorld, menu: EntityID) {
     updateEndVisibility(world, menu, false);
     updateOptionsVisibility(world, menu, false);
   } else if (clicked(world, GameMenu.CButtonRef[menu])) {
+    updateText(world, menu, WAITING_MSG);
     APP.hubChannel?.sendCommand({
       command: "game",
       args: ["option", "C"]
     });
-    clearText(world);
     updateEndVisibility(world, menu, false);
     updateOptionsVisibility(world, menu, false);
   } else if (clicked(world, GameMenu.DButtonRef[menu])) {
+    updateText(world, menu, WAITING_MSG);
     APP.hubChannel?.sendCommand({
       command: "game",
       args: ["option", "D"]
     });
     updateEndVisibility(world, menu, false);
     updateOptionsVisibility(world, menu, false);
-    clearText(world);
   }
 }
 
