@@ -8,6 +8,7 @@ import { updateSlice9Geometry } from "../update-slice9-geometry";
 import { Vector3 } from "three";
 import { inflateEnvironmentSettings } from "../inflators/environment-settings";
 import { loadTexture } from "../utils/load-texture";
+import { proxiedUrlFor } from "../utils/media-url-utils";
 
 const textSize = new Vector3();
 const getTextSize = (function () {
@@ -103,11 +104,12 @@ const end = (msg?: string) => {
 
 let expHandler: NodeJS.Timer | null;
 const skybox = async (skybox: string) => {
-  console.log(skybox);
+  const skyboxProxied = proxiedUrlFor(skybox);
+  console.log(skyboxProxied);
   const envSettingsEid = anyEntityWith(APP.world, EnvironmentSettings);
   if (envSettingsEid) {
     const environmentSystem = APP.scene?.systems["hubs-systems"].environmentSystem;
-    const { texture } = await loadTexture(skybox, 1, "image/jpeg");
+    const { texture } = await loadTexture(skyboxProxied, 1, "image/jpeg");
     const envMap = texture.clone();
     envMap.flipY = true;
     if (expHandler) {
