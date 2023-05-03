@@ -320,7 +320,7 @@ function setupButtons(world: HubsWorld, menu: EntityID) {
 }
 
 function handleClicks(world: HubsWorld, menu: EntityID) {
-  clearText(world);
+  menu && clearText(world);
   if (clicked(world, GameMenu.StartButtonRef[menu])) {
     APP.hubChannel?.sendCommand({
       command: "game",
