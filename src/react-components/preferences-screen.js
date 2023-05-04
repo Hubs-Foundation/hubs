@@ -412,9 +412,17 @@ const preferenceLabels = defineMessages({
     id: "preferences-screen.preference.disable-auto-gain-control",
     defaultMessage: "Disable microphone automatic gain control"
   },
+  enableSmoothRotation: {
+    id: "preferences-screen.preference.enable-smooth-rotation",
+    defaultMessage: "Enable Smooth Rotation"
+  },
   snapRotationDegrees: {
     id: "preferences-screen.preference.snap-rotation-degrees",
     defaultMessage: "Rotation per snap (in degrees)"
+  },
+  smoothRotationCameraSpeed: {
+    id: "preferences-screen.preference.smooth-rotation-camera-speed",
+    defaultMessage: "Rotation Camera Speed"
   },
   disableMovement: {
     id: "preferences-screen.preference.disable-movement",
@@ -1059,12 +1067,28 @@ class PreferencesScreen extends Component {
         CATEGORY_MOVEMENT,
         [
           {
+            key: "enableSmoothRotation",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX,
+            tooltipKey: "enableSmoothRotation",
+            promptForRefresh: true
+          },
+          {
             key: "snapRotationDegrees",
+            disableIfTrue: "enableSmoothRotation",
             prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
             min: 0,
             max: 90,
             step: 5,
             digits: 0
+          },
+          {
+            key: "smoothRotationCameraSpeed",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
+            disableIfFalse: "enableSmoothRotation",
+            min: 1.0,
+            max: 5.0,
+            step: 0.1,
+            digits: 1
           },
           {
             key: "disableMovement",

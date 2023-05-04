@@ -109,6 +109,16 @@ export const daydreamUserBindings = addSetsToBindings({
     },
     {
       src: {
+        value: dpadEast,
+        bool: touchpadRising
+      },
+      dest: {
+        value: paths.actions.smoothRotateRight
+      },
+      xform: xforms.copy
+    },
+    {
+      src: {
         value: dpadWest,
         bool: touchpadRising
       },
@@ -116,6 +126,16 @@ export const daydreamUserBindings = addSetsToBindings({
         value: paths.actions.snapRotateLeft
       },
       xform: xforms.copyIfTrue
+    },
+    {
+      src: {
+        value: dpadWest,
+        bool: touchpadRising
+      },
+      dest: {
+        value: paths.actions.smoothRotateLeft
+      },
+      xform: xforms.copy
     },
     {
       src: {

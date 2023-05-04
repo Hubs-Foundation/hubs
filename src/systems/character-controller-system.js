@@ -244,14 +244,25 @@ export class CharacterControllerSystem {
       const preferences = window.APP.store.state.preferences;
       const snapRotateLeft = userinput.get(paths.actions.snapRotateLeft);
       const snapRotateRight = userinput.get(paths.actions.snapRotateRight);
-      if (snapRotateLeft) {
-        this.dXZ += (preferences.snapRotationDegrees * Math.PI) / 180;
-      }
-      if (snapRotateRight) {
-        this.dXZ -= (preferences.snapRotationDegrees * Math.PI) / 180;
-      }
-      if (snapRotateLeft || snapRotateRight) {
-        this.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SNAP_ROTATE);
+      if (preferences.enableSmoothRotation) {
+        const smoothRotateLeft = userinput.get(paths.actions.smoothRotateLeft);
+        const smoothRotateRight = userinput.get(paths.actions.smoothRotateRight);
+        if (smoothRotateLeft) {
+          this.dXZ += (preferences.smoothRotationCameraSpeed * Math.PI) / 180;
+        }
+        if (smoothRotateRight) {
+          this.dXZ -= (preferences.smoothRotationCameraSpeed * Math.PI) / 180;
+        }
+      } else {
+        if (snapRotateLeft) {
+          this.dXZ += (preferences.snapRotationDegrees * Math.PI) / 180;
+        }
+        if (snapRotateRight) {
+          this.dXZ -= (preferences.snapRotationDegrees * Math.PI) / 180;
+        }
+        if (snapRotateLeft || snapRotateRight) {
+          this.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SNAP_ROTATE);
+        }
       }
       const characterAcceleration = userinput.get(paths.actions.characterAcceleration);
       const hasCharacterAcceleration = characterAcceleration && (characterAcceleration[0] || characterAcceleration[1]);

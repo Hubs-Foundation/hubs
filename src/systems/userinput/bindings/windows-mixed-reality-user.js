@@ -391,9 +391,19 @@ function teleportationAndRotationBindings() {
       xform: xforms.any
     },
     {
+      src: [rJoyWestRising, keyboardQRising],
+      dest: { value: paths.actions.smoothRotateLeft },
+      xform: xforms.copy
+    },
+    {
       src: [rJoyEastRising, keyboardERising],
       dest: { value: paths.actions.snapRotateRight },
       xform: xforms.any
+    },
+    {
+      src: [rJoyEastRising, keyboardERising],
+      dest: { value: paths.actions.smoothRotateRight },
+      xform: xforms.copy
     }
   ];
 }

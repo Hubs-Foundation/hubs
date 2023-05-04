@@ -150,9 +150,19 @@ export const xboxControllerUserBindings = addSetsToBindings({
       xform: xforms.rising
     },
     {
+      src: { value: button("leftBumper").pressed },
+      dest: { value: paths.actions.smoothRotateLeft },
+      xform: xforms.copy
+    },
+    {
       src: { value: button("rightBumper").pressed },
       dest: { value: paths.actions.snapRotateRight },
       xform: xforms.rising
+    },
+    {
+      src: { value: button("rightBumper").pressed },
+      dest: { value: paths.actions.smoothRotateRight },
+      xform: xforms.copy
     },
     {
       src: {},

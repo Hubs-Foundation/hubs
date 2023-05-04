@@ -150,6 +150,17 @@ export default function generate3DOFTriggerBindings(device) {
       },
       {
         src: {
+          value: dpadEast,
+          bool: touchpadRising
+        },
+        dest: {
+          value: paths.actions.smoothRotateRight
+        },
+        xform: xforms.copy,
+        priority: 100
+      },
+      {
+        src: {
           value: dpadWest,
           bool: touchpadRising
         },
@@ -157,6 +168,17 @@ export default function generate3DOFTriggerBindings(device) {
           value: paths.actions.snapRotateLeft
         },
         xform: xforms.copyIfTrue,
+        priority: 100
+      },
+      {
+        src: {
+          value: dpadWest,
+          bool: touchpadRising
+        },
+        dest: {
+          value: paths.actions.smoothRotateLeft
+        },
+        xform: xforms.copy,
         priority: 100
       },
       {
