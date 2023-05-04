@@ -255,7 +255,8 @@ export const GameMenu = defineComponent({
   DButtonRef: Types.eid,
   StartButtonRef: Types.eid,
   EndButtonRef: Types.eid,
-  TextRef: Types.eid
+  TextRef: Types.eid,
+  TurnRef: Types.eid
 });
 // TODO: Store this data elsewhere, since only one or two will ever exist.
 export const LinkHoverMenu = defineComponent({

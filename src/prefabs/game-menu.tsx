@@ -4,15 +4,18 @@ import { ArrayVec3, Attrs, Ref, createElementEntity, createRef } from "../utils/
 import { Button3D, BUTTON_TYPES } from "./button3D";
 import { textureLoader } from "../utils/media-utils";
 import textBgSrc from "../assets/hud/tooltip.9.png";
+import nameBgSrc from "../assets/hud/nametag.9.png";
 import { Layers } from "../camera-layers";
 
 const textBgTexture = textureLoader.load(textBgSrc);
+const nameBgTexture = textureLoader.load(nameBgSrc);
 
 const buttonHeight = 0.2;
 const buttonScale: ArrayVec3 = [0.75, 0.75, 0.75];
 
 const position = {
-  end: [0, 1.1, 0] as ArrayVec3,
+  end: [0.8, 1.1, 0] as ArrayVec3,
+  turn: [-0.8, 1.1, 0] as ArrayVec3,
   text: [0, 0.6, -0.05] as ArrayVec3,
   A: [0, 0.1, 0] as ArrayVec3,
   B: [0, -0.1, 0] as ArrayVec3,
@@ -23,6 +26,7 @@ const position = {
 
 interface GameButtonParams extends Attrs {
   text: string;
+  texture?: Texture;
 }
 
 interface Text3DParams extends Attrs {
@@ -32,9 +36,18 @@ interface Text3DParams extends Attrs {
   texture?: Texture;
   name?: string;
   labelRef?: Ref;
+  color?: string;
 }
 
-export function Text3D({ text, width, height, name = "Text", texture = textBgTexture, ...props }: Text3DParams) {
+export function Text3D({
+  text,
+  width,
+  height,
+  name = "Text",
+  texture = textBgTexture,
+  color = "#ffffff",
+  ...props
+}: Text3DParams) {
   const labelRef = createRef();
   return (
     <entity
@@ -46,7 +59,7 @@ export function Text3D({ text, width, height, name = "Text", texture = textBgTex
       <entity
         ref={labelRef}
         layers={1 << Layers.CAMERA_LAYER_UI}
-        text={{ value: text, color: "#ffffff", textAlign: "center", anchorX: "center", anchorY: "middle" }}
+        text={{ value: text, color, textAlign: "center", anchorX: "center", anchorY: "middle" }}
         position={[0, 0, 0.01]}
         name={`${name} Label`}
       />
@@ -70,6 +83,7 @@ function GameButton(props: GameButtonParams) {
 export function GameMenuPrefab() {
   const refs = {
     text: createRef(),
+    turn: createRef(),
     A: createRef(),
     B: createRef(),
     C: createRef(),
@@ -88,11 +102,13 @@ export function GameMenuPrefab() {
         CButtonRef: refs.C,
         DButtonRef: refs.D,
         StartButtonRef: refs.start,
-        EndButtonRef: refs.end
+        EndButtonRef: refs.end,
+        TurnRef: refs.turn
       }}
       billboard={{ onlyY: true }}
     >
       <Text3D ref={refs.text} position={position.text} text={""} width={2} height={0.75} />
+      <GameButton ref={refs.turn} position={position.turn} text={"Your Turn"} texture={nameBgTexture} />
       <GameButton ref={refs.A} position={position.A} text={"A"} />
       <GameButton ref={refs.B} position={position.B} text={"B"} />
       <GameButton ref={refs.C} position={position.C} text={"C"} />

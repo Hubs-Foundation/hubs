@@ -10,8 +10,11 @@ import { EnvironmentSettingsParams, inflateEnvironmentSettings } from "../inflat
 import { loadTexture } from "../utils/load-texture";
 import { proxiedUrlFor } from "../utils/media-url-utils";
 import { EnvironmentSystem } from "../systems/environment-system";
+import gameScene from "../assets/models/GameScene.glb";
+import { swapActiveScene } from "./scene-loading";
+import { AElement } from "aframe";
 
-const WAITING_MSG = ".".repeat(100);
+const GAMES = ["es", "hp", "es", "lotr", "sw"];
 
 const textSize = new Vector3();
 const getTextSize = (function () {
@@ -50,50 +53,76 @@ function wordWrap(str: string, maxWidth: number) {
   return res + str;
 }
 
-enum CommandType {
+enum CommandE {
   Connect = "connect",
   Disconnect = "disconnect",
   Text = "text",
   Options = "options",
   End = "end",
-  Skybox = "skybox"
+  Skybox = "skybox",
+  Start = "start"
 }
 
-export type Options = {
+export type GameOptionsI = {
   A: string;
   B: string;
   C: string;
   D: string;
 };
-export type OptionsResponse = {
+export interface OptionsResponseI {
   prompt: string;
   description: string;
+  options: GameOptionsI;
   player: string;
-  options: Options;
-};
+}
 
 const text = (msg?: string) => {
   console.log(msg);
   if (menu) {
-    msg && updateText(APP.world, menu, msg);
+    updateText(APP.world, menu, msg);
+    updateStartVisibility(APP.world, menu, false);
+    updateTurnVisibility(APP.world, menu, false);
+    updateEndVisibility(APP.world, menu, false);
+    updateOptionsVisibility(APP.world, menu, false);
   }
 };
 
-const options = (options: OptionsResponse) => {
+let lastOptions: OptionsResponseI | null = null;
+const options = (options: OptionsResponseI) => {
   console.log(options);
   if (menu) {
+    lastOptions = options;
     updateStartVisibility(APP.world, menu, false);
+    updateTurnVisibility(APP.world, menu, NAF.clientId === options.player ? true : false);
     updateText(APP.world, menu, options.prompt, () => {
-      updateEndVisibility(APP.world, menu, true);
-      updateOptions(APP.world, menu, options.options);
+      if (NAF.clientId === options.player) {
+        updateEndVisibility(APP.world, menu, true);
+        updateOptions(APP.world, menu, options.options);
+      } else {
+        updateOptionsVisibility(APP.world, menu, false);
+      }
     });
   }
 };
 
-const end = (options: OptionsResponse) => {
+const start = () => {
+  if (menu) {
+    const envSettingsEid = anyEntityWith(APP.world, EnvironmentSettings)!;
+    fadeOut(() => {
+      inflateEnvironmentSettings(APP.world, envSettingsEid, {
+        backgroundTexture: undefined,
+        backgroundColor: new Color("#222222")
+      });
+      environmentSystem.updateEnvironmentSettings((EnvironmentSettings as any).map.get(envSettingsEid));
+      fadeIn();
+    });
+  }
+};
+
+const end = (options: OptionsResponseI) => {
   console.log(options);
   if (menu) {
-    fadeOut();
+    updateTurnVisibility(APP.world, menu, false);
     updateEndVisibility(APP.world, menu, false);
     updateOptionsVisibility(APP.world, menu, false);
     updateText(APP.world, menu, options.prompt, () => {
@@ -102,12 +131,6 @@ const end = (options: OptionsResponse) => {
   }
 };
 
-const updateExp = (envSettingsEid: EntityID, envSettings: EnvironmentSettingsParams, exp: number) => {
-  inflateEnvironmentSettings(APP.world, envSettingsEid, { toneMappingExposure: exp });
-  environmentSystem.updateEnvironmentSettings(envSettings);
-};
-
-let expHandler: NodeJS.Timer | null;
 const skybox = async (skybox: string) => {
   const skyboxProxied = proxiedUrlFor(skybox);
   console.log(skyboxProxied);
@@ -127,41 +150,17 @@ const skybox = async (skybox: string) => {
 };
 
 const fadeIn = (callback?: Function) => {
-  const envSettingsEid = anyEntityWith(APP.world, EnvironmentSettings)!;
-  const envSettings = (EnvironmentSettings as any).map.get(envSettingsEid);
-  let exp = envSettings.toneMappingExposure;
-  if (expHandler) {
-    clearInterval(expHandler);
-  }
-  expHandler = setInterval(() => {
-    if (exp < 1) {
-      exp += 0.01;
-      updateExp(envSettingsEid, envSettings, exp);
-    } else {
-      updateExp(envSettingsEid, envSettings, 1);
-      clearInterval(expHandler!);
-      callback && callback();
-    }
-  }, 10);
+  const fader = (document.getElementById("viewing-camera")! as AElement).components["fader"];
+  (fader as any).fadeIn().then(() => {
+    callback && callback();
+  });
 };
 
 const fadeOut = (callback?: Function) => {
-  const envSettingsEid = anyEntityWith(APP.world, EnvironmentSettings)!;
-  const envSettings = (EnvironmentSettings as any).map.get(envSettingsEid);
-  let exp = envSettings.toneMappingExposure;
-  if (expHandler) {
-    clearInterval(expHandler);
-  }
-  expHandler = setInterval(() => {
-    if (exp > 0) {
-      exp -= 0.01;
-      updateExp(envSettingsEid, envSettings, exp);
-    } else {
-      updateExp(envSettingsEid, envSettings, 0);
-      clearInterval(expHandler!);
-      callback && callback();
-    }
-  }, 10);
+  const fader = (document.getElementById("viewing-camera")! as AElement).components["fader"];
+  (fader as any).fadeOut().then(() => {
+    callback && callback();
+  });
 };
 
 const connect = () => {
@@ -172,12 +171,14 @@ const connect = () => {
   menuObj.position.set(0, 1.4, 0);
   const obj = APP.world.eid2obj.get(menu)!;
   obj.visible = true;
+  updateTurnVisibility(APP.world, menu, false);
   updateStartVisibility(APP.world, menu, true);
   updateEndVisibility(APP.world, menu, false);
   updateOptionsVisibility(APP.world, menu, false);
   updateText(APP.world, menu, "");
 
-  fadeOut();
+  connected = true;
+  swapActiveScene(APP.world, gameScene);
 };
 
 const disconnect = () => {
@@ -186,32 +187,35 @@ const disconnect = () => {
 
   const obj = APP.world.eid2obj.get(menu)!;
   obj.visible = false;
-
-  fadeOut();
+  connected = false;
 };
 
 const game = (data: any[]) => {
   const command = data.shift();
 
-  if (!Object.values(CommandType).includes(command as CommandType)) return;
+  if (!Object.values(CommandE).includes(command as CommandE)) return;
 
   switch (command) {
-    case CommandType.Connect:
+    case CommandE.Connect:
       connect();
       break;
-    case CommandType.Disconnect:
+    case CommandE.Disconnect:
       disconnect();
       break;
-    case CommandType.Text:
+    case CommandE.Text:
       text(data.shift());
       break;
-    case CommandType.Options:
-      options(data.shift() as OptionsResponse);
+    case CommandE.Options:
+      options(data.shift() as OptionsResponseI);
       break;
-    case CommandType.End:
+    case CommandE.Start:
+      start();
+      options(data.shift());
+      break;
+    case CommandE.End:
       end(data.shift());
       break;
-    case CommandType.Skybox:
+    case CommandE.Skybox:
       skybox(data.shift());
       break;
   }
@@ -251,7 +255,10 @@ function updateEndVisibility(world: HubsWorld, menu: EntityID, visible: boolean)
 const TYPEWRITER_SPEED = 100;
 let textHandler: NodeJS.Timeout | null;
 function updateText(world: HubsWorld, menu: EntityID, msg?: string, callback?: Function) {
-  if (!msg) return;
+  if (!msg) {
+    callback && callback();
+    return;
+  }
 
   const textRef = GameMenu.TextRef[menu];
   const text = findChildWithComponent(world, TextTag, textRef)!;
@@ -275,6 +282,12 @@ function updateText(world: HubsWorld, menu: EntityID, msg?: string, callback?: F
   textHandler = setTimeout(typewriter, TYPEWRITER_SPEED);
 }
 
+function updateTurnVisibility(world: HubsWorld, menu: EntityID, visible: boolean) {
+  const nameRef = GameMenu.TurnRef[menu];
+  const textObj = world.eid2obj.get(nameRef)!;
+  textObj.visible = visible;
+}
+
 function updateButton(world: HubsWorld, buttonRef: EntityID, msg: string) {
   if (msg) {
     let text = findChildWithComponent(world, TextTag, buttonRef)!;
@@ -286,7 +299,7 @@ function updateButton(world: HubsWorld, buttonRef: EntityID, msg: string) {
   }
 }
 
-function updateOptions(world: HubsWorld, menu: EntityID, options: Options) {
+function updateOptions(world: HubsWorld, menu: EntityID, options: GameOptionsI) {
   updateButton(world, GameMenu.AButtonRef[menu], options.A);
   updateButton(world, GameMenu.BButtonRef[menu], options.B);
   updateButton(world, GameMenu.CButtonRef[menu], options.C);
@@ -312,75 +325,83 @@ function setupButtons(world: HubsWorld, menu: EntityID) {
 
 function handleClicks(world: HubsWorld, menu: EntityID) {
   if (clicked(world, GameMenu.StartButtonRef[menu])) {
-    updateText(world, menu, WAITING_MSG);
     APP.hubChannel?.sendCommand({
       command: "game",
-      args: ["start", ["es", "hp", "es", "lotr", "sw"][Math.floor(Math.random() * 4)]]
+      args: ["start", GAMES[Math.floor(Math.random() * GAMES.length)]]
     });
     updateStartVisibility(world, menu, false);
+    updateEndVisibility(world, menu, false);
+    updateTurnVisibility(world, menu, false);
   } else if (clicked(world, GameMenu.EndButtonRef[menu])) {
-    updateText(world, menu, WAITING_MSG);
     APP.hubChannel?.sendCommand({
       command: "game",
       args: ["end"]
     });
     updateEndVisibility(world, menu, false);
     updateOptionsVisibility(world, menu, false);
+    updateTurnVisibility(world, menu, false);
   } else if (clicked(world, GameMenu.AButtonRef[menu])) {
-    updateText(world, menu, WAITING_MSG);
     APP.hubChannel?.sendCommand({
       command: "game",
-      args: ["option", "A"]
+      args: ["option", "A", lastOptions?.options.A]
     });
     updateEndVisibility(world, menu, false);
     updateOptionsVisibility(world, menu, false);
+    updateEndVisibility(world, menu, false);
+    updateTurnVisibility(world, menu, false);
   } else if (clicked(world, GameMenu.BButtonRef[menu])) {
-    updateText(world, menu, WAITING_MSG);
     APP.hubChannel?.sendCommand({
       command: "game",
-      args: ["option", "B"]
+      args: ["option", "B", lastOptions?.options.B]
     });
     updateEndVisibility(world, menu, false);
     updateOptionsVisibility(world, menu, false);
+    updateEndVisibility(world, menu, false);
+    updateTurnVisibility(world, menu, false);
   } else if (clicked(world, GameMenu.CButtonRef[menu])) {
-    updateText(world, menu, WAITING_MSG);
     APP.hubChannel?.sendCommand({
       command: "game",
-      args: ["option", "C"]
+      args: ["option", "C", lastOptions?.options.C]
     });
     updateEndVisibility(world, menu, false);
     updateOptionsVisibility(world, menu, false);
+    updateEndVisibility(world, menu, false);
+    updateTurnVisibility(world, menu, false);
   } else if (clicked(world, GameMenu.DButtonRef[menu])) {
-    updateText(world, menu, WAITING_MSG);
     APP.hubChannel?.sendCommand({
       command: "game",
-      args: ["option", "D"]
+      args: ["option", "D", lastOptions?.options.D]
     });
     updateEndVisibility(world, menu, false);
     updateOptionsVisibility(world, menu, false);
+    updateEndVisibility(world, menu, false);
+    updateTurnVisibility(world, menu, false);
   }
 }
 
+let sceneEid: EntityID;
 let initialized = false;
 let menu: EntityID;
 let environmentSystem: EnvironmentSystem;
+let connected = false;
 export function gameBotSystem(world: HubsWorld) {
   if (!initialized && APP.messageDispatch) {
     environmentSystem = APP.scene?.systems["hubs-systems"].environmentSystem;
     APP.scene?.addEventListener("environment-scene-loaded", event => {
-      const scene = (event as any).detail;
-      if (!hasComponent(world, EnvironmentSettings, scene)) {
-        inflateEnvironmentSettings(world, scene, {
+      sceneEid = (event as any).detail;
+      if (!hasComponent(world, EnvironmentSettings, sceneEid) || connected) {
+        inflateEnvironmentSettings(world, sceneEid, {
           backgroundColor: new Color("#222222"),
+          backgroundTexture: undefined,
           toneMappingExposure: 1,
           enableHDRPipeline: true
         });
-        environmentSystem.updateEnvironmentSettings((EnvironmentSettings as any).map.get(scene));
+        environmentSystem.updateEnvironmentSettings((EnvironmentSettings as any).map.get(sceneEid));
       }
     });
     APP.messageDispatch!.addEventListener("message", (event: CustomEvent) => {
       const { body, type, sessionId } = event.detail;
-      if (sessionId !== NAF.clientId && type === "command" && body.command === "game") {
+      if (sessionId !== NAF.clientId && type === "command" && body.command === "game" && APP.scene?.is("entered")) {
         game(body.args);
       }
     });

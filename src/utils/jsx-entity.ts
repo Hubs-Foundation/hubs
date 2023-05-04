@@ -336,6 +336,7 @@ export interface JSXComponentData extends ComponentData {
     DButtonRef: Ref;
     StartButtonRef: Ref;
     EndButtonRef: Ref;
+    TurnRef: Ref;
   };
   linkHoverMenu?: {
     linkButtonRef: Ref;
