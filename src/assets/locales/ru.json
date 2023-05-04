@@ -132,6 +132,7 @@
     "Активировать контроллер движения в левой части экрана",
   "preferences-screen.preference.enable-on-screen-joystick-right":
     "Активировать контроллер поворота в правой части экрана",
+  "preferences-screen.preference.enable-smooth-rotation": "Включить плавное вращение",
   "preferences-screen.preference.global-media-volume": "Громкость мультимедиа",
   "preferences-screen.preference.global-voice-volume": "Громкость других пользователей",
   "preferences-screen.preference.invert-touchscreen-camera-move":
@@ -146,6 +147,7 @@
   "preferences-screen.preference.prefer-mobile-object-info-panel":
     "Предпочитать мобильные панели для отображения информации об объектах",
   "preferences-screen.preference.preferred-camera": "Предпочтительная камера",
+  "preferences-screen.preference.smooth-rotation-camera-speed": "Скорость плавного вращения камеры",
   "preferences-screen.preference.snap-rotation-degrees": "Поворот по долям (в градусах)",
   "preferences-screen.prompt-for-refresh":
     "Ваши настройки сохранены, однако для отображения некоторых изменений требуется перезагрузить страницу.",

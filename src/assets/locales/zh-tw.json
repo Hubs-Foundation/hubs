@@ -643,4 +643,6 @@
 	"webvr-unsupported-modal.title": "使用VR進入",
 	"webvr-unsupported-modal.webvr-rocks-link": "支援實驗VR的瀏覽器清單請見<a>WebVR Rocks</a>.",
 	"whats-new-page.title": "新消息"
+  "preferences-screen.preference.enable-smooth-rotation": "啟用平滑旋轉",
+  "preferences-screen.preference.smooth-rotation-camera-speed": "平滑旋轉相機速度",
 }
