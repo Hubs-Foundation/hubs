@@ -35,22 +35,20 @@ export const Vector3Nodes = definitionListToMap([
     }
   }),
   makeInNOutFunctionDesc({
-    name: "math/vec3/toEuler",
-    label: "To Euler",
-    category: "Vec3 Math" as any,
-    in: [{ v: "vec3" }],
-    out: [{ v: "euler" }],
-    exec: (v: Vector3) => {
-      return { v: new Euler().setFromVector3(v) };
-    }
-  }),
-  makeInNOutFunctionDesc({
     name: "math/vec3",
     label: "Vec3",
     category: "Vec3 Math" as any,
     in: ["vec3"],
     out: "vec3",
     exec: (a: Vector3) => a
+  }),
+  makeInNOutFunctionDesc({
+    name: "math/vec3/applyEuler",
+    label: "Apply Euler",
+    category: "Vec3 Math" as any,
+    in: ["vec3", "euler"],
+    out: "vec3",
+    exec: (a: Vector3, b: Euler) => a.clone().applyEuler(b)
   }),
   makeInNOutFunctionDesc({
     name: "math/toVec3/float",

@@ -45,6 +45,7 @@ export function cleanupNodespac(nodeSpec: NodeSpecJSON[]) {
     else if (node.type.startsWith("math/negate")) node.label = "Negate";
     else if (node.type.startsWith("math/subtract")) node.label = "Subtract";
     else if (node.type === "hubs/entity/hasComponent") node.inputs[2].defaultValue = true;
+    else if (node.type === "math/vec3/applyEuler") (node.inputs[0].defaultValue as any) = { x: 0, y: 0, z: 1 };
   }
   return nodeSpec;
 }
