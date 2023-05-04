@@ -63,9 +63,14 @@ const registry: IRegistry = {
 };
 
 
-  const easingNode = registry.nodes["math/easing"] as any; 
-  easingNode.in.easingMode.choices = easingNode.in.easingMode.options.map((v: any) => ({ text: v, value: v }));
-  easingNode.in.easingFunction.choices = easingNode.in.easingFunction.options.map((v: any) => ({ text: v, value: v }));
+const easingNode = registry.nodes["math/easing"] as any; 
+easingNode.in.easingMode.choices = easingNode.in.easingMode.options.map((v: any) => ({ text: v, value: v }));
+easingNode.in.easingFunction.choices = easingNode.in.easingFunction.options.map((v: any) => ({ text: v, value: v }));
+
+const orders = ["XYZ", "YXZ", "ZXY", "ZYX", "YZX", "XZY" ].map(v => ({text: v, value: v}));
+const eulerCombineNode = registry.nodes["math/euler/combine"] as any;
+eulerCombineNode.in()[3].choices = orders
+eulerCombineNode.in()[3].defaultValue = orders[0].value
 
 const nodeSpec = cleanupNodespac(writeNodeSpecsToJSON({ ...registry, dependencies: {} }));
 console.log("registry", registry, nodeSpec);
