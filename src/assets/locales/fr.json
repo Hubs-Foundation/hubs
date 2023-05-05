@@ -112,7 +112,6 @@
   "chat-sidebar.system-message.scene-change": "{name} a changé la scène en {sceneName}",
   "chat-sidebar.title": "Chat",
   "chat-toolbar-button": "Chat",
-  "chat-tooltip.description": "Ouvrir la barre latérale de discussion",
   "close-room-modal.confirm": "Oui, fermer la salle",
   "close-room-modal.confirm-room-name-field": "Confirmer le nom de la salle",
   "close-room-modal.message": "En fermant cette salle, vous allez exclure tous les participants, vous y compris, et la fermer définitivement.{linebreak}Confirmer ? Cette action ne peut pas être annulée.",

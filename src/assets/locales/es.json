@@ -18,7 +18,6 @@
   "chat-sidebar.system-message.leave": "{name} se fue.",
   "chat-sidebar.system-message.name-change": "{oldName} ahora se llama {newName}",
   "chat-sidebar.system-message.scene-change": "{name} ha cambiado la escena a {sceneName}",
-  "chat-tooltip.description": "Abrir barra lateral de chat",
   "close-room-modal.confirm": "Sí, cerrar la sala",
   "close-room-modal.message": "Al cerrar esta sala, te expulsarás a ti y a otros y la eliminarás permanentemente.{linebreak}¿Estás seguro(a)? Está acción no puede ser revertida.",
   "discord-page.community-link": "Discord de Hubs",

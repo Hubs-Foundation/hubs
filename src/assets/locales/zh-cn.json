@@ -18,7 +18,6 @@
   "chat-sidebar.system-message.leave": "{name} 离开",
   "chat-sidebar.system-message.name-change": "{oldName} 被称为 {newName}",
   "chat-sidebar.system-message.scene-change": "{name} 更换场景 {sceneName}",
-  "chat-tooltip.description": "打开聊天侧边栏",
   "close-room-modal.confirm": "是的，关闭房间",
   "close-room-modal.message": "关闭这个房间会把你与朋友都移除这个房间，会永久关闭.{linebreak}确定? 该操作不能撤销",
   "create-room-button": "新建房间",

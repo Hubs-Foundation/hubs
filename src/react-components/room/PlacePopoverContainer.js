@@ -19,7 +19,7 @@ import { ToolTip } from "@mozilla/lilypad-ui";
 
 const placeTooltipDescription = defineMessage({
   id: "place-tooltip.description",
-  defaultMessage: "Choose from a variety of objects to place"
+  defaultMessage: "Select from a variety of objects and tools to edit your room"
 });
 
 export function PlacePopoverContainer({ scene, mediaSearchStore, showNonHistoriedDialog, hubChannel }) {

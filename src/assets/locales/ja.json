@@ -141,7 +141,6 @@
   "chat-sidebar.system-message.scene-change": "シーンが {name} から {sceneName} に変更されました",
   "chat-sidebar.title": "チャット",
   "chat-toolbar-button": "チャット",
-  "chat-tooltip.description": "「チャットサイドバーを開く」",
   "close-room-modal.confirm": "はい、ルームを閉じます",
   "close-room-modal.confirm-room-name-field": "ルーム名の確認",
   "close-room-modal.message": "このルームを閉じると、自分や他の人がルームから削除され完全にシャットダウンされます。{linebreak}よろしいですか？この操作は元に戻せません。",

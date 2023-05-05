@@ -8,7 +8,7 @@ import { ToolTip } from "@mozilla/lilypad-ui";
 
 const reactTooltipDescription = defineMessage({
   id: "react-tooltip.description",
-  defaultMessage: "Raise your hand or choose from a list of reactions to emote"
+  defaultMessage: "Reactions"
 });
 
 const emojiLabels = defineMessages({

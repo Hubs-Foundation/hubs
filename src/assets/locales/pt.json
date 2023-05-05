@@ -114,7 +114,6 @@
   "chat-sidebar.system-message.scene-change": "{name} mudou o cenário para {sceneName}",
   "chat-sidebar.title": "Chat",
   "chat-toolbar-button": "Chat",
-  "chat-tooltip.description": "Abrir a barra lateral do chat",
   "close-room-modal.confirm": "Sim, fechar sala",
   "close-room-modal.confirm-room-name-field": "Confirmar o nome da sala",
   "close-room-modal.message": "Ao fechar esta sala, você será removido e removerá as outras pessoas dela, apagando-a permanentemente.{linebreak}Você tem certeza? Isto não pode ser desfeito.",

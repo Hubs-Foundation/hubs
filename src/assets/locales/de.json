@@ -92,7 +92,6 @@
   "chat-sidebar.system-message.scene-change": "{name} hat die Szene zu {sceneName} geändert",
   "chat-sidebar.title": "Chat",
   "chat-toolbar-button": "Chat",
-  "chat-tooltip.description": "Chat-Seitenleiste öffnen",
   "close-room-modal.confirm": "Ja, Raum schließen",
   "close-room-modal.confirm-room-name-field": "Bestätige den Raumnamen",
   "close-room-modal.message": "Wenn du diesen Raum schließt, entfernst du dich und andere aus dem Raum und wirst ihn für immer schließen.{linebreak}Bist du sicher? Diese Aktion kann nicht rückgängig gemacht werden.",

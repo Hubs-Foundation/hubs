@@ -10,7 +10,7 @@ import { defineMessage, useIntl } from "react-intl";
 
 const inviteTooltipDescription = defineMessage({
   id: "invite-tooltip.description",
-  defaultMessage: "View invite links"
+  defaultMessage: "Copy room link to invite others to the room"
 });
 
 export function InvitePopoverContainer({ hub, hubChannel, scene, store, ...rest }) {

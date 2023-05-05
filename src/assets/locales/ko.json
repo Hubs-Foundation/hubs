@@ -107,7 +107,6 @@
   "chat-sidebar.system-message.hub-change": "당신은 {hubName} 으로 이동했습니다.",
   "chat-sidebar.title": "채팅",
   "chat-toolbar-button": "채팅",
-  "chat-tooltip.description": "채팅 사이드바 열기",
   "more-menu-popover.title": "더보기",
   "room-entry-modal.room-name-label": "Room 이름",
   "room-entry-modal.join-room-button": "입장하기",

@@ -18,7 +18,6 @@
   "chat-sidebar.system-message.leave": "{name} покинул(а) место.",
   "chat-sidebar.system-message.name-change": "{oldName} сменил(а) имя на {newName}",
   "chat-sidebar.system-message.scene-change": "{name} сменил(а) сцену на {sceneName}",
-  "chat-tooltip.description": "Открыть боковую панель чата",
   "close-room-modal.confirm": "Да, закрыть эту комнату",
   "close-room-modal.message": "Закрыв эту комнату, вы и остальные пользователи автоматически из неё выйдете. Комната будет удалена навсегда.{linebreak}Вы уверены? Это действие нельзя отменить.",
   "create-room-button": "Создать комнату",

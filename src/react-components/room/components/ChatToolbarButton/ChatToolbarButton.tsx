@@ -9,7 +9,7 @@ import { ToolTip } from "@mozilla/lilypad-ui";
 
 const chatTooltipDescription = defineMessage({
   id: "chat-tooltip.description",
-  defaultMessage: "Open chat sidebar"
+  defaultMessage: "Open the chat sidebar (T)"
 });
 
 interface ChatToolbarButtonProps extends RefAttributes<any> {

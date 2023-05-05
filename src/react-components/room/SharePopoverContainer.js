@@ -11,7 +11,7 @@ import { ToolTip } from "@mozilla/lilypad-ui";
 
 const shareTooltipDescription = defineMessage({
   id: "share-tooltip.description",
-  defaultMessage: "Share screen or camera"
+  defaultMessage: "Display your screen or webcam as an object in the room"
 });
 
 function useShare(scene, hubChannel) {
