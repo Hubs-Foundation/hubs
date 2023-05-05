@@ -27,6 +27,7 @@ import { MyCameraTool } from "./bit-components";
 import { anyEntityWith } from "./utils/bit-utils";
 import { moveToSpawnPoint } from "./bit-systems/waypoint";
 import { spawnFromFileList, spawnFromUrl } from "./load-media-on-paste-or-drop";
+import { isLockedDownDemoRoom } from "./utils/hub-utils";
 
 const useNewLoader = qsTruthy("newLoader");
 
@@ -163,13 +164,14 @@ export default class SceneEntryManager {
   };
 
   _setupPlayerRig = () => {
-    this._setPlayerInfoFromProfile();
-
     // Explict user action changed avatar or updated existing avatar.
     this.scene.addEventListener("avatar_updated", () => this._setPlayerInfoFromProfile(true));
 
     // Store updates can occur to avatar id in cases like error, auth reset, etc.
-    this.store.addEventListener("statechanged", () => this._setPlayerInfoFromProfile());
+    if (!isLockedDownDemoRoom()) {
+      this._setPlayerInfoFromProfile();
+      this.store.addEventListener("statechanged", () => this._setPlayerInfoFromProfile());
+    }
 
     const avatarScale = parseInt(qs.get("avatar_scale"), 10);
     if (avatarScale) {

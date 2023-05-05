@@ -22,6 +22,7 @@ import {
   setMaxResolution
 } from "../utils/screen-orientation-utils";
 import { AAModes } from "../constants";
+import { isLockedDownDemoRoom } from "../utils/hub-utils";
 
 import dropdownArrowUrl from "../assets/images/dropdown_arrow.png";
 import dropdownArrow2xUrl from "../assets/images/dropdown_arrow@2x.png";
@@ -972,7 +973,7 @@ class PreferencesScreen extends Component {
     this.mediaDevicesManager.on(MediaDevicesEvents.DEVICE_CHANGE, this.onMediaDevicesUpdated);
     APP.hubChannel.addEventListener("permissions_updated", this.permissionsUpdated);
 
-    if (this.state.canVoiceChat) {
+    if (this.state.canVoiceChat && !isLockedDownDemoRoom()) {
       this.mediaDevicesManager.startMicShare({ updatePrefs: false }).then(this.updateMediaDevices);
     } else {
       this.updateMediaDevices();
@@ -1105,7 +1106,9 @@ class PreferencesScreen extends Component {
                 }
               ]
             : []),
-          ...(MediaDevicesManager.isAudioInputSelectEnabled ? [this.state.preferredMic] : []),
+          ...(MediaDevicesManager.isAudioInputSelectEnabled && !isLockedDownDemoRoom()
+            ? [this.state.preferredMic]
+            : []),
           ...(MediaDevicesManager.isAudioOutputSelectEnabled ? [this.state.preferredSpeakers] : []),
           {
             key: "globalVoiceVolume",
@@ -1210,55 +1213,59 @@ class PreferencesScreen extends Component {
             prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
             options: availableThemes
           },
-          {
-            key: "nametagVisibility",
-            prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
-            options: [
-              {
-                value: "showAll",
-                text: intl.formatMessage({
-                  id: "preferences-screen.nametag-visibility.show-all",
-                  defaultMessage: "Always"
-                })
-              },
-              {
-                value: "showNone",
-                text: intl.formatMessage({
-                  id: "preferences-screen.nametag-visibility.show-none",
-                  defaultMessage: "Never"
-                })
-              },
-              {
-                value: "showFrozen",
-                text: intl.formatMessage({
-                  id: "preferences-screen.nametag-visibility.show-frozen",
-                  defaultMessage: "Only in Frozen state"
-                })
-              },
-              {
-                value: "showSpeaking",
-                text: intl.formatMessage({
-                  id: "preferences-screen.nametag-visibility.show-speaking",
-                  defaultMessage: "Only speaking"
-                })
-              },
-              {
-                value: "showClose",
-                text: intl.formatMessage({
-                  id: "preferences-screen.nametag-visibility.show-close",
-                  defaultMessage: "Close to me"
-                })
-              }
-            ]
-          },
-          {
-            key: "nametagVisibilityDistance",
-            prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
-            min: 1,
-            max: 20,
-            step: 1,
-            digits: 2
-          },
+          ...(!isLockedDownDemoRoom()
+            ? [
+                {
+                  key: "nametagVisibility",
+                  prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
+                  options: [
+                    {
+                      value: "showAll",
+                      text: intl.formatMessage({
+                        id: "preferences-screen.nametag-visibility.show-all",
+                        defaultMessage: "Always"
+                      })
+                    },
+                    {
+                      value: "showNone",
+                      text: intl.formatMessage({
+                        id: "preferences-screen.nametag-visibility.show-none",
+                        defaultMessage: "Never"
+                      })
+                    },
+                    {
+                      value: "showFrozen",
+                      text: intl.formatMessage({
+                        id: "preferences-screen.nametag-visibility.show-frozen",
+                        defaultMessage: "Only in Frozen state"
+                      })
+                    },
+                    {
+                      value: "showSpeaking",
+                      text: intl.formatMessage({
+                        id: "preferences-screen.nametag-visibility.show-speaking",
+                        defaultMessage: "Only speaking"
+                      })
+                    },
+                    {
+                      value: "showClose",
+                      text: intl.formatMessage({
+                        id: "preferences-screen.nametag-visibility.show-close",
+                        defaultMessage: "Close to me"
+                      })
+                    }
+                  ]
+                },
+                {
+                  key: "nametagVisibilityDistance",
+                  prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
+                  min: 1,
+                  max: 20,
+                  step: 1,
+                  digits: 2
+                }
+              ]
+            : []),
           this.state.preferredCamera,
           {
             key: "allowMultipleHubsInstances",
