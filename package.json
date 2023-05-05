@@ -71,7 +71,7 @@
     "@fortawesome/fontawesome-svg-core": "^1.2.2",
     "@fortawesome/free-solid-svg-icons": "^5.2.0",
     "@fortawesome/react-fontawesome": "^0.1.0",
-    "@mozilla/lilypad-ui": "^1.8.2",
+    "@mozilla/lilypad-ui": "^1.8.3",
     "@mozillareality/easing-functions": "^0.1.1",
     "@popperjs/core": "^2.4.4",
     "aframe": "github:mozillareality/aframe#hubs/master",
