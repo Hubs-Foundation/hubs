@@ -207,7 +207,7 @@ function createPreviewMesh(world, frame, capturable) {
     if (isVideo) {
       ratio = MediaVideo.ratio[mediaEid];
     }
-    srcMesh = APP.world.eid2obj.get(mediaEid);
+    srcMesh = world.eid2obj.get(mediaEid);
   }
 
   // Audios can't be cloned so we take a different path for them
@@ -264,7 +264,7 @@ function createPreviewMesh(world, frame, capturable) {
 
   const cloneObj = new Group();
   cloneObj.add(previewMesh);
-  APP.world.scene.add(cloneObj);
+  world.scene.add(cloneObj);
 
   hasComponent(world, AEntity, capturable) && (cloneObj.el = el); // We rely on media-loader component for bounds
 
@@ -434,7 +434,7 @@ export function mediaFramesSystem(world, physicsSystem) {
     MediaFrame.scale[frame].set(NetworkedMediaFrame.scale[frame]);
 
     frame2mixer.forEach(mixer => {
-      mixer.update(APP.world.time.delta / 1000);
+      mixer.update(world.time.delta / 1000);
     });
 
     display(world, physicsSystem, frame, captured, heldMediaTypes);
