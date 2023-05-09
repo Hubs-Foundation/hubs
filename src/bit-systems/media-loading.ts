@@ -217,10 +217,12 @@ function* loadAndAnimateMedia(world: HubsWorld, eid: EntityID, clearRollbacks: C
   removeComponent(world, MediaLoader, eid);
 
   if (media) {
-    const box = getBox(world, eid, media);
-    addComponent(world, MediaContentBounds, media);
-    box.getSize(tmpVector);
-    MediaContentBounds.bounds[media].set(tmpVector.toArray());
+    if (hasComponent(world, MediaLoaded, media)) {
+      const box = getBox(world, eid, media);
+      addComponent(world, MediaContentBounds, media);
+      box.getSize(tmpVector);
+      MediaContentBounds.bounds[media].set(tmpVector.toArray());
+    }
     // TODO update scale?
     removeComponent(world, PhysicsShape, eid);
     inflatePhysicsShape(world, eid, {
@@ -234,8 +236,6 @@ const jobs = new JobRunner();
 const mediaLoaderQuery = defineQuery([MediaLoader]);
 const mediaLoaderEnterQuery = enterQuery(mediaLoaderQuery);
 const mediaLoaderExitQuery = exitQuery(mediaLoaderQuery);
-const mediaLoadedQuery = defineQuery([MediaLoaded]);
-const mediaLoadedExitQuery = exitQuery(mediaLoadedQuery);
 export function mediaLoadingSystem(world: HubsWorld) {
   mediaLoaderEnterQuery(world).forEach(function (eid) {
     jobs.add(eid, clearRollbacks => loadAndAnimateMedia(world, eid, clearRollbacks));
@@ -244,8 +244,6 @@ export function mediaLoadingSystem(world: HubsWorld) {
   mediaLoaderExitQuery(world).forEach(function (eid) {
     jobs.stop(eid);
   });
-
-  mediaLoadedExitQuery(world).forEach(eid => removeComponent(world, MediaContentBounds, eid));
 
   jobs.tick();
 }
