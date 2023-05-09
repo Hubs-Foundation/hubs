@@ -1,7 +1,16 @@
 // https://dev.reticulum.io/scenes/7vGnzkM/outdoor-meetup
 // A scene with media-frames
 
-import { defineQuery, enterQuery, exitQuery, entityExists, hasComponent, addEntity, removeEntity } from "bitecs";
+import {
+  defineQuery,
+  enterQuery,
+  exitQuery,
+  entityExists,
+  hasComponent,
+  addEntity,
+  removeEntity,
+  addComponent
+} from "bitecs";
 import {
   AEntity,
   Deleting,
@@ -126,10 +135,6 @@ function isColliding(world, physicsSystem, eidA, eidB) {
   return false;
 }
 
-function getEntityBounds(target) {
-  return new Vector3().fromArray(MediaContentBounds.bounds[target]);
-}
-
 function scaleForAspectFit(containerSize, itemSize) {
   return Math.min(containerSize[0] / itemSize.x, containerSize[1] / itemSize.y, containerSize[2] / itemSize.z);
 }
@@ -139,14 +144,16 @@ const snapToFrame = (() => {
   const frameQuat = new Quaternion();
   const frameScale = new Vector3();
   const m4 = new Matrix4();
+  const contentBounds = new Vector3();
 
-  return (world, frame, target, contentBounds) => {
+  return (world, frame, target) => {
     const frameObj = world.eid2obj.get(frame);
     const targetObj = world.eid2obj.get(target);
 
     frameObj.updateMatrices();
     frameObj.matrixWorld.decompose(framePos, frameQuat, frameScale);
 
+    contentBounds.fromArray(MediaContentBounds.bounds[target]);
     setMatrixWorld(
       targetObj,
       m4.compose(
@@ -171,7 +178,7 @@ const setMatrixScale = (() => {
   };
 })();
 
-function createPreviewMesh(world, frame, capturable) {
+function createPreviewMesh(world, capturable) {
   let srcMesh;
   let el;
   let previewMesh;
@@ -245,13 +252,15 @@ function createPreviewMesh(world, frame, capturable) {
 }
 
 function showPreview(world, frame, capturable) {
-  const previewObj = createPreviewMesh(world, frame, capturable);
+  const previewObj = createPreviewMesh(world, capturable);
   const eid = addEntity(world);
   addObject3DComponent(world, eid, previewObj);
+  addComponent(world, MediaContentBounds, eid);
+  MediaContentBounds.bounds[eid].set(MediaContentBounds.bounds[capturable]);
 
   MediaFrame.preview[frame] = eid;
   MediaFrame.previewingNid[frame] = Networked.id[capturable];
-  snapToFrame(world, frame, eid, getEntityBounds(capturable));
+  snapToFrame(world, frame, eid);
 }
 
 function hidePreview(world, frame) {
@@ -352,7 +361,7 @@ export function mediaFramesSystem(world, physicsSystem) {
     const isFrameOwned = hasComponent(world, Owned, frame);
 
     if (captured && isCapturedOwned && !isCapturedHeld && !isFrameDeleting && colliding) {
-      snapToFrame(world, frame, captured, getEntityBounds(captured));
+      snapToFrame(world, frame, captured);
       physicsSystem.updateRigidBodyOptions(captured, { type: "kinematic" });
     } else if (
       (isFrameOwned && MediaFrame.capturedNid[frame] && world.deletedNids.has(MediaFrame.capturedNid[frame])) ||
@@ -383,7 +392,7 @@ export function mediaFramesSystem(world, physicsSystem) {
         const obj = world.eid2obj.get(capturable);
         obj.updateMatrices();
         tmpVec3.setFromMatrixScale(obj.matrixWorld).toArray(NetworkedMediaFrame.scale[frame]);
-        snapToFrame(world, frame, capturable, getEntityBounds(capturable));
+        snapToFrame(world, frame, capturable);
         physicsSystem.updateRigidBodyOptions(capturable, { type: "kinematic" });
       }
     }
