@@ -4,7 +4,6 @@
 import { defineQuery, enterQuery, exitQuery, entityExists, hasComponent, addEntity, removeEntity } from "bitecs";
 import {
   AEntity,
-  AnimationMixer,
   Deleting,
   GLTFModel,
   Held,
@@ -32,7 +31,6 @@ import {
   Box3,
   DoubleSide,
   Group,
-  LoopRepeat,
   Matrix4,
   Mesh,
   MeshBasicMaterial,
@@ -184,7 +182,6 @@ const setMatrixScale = (() => {
   };
 })();
 
-const frame2mixer = new Map();
 function createPreviewMesh(world, frame, capturable) {
   let srcMesh;
   let el;
@@ -236,19 +233,6 @@ function createPreviewMesh(world, frame, capturable) {
         return mat;
       });
     });
-
-    if (hasComponent(world, AEntity, capturable)) {
-      const loopAnimation = el.components["loop-animation"];
-      if (loopAnimation && loopAnimation.isPlaying) {
-        const originalAnimation = loopAnimation.currentActions[loopAnimation.data.activeClipIndex];
-        const animation = previewMesh.animations[loopAnimation.data.activeClipIndex];
-        const mixer = new AnimationMixer(previewMesh);
-        const action = mixer.clipAction(animation);
-        action.syncWith(originalAnimation);
-        action.setLoop(LoopRepeat, Infinity).play();
-        frame2mixer.set(frame, mixer);
-      }
-    }
   }
 
   // TODO HACK We add this mesh to a group whose position is centered
@@ -288,8 +272,6 @@ function hidePreview(world, frame) {
 
   MediaFrame.preview[frame] = 0;
   MediaFrame.previewingNid[frame] = 0;
-
-  frame2mixer.delete(frame);
 }
 
 const zero = [0, 0, 0];
@@ -432,10 +414,6 @@ export function mediaFramesSystem(world, physicsSystem) {
 
     MediaFrame.capturedNid[frame] = NetworkedMediaFrame.capturedNid[frame];
     MediaFrame.scale[frame].set(NetworkedMediaFrame.scale[frame]);
-
-    frame2mixer.forEach(mixer => {
-      mixer.update(world.time.delta / 1000);
-    });
 
     display(world, physicsSystem, frame, captured, heldMediaTypes);
   }
