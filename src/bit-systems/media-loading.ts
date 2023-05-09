@@ -224,7 +224,6 @@ function* loadAndAnimateMedia(world: HubsWorld, eid: EntityID, clearRollbacks: C
       MediaContentBounds.bounds[media].set(tmpVector.toArray());
     }
     // TODO update scale?
-    removeComponent(world, PhysicsShape, eid);
     inflatePhysicsShape(world, eid, {
       type: hasComponent(world, GLTFModel, media) ? Shape.HULL : Shape.BOX,
       minHalfExtent: 0.04
