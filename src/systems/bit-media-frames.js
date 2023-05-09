@@ -178,6 +178,11 @@ const setMatrixScale = (() => {
   };
 })();
 
+const videoGeometry = createPlaneBufferGeometry(1, 1, 1, 1, TEXTURES_FLIP_Y);
+const previewMaterial = new MeshBasicMaterial();
+previewMaterial.side = DoubleSide;
+previewMaterial.transparent = true;
+previewMaterial.opacity = 0.5;
 function createPreviewMesh(world, capturable) {
   let srcMesh;
   let el;
@@ -205,13 +210,7 @@ function createPreviewMesh(world, capturable) {
 
   // Audios can't be cloned so we take a different path for them
   if (isVideo) {
-    const previewMaterial = new MeshBasicMaterial();
-    previewMaterial.side = DoubleSide;
-    previewMaterial.transparent = true;
-    previewMaterial.opacity = 0.5;
-
-    const geometry = createPlaneBufferGeometry(1, 1, 1, 1, TEXTURES_FLIP_Y);
-    previewMesh = new Mesh(geometry, previewMaterial);
+    previewMesh = new Mesh(videoGeometry, previewMaterial);
     previewMesh.material.map = srcMesh.material.map;
     previewMesh.material.needsUpdate = true;
     // Preview mesh UVs are set to accommodate textureLoader default, but video textures don't match this
