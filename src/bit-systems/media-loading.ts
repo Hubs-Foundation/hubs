@@ -1,5 +1,5 @@
 import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
-import { Vector3 } from "three";
+import { Box3, Euler, Vector3 } from "three";
 import { HubsWorld } from "../app";
 import {
   GLTFModel,
@@ -7,8 +7,7 @@ import {
   MediaLoaded,
   MediaLoader,
   Networked,
-  ObjectMenuTarget,
-  PhysicsShape
+  ObjectMenuTarget
 } from "../bit-components";
 import { inflatePhysicsShape, Shape } from "../inflators/physics-shape";
 import { ErrorObject } from "../prefabs/error-object";
@@ -29,9 +28,9 @@ import { MediaType, mediaTypeName, resolveMediaInfo } from "../utils/media-utils
 import { EntityID } from "../utils/networking-types";
 
 const getBox = (() => {
-  const rotation = new THREE.Euler();
+  const rotation = new Euler();
   return (world: HubsWorld, eid: EntityID, rootEid: EntityID, worldSpace?: boolean) => {
-    const box = new THREE.Box3();
+    const box = new Box3();
     const obj = world.eid2obj.get(eid)!;
     const rootObj = world.eid2obj.get(rootEid)!;
 
@@ -95,12 +94,12 @@ function resizeAndRecenter(world: HubsWorld, media: EntityID, eid: EntityID) {
   if (!resize && !recenter) return;
 
   const mediaObj = world.eid2obj.get(media)!;
-  const box = new THREE.Box3();
+  const box = new Box3();
   box.setFromObject(mediaObj);
 
   let scalar = 1;
   if (resize) {
-    const size = new THREE.Vector3();
+    const size = new Vector3();
     box.getSize(size);
     scalar = 1 / Math.max(size.x, size.y, size.z);
     if (hasComponent(world, GLTFModel, media)) scalar = scalar * 0.5;
@@ -109,7 +108,7 @@ function resizeAndRecenter(world: HubsWorld, media: EntityID, eid: EntityID) {
   }
 
   if (recenter) {
-    const center = new THREE.Vector3();
+    const center = new Vector3();
     box.getCenter(center);
     mediaObj.position.copy(center).multiplyScalar(-1 * scalar);
     mediaObj.matrixNeedsUpdate = true;
