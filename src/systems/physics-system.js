@@ -246,26 +246,17 @@ export class PhysicsSystem {
   updateRigidBody(eid, options) {
     const bodyId = Rigidbody.bodyId[eid];
     updateRigiBodyParams(eid, options);
-    this.updateBody(bodyId, options);
-  }
-
-  updateBody(uuid, options) {
-    if (this.bodyUuidToData.has(uuid)) {
-      this.bodyUuidToData.get(uuid).options = options;
-      this.workerHelpers.updateBody(uuid, options);
+    if (this.bodyUuidToData.has(bodyId)) {
+      this.bodyUuidToData.get(bodyId).options = options;
+      this.workerHelpers.updateBody(bodyId, options);
     } else {
-      console.warn(`updateBody called for uuid: ${uuid} but body missing.`);
+      console.warn(`updateBody called for uuid: ${bodyId} but body missing.`);
     }
   }
 
   updateRigidBodyOptions(eid, options) {
     const bodyId = Rigidbody.bodyId[eid];
     updateRigiBodyParams(eid, options);
-    this.updateBodyOptions(bodyId, options);
-  }
-
-  // TODO inline updateBody
-  updateBodyOptions(bodyId, options) {
     const bodyData = this.bodyUuidToData.get(bodyId);
     if (!bodyData) {
       // TODO: Fix me.

@@ -409,7 +409,7 @@ export function mediaFramesSystem(world, physicsSystem) {
       // TODO: If you are resetting scale because you lost a race for the frame,
       //       you should probably also move the object away from the frame.
       setMatrixScale(world.eid2obj.get(captured), MediaFrame.scale[frame]);
-      physicsSystem.updateBodyOptions(captured, { type: "dynamic" });
+      physicsSystem.updateRigidBodyOptions(captured, { type: "dynamic" });
     }
 
     MediaFrame.capturedNid[frame] = NetworkedMediaFrame.capturedNid[frame];
