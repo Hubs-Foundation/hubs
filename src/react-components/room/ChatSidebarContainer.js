@@ -48,6 +48,8 @@ const chatSidebarMessages = defineMessages({
     defaultMessage: "Text Chat Off"
   }
 });
+
+// NOTE: context and related functions moved to ChatContext
 export function ChatSidebarContainer({
   scene,
   canSpawnMessages,

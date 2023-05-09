@@ -3,7 +3,7 @@ import { ToolbarButton } from "../../../input/ToolbarButton";
 // @ts-ignore
 import { ReactComponent as ChatIcon } from "../../../icons/Chat.svg";
 import { FormattedMessage, defineMessage, useIntl } from "react-intl";
-import React, { RefAttributes, useContext } from "react";
+import React, { useContext } from "react";
 import { ChatContext } from "../../contexts/ChatContext";
 import { ToolTip } from "@mozilla/lilypad-ui";
 
@@ -12,9 +12,9 @@ const chatTooltipDescription = defineMessage({
   defaultMessage: "Open the chat sidebar (T)"
 });
 
-interface ChatToolbarButtonProps extends RefAttributes<any> {
+type ChatToolbarButtonProps = {
   onClick: () => void;
-}
+};
 
 const ChatToolbarButton = ({ onClick }: ChatToolbarButtonProps) => {
   const { unreadMessages } = useContext(ChatContext);

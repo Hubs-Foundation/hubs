@@ -1,5 +1,4 @@
-import React, { createContext, useCallback, useEffect, useState } from "react";
-import PropTypes from "prop-types";
+import React, { ReactNode, createContext, useCallback, useEffect, useState } from "react";
 import { useRole } from "../hooks/useRole";
 
 type ChatContextValuesT = {
@@ -9,13 +8,22 @@ type ChatContextValuesT = {
   setMessagesRead?: () => void;
 };
 
+type NewMessageT = {
+  [x: string]: any;
+  type: string;
+  name: string;
+  sent: boolean;
+  sessionId: string;
+  messages: NewMessageT[];
+};
+
 export const ChatContext = createContext<ChatContextValuesT>({ messageGroups: [], sendMessage: message => {} });
 
 let uniqueMessageId = 0;
 
 const NEW_MESSAGE_GROUP_TIMEOUT = 1000 * 60;
 
-function shouldCreateNewMessageGroup(messageGroups: any[], newMessage: { sessionId: any; type: any }, now: number) {
+function shouldCreateNewMessageGroup(messageGroups: NewMessageT[], newMessage: NewMessageT, now: number) {
   if (messageGroups.length === 0) {
     return true;
   }
@@ -34,10 +42,7 @@ function shouldCreateNewMessageGroup(messageGroups: any[], newMessage: { session
   return now - lastMessage.timestamp > NEW_MESSAGE_GROUP_TIMEOUT;
 }
 
-function processChatMessage(
-  messageGroups: any[],
-  newMessage: { [x: string]: any; type: any; name: any; sent: any; sessionId: any }
-) {
+function processChatMessage(messageGroups: any[], newMessage: NewMessageT) {
   const now = Date.now();
   const { name, sent, sessionId, ...messageProps } = newMessage;
 
@@ -67,10 +72,7 @@ function processChatMessage(
 
 // Returns the new message groups array when we receive a message.
 // If the message is ignored, we return the original message group array.
-function updateMessageGroups(
-  messageGroups: any[],
-  newMessage: { [x: string]: any; type: any; name: any; sent: any; sessionId: any }
-) {
+function updateMessageGroups(messageGroups: any[], newMessage: NewMessageT) {
   switch (newMessage.type) {
     case "join":
     case "entered":
@@ -100,13 +102,18 @@ function updateMessageGroups(
   }
 }
 
-export function ChatContextProvider({ messageDispatch, children }: { messageDispatch: any; children: any }) {
-  const [messageGroups, setMessageGroups] = useState<any[]>([]);
+type ChatContextProviderPropsT = {
+  children: ReactNode;
+  messageDispatch: Record<string, any>;
+};
+
+export function ChatContextProvider({ messageDispatch, children }: ChatContextProviderPropsT) {
+  const [messageGroups, setMessageGroups] = useState<NewMessageT[]>([]);
   const [unreadMessages, setUnreadMessages] = useState<boolean>(false);
   const isMod = useRole("owner");
-
+  console.log(messageGroups, messageDispatch);
   useEffect(() => {
-    function onReceiveMessage(event: { detail: any }) {
+    function onReceiveMessage(event: { detail: NewMessageT }) {
       const newMessage = event.detail;
 
       if (isMod && newMessage.sessionId === NAF.clientId && newMessage.type === "permission") return;
@@ -136,7 +143,7 @@ export function ChatContextProvider({ messageDispatch, children }: { messageDisp
   }, [messageDispatch, setMessageGroups, setUnreadMessages, isMod]);
 
   const sendMessage = useCallback(
-    (message: any) => {
+    (message: string) => {
       if (messageDispatch) {
         messageDispatch.dispatch(message);
       }
@@ -154,8 +161,3 @@ export function ChatContextProvider({ messageDispatch, children }: { messageDisp
     </ChatContext.Provider>
   );
 }
-
-ChatContextProvider.propTypes = {
-  children: PropTypes.node,
-  messageDispatch: PropTypes.object
-};
