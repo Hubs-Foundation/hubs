@@ -123,7 +123,7 @@ function getCapturableEntity(world, physicsSystem, frame) {
   return null;
 }
 
-function isColliding(world, physicsSystem, eidA, eidB) {
+function isEntityColliding(physicsSystem, eidA, eidB) {
   const collisions = physicsSystem.getCollisions(Rigidbody.bodyId[eidA]);
   for (let i = 0; i < collisions.length; i++) {
     const bodyData = physicsSystem.bodyUuidToData.get(collisions[i]);
@@ -275,13 +275,13 @@ function hidePreview(world, frame) {
 const zero = [0, 0, 0];
 const tmpVec3 = new Vector3();
 
-export function display(world, physicsSystem, frame, captured, heldMediaTypes) {
+export function display(world, physicsSystem, frame, capturedEid, heldMediaTypes) {
   const capturable = !MediaFrame.capturedNid[frame] && getCapturableEntity(world, physicsSystem, frame);
   const shouldPreviewBeVisible =
     (capturable && findChildWithComponent(world, Held, capturable)) ||
-    (captured && findChildWithComponent(world, Held, captured));
+    (capturedEid && findChildWithComponent(world, Held, capturedEid));
   if (shouldPreviewBeVisible && !MediaFrame.preview[frame]) {
-    showPreview(world, frame, capturable ? capturable : captured);
+    showPreview(world, frame, capturable ? capturable : capturedEid);
   } else if (!shouldPreviewBeVisible && MediaFrame.preview[frame]) {
     hidePreview(world, frame);
   }
@@ -291,9 +291,9 @@ export function display(world, physicsSystem, frame, captured, heldMediaTypes) {
   guideObj.visible = !!(MediaFrame.mediaType[frame] & heldMediaTypes);
 
   if (guideObj.visible) {
-    const captured = world.nid2eid.get(MediaFrame.capturedNid[frame]) || 0;
+    const capturedEid = world.nid2eid.get(MediaFrame.capturedNid[frame]) || 0;
     const isHoldingObjectOfInterest =
-      (captured && findChildWithComponent(world, Held, captured)) ||
+      (capturedEid && findChildWithComponent(world, Held, capturedEid)) ||
       (capturable && findChildWithComponent(world, Held, capturable));
 
     guideObj.material.uniforms.color.value.set(
@@ -353,29 +353,29 @@ export function mediaFramesSystem(world, physicsSystem) {
   for (let i = 0; i < mediaFrames.length; i++) {
     const frame = mediaFrames[i];
 
-    const captured = world.nid2eid.get(MediaFrame.capturedNid[frame]) || 0;
-    const isCapturedOwned = hasComponent(world, Owned, captured);
-    const isCapturedHeld = findChildWithComponent(world, Held, captured);
-    const colliding = captured && isColliding(world, physicsSystem, frame, captured);
+    const capturedEid = world.nid2eid.get(MediaFrame.capturedNid[frame]) || 0;
+    const isCapturedOwned = hasComponent(world, Owned, capturedEid);
+    const isCapturedHeld = findChildWithComponent(world, Held, capturedEid);
+    const isCapturedColliding = capturedEid && isEntityColliding(physicsSystem, frame, capturedEid);
     const isFrameDeleting = findAncestorWithComponent(world, Deleting, frame);
     const isFrameOwned = hasComponent(world, Owned, frame);
 
-    if (captured && isCapturedOwned && !isCapturedHeld && !isFrameDeleting && colliding) {
-      snapToFrame(world, frame, captured);
-      physicsSystem.updateRigidBodyOptions(captured, { type: "kinematic" });
+    if (capturedEid && isCapturedOwned && !isCapturedHeld && !isFrameDeleting && isCapturedColliding) {
+      snapToFrame(world, frame, capturedEid);
+      physicsSystem.updateRigidBodyOptions(capturedEid, { type: "kinematic" });
     } else if (
       (isFrameOwned && MediaFrame.capturedNid[frame] && world.deletedNids.has(MediaFrame.capturedNid[frame])) ||
-      (captured && isCapturedOwned && !colliding) ||
+      (capturedEid && isCapturedOwned && !isCapturedColliding) ||
       isFrameDeleting
     ) {
       takeOwnership(world, frame);
       NetworkedMediaFrame.capturedNid[frame] = 0;
       NetworkedMediaFrame.scale[frame].set(zero);
-      // TODO BUG: If an entity I do not own is captured by the media frame,
+      // TODO BUG: If an entity I do not own is capturedEid by the media frame,
       //           and then I take ownership of the entity (by grabbing it),
-      //           the physics system does not immediately notice the entity colliding with the frame,
+      //           the physics system does not immediately notice the entity isCapturedColliding with the frame,
       //           so I immediately think the frame should be emptied.
-    } else if (isFrameOwned && MediaFrame.capturedNid[frame] && !captured) {
+    } else if (isFrameOwned && MediaFrame.capturedNid[frame] && !capturedEid) {
       NetworkedMediaFrame.capturedNid[frame] = 0;
       NetworkedMediaFrame.scale[frame].set(zero);
     } else if (!NetworkedMediaFrame.capturedNid[frame]) {
@@ -399,19 +399,19 @@ export function mediaFramesSystem(world, physicsSystem) {
 
     if (
       NetworkedMediaFrame.capturedNid[frame] !== MediaFrame.capturedNid[frame] &&
-      captured &&
-      entityExists(world, captured) &&
+      capturedEid &&
+      entityExists(world, capturedEid) &&
       isCapturedOwned
     ) {
       // TODO: If you are resetting scale because you lost a race for the frame,
       //       you should probably also move the object away from the frame.
-      setMatrixScale(world.eid2obj.get(captured), MediaFrame.scale[frame]);
-      physicsSystem.updateRigidBodyOptions(captured, { type: "dynamic" });
+      setMatrixScale(world.eid2obj.get(capturedEid), MediaFrame.scale[frame]);
+      physicsSystem.updateRigidBodyOptions(capturedEid, { type: "dynamic" });
     }
 
     MediaFrame.capturedNid[frame] = NetworkedMediaFrame.capturedNid[frame];
     MediaFrame.scale[frame].set(NetworkedMediaFrame.scale[frame]);
 
-    display(world, physicsSystem, frame, captured, heldMediaTypes);
+    display(world, physicsSystem, frame, capturedEid, heldMediaTypes);
   }
 }
