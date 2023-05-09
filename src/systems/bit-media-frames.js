@@ -324,10 +324,9 @@ export function mediaFramesSystem(world, physicsSystem) {
       );
     }
 
-    const guideEid = MediaFrame.guide[eid];
-    const guide = world.eid2obj.get(guideEid);
+    const guideObj = world.eid2obj.get(MediaFrame.guide[eid]);
     const frameObj = world.eid2obj.get(eid);
-    frameObj.add(guide);
+    frameObj.add(guideObj);
   });
 
   exitedMediaFramesQuery(world).forEach(eid => {
