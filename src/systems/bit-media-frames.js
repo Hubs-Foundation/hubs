@@ -245,7 +245,7 @@ function createPreviewMesh(world, capturable) {
   cloneObj.add(previewMesh);
   world.scene.add(cloneObj);
 
-  hasComponent(world, AEntity, capturable) && (cloneObj.el = el); // We rely on media-loader component for bounds
+  hasComponent(world, AEntity, capturable) && (cloneObj.el = el);
 
   return cloneObj;
 }
