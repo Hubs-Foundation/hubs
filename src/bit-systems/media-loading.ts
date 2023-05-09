@@ -218,9 +218,9 @@ function* loadAndAnimateMedia(world: HubsWorld, eid: EntityID, clearRollbacks: C
   if (media) {
     if (hasComponent(world, MediaLoaded, media)) {
       const box = getBox(world, eid, media);
-      addComponent(world, MediaContentBounds, media);
+      addComponent(world, MediaContentBounds, eid);
       box.getSize(tmpVector);
-      MediaContentBounds.bounds[media].set(tmpVector.toArray());
+      MediaContentBounds.bounds[eid].set(tmpVector.toArray());
     }
     // TODO update scale?
     inflatePhysicsShape(world, eid, {

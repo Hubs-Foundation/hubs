@@ -127,18 +127,8 @@ function isColliding(world, physicsSystem, eidA, eidB) {
 }
 
 // TODO we only allow capturing media-loader so rely on its bounds calculations for now
-function getEntityBounds(world, target) {
-  const targetObj = world.eid2obj.get(target);
-
-  let contentBounds;
-  if (hasComponent(world, AEntity, target)) {
-    contentBounds = targetObj.el.components["media-loader"].contentBounds;
-  } else {
-    const mediaEid = findChildWithComponent(world, MediaLoaded, target);
-    contentBounds = new Vector3().fromArray(MediaContentBounds.bounds[mediaEid]);
-  }
-
-  return contentBounds;
+function getEntityBounds(target) {
+  return new Vector3().fromArray(MediaContentBounds.bounds[target]);
 }
 
 function scaleForAspectFit(containerSize, itemSize) {
@@ -262,7 +252,7 @@ function showPreview(world, frame, capturable) {
 
   MediaFrame.preview[frame] = eid;
   MediaFrame.previewingNid[frame] = Networked.id[capturable];
-  snapToFrame(world, frame, eid, getEntityBounds(world, capturable));
+  snapToFrame(world, frame, eid, getEntityBounds(capturable));
 }
 
 function hidePreview(world, frame) {
@@ -364,7 +354,7 @@ export function mediaFramesSystem(world, physicsSystem) {
     const isFrameOwned = hasComponent(world, Owned, frame);
 
     if (captured && isCapturedOwned && !isCapturedHeld && !isFrameDeleting && colliding) {
-      snapToFrame(world, frame, captured, getEntityBounds(world, captured));
+      snapToFrame(world, frame, captured, getEntityBounds(captured));
       physicsSystem.updateRigidBodyOptions(captured, { type: "kinematic" });
     } else if (
       (isFrameOwned && MediaFrame.capturedNid[frame] && world.deletedNids.has(MediaFrame.capturedNid[frame])) ||
@@ -395,7 +385,7 @@ export function mediaFramesSystem(world, physicsSystem) {
         const obj = world.eid2obj.get(capturable);
         obj.updateMatrices();
         tmpVec3.setFromMatrixScale(obj.matrixWorld).toArray(NetworkedMediaFrame.scale[frame]);
-        snapToFrame(world, frame, capturable, getEntityBounds(world, capturable));
+        snapToFrame(world, frame, capturable, getEntityBounds(capturable));
         physicsSystem.updateRigidBodyOptions(capturable, { type: "kinematic" });
       }
     }
