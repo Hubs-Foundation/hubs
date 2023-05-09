@@ -4,6 +4,7 @@
 import { defineQuery, enterQuery, exitQuery, entityExists, hasComponent, addEntity, removeEntity } from "bitecs";
 import {
   AEntity,
+  AnimationMixer,
   Deleting,
   GLTFModel,
   Held,
@@ -27,6 +28,19 @@ import { MediaContentBounds } from "../bit-systems/media-loading";
 import { TEXTURES_FLIP_Y } from "../loaders/HubsTextureLoader";
 import { addObject3DComponent } from "../utils/jsx-entity";
 import { updateMaterials } from "../utils/material-utils";
+import {
+  Box3,
+  DoubleSide,
+  Group,
+  LoopRepeat,
+  Matrix4,
+  Mesh,
+  MeshBasicMaterial,
+  NormalBlending,
+  Quaternion,
+  RGBAFormat,
+  Vector3
+} from "three";
 
 const EMPTY_COLOR = 0x6fc0fd;
 const HOVER_COLOR = 0x2f80ed;
@@ -134,10 +148,10 @@ function scaleForAspectFit(containerSize, itemSize) {
 }
 
 const snapToFrame = (() => {
-  const framePos = new THREE.Vector3();
-  const frameQuat = new THREE.Quaternion();
-  const frameScale = new THREE.Vector3();
-  const m4 = new THREE.Matrix4();
+  const framePos = new Vector3();
+  const frameQuat = new Quaternion();
+  const frameScale = new Vector3();
+  const m4 = new Matrix4();
 
   return (world, frame, target, contentBounds) => {
     const frameObj = world.eid2obj.get(frame);
@@ -158,10 +172,10 @@ const snapToFrame = (() => {
 })();
 
 const setMatrixScale = (() => {
-  const position = new THREE.Vector3();
-  const quaternion = new THREE.Quaternion();
-  const scale = new THREE.Vector3();
-  const m4 = new THREE.Matrix4();
+  const position = new Vector3();
+  const quaternion = new Quaternion();
+  const scale = new Vector3();
+  const m4 = new Matrix4();
 
   return (obj, scaleArray) => {
     obj.updateMatrices();
@@ -198,13 +212,13 @@ function createPreviewMesh(world, frame, capturable) {
 
   // Audios can't be cloned so we take a different path for them
   if (isVideo) {
-    const previewMaterial = new THREE.MeshBasicMaterial();
-    previewMaterial.side = THREE.DoubleSide;
+    const previewMaterial = new MeshBasicMaterial();
+    previewMaterial.side = DoubleSide;
     previewMaterial.transparent = true;
     previewMaterial.opacity = 0.5;
 
     const geometry = createPlaneBufferGeometry(1, 1, 1, 1, TEXTURES_FLIP_Y);
-    previewMesh = new THREE.Mesh(geometry, previewMaterial);
+    previewMesh = new Mesh(geometry, previewMaterial);
     previewMesh.material.map = srcMesh.material.map;
     previewMesh.material.needsUpdate = true;
     // Preview mesh UVs are set to accommodate textureLoader default, but video textures don't match this
@@ -216,8 +230,8 @@ function createPreviewMesh(world, frame, capturable) {
         const mat = srcMat.clone();
         mat.transparent = true;
         mat.opacity = 0.5;
-        mat.format = THREE.RGBAFormat;
-        mat.blending = THREE.NormalBlending;
+        mat.format = RGBAFormat;
+        mat.blending = NormalBlending;
         node.material = mat;
         return mat;
       });
@@ -228,10 +242,10 @@ function createPreviewMesh(world, frame, capturable) {
       if (loopAnimation && loopAnimation.isPlaying) {
         const originalAnimation = loopAnimation.currentActions[loopAnimation.data.activeClipIndex];
         const animation = previewMesh.animations[loopAnimation.data.activeClipIndex];
-        const mixer = new THREE.AnimationMixer(previewMesh);
+        const mixer = new AnimationMixer(previewMesh);
         const action = mixer.clipAction(animation);
         action.syncWith(originalAnimation);
-        action.setLoop(THREE.LoopRepeat, Infinity).play();
+        action.setLoop(LoopRepeat, Infinity).play();
         frame2mixer.set(frame, mixer);
       }
     }
@@ -244,11 +258,11 @@ function createPreviewMesh(world, frame, capturable) {
   previewMesh.position.setScalar(0);
   previewMesh.quaternion.identity();
   previewMesh.matrixNeedsUpdate = true;
-  const aabb = new THREE.Box3().setFromObject(previewMesh);
+  const aabb = new Box3().setFromObject(previewMesh);
   aabb.getCenter(previewMesh.position).multiplyScalar(-1);
   previewMesh.matrixNeedsUpdate = true;
 
-  const cloneObj = new THREE.Group();
+  const cloneObj = new Group();
   cloneObj.add(previewMesh);
   APP.world.scene.add(cloneObj);
 
@@ -279,7 +293,7 @@ function hidePreview(world, frame) {
 }
 
 const zero = [0, 0, 0];
-const tmpVec3 = new THREE.Vector3();
+const tmpVec3 = new Vector3();
 
 export function display(world, physicsSystem, frame, captured, heldMediaTypes) {
   const capturable = !MediaFrame.capturedNid[frame] && getCapturableEntity(world, physicsSystem, frame);
