@@ -126,7 +126,6 @@ function isColliding(world, physicsSystem, eidA, eidB) {
   return false;
 }
 
-// TODO we only allow capturing media-loader so rely on its bounds calculations for now
 function getEntityBounds(target) {
   return new Vector3().fromArray(MediaContentBounds.bounds[target]);
 }
