@@ -1,7 +1,15 @@
 import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
 import { Vector3 } from "three";
 import { HubsWorld } from "../app";
-import { GLTFModel, MediaLoaded, MediaLoader, Networked, ObjectMenuTarget, PhysicsShape } from "../bit-components";
+import {
+  GLTFModel,
+  MediaContentBounds,
+  MediaLoaded,
+  MediaLoader,
+  Networked,
+  ObjectMenuTarget,
+  PhysicsShape
+} from "../bit-components";
 import { inflatePhysicsShape, Shape } from "../inflators/physics-shape";
 import { ErrorObject } from "../prefabs/error-object";
 import { LoadingObject } from "../prefabs/loading-object";
@@ -19,8 +27,6 @@ import { loadVideo } from "../utils/load-video";
 import { loadAudio } from "../utils/load-audio";
 import { MediaType, mediaTypeName, resolveMediaInfo } from "../utils/media-utils";
 import { EntityID } from "../utils/networking-types";
-
-export const MediaContentBounds = (MediaLoaded as any).contentBounds as Map<EntityID, Vector3>;
 
 const getBox = (() => {
   const rotation = new THREE.Euler();
@@ -194,6 +200,7 @@ function* loadMedia(world: HubsWorld, eid: EntityID) {
   return media;
 }
 
+const tmpVector = new Vector3();
 function* loadAndAnimateMedia(world: HubsWorld, eid: EntityID, clearRollbacks: ClearFunction) {
   if (MediaLoader.flags[eid] & MEDIA_LOADER_FLAGS.IS_OBJECT_MENU_TARGET) {
     addComponent(world, ObjectMenuTarget, eid);
@@ -211,7 +218,9 @@ function* loadAndAnimateMedia(world: HubsWorld, eid: EntityID, clearRollbacks: C
 
   if (media) {
     const box = getBox(world, eid, media);
-    MediaContentBounds.set(media, box.getSize(new Vector3()));
+    addComponent(world, MediaContentBounds, media);
+    box.getSize(tmpVector);
+    MediaContentBounds.bounds[media].set(tmpVector.toArray());
     // TODO update scale?
     removeComponent(world, PhysicsShape, eid);
     inflatePhysicsShape(world, eid, {
@@ -236,7 +245,7 @@ export function mediaLoadingSystem(world: HubsWorld) {
     jobs.stop(eid);
   });
 
-  mediaLoadedExitQuery(world).forEach(eid => MediaContentBounds.delete(eid));
+  mediaLoadedExitQuery(world).forEach(eid => removeComponent(world, MediaContentBounds, eid));
 
   jobs.tick();
 }

@@ -157,7 +157,9 @@ export const MediaLoader = defineComponent({
 });
 MediaLoader.src[$isStringType] = true;
 export const MediaLoaded = defineComponent();
-MediaLoaded.contentBounds = new Map();
+export const MediaContentBounds = defineComponent({
+  bounds: [Types.f32, 3]
+});
 
 export const SceneRoot = defineComponent();
 export const NavMesh = defineComponent();

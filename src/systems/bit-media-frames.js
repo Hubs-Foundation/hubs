@@ -8,6 +8,7 @@ import {
   Deleting,
   GLTFModel,
   Held,
+  MediaContentBounds,
   MediaFrame,
   MediaImage,
   MediaLoaded,
@@ -24,7 +25,6 @@ import { cloneObject3D, createPlaneBufferGeometry, disposeNode, setMatrixWorld }
 import { takeOwnership } from "../utils/take-ownership";
 import { takeSoftOwnership } from "../utils/take-soft-ownership";
 import { findAncestorWithComponent, findChildWithComponent } from "../utils/bit-utils";
-import { MediaContentBounds } from "../bit-systems/media-loading";
 import { TEXTURES_FLIP_Y } from "../loaders/HubsTextureLoader";
 import { addObject3DComponent } from "../utils/jsx-entity";
 import { updateMaterials } from "../utils/material-utils";
@@ -137,7 +137,7 @@ function getEntityBounds(world, target) {
     contentBounds = targetObj.el.components["media-loader"].contentBounds;
   } else {
     const mediaEid = findChildWithComponent(world, MediaLoaded, target);
-    contentBounds = MediaContentBounds.get(mediaEid);
+    contentBounds = new Vector3().fromArray(MediaContentBounds.bounds[mediaEid]);
   }
 
   return contentBounds;
