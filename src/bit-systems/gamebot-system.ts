@@ -252,7 +252,7 @@ function updateEndVisibility(world: HubsWorld, menu: EntityID, visible: boolean)
   });
 }
 
-const TYPEWRITER_SPEED = 100;
+const TYPEWRITER_SPEED = 50;
 let textHandler: NodeJS.Timeout | null;
 function updateText(world: HubsWorld, menu: EntityID, msg?: string, callback?: Function) {
   if (!msg) {
