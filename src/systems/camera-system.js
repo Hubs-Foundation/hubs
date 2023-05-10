@@ -8,8 +8,19 @@ import { qsGet } from "../utils/qs_truthy";
 const customFOV = qsGet("fov");
 const enableThirdPersonMode = qsTruthy("thirdPerson");
 import { Layers } from "../camera-layers";
+import { Inspectable } from "../bit-components";
+import { findAncestorWithComponent, shouldUseNewLoader } from "../utils/bit-utils";
 
-function getInspectableInHierarchy(el) {
+function getInspectableInHierarchy(eid) {
+  let inspectable = findAncestorWithComponent(APP.world, Inspectable, eid);
+  if (!inspectable) {
+    console.warn("could not find inspectable in hierarchy");
+    inspectable = eid;
+  }
+  return APP.world.eid2obj.get(inspectable);
+}
+
+function getInspectableInHierarchyAframe(el) {
   let inspectable = el;
   while (inspectable) {
     if (isTagged(inspectable, "inspectable")) {
@@ -36,8 +47,14 @@ function pivotFor(el) {
   return child.object3D;
 }
 
-export function getInspectableAndPivot(el) {
-  const inspectable = getInspectableInHierarchy(el);
+function getInspectableAndPivot(eid) {
+  const inspectable = getInspectableInHierarchy(eid);
+  // TODO Add support for pivotFor (avatars only)
+  return { inspectable, pivot: inspectable };
+}
+
+function getInspectableAndPivotAframe(el) {
+  const inspectable = getInspectableInHierarchyAframe(el);
   const pivot = pivotFor(inspectable.el);
   return { inspectable, pivot };
 }
@@ -119,22 +136,16 @@ const moveRigSoCameraLooksAtPivot = (function () {
     decompose(camera.matrixWorld, cwp, cwq);
     rig.getWorldQuaternion(cwq);
 
-    const box = getBox(inspectable.el, inspectable.el.getObject3D("mesh") || inspectable, true);
+    const box = getBox(inspectable, inspectable, true);
     if (box.min.x === Infinity) {
       // fix edgecase where inspectable object has no mesh / dimensions
       box.min.subVectors(owp, defaultBoxMax);
       box.max.addVectors(owp, defaultBoxMax);
     }
     box.getCenter(center);
-    const vrMode = inspectable.el.sceneEl.is("vr-mode");
+    const vrMode = APP.scene.is("vr-mode");
     const dist =
-      calculateViewingDistance(
-        inspectable.el.sceneEl.camera.fov,
-        inspectable.el.sceneEl.camera.aspect,
-        box,
-        center,
-        vrMode
-      ) * distanceMod;
+      calculateViewingDistance(APP.scene.camera.fov, APP.scene.camera.aspect, box, center, vrMode) * distanceMod;
     target.position.addVectors(
       owp,
       oForw
@@ -252,15 +263,19 @@ export class CameraSystem {
     this.mode = NEXT_MODES[this.mode] || 0;
   }
 
-  inspect(el, distanceMod, fireChangeEvent = true) {
-    const { inspectable, pivot } = getInspectableAndPivot(el);
-
+  inspect(obj, distanceMod, fireChangeEvent = true) {
     this.verticalDelta = 0;
     this.horizontalDelta = 0;
     this.inspectZoom = 0;
+
     if (this.mode === CAMERA_MODE_INSPECT) {
       return;
     }
+
+    const { inspectable, pivot } = shouldUseNewLoader()
+      ? getInspectableAndPivot(obj.eid)
+      : getInspectableAndPivotAframe(obj.el);
+
     const scene = AFRAME.scenes[0];
     scene.object3D.traverse(ensureLightsAreSeenByCamera);
     scene.classList.add("hand-cursor");
@@ -282,7 +297,16 @@ export class CameraSystem {
     this.viewingCamera.updateMatrices();
     this.snapshot.matrixWorld.copy(this.viewingRig.object3D.matrixWorld);
 
-    this.snapshot.audio = !(inspectable.el && isTagged(inspectable.el, "preventAudioBoost")) && getAudio(inspectable);
+    let preventAudioBoost;
+
+    if (shouldUseNewLoader()) {
+      // TODO Add when avatar is migrated
+      preventAudioBoost = false;
+    } else {
+      preventAudioBoost = inspectable.el && isTagged(inspectable.el, "preventAudioBoost");
+    }
+
+    this.snapshot.audio = !preventAudioBoost && getAudio(inspectable);
     if (this.snapshot.audio) {
       this.snapshot.audio.updateMatrices();
       this.snapshot.audioTransform.copy(this.snapshot.audio.matrixWorld);
@@ -427,7 +451,7 @@ export class CameraSystem {
         const hoverEl = this.interaction.state.rightRemote.hovered || this.interaction.state.leftRemote.hovered;
 
         if (hoverEl) {
-          this.inspect(hoverEl, 1.5);
+          this.inspect(hoverEl.object3D, 1.5);
         }
       } else if (this.mode === CAMERA_MODE_INSPECT && this.userinput.get(paths.actions.stopInspecting)) {
         scene.emit("uninspect");
