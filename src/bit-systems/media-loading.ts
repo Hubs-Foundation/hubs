@@ -5,6 +5,7 @@ import {
   GLTFModel,
   LoadedByMediaLoader,
   MediaContentBounds,
+  MediaInfo,
   MediaLoaded,
   MediaLoader,
   Networked,
@@ -207,6 +208,9 @@ function* loadMedia(world: HubsWorld, eid: EntityID) {
     }
     media = yield* loader(world, eid, urlData);
     addComponent(world, MediaLoaded, media);
+    addComponent(world, MediaInfo, media);
+    MediaInfo.accessibleUrl[media] = APP.getSid(urlData.accessibleUrl);
+    MediaInfo.contentType[media] = APP.getSid(urlData.contentType);
   } catch (e) {
     console.error(e);
     media = renderAsEntity(world, ErrorObject());
@@ -252,6 +256,9 @@ const jobs = new JobRunner();
 const mediaLoaderQuery = defineQuery([MediaLoader]);
 const mediaLoaderEnterQuery = enterQuery(mediaLoaderQuery);
 const mediaLoaderExitQuery = exitQuery(mediaLoaderQuery);
+const mediaLoadedQuery = defineQuery([MediaLoaded]);
+const mediaLoadedEnterQuery = enterQuery(mediaLoadedQuery);
+const mediaLoadedExitQuery = exitQuery(mediaLoadedQuery);
 export function mediaLoadingSystem(world: HubsWorld) {
   mediaLoaderEnterQuery(world).forEach(function (eid) {
     jobs.add(eid, clearRollbacks => loadAndAnimateMedia(world, eid, clearRollbacks));
@@ -260,6 +267,9 @@ export function mediaLoadingSystem(world: HubsWorld) {
   mediaLoaderExitQuery(world).forEach(function (eid) {
     jobs.stop(eid);
   });
+
+  mediaLoadedEnterQuery(world).forEach(() => APP.scene?.emit("listed_media_changed"));
+  mediaLoadedExitQuery(world).forEach(() => APP.scene?.emit("listed_media_changed"));
 
   jobs.tick();
 }

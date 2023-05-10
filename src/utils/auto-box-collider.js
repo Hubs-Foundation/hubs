@@ -90,13 +90,13 @@ export const computeObjectAABB = (function () {
 })();
 
 const rotation = new THREE.Euler();
-export function getBox(entity, boxRoot, worldSpace) {
+export function getBox(obj, boxRoot, worldSpace) {
   const box = new THREE.Box3();
 
-  rotation.copy(entity.object3D.rotation);
-  entity.object3D.rotation.set(0, 0, 0);
+  rotation.copy(obj.rotation);
+  obj.rotation.set(0, 0, 0);
 
-  entity.object3D.updateMatrices(true, true);
+  obj.updateMatrices(true, true);
   boxRoot.updateMatrices(true, true);
   boxRoot.updateMatrixWorld(true);
 
@@ -104,11 +104,11 @@ export function getBox(entity, boxRoot, worldSpace) {
 
   if (!box.isEmpty()) {
     if (!worldSpace) {
-      entity.object3D.worldToLocal(box.min);
-      entity.object3D.worldToLocal(box.max);
+      obj.worldToLocal(box.min);
+      obj.worldToLocal(box.max);
     }
-    entity.object3D.rotation.copy(rotation);
-    entity.object3D.matrixNeedsUpdate = true;
+    obj.rotation.copy(rotation);
+    obj.matrixNeedsUpdate = true;
   }
 
   boxRoot.matrixWorldNeedsUpdate = true;

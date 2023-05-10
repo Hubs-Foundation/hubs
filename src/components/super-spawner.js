@@ -111,7 +111,7 @@ AFRAME.registerComponent("super-spawner", {
         ? 1
         : 0.5;
 
-    const scaleCoefficient = getScaleCoefficient(boxSize, getBox(spawnedEntity, spawnedEntity.object3D));
+    const scaleCoefficient = getScaleCoefficient(boxSize, getBox(spawnedEntity.object3D, spawnedEntity.object3D));
     this.spawnedMediaScale.divideScalar(scaleCoefficient);
   },
 

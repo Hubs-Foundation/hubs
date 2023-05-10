@@ -161,6 +161,12 @@ export const LoadedByMediaLoader = defineComponent();
 export const MediaContentBounds = defineComponent({
   bounds: [Types.f32, 3]
 });
+export const MediaInfo = defineComponent({
+  accessibleUrl: Types.ui32,
+  contentType: Types.ui32
+});
+MediaInfo.accessibleUrl[$isStringType] = true;
+MediaInfo.contentType[$isStringType] = true;
 
 export const SceneRoot = defineComponent();
 export const NavMesh = defineComponent();
