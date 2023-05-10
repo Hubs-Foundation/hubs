@@ -32,12 +32,7 @@ export function Header({
           <ul>
             <li>
               <a href="/" className={styles.homeLink}>
-                {/*
-                This forceConfigurableLogo prop is a bit of a hack, since we want the home page on HMC to use our 
-                configured logo, which is left-aligned, as opposed to the logo that we typically used for HMC, 
-                which is center-aligned.
-                */}
-                <AppLogo forceConfigurableLogo />
+                <AppLogo />
               </a>
             </li>
             {enableSpoke && (
