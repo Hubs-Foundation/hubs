@@ -23,8 +23,8 @@ export function RoomEntryModal({
   onEnterOnDevice,
   showSpectate,
   onSpectate,
-  showOptions,
-  onOptions,
+  showRoomSettings,
+  onRoomSettings,
   ...rest
 }) {
   const breakpoint = useCssBreakpoints();
@@ -67,13 +67,13 @@ export function RoomEntryModal({
               </span>
             </Button>
           )}
-          {showOptions && breakpoint !== "sm" && (
+          {showRoomSettings && breakpoint !== "sm" && (
             <>
               <hr className={styleUtils.showLg} />
-              <Button preset="transparent" className={styleUtils.showLg} onClick={onOptions}>
+              <Button preset="transparent" className={styleUtils.showLg} onClick={onRoomSettings}>
                 <SettingsIcon />
                 <span>
-                  <FormattedMessage id="room-entry-modal.options-button" defaultMessage="Options" />
+                  <FormattedMessage id="room-entry-modal.room-settings-button" defaultMessage="Room Settings" />
                 </span>
               </Button>
             </>
@@ -93,13 +93,13 @@ RoomEntryModal.propTypes = {
   onEnterOnDevice: PropTypes.func,
   showSpectate: PropTypes.bool,
   onSpectate: PropTypes.func,
-  showOptions: PropTypes.bool,
-  onOptions: PropTypes.func
+  showRoomSettings: PropTypes.bool,
+  onRoomSettings: PropTypes.func
 };
 
 RoomEntryModal.defaultProps = {
   showJoinRoom: true,
   showEnterOnDevice: true,
   showSpectate: true,
-  showOptions: true
+  showRoomSettings: true
 };

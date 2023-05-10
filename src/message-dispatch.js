@@ -11,6 +11,8 @@ import { createNetworkedEntity } from "./utils/create-networked-entity";
 import qsTruthy from "./utils/qs_truthy";
 import { add, testAsset, respawn } from "./utils/chat-commands";
 import { loadState, downloadSavedEntityStates, clearState } from "./utils/entity-state-utils";
+import { isLockedDownDemoRoom } from "./utils/hub-utils";
+
 
 let uiRoot;
 // Handles user-entered messages
@@ -57,6 +59,8 @@ export default class MessageDispatch extends EventTarget {
   }
 
   receive(message) {
+    if (isLockedDownDemoRoom()) return;
+
     this.addToPresenceLog(message);
     this.dispatchEvent(new CustomEvent("message", { detail: message }));
   }

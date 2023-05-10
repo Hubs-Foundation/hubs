@@ -452,7 +452,7 @@
   "revoke-token-modal.title": "Révoquer jeton",
   "room-entry-modal.enter-on-device-button": "Entrer avec l'appareil",
   "room-entry-modal.join-room-button": "Rejoindre la salle",
-  "room-entry-modal.options-button": "Options",
+  "room-entry-modal.room-settings-button": "Paramètres de la salle",
   "room-entry-modal.room-name-label": "Nom de la salle",
   "room-entry-modal.spectate-button": "Observer",
   "room-settings-sidebar.access-invite": "Invitation seulement",

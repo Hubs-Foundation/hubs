@@ -6,6 +6,7 @@ import { FormattedMessage } from "react-intl";
 import screenfull from "screenfull";
 
 import configs from "../utils/configs";
+import { isLockedDownDemoRoom } from "../utils/hub-utils";
 import { VR_DEVICE_AVAILABILITY } from "../utils/vr-caps-detect";
 import { canShare } from "../utils/share";
 import styles from "../assets/stylesheets/ui-root.scss";
@@ -817,6 +818,7 @@ class UIRoot extends Component {
 
   renderEntryStartPanel = () => {
     const { hasAcceptedProfile, hasChangedName } = this.props.store.state.activity;
+    const isLockedDownDemo = isLockedDownDemoRoom();
     const promptForNameAndAvatarBeforeEntry = this.props.hubIsBound ? !hasAcceptedProfile : !hasChangedName;
 
     // TODO: What does onEnteringCanceled do?
@@ -826,10 +828,16 @@ class UIRoot extends Component {
           roomName={this.props.hub.name}
           showJoinRoom={!this.state.waitingOnAudio && !this.props.entryDisallowed}
           onJoinRoom={() => {
+            if (isLockedDownDemo) {
+              if (this.props.forcedVREntryType?.startsWith("vr")) {
+                this.setState({ enterInVR: true }, this.onAudioReadyButton);
+                return;
+              }
+              return this.onAudioReadyButton();
+            }
             if (promptForNameAndAvatarBeforeEntry || !this.props.forcedVREntryType) {
               this.setState({ entering: true });
               this.props.hubChannel.sendEnteringEvent();
-
               if (promptForNameAndAvatarBeforeEntry) {
                 this.pushHistoryState("entry_step", "profile");
               } else {
@@ -844,8 +852,8 @@ class UIRoot extends Component {
           onEnterOnDevice={() => this.attemptLink()}
           showSpectate={!this.state.waitingOnAudio}
           onSpectate={() => this.setState({ watching: true })}
-          showOptions={this.props.hubChannel.canOrWillIfCreator("update_hub")}
-          onOptions={() => {
+          showRoomSettings={this.props.hubChannel.canOrWillIfCreator("update_hub")}
+          onRoomSettings={() => {
             this.props.performConditionalSignIn(
               () => this.props.hubChannel.can("update_hub"),
               () => this.setSidebar("room-settings"),
@@ -1099,7 +1107,9 @@ class UIRoot extends Component {
 
     const streaming = this.state.isStreaming;
 
-    const showObjectList = enteredOrWatching;
+    const isLockedDownDemo = isLockedDownDemoRoom();
+
+    const showObjectList = enteredOrWatching && !isLockedDownDemo;
     const showECSObjectsMenuButton = qsTruthy("ecsDebug");
 
     const streamer = getCurrentStreamer();
@@ -1150,7 +1160,7 @@ class UIRoot extends Component {
                 reason: LeaveReason.createRoom
               })
           },
-          {
+          !isLockedDownDemo && {
             id: "user-profile",
             label: <FormattedMessage id="more-menu.profile" defaultMessage="Change Name & Avatar" />,
             icon: AvatarIcon,
@@ -1391,7 +1401,8 @@ class UIRoot extends Component {
                         )}
                         <PeopleMenuButton
                           active={this.state.sidebarId === "people"}
-                          onClick={() => this.toggleSidebar("people")}
+                          disabled={isLockedDownDemo}
+                          onClick={!isLockedDownDemo ? () => this.toggleSidebar("people") : null}
                           presencecount={this.state.presenceCount}
                         />
                         {showECSObjectsMenuButton && (
@@ -1593,14 +1604,18 @@ class UIRoot extends Component {
                     )}
                     {entered && (
                       <>
-                        <AudioPopoverContainer scene={this.props.scene} />
-                        <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel} />
-                        <PlacePopoverContainer
-                          scene={this.props.scene}
-                          hubChannel={this.props.hubChannel}
-                          mediaSearchStore={this.props.mediaSearchStore}
-                          showNonHistoriedDialog={this.showNonHistoriedDialog}
-                        />
+                        {!isLockedDownDemo && (
+                          <>
+                            <AudioPopoverContainer scene={this.props.scene} />
+                            <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel} />
+                            <PlacePopoverContainer
+                              scene={this.props.scene}
+                              hubChannel={this.props.hubChannel}
+                              mediaSearchStore={this.props.mediaSearchStore}
+                              showNonHistoriedDialog={this.showNonHistoriedDialog}
+                            />
+                          </>
+                        )}
                         {this.props.hubChannel.can("spawn_emoji") && (
                           <ReactionPopoverContainer
                             scene={this.props.scene}
@@ -1609,9 +1624,11 @@ class UIRoot extends Component {
                         )}
                       </>
                     )}
-                    <ChatToolbarButtonContainer
-                      onClick={() => this.toggleSidebar("chat", { chatPrefix: "", chatAutofocus: false })}
-                    />
+                    {!isLockedDownDemo && (
+                      <ChatToolbarButtonContainer
+                        onClick={() => this.toggleSidebar("chat", { chatPrefix: "", chatAutofocus: false })}
+                      />
+                    )}
                     {entered && isMobileVR && (
                       <ToolbarButton
                         className={styleUtils.hideLg}

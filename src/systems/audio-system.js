@@ -137,9 +137,11 @@ export class AudioSystem {
     this.outboundAnalyser.connect(this.mediaStreamDestinationNode);
     this.audioContextNeedsToBeResumed = false;
 
+    this.mediaGain = this.audioContext.createGain();
     this.mixer = {
       [SourceType.AVATAR_AUDIO_SOURCE]: this.audioContext.createGain(),
-      [SourceType.MEDIA_VIDEO]: this.audioContext.createGain(),
+      [SourceType.MEDIA_VIDEO]: this.mediaGain,
+      [SourceType.AUDIO_TARGET]: this.mediaGain,
       [SourceType.SFX]: this.audioContext.createGain()
     };
     this.mixer[SourceType.AVATAR_AUDIO_SOURCE].connect(this._sceneEl.audioListener.getInput());

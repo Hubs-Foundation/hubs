@@ -2,12 +2,13 @@ import audioDebugVert from "../systems/audio-debug.vert";
 import audioDebugFrag from "../systems/audio-debug.frag";
 import { defineQuery, enterQuery, exitQuery } from "bitecs";
 import { getScene, HubsWorld } from "../app";
-import { AudioEmitter, NavMesh } from "../bit-components";
+import { NavMesh } from "../bit-components";
 import { DistanceModelType } from "../components/audio-params";
 import { getWebGLVersion } from "../utils/webgl";
-import { EMITTER_FLAGS, isPositionalAudio } from "./audio-emitter-system";
+import { AudioObject3D, isPositionalAudio } from "./audio-emitter-system";
 import { Mesh, Material, Vector3, ShaderMaterial } from "three";
 import { disposeMaterial } from "../utils/three-utils";
+import { ElOrEid } from "../utils/bit-utils";
 
 const fakePanner = {
   distanceModel: DistanceModelType.Inverse,
@@ -145,7 +146,6 @@ export const cleanupAudioDebugNavMesh = (navEid: number) => removeDebugMaterial(
 
 const emitterPos = new THREE.Vector3();
 const emitterDir = new THREE.Vector3();
-const audioEmittersQuery = defineQuery([AudioEmitter]);
 const navMeshQuery = defineQuery([NavMesh]);
 const navMeshEnterQuery = enterQuery(navMeshQuery);
 const navMeshExitQuery = exitQuery(navMeshQuery);
@@ -159,16 +159,11 @@ export function audioDebugSystem(world: HubsWorld) {
       isEnabled && addDebugMaterial(world, navEid);
     });
     let idx = 0;
-    audioEmittersQuery(world).forEach(emitterEid => {
-      if (
-        AudioEmitter.flags[emitterEid] & EMITTER_FLAGS.PAUSED ||
-        AudioEmitter.flags[emitterEid] & EMITTER_FLAGS.MUTED
-      ) {
+    APP.audios.forEach((audio: AudioObject3D, audioEmitterId: ElOrEid) => {
+      if (APP.isAudioPaused.has(audioEmitterId) || APP.mutedState.has(audioEmitterId)) {
         return;
       }
       if (idx >= maxDebugEmitters) return;
-
-      const audio = APP.audios.get(emitterEid)!;
 
       audio.getWorldPosition(emitterPos);
       audio.getWorldDirection(emitterDir);
@@ -191,7 +186,7 @@ export function audioDebugSystem(world: HubsWorld) {
       uniforms.coneInnerAngles[idx] = panner.coneInnerAngle;
       uniforms.coneOuterAngles[idx] = panner.coneOuterAngle;
       uniforms.gains[idx] = audio.gain.gain.value;
-      uniforms.clipped[idx] = APP.clippingState.has(emitterEid) ? 1 : 0;
+      uniforms.clipped[idx] = APP.clippingState.has(audioEmitterId) ? 1 : 0;
 
       idx++;
     });

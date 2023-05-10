@@ -280,8 +280,36 @@ export const ParticleEmitterTag = defineComponent({
 export const AudioZone = defineComponent({
   flags: Types.ui8
 });
+export const AudioTarget = defineComponent({
+  minDelay: Types.ui32,
+  maxDelay: Types.ui32,
+  source: Types.eid,
+  flags: Types.ui8
+});
+export const AudioSource = defineComponent({
+  flags: Types.ui8
+});
 export const AudioParams = defineComponent();
 export const ScenePreviewCamera = defineComponent({
   duration: Types.f32,
   positionOnly: Types.ui8
+});
+export const LinearTranslate = defineComponent({
+  duration: Types.f32,
+  targetX: Types.f32,
+  targetY: Types.f32,
+  targetZ: Types.f32
+});
+export const LinearRotate = defineComponent({
+  duration: Types.f32,
+  targetX: Types.f32,
+  targetY: Types.f32,
+  targetZ: Types.f32,
+  targetW: Types.f32
+});
+export const LinearScale = defineComponent({
+  duration: Types.f32,
+  targetX: Types.f32,
+  targetY: Types.f32,
+  targetZ: Types.f32
 });

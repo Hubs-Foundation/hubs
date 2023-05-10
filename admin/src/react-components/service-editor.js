@@ -270,7 +270,6 @@ class ConfigurationEditor extends Component {
           key={displayPath}
           id={displayPath}
           label={name || displayPath}
-          inputProps={{ maxLength: 4096 }}
           value={currentValue || (isTheme && !this.state.isDirty && JSON.stringify(theme, null, 2)) || ""}
           onChange={ev => {
             const value = ev.target.value;
@@ -522,6 +521,20 @@ class ConfigurationEditor extends Component {
         {/* SOCIAL MEDIA CARD */}
         {getInput(configurables[6])}
         <AdditionalInfo size="1024px x 576px (max)" format="JPG, GIF, PNG" />
+        <div>
+          {this.state.saving ? (
+            <CircularProgress />
+          ) : (
+            <Button
+              onClick={this.onSubmit.bind(this)}
+              className={this.props.classes.button}
+              variant="contained"
+              color="primary"
+            >
+              Save
+            </Button>
+          )}
+        </div>
       </form>
     );
   }

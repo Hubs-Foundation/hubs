@@ -461,7 +461,7 @@
 	"revoke-token-modal.title": "撤銷代幣",
 	"room-entry-modal.enter-on-device-button": "在裝置上輸入",
 	"room-entry-modal.join-room-button": "加入房間",
-	"room-entry-modal.options-button": "可選的",
+	"room-entry-modal.room-settings-button": "房间设置",
 	"room-entry-modal.room-name-label": "房間名稱",
 	"room-entry-modal.spectate-button": "觀看",
 	"room-settings-sidebar.access-invite": "僅限邀請",

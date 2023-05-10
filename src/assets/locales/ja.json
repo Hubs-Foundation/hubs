@@ -513,7 +513,7 @@
   "revoke-token-modal.title": "トークンの取り消し",
   "room-entry-modal.enter-on-device-button": "デバイスで入室",
   "room-entry-modal.join-room-button": "入室",
-  "room-entry-modal.options-button": "オプション",
+  "room-entry-modal.room-settings-button": "ルームの設定",
   "room-entry-modal.room-name-label": "ルーム名",
   "room-entry-modal.spectate-button": "観客モードで入室",
   "room-settings-sidebar.access-invite": "招待者のみ",

@@ -2,7 +2,8 @@ import {
   getCurrentHubId,
   updateVRHudPresenceCount,
   updateSceneCopresentState,
-  createHubChannelParams
+  createHubChannelParams,
+  isLockedDownDemoRoom
 } from "./utils/hub-utils";
 import "./utils/debug-log";
 import configs from "./utils/configs";
@@ -158,6 +159,7 @@ import MessageDispatch from "./message-dispatch";
 import SceneEntryManager from "./scene-entry-manager";
 import Subscriptions from "./subscriptions";
 import { createInWorldLogMessage } from "./react-components/chat-message";
+import { fetchRandomDefaultAvatarId } from "./utils/identity.js";
 
 import "./systems/nav";
 import "./systems/frame-scheduler";
@@ -723,7 +725,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const browser = detect();
   // HACK - it seems if we don't initialize the mic track up-front, voices can drop out on iOS
   // safari when initializing it later.
-  if (["iOS", "Mac OS"].includes(detectedOS) && ["safari", "ios"].includes(browser.name)) {
+  // Seems to be working for Safari >= 16.4. We should revisit this in the future and remove it completely.
+  if (["iOS", "Mac OS"].includes(detectedOS) && ["safari", "ios"].includes(browser.name) && browser.version < "16.4") {
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
     } catch (e) {
@@ -833,6 +836,18 @@ document.addEventListener("DOMContentLoaded", async () => {
       () => hubChannel.updateScene(sceneInfo),
       SignInMessages.changeScene
     );
+  });
+
+  scene.addEventListener("hub_updated", async () => {
+    if (isLockedDownDemoRoom()) {
+      const avatarRig = document.querySelector("#avatar-rig");
+      const avatarId = await fetchRandomDefaultAvatarId();
+      avatarRig.setAttribute("player-info", { avatarSrc: await getAvatarSrc(avatarId) });
+    } else {
+      if (scene.is("entered")) {
+        entryManager._setPlayerInfoFromProfile(true);
+      }
+    }
   });
 
   remountUI({
@@ -1362,10 +1377,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         updateEnvironmentForHub(hub, entryManager);
       });
 
+      const sceneName = hub.scene ? hub.scene.name : "a custom URL";
+
+      console.log(`Entering new scene: ${sceneName}`);
+
       messageDispatch.receive({
         type: "scene_changed",
         name: displayName,
-        sceneName: hub.scene ? hub.scene.name : "a custom URL"
+        sceneName
       });
     }
 
