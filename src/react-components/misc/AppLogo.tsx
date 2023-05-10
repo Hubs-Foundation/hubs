@@ -8,9 +8,9 @@ import { useLogo } from "../styles/theme";
 export function AppLogo({ className }: { className?: string }) {
   const logo = useLogo();
 
-  if (isHmc() && !logo) {
-    return <HmcLogo className="hmc-logo" />;
-  } else {
-    return <img className={className} alt={configs.translation("app-name")} src={logo} />;
-  }
+  return isHmc() && !logo ? (
+    <HmcLogo className="hmc-logo" />
+  ) : (
+    <img className={className} alt={configs.translation("app-name")} src={logo} />
+  );
 }
