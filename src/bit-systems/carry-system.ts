@@ -1,9 +1,20 @@
 import { AElement, UserInputSystem } from "aframe";
-import { defineQuery, entityExists, hasComponent } from "bitecs";
+import { defineQuery, entityExists, hasComponent, removeComponent } from "bitecs";
 import { Selection } from "postprocessing";
 import { ArrowHelper, Box3, Camera, MathUtils, Matrix3, Matrix4, Mesh, Quaternion, Raycaster, Vector3 } from "three";
 import { HubsWorld } from "../app";
-import { Carryable, FloatyObject, HoveredRemoteRight, Owned, Rigidbody, SceneRoot } from "../bit-components";
+import {
+  Carryable,
+  FloatyObject,
+  Held,
+  HeldHandLeft,
+  HeldRemoteLeft,
+  HeldRemoteRight,
+  HoveredRemoteRight,
+  Owned,
+  Rigidbody,
+  SceneRoot
+} from "../bit-components";
 import { COLLISION_LAYERS } from "../constants";
 import { CharacterControllerSystem } from "../systems/character-controller-system";
 import { FLOATY_OBJECT_FLAGS } from "../systems/floaty-object-system";
@@ -114,6 +125,12 @@ export function carryObject(eid: EntityID) {
   carryStateData.activeObject = eid;
   carryStateData.applyGravity = true;
   takeOwnership(world, carryStateData.activeObject);
+
+  removeComponent(world, HeldRemoteRight, eid);
+  removeComponent(world, HeldRemoteLeft, eid);
+  removeComponent(world, HeldRemoteRight, eid);
+  removeComponent(world, HeldHandLeft, eid);
+  removeComponent(world, Held, eid);
 
   APP.canvas!.requestPointerLock();
 
@@ -458,7 +475,19 @@ export function carrySystem(
   } else {
     outlineEffect.visibleEdgeColor.setHex(0x08c7f1);
     const hovered = queryHoveredRemoteRight(world)[0];
-    if (carryStateData.activeObject) {
+
+    const heldRightRemote = anyEntityWith(world, HeldRemoteRight);
+    if (heldRightRemote && userinput.get(paths.actions.carry.toggle_snap)) {
+      carryObject(heldRightRemote);
+      carryState = CarryState.SNAPPING;
+      carryStateData.rotationOffset = 0;
+      carryStateData.nudgeOffset = NUDGE_START_OFFSET;
+      carryStateData.snapFace = -1;
+
+      gridMesh.visible = true;
+      lastIntersectedObj = null;
+      uiNeedsUpdate = true;
+    } else if (carryStateData.activeObject) {
       addEntityToSelection(world, selection, carryStateData.activeObject);
     } else if (hovered) {
       addEntityToSelection(world, selection, hovered);

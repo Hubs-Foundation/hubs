@@ -17,6 +17,7 @@ import {
 import { canMove } from "../utils/permissions-utils";
 import qsTruthy from "../utils/qs_truthy";
 
+const mouselockWhenGrabbing = qsTruthy("mouselockWhenGrabbing");
 const mouselockWhenNotGrabbing = qsTruthy("mouselockWhenNotGrabbing");
 
 const GRAB_REMOTE_RIGHT = paths.actions.cursor.right.grab;
@@ -43,6 +44,7 @@ function grab(world, userinput, queryHovered, held, grabPath) {
   ) {
     addComponent(world, held, hovered);
     addComponent(world, Held, hovered);
+    if (mouselockWhenGrabbing) APP.canvas.requestPointerLock();
     if (mouselockWhenNotGrabbing) document.exitPointerLock();
   }
 }
@@ -60,6 +62,7 @@ function drop(world, userinput, queryHeld, held, dropPath) {
       !hasComponent(world, HeldHandLeft, heldEid)
     ) {
       removeComponent(world, Held, heldEid);
+      if (mouselockWhenGrabbing) document.exitPointerLock();
       if (mouselockWhenNotGrabbing) APP.canvas.requestPointerLock();
     }
   }

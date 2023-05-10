@@ -157,6 +157,11 @@ AFRAME.registerComponent("cursor-controller", {
       this.raycaster.far = this.data.far * playerScale;
       this.raycaster.near = this.data.near * playerScale;
 
+      const hovered = left ? hoveredLeftRemoteQuery(APP.world) : hoveredRightRemoteQuery(APP.world);
+      for (let i = 0; i < hovered.length; i++) {
+        removeComponent(APP.world, left ? HoveredRemoteLeft : HoveredRemoteRight, hovered[i]);
+      }
+
       const isGrabbing = left ? anyEntityWith(APP.world, HeldRemoteLeft) : anyEntityWith(APP.world, HeldRemoteRight);
       let isHoveringSomething = false;
       if (!isGrabbing) {
@@ -174,13 +179,6 @@ AFRAME.registerComponent("cursor-controller", {
         isHoveringSomething = !!remoteHoverTarget;
         if (remoteHoverTarget) {
           addComponent(APP.world, left ? HoveredRemoteLeft : HoveredRemoteRight, remoteHoverTarget);
-        }
-        const hovered = left ? hoveredLeftRemoteQuery(APP.world) : hoveredRightRemoteQuery(APP.world);
-        for (let i = 0; i < hovered.length; i++) {
-          // Unhover anything that should no longer be hovered
-          if (remoteHoverTarget !== hovered[i]) {
-            removeComponent(APP.world, left ? HoveredRemoteLeft : HoveredRemoteRight, hovered[i]);
-          }
         }
         this.distance = remoteHoverTarget ? this.intersection.distance : this.data.defaultDistance * playerScale;
       }

@@ -65,6 +65,31 @@ if (qsTruthy("newLoader")) {
   });
 }
 
+const interactableClickAndHold = [
+  {
+    src: { value: paths.device.mouse.buttonLeft },
+    dest: { value: k("mousedown") },
+    xform: xforms.rising
+  },
+  {
+    src: { value: paths.device.mouse.buttonLeft },
+    dest: { value: k("mouseup") },
+    xform: xforms.falling
+  },
+  {
+    src: {
+      rising: k("mousedown"),
+      falling: k("mouseup")
+    },
+    dest: {
+      click: k("grabWithClick"),
+      grab: k("grabWithHold"),
+      ddrop: k("dropWithHold")
+    },
+    xform: xforms.clickAndHold()
+  }
+];
+
 export const keyboardMouseUserBindings = addSetsToBindings({
   [sets.global]: [
     {
@@ -720,9 +745,34 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     },
     {
       src: { value: paths.device.mouse.buttonLeft },
+      dest: { value: k("dropWithClick") },
+      xform: xforms.rising
+    },
+    {
+      src: { value: paths.device.mouse.buttonLeft },
+      dest: { value: k("dropWithHold") },
+      xform: xforms.falling
+    },
+    {
+      src: { value: paths.device.keyboard.key("space") },
+      dest: { value: paths.actions.carry.toggle_snap },
+      xform: xforms.rising,
+      priority: 2000 // TODO
+    },
+    {
+      src: { value: paths.device.keyboard.key("Escape") },
+      dest: { value: k("dropWithEsc") },
+      xform: xforms.rising
+    },
+    {
+      src: [k("dropWithClick"), k("dropWithHold"), k("dropWithEsc")],
       dest: { value: paths.actions.cursor.right.drop },
-      xform: xforms.falling,
-      priority: 2
+      xform: xforms.any
+    },
+    {
+      src: { value: paths.device.keyboard.key("Escape") },
+      dest: { value: paths.actions.camera.exitMirror },
+      xform: xforms.falling
     }
   ],
   [sets.rightCursorHoldingUI]: [
@@ -740,11 +790,11 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     }
   ],
   [sets.rightCursorHoveringOnInteractable]: [
+    ...interactableClickAndHold,
     {
-      src: { value: paths.device.mouse.buttonLeft },
+      src: [k("grabWithClick"), k("grabWithHold")],
       dest: { value: paths.actions.cursor.right.grab },
-      xform: xforms.rising,
-      priority: 1
+      xform: xforms.any
     },
     {
       src: { value: paths.device.mouse.buttonRight },
@@ -771,36 +821,36 @@ export const keyboardMouseUserBindings = addSetsToBindings({
     }
   ],
   [sets.rightCursorHoveringOnCarryable]: [
-    {
-      src: { value: paths.device.mouse.buttonLeft },
-      dest: { value: k("mousedown") },
-      xform: xforms.rising,
-      priority: 1000 // TODO
-    },
-    {
-      src: { value: paths.device.mouse.buttonLeft },
-      dest: { value: k("mouseup") },
-      xform: xforms.falling,
-      priority: 1000 // TODO
-    },
+    // {
+    //   src: { value: paths.device.mouse.buttonLeft },
+    //   dest: { value: k("mousedown") },
+    //   xform: xforms.rising,
+    //   priority: 1000 TODO
+    // },
+    // {
+    //   src: { value: paths.device.mouse.buttonLeft },
+    //   dest: { value: k("mouseup") },
+    //   xform: xforms.falling,
+    //   priority: 1000 TODO
+    // },
     {
       src: { value: paths.device.mouse.buttonRight },
       dest: { value: paths.actions.cursor.right.menu },
       xform: xforms.rising,
-      priority: 1000 // TODO
-    },
-    {
-      src: {
-        rising: k("mousedown"),
-        falling: k("mouseup")
-      },
-      dest: {
-        click: paths.actions.cursor.right.grab,
-        doubleClick: paths.actions.carry.carry
-      },
-      xform: xforms.doubleClick(),
-      priority: 2000 //TODO
+      priority: 1000 //TODO
     }
+    // {
+    //   src: {
+    //     rising: k("mousedown"),
+    //     falling: k("mouseup")
+    //   },
+    //   dest: {
+    //     click: paths.actions.cursor.right.grab,
+    //     doubleClick: paths.actions.carry.carry
+    //   },
+    //   xform: xforms.doubleClick(),
+    //   priority: 2000 TODO
+    // }
   ],
   [sets.carryingObject]: [
     {
