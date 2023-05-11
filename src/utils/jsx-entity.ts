@@ -279,6 +279,7 @@ export interface JSXComponentData extends ComponentData {
   };
   networkedVideo?: true;
   videoMenu?: {
+    sliderRef: Ref;
     timeLabelRef: Ref;
     trackRef: Ref;
     headRef: Ref;

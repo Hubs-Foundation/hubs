@@ -44,6 +44,7 @@ function Slider({ trackRef, headRef, ...props }: any) {
 export function VideoMenuPrefab() {
   const uiZ = 0.001;
   const timeLabelRef = createRef();
+  const sliderRef = createRef();
   const headRef = createRef();
   const trackRef = createRef();
   const playIndicatorRef = createRef();
@@ -51,7 +52,10 @@ export function VideoMenuPrefab() {
   const halfHeight = 9 / 16 / 2;
 
   return (
-    <entity name="Video Menu" videoMenu={{ timeLabelRef, headRef, trackRef, playIndicatorRef, pauseIndicatorRef }}>
+    <entity
+      name="Video Menu"
+      videoMenu={{ sliderRef, timeLabelRef, headRef, trackRef, playIndicatorRef, pauseIndicatorRef }}
+    >
       <Label
         name="Time Label"
         text={{ anchorY: "top", anchorX: "right" }}
@@ -59,7 +63,7 @@ export function VideoMenuPrefab() {
         scale={[0.5, 0.5, 0.5]}
         position={[0.5 - 0.02, halfHeight - 0.02, uiZ]}
       />
-      <Slider trackRef={trackRef} headRef={headRef} position={[0, -halfHeight + 0.025, uiZ]} />
+      <Slider ref={sliderRef} trackRef={trackRef} headRef={headRef} position={[0, -halfHeight + 0.025, uiZ]} />
       <entity
         ref={playIndicatorRef}
         position={[0, 0, uiZ]}

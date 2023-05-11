@@ -191,6 +191,7 @@ export const NetworkedVideo = defineComponent({
 export const VideoMenuItem = defineComponent();
 export const VideoMenu = defineComponent({
   videoRef: Types.eid,
+  sliderRef: Types.eid,
   timeLabelRef: Types.eid,
   trackRef: Types.eid,
   headRef: Types.eid,
