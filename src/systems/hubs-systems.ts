@@ -76,6 +76,7 @@ import { textSystem } from "../bit-systems/text";
 import { audioTargetSystem } from "../bit-systems/audio-target-system";
 import { scenePreviewCameraSystem } from "../bit-systems/scene-preview-camera-system";
 import { linearTransformSystem } from "../bit-systems/linear-transform";
+import { quackSystem } from "../bit-systems/quack";
 
 declare global {
   interface Window {
@@ -259,6 +260,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   hubsSystems.nameTagSystem.tick();
   simpleWaterSystem(world);
   linearTransformSystem(world);
+  quackSystem(world);
 
   // All systems that update text properties should run before this
   textSystem(world);
