@@ -6,7 +6,7 @@ import { EnvironmentSettings, GameMenu, Interacted, Slice9, TextTag } from "../b
 import { Text as TroikaText } from "troika-three-text";
 import { updateSlice9Geometry } from "../update-slice9-geometry";
 import { Color, Vector3 } from "three";
-import { EnvironmentSettingsParams, inflateEnvironmentSettings } from "../inflators/environment-settings";
+import { inflateEnvironmentSettings } from "../inflators/environment-settings";
 import { loadTexture } from "../utils/load-texture";
 import { proxiedUrlFor } from "../utils/media-url-utils";
 import { EnvironmentSystem } from "../systems/environment-system";
@@ -110,7 +110,6 @@ const start = () => {
     const envSettingsEid = anyEntityWith(APP.world, EnvironmentSettings)!;
     fadeOut(() => {
       inflateEnvironmentSettings(APP.world, envSettingsEid, {
-        backgroundTexture: undefined,
         backgroundColor: new Color("#222222")
       });
       environmentSystem.updateEnvironmentSettings((EnvironmentSettings as any).map.get(envSettingsEid));
@@ -136,13 +135,10 @@ const skybox = async (skybox: string) => {
   console.log(skyboxProxied);
   const envSettingsEid = anyEntityWith(APP.world, EnvironmentSettings)!;
   const { texture } = await loadTexture(skyboxProxied, 1, "image/jpeg");
-  const envMap = texture.clone();
-  envMap.flipY = true;
 
   fadeOut(() => {
     inflateEnvironmentSettings(APP.world, envSettingsEid, {
-      backgroundTexture: texture,
-      envMapTexture: envMap
+      backgroundTexture: texture
     });
     environmentSystem.updateEnvironmentSettings((EnvironmentSettings as any).map.get(envSettingsEid));
     fadeIn();
@@ -392,7 +388,6 @@ export function gameBotSystem(world: HubsWorld) {
       if (!hasComponent(world, EnvironmentSettings, sceneEid) || connected) {
         inflateEnvironmentSettings(world, sceneEid, {
           backgroundColor: new Color("#222222"),
-          backgroundTexture: undefined,
           toneMappingExposure: 1,
           enableHDRPipeline: true
         });
