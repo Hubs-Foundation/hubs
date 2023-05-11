@@ -76,6 +76,8 @@ import { textSystem } from "../bit-systems/text";
 import { audioTargetSystem } from "../bit-systems/audio-target-system";
 import { scenePreviewCameraSystem } from "../bit-systems/scene-preview-camera-system";
 import { linearTransformSystem } from "../bit-systems/linear-transform";
+import { mixerAnimatableSystem } from "../bit-systems/mixer-animatable";
+import { loopAnimationSystem } from "../bit-systems/loop-animation";
 
 declare global {
   interface Window {
@@ -259,6 +261,8 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   hubsSystems.nameTagSystem.tick();
   simpleWaterSystem(world);
   linearTransformSystem(world);
+  mixerAnimatableSystem(world);
+  loopAnimationSystem(world);
 
   // All systems that update text properties should run before this
   textSystem(world);
