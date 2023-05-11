@@ -82,7 +82,7 @@ export function videoMenuSystem(world: HubsWorld, userinput: any) {
     const videoEid = VideoMenu.videoRef[eid];
     if (!videoEid) return;
     const menuObj = world.eid2obj.get(eid)!;
-    const video = (world.eid2obj.get(videoEid) as any).material.map.image as HTMLVideoElement;
+    const video = (world.eid2obj.get(videoEid) as any).material.map.video as HTMLVideoElement;
     const togglePlayVideo = userinput.get(paths.actions.cursor.right.togglePlayVideo);
     if (togglePlayVideo) {
       if (hasComponent(world, NetworkedVideo, videoEid)) {

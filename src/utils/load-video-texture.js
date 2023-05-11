@@ -1,8 +1,9 @@
-import { LinearFilter, VideoTexture, sRGBEncoding } from "three";
+import { LinearFilter, sRGBEncoding } from "three";
 import HLS from "hls.js";
 import { DashVideoTexture } from "../textures/DashVideoTexture";
 import { HLSVideoTexture } from "../textures/HLSVideoTexture";
 import { createDashPlayer, createHLSPlayer, createVideoOrAudioEl } from "./media-utils";
+import { VideoTexture } from "../textures/VideoTexture";
 
 export async function loadVideoTexture(src, contentType) {
   const videoEl = createVideoOrAudioEl("video");

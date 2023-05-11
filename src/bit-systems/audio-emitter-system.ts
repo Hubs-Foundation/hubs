@@ -72,7 +72,7 @@ export function makeAudioEntity(world: HubsWorld, source: number, sourceType: So
 
   if (sourceType === SourceType.MEDIA_VIDEO) {
     const videoObj = world.eid2obj.get(source) as Mesh;
-    const video = (videoObj.material as MeshStandardMaterial).map!.image as HTMLVideoElement;
+    const video = (videoObj.material as MeshStandardMaterial).map!.video as HTMLVideoElement;
     if (video.paused) {
       APP.isAudioPaused.add(eid);
     } else {

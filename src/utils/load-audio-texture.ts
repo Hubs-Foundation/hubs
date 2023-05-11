@@ -1,14 +1,23 @@
-import { VideoTexture } from "three";
 import { createVideoOrAudioEl } from "../utils/media-utils";
+import audioIcon from "../assets/images/audio.png";
+import { VideoTexture } from "../textures/VideoTexture";
 
 // TODO: Replace async with function*?
-// TODO: Integrate with loadVideoTexture in load-audio-texture?
-export async function loadAudioTexture(src: string) : Promise<{texture: VideoTexture, ratio: number}> {
+export async function loadAudioTexture(src: string): Promise<{ texture: VideoTexture; ratio: number }> {
   const videoEl = createVideoOrAudioEl("video") as HTMLVideoElement;
-  const texture = new VideoTexture(videoEl);
+  const imageEl = new Image();
+  imageEl.src = audioIcon;
+  const texture = new VideoTexture(videoEl, imageEl);
+  imageEl.onload = () => {
+    texture.needsUpdate = true;
+  };
 
   const isReady = () => {
-    return videoEl.readyState > 0;
+    return (
+      videoEl.readyState > 0 &&
+      (texture.image.videoHeight || texture.image.height) &&
+      (texture.image.videoWidth || texture.image.width)
+    );
   };
 
   return new Promise((resolve, reject) => {
@@ -28,10 +37,9 @@ export async function loadAudioTexture(src: string) : Promise<{texture: VideoTex
     const poll = () => {
       if (isReady()) {
         videoEl.onerror = null;
-        // TODO: AudioIcon image must be used to render and
-	//       ratio must be of the AudioIcon. Fix this.
-	//       Also see the comment in utils/load-audio.
-        resolve({ texture, ratio: 3.0 / 4.0 });
+        const height = texture.image.videoHeight || texture.image.height;
+        const width = texture.image.videoWidth || texture.image.width;
+        resolve({ texture, ratio: height / width });
       } else {
         pollTimeout = setTimeout(poll, 500);
       }

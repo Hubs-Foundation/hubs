@@ -65,7 +65,7 @@ import {
 import { inflateSpawnpoint, inflateWaypoint, WaypointParams } from "../inflators/waypoint";
 import { inflateReflectionProbe, ReflectionProbeParams } from "../inflators/reflection-probe";
 import { HubsWorld } from "../app";
-import { Group, Material, Object3D, Texture, VideoTexture } from "three";
+import { Group, Material, Object3D, Texture } from "three";
 import { AlphaMode } from "./create-image-mesh";
 import { MediaLoaderParams } from "../inflators/media-loader";
 import { preload } from "./preload";
@@ -95,6 +95,7 @@ import { BoxColliderParams, inflateBoxCollider } from "../inflators/box-collider
 import { inflateTrimesh } from "../inflators/trimesh";
 import { HeightFieldParams, inflateHeightField } from "../inflators/heightfield";
 import { inflateAudioSettings } from "../inflators/audio-settings";
+import { VideoTexture } from "../textures/VideoTexture";
 
 preload(
   new Promise(resolve => {
