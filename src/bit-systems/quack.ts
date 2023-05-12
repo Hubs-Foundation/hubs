@@ -9,9 +9,9 @@ const heldQuackEnterQuery = enterQuery(heldQuackQuery);
 const quack = (eid: number) => {
   const rand = Math.random();
   if (rand < 0.01) {
-    AFRAME.scenes[0].systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SPECIAL_QUACK);
+    APP.scene?.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SPECIAL_QUACK);
   } else {
-    AFRAME.scenes[0].systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_QUACK);
+    APP.scene?.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_QUACK);
   }
 };
 
