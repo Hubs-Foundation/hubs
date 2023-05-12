@@ -28,12 +28,12 @@ $input-height: 40px;
   &:hover {
     border-color: theme.$input-border-color-hover;
   }
-  
+
   &:focus {
     outline: none;
   }
-  
-  &:focus-within  {
+
+  &:focus-within {
     border-color: theme.$input-outline-color;
     box-shadow: 0 0 0 2px theme.$input-outline-color;
   }
@@ -81,5 +81,5 @@ $input-height: 40px;
 
 :local(.highlighted-item) {
   color: theme.$active-text-color;
-  background-color: theme.$active-color;
+  background-color: theme.$active-color-hover;
 }

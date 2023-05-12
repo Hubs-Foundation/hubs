@@ -15,7 +15,6 @@ import {
   HoldableButton,
   HoverButton,
   MakeKinematicOnRelease,
-  AnimationMixer,
   Networked,
   NetworkedTransform,
   Object3DTag,
@@ -39,7 +38,8 @@ import {
   MaterialTag,
   VideoTextureSource,
   Quack,
-  Mirror
+  Mirror,
+  MixerAnimatableInitialize
 } from "../bit-components";
 import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
@@ -52,6 +52,7 @@ import { inflateVideoLoader, VideoLoaderParams } from "../inflators/video-loader
 import { inflateImageLoader, ImageLoaderParams } from "../inflators/image-loader";
 import { inflateModelLoader, ModelLoaderParams } from "../inflators/model-loader";
 import { inflateLink, LinkParams } from "../inflators/link";
+import { inflateLoopAnimationInitialize, LoopAnimationParams } from "../inflators/loop-animation";
 import { inflateSlice9 } from "../inflators/slice9";
 import { TextParams, inflateText } from "../inflators/text";
 import {
@@ -280,6 +281,7 @@ export interface JSXComponentData extends ComponentData {
   };
   networkedVideo?: true;
   videoMenu?: {
+    sliderRef: Ref;
     timeLabelRef: Ref;
     trackRef: Ref;
     headRef: Ref;
@@ -349,8 +351,8 @@ export interface JSXComponentData extends ComponentData {
     captureDurLblRef: Ref;
     sndToggleRef: Ref;
   };
-  animationMixer?: any;
   mediaLoader?: MediaLoaderParams;
+  mixerAnimatable?: boolean;
   sceneRoot?: boolean;
   sceneLoader?: { src: string };
   object3D?: any;
@@ -359,6 +361,7 @@ export interface JSXComponentData extends ComponentData {
   networkDebug?: boolean;
   waypointPreview?: boolean;
   pdf?: PDFParams;
+  loopAnimation?: LoopAnimationParams;
 }
 
 export interface GLTFComponentData extends ComponentData {
@@ -451,7 +454,6 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   linkHoverMenuItem: createDefaultInflator(LinkHoverMenuItem),
   pdfMenu: createDefaultInflator(PDFMenu),
   cameraTool: createDefaultInflator(CameraTool, { captureDurIdx: 1 }),
-  animationMixer: createDefaultInflator(AnimationMixer),
   networkedVideo: createDefaultInflator(NetworkedVideo),
   videoMenu: createDefaultInflator(VideoMenu),
   videoMenuItem: createDefaultInflator(VideoMenuItem),
@@ -462,6 +464,8 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   pdf: inflatePDF,
   mediaLoader: inflateMediaLoader,
   quack: createDefaultInflator(Quack),
+  mixerAnimatable: createDefaultInflator(MixerAnimatableInitialize),
+  loopAnimation: inflateLoopAnimationInitialize,
 
   // inflators that create Object3Ds
   object3D: addObject3DComponent,
