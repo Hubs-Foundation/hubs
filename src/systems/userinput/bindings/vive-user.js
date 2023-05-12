@@ -398,6 +398,11 @@ export const viveUserBindings = addSetsToBindings({
       xform: xforms.any
     },
     {
+      src: [rSnapRight1, rSnapRight2, keyboardSnapRight],
+      dest: { value: paths.actions.smoothRotateRight },
+      xform: xforms.copy
+    },
+    {
       src: { value: paths.device.keyboard.key("Tab") },
       dest: { value: paths.actions.toggleFreeze },
       xform: xforms.rising
@@ -468,6 +473,11 @@ export const viveUserBindings = addSetsToBindings({
       src: [rSnapLeft1, rSnapLeft2, keyboardSnapLeft],
       dest: { value: paths.actions.snapRotateLeft },
       xform: xforms.any
+    },
+    {
+      src: [rSnapLeft1, rSnapLeft2, keyboardSnapLeft],
+      dest: { value: paths.actions.smoothRotateLeft },
+      xform: xforms.copy
     },
     {
       src: {

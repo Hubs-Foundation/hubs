@@ -10,6 +10,8 @@ const BASIC_ACTIVITY_PATHS = [
   paths.actions.leftHand.startTeleport,
   paths.actions.snapRotateRight,
   paths.actions.snapRotateLeft,
+  paths.actions.smoothRotateRight,
+  paths.actions.smoothRotateLeft,
   paths.actions.cursor.right.grab,
   paths.actions.cursor.left.grab,
   paths.actions.rightHand.grab,

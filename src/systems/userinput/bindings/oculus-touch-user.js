@@ -297,6 +297,11 @@ export const oculusTouchUserBindings = addSetsToBindings({
       xform: xforms.any
     },
     {
+      src: [rightTouchSnapRight, keyboardSnapRight],
+      dest: { value: paths.actions.smoothRotateRight },
+      xform: xforms.copy
+    },
+    {
       src: { value: paths.device.keyboard.key("Tab") },
       dest: { value: paths.actions.toggleFreeze },
       xform: xforms.rising
@@ -350,6 +355,11 @@ export const oculusTouchUserBindings = addSetsToBindings({
       src: [rightTouchSnapLeft, keyboardSnapLeft],
       dest: { value: paths.actions.snapRotateLeft },
       xform: xforms.any
+    },
+    {
+      src: [rightTouchSnapLeft, keyboardSnapLeft],
+      dest: { value: paths.actions.smoothRotateLeft },
+      xform: xforms.copy
     },
     {
       src: {
