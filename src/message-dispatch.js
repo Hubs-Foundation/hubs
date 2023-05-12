@@ -11,7 +11,6 @@ import { createNetworkedEntity } from "./utils/create-networked-entity";
 import qsTruthy from "./utils/qs_truthy";
 import { add, testAsset, respawn } from "./utils/chat-commands";
 import { isLockedDownDemoRoom } from "./utils/hub-utils";
-import { inflateQuack } from "./inflators/quack";
 
 let uiRoot;
 // Handles user-entered messages
@@ -143,14 +142,7 @@ export default class MessageDispatch extends EventTarget {
       case "duck":
         if (qsTruthy("newLoader")) {
           const avatarPov = document.querySelector("#avatar-pov-node").object3D;
-          const eid = createNetworkedEntity(APP.world, "media", {
-            src: getAbsoluteHref(location.href, ducky),
-            resize: true,
-            recenter: true,
-            animateLoad: true,
-            isObjectMenuTarget: true
-          });
-          inflateQuack(APP.world, eid);
+          const eid = createNetworkedEntity(APP.world, "duck");
           const obj = APP.world.eid2obj.get(eid);
           obj.position.copy(avatarPov.localToWorld(new THREE.Vector3(0, 0, -1.5)));
           obj.lookAt(avatarPov.getWorldPosition(new THREE.Vector3()));
