@@ -1,5 +1,13 @@
 import { EventEmitter } from "eventemitter3";
-import { MediaDevicesEvents, PermissionStatus, MediaDevices, NO_DEVICE_ID } from "./media-devices-utils";
+import {
+  MediaDevicesEvents,
+  PermissionStatus,
+  MediaDevices,
+  NO_DEVICE_ID,
+  optionFor,
+  getValidMediaDevices,
+  DEFAULT_MEDIA_DEVICE_OPTION
+} from "./media-devices-utils";
 import { detectOS, detect } from "detect-browser";
 import { isIOS as detectIOS } from "./is-mobile";
 
@@ -33,8 +41,7 @@ export default class MediaDevicesManager extends EventEmitter {
     this._micDevices = [];
     this._videoDevices = [];
     this._outputDevices = [];
-    this._deviceId = null;
-    this._audioTrack = null;
+    this.audioTrack = null;
     this.audioSystem = audioSystem;
     this._mediaStream = audioSystem.outboundStream;
     this._permissionsStatus = {
@@ -46,8 +53,6 @@ export default class MediaDevicesManager extends EventEmitter {
 
     this.onDeviceChange = this.onDeviceChange.bind(this);
     navigator.mediaDevices.addEventListener("devicechange", this.onDeviceChange);
-    this.onPermissionsUpdated = this.onPermissionsUpdated.bind(this);
-    APP.hubChannel.addEventListener("permissions_updated", this.onPermissionsUpdated);
   }
 
   static get isAudioOutputSelectEnabled() {
@@ -58,44 +63,16 @@ export default class MediaDevicesManager extends EventEmitter {
     return audioInputSelectEnabled;
   }
 
-  get deviceId() {
-    return this._deviceId;
-  }
-
-  set deviceId(deviceId) {
-    this._deviceId = deviceId;
-  }
-
-  get audioTrack() {
-    return this._audioTrack;
-  }
-
-  set audioTrack(audioTrack) {
-    this._audioTrack = audioTrack;
-  }
-
-  get defaultInputDeviceId() {
-    return this._micDevices.length > 0 ? this._micDevices[0].value : NO_DEVICE_ID;
-  }
-
-  get defaultOutputDeviceId() {
-    return this._outputDevices.length > 0 ? this._outputDevices[0].value : NO_DEVICE_ID;
-  }
-
-  get defaultVideoDeviceId() {
-    return this._videoDevices.length > 0 ? this._videoDevices[0].value : NO_DEVICE_ID;
-  }
-
   get micDevicesOptions() {
-    return this._micDevices.length > 0 ? this._micDevices : [{ value: NO_DEVICE_ID, label: "None" }];
+    return [DEFAULT_MEDIA_DEVICE_OPTION, ...this._micDevices];
   }
 
   get videoDevicesOptions() {
-    return this._videoDevices.length > 0 ? this._videoDevices : [{ value: NO_DEVICE_ID, label: "None" }];
+    return [DEFAULT_MEDIA_DEVICE_OPTION, ...this._videoDevices];
   }
 
   get outputDevicesOptions() {
-    return this._outputDevices.length > 0 ? this._outputDevices : [{ value: NO_DEVICE_ID, label: "None" }];
+    return [DEFAULT_MEDIA_DEVICE_OPTION, ...this._outputDevices];
   }
 
   get mediaStream() {
@@ -122,7 +99,7 @@ export default class MediaDevicesManager extends EventEmitter {
     const exists = this._outputDevices.some(device => {
       return device.value === preferredSpeakers;
     });
-    return exists ? preferredSpeakers : this.defaultOutputDeviceId;
+    return exists ? preferredSpeakers : NO_DEVICE_ID;
   }
 
   get isMicShared() {
@@ -145,27 +122,9 @@ export default class MediaDevicesManager extends EventEmitter {
     });
   }
 
-  set micEnabled(enabled) {
-    APP.dialog.enableMicrophone(enabled);
-  }
-
-  get isMicEnabled() {
-    return APP.dialog.isMicEnabled;
-  }
-
-  toggleMic() {
-    APP.dialog.toggleMicrophone();
-  }
-
   getPermissionsStatus(type) {
     return this._permissionsStatus[type];
   }
-
-  onPermissionsUpdated = () => {
-    if (!APP.hubChannel.can("voice_chat")) {
-      APP.dialog.enableMicrophone(false);
-    }
-  };
 
   onDeviceChange = () => {
     this.fetchMediaDevices().then(() => {
@@ -174,46 +133,26 @@ export default class MediaDevicesManager extends EventEmitter {
     });
   };
 
-  updatePermissions() {
-    const micStatus = this._micDevices.length === 0 ? PermissionStatus.PROMPT : PermissionStatus.GRANTED;
-    this._permissionsStatus[MediaDevices.MICROPHONE] = micStatus;
+  updatePermissionStatus(mediaDevice, shouldPrompt) {
+    const status = shouldPrompt ? PermissionStatus.PROMPT : PermissionStatus.GRANTED;
+    this._permissionsStatus[mediaDevice] = status;
     this.emit(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, {
-      mediaDevice: MediaDevices.MICROPHONE,
-      status: micStatus
-    });
-    const videoStatus = this._videoDevices.length === 0 ? PermissionStatus.PROMPT : PermissionStatus.GRANTED;
-    this._permissionsStatus[MediaDevices.CAMERA] = videoStatus;
-    this.emit(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, {
-      mediaDevice: MediaDevices.CAMERA,
-      status: videoStatus
-    });
-    const speakersStatus = this._micDevices.length === 0 ? PermissionStatus.PROMPT : PermissionStatus.GRANTED;
-    this._permissionsStatus[MediaDevices.SPEAKERS] = speakersStatus;
-    this.emit(MediaDevicesEvents.PERMISSIONS_STATUS_CHANGED, {
-      mediaDevice: MediaDevices.SPEAKERS,
-      status: speakersStatus
+      mediaDevice,
+      status
     });
   }
 
   async fetchMediaDevices() {
     console.log("Fetching media devices");
-    return new Promise(resolve => {
-      navigator.mediaDevices.enumerateDevices().then(mediaDevices => {
-        mediaDevices = mediaDevices.filter(d => d.label !== "");
-        this._micDevices = mediaDevices
-          .filter(d => d.deviceId !== "default" && d.kind === "audioinput")
-          .map(d => ({ value: d.deviceId, label: d.label || `Mic Device (${d.deviceId.substring(0, 9)})` }));
-        this._videoDevices = mediaDevices
-          .filter(d => d.deviceId !== "default" && d.kind === "videoinput")
-          .map(d => ({ value: d.deviceId, label: d.label || `Camera Device (${d.deviceId.substring(0, 9)})` }));
-        if (MediaDevicesManager.isAudioOutputSelectEnabled) {
-          this._outputDevices = mediaDevices
-            .filter(d => d.deviceId !== "default" && d.kind === "audiooutput")
-            .map(d => ({ value: d.deviceId, label: d.label || `Audio Output (${d.deviceId.substring(0, 9)})` }));
-        }
-        this.updatePermissions();
-        resolve();
-      });
+    return getValidMediaDevices().then(mediaDevices => {
+      this._micDevices = mediaDevices.filter(d => d.kind === "audioinput").map(optionFor);
+      this._videoDevices = mediaDevices.filter(d => d.kind === "videoinput").map(optionFor);
+      if (MediaDevicesManager.isAudioOutputSelectEnabled) {
+        this._outputDevices = mediaDevices.filter(d => d.kind === "audiooutput").map(optionFor);
+        this.updatePermissionStatus(MediaDevices.SPEAKERS, this._outputDevices.length === 0);
+      }
+      this.updatePermissionStatus(MediaDevices.MICROPHONE, this._micDevices.length === 0);
+      this.updatePermissionStatus(MediaDevices.CAMERA, this._videoDevices.length === 0);
     });
   }
 
@@ -297,7 +236,7 @@ export default class MediaDevicesManager extends EventEmitter {
       this.audioTrack = newStream.getAudioTracks()[0];
       this.audioTrack.addEventListener("ended", async () => {
         this._scene.emit(MediaDevicesEvents.MIC_SHARE_ENDED);
-        this.startMicShare({ unmute: this.isMicEnabled });
+        this.startMicShare({ unmute: APP.dialog.isMicEnabled });
       });
 
       if (/Oculus/.test(navigator.userAgent)) {
@@ -437,30 +376,20 @@ export default class MediaDevicesManager extends EventEmitter {
   }
 
   deviceIdForMicDeviceLabel(label) {
-    return this._micDevices.filter(d => d.label === label).map(d => d.value)[0] || this.defaultInputDeviceId;
+    const match = this.micDevicesOptions.find(d => d.label === label);
+    return (match && match.value) || NO_DEVICE_ID;
   }
 
   deviceIdForSpeakersDeviceLabel(label) {
-    return this._outputDevices.filter(d => d.label === label).map(d => d.value)[0] || this.defaultOutputDeviceId;
+    const match = this.outputDevicesOptions.find(d => d.label === label);
+    return (match && match.value) || NO_DEVICE_ID;
   }
 
   micLabelForDeviceId(deviceId) {
-    return this._micDevices.filter(d => d.value === deviceId).map(d => d.label)[0];
-  }
-
-  speakersLabelForDeviceId(deviceId) {
-    return this._outputDevices.filter(d => d.value === deviceId).map(d => d.label)[0];
+    return this.micDevicesOptions.find(d => d.value === deviceId).label;
   }
 
   hasHmdMicrophone() {
     return !!this.state._micDevices.find(d => HMD_MIC_REGEXES.find(r => d.label.match(r)));
-  }
-
-  videoDeviceIdForMicLabel(label) {
-    return this._videoDevices.filter(d => d.label === label).map(d => d.value)[0];
-  }
-
-  videoLabelForDeviceId(deviceId) {
-    return this._videoDevices.filter(d => d.value === deviceId).map(d => d.label)[0];
   }
 }

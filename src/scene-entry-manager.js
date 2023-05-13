@@ -132,7 +132,7 @@ export default class SceneEntryManager {
 
     this.scene.addState("entered");
 
-    APP.mediaDevicesManager.micEnabled = !muteOnEntry;
+    APP.dialog.enableMicrophone(!muteOnEntry);
   };
 
   whenSceneLoaded = callback => {

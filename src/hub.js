@@ -774,6 +774,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   const authChannel = new AuthChannel(store);
   const hubChannel = new HubChannel(store, hubId);
   window.APP.hubChannel = hubChannel;
+  hubChannel.addEventListener("permissions_updated", () => {
+    if (!hubChannel.can("voice_chat")) {
+      APP.dialog.enableMicrophone(false);
+    }
+  });
 
   const entryManager = new SceneEntryManager(hubChannel, authChannel, history);
   window.APP.entryManager = entryManager;
@@ -1444,7 +1449,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   hubPhxChannel.on("mute", ({ session_id }) => {
     if (session_id === NAF.clientId) {
-      APP.mediaDevicesManager.micEnabled = false;
+      APP.dialog.enableMicrophone(false);
     }
   });
 

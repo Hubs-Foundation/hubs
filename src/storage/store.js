@@ -11,7 +11,7 @@ const OAUTH_FLOW_CREDENTIALS_KEY = "ret-oauth-flow-account-credentials";
 const validator = new Validator();
 import { EventTarget } from "event-target-shim";
 import { fetchRandomDefaultAvatarId, generateRandomName } from "../utils/identity.js";
-import { NO_DEVICE_ID } from "../utils/media-devices-utils.js";
+import { NO_DEVICE_ID } from "../utils/media-devices-utils";
 import { AAModes } from "../constants";
 
 const defaultMaterialQuality = (function () {

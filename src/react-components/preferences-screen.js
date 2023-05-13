@@ -10,7 +10,12 @@ import styles from "../assets/stylesheets/preferences-screen.scss";
 import { AVAILABLE_LOCALES } from "../assets/locales/locale_config";
 import { themes } from "../utils/theme";
 import MediaDevicesManager from "../utils/media-devices-manager";
-import { MediaDevices, MediaDevicesEvents, PermissionStatus } from "../utils/media-devices-utils";
+import {
+  DEFAULT_MEDIA_DEVICE_OPTION,
+  MediaDevices,
+  MediaDevicesEvents,
+  PermissionStatus
+} from "../utils/media-devices-utils";
 import { Slider } from "./input/Slider";
 import {
   addOrientationChangeListener,
@@ -874,25 +879,30 @@ class PreferencesScreen extends Component {
 
     this.mediaDevicesManager = APP.mediaDevicesManager;
 
+    const defaultMediaDeviceOption = {
+      value: DEFAULT_MEDIA_DEVICE_OPTION.value,
+      text: DEFAULT_MEDIA_DEVICE_OPTION.label
+    };
+
     this.state = {
       category: CATEGORY_AUDIO,
       toastHeight: "150px",
       preferredMic: {
         key: "preferredMic",
         prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
-        options: [{ value: "none", text: "None" }],
+        options: [defaultMediaDeviceOption],
         disabled: !canVoiceChat
       },
       preferredCamera: {
         key: "preferredCamera",
         prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
-        options: [{ value: "none", text: "None" }]
+        options: [defaultMediaDeviceOption]
       },
       ...(MediaDevicesManager.isAudioOutputSelectEnabled && {
         preferredSpeakers: {
           key: "preferredSpeakers",
           prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
-          options: [{ value: "none", text: "None" }]
+          options: [defaultMediaDeviceOption]
         }
       }),
       canVoiceChat
