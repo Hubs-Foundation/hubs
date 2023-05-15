@@ -120,13 +120,7 @@ export function ChatContextProvider({ messageDispatch, children }: ChatContextPr
 
       setMessageGroups(messages => updateMessageGroups(messages, newMessage));
 
-      if (
-        newMessage.type === "chat" ||
-        newMessage.type === "image" ||
-        newMessage.type === "photo" ||
-        newMessage.type === "video" ||
-        newMessage.type === "permission"
-      ) {
+      if (["chat", "image", "photo", "video", "permission"].includes(newMessage.type)) {
         setUnreadMessages(true);
       }
     }
