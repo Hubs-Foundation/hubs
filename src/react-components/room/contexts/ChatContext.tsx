@@ -111,7 +111,7 @@ export function ChatContextProvider({ messageDispatch, children }: ChatContextPr
   const [messageGroups, setMessageGroups] = useState<NewMessageT[]>([]);
   const [unreadMessages, setUnreadMessages] = useState<boolean>(false);
   const isMod = useRole("owner");
-  console.log(messageGroups, messageDispatch);
+
   useEffect(() => {
     function onReceiveMessage(event: { detail: NewMessageT }) {
       const newMessage = event.detail;
