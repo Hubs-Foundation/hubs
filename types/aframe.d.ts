@@ -96,6 +96,11 @@ declare module "aframe" {
     invaders: PersonalSpaceInvader[];
   }
 
+  interface TransformSelectedObjectSystem extends ASystem {
+    startTransform(targetObj: Object3D, handObj: Object3D, data: object): void;
+    stopTransform(): void;
+  }
+
   interface AScene extends AElement {
     object3D: Scene;
     renderStarted: boolean;
@@ -109,6 +114,7 @@ declare module "aframe" {
     systems: {
       "hubs-systems": HubsSystems;
       "personal-space-bubble": PersonalSpaceBubbleSystem;
+      "transform-selected-object": TransformSelectedObjectSystem;
       userinput: UserInputSystem;
       /** @deprecated see bit-interaction-system */
       interaction: InteractionSystem;

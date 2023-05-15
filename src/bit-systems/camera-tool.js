@@ -9,7 +9,6 @@ import {
   HoveredRemoteRight,
   Interacted,
   RemoteRight,
-  Rigidbody,
   TextButton
 } from "../bit-components";
 import { addMedia } from "../utils/media-utils";
@@ -212,7 +211,7 @@ function rotateWithRightClick(world, camera) {
     userinput.get(paths.device.mouse.buttonRight)
   ) {
     const rightCursor = anyEntityWith(world, RemoteRight);
-    physicsSystem.updateBodyOptions(Rigidbody.bodyId[camera], { type: "kinematic" });
+    physicsSystem.updateRigidBodyOptions(camera, { type: "kinematic" });
     transformSystem.startTransform(world.eid2obj.get(camera), world.eid2obj.get(rightCursor), {
       mode: "cursor"
     });

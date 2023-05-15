@@ -25,7 +25,7 @@ import { waitForDOMContentLoaded } from "../utils/async-utils";
 
 import { SHAPE } from "three-ammo/constants";
 import { addComponent, entityExists, removeComponent } from "bitecs";
-import { MediaLoading } from "../bit-components";
+import { MediaContentBounds, MediaLoading } from "../bit-components";
 
 let loadingObject;
 
@@ -279,7 +279,9 @@ AFRAME.registerComponent("media-loader", {
       }
 
       // TODO this does duplicate work in some cases, but finish() is the only consistent place to do it
-      this.contentBounds = getBox(this.el, this.el.getObject3D("mesh")).getSize(new THREE.Vector3());
+      const contentBounds = getBox(this.el, this.el.getObject3D("mesh")).getSize(new THREE.Vector3());
+      addComponent(APP.world, MediaContentBounds, el.eid);
+      MediaContentBounds.bounds[el.eid].set(contentBounds.toArray());
 
       el.emit("media-loaded");
       if (el.eid && entityExists(APP.world, el.eid)) {
