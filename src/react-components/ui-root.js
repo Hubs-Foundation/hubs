@@ -50,7 +50,7 @@ import { EnterOnDeviceModal } from "./room/EnterOnDeviceModal";
 import { MicSetupModalContainer } from "./room/MicSetupModalContainer";
 import { InvitePopoverContainer } from "./room/InvitePopoverContainer";
 import { MoreMenuPopoverButton, CompactMoreMenuButton, MoreMenuContextProvider } from "./room/MoreMenuPopover";
-import { ChatSidebarContainer, ChatContextProvider, ChatToolbarButtonContainer } from "./room/ChatSidebarContainer";
+import { ChatSidebarContainer } from "./room/ChatSidebarContainer";
 import { ContentMenu, PeopleMenuButton, ObjectsMenuButton, ECSDebugMenuButton } from "./room/ContentMenu";
 import { ReactComponent as CameraIcon } from "./icons/Camera.svg";
 import { ReactComponent as AvatarIcon } from "./icons/Avatar.svg";
@@ -71,13 +71,13 @@ import { ReactComponent as LeaveIcon } from "./icons/Leave.svg";
 import { ReactComponent as EnterIcon } from "./icons/Enter.svg";
 import { ReactComponent as InviteIcon } from "./icons/Invite.svg";
 import { PeopleSidebarContainer, userFromPresence } from "./room/PeopleSidebarContainer";
-import { ObjectListProvider } from "./room/useObjectList";
+import { ObjectListProvider } from "./room/hooks/useObjectList";
 import { ObjectsSidebarContainer } from "./room/ObjectsSidebarContainer";
 import { ObjectMenuContainer } from "./room/ObjectMenuContainer";
 import { useCssBreakpoints } from "react-use-css-breakpoints";
 import { PlacePopoverContainer } from "./room/PlacePopoverContainer";
 import { SharePopoverContainer } from "./room/SharePopoverContainer";
-import { AudioPopoverContainer } from "./room/AudioPopoverContainer";
+import { AudioPopoverButtonContainer } from "./room/AudioPopoverButtonContainer";
 import { ReactionPopoverContainer } from "./room/ReactionPopoverContainer";
 import { SafariMicModal } from "./room/SafariMicModal";
 import { RoomSignInModalContainer } from "./auth/RoomSignInModalContainer";
@@ -98,7 +98,9 @@ import { MediaDevicesEvents } from "../utils/media-devices-utils";
 import { TERMS, PRIVACY } from "../constants";
 import { ECSDebugSidebarContainer } from "./debug-panel/ECSSidebar";
 import { NotificationsContainer } from "./room/NotificationsContainer";
-import { usePermissions } from "./room/usePermissions";
+import { usePermissions } from "./room/hooks/usePermissions";
+import { ChatContextProvider } from "./room/contexts/ChatContext";
+import ChatToolbarButton from "./room/components/ChatToolbarButton/ChatToolbarButton";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -1606,7 +1608,7 @@ class UIRoot extends Component {
                       <>
                         {!isLockedDownDemo && (
                           <>
-                            <AudioPopoverContainer scene={this.props.scene} />
+                            <AudioPopoverButtonContainer scene={this.props.scene} />
                             <SharePopoverContainer scene={this.props.scene} hubChannel={this.props.hubChannel} />
                             <PlacePopoverContainer
                               scene={this.props.scene}
@@ -1625,7 +1627,7 @@ class UIRoot extends Component {
                       </>
                     )}
                     {!isLockedDownDemo && (
-                      <ChatToolbarButtonContainer
+                      <ChatToolbarButton
                         onClick={() => this.toggleSidebar("chat", { chatPrefix: "", chatAutofocus: false })}
                       />
                     )}

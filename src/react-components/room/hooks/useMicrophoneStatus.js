@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { MediaDevices, MediaDevicesEvents } from "../../utils/media-devices-utils";
+import { MediaDevices, MediaDevicesEvents } from "../../../utils/media-devices-utils";
 
 export function useMicrophoneStatus(scene) {
   const mediaDevicesManager = APP.mediaDevicesManager;

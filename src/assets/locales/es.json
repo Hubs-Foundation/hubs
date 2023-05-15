@@ -7,8 +7,7 @@
   "avatar-page.select": "Seleccionar",
   "avatar-page.selected": "Este es tu avatar actual",
   "avatar-preview.loading-failed": "Carga fallida{linebreak}Por favor, elige otro avatar",
-  "avatar-settings-content.display-name-description":
-    "Caracteres alfanuméricos y guiones. Al menos 3 caracteres, máximo 32",
+  "avatar-settings-content.display-name-description": "Caracteres alfanuméricos y guiones. Al menos 3 caracteres, máximo 32",
   "button.apply": "Aplicar",
   "chat-sidebar.log-message.invalid-scene-url": "Esta URL no apunta a una escena o a un archivo .GLB válido.",
   "chat-sidebar.system-message.entered-lobby": "{name} entró a la antesala.",
@@ -20,27 +19,21 @@
   "chat-sidebar.system-message.name-change": "{oldName} ahora se llama {newName}",
   "chat-sidebar.system-message.scene-change": "{name} ha cambiado la escena a {sceneName}",
   "close-room-modal.confirm": "Sí, cerrar la sala",
-  "close-room-modal.message":
-    "Al cerrar esta sala, te expulsarás a ti y a otros y la eliminarás permanentemente.{linebreak}¿Estás seguro(a)? Está acción no puede ser revertida.",
+  "close-room-modal.message": "Al cerrar esta sala, te expulsarás a ti y a otros y la eliminarás permanentemente.{linebreak}¿Estás seguro(a)? Está acción no puede ser revertida.",
   "discord-page.community-link": "Discord de Hubs",
   "discord-page.invite-button": "Invitar un Bot al servidor",
-  "discord-page.primary-tagline":
-    "Comparte una sala virtual con tu comunidad.{linebreak}Mira videos, juega con objetos 3D o simplemente pasa el rato.",
+  "discord-page.primary-tagline": "Comparte una sala virtual con tu comunidad.{linebreak}Mira videos, juega con objetos 3D o simplemente pasa el rato.",
   "discord-page.secondary-tagline": "Realidad virtual inmersiva sin descargas ni registros.",
   "discord-page.splash-tag": "Diseñado para negociaciones serias.",
   "exited-room-screen.reason.closed": "Esta sala ya no está disponible.",
-  "exited-room-screen.reason.connect-error":
-    "Imposible conectarse a esta sala. Por favor, vuelve a intentar más tarde.",
-  "exited-room-screen.reason.denied":
-    "No tienes permiso para entrar a la sala. Por favor, pide permiso al creador de la sala.",
-  "exited-room-screen.reason.disconnected":
-    "Te has desconectado de la sala. Refresca la página para volver a conectarte.",
+  "exited-room-screen.reason.connect-error": "Imposible conectarse a esta sala. Por favor, vuelve a intentar más tarde.",
+  "exited-room-screen.reason.denied": "No tienes permiso para entrar a la sala. Por favor, pide permiso al creador de la sala.",
+  "exited-room-screen.reason.disconnected": "Te has desconectado de la sala. Refresca la página para volver a conectarte.",
   "exited-room-screen.reason.exited": "Tu sesión ha terminado. Refresca el navegador para empezar una nueva.",
   "exited-room-screen.reason.full": "Esta sala está llena. Por favor, vuelve a intentar más tarde.",
   "exited-room-screen.reason.left": "Has abandonado la sala.",
   "exited-room-screen.reason.scene-error": "Falló la carga de la escena.",
-  "exited-room-screen.reason.version-mismatch":
-    "La versión que instalaste aún no está disponible. Tu navegador se refrescará en 5 segundos.",
+  "exited-room-screen.reason.version-mismatch": "La versión que instalaste aún no está disponible. Tu navegador se refrescará en 5 segundos.",
   "hubs-cloud-page.get-started": "Guía de inicio rápido",
   "hubs-cloud-page.hero-button.enterprise": "Obtén Hubs Cloud empresarial",
   "hubs-cloud-page.hero-button.personal": "Obtén Hubs Cloud personal",
@@ -100,17 +93,13 @@
   "preferences-screen.category.movement": "Movimiento",
   "preferences-screen.category.touchscreen": "Pantalla táctil",
   "preferences-screen.close-button": "Cerrar menú de preferencias",
-  "preferences-screen.preference.allow-multiple-hubs-instances":
-    "Deshabilitar salida automática cuando hay varias salas abiertas simultáneamente",
+  "preferences-screen.preference.allow-multiple-hubs-instances": "Deshabilitar salida automática cuando hay varias salas abiertas simultáneamente",
   "preferences-screen.preference.animate-waypoint-transitions": "Animar transiciones de puntos de referencia",
-  "preferences-screen.preference.disable-auto-gain-control":
-    "Desactivar el control automático de ganancia del micrófono",
-  "preferences-screen.preference.disable-auto-pixel-ratio":
-    "Deshabilitar ajustes automáticos de la proporción del píxel",
+  "preferences-screen.preference.disable-auto-gain-control": "Desactivar el control automático de ganancia del micrófono",
+  "preferences-screen.preference.disable-auto-pixel-ratio": "Deshabilitar ajustes automáticos de la proporción del píxel",
   "preferences-screen.preference.disable-backwards-movement": "Deshabilitar movimiento hacia atrás",
   "preferences-screen.preference.disable-echo-cancellation": "Desactivar la anulación del eco del micrófono",
-  "preferences-screen.preference.disable-idle-detection":
-    "Deshabilitar salida automática cuando el avatar está inactivo o en segundo plano",
+  "preferences-screen.preference.disable-idle-detection": "Deshabilitar salida automática cuando el avatar está inactivo o en segundo plano",
   "preferences-screen.preference.disable-movement": "Deshabilitar movimiento",
   "preferences-screen.preference.disable-noise-suppression": "Desactivar la supresión de ruido del micrófono",
   "preferences-screen.preference.disable-sound-effects": "Desactivar efectos sonoros",
@@ -118,36 +107,29 @@
   "preferences-screen.preference.disable-teleporter": "Deshabilitar teletransportación",
   "preferences-screen.preference.enable-dynamic-shadows": "Habilitar sombras dinámicas",
   "preferences-screen.preference.enable-gyro": "Enable gyroscope (when supported by browser/device)",
-  "preferences-screen.preference.enable-on-screen-joystick-left":
-    "Habilitar el controlador para caminar, a la izquierda de la pantalla",
-  "preferences-screen.preference.enable-on-screen-joystick-right":
-    "Habilitar el controlador para girar, a la derecha de la pantalla",
+  "preferences-screen.preference.enable-on-screen-joystick-left": "Habilitar el controlador para caminar, a la izquierda de la pantalla",
+  "preferences-screen.preference.enable-on-screen-joystick-right": "Habilitar el controlador para girar, a la derecha de la pantalla",
   "preferences-screen.preference.global-media-volume": "Volumen de multimedios",
   "preferences-screen.preference.global-voice-volume": "Volumen de la voz entrante",
-  "preferences-screen.preference.invert-touchscreen-camera-move":
-    "Invertir la dirección del movimiento de la cámara para pantallas táctiles",
+  "preferences-screen.preference.invert-touchscreen-camera-move": "Invertir la dirección del movimiento de la cámara para pantallas táctiles",
   "preferences-screen.preference.locale": "Idioma",
   "preferences-screen.preference.material-quality-setting": "Calidad del material",
   "preferences-screen.preference.max-resolution": "Resolución máxima",
   "preferences-screen.preference.movement-speed-modifier": "Modificador de la velocidad de movimiento",
   "preferences-screen.preference.mute-mic-on-entry": "Silenciar el micrófono al entrar",
-  "preferences-screen.preference.only-show-nametags-in-freeze":
-    "Solo mostrar las etiquetas de nombre en modo contextual",
-  "preferences-screen.preference.prefer-mobile-object-info-panel":
-    "Preferir panel de móviles para información de objetos",
+  "preferences-screen.preference.only-show-nametags-in-freeze": "Solo mostrar las etiquetas de nombre en modo contextual",
+  "preferences-screen.preference.prefer-mobile-object-info-panel": "Preferir panel de móviles para información de objetos",
   "preferences-screen.preference.preferred-camera": "Cámara preferida",
   "preferences-screen.preference.preferred-mic": "Micrófono preferido",
   "preferences-screen.preference.preferred-mic.default": "Ninguno",
   "preferences-screen.preference.show-fps-counter": "Show FPS Counter",
   "preferences-screen.preference.show-rtc-debug-panel": "Mostrar el panel de RTC",
   "preferences-screen.preference.snap-rotation-degrees": "Rotación por bloque (en grados)",
-  "preferences-screen.prompt-for-refresh":
-    "Tus preferencias están guardadas, pero algunos de los cambios no entrarán en vigencia hasta que refresques la página.",
+  "preferences-screen.prompt-for-refresh": "Tus preferencias están guardadas, pero algunos de los cambios no entrarán en vigencia hasta que refresques la página.",
   "preferences-screen.refresh-now": "Refrescar ahora",
   "preferences-screen.reset-to-default": "Restaurar preferencias por defecto",
   "promote-client-modal.confirm-prefix": "Sí, promover a {name}",
-  "promote-client-modal.message":
-    "Al promover al usuario, le darás acceso completo a las características de la sala y a las herramientas de moderación.{linebreak}¿Estás seguro(a)?",
+  "promote-client-modal.message": "Al promover al usuario, le darás acceso completo a las características de la sala y a las herramientas de moderación.{linebreak}¿Estás seguro(a)?",
   "room-settings-sidebar.access-invite": "Invitación exclusiva",
   "room-settings-sidebar.access-invite-description": "Invita a personas con un vínculo que puede ser anulado",
   "room-settings-sidebar.access-public": "Público",
@@ -191,8 +173,7 @@
   "sign-in-modal.signin-message.room-settings": "Necesitas iniciar sesión para cambiar las propiedades de la sala.",
   "sign-in-modal.signin-message.tweet": "Necesitas iniciar sesión para enviar tuits.",
   "sign-in-modal.signin-message.unpin": "Necesitas iniciar sesión para desanclar objetos.",
-  "sign-in-modal.wait-for-verification":
-    "<p>¡Correo enviado a {email}!</p><p>Para continuar, haz clic en el vínculo del correo usando un teléfono, tablet o computador.</p><p>¿No tienes correo? No podrás crear una cuenta.</p>",
+  "sign-in-modal.wait-for-verification": "<p>¡Correo enviado a {email}!</p><p>Para continuar, haz clic en el vínculo del correo usando un teléfono, tablet o computador.</p><p>¿No tienes correo? No podrás crear una cuenta.</p>",
   "spectating-label.label": "Estás mirando",
   "support.copied": "¡copiado!",
   "support.copy": "copiar",
@@ -205,8 +186,7 @@
   "support.update-browser": "Por favor, trata de cambiar a otro navegador web o actualizar éste",
   "tips.desktop.invite": "No hay nadie aquí. Usa el botón Compartir de arriba para compartir esta sala.",
   "tips.desktop.locomotion": "Usa las teclas {moveKeys} para moverte. Mantén presionado Mayúsculas para acelerar.",
-  "tips.desktop.look":
-    "¡Bienvenido(a) a {appName}! Hagamos un recorrido rápido. 👋 Haz clic y arrastra para mirar alrededor.",
+  "tips.desktop.look": "¡Bienvenido(a) a {appName}! Hagamos un recorrido rápido. 👋 Haz clic y arrastra para mirar alrededor.",
   "tips.desktop.turning": "Perfecto. Usa las teclas {turnLeftKey} y {turnRightKey} para girar.",
   "tips.mobile.invite": "Usa el botón Compartir para compartir esta sala.",
   "tips.mobile.locomotion": "¡Genial! Para moverte, pellizca con dos dedos.",

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext, createContext, useCallback, Children, cloneElement } from "react";
 import PropTypes from "prop-types";
-import { mediaSort, getMediaType } from "../../utils/media-sorting.js";
+import { mediaSort, getMediaType } from "../../../utils/media-sorting.js";
 
 function getDisplayString(el) {
   // Having a listed-media component does not guarantee the existence of a media-loader component,
