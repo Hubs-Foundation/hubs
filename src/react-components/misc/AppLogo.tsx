@@ -7,6 +7,8 @@ import { useLogo } from "../styles/theme";
 
 export function AppLogo({ className }: { className?: string }) {
   const logo = useLogo();
+
+  // Display HMC logo if account and HMC and no custom logo is configured
   const shouldDisplayHmcLogo = isHmc() && !logo;
 
   return shouldDisplayHmcLogo ? (
