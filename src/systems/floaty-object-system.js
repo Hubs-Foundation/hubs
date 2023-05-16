@@ -116,7 +116,7 @@ export const floatyObjectSystem = world => {
         removeComponent(world, MakeStaticWhenAtRest, eid);
       }
     } else if (FloatyObject.flags[eid] & FLOATY_OBJECT_FLAGS.HELIUM_WHEN_LARGE) {
-      const scaleComponent = world.eid2obj.get(eid).scale.x;
+      const curScale = world.eid2obj.get(eid).scale.x;
 
       // These three hard-coded values may need to become a property of the FloatyObject
       // component if HELIUM_WHEN_LARGE is used for an entity other than the Duck
@@ -124,7 +124,7 @@ export const floatyObjectSystem = world => {
       const maxScale = 5.0;
       const maxForce = 6.5;
 
-      const ratio = Math.min(1, (scaleComponent - initialScale) / (maxScale - initialScale));
+      const ratio = Math.min(1, (curScale - initialScale) / (maxScale - initialScale));
       const force = ratio * maxForce;
 
       if (force > 0) {
