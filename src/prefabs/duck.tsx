@@ -2,7 +2,6 @@
 import { createElementEntity, EntityDef } from "../utils/jsx-entity";
 import { COLLISION_LAYERS } from "../constants";
 import { FLOATY_OBJECT_FLAGS } from "../systems/floaty-object-system";
-import { Type } from "../inflators/rigid-body";
 import ducky from "../assets/models/DuckyMesh.glb";
 import { getAbsoluteHref } from "../utils/media-url-utils";
 import { Fit, Shape } from "../inflators/physics-shape";
@@ -26,11 +25,12 @@ export function DuckPrefab(): EntityDef {
       handCollisionTarget
       offersRemoteConstraint
       offersHandConstraint
-      floatyObject
+      floatyObject={{
+        flags: FLOATY_OBJECT_FLAGS.HELIUM_WHEN_LARGE
+      }}
       destroyAtExtremeDistance
       holdable
       rigidbody={{
-        gravity: [0, -9.8, 0],
         collisionGroup: COLLISION_LAYERS.INTERACTABLES,
         collisionMask:
           COLLISION_LAYERS.HANDS |
