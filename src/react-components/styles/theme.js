@@ -57,7 +57,7 @@ export function useTheme(themeId) {
 
 function getAppLogo(darkMode) {
   const theme = getCurrentTheme();
-  const shouldUseDarkLogo = theme ? theme.darkModeDefault : darkMode;
+  const shouldUseDarkLogo = theme ? theme.darkModeDefault || theme.id.includes("dark-mode") : darkMode;
   return (shouldUseDarkLogo && configs.image("logo_dark")) || configs.image("logo");
 }
 
