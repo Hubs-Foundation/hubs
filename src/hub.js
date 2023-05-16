@@ -188,11 +188,12 @@ import MediaDevicesManager from "./utils/media-devices-manager";
 import PinningHelper from "./utils/pinning-helper";
 import { sleep } from "./utils/async-utils";
 import { platformUnsupported } from "./support";
-import { renderAsEntity } from "./utils/jsx-entity";
+import { addObject3DComponent, renderAsEntity } from "./utils/jsx-entity";
 import { VideoMenuPrefab } from "./prefabs/video-menu";
 import { ObjectMenuPrefab } from "./prefabs/object-menu";
 import { LinkHoverMenuPrefab } from "./prefabs/link-hover-menu";
 import { PDFMenuPrefab } from "./prefabs/pdf-menu";
+import { agentPrefab, setAgentParams } from "./prefabs/agent";
 import { loadWaypointPreviewModel, WaypointPreview } from "./prefabs/waypoint-preview";
 import { preload } from "./utils/preload";
 
@@ -754,6 +755,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   subscriptions.register();
 
   const scene = document.querySelector("a-scene");
+
+  // const agent_id = renderAsEntity(APP.world, agentPrefab());
+  // const obj = APP.world.eid2obj.get(agent_id);
+  //   scene.add(obj);
+  // addObject3DComponent(APP.world, agent_id, new THREE.Mesh(
+  //   new THREE.BoxGeometry(1.0, 1.0),
+  //   new THREE.MeshBasicMaterial()
+  // ) );
+
+  const agent_id = renderAsEntity(APP.world, agentPrefab());
+  console.log(setAgentParams(agent_id));
+
+  
+
 
   const onSceneLoaded = () => {
     const physicsSystem = scene.systems["hubs-systems"].physicsSystem;
