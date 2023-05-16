@@ -12,11 +12,11 @@ import { SelectInputField } from "../input/SelectInputField";
 import { ToggleInput } from "../input/ToggleInput";
 import { Column } from "../layout/Column";
 import { defineMessages, FormattedMessage, useIntl } from "react-intl";
-import { Popover } from "../popover/Popover";
 import { PermissionStatus } from "../../utils/media-devices-utils";
 import { Spinner } from "../misc/Spinner";
+import { ToolTip } from "@mozilla/lilypad-ui";
 
-export const tittleMessages = defineMessages({
+export const titleMessages = defineMessages({
   microphoneSetup: {
     id: "mic-setup-modal.title",
     defaultMessage: "Microphone Setup"
@@ -51,7 +51,7 @@ export function MicSetupModal({
   const intl = useIntl();
   return (
     <Modal
-      title={intl.formatMessage(tittleMessages[canVoiceChat ? "microphoneSetup" : "audioSetup"])}
+      title={intl.formatMessage(titleMessages[canVoiceChat ? "microphoneSetup" : "audioSetup"])}
       beforeTitle={<BackButton onClick={onBack} />}
       className={className}
       {...rest}
@@ -90,32 +90,9 @@ export function MicSetupModal({
                         checked={isMicrophoneMuted}
                         onChange={onChangeMicrophoneMuted}
                       />
-                      <Popover
-                        title="Info"
-                        content={
-                          <Column className={styles.popoverContent}>
-                            <FormattedMessage
-                              id="mic-setup-modal.mute-mic-info"
-                              defaultMessage="You can mute anytime after you enter the room"
-                            />
-                          </Column>
-                        }
-                        placement="top"
-                        showHeader={false}
-                        disableFullscreen
-                        popoverClass={styles.popover}
-                        arrowClass={styles.popoverArrow}
-                      >
-                        {({ openPopover, closePopover, triggerRef }) => (
-                          <div ref={triggerRef}>
-                            <InfoIcon
-                              className={styles.infoIcon}
-                              onMouseEnter={openPopover}
-                              onMouseLeave={closePopover}
-                            />
-                          </div>
-                        )}
-                      </Popover>
+                      <ToolTip category="primary" description="Toggle mic on/off anytime after you enter the room (M)">
+                        <InfoIcon className={styles.infoIcon} />
+                      </ToolTip>
                     </>
                   ) : (
                     (permissionStatus === PermissionStatus.PROMPT && (

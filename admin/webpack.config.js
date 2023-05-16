@@ -80,7 +80,7 @@ module.exports = (env, argv) => {
       RETICULUM_SERVER: "hubs.local:4000",
       POSTGREST_SERVER: "",
       ITA_SERVER: "turkey",
-      TIER: "p0"
+      TIER: "p1"
     });
   }
 

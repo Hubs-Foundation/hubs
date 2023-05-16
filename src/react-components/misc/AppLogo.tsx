@@ -1,7 +1,7 @@
 import React from "react";
 
 import configs from "../../utils/configs";
-import HmcLogo from "../icons/HmcLogo.svg";
+import { ReactComponent as HmcLogo } from "../icons/HmcLogo.svg";
 import { isHmc } from "../../utils/isHmc";
 import { useLogo } from "../styles/theme";
 

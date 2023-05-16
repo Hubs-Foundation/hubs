@@ -4,9 +4,19 @@ import configs from "../../utils/configs";
 import { hubUrl } from "../../utils/phoenix-utils";
 import { InvitePopoverButton } from "./InvitePopover";
 import { handleExitTo2DInterstitial } from "../../utils/vr-interstitial";
-import { useInviteUrl } from "./useInviteUrl";
+import { useInviteUrl } from "./hooks/useInviteUrl";
+import { ToolTip } from "@mozilla/lilypad-ui";
+import { defineMessage, useIntl } from "react-intl";
+
+const inviteTooltipDescription = defineMessage({
+  id: "invite-tooltip.description",
+  defaultMessage: "Copy room link to invite others to the room"
+});
 
 export function InvitePopoverContainer({ hub, hubChannel, scene, store, ...rest }) {
+  const intl = useIntl();
+  const description = intl.formatMessage(inviteTooltipDescription);
+
   // TODO: Move to Hub class
   const shortUrl = `https://${configs.SHORTLINK_DOMAIN}`;
   const url = `${shortUrl}/${hub.hub_id}`;
@@ -48,16 +58,18 @@ export function InvitePopoverContainer({ hub, hubChannel, scene, store, ...rest 
   }
 
   return (
-    <InvitePopoverButton
-      inviteRequired={inviteRequired}
-      fetchingInvite={fetchingInvite}
-      inviteUrl={inviteUrl}
-      revokeInvite={revokeInvite}
-      url={url}
-      embed={embedText}
-      popoverApiRef={popoverApiRef}
-      {...rest}
-    />
+    <ToolTip description={description}>
+      <InvitePopoverButton
+        inviteRequired={inviteRequired}
+        fetchingInvite={fetchingInvite}
+        inviteUrl={inviteUrl}
+        revokeInvite={revokeInvite}
+        url={url}
+        embed={embedText}
+        popoverApiRef={popoverApiRef}
+        {...rest}
+      />
+    </ToolTip>
   );
 }
 

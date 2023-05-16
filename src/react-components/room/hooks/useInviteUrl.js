@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { hubUrl } from "../../utils/phoenix-utils";
+import { hubUrl } from "../../../utils/phoenix-utils";
 
 export function useInviteUrl(hubChannel, disabled = false) {
   const [inviteId, setInviteId] = useState();

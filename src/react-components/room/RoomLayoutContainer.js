@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 import PropTypes from "prop-types";
 import { RoomLayout } from "../layout/RoomLayout";
-import { useResizeViewport } from "./useResizeViewport";
+import { useResizeViewport } from "./hooks/useResizeViewport";
 
 export function RoomLayoutContainer({ store, scene, ...rest }) {
   const viewportRef = useRef();

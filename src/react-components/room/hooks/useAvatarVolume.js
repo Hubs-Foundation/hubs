@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { getPlayerInfo } from "../../utils/component-utils";
+import { getPlayerInfo } from "../../../utils/component-utils";
 
 export default function useAvatarVolume(sessionId, onMultiplierChanged) {
   const playerInfo = getPlayerInfo(sessionId);
