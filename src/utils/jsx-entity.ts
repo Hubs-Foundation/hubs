@@ -38,8 +38,10 @@ import {
   MaterialTag,
   VideoTextureSource,
   Mirror,
-  MixerAnimatableInitialize
+  MixerAnimatableInitialize,
+  Agent
 } from "../bit-components";
+
 import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
 import { GrabbableParams, inflateGrabbable } from "../inflators/grabbable";
@@ -95,6 +97,7 @@ import { BoxColliderParams, inflateBoxCollider } from "../inflators/box-collider
 import { inflateTrimesh } from "../inflators/trimesh";
 import { HeightFieldParams, inflateHeightField } from "../inflators/heightfield";
 import { inflateAudioSettings } from "../inflators/audio-settings";
+import { AgentParams, inflateAgent } from "../inflators/agent";
 
 preload(
   new Promise(resolve => {
@@ -360,6 +363,7 @@ export interface JSXComponentData extends ComponentData {
   waypointPreview?: boolean;
   pdf?: PDFParams;
   loopAnimation?: LoopAnimationParams;
+  agent?: AgentParams;
 }
 
 export interface GLTFComponentData extends ComponentData {
@@ -470,7 +474,9 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   slice9: inflateSlice9,
   model: inflateModel,
   image: inflateImage,
-  video: inflateVideo
+  video: inflateVideo,
+
+  agent: inflateAgent
 };
 
 export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorFn }> = {

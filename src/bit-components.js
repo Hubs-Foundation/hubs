@@ -6,6 +6,10 @@ setRemovedRecycleThreshold(0.2);
 
 export const $isStringType = Symbol("isStringType");
 
+export const Agent = defineComponent({
+  language: Types.ui8,
+  needed: Type.ui8
+})
 export const Networked = defineComponent({
   id: Types.ui32,
   creator: Types.ui32,
