@@ -99,7 +99,6 @@ function tryGetTheme(themeId) {
 }
 
 function getCurrentTheme() {
-  console.log(store.state);
   const preferredThemeId = store.state?.preferences?.theme;
   return tryGetTheme(preferredThemeId);
 }

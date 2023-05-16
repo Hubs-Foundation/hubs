@@ -98,7 +98,6 @@ configs.image = (imageName, cssUrl) => {
   const url =
     (configs.APP_CONFIG && configs.APP_CONFIG.images && configs.APP_CONFIG.images[imageName]) ||
     localDevImages[imageName];
-  console.log("config image", configs.APP_CONFIG?.images, url, localDevImages);
   return url && cssUrl ? `url(${url})` : url;
 };
 
