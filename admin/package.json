@@ -26,9 +26,9 @@
     "bitecs": "github:mozilla/bitECS#hubs-patches",
     "classnames": "^2.2.5",
     "hubs": "file:..",
-    "react": "^16.1.1",
+    "react": "^18.2.0",
     "react-admin": "^2.6.3",
-    "react-dom": "^16.1.1",
+    "react-dom": "^18.2.0",
     "react-intl": "^2.4.0",
     "three": "github:mozillareality/three.js#hubs-patches-141"
   },
