@@ -193,7 +193,6 @@ import { VideoMenuPrefab } from "./prefabs/video-menu";
 import { ObjectMenuPrefab } from "./prefabs/object-menu";
 import { LinkHoverMenuPrefab } from "./prefabs/link-hover-menu";
 import { PDFMenuPrefab } from "./prefabs/pdf-menu";
-import { agentPrefab, setAgentParams } from "./prefabs/agent";
 import { loadWaypointPreviewModel, WaypointPreview } from "./prefabs/waypoint-preview";
 import { preload } from "./utils/preload";
 
@@ -764,8 +763,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   //   new THREE.MeshBasicMaterial()
   // ) );
 
-  const agent_id = renderAsEntity(APP.world, agentPrefab());
-  console.log(setAgentParams(agent_id));
+  // const agent_id = renderAsEntity(APP.world, agentPrefab());
+  // AFRAME.scenes[0].object3D.add(obj);
+  // console.log(setAgentParams(agent_id));
+
+  // const agentID = addAgentToScene(APP.world);
+  // const agentObj = APP.world.eid2obj.get(agentID);
+
+  // const avatarPov = document.querySelector("#avatar-pov-node").object3D;
+  // agentObj.position.copy(avatarPov.localToWorld(new THREE.Vector3(0, 0, -1.5)));
+  // agentObj.lookAt(avatarPov.getWorldPosition(new THREE.Vector3()));
+
+  // console.log("aaaaaaaaaaaaaaaa", agentObj.position, agentObj.visible);
 
   
 
@@ -863,6 +872,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         entryManager._setPlayerInfoFromProfile(true);
       }
     }
+
+    // const agentID = addAgentToScene(APP.world);
+    // const agentObj = APP.world.eid2obj.get(agentID);
+
+    // const avatarPov = document.querySelector("#avatar-pov-node").object3D;
+    // agentObj.position.copy(avatarPov.localToWorld(new THREE.Vector3(0, 0, -1.5)));
+    // agentObj.lookAt(avatarPov.getWorldPosition(new THREE.Vector3()));
+
+    // console.log("aaaaaaaaaaaaaaaa", agentObj);
   });
 
   remountUI({

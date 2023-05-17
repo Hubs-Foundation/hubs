@@ -23,12 +23,12 @@ import { getAvatarSrc, getAvatarType } from "./utils/avatar-utils";
 import { SOUND_ENTER_SCENE } from "./systems/sound-effects-system";
 import { MediaDevices, MediaDevicesEvents } from "./utils/media-devices-utils";
 import { addComponent, removeEntity } from "bitecs";
-import { MyCameraTool } from "./bit-components";
+import { Agent, MyCameraTool } from "./bit-components";
 import { anyEntityWith } from "./utils/bit-utils";
 import { moveToSpawnPoint } from "./bit-systems/waypoint";
 import { spawnFromFileList, spawnFromUrl } from "./load-media-on-paste-or-drop";
 import { isLockedDownDemoRoom } from "./utils/hub-utils";
-
+import { addAgentToScene } from "./prefabs/agent";
 const useNewLoader = qsTruthy("newLoader");
 
 export default class SceneEntryManager {
@@ -95,6 +95,7 @@ export default class SceneEntryManager {
     this._setupKicking();
     this._setupMedia();
     this._setupCamera();
+    this._setupAgent();
 
     if (qsTruthy("offline")) return;
 
@@ -446,6 +447,29 @@ export default class SceneEntryManager {
 
     this.mediaSearchStore.addEventListener("media-exit", () => {
       exit2DInterstitialAndEnterVR();
+    });
+  };
+
+  _setupAgent = () => {
+    this.scene.addEventListener("agent-toggle", () =>{
+
+      const myAgent = anyEntityWith(APP.world, Agent);
+
+      if(myAgent){
+        removeEntity(APP.world, myAgent);
+      }
+      else{
+
+        const avatarPov = document.querySelector("#avatar-pov-node").object3D;
+        const agentID = addAgentToScene(APP.world);
+        const agentObj = APP.world.eid2obj.get(agentID);
+        
+        agentObj.position.copy(avatarPov.localToWorld(new THREE.Vector3(0, 0, -1.0)));
+        agentObj.lookAt(avatarPov.getWorldPosition(new THREE.Vector3()));
+
+        console.log("Agent Instatiated");
+
+      }
     });
   };
 

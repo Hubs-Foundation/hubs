@@ -4,6 +4,7 @@ import { ReactComponent as InviteIcon } from "../icons/Invite.svg";
 import { ReactComponent as MicrophoneIcon } from "../icons/Microphone.svg";
 import { ReactComponent as ArrowIcon } from "../icons/Arrow.svg";
 import { ReactComponent as ShareIcon } from "../icons/Share.svg";
+import {ReactComponent as AvatarIcon } from "../icons/Avatar.svg";
 import { ReactComponent as ObjectIcon } from "../icons/Object.svg";
 import { ReactComponent as ReactionIcon } from "../icons/Reaction.svg";
 import { ReactComponent as ChatIcon } from "../icons/Chat.svg";
@@ -72,6 +73,9 @@ export const RoomToolbar = args => (
         <ToolbarButton icon={<ObjectIcon />} label="Place" preset="accent3" {...args} />
         <ToolbarButton icon={<ReactionIcon />} label="React" preset="accent2" {...args} />
         <ToolbarButton icon={<ChatIcon />} label="Chat" preset="accent4" {...args} />
+        <ToolbarButton icon={<AvatarIcon />} label="Agent" preset="accent4" {...args} />
+        
+
       </>
     }
     toolbarRight={
