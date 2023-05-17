@@ -8,7 +8,7 @@ import createEmojiPlugin from "draft-js-emoji-plugin";
 import createHashtagPlugin from "draft-js-hashtag-plugin";
 import createLinkifyPlugin from "draft-js-linkify-plugin";
 import createCounterPlugin from "draft-js-counter-plugin";
-import Editor from "draft-js-plugins-editor";
+import Editor from "@draft-js-plugins/editor";
 import "draft-js-emoji-plugin/lib/plugin.css";
 import "draft-js-hashtag-plugin/lib/plugin.css";
 import "draft-js-linkify-plugin/lib/plugin.css";
