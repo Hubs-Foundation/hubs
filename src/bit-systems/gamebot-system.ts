@@ -148,10 +148,11 @@ void main() {
 
 const AUDIOS = {
   fantasy:
-    "https://cf.harvestmedia.net/assets/samples/4f76c3819105b600966fd4d096dd5d23325d1348/2891b0c8edb761b184cc217eda25d8db",
-  action: "https://cf.harvestmedia.net/assets/samples/4f76c3819105b600966fd4d096dd5d23325d1348/fadeffb4003629eb",
+    "https://www.fesliyanstudios.com/musicfiles/2021-02-23_-_Fantasy_Ambience_-_David_Fesliyan/2021-02-23_-_Fantasy_Ambience_-_David_Fesliyan.mp3",
+  action:
+    "https://www.fesliyanstudios.com/musicfiles/2022-05-25_-_Clash_Of_Heroes_-_www.FesliyanStudios.com/2022-05-25_-_Clash_Of_Heroes_-_www.FesliyanStudios.com.mp3",
   terror:
-    "https://cf.harvestmedia.net/assets/samples/4f76c3819105b600966fd4d096dd5d23325d1348/44f092c79972fa908372f9f4d6c31c6c"
+    "https://www.fesliyanstudios.com/musicfiles/2022-12-31_-_Scene_Of_The_Crime_-_www.FesliyanStudios.com/2022-12-31_-_Scene_Of_The_Crime_-_www.FesliyanStudios.com.mp3"
 };
 
 const RAIN = {
