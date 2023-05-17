@@ -37,8 +37,6 @@ import { inflateMediaLoader } from "../inflators/media-loader";
 import { addObject3DComponent } from "../utils/jsx-entity";
 var anime = require("animejs").default;
 
-import detectMobile from "../utils/is-mobile";
-
 const bgSkyboxTexture = textureLoader.load(bgSkyboxSrc);
 bgSkyboxTexture.encoding = LinearEncoding;
 bgSkyboxTexture.wrapS = RepeatWrapping;
@@ -67,7 +65,6 @@ uniform sampler2D iChannel1;
 uniform sampler2D iChannel2;
 uniform float iMix;
 uniform float iTime;
-uniform bool isMobile;
  
 #include <common>
 const float kPi = 3.141592;
@@ -101,7 +98,6 @@ vec4 sRGBToLinear( in vec4 value ) {
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
   vec2 uv = vec2(fragCoord);
   
-  if (isMobile) uv.y = 1.0 - uv.y;
   uv.x += sin(uv.y*50.0+iTime/2500.0)*(uv.y*(1.0 - uv.y))/200.0;
 
   // color textures
@@ -689,8 +685,7 @@ export function gameBotSystem(world: HubsWorld) {
           value: noiseTexture
         },
         iMix: { value: 0.0 },
-        iTime: { value: world.time.elapsed },
-        isMobile: { value: detectMobile() }
+        iTime: { value: world.time.elapsed }
       },
       vertexShader: skybox_vert,
       fragmentShader: skybox_frag,
