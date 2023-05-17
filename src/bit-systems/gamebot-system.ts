@@ -1,20 +1,226 @@
-import { hasComponent } from "bitecs";
+import { addComponent, addEntity, hasComponent, removeComponent, removeEntity } from "bitecs";
 import { HubsWorld } from "../app";
 import { anyEntityWith, findChildWithComponent } from "../utils/bit-utils";
 import { EntityID } from "../utils/networking-types";
-import { EnvironmentSettings, GameMenu, Interacted, Slice9, TextTag } from "../bit-components";
+import {
+  CursorRaycastable,
+  DisableButton,
+  GameMenu,
+  Interacted,
+  ParticleEmitterTag,
+  Slice9,
+  TextTag
+} from "../bit-components";
 import { Text as TroikaText } from "troika-three-text";
 import { updateSlice9Geometry } from "../update-slice9-geometry";
-import { Color, Vector3 } from "three";
-import { inflateEnvironmentSettings } from "../inflators/environment-settings";
+import {
+  BackSide,
+  Group,
+  LinearEncoding,
+  Mesh,
+  Object3D,
+  RepeatWrapping,
+  ShaderMaterial,
+  SphereGeometry,
+  Texture,
+  Vector3
+} from "three";
 import { loadTexture } from "../utils/load-texture";
 import { proxiedUrlFor } from "../utils/media-url-utils";
-import { EnvironmentSystem } from "../systems/environment-system";
 import gameScene from "../assets/models/GameScene.glb";
 import { swapActiveScene } from "./scene-loading";
-import { AElement } from "aframe";
+import bgSkyboxSrc from "../assets/images/GameScene_bg.png";
+import noiseSrc from "../assets/images/noise.png";
+import { textureLoader } from "../utils/media-utils";
+import { inflateParticleEmitter } from "../inflators/particle-emitter";
+import { inflateMediaLoader } from "../inflators/media-loader";
+import { addObject3DComponent } from "../utils/jsx-entity";
+var anime = require("animejs").default;
 
-const GAMES = ["es", "hp", "es", "lotr", "sw"];
+import detectMobile from "../utils/is-mobile";
+
+const bgSkyboxTexture = textureLoader.load(bgSkyboxSrc);
+bgSkyboxTexture.encoding = LinearEncoding;
+bgSkyboxTexture.wrapS = RepeatWrapping;
+bgSkyboxTexture.wrapT = RepeatWrapping;
+const noiseTexture = textureLoader.load(noiseSrc);
+noiseTexture.encoding = LinearEncoding;
+noiseTexture.wrapS = RepeatWrapping;
+noiseTexture.wrapT = RepeatWrapping;
+
+const skybox_vert = `
+varying vec2 vUv;
+void main()
+{
+  gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+  vUv = uv;
+  vUv.y = 1.0 - vUv.y;
+}
+`;
+
+const skybox_frag = `
+precision highp float;
+varying vec2 vUv;
+
+uniform sampler2D iChannel0;
+uniform sampler2D iChannel1;
+uniform sampler2D iChannel2;
+uniform float iMix;
+uniform float iTime;
+uniform bool isMobile;
+ 
+#include <common>
+const float kPi = 3.141592;
+
+float random(vec2 st) {
+  return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
+float noise(vec2 st) {
+  vec2 i = floor(st);
+  vec2 f = fract(st);
+  
+  // Four corner gradients
+  float a = random(i);
+  float b = random(i + vec2(1.0, 0.0));
+  float c = random(i + vec2(0.0, 1.0));
+  float d = random(i + vec2(1.0, 1.0));
+  
+  // Smooth interpolation
+  vec2 u = f * f * (3.0 - 2.0 * f);
+  
+  return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
+}
+
+vec4 sRGBToLinear( in vec4 value ) {
+	return vec4( mix( pow( value.rgb * 0.9478672986 + vec3( 0.0521327014 ), vec3( 2.4 ) ), value.rgb * 0.0773993808, vec3( lessThanEqual( value.rgb, vec3( 0.04045 ) ) ) ), value.a );
+}
+
+#define mask_tile 0.3
+
+void mainImage(out vec4 fragColor, in vec2 fragCoord) {
+  vec2 uv = vec2(fragCoord);
+  
+  if (isMobile) uv.y = 1.0 - uv.y;
+  uv.x += sin(uv.y*50.0+iTime/2500.0)*(uv.y*(1.0 - uv.y))/200.0;
+
+  // color textures
+  vec4 clrA = sRGBToLinear(texture(iChannel0, uv));
+  
+  // color textures
+  vec4 clrBG = sRGBToLinear(texture(iChannel1, uv));
+
+  // set these to increase/decrease the edge width
+  float edge_width_start = 0.15; // width at the start of the dissolve (alpha = 1)
+  float edge_width_end = 0.05; // width at the end of the dissolve (alpha = 0)
+  
+  float edge_width = mix(edge_width_start, edge_width_end, smoothstep(0., 1., iMix)); // 
+  
+  // increase the alpha range by the edge width so we are not left with only glowy edges 
+  float myAlpha = mix(0. - edge_width, 1., iMix); 
+  
+  // fade mask uv
+  vec2 uv_mask = fragCoord.xy;
+  
+  // fade mask texture
+  // use a linear texture that has values between 0-1
+  float r = noise(fragCoord * 10.);
+  vec4 alphaTex = vec4(r, r, r, r);
+  // vec4 alphaTex = texture(iChannel2, uv_mask * mask_tile);
+
+  // alpha mask (1-bit)
+  float a = step(alphaTex.r, myAlpha);
+
+  // edge mask which is a slightly progressed version of the alpha
+  // this mask doesn't need to be 1 bit as it will just be added to the color
+  float edge = smoothstep(alphaTex.r - edge_width, alphaTex.r, myAlpha);
+
+  vec4 edgeColor = vec4(0., 0.1, 1.0, 1.0);
+  edgeColor *= edge * 10.;
+  
+  // add edge color to the color
+  clrA += edgeColor;
+
+  fragColor = mix(clrA, clrBG, a);
+}
+ 
+void main() {
+  mainImage(gl_FragColor, vUv);
+	#include <encodings_fragment>
+}
+`;
+
+const AUDIOS = {
+  fantasy:
+    "https://cf.harvestmedia.net/assets/samples/4f76c3819105b600966fd4d096dd5d23325d1348/2891b0c8edb761b184cc217eda25d8db",
+  action: "https://cf.harvestmedia.net/assets/samples/4f76c3819105b600966fd4d096dd5d23325d1348/fadeffb4003629eb",
+  terror:
+    "https://cf.harvestmedia.net/assets/samples/4f76c3819105b600966fd4d096dd5d23325d1348/44f092c79972fa908372f9f4d6c31c6c"
+};
+
+const RAIN = {
+  particleCount: 500,
+  src: "https://uploads-prod.reticulum.io/files/fdc153ae-3fbb-48e5-b2dd-08fc29988f53.png",
+  ageRandomness: 6,
+  lifetime: 2,
+  lifetimeRandomness: 0,
+  sizeCurve: "exponentialOut",
+  startSize: 0.10000000149011612,
+  endSize: 0.10000000149011612,
+  sizeRandomness: 0,
+  colorCurve: "linear",
+  startColor: "#ffffff",
+  startOpacity: 1,
+  middleColor: "#ffffff",
+  middleOpacity: 1,
+  endColor: "#ffffff",
+  endOpacity: 0.5,
+  velocityCurve: "linear",
+  startVelocity: {
+    x: 0,
+    y: 0,
+    z: 10
+  },
+  endVelocity: {
+    x: 0,
+    y: 0,
+    z: 10
+  },
+  angularVelocity: 0
+};
+
+const SNOW = {
+  particleCount: 200,
+  src: "https://uploads-prod.reticulum.io/files/b32768fb-952d-458d-8a2b-ca7c5490eaf3.png",
+  ageRandomness: 6,
+  lifetime: 2,
+  lifetimeRandomness: 2,
+  sizeCurve: "exponentialOut",
+  startSize: 0.10000000149011612,
+  endSize: 0.10000000149011612,
+  sizeRandomness: 0.10000000149011612,
+  colorCurve: "linear",
+  startColor: "#ffffff",
+  startOpacity: 1,
+  middleColor: "#ffffff",
+  middleOpacity: 1,
+  endColor: "#ffffff",
+  endOpacity: 1,
+  velocityCurve: "linear",
+  startVelocity: {
+    x: 0,
+    y: 0,
+    z: 3
+  },
+  endVelocity: {
+    x: 0,
+    y: 0,
+    z: 2
+  },
+  angularVelocity: 3
+};
+
+const GAMES = ["es", "hp", "cj", "lotr", "sw"];
 
 const textSize = new Vector3();
 const getTextSize = (function () {
@@ -58,7 +264,6 @@ enum CommandE {
   Disconnect = "disconnect",
   Text = "text",
   Options = "options",
-  End = "end",
   Skybox = "skybox",
   Start = "start"
 }
@@ -69,11 +274,28 @@ export type GameOptionsI = {
   C: string;
   D: string;
 };
+
+enum WeatherE {
+  Clear = "Clear",
+  Rain = "Rain",
+  Wind = "Wind",
+  Snow = "Snow"
+}
+
+enum TypeE {
+  Fantasy = "fantasy",
+  Action = "action",
+  Terror = "terror"
+}
+
 export interface OptionsResponseI {
   prompt: string;
   description: string;
   options: GameOptionsI;
   player: string;
+  state: "started" | "ended";
+  weather: WeatherE;
+  type: TypeE;
 }
 
 const text = (msg?: string) => {
@@ -84,6 +306,7 @@ const text = (msg?: string) => {
     updateTurnVisibility(APP.world, menu, false);
     updateEndVisibility(APP.world, menu, false);
     updateOptionsVisibility(APP.world, menu, false);
+    animateObjectScale(character, 1.0);
   }
 };
 
@@ -91,90 +314,148 @@ let lastOptions: OptionsResponseI | null = null;
 const options = (options: OptionsResponseI) => {
   console.log(options);
   if (menu) {
-    lastOptions = options;
-    updateStartVisibility(APP.world, menu, false);
+    animateObjectScale(character, 1.0);
+    updateStartVisibility(APP.world, menu, options.state === "ended");
     updateTurnVisibility(APP.world, menu, NAF.clientId === options.player ? true : false);
+    updateEndVisibility(APP.world, menu, NAF.clientId === options.player ? true : false);
     updateText(APP.world, menu, options.prompt, () => {
-      if (NAF.clientId === options.player) {
-        updateEndVisibility(APP.world, menu, true);
-        updateOptions(APP.world, menu, options.options);
-      } else {
-        updateOptionsVisibility(APP.world, menu, false);
-      }
+      updateOptionsVisibility(APP.world, menu, true);
+      updateOptionsEnabled(APP.world, menu, NAF.clientId === options.player);
+      updateOptions(APP.world, menu, options.options);
+      animateObjectScale(character, 0.0);
     });
-  }
-};
-
-const start = () => {
-  if (menu) {
-    const envSettingsEid = anyEntityWith(APP.world, EnvironmentSettings)!;
-    fadeOut(() => {
-      inflateEnvironmentSettings(APP.world, envSettingsEid, {
-        backgroundColor: new Color("#222222")
+    if (options.weather === WeatherE.Rain) {
+      hasComponent(APP.world, ParticleEmitterTag, weatherEid) &&
+        removeComponent(APP.world, ParticleEmitterTag, weatherEid);
+      inflateParticleEmitter(APP.world, weatherEid, RAIN);
+    } else if (options.weather === WeatherE.Snow) {
+      hasComponent(APP.world, ParticleEmitterTag, weatherEid) &&
+        removeComponent(APP.world, ParticleEmitterTag, weatherEid);
+      inflateParticleEmitter(APP.world, weatherEid, SNOW);
+    } else {
+      hasComponent(APP.world, ParticleEmitterTag, weatherEid) &&
+        removeComponent(APP.world, ParticleEmitterTag, weatherEid);
+    }
+    if (lastOptions?.type !== options.type) {
+      removeEntity(APP.world, audioEid);
+      audioEid = addEntity(APP.world);
+      addObject3DComponent(APP.world, audioEid, new Group());
+      inflateMediaLoader(APP.world, audioEid, {
+        src: AUDIOS[options.type].toLowerCase(),
+        resize: false,
+        recenter: false,
+        animateLoad: false,
+        isObjectMenuTarget: false
       });
-      environmentSystem.updateEnvironmentSettings((EnvironmentSettings as any).map.get(envSettingsEid));
-      fadeIn();
-    });
+    }
+    lastOptions = options;
   }
 };
 
-const end = (options: OptionsResponseI) => {
-  console.log(options);
+const updateSkybox = (texture: Texture) => {
+  const shader = sky.material as ShaderMaterial;
+  const current = shader.uniforms.iMix.value;
+  let prevTexture: Texture;
+  if (current === 0) {
+    prevTexture = shader.uniforms.iChannel0.value;
+    shader.uniforms.iChannel1.value = texture;
+  } else {
+    prevTexture = shader.uniforms.iChannel1.value;
+    shader.uniforms.iChannel0.value = texture;
+  }
+  anime({
+    duration: 2000,
+    easing: "linear",
+    targets: [shader.uniforms.iMix],
+    value: Math.abs(1 - current),
+    complete: () => {
+      if (current === 0) {
+        shader.uniforms.iChannel0.value = prevTexture;
+      } else {
+        shader.uniforms.iChannel1.value = prevTexture;
+      }
+    }
+  });
+};
+
+const start = (msg?: string) => {
   if (menu) {
+    hasComponent(APP.world, ParticleEmitterTag, weatherEid) &&
+      removeComponent(APP.world, ParticleEmitterTag, weatherEid);
+    removeEntity(APP.world, audioEid);
+
     updateTurnVisibility(APP.world, menu, false);
+    updateStartVisibility(APP.world, menu, true);
     updateEndVisibility(APP.world, menu, false);
     updateOptionsVisibility(APP.world, menu, false);
-    updateText(APP.world, menu, options.prompt, () => {
-      updateStartVisibility(APP.world, menu, true);
-    });
+    updateText(APP.world, menu, msg);
+    updateSkybox(bgSkyboxTexture);
+
+    character && animateObjectScale(character, 0.0);
   }
 };
 
 const skybox = async (skybox: string) => {
-  const skyboxProxied = proxiedUrlFor(skybox);
-  console.log(skyboxProxied);
-  const envSettingsEid = anyEntityWith(APP.world, EnvironmentSettings)!;
-  const { texture } = await loadTexture(skyboxProxied, 1, "image/jpeg");
-
-  fadeOut(() => {
-    inflateEnvironmentSettings(APP.world, envSettingsEid, {
-      backgroundTexture: texture
-    });
-    environmentSystem.updateEnvironmentSettings((EnvironmentSettings as any).map.get(envSettingsEid));
-    fadeIn();
-  });
+  const proxiedSrc = proxiedUrlFor(skybox);
+  if (lastSkySrc !== proxiedSrc) {
+    lastSkySrc = proxiedSrc;
+    console.log(lastSkySrc);
+    const { texture } = await loadTexture(lastSkySrc, 1, "image/jpeg");
+    texture.encoding = LinearEncoding;
+    texture.wrapS = RepeatWrapping;
+    texture.wrapT = RepeatWrapping;
+    updateSkybox(texture);
+  }
 };
 
-const fadeIn = (callback?: Function) => {
-  const fader = (document.getElementById("viewing-camera")! as AElement).components["fader"];
-  (fader as any).fadeIn().then(() => {
-    callback && callback();
-  });
-};
-
-const fadeOut = (callback?: Function) => {
-  const fader = (document.getElementById("viewing-camera")! as AElement).components["fader"];
-  (fader as any).fadeOut().then(() => {
-    callback && callback();
+const animateObjectScale = (obj: Object3D, scale: number) => {
+  anime({
+    targets: {
+      x: obj.scale.x,
+      y: obj.scale.y,
+      z: obj.scale.z
+    },
+    x: scale,
+    y: scale,
+    z: scale,
+    easing: "easeInOutSine",
+    duration: 500,
+    update: (anim: any) => {
+      obj.scale.set(anim.animatables[0].target.x, anim.animatables[0].target.y, anim.animatables[0].target.z);
+      obj.matrixNeedsUpdate = true;
+    }
   });
 };
 
 const connect = () => {
-  menu = anyEntityWith(APP.world, GameMenu)!;
-  setupButtons(APP.world, menu);
+  if (!sceneSet) {
+    menu = anyEntityWith(APP.world, GameMenu)!;
+    setupButtons(APP.world, menu);
 
-  const menuObj = APP.world.eid2obj.get(menu)!;
-  menuObj.position.set(0, 1.4, 0);
-  const obj = APP.world.eid2obj.get(menu)!;
-  obj.visible = true;
-  updateTurnVisibility(APP.world, menu, false);
-  updateStartVisibility(APP.world, menu, true);
-  updateEndVisibility(APP.world, menu, false);
-  updateOptionsVisibility(APP.world, menu, false);
-  updateText(APP.world, menu, "");
+    const menuObj = APP.world.eid2obj.get(menu)!;
+    menuObj.position.set(0, 1.4, 0);
+    menuObj.visible = false;
 
-  connected = true;
-  swapActiveScene(APP.world, gameScene);
+    APP.world.scene.add(sky);
+    sky.position.setY(10);
+    const characterUpdate = (event: any) => {
+      const sceneObj = APP.world.eid2obj.get(event.detail)!;
+      sceneObj.traverse(obj => {
+        if (obj.name === "Character") {
+          character = obj;
+        }
+      });
+      character.scale.set(0, 0, 0);
+      weatherEid = addEntity(APP.world);
+      APP.scene?.removeEventListener("environment-scene-loaded", characterUpdate);
+
+      menuObj.visible = true;
+      sceneSet = true;
+      pendingCommands.forEach(command => game(command));
+    };
+    APP.scene?.addEventListener("environment-scene-loaded", characterUpdate);
+    swapActiveScene(APP.world, gameScene);
+  }
 };
 
 const disconnect = () => {
@@ -183,9 +464,9 @@ const disconnect = () => {
 
   const obj = APP.world.eid2obj.get(menu)!;
   obj.visible = false;
-  connected = false;
 };
 
+const pendingCommands = new Array<any[]>();
 const game = (data: any[]) => {
   const command = data.shift();
 
@@ -199,20 +480,32 @@ const game = (data: any[]) => {
       disconnect();
       break;
     case CommandE.Text:
-      text(data.shift());
+      if (sceneSet) {
+        text(data.shift());
+      } else {
+        pendingCommands.push([command, data.shift()]);
+      }
       break;
     case CommandE.Options:
-      options(data.shift() as OptionsResponseI);
+      if (sceneSet) {
+        options(data.shift() as OptionsResponseI);
+      } else {
+        pendingCommands.push([command, data.shift()]);
+      }
       break;
     case CommandE.Start:
-      start();
-      options(data.shift());
-      break;
-    case CommandE.End:
-      end(data.shift());
+      if (sceneSet) {
+        start(data.shift());
+      } else {
+        pendingCommands.push([command, data.shift()]);
+      }
       break;
     case CommandE.Skybox:
-      skybox(data.shift());
+      if (sceneSet) {
+        skybox(data.shift());
+      } else {
+        pendingCommands.push([command, data.shift()]);
+      }
       break;
   }
 };
@@ -223,7 +516,7 @@ function clicked(world: HubsWorld, eid: EntityID) {
 
 function updateButtonVisibility(world: HubsWorld, buttonRef: EntityID, visible: boolean) {
   const buttonObj = world.eid2obj.get(buttonRef)!;
-  buttonObj.visible = visible;
+  animateObjectScale(buttonObj, visible ? 0.75 : 0.0);
 }
 
 function updateOptionsVisibility(world: HubsWorld, menu: EntityID, visible: boolean) {
@@ -234,17 +527,31 @@ function updateOptionsVisibility(world: HubsWorld, menu: EntityID, visible: bool
   );
 }
 
+function updateOptionsEnabled(world: HubsWorld, menu: EntityID, enabled: boolean) {
+  [GameMenu.AButtonRef[menu], GameMenu.BButtonRef[menu], GameMenu.CButtonRef[menu], GameMenu.DButtonRef[menu]].forEach(
+    buttonRef => {
+      if (enabled) {
+        addComponent(world, CursorRaycastable, buttonRef);
+        removeComponent(world, DisableButton, buttonRef);
+      } else {
+        removeComponent(world, CursorRaycastable, buttonRef);
+        addComponent(world, DisableButton, buttonRef);
+      }
+    }
+  );
+}
+
 function updateStartVisibility(world: HubsWorld, menu: EntityID, visible: boolean) {
   [GameMenu.StartButtonRef[menu]].forEach(buttonRef => {
     const buttonObj = world.eid2obj.get(buttonRef)!;
-    buttonObj.visible = visible;
+    animateObjectScale(buttonObj, visible ? 0.75 : 0.0);
   });
 }
 
 function updateEndVisibility(world: HubsWorld, menu: EntityID, visible: boolean) {
   [GameMenu.EndButtonRef[menu]].forEach(buttonRef => {
     const buttonObj = world.eid2obj.get(buttonRef)!;
-    buttonObj.visible = visible;
+    animateObjectScale(buttonObj, visible ? 0.75 : 0.0);
   });
 }
 
@@ -281,7 +588,7 @@ function updateText(world: HubsWorld, menu: EntityID, msg?: string, callback?: F
 function updateTurnVisibility(world: HubsWorld, menu: EntityID, visible: boolean) {
   const nameRef = GameMenu.TurnRef[menu];
   const textObj = world.eid2obj.get(nameRef)!;
-  textObj.visible = visible;
+  animateObjectScale(textObj, visible ? 0.75 : 0.0);
 }
 
 function updateButton(world: HubsWorld, buttonRef: EntityID, msg: string) {
@@ -325,83 +632,75 @@ function handleClicks(world: HubsWorld, menu: EntityID) {
       command: "game",
       args: ["start", GAMES[Math.floor(Math.random() * GAMES.length)]]
     });
-    updateStartVisibility(world, menu, false);
-    updateEndVisibility(world, menu, false);
-    updateTurnVisibility(world, menu, false);
   } else if (clicked(world, GameMenu.EndButtonRef[menu])) {
     APP.hubChannel?.sendCommand({
       command: "game",
       args: ["end"]
     });
-    updateEndVisibility(world, menu, false);
-    updateOptionsVisibility(world, menu, false);
-    updateTurnVisibility(world, menu, false);
   } else if (clicked(world, GameMenu.AButtonRef[menu])) {
     APP.hubChannel?.sendCommand({
       command: "game",
       args: ["option", "A", lastOptions?.options.A]
     });
-    updateEndVisibility(world, menu, false);
-    updateOptionsVisibility(world, menu, false);
-    updateEndVisibility(world, menu, false);
-    updateTurnVisibility(world, menu, false);
   } else if (clicked(world, GameMenu.BButtonRef[menu])) {
     APP.hubChannel?.sendCommand({
       command: "game",
       args: ["option", "B", lastOptions?.options.B]
     });
-    updateEndVisibility(world, menu, false);
-    updateOptionsVisibility(world, menu, false);
-    updateEndVisibility(world, menu, false);
-    updateTurnVisibility(world, menu, false);
   } else if (clicked(world, GameMenu.CButtonRef[menu])) {
     APP.hubChannel?.sendCommand({
       command: "game",
       args: ["option", "C", lastOptions?.options.C]
     });
-    updateEndVisibility(world, menu, false);
-    updateOptionsVisibility(world, menu, false);
-    updateEndVisibility(world, menu, false);
-    updateTurnVisibility(world, menu, false);
   } else if (clicked(world, GameMenu.DButtonRef[menu])) {
     APP.hubChannel?.sendCommand({
       command: "game",
       args: ["option", "D", lastOptions?.options.D]
     });
-    updateEndVisibility(world, menu, false);
-    updateOptionsVisibility(world, menu, false);
-    updateEndVisibility(world, menu, false);
-    updateTurnVisibility(world, menu, false);
   }
 }
 
-let sceneEid: EntityID;
 let initialized = false;
 let menu: EntityID;
-let environmentSystem: EnvironmentSystem;
-let connected = false;
+let sky: Mesh;
+let lastSkySrc: string;
+let sceneSet: boolean = false;
+let character: Object3D;
+let weatherEid: EntityID;
+let audioEid: EntityID;
 export function gameBotSystem(world: HubsWorld) {
   if (!initialized && APP.messageDispatch) {
-    environmentSystem = APP.scene?.systems["hubs-systems"].environmentSystem;
-    APP.scene?.addEventListener("environment-scene-loaded", event => {
-      sceneEid = (event as any).detail;
-      if (!hasComponent(world, EnvironmentSettings, sceneEid) || connected) {
-        inflateEnvironmentSettings(world, sceneEid, {
-          backgroundColor: new Color("#222222"),
-          toneMappingExposure: 1,
-          enableHDRPipeline: true
-        });
-        environmentSystem.updateEnvironmentSettings((EnvironmentSettings as any).map.get(sceneEid));
-      }
-    });
     APP.messageDispatch!.addEventListener("message", (event: CustomEvent) => {
       const { body, type, sessionId } = event.detail;
       if (sessionId !== NAF.clientId && type === "command" && body.command === "game" && APP.scene?.is("entered")) {
         game(body.args);
       }
     });
+    const geometry = new SphereGeometry(15, 32, 16);
+    const material = new THREE.ShaderMaterial({
+      uniforms: {
+        iChannel0: {
+          value: bgSkyboxTexture
+        },
+        iChannel1: {
+          value: bgSkyboxTexture
+        },
+        iChannel2: {
+          value: noiseTexture
+        },
+        iMix: { value: 0.0 },
+        iTime: { value: world.time.elapsed },
+        isMobile: { value: detectMobile() }
+      },
+      vertexShader: skybox_vert,
+      fragmentShader: skybox_frag,
+      side: BackSide
+    });
+    sky = new Mesh(geometry, material);
     initialized = true;
-  } else {
+  } else if (initialized) {
+    const shader = sky.material as ShaderMaterial;
+    shader.uniforms.iTime.value = world.time.elapsed;
     handleClicks(world, menu);
   }
 }

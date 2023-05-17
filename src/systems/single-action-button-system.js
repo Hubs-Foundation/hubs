@@ -1,5 +1,6 @@
 import { addComponent, defineQuery, hasComponent, removeComponent } from "bitecs";
 import {
+  DisableButton,
   HoverButton,
   HoveredHandLeft,
   HoveredHandRight,
@@ -71,13 +72,15 @@ function applyTheme() {
     color: new THREE.Color(0xffffff),
     hoverColor: new THREE.Color(0xaaaaaa),
     textColor: new THREE.Color(getThemeColor("action-color")),
-    textHoverColor: new THREE.Color(getThemeColor("action-color-highlight"))
+    textHoverColor: new THREE.Color(getThemeColor("action-color-highlight")),
+    disabledColor: new THREE.Color(getThemeColor("action-color-disabled"))
   };
   buttonStyles[BUTTON_TYPES.ACTION] = {
     color: new THREE.Color(getThemeColor("action-color")),
     hoverColor: new THREE.Color(getThemeColor("action-color-highlight")),
     textColor: new THREE.Color(0xffffff),
-    textHoverColor: new THREE.Color(0xffffff)
+    textHoverColor: new THREE.Color(0xffffff),
+    disabledColor: new THREE.Color(getThemeColor("action-color-disabled"))
   };
 }
 onThemeChanged(applyTheme);
@@ -89,12 +92,20 @@ const hoverButtonsQuery = defineQuery([HoverButton]);
 function hoverButtonSystem(world) {
   hoverButtonsQuery(world).forEach(function (eid) {
     const obj = world.eid2obj.get(eid);
-    const isHovered = hasAnyComponent(world, hoverComponents, eid);
     const style = buttonStyles[HoverButton.type[eid]];
-    obj.material.color.copy(isHovered ? style.hoverColor : style.color);
-    if (hasComponent(world, TextButton, eid)) {
-      const lbl = world.eid2obj.get(TextButton.labelRef[eid]);
-      lbl.color = isHovered ? style.textHoverColor : style.textColor;
+    if (hasComponent(world, DisableButton, eid)) {
+      obj.material.color.copy(style.disabledColor);
+      if (hasComponent(world, TextButton, eid)) {
+        const lbl = world.eid2obj.get(TextButton.labelRef[eid]);
+        lbl.color = style.textColor;
+      }
+    } else {
+      const isHovered = hasAnyComponent(world, hoverComponents, eid);
+      obj.material.color.copy(isHovered ? style.hoverColor : style.color);
+      if (hasComponent(world, TextButton, eid)) {
+        const lbl = world.eid2obj.get(TextButton.labelRef[eid]);
+        lbl.color = isHovered ? style.textHoverColor : style.textColor;
+      }
     }
   });
 }

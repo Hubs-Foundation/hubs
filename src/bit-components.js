@@ -83,6 +83,7 @@ export const HandCollisionTarget = defineComponent();
 export const OffersHandConstraint = defineComponent();
 export const TogglesHoveredActionSet = defineComponent();
 export const HoverButton = defineComponent({ type: Types.ui8 });
+export const DisableButton = defineComponent();
 export const TextButton = defineComponent({ labelRef: Types.eid });
 export const HoldableButton = defineComponent();
 export const SingleActionButton = defineComponent();

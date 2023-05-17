@@ -38,7 +38,8 @@ import {
   MaterialTag,
   VideoTextureSource,
   Mirror,
-  MixerAnimatableInitialize
+  MixerAnimatableInitialize,
+  DisableButton,
   GameMenu
 } from "../bit-components";
 import { inflateMediaLoader } from "../inflators/media-loader";
@@ -308,6 +309,7 @@ export interface JSXComponentData extends ComponentData {
   textButton?: any;
   hoverButton?: any;
   rigidbody?: OptionalParams<RigidBodyParams>;
+  disableButton?: true;
   physicsShape?: OptionalParams<PhysicsShapeParams>;
   floatyObject?: any;
   networkedFloatyObject?: any;
@@ -449,6 +451,7 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   holdableButton: createDefaultInflator(HoldableButton),
   textButton: createDefaultInflator(TextButton),
   hoverButton: createDefaultInflator(HoverButton),
+  disableButton: createDefaultInflator(DisableButton),
   holdable: createDefaultInflator(Holdable),
   deletable: createDefaultInflator(Deletable),
   rigidbody: inflateRigidBody,

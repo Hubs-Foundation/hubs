@@ -4,11 +4,12 @@ import { store } from "./store-instance";
 // NOTE these should be synchronized with the top of shared.scss
 const DEFAULT_ACTION_COLOR = "#FF3464";
 const DEFAULT_ACTION_COLOR_LIGHT = "#FF74A4";
+const DEFAULT_ACTION_COLOR_DISABLED = "#555555";
 
 const DEFAULT_COLORS = {
   "action-color": DEFAULT_ACTION_COLOR,
   "action-label-color": DEFAULT_ACTION_COLOR,
-  "action-color-disabled": DEFAULT_ACTION_COLOR_LIGHT,
+  "action-color-disabled": DEFAULT_ACTION_COLOR_DISABLED,
   "action-color-highlight": DEFAULT_ACTION_COLOR_LIGHT,
   "action-text-color": "#FFFFFF",
   "action-subtitle-color": "#F0F0F0",

@@ -27,6 +27,7 @@ const position = {
 interface GameButtonParams extends Attrs {
   text: string;
   texture?: Texture;
+  disableButton?: boolean;
 }
 
 interface Text3DParams extends Attrs {
@@ -108,7 +109,7 @@ export function GameMenuPrefab() {
       billboard={{ onlyY: true }}
     >
       <Text3D ref={refs.text} position={position.text} text={""} width={2} height={0.75} />
-      <GameButton ref={refs.turn} position={position.turn} text={"Your Turn"} texture={nameBgTexture} />
+      <GameButton ref={refs.turn} position={position.turn} text={"Your Turn"} texture={nameBgTexture} disableButton />
       <GameButton ref={refs.A} position={position.A} text={"A"} />
       <GameButton ref={refs.B} position={position.B} text={"B"} />
       <GameButton ref={refs.C} position={position.C} text={"C"} />
