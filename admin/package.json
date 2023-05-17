@@ -27,9 +27,9 @@
     "classnames": "^2.2.5",
     "hubs": "file:..",
     "react": "^18.2.0",
-    "react-admin": "^2.6.3",
+    "react-admin": "^4.10.3",
     "react-dom": "^18.2.0",
-    "react-intl": "^2.4.0",
+    "react-intl": "^6.4.2",
     "three": "github:mozillareality/three.js#hubs-patches-141"
   },
   "devDependencies": {
