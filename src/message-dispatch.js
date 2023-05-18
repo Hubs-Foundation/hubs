@@ -273,10 +273,16 @@ export default class MessageDispatch extends EventTarget {
       case "load":
         {
 <<<<<<< HEAD
+<<<<<<< HEAD
           loadFromJson(this.hubChannel);
 =======
           loadState(this.hubChannel, args);
 >>>>>>> e95fe000e (Add support for loading entity state from github)
+=======
+          if (APP.hubChannel.can("pin_objects") && APP.hubChannel.signIn) {
+            loadState(this.hubChannel, args);
+          }
+>>>>>>> c1e7431ba (Set sign in condition for load and clear command.)
         }
         break;
       case "download":
@@ -286,7 +292,9 @@ export default class MessageDispatch extends EventTarget {
         break;
       case "clear":
         {
-          clearState(this.hubChannel);
+          if (APP.hubChannel.can("pin_objects") && APP.hubChannel.signIn) {
+            clearState(this.hubChannel);
+          }
         }
         break;
     }
