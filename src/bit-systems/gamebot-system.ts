@@ -143,12 +143,10 @@ void main() {
 `;
 
 const AUDIOS = {
-  fantasy:
-    "https://www.fesliyanstudios.com/musicfiles/2021-02-23_-_Fantasy_Ambience_-_David_Fesliyan/2021-02-23_-_Fantasy_Ambience_-_David_Fesliyan.mp3",
+  fantasy: "https://cf.harvestmedia.net/assets/samples/4f76c3819105b600966fd4d096dd5d23325d1348/c2c0f1eadc0dfbf8",
   action:
-    "https://www.fesliyanstudios.com/musicfiles/2022-05-25_-_Clash_Of_Heroes_-_www.FesliyanStudios.com/2022-05-25_-_Clash_Of_Heroes_-_www.FesliyanStudios.com.mp3",
-  terror:
-    "https://www.fesliyanstudios.com/musicfiles/2022-12-31_-_Scene_Of_The_Crime_-_www.FesliyanStudios.com/2022-12-31_-_Scene_Of_The_Crime_-_www.FesliyanStudios.com.mp3"
+    "https://cf.harvestmedia.net/assets/samples/4f76c3819105b600966fd4d096dd5d23325d1348/a1d3ab27180183e6539afc7ef5615946",
+  terror: "https://cf.harvestmedia.net/assets/samples/4f76c3819105b600966fd4d096dd5d23325d1348/55da184c20a24b143"
 };
 
 const RAIN = {
