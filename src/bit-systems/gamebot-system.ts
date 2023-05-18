@@ -38,15 +38,6 @@ import { inflateMediaLoader } from "../inflators/media-loader";
 import { addObject3DComponent } from "../utils/jsx-entity";
 var anime = require("animejs").default;
 
-const bgSkyboxTexture = textureLoader.load(bgSkyboxSrc);
-bgSkyboxTexture.encoding = LinearEncoding;
-bgSkyboxTexture.wrapS = RepeatWrapping;
-bgSkyboxTexture.wrapT = RepeatWrapping;
-const noiseTexture = textureLoader.load(noiseSrc);
-noiseTexture.encoding = LinearEncoding;
-noiseTexture.wrapS = RepeatWrapping;
-noiseTexture.wrapT = RepeatWrapping;
-
 const skybox_vert = `
 varying vec2 vUv;
 void main()
@@ -66,6 +57,7 @@ uniform sampler2D iChannel1;
 uniform sampler2D iChannel2;
 uniform float iMix;
 uniform float iTime;
+uniform bool iFlipY;
  
 #include <common>
 const float kPi = 3.141592;
@@ -99,6 +91,9 @@ vec4 sRGBToLinear( in vec4 value ) {
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
   vec2 uv = vec2(fragCoord);
   
+  if (iFlipY) {
+    uv.y = 1.0 - uv.y;
+  }
   uv.x += sin(uv.y*50.0+iTime/2500.0)*(uv.y*(1.0 - uv.y))/200.0;
 
   // color textures
@@ -218,7 +213,7 @@ const SNOW = {
   angularVelocity: 3
 };
 
-const GAMES = ["es", "hp", "cj", "lotr", "sw"];
+const GAMES = ["lotr", "hp", "es", "sw", "dn", "db", "nt", "br"];
 
 const textSize = new Vector3();
 const getTextSize = (function () {
@@ -313,6 +308,7 @@ const options = (options: OptionsResponseI) => {
   console.log(options);
   if (menu) {
     animateObjectScale(character, 1.0);
+    updateOptionsVisibility(APP.world, menu, false);
     updateStartVisibility(APP.world, menu, options.state === "ended");
     updateTurnVisibility(APP.world, menu, NAF.clientId === options.player ? true : false);
     updateEndVisibility(APP.world, menu, NAF.clientId === options.player ? true : false);
@@ -425,8 +421,39 @@ const animateObjectScale = (obj: Object3D, scale: number) => {
   });
 };
 
-const connect = () => {
+const isFirefox = navigator.userAgent.toLowerCase().indexOf("firefox") > -1;
+
+const connect = async () => {
   if (!connected) {
+    bgSkyboxTexture = await textureLoader.load(bgSkyboxSrc);
+    bgSkyboxTexture.encoding = LinearEncoding;
+    const noiseTexture = await textureLoader.load(noiseSrc);
+    noiseTexture.encoding = LinearEncoding;
+
+    const geometry = new SphereGeometry(15, 32, 16);
+    const material = new THREE.ShaderMaterial({
+      uniforms: {
+        iChannel0: {
+          value: bgSkyboxTexture
+        },
+        iChannel1: {
+          value: bgSkyboxTexture
+        },
+        iChannel2: {
+          value: noiseTexture
+        },
+        iMix: { value: 0.0 },
+        iTime: { value: APP.world.time.elapsed },
+        iFlipY: { value: isFirefox }
+      },
+      vertexShader: skybox_vert,
+      fragmentShader: skybox_frag,
+      side: BackSide
+    });
+    sky = new Mesh(geometry, material);
+    APP.world.scene.add(sky);
+    sky.position.setY(10);
+
     APP.world.scene.visible = false;
     const sceneEid = anyEntityWith(APP.world, EnvironmentSettings);
     if (sceneEid) {
@@ -440,8 +467,6 @@ const connect = () => {
     menuObj.position.set(0, 1.4, 0);
     menuObj.visible = false;
 
-    APP.world.scene.add(sky);
-    sky.position.setY(10);
     const characterUpdate = (event: any) => {
       const sceneObj = APP.world.eid2obj.get(event.detail)!;
       sceneObj.traverse(obj => {
@@ -675,6 +700,7 @@ let connected: boolean = false;
 let character: Object3D;
 let weatherEid: EntityID;
 let audioEid: EntityID;
+let bgSkyboxTexture: Texture;
 export function gameBotSystem(world: HubsWorld) {
   if (!initialized && APP.messageDispatch) {
     APP.messageDispatch!.addEventListener("message", (event: CustomEvent) => {
@@ -683,30 +709,12 @@ export function gameBotSystem(world: HubsWorld) {
         game(body.args);
       }
     });
-    const geometry = new SphereGeometry(15, 32, 16);
-    const material = new THREE.ShaderMaterial({
-      uniforms: {
-        iChannel0: {
-          value: bgSkyboxTexture
-        },
-        iChannel1: {
-          value: bgSkyboxTexture
-        },
-        iChannel2: {
-          value: noiseTexture
-        },
-        iMix: { value: 0.0 },
-        iTime: { value: world.time.elapsed }
-      },
-      vertexShader: skybox_vert,
-      fragmentShader: skybox_frag,
-      side: BackSide
-    });
-    sky = new Mesh(geometry, material);
     initialized = true;
   } else if (initialized) {
-    const shader = sky.material as ShaderMaterial;
-    shader.uniforms.iTime.value = world.time.elapsed;
+    if (connected) {
+      const shader = sky.material as ShaderMaterial;
+      shader.uniforms.iTime.value = world.time.elapsed;
+    }
     handleClicks(world, menu);
   }
 }
