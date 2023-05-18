@@ -259,7 +259,9 @@ export default class MessageDispatch extends EventTarget {
         break;
       case "load":
         {
-          loadState(this.hubChannel, args);
+          if (APP.hubChannel.can("pin_objects") && APP.hubChannel.signIn) {
+            loadState(this.hubChannel, args);
+          }
         }
         break;
       case "download":
@@ -269,7 +271,9 @@ export default class MessageDispatch extends EventTarget {
         break;
       case "clear":
         {
-          clearState(this.hubChannel);
+          if (APP.hubChannel.can("pin_objects") && APP.hubChannel.signIn) {
+            clearState(this.hubChannel);
+          }
         }
         break;
     }

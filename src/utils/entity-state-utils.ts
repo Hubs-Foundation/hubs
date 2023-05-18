@@ -10,8 +10,6 @@ import { CreateMessage, EntityID, NetworkID, StorableUpdateMessage } from "./net
 import qsTruthy from "./qs_truthy";
 import { deleteTheDeletableAncestor } from "../bit-systems/delete-entity-system";
 
-
-
 export type EntityState = {
   create_message: CreateMessage;
   update_messages: StorableUpdateMessage[];
@@ -233,17 +231,9 @@ export function loadFromJson(hubChannel: HubChannel) {
     fileSelector.remove();
   });
 }
-(window as any).loadFromJson = () => {
-  loadFromJson(APP.hubChannel!);
-};
-(window as any).loadState = (state: string) => {
-  loadState(APP.hubChannel!, state);
-};
-(window as any).clearState = () => {
-  clearState(APP.hubChannel!);
-};
 
-const TEST_ASSET_STATE = "https://raw.githubusercontent.com/mozilla/hubs-sample-assets/main/Hubs%20Components/test_json/__NAME__";
+const TEST_ASSET_STATE =
+  "https://raw.githubusercontent.com/mozilla/hubs-sample-assets/main/Hubs%20Components/test_json/__NAME__";
 
 export async function loadState(hubChannel: HubChannel, state: string) {
   clearState(hubChannel);
@@ -254,8 +244,8 @@ export async function loadState(hubChannel: HubChannel, state: string) {
   entityStates.data.forEach(entityState => {
     rewriteNidsForEntityState(entityState);
     rebroadcastEntityState(hubChannel, entityState);
-  })
-};
+  });
+}
 
 export function clearState(hubChannel: HubChannel) {
   networkedQuery(APP.world).forEach(eid => {
