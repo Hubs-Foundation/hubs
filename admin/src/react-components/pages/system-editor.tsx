@@ -10,7 +10,7 @@ import CardSection from "../shared/CardSection";
 import { Icon } from "@mozilla/lilypad-ui";
 import { DiscordIcon, BookIcon, QuestionIcon, GithubIcon } from "../shared/icons";
 import Card from "../shared/Card";
-import { hasPaidFeature } from "../../utils/feature_flags";
+import { hasPaidFeature, isBrandingDisabled } from "../../utils/feature_flags";
 
 const styles = withCommonStyles(() => ({}));
 
@@ -108,7 +108,7 @@ const SystemEditorComponent = ({ classes }) => {
         <section className="mb-40">
           <h3 className="heading-sm mb-28">Customize the look of your hub</h3>
 
-          {hasPaidFeature() && (
+          {hasPaidFeature() && !isBrandingDisabled() && (
             <CardSection
               className="mb-20"
               ctaCallback={() => {
