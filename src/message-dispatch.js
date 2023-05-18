@@ -12,6 +12,7 @@ import qsTruthy from "./utils/qs_truthy";
 import { add, testAsset, respawn } from "./utils/chat-commands";
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { isLockedDownDemoRoom } from "./utils/hub-utils";
 import { loadFromJson, downloadSavedEntityStates } from "./utils/entity-state-utils";
 =======
@@ -20,6 +21,9 @@ import { loadState, downloadSavedEntityStates } from "./utils/entity-state-utils
 =======
 import { loadState, downloadSavedEntityStates, clearState } from "./utils/entity-state-utils";
 >>>>>>> 6ff8d9ed9 (Set function to clear scene)
+=======
+import { loadState, downloadSavedEntityStates, clearState } from "./utils/entity-state-utils";
+>>>>>>> eae92bf85 (fix merge conflict)
 
 let uiRoot;
 // Handles user-entered messages
@@ -66,8 +70,6 @@ export default class MessageDispatch extends EventTarget {
   }
 
   receive(message) {
-    if (isLockedDownDemoRoom()) return;
-
     this.addToPresenceLog(message);
     this.dispatchEvent(new CustomEvent("message", { detail: message }));
   }
