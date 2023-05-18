@@ -15,7 +15,6 @@ import {
   HoldableButton,
   HoverButton,
   MakeKinematicOnRelease,
-  AnimationMixer,
   Networked,
   NetworkedTransform,
   Object3DTag,
@@ -38,7 +37,8 @@ import {
   Billboard,
   MaterialTag,
   VideoTextureSource,
-  Mirror
+  Mirror,
+  MixerAnimatableInitialize
 } from "../bit-components";
 import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
@@ -51,6 +51,7 @@ import { inflateVideoLoader, VideoLoaderParams } from "../inflators/video-loader
 import { inflateImageLoader, ImageLoaderParams } from "../inflators/image-loader";
 import { inflateModelLoader, ModelLoaderParams } from "../inflators/model-loader";
 import { inflateLink, LinkParams } from "../inflators/link";
+import { inflateLoopAnimationInitialize, LoopAnimationParams } from "../inflators/loop-animation";
 import { inflateSlice9 } from "../inflators/slice9";
 import { TextParams, inflateText } from "../inflators/text";
 import {
@@ -88,7 +89,7 @@ import { inflateAudioParams } from "../inflators/audio-params";
 import { AudioSourceParams, inflateAudioSource } from "../inflators/audio-source";
 import { AudioTargetParams, inflateAudioTarget } from "../inflators/audio-target";
 import { PhysicsShapeParams, inflatePhysicsShape } from "../inflators/physics-shape";
-import { inflateRigidBody, RigiBodyParams } from "../inflators/rigid-body";
+import { inflateRigidBody, RigidBodyParams } from "../inflators/rigid-body";
 import { AmmoShapeParams, inflateAmmoShape } from "../inflators/ammo-shape";
 import { BoxColliderParams, inflateBoxCollider } from "../inflators/box-collider";
 import { inflateTrimesh } from "../inflators/trimesh";
@@ -253,6 +254,8 @@ export interface ComponentData {
   mirror?: MirrorParams;
   audioZone?: AudioZoneParams;
   audioParams?: AudioSettings;
+  mediaFrame?: any;
+  text?: TextParams;
 }
 
 type OptionalParams<T> = Partial<T> | true;
@@ -278,6 +281,7 @@ export interface JSXComponentData extends ComponentData {
   };
   networkedVideo?: true;
   videoMenu?: {
+    sliderRef: Ref;
     timeLabelRef: Ref;
     trackRef: Ref;
     headRef: Ref;
@@ -302,7 +306,7 @@ export interface JSXComponentData extends ComponentData {
   networked?: any;
   textButton?: any;
   hoverButton?: any;
-  rigidbody?: OptionalParams<RigiBodyParams>;
+  rigidbody?: OptionalParams<RigidBodyParams>;
   physicsShape?: OptionalParams<PhysicsShapeParams>;
   floatyObject?: any;
   networkedFloatyObject?: any;
@@ -346,17 +350,16 @@ export interface JSXComponentData extends ComponentData {
     captureDurLblRef: Ref;
     sndToggleRef: Ref;
   };
-  animationMixer?: any;
   mediaLoader?: MediaLoaderParams;
+  mixerAnimatable?: boolean;
   sceneRoot?: boolean;
   sceneLoader?: { src: string };
-  mediaFrame?: any;
   object3D?: any;
-  text?: TextParams;
   model?: ModelParams;
   networkDebug?: boolean;
   waypointPreview?: boolean;
   pdf?: PDFParams;
+  loopAnimation?: LoopAnimationParams;
 }
 
 export interface GLTFComponentData extends ComponentData {
@@ -418,7 +421,9 @@ export const commonInflators: Required<{ [K in keyof ComponentData]: InflatorFn 
   spotLight: inflateSpotLight,
   mirror: inflateMirror,
   audioZone: inflateAudioZone,
-  audioParams: inflateAudioParams
+  audioParams: inflateAudioParams,
+  mediaFrame: inflateMediaFrame,
+  text: inflateText
 };
 
 const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
@@ -448,7 +453,6 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   linkHoverMenuItem: createDefaultInflator(LinkHoverMenuItem),
   pdfMenu: createDefaultInflator(PDFMenu),
   cameraTool: createDefaultInflator(CameraTool, { captureDurIdx: 1 }),
-  animationMixer: createDefaultInflator(AnimationMixer),
   networkedVideo: createDefaultInflator(NetworkedVideo),
   videoMenu: createDefaultInflator(VideoMenu),
   videoMenuItem: createDefaultInflator(VideoMenuItem),
@@ -458,12 +462,12 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   waypointPreview: createDefaultInflator(WaypointPreview),
   pdf: inflatePDF,
   mediaLoader: inflateMediaLoader,
+  mixerAnimatable: createDefaultInflator(MixerAnimatableInitialize),
+  loopAnimation: inflateLoopAnimationInitialize,
 
   // inflators that create Object3Ds
-  mediaFrame: inflateMediaFrame,
   object3D: addObject3DComponent,
   slice9: inflateSlice9,
-  text: inflateText,
   model: inflateModel,
   image: inflateImage,
   video: inflateVideo

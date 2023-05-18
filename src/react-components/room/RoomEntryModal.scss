@@ -7,7 +7,7 @@
     width: 156px;
   }
 
-  @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
+  @media (min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
     padding: 24px;
   }
 }
@@ -19,8 +19,12 @@
 }
 
 :local(.logo) {
+  height: auto;
   max-height: 250px;
   height: 100%;
+  object-fit: contain;
+  object-position: center;
+  min-width: 172px;
 }
 
 :local(.room-name) {
@@ -38,7 +42,7 @@
     font-size: theme.$font-size-sm;
     text-align: center;
 
-    @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
+    @media (min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
       font-size: 20px;
     }
   }
@@ -49,7 +53,7 @@
     margin-left: 16px;
     margin-right: 16px;
 
-    @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
+    @media (min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
       margin-left: 8px;
       margin-right: 8px;
     }

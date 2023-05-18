@@ -4,7 +4,6 @@ import { Button3D, BUTTON_TYPES } from "./button3D";
 
 const buttonHeight = 0.2;
 const buttonScale: ArrayVec3 = [0.4, 0.4, 0.4];
-const smallButtonScale: ArrayVec3 = [0.2, 0.2, 0.2];
 const uiZ = 0.25;
 
 function PinButton(props: Attrs) {
@@ -170,6 +169,7 @@ function RotateButton(props: Attrs) {
       height={buttonHeight}
       type={BUTTON_TYPES.ACTION}
       text={"rotate"}
+      holdable
       {...props}
     />
   );
@@ -198,6 +198,7 @@ function ScaleButton(props: Attrs) {
       height={buttonHeight}
       type={BUTTON_TYPES.ACTION}
       text={"scale"}
+      holdable
       {...props}
     />
   );

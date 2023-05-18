@@ -1,15 +1,15 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { AudioPopoverContent } from "./AudioPopoverContent";
-import { useMicrophone } from "./useMicrophone";
-import { useSpeakers } from "./useSpeakers";
-import { useSound } from "./useSound";
+import { useMicrophone } from "./hooks/useMicrophone";
+import { useSpeakers } from "./hooks/useSpeakers";
+import { useSound } from "./hooks/useSound";
 import { SOUND_SPEAKER_TONE } from "../../systems/sound-effects-system";
-import { useMicrophoneStatus } from "./useMicrophoneStatus";
+import { useMicrophoneStatus } from "./hooks/useMicrophoneStatus";
 import MediaDevicesManager from "../../utils/media-devices-manager";
 import { VolumeLevelBar } from "../misc/VolumeLevelBar";
 import styles from "./AudioPopover.scss";
-import { useCan } from "./useCan";
+import { useCan } from "./hooks/useCan";
 
 export const AudioPopoverContentContainer = ({ scene }) => {
   const { isMicMuted, toggleMute, isMicEnabled, permissionStatus } = useMicrophoneStatus(scene);

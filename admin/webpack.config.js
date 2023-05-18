@@ -80,7 +80,7 @@ module.exports = (env, argv) => {
       RETICULUM_SERVER: "hubs.local:4000",
       POSTGREST_SERVER: "",
       ITA_SERVER: "turkey",
-      TIER: "p0"
+      TIER: "p1"
     });
   }
 
@@ -295,6 +295,7 @@ module.exports = (env, argv) => {
       new webpack.DefinePlugin({
         "process.browser": true,
         "process.env": JSON.stringify({
+          DISABLE_BRANDING: process.env.DISABLE_BRANDING,
           NODE_ENV: argv.mode,
           BUILD_VERSION: process.env.BUILD_VERSION,
           CONFIGURABLE_SERVICES: process.env.CONFIGURABLE_SERVICES,

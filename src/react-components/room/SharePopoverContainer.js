@@ -4,9 +4,15 @@ import { ReactComponent as VideoIcon } from "../icons/Video.svg";
 import { ReactComponent as DesktopIcon } from "../icons/Desktop.svg";
 import { ReactComponent as AvatarIcon } from "../icons/Avatar.svg";
 import { SharePopoverButton } from "./SharePopover";
-import { FormattedMessage } from "react-intl";
-import useAvatar from "./useAvatar";
+import { FormattedMessage, defineMessage, useIntl } from "react-intl";
+import useAvatar from "./hooks/useAvatar";
 import { MediaDevicesEvents, MediaDevices } from "../../utils/media-devices-utils";
+import { ToolTip } from "@mozilla/lilypad-ui";
+
+const shareTooltipDescription = defineMessage({
+  id: "share-tooltip.description",
+  defaultMessage: "Display your screen or webcam as an object in the room"
+});
 
 function useShare(scene, hubChannel) {
   const mediaDevicesManager = APP.mediaDevicesManager;
@@ -110,6 +116,8 @@ function useShare(scene, hubChannel) {
 }
 
 export function SharePopoverContainer({ scene, hubChannel }) {
+  const intl = useIntl();
+  const description = intl.formatMessage(shareTooltipDescription);
   const {
     sharingSource,
     canShareCamera,
@@ -147,7 +155,11 @@ export function SharePopoverContainer({ scene, hubChannel }) {
     }
   ];
 
-  return <SharePopoverButton items={items} />;
+  return (
+    <ToolTip description={description}>
+      <SharePopoverButton items={items} />
+    </ToolTip>
+  );
 }
 
 SharePopoverContainer.propTypes = {

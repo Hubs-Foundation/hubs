@@ -24,6 +24,7 @@ import { disposeMaterial, traverseSome, disposeNode } from "../utils/three-utils
 import { forEachMaterial } from "../utils/material-utils";
 import { cleanupAudio } from "../bit-systems/audio-emitter-system";
 import { cleanupAudioDebugNavMesh } from "../bit-systems/audio-debug-system";
+import { cleanupMediaFrame } from "./bit-media-frames";
 
 function cleanupObjOnExit(Component, f) {
   const query = exitQuery(defineQuery([Component]));
@@ -51,8 +52,8 @@ const cleanupGLTFs = cleanupObjOnExit(GLTFModel, obj => {
 });
 const cleanupLights = cleanupObjOnExit(LightTag, obj => obj.dispose());
 const cleanupTexts = cleanupObjOnExit(TextTag, obj => obj.dispose());
-const cleanupMediaFrames = cleanupObjOnExit(MediaFrame, obj => obj.geometry.dispose());
-const cleanupAudioEmitters = cleanupObjOnExit(AudioEmitter, obj => cleanupAudio(obj));
+const cleanupMediaFrames = cleanupObjOnExit(MediaFrame, cleanupMediaFrame);
+const cleanupAudioEmitters = cleanupObjOnExit(AudioEmitter, cleanupAudio);
 const cleanupImages = cleanupObjOnExit(MediaImage, obj => {
   releaseTextureByKey(APP.getString(MediaImage.cacheKey[obj.eid]));
   obj.geometry.dispose();

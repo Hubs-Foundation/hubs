@@ -1,12 +1,20 @@
 import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
-import { Vector3 } from "three";
+import { Box3, Euler, Vector3 } from "three";
 import { HubsWorld } from "../app";
-import { GLTFModel, MediaLoaded, MediaLoader, Networked, ObjectMenuTarget } from "../bit-components";
+import {
+  GLTFModel,
+  MediaContentBounds,
+  MediaLoaded,
+  MediaLoader,
+  Networked,
+  ObjectMenuTarget
+} from "../bit-components";
 import { inflatePhysicsShape, Shape } from "../inflators/physics-shape";
 import { ErrorObject } from "../prefabs/error-object";
 import { LoadingObject } from "../prefabs/loading-object";
 import { animate } from "../utils/animate";
 import { setNetworkedDataWithoutRoot } from "../utils/assign-network-ids";
+import { computeObjectAABB } from "../utils/auto-box-collider";
 import { crClearTimeout, crNextFrame, crTimeout } from "../utils/coroutine";
 import { ClearFunction, JobRunner, withRollback } from "../utils/coroutine-utils";
 import { easeOutQuadratic } from "../utils/easing";
@@ -16,8 +24,40 @@ import { loadModel } from "../utils/load-model";
 import { loadPDF } from "../utils/load-pdf";
 import { loadVideo } from "../utils/load-video";
 import { loadAudio } from "../utils/load-audio";
+import { loadHtml } from "../utils/load-html";
 import { MediaType, mediaTypeName, resolveMediaInfo } from "../utils/media-utils";
 import { EntityID } from "../utils/networking-types";
+
+const getBox = (() => {
+  const rotation = new Euler();
+  return (world: HubsWorld, eid: EntityID, rootEid: EntityID, worldSpace?: boolean) => {
+    const box = new Box3();
+    const obj = world.eid2obj.get(eid)!;
+    const rootObj = world.eid2obj.get(rootEid)!;
+
+    rotation.copy(obj.rotation);
+    obj.rotation.set(0, 0, 0);
+    obj.updateMatrices(true, true);
+    rootObj.updateMatrices(true, true);
+    rootObj.updateMatrixWorld(true);
+
+    computeObjectAABB(rootObj, box, false);
+
+    if (!box.isEmpty()) {
+      if (!worldSpace) {
+        obj.worldToLocal(box.min);
+        obj.worldToLocal(box.max);
+      }
+      obj.rotation.copy(rotation);
+      obj.matrixNeedsUpdate = true;
+    }
+
+    rootObj.matrixWorldNeedsUpdate = true;
+    rootObj.updateMatrices();
+
+    return box;
+  };
+})();
 
 export function* waitForMediaLoaded(world: HubsWorld, eid: EntityID) {
   while (hasComponent(world, MediaLoader, eid)) {
@@ -39,7 +79,9 @@ const loaderForMediaType = {
     { accessibleUrl, contentType }: { accessibleUrl: string; contentType: string }
   ) => loadModel(world, accessibleUrl, contentType, true),
   [MediaType.PDF]: (world: HubsWorld, { accessibleUrl }: { accessibleUrl: string }) => loadPDF(world, accessibleUrl),
-  [MediaType.AUDIO]: (world: HubsWorld, { accessibleUrl }: { accessibleUrl: string }) => loadAudio(world, accessibleUrl)
+  [MediaType.AUDIO]: (world: HubsWorld, { accessibleUrl }: { accessibleUrl: string }) => loadAudio(world, accessibleUrl),
+  [MediaType.HTML]: (world: HubsWorld, { canonicalUrl, thumbnail }: { canonicalUrl: string, thumbnail: string }) =>
+    loadHtml(world, canonicalUrl, thumbnail)
 };
 
 export const MEDIA_LOADER_FLAGS = {
@@ -55,12 +97,12 @@ function resizeAndRecenter(world: HubsWorld, media: EntityID, eid: EntityID) {
   if (!resize && !recenter) return;
 
   const mediaObj = world.eid2obj.get(media)!;
-  const box = new THREE.Box3();
+  const box = new Box3();
   box.setFromObject(mediaObj);
 
   let scalar = 1;
   if (resize) {
-    const size = new THREE.Vector3();
+    const size = new Vector3();
     box.getSize(size);
     scalar = 1 / Math.max(size.x, size.y, size.z);
     if (hasComponent(world, GLTFModel, media)) scalar = scalar * 0.5;
@@ -69,7 +111,7 @@ function resizeAndRecenter(world: HubsWorld, media: EntityID, eid: EntityID) {
   }
 
   if (recenter) {
-    const center = new THREE.Vector3();
+    const center = new Vector3();
     box.getCenter(center);
     mediaObj.position.copy(center).multiplyScalar(-1 * scalar);
     mediaObj.matrixNeedsUpdate = true;
@@ -160,6 +202,7 @@ function* loadMedia(world: HubsWorld, eid: EntityID) {
   return media;
 }
 
+const tmpVector = new Vector3();
 function* loadAndAnimateMedia(world: HubsWorld, eid: EntityID, clearRollbacks: ClearFunction) {
   if (MediaLoader.flags[eid] & MEDIA_LOADER_FLAGS.IS_OBJECT_MENU_TARGET) {
     addComponent(world, ObjectMenuTarget, eid);
@@ -176,8 +219,14 @@ function* loadAndAnimateMedia(world: HubsWorld, eid: EntityID, clearRollbacks: C
   removeComponent(world, MediaLoader, eid);
 
   if (media) {
+    if (hasComponent(world, MediaLoaded, media)) {
+      const box = getBox(world, eid, media);
+      addComponent(world, MediaContentBounds, eid);
+      box.getSize(tmpVector);
+      MediaContentBounds.bounds[eid].set(tmpVector.toArray());
+    }
     // TODO update scale?
-    inflatePhysicsShape(world, media, {
+    inflatePhysicsShape(world, eid, {
       type: hasComponent(world, GLTFModel, media) ? Shape.HULL : Shape.BOX,
       minHalfExtent: 0.04
     });

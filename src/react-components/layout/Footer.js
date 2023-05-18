@@ -25,11 +25,11 @@ export function Footer({
           {!hidePoweredBy && (
             <FormattedMessage
               id="footer.powered-by"
-              defaultMessage="Powered by <a>Hubs Cloud</a>"
+              defaultMessage="Powered by <a>Mozilla Hubs</a>"
               values={{
                 // eslint-disable-next-line react/display-name
                 a: chunks => (
-                  <a className={styles.link} href="https://hubs.mozilla.com/cloud">
+                  <a className={styles.link} href="https://hubs.mozilla.com">
                     {chunks}
                   </a>
                 )

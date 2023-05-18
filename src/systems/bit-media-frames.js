@@ -1,23 +1,53 @@
 // https://dev.reticulum.io/scenes/7vGnzkM/outdoor-meetup
 // A scene with media-frames
 
-import { addEntity, defineQuery, enterQuery, exitQuery, entityExists, hasComponent, removeEntity } from "bitecs";
+import {
+  defineQuery,
+  enterQuery,
+  exitQuery,
+  entityExists,
+  hasComponent,
+  addEntity,
+  removeEntity,
+  addComponent
+} from "bitecs";
 import {
   AEntity,
+  Deleting,
+  GLTFModel,
   Held,
+  MediaContentBounds,
   MediaFrame,
+  MediaImage,
+  MediaLoaded,
   MediaLoading,
+  MediaPDF,
+  MediaVideo,
   Networked,
   NetworkedMediaFrame,
   Owned,
   Rigidbody
 } from "../bit-components";
-import { addObject3DComponent } from "../utils/jsx-entity";
-import { updateMaterials } from "../utils/material-utils";
 import { MediaType } from "../utils/media-utils";
-import { cloneObject3D, setMatrixWorld } from "../utils/three-utils";
+import { cloneObject3D, createPlaneBufferGeometry, disposeNode, setMatrixWorld } from "../utils/three-utils";
 import { takeOwnership } from "../utils/take-ownership";
 import { takeSoftOwnership } from "../utils/take-soft-ownership";
+import { findAncestorWithComponent, findChildWithComponent } from "../utils/bit-utils";
+import { TEXTURES_FLIP_Y } from "../loaders/HubsTextureLoader";
+import { addObject3DComponent } from "../utils/jsx-entity";
+import { updateMaterials } from "../utils/material-utils";
+import {
+  Box3,
+  DoubleSide,
+  Group,
+  Matrix4,
+  Mesh,
+  MeshBasicMaterial,
+  NormalBlending,
+  Quaternion,
+  RGBAFormat,
+  Vector3
+} from "three";
 
 const EMPTY_COLOR = 0x6fc0fd;
 const HOVER_COLOR = 0x2f80ed;
@@ -27,16 +57,21 @@ const mediaFramesQuery = defineQuery([MediaFrame]);
 const enteredMediaFramesQuery = enterQuery(mediaFramesQuery);
 const exitedMediaFramesQuery = exitQuery(mediaFramesQuery);
 
-// TODO currently only aframe entiteis can be placed in media frames
 function mediaTypeMaskFor(world, eid) {
-  if (!hasComponent(world, AEntity, eid)) return 0;
-
-  const el = world.eid2obj.get(eid).el;
   let mediaTypeMask = 0;
-  mediaTypeMask |= el.components["gltf-model-plus"] && MediaType.MODEL;
-  mediaTypeMask |= el.components["media-video"] && MediaType.VIDEO;
-  mediaTypeMask |= el.components["media-image"] && MediaType.IMAGE;
-  mediaTypeMask |= el.components["media-pdf"] && MediaType.PDF;
+  if (hasComponent(world, AEntity, eid)) {
+    const el = world.eid2obj.get(eid).el;
+    mediaTypeMask |= el.components["gltf-model-plus"] && MediaType.MODEL;
+    mediaTypeMask |= el.components["media-video"] && MediaType.VIDEO;
+    mediaTypeMask |= el.components["media-image"] && MediaType.IMAGE;
+    mediaTypeMask |= el.components["media-pdf"] && MediaType.PDF;
+  } else {
+    const mediaEid = findChildWithComponent(world, MediaLoaded, eid);
+    mediaTypeMask |= hasComponent(world, GLTFModel, mediaEid) && MediaType.MODEL;
+    mediaTypeMask |= hasComponent(world, MediaVideo, mediaEid) && MediaType.VIDEO;
+    mediaTypeMask |= hasComponent(world, MediaImage, mediaEid) && MediaType.IMAGE;
+    mediaTypeMask |= hasComponent(world, MediaPDF, mediaEid) && MediaType.PDF;
+  }
   return mediaTypeMask;
 }
 
@@ -70,8 +105,7 @@ function inOtherFrame(world, ignoredFrame, eid) {
   return false;
 }
 
-function getCapturableEntity(world, frame) {
-  const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
+function getCapturableEntity(world, physicsSystem, frame) {
   const collisions = physicsSystem.getCollisions(Rigidbody.bodyId[frame]);
   const frameObj = world.eid2obj.get(frame);
   for (let i = 0; i < collisions.length; i++) {
@@ -89,8 +123,7 @@ function getCapturableEntity(world, frame) {
   return null;
 }
 
-function isColliding(world, eidA, eidB) {
-  const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
+function isEntityColliding(physicsSystem, eidA, eidB) {
   const collisions = physicsSystem.getCollisions(Rigidbody.bodyId[eidA]);
   for (let i = 0; i < collisions.length; i++) {
     const bodyData = physicsSystem.bodyUuidToData.get(collisions[i]);
@@ -102,26 +135,25 @@ function isColliding(world, eidA, eidB) {
   return false;
 }
 
+function scaleForAspectFit(containerSize, itemSize) {
+  return Math.min(containerSize[0] / itemSize.x, containerSize[1] / itemSize.y, containerSize[2] / itemSize.z);
+}
+
 const snapToFrame = (() => {
-  const framePos = new THREE.Vector3();
-  const frameQuat = new THREE.Quaternion();
-  const frameScale = new THREE.Vector3();
-  const m4 = new THREE.Matrix4();
+  const framePos = new Vector3();
+  const frameQuat = new Quaternion();
+  const frameScale = new Vector3();
+  const m4 = new Matrix4();
+  const contentBounds = new Vector3();
 
-  function scaleForAspectFit(containerSize, itemSize) {
-    return Math.min(containerSize[0] / itemSize.x, containerSize[1] / itemSize.y, containerSize[2] / itemSize.z);
-  }
-
-  return function snapToFrame(world, frame, target) {
+  return (world, frame, target) => {
     const frameObj = world.eid2obj.get(frame);
     const targetObj = world.eid2obj.get(target);
 
     frameObj.updateMatrices();
     frameObj.matrixWorld.decompose(framePos, frameQuat, frameScale);
 
-    // TODO we only allow capturing media-loader so rely on its bounds calculations for now
-    const contentBounds = targetObj.el.components["media-loader"].contentBounds;
-
+    contentBounds.fromArray(MediaContentBounds.bounds[target]);
     setMatrixWorld(
       targetObj,
       m4.compose(
@@ -133,89 +165,137 @@ const snapToFrame = (() => {
   };
 })();
 
-function setMatrixScale(obj, scaleArray) {
-  const position = new THREE.Vector3();
-  const quaternion = new THREE.Quaternion();
-  const scale = new THREE.Vector3();
-  const m4 = new THREE.Matrix4();
-  obj.updateMatrices();
-  obj.matrixWorld.decompose(position, quaternion, scale);
-  setMatrixWorld(obj, m4.compose(position, quaternion, scale.fromArray(scaleArray)));
-}
+const setMatrixScale = (() => {
+  const position = new Vector3();
+  const quaternion = new Quaternion();
+  const scale = new Vector3();
+  const m4 = new Matrix4();
 
-function cloneForPreview(world, eid) {
-  // TODO We assume capturable object is an AFRAME entity
-  const el = world.eid2obj.get(eid).el;
-  const mesh = el.getObject3D("mesh");
-  const meshClone = cloneObject3D(mesh, false);
-  meshClone.traverse(node => {
-    updateMaterials(node, function (srcMat) {
-      const mat = srcMat.clone();
-      mat.transparent = true;
-      mat.opacity = 0.5;
-      mat.format = THREE.RGBAFormat;
-      mat.blending = THREE.NormalBlending;
-      node.material = mat;
-      return mat;
+  return (obj, scaleArray) => {
+    obj.updateMatrices();
+    obj.matrixWorld.decompose(position, quaternion, scale);
+    setMatrixWorld(obj, m4.compose(position, quaternion, scale.fromArray(scaleArray)));
+  };
+})();
+
+const videoGeometry = createPlaneBufferGeometry(1, 1, 1, 1, TEXTURES_FLIP_Y);
+const previewMaterial = new MeshBasicMaterial();
+previewMaterial.side = DoubleSide;
+previewMaterial.transparent = true;
+previewMaterial.opacity = 0.5;
+function createPreviewMesh(world, capturable) {
+  let srcMesh;
+  let el;
+  let previewMesh;
+  let isVideo = false;
+  let ratio = 1;
+  if (hasComponent(world, AEntity, capturable)) {
+    el = world.eid2obj.get(capturable).el;
+    const video = el.components["media-video"];
+    isVideo = !!video;
+    if (isVideo) {
+      ratio =
+        (video.videoTexture.image.videoHeight || video.videoTexture.image.height) /
+        (video.videoTexture.image.videoWidth || video.videoTexture.image.width);
+    }
+    srcMesh = el.getObject3D("mesh");
+  } else {
+    const mediaEid = findChildWithComponent(world, MediaLoaded, capturable);
+    isVideo = hasComponent(world, MediaVideo, mediaEid);
+    if (isVideo) {
+      ratio = MediaVideo.ratio[mediaEid];
+    }
+    srcMesh = world.eid2obj.get(mediaEid);
+  }
+
+  // Audios can't be cloned so we take a different path for them
+  if (isVideo) {
+    previewMesh = new Mesh(videoGeometry, previewMaterial);
+    previewMesh.material.map = srcMesh.material.map;
+    previewMesh.material.needsUpdate = true;
+    // Preview mesh UVs are set to accommodate textureLoader default, but video textures don't match this
+    previewMesh.scale.y *= TEXTURES_FLIP_Y !== previewMesh.material.map.flipY ? -ratio : ratio;
+  } else {
+    previewMesh = cloneObject3D(srcMesh, false);
+    previewMesh.traverse(node => {
+      updateMaterials(node, function (srcMat) {
+        const mat = srcMat.clone();
+        mat.transparent = true;
+        mat.opacity = 0.5;
+        mat.format = RGBAFormat;
+        mat.blending = NormalBlending;
+        node.material = mat;
+        return mat;
+      });
     });
-  });
-
-  // TODO play animations on previews
+  }
 
   // TODO HACK We add this mesh to a group whose position is centered
   //      so that putting this in the middle of a media frame is easy,
   //      but we should just do this math when putting an object into a frame
   //      and not assume an object's root is in the center of its geometry.
-  meshClone.position.setScalar(0);
-  meshClone.quaternion.identity();
-  meshClone.matrixNeedsUpdate = true;
-  const aabb = new THREE.Box3().setFromObject(meshClone);
-  aabb.getCenter(meshClone.position).multiplyScalar(-1);
-  meshClone.matrixNeedsUpdate = true;
+  previewMesh.position.setScalar(0);
+  previewMesh.quaternion.identity();
+  previewMesh.matrixNeedsUpdate = true;
+  const aabb = new Box3().setFromObject(previewMesh);
+  aabb.getCenter(previewMesh.position).multiplyScalar(-1);
+  previewMesh.matrixNeedsUpdate = true;
 
-  const cloneObj = new THREE.Group();
-  cloneObj.el = el; // We rely on media-loader component for bounds
-  cloneObj.add(meshClone);
-  AFRAME.scenes[0].object3D.add(cloneObj);
+  const cloneObj = new Group();
+  cloneObj.add(previewMesh);
+  world.scene.add(cloneObj);
 
-  return addObject3DComponent(world, addEntity(world), cloneObj);
+  hasComponent(world, AEntity, capturable) && (cloneObj.el = el);
+
+  return cloneObj;
 }
 
 function showPreview(world, frame, capturable) {
-  const clone = cloneForPreview(world, capturable);
-  MediaFrame.preview[frame] = clone;
+  const previewObj = createPreviewMesh(world, capturable);
+  const eid = addEntity(world);
+  addObject3DComponent(world, eid, previewObj);
+  addComponent(world, MediaContentBounds, eid);
+  MediaContentBounds.bounds[eid].set(MediaContentBounds.bounds[capturable]);
+
+  MediaFrame.preview[frame] = eid;
   MediaFrame.previewingNid[frame] = Networked.id[capturable];
-  snapToFrame(world, frame, clone);
+  snapToFrame(world, frame, eid);
 }
 
 function hidePreview(world, frame) {
   // NOTE we intentionally do not dispose of geometries or textures since they are all shared with the original object
-  removeEntity(world, MediaFrame.preview[frame]);
+  const eid = MediaFrame.preview[frame];
+  removeEntity(world, eid);
+
   MediaFrame.preview[frame] = 0;
   MediaFrame.previewingNid[frame] = 0;
 }
 
 const zero = [0, 0, 0];
-const tmpVec3 = new THREE.Vector3();
+const tmpVec3 = new Vector3();
 
-export function display(world, frame, heldMediaTypes) {
-  const capturable = !MediaFrame.capturedNid[frame] && getCapturableEntity(world, frame);
-  const shouldPreviewBeVisible = capturable && hasComponent(world, Held, capturable);
+export function display(world, physicsSystem, frame, capturedEid, heldMediaTypes) {
+  const capturable = !MediaFrame.capturedNid[frame] && getCapturableEntity(world, physicsSystem, frame);
+  const shouldPreviewBeVisible =
+    (capturable && findChildWithComponent(world, Held, capturable)) ||
+    (capturedEid && findChildWithComponent(world, Held, capturedEid));
   if (shouldPreviewBeVisible && !MediaFrame.preview[frame]) {
-    showPreview(world, frame, capturable);
+    showPreview(world, frame, capturable ? capturable : capturedEid);
   } else if (!shouldPreviewBeVisible && MediaFrame.preview[frame]) {
     hidePreview(world, frame);
   }
 
-  const frameObj = world.eid2obj.get(frame);
-  frameObj.visible = !!(MediaFrame.mediaType[frame] & heldMediaTypes);
+  const guideEid = MediaFrame.guide[frame];
+  const guideObj = world.eid2obj.get(guideEid);
+  guideObj.visible = !!(MediaFrame.mediaType[frame] & heldMediaTypes);
 
-  if (frameObj.visible) {
-    const captured = world.nid2eid.get(MediaFrame.capturedNid[frame]) || 0;
+  if (guideObj.visible) {
+    const capturedEid = world.nid2eid.get(MediaFrame.capturedNid[frame]) || 0;
     const isHoldingObjectOfInterest =
-      (captured && hasComponent(world, Held, captured)) || (capturable && hasComponent(world, Held, capturable));
+      (capturedEid && findChildWithComponent(world, Held, capturedEid)) ||
+      (capturable && findChildWithComponent(world, Held, capturable));
 
-    frameObj.material.uniforms.color.value.set(
+    guideObj.material.uniforms.color.value.set(
       isHoldingObjectOfInterest ? HOVER_COLOR : MediaFrame.capturedNid[frame] ? FULL_COLOR : EMPTY_COLOR
     );
   }
@@ -229,10 +309,16 @@ function mediaTypesOf(world, entities) {
   return mask;
 }
 
+export function cleanupMediaFrame(obj) {
+  obj.traverse(child => {
+    disposeNode(child);
+  });
+}
+
 const takeOwnershipOnTimeout = new Map();
 const heldQuery = defineQuery([Held]);
 // const droppedQuery = exitQuery(heldQuery);
-export function mediaFramesSystem(world) {
+export function mediaFramesSystem(world, physicsSystem) {
   enteredMediaFramesQuery(world).forEach(eid => {
     if (Networked.owner[eid] === APP.getSid("reticulum")) {
       takeOwnershipOnTimeout.set(
@@ -245,6 +331,10 @@ export function mediaFramesSystem(world) {
         }, 10000)
       );
     }
+
+    const guideObj = world.eid2obj.get(MediaFrame.guide[eid]);
+    const frameObj = world.eid2obj.get(eid);
+    frameObj.add(guideObj);
   });
 
   exitedMediaFramesQuery(world).forEach(eid => {
@@ -255,7 +345,6 @@ export function mediaFramesSystem(world) {
     }
   });
 
-  const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
   const heldMediaTypes = mediaTypesOf(world, heldQuery(world));
   // const droppedEntities = droppedQuery(world).filter(eid => entityExists(world, eid));
   const mediaFrames = mediaFramesQuery(world);
@@ -263,32 +352,37 @@ export function mediaFramesSystem(world) {
   for (let i = 0; i < mediaFrames.length; i++) {
     const frame = mediaFrames[i];
 
-    const captured = world.nid2eid.get(MediaFrame.capturedNid[frame]) || 0;
-    const colliding = captured && isColliding(world, frame, captured);
+    const capturedEid = world.nid2eid.get(MediaFrame.capturedNid[frame]) || 0;
+    const isCapturedOwned = hasComponent(world, Owned, capturedEid);
+    const isCapturedHeld = findChildWithComponent(world, Held, capturedEid);
+    const isCapturedColliding = capturedEid && isEntityColliding(physicsSystem, frame, capturedEid);
+    const isFrameDeleting = findAncestorWithComponent(world, Deleting, frame);
+    const isFrameOwned = hasComponent(world, Owned, frame);
 
-    if (captured && hasComponent(world, Owned, captured) && !hasComponent(world, Held, captured) && colliding) {
-      snapToFrame(world, frame, captured);
-      physicsSystem.updateBodyOptions(Rigidbody.bodyId[captured], { type: "kinematic" });
+    if (capturedEid && isCapturedOwned && !isCapturedHeld && !isFrameDeleting && isCapturedColliding) {
+      snapToFrame(world, frame, capturedEid);
+      physicsSystem.updateRigidBodyOptions(capturedEid, { type: "kinematic" });
     } else if (
-      (hasComponent(world, Owned, frame) &&
-        MediaFrame.capturedNid[frame] &&
-        world.deletedNids.has(MediaFrame.capturedNid[frame])) ||
-      (captured && hasComponent(world, Owned, captured) && !colliding)
+      (isFrameOwned && MediaFrame.capturedNid[frame] && world.deletedNids.has(MediaFrame.capturedNid[frame])) ||
+      (capturedEid && isCapturedOwned && !isCapturedColliding) ||
+      isFrameDeleting
     ) {
       takeOwnership(world, frame);
       NetworkedMediaFrame.capturedNid[frame] = 0;
       NetworkedMediaFrame.scale[frame].set(zero);
-      // TODO BUG: If an entity I do not own is captured by the media frame,
+      // TODO BUG: If an entity I do not own is capturedEid by the media frame,
       //           and then I take ownership of the entity (by grabbing it),
-      //           the physics system does not immediately notice the entity colliding with the frame,
+      //           the physics system does not immediately notice the entity isCapturedColliding with the frame,
       //           so I immediately think the frame should be emptied.
+    } else if (isFrameOwned && MediaFrame.capturedNid[frame] && !capturedEid) {
+      NetworkedMediaFrame.capturedNid[frame] = 0;
+      NetworkedMediaFrame.scale[frame].set(zero);
     } else if (!NetworkedMediaFrame.capturedNid[frame]) {
-      const capturable = getCapturableEntity(world, frame);
+      const capturable = getCapturableEntity(world, physicsSystem, frame);
       if (
         capturable &&
-        (hasComponent(world, Owned, capturable) ||
-          (isOwnedByRet(world, capturable) && hasComponent(world, Owned, frame))) &&
-        !hasComponent(world, Held, capturable) &&
+        (hasComponent(world, Owned, capturable) || (isOwnedByRet(world, capturable) && isFrameOwned)) &&
+        !findChildWithComponent(world, Held, capturable) &&
         !inOtherFrame(world, frame, capturable)
       ) {
         takeOwnership(world, frame);
@@ -298,25 +392,25 @@ export function mediaFramesSystem(world) {
         obj.updateMatrices();
         tmpVec3.setFromMatrixScale(obj.matrixWorld).toArray(NetworkedMediaFrame.scale[frame]);
         snapToFrame(world, frame, capturable);
-        physicsSystem.updateBodyOptions(Rigidbody.bodyId[capturable], { type: "kinematic" });
+        physicsSystem.updateRigidBodyOptions(capturable, { type: "kinematic" });
       }
     }
 
     if (
       NetworkedMediaFrame.capturedNid[frame] !== MediaFrame.capturedNid[frame] &&
-      captured &&
-      entityExists(world, captured) &&
-      hasComponent(world, Owned, captured)
+      capturedEid &&
+      entityExists(world, capturedEid) &&
+      isCapturedOwned
     ) {
       // TODO: If you are resetting scale because you lost a race for the frame,
       //       you should probably also move the object away from the frame.
-      setMatrixScale(world.eid2obj.get(captured), MediaFrame.scale[frame]);
-      physicsSystem.updateBodyOptions(Rigidbody.bodyId[captured], { type: "dynamic" });
+      setMatrixScale(world.eid2obj.get(capturedEid), MediaFrame.scale[frame]);
+      physicsSystem.updateRigidBodyOptions(capturedEid, { type: "dynamic" });
     }
 
     MediaFrame.capturedNid[frame] = NetworkedMediaFrame.capturedNid[frame];
     MediaFrame.scale[frame].set(NetworkedMediaFrame.scale[frame]);
 
-    display(world, frame, heldMediaTypes);
+    display(world, physicsSystem, frame, capturedEid, heldMediaTypes);
   }
 }
