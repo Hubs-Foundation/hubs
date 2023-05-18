@@ -78,6 +78,7 @@ import { scenePreviewCameraSystem } from "../bit-systems/scene-preview-camera-sy
 import { linearTransformSystem } from "../bit-systems/linear-transform";
 import { mixerAnimatableSystem } from "../bit-systems/mixer-animatable";
 import { loopAnimationSystem } from "../bit-systems/loop-animation";
+import { pinnableSystem } from "../bit-systems/pinnable-system";
 
 declare global {
   interface Window {
@@ -221,6 +222,8 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   hubsSystems.twoPointStretchingSystem.tick();
 
   floatyObjectSystem(world);
+
+  pinnableSystem(world, APP.hubChannel!);
 
   hubsSystems.holdableButtonSystem.tick();
   hubsSystems.hoverButtonSystem.tick();

@@ -1,4 +1,4 @@
-import { defineQuery, enterQuery, entityExists, exitQuery, hasComponent } from "bitecs";
+import { addComponent, defineQuery, enterQuery, entityExists, exitQuery, hasComponent, removeComponent } from "bitecs";
 import { Matrix4, Quaternion, Vector3 } from "three";
 import type { HubsWorld } from "../app";
 import {
@@ -7,6 +7,8 @@ import {
   Interacted,
   ObjectMenu,
   ObjectMenuTarget,
+  Pinnable,
+  Pinned,
   RemoteRight,
   Rigidbody
 } from "../bit-components";
@@ -148,9 +150,9 @@ function cloneObject(world: HubsWorld, sourceEid: EntityID) {
 
 function handleClicks(world: HubsWorld, menu: EntityID, hubChannel: HubChannel) {
   if (clicked(world, ObjectMenu.pinButtonRef[menu])) {
-    createEntityState(hubChannel, world, ObjectMenu.targetRef[menu]);
+    addComponent(world, Pinned, ObjectMenu.targetRef[menu]);
   } else if (clicked(world, ObjectMenu.unpinButtonRef[menu])) {
-    deleteEntityState(hubChannel, world, ObjectMenu.targetRef[menu]);
+    removeComponent(world, Pinned, ObjectMenu.targetRef[menu]);
   } else if (clicked(world, ObjectMenu.cameraFocusButtonRef[menu])) {
     console.log("Clicked focus");
   } else if (clicked(world, ObjectMenu.cameraTrackButtonRef[menu])) {
@@ -203,8 +205,11 @@ function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
   const obj = world.eid2obj.get(menu)!;
   obj.visible = visible;
 
-  world.eid2obj.get(ObjectMenu.pinButtonRef[menu])!.visible = visible && !isPinned(target);
-  world.eid2obj.get(ObjectMenu.unpinButtonRef[menu])!.visible = visible && isPinned(target);
+  const isPinnable = hasComponent(world, Pinnable, target);
+  const isPinned = hasComponent(world, Pinned, target);
+
+  world.eid2obj.get(ObjectMenu.pinButtonRef[menu])!.visible = visible && isPinnable && !isPinned;
+  world.eid2obj.get(ObjectMenu.unpinButtonRef[menu])!.visible = visible && isPinnable && isPinned;
 
   [
     ObjectMenu.cameraFocusButtonRef[menu],
