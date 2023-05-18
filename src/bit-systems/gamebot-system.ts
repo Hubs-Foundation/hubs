@@ -5,6 +5,7 @@ import { EntityID } from "../utils/networking-types";
 import {
   CursorRaycastable,
   DisableButton,
+  EnvironmentSettings,
   GameMenu,
   Interacted,
   ParticleEmitterTag,
@@ -425,7 +426,13 @@ const animateObjectScale = (obj: Object3D, scale: number) => {
 };
 
 const connect = () => {
-  if (!sceneSet) {
+  if (!connected) {
+    APP.world.scene.visible = false;
+    const sceneEid = anyEntityWith(APP.world, EnvironmentSettings);
+    if (sceneEid) {
+      removeComponent(APP.world, EnvironmentSettings, sceneEid);
+    }
+
     menu = anyEntityWith(APP.world, GameMenu)!;
     setupButtons(APP.world, menu);
 
@@ -446,8 +453,11 @@ const connect = () => {
       weatherEid = addEntity(APP.world);
       APP.scene?.removeEventListener("environment-scene-loaded", characterUpdate);
 
+      APP.world.scene.visible = true;
       menuObj.visible = true;
-      sceneSet = true;
+
+      connected = true;
+
       pendingCommands.forEach(command => game(command));
     };
     APP.scene?.addEventListener("environment-scene-loaded", characterUpdate);
@@ -477,28 +487,28 @@ const game = (data: any[]) => {
       disconnect();
       break;
     case CommandE.Text:
-      if (sceneSet) {
+      if (connected) {
         text(data.shift());
       } else {
         pendingCommands.push([command, data.shift()]);
       }
       break;
     case CommandE.Options:
-      if (sceneSet) {
+      if (connected) {
         options(data.shift() as OptionsResponseI);
       } else {
         pendingCommands.push([command, data.shift()]);
       }
       break;
     case CommandE.Start:
-      if (sceneSet) {
+      if (connected) {
         start(data.shift());
       } else {
         pendingCommands.push([command, data.shift()]);
       }
       break;
     case CommandE.Skybox:
-      if (sceneSet) {
+      if (connected) {
         skybox(data.shift());
       } else {
         pendingCommands.push([command, data.shift()]);
@@ -661,7 +671,7 @@ let initialized = false;
 let menu: EntityID;
 let sky: Mesh;
 let lastSkySrc: string;
-let sceneSet: boolean = false;
+let connected: boolean = false;
 let character: Object3D;
 let weatherEid: EntityID;
 let audioEid: EntityID;
