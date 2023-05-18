@@ -47,6 +47,7 @@ export async function loadVideoTexture(src, contentType) {
       texture = new VideoTexture(videoEl);
       videoEl.src = src;
       videoEl.onerror = failLoad;
+      videoEl.loop = true;
     }
 
     texture.minFilter = LinearFilter;

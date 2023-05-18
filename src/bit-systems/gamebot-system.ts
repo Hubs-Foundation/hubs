@@ -94,7 +94,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
   if (iFlipY) {
     uv.y = 1.0 - uv.y;
   }
-  uv.x += sin(uv.y*50.0+iTime/2500.0)*(uv.y*(1.0 - uv.y))/200.0;
+  uv.x += sin(uv.y*50.0+iTime/2500.0)*(uv.y*(1.0 - uv.y))/400.0;
 
   // color textures
   vec4 clrA = sRGBToLinear(texture(iChannel0, uv));
