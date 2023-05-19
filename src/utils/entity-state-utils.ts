@@ -64,7 +64,7 @@ export async function createEntityState(
 
 export async function updateEntityState(hubChannel: HubChannel, world: HubsWorld, eid: EntityID) {
   const payload = updateEntityStatePayload(world, eid);
-  // console.log("update_entity_state",  payload);
+  console.log("update_entity_state", payload);
   return push(hubChannel, "update_entity_state", payload);
 }
 

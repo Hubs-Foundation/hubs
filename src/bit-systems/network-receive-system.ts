@@ -1,6 +1,6 @@
 import { addComponent, defineQuery, enterQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
 import { HubsWorld } from "../app";
-import { Networked, Owned } from "../bit-components";
+import { Networked, Owned, Pinned } from "../bit-components";
 import { renderAsNetworkedEntity } from "../utils/create-networked-entity";
 import { deleteEntityState, hasSavedEntityState } from "../utils/entity-state-utils";
 import { networkableComponents, schemas, StoredComponent } from "../utils/network-schemas";
@@ -141,7 +141,6 @@ export function networkReceiveSystem(world: HubsWorld) {
         world.ignoredNids.add(nid);
         continue;
       }
-
       renderAsNetworkedEntity(world, prefabName, initialData, nidString, creator);
     }
   }
@@ -228,6 +227,8 @@ export function networkReceiveSystem(world: HubsWorld) {
       } else if (hasComponent(world, Owned, eid)) {
         removeComponent(world, Owned, eid);
       }
+
+      addComponent(world, Pinned, eid);
 
       Networked.owner[eid] = APP.getSid(updateMessage.owner);
       Networked.lastOwnerTime[eid] = updateMessage.lastOwnerTime;
