@@ -5,6 +5,7 @@ import {
   HeldRemoteRight,
   HoveredRemoteRight,
   Interacted,
+  MediaLoaded,
   ObjectMenu,
   ObjectMenuTarget,
   Pinnable,
@@ -18,10 +19,11 @@ import HubChannel from "../utils/hub-channel";
 import type { EntityID } from "../utils/networking-types";
 import { setMatrixWorld } from "../utils/three-utils";
 import { deleteTheDeletableAncestor } from "./delete-entity-system";
-import { createMessageDatas, isPinned } from "./networking";
+import { createMessageDatas } from "./networking";
 import { TRANSFORM_MODE } from "../components/transform-object-button";
 import { ScalingHandler } from "../components/scale-button";
 import { setPinned } from "../utils/bit-pinning-helper";
+import { getPromotionTokenForFile } from "../utils/media-utils";
 
 // Working variables.
 const _vec3_1 = new Vector3();
@@ -207,9 +209,11 @@ function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
 
   const isPinnable = hasComponent(world, Pinnable, target);
   const isPinned = hasComponent(world, Pinned, target);
+  const fileId = APP.getString(MediaLoaded.fileId[target]);
+  const canPin = !fileId || getPromotionTokenForFile(fileId);
 
-  world.eid2obj.get(ObjectMenu.pinButtonRef[menu])!.visible = visible && isPinnable && !isPinned;
-  world.eid2obj.get(ObjectMenu.unpinButtonRef[menu])!.visible = visible && isPinnable && isPinned;
+  world.eid2obj.get(ObjectMenu.pinButtonRef[menu])!.visible = visible && canPin && !isPinned && isPinnable;
+  world.eid2obj.get(ObjectMenu.unpinButtonRef[menu])!.visible = visible && isPinned && isPinnable;
 
   [
     ObjectMenu.cameraFocusButtonRef[menu],
