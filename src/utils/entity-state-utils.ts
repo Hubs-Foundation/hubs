@@ -28,6 +28,9 @@ export type CreateEntityStatePayload = {
   nid: NetworkID;
   create_message: CreateMessage;
   updates: UpdateEntityStatePayload[];
+  file_id?: string;
+  file_access_token?: string;
+  promotion_token?: string;
 };
 
 export type DeleteEntityStatePayload = {
@@ -41,8 +44,20 @@ export function hasSavedEntityState(world: HubsWorld, eid: EntityID) {
   });
 }
 
-export async function createEntityState(hubChannel: HubChannel, world: HubsWorld, eid: EntityID) {
+export async function createEntityState(
+  hubChannel: HubChannel,
+  world: HubsWorld,
+  eid: EntityID,
+  fileId?: string,
+  fileAccessToken?: string,
+  promotionToken?: string
+) {
   const payload = createEntityStatePayload(world, eid);
+  if (fileId && promotionToken) {
+    payload.file_id = fileId;
+    payload.file_access_token = fileAccessToken;
+    payload.promotion_token = promotionToken;
+  }
   // console.log("save_entity_state",  payload);
   return push(hubChannel, "save_entity_state", payload);
 }

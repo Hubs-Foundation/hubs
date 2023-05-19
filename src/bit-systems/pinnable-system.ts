@@ -9,11 +9,10 @@ const pinnedEnteryQuery = enterQuery(pinnedQuery);
 const pinnedExitQuery = exitQuery(pinnedQuery);
 
 export const pinnableSystem = (world: HubsWorld, hubsChannel: HubChannel) => {
-  pinnedEnteryQuery(world).forEach(eid => {
-    setPinned(hubsChannel, world, eid, true);
-  });
-
-  pinnedExitQuery(world).forEach(eid => {
-    setPinned(hubsChannel, world, eid, false);
-  });
+  // pinnedEnteryQuery(world).forEach(eid => {
+  //   setPinned(hubsChannel, world, eid, true);
+  // });
+  // pinnedExitQuery(world).forEach(eid => {
+  //   setPinned(hubsChannel, world, eid, false);
+  // });
 };

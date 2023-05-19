@@ -79,8 +79,9 @@ const loaderForMediaType = {
     { accessibleUrl, contentType }: { accessibleUrl: string; contentType: string }
   ) => loadModel(world, accessibleUrl, contentType, true),
   [MediaType.PDF]: (world: HubsWorld, { accessibleUrl }: { accessibleUrl: string }) => loadPDF(world, accessibleUrl),
-  [MediaType.AUDIO]: (world: HubsWorld, { accessibleUrl }: { accessibleUrl: string }) => loadAudio(world, accessibleUrl),
-  [MediaType.HTML]: (world: HubsWorld, { canonicalUrl, thumbnail }: { canonicalUrl: string, thumbnail: string }) =>
+  [MediaType.AUDIO]: (world: HubsWorld, { accessibleUrl }: { accessibleUrl: string }) =>
+    loadAudio(world, accessibleUrl),
+  [MediaType.HTML]: (world: HubsWorld, { canonicalUrl, thumbnail }: { canonicalUrl: string; thumbnail: string }) =>
     loadHtml(world, canonicalUrl, thumbnail)
 };
 
@@ -216,6 +217,9 @@ function* loadAndAnimateMedia(world: HubsWorld, eid: EntityID, clearRollbacks: C
   if (MediaLoader.flags[eid] & MEDIA_LOADER_FLAGS.ANIMATE_LOAD) {
     yield* animateScale(world, media);
   }
+  addComponent(world, MediaLoaded, eid);
+  MediaLoaded.fileId[eid] = MediaLoader.fileId[eid];
+  MediaLoaded.src[eid] = MediaLoader.src[eid];
   removeComponent(world, MediaLoader, eid);
 
   if (media) {

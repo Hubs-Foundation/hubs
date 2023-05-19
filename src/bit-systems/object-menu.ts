@@ -14,7 +14,6 @@ import {
 } from "../bit-components";
 import { anyEntityWith, findAncestorWithComponent } from "../utils/bit-utils";
 import { createNetworkedEntity } from "../utils/create-networked-entity";
-import { createEntityState, deleteEntityState } from "../utils/entity-state-utils";
 import HubChannel from "../utils/hub-channel";
 import type { EntityID } from "../utils/networking-types";
 import { setMatrixWorld } from "../utils/three-utils";
@@ -22,6 +21,7 @@ import { deleteTheDeletableAncestor } from "./delete-entity-system";
 import { createMessageDatas, isPinned } from "./networking";
 import { TRANSFORM_MODE } from "../components/transform-object-button";
 import { ScalingHandler } from "../components/scale-button";
+import { setPinned } from "../utils/bit-pinning-helper";
 
 // Working variables.
 const _vec3_1 = new Vector3();
@@ -150,9 +150,9 @@ function cloneObject(world: HubsWorld, sourceEid: EntityID) {
 
 function handleClicks(world: HubsWorld, menu: EntityID, hubChannel: HubChannel) {
   if (clicked(world, ObjectMenu.pinButtonRef[menu])) {
-    addComponent(world, Pinned, ObjectMenu.targetRef[menu]);
+    setPinned(hubChannel, world, ObjectMenu.targetRef[menu], true);
   } else if (clicked(world, ObjectMenu.unpinButtonRef[menu])) {
-    removeComponent(world, Pinned, ObjectMenu.targetRef[menu]);
+    setPinned(hubChannel, world, ObjectMenu.targetRef[menu], false);
   } else if (clicked(world, ObjectMenu.cameraFocusButtonRef[menu])) {
     console.log("Clicked focus");
   } else if (clicked(world, ObjectMenu.cameraTrackButtonRef[menu])) {
