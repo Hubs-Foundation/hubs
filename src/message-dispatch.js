@@ -262,15 +262,15 @@ export default class MessageDispatch extends EventTarget {
         break;
       case "load":
         {
-          if (APP.hubChannel.can("pin_objects") && APP.hubChannel.signIn) {
-            loadState(this.hubChannel, args);
+          if (this.hubChannel.can("pin_objects") && this.hubChannel.signIn) {
+            loadState(this.hubChannel, APP.world, args);
           }
         }
         break;
       case "clear":
         {
-          if (APP.hubChannel.can("pin_objects") && APP.hubChannel.signIn) {
-            clearState(this.hubChannel);
+          if (this.hubChannel.can("pin_objects") && this.hubChannel.signIn) {
+            clearState(this.hubChannel, APP.world);
           }
         }
         break;

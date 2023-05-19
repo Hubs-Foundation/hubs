@@ -238,10 +238,11 @@ function loadFromJson(hubChannel: HubChannel) {
 const TEST_ASSET_STATE =
   "https://raw.githubusercontent.com/mozilla/hubs-sample-assets/main/Hubs%20Components/test_json/__NAME__";
 
-export async function loadState(hubChannel: HubChannel, state: string) {
-  clearState(hubChannel);
+export async function loadState(hubChannel: HubChannel, world: HubsWorld, state: string) {
+  clearState(world, hubChannel);
 
   const stateUrl = TEST_ASSET_STATE.replace("__NAME__", state);
+  console.log(stateUrl);
   const resp = await fetch(stateUrl);
   const entityStates: EntityStateList = await resp.json();
   entityStates.data.forEach(entityState => {
@@ -250,10 +251,10 @@ export async function loadState(hubChannel: HubChannel, state: string) {
   });
 }
 
-export function clearState(hubChannel: HubChannel) {
-  networkedQuery(APP.world).forEach(eid => {
+export function clearState(world: HubsWorld, hubChannel: HubChannel) {
+  networkedQuery(world).forEach(eid => {
     if (isNetworkInstantiated(eid) && isPinned(eid)) {
-      deleteTheDeletableAncestor(APP.world, eid);
+      deleteTheDeletableAncestor(world, eid);
     }
   });
 }
