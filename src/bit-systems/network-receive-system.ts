@@ -12,6 +12,7 @@ import {
   createMessageDatas,
   disconnectedClientIds,
   isNetworkInstantiated,
+  isPinned,
   localClientID,
   networkedQuery,
   pendingCreatorChanges,
@@ -228,7 +229,9 @@ export function networkReceiveSystem(world: HubsWorld) {
         removeComponent(world, Owned, eid);
       }
 
-      addComponent(world, Pinned, eid);
+      if (isPinned(eid)) {
+        addComponent(world, Pinned, eid);
+      }
 
       Networked.owner[eid] = APP.getSid(updateMessage.owner);
       Networked.lastOwnerTime[eid] = updateMessage.lastOwnerTime;
