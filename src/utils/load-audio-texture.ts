@@ -3,7 +3,9 @@ import audioIcon from "../assets/images/audio.png";
 import { HubsVideoTexture } from "../textures/HubsVideoTexture";
 
 // TODO: Replace async with function*?
-export async function loadAudioTexture(src: string): Promise<{ texture: HubsVideoTexture; ratio: number }> {
+export async function loadAudioTexture(
+  src: string
+): Promise<{ texture: HubsVideoTexture; ratio: number; video: HTMLVideoElement }> {
   const videoEl = createVideoOrAudioEl("video") as HTMLVideoElement;
   const imageEl = new Image();
   imageEl.src = audioIcon;
@@ -39,7 +41,7 @@ export async function loadAudioTexture(src: string): Promise<{ texture: HubsVide
         videoEl.onerror = null;
         const height = texture.image.videoHeight || texture.image.height;
         const width = texture.image.videoWidth || texture.image.width;
-        resolve({ texture, ratio: height / width });
+        resolve({ texture, ratio: height / width, video: videoEl });
       } else {
         pollTimeout = setTimeout(poll, 500);
       }

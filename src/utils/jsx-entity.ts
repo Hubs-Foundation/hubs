@@ -279,6 +279,7 @@ export interface JSXComponentData extends ComponentData {
     ratio: number;
     projection: ProjectionMode;
     autoPlay: boolean;
+    video: HTMLVideoElement;
   };
   networkedVideo?: true;
   videoMenu?: {

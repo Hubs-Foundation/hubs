@@ -62,7 +62,7 @@ export async function loadVideoTexture(src, contentType) {
 
         const height = texture.image.videoHeight || texture.image.height;
         const width = texture.image.videoWidth || texture.image.width;
-        resolve({ texture, audioSourceEl: texture.image, ratio: height / width });
+        resolve({ texture, audioSourceEl: texture.image, ratio: height / width, video: videoEl });
       } else {
         pollTimeout = setTimeout(poll, 500);
       }
