@@ -95,7 +95,7 @@ import { BoxColliderParams, inflateBoxCollider } from "../inflators/box-collider
 import { inflateTrimesh } from "../inflators/trimesh";
 import { HeightFieldParams, inflateHeightField } from "../inflators/heightfield";
 import { inflateAudioSettings } from "../inflators/audio-settings";
-import { VideoTexture } from "../textures/VideoTexture";
+import { HubsVideoTexture } from "../textures/HubsVideoTexture";
 
 preload(
   new Promise(resolve => {
@@ -275,7 +275,7 @@ export interface JSXComponentData extends ComponentData {
     cacheKey: string;
   };
   video?: {
-    texture: VideoTexture;
+    texture: HubsVideoTexture;
     ratio: number;
     projection: ProjectionMode;
     autoPlay: boolean;

@@ -4,10 +4,10 @@ import { ProjectionMode } from "./projection-mode";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { loadAudioTexture } from "../utils/load-audio-texture";
 import { HubsWorld } from "../app";
-import { VideoTexture } from "../textures/VideoTexture";
+import { HubsVideoTexture } from "../textures/HubsVideoTexture";
 
 export function* loadAudio(world: HubsWorld, url: string) {
-  const { texture, ratio }: { texture: VideoTexture; ratio: number } = yield loadAudioTexture(url);
+  const { texture, ratio }: { texture: HubsVideoTexture; ratio: number } = yield loadAudioTexture(url);
 
   return renderAsEntity(
     world,

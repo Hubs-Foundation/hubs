@@ -3,7 +3,7 @@ import HLS from "hls.js";
 import { DashVideoTexture } from "../textures/DashVideoTexture";
 import { HLSVideoTexture } from "../textures/HLSVideoTexture";
 import { createDashPlayer, createHLSPlayer, createVideoOrAudioEl } from "./media-utils";
-import { VideoTexture } from "../textures/VideoTexture";
+import { HubsVideoTexture } from "../textures/HubsVideoTexture";
 
 export async function loadVideoTexture(src, contentType) {
   const videoEl = createVideoOrAudioEl("video");
@@ -45,7 +45,7 @@ export async function loadVideoTexture(src, contentType) {
     }
 
     if (texture === null) {
-      texture = new VideoTexture(videoEl);
+      texture = new HubsVideoTexture(videoEl);
       videoEl.src = src;
       videoEl.onerror = failLoad;
     }

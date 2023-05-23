@@ -1,13 +1,13 @@
 import { createVideoOrAudioEl } from "../utils/media-utils";
 import audioIcon from "../assets/images/audio.png";
-import { VideoTexture } from "../textures/VideoTexture";
+import { HubsVideoTexture } from "../textures/HubsVideoTexture";
 
 // TODO: Replace async with function*?
-export async function loadAudioTexture(src: string): Promise<{ texture: VideoTexture; ratio: number }> {
+export async function loadAudioTexture(src: string): Promise<{ texture: HubsVideoTexture; ratio: number }> {
   const videoEl = createVideoOrAudioEl("video") as HTMLVideoElement;
   const imageEl = new Image();
   imageEl.src = audioIcon;
-  const texture = new VideoTexture(videoEl, imageEl);
+  const texture = new HubsVideoTexture(videoEl, imageEl);
   imageEl.onload = () => {
     texture.needsUpdate = true;
   };
