@@ -24,6 +24,7 @@ import { TRANSFORM_MODE } from "../components/transform-object-button";
 import { ScalingHandler } from "../components/scale-button";
 import { setPinned } from "../utils/bit-pinning-helper";
 import { getPromotionTokenForFile } from "../utils/media-utils";
+import { get } from "react-hook-form";
 
 // Working variables.
 const _vec3_1 = new Vector3();
@@ -207,13 +208,15 @@ function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
   const obj = world.eid2obj.get(menu)!;
   obj.visible = visible;
 
-  const isPinnable = hasComponent(world, Pinnable, target);
-  const isPinned = hasComponent(world, Pinned, target);
-  const fileId = APP.getString(MediaLoaded.fileId[target]);
-  const canPin = !fileId || getPromotionTokenForFile(fileId);
-
-  world.eid2obj.get(ObjectMenu.pinButtonRef[menu])!.visible = visible && canPin && !isPinned && isPinnable;
-  world.eid2obj.get(ObjectMenu.unpinButtonRef[menu])!.visible = visible && isPinned && isPinnable;
+  if (hasComponent(world, Pinnable, target)) {
+    if (hasComponent(world, Pinned, target)) {
+      world.eid2obj.get(ObjectMenu.unpinButtonRef[menu])!.visible = visible;
+    } else {
+      const fileId = APP.getString(MediaLoaded.fileId[target]);
+      const canPin = !fileId || getPromotionTokenForFile(fileId);
+      world.eid2obj.get(ObjectMenu.pinButtonRef[menu])!.visible = visible && canPin;
+    }
+  }
 
   [
     ObjectMenu.cameraFocusButtonRef[menu],

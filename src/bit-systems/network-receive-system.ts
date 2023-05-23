@@ -1,6 +1,6 @@
 import { addComponent, defineQuery, enterQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
 import { HubsWorld } from "../app";
-import { Networked, Owned, Pinned } from "../bit-components";
+import { Networked, Owned, Pinnable, Pinned } from "../bit-components";
 import { renderAsNetworkedEntity } from "../utils/create-networked-entity";
 import { deleteEntityState, hasSavedEntityState } from "../utils/entity-state-utils";
 import { networkableComponents, schemas, StoredComponent } from "../utils/network-schemas";
@@ -229,7 +229,7 @@ export function networkReceiveSystem(world: HubsWorld) {
         removeComponent(world, Owned, eid);
       }
 
-      if (isPinned(eid)) {
+      if (isPinned(eid) && hasComponent(world, Pinnable, eid)) {
         addComponent(world, Pinned, eid);
       }
 
