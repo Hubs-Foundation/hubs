@@ -5,10 +5,10 @@ import HubChannel from "./hub-channel";
 import { takeOwnership } from "./take-ownership";
 
 export const setPinned = async (hubChannel: HubChannel, world: HubsWorld, eid: number, shouldPin: boolean) => {
-  _signInAndPinOrUnpinElement(eid, shouldPin);
+  _signInAndPinOrUnpinElement(hubChannel, world, eid, shouldPin);
 };
 
-const _pinElement = async (eid: number) => {
+const _pinElement = async (hubChannel: HubChannel, world: HubsWorld, eid: number) => {
   const src = APP.getString(MediaLoaded.src[eid]);
   const fileId = APP.getString(MediaLoaded.fileId[eid]);
   let fileAccessToken, promotionToken;
@@ -23,12 +23,12 @@ const _pinElement = async (eid: number) => {
   }
 
   try {
-    await createEntityState(APP.hubChannel!, APP.world, eid, fileId!, fileAccessToken, promotionToken);
-    takeOwnership(APP.world, eid);
+    await createEntityState(hubChannel, world, eid, fileId!, fileAccessToken, promotionToken);
+    takeOwnership(world, eid);
   } catch (e) {
     if (e.reason === "invalid_token") {
-      // await this.authChannel.signOut(this.hubChannel);
-      // this._signInAndPinOrUnpinElement(el);
+      // TODO: Sign out and sign in again
+      // signInAndPinOrUnpinElement(el);
       console.log("PinningHelper: Pin failed due to invalid token, signing out and trying again", e);
     } else {
       console.warn("PinningHelper: Pin failed for unknown reason", e);
@@ -36,20 +36,14 @@ const _pinElement = async (eid: number) => {
   }
 };
 
-const unpinElement = (eid: number) => {
-  deleteEntityState(APP.hubChannel!, APP.world, eid);
+const unpinElement = (hubChannel: HubChannel, world: HubsWorld, eid: number) => {
+  deleteEntityState(hubChannel, world, eid);
 };
 
-const _signInAndPinOrUnpinElement = (eid: number, shouldPin: boolean) => {
-  const action = shouldPin ? () => _pinElement(eid) : () => unpinElement(eid);
+const _signInAndPinOrUnpinElement = (hubChannel: HubChannel, world: HubsWorld, eid: number, shouldPin: boolean) => {
+  const action = shouldPin ? () => _pinElement(hubChannel, world, eid) : () => unpinElement(hubChannel, world, eid);
 
-  // performConditionalSign(
-  //   () => this.hubChannel.signedIn,
-  //   action,
-  //   shouldPin ? SignInMessages.pin : SignInMessages.unpin,
-  //   e => {
-  //     console.warn(`PinningHelper: Conditional sign-in failed. ${e}`);
-  //   }
-  // );
+  // TODO: Perform conditional sign in
+
   action();
 };
