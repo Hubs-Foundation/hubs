@@ -63,14 +63,16 @@ function createHTTPSConfig() {
 }
 
 function getModuleDependencies(moduleName) {
+  console.log(packageLock.dependencies);
   const deps = packageLock.dependencies;
   const arr = [];
-
+  console.log("DEPS", deps);
   const gatherDeps = name => {
+    console.log("***", name);
     arr.push(path.join(__dirname, "node_modules", name) + path.sep);
 
     const moduleDef = deps[name];
-
+    console.log("MOD", moduleDef);
     if (moduleDef && moduleDef.requires) {
       for (const requiredModuleName in moduleDef.requires) {
         gatherDeps(requiredModuleName);
@@ -84,6 +86,7 @@ function getModuleDependencies(moduleName) {
 }
 
 function deepModuleDependencyTest(modulesArr) {
+  console.log("modulesArray", modulesArr);
   const deps = [];
 
   for (const moduleName of modulesArr) {
