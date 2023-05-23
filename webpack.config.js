@@ -63,8 +63,7 @@ function createHTTPSConfig() {
 }
 
 function getModuleDependencies(moduleName) {
-  console.log(packageLock.dependencies);
-  const deps = packageLock.dependencies;
+  const deps = packageLock.packages;
   const arr = [];
   console.log("DEPS", deps);
   const gatherDeps = name => {
