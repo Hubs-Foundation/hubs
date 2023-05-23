@@ -78,6 +78,7 @@ import { scenePreviewCameraSystem } from "../bit-systems/scene-preview-camera-sy
 import { linearTransformSystem } from "../bit-systems/linear-transform";
 import { mixerAnimatableSystem } from "../bit-systems/mixer-animatable";
 import { loopAnimationSystem } from "../bit-systems/loop-animation";
+import { AgentSystem } from "../bit-systems/agent-system";
 
 declare global {
   interface Window {
@@ -148,6 +149,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   const sceneEl = AFRAME.scenes[0];
   const aframeSystems = sceneEl.systems;
   const hubsSystems = aframeSystems["hubs-systems"];
+
 
   // TODO does anything actually ever pause the scene?
   if (!sceneEl.isPlaying && !hubsSystems.DOMContentDidLoad) return;
@@ -263,6 +265,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   linearTransformSystem(world);
   mixerAnimatableSystem(world);
   loopAnimationSystem(world);
+  AgentSystem(world);
 
   // All systems that update text properties should run before this
   textSystem(world);

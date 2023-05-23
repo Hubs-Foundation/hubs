@@ -1,8 +1,8 @@
 /** @jsx createElementEntity */
 import { AgentParams } from "../inflators/agent";
-import { createElementEntity, createRef, renderAsEntity } from "../utils/jsx-entity";
+import { createElementEntity, renderAsEntity } from "../utils/jsx-entity";
 import { preload } from "../utils/preload";
-import { cloneModelFromCache, loadModel } from "../components/gltf-model-plus";
+import {loadModel } from "../components/gltf-model-plus";
 import agentModelSrc from "../assets/models/cute_agent.glb";
 import { AElement } from "aframe";
 import { Vector3 } from "three";
@@ -20,10 +20,10 @@ const agentMediaParams:MediaLoaderParams = {
   isObjectMenuTarget: true
 }
 
-export function agentPrefab(params: AgentParams = { language: 0, needed: false }) { 
+export function agentPrefab(params: AgentParams = { language: 0, needed: false, follow: false }) { 
   return <entity 
     name="Agent" 
-    agent={{ language: params.language, needed: params.needed }} 
+    agent={{ language: params.language, needed: params.needed, follow: params.follow}} 
     scale={[1, 1, 1]}
     mediaLoader={agentMediaParams}
   />;

@@ -101,7 +101,7 @@ import { NotificationsContainer } from "./room/NotificationsContainer";
 import { usePermissions } from "./room/hooks/usePermissions";
 import { ChatContextProvider } from "./room/contexts/ChatContext";
 import ChatToolbarButton from "./room/components/ChatToolbarButton/ChatToolbarButton";
-import AgentToolbarButton from "./room/components/AgentToolBarButton/AgentToolBarButton";
+import {AgenSpawnButton} from "./room/AgentSpawnButton.js";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -1617,8 +1617,7 @@ class UIRoot extends Component {
                               mediaSearchStore={this.props.mediaSearchStore}
                               showNonHistoriedDialog={this.showNonHistoriedDialog}
                             />
-                            <AgentToolbarButton onClick={()=> this.props.scene.emit("agent-toggle")}/>
-                            
+                            <AgenSpawnButton scene={this.props.scene}/>
                           </>
                         )}
                         {this.props.hubChannel.can("spawn_emoji") && (

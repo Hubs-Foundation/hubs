@@ -186,7 +186,6 @@ export default class SceneEntryManager {
 
     this._lastFetchedAvatarId = avatarId;
     const avatarSrc = await getAvatarSrc(avatarId);
-
     this.avatarRig.setAttribute("player-info", { avatarSrc, avatarType: getAvatarType(avatarId) });
   };
 
@@ -457,18 +456,30 @@ export default class SceneEntryManager {
 
       if(myAgent){
         removeEntity(APP.world, myAgent);
+        this.scene.emit("agent-removed");
       }
       else{
 
         const avatarPov = document.querySelector("#avatar-pov-node").object3D;
+        var POVForward = new THREE.Vector3();
+        var avatar_POV_position = new THREE.Vector3();
+
+        avatar_POV_position = avatarPov.getWorldPosition(avatar_POV_position);
+        POVForward = avatarPov.getWorldDirection(POVForward);
+
+        const forward = new THREE.Vector3(-POVForward.x, 0, -POVForward.z).normalize();
+       
         const agentID = addAgentToScene(APP.world);
         const agentObj = APP.world.eid2obj.get(agentID);
+
+        //axis helper
+        // const axesHelper = new THREE.AxesHelper(5);
+        // agentObj.add(axesHelper);
         
-        agentObj.position.copy(avatarPov.localToWorld(new THREE.Vector3(0, 0, -1.0)));
+        agentObj.position.copy(avatar_POV_position.add(forward));
         agentObj.lookAt(avatarPov.getWorldPosition(new THREE.Vector3()));
-
-        console.log("Agent Instatiated");
-
+        agentObj.rotateOnAxis(new THREE.Vector3(0,1,0),-1.5707963268 );
+        this.scene.emit("agent-spawned");
       }
     });
   };

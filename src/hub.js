@@ -754,30 +754,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   subscriptions.register();
 
   const scene = document.querySelector("a-scene");
-
-  // const agent_id = renderAsEntity(APP.world, agentPrefab());
-  // const obj = APP.world.eid2obj.get(agent_id);
-  //   scene.add(obj);
-  // addObject3DComponent(APP.world, agent_id, new THREE.Mesh(
-  //   new THREE.BoxGeometry(1.0, 1.0),
-  //   new THREE.MeshBasicMaterial()
-  // ) );
-
-  // const agent_id = renderAsEntity(APP.world, agentPrefab());
-  // AFRAME.scenes[0].object3D.add(obj);
-  // console.log(setAgentParams(agent_id));
-
-  // const agentID = addAgentToScene(APP.world);
-  // const agentObj = APP.world.eid2obj.get(agentID);
-
-  // const avatarPov = document.querySelector("#avatar-pov-node").object3D;
-  // agentObj.position.copy(avatarPov.localToWorld(new THREE.Vector3(0, 0, -1.5)));
-  // agentObj.lookAt(avatarPov.getWorldPosition(new THREE.Vector3()));
-
-  // console.log("aaaaaaaaaaaaaaaa", agentObj.position, agentObj.visible);
-
-  
-
+ 
+  //axis helper
+  getScene().then(scene => {
+    const axesHelper = new THREE.AxesHelper(5);
+    scene.add(axesHelper);
+  });
 
   const onSceneLoaded = () => {
     const physicsSystem = scene.systems["hubs-systems"].physicsSystem;
