@@ -6,6 +6,7 @@ import {
   AudioSettingsChanged,
   MediaLoaded,
   MediaVideo,
+  MediaVideoData,
   Networked,
   NetworkedVideo,
   Owned
@@ -60,6 +61,7 @@ export function videoSystem(world: HubsWorld, audioSystem: AudioSystem) {
     audioParamsEid && APP.audioOverrides.delete(audioParamsEid);
     Emitter2Params.delete(videoEid);
     Emitter2Audio.delete(videoEid);
+    MediaVideoData.delete(videoEid);
   });
 
   networkedVideoEnterQuery(world).forEach(function (eid) {
@@ -69,7 +71,7 @@ export function videoSystem(world: HubsWorld, audioSystem: AudioSystem) {
   });
 
   networkedVideoQuery(world).forEach(function (eid) {
-    const video = (world.eid2obj.get(eid) as any).material.map.video as HTMLVideoElement;
+    const video = MediaVideoData.get(eid)!;
     if (hasComponent(world, Owned, eid)) {
       NetworkedVideo.time[eid] = video.currentTime;
       let flags = 0;
