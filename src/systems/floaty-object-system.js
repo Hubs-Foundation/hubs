@@ -60,7 +60,8 @@ function makeKinematicOnRelease(world) {
 export const FLOATY_OBJECT_FLAGS = {
   MODIFY_GRAVITY_ON_RELEASE: 1 << 0,
   REDUCE_ANGULAR_FLOAT: 1 << 1,
-  UNTHROWABLE: 1 << 2
+  UNTHROWABLE: 1 << 2,
+  HELIUM_WHEN_LARGE: 1 << 3
 };
 
 const enteredFloatyObjectsQuery = enterQuery(defineQuery([FloatyObject, Rigidbody]));
@@ -106,6 +107,32 @@ export const floatyObjectSystem = world => {
       } else {
         physicsSystem.updateRigidBodyOptions(eid, {
           gravity: { x: 0, y: FloatyObject.releaseGravity[eid], z: 0 },
+          angularDamping: 0.01,
+          linearDamping: 0.01,
+          linearSleepingThreshold: 1.6,
+          angularSleepingThreshold: 2.5,
+          collisionFilterMask: COLLISION_LAYERS.DEFAULT_INTERACTABLE
+        });
+        removeComponent(world, MakeStaticWhenAtRest, eid);
+      }
+    } else if (FloatyObject.flags[eid] & FLOATY_OBJECT_FLAGS.HELIUM_WHEN_LARGE) {
+      const curScale = world.eid2obj.get(eid).scale.x;
+
+      // These three hard-coded values may need to become a property of the FloatyObject
+      // component if HELIUM_WHEN_LARGE is used for an entity other than the Duck
+      const initialScale = 1;
+      const maxScale = 5.0;
+      const maxForce = 6.5;
+
+      const ratio = Math.min(1, (curScale - initialScale) / (maxScale - initialScale));
+      const force = ratio * maxForce;
+
+      if (force > 0) {
+        const angle = Math.random() * Math.PI * 2;
+        const x = Math.cos(angle);
+        const z = Math.sin(angle);
+        physicsSystem.updateRigidBodyOptions(eid, {
+          gravity: { x, y: force, z },
           angularDamping: 0.01,
           linearDamping: 0.01,
           linearSleepingThreshold: 1.6,
