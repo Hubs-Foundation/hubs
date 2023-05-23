@@ -24,7 +24,6 @@ import { TRANSFORM_MODE } from "../components/transform-object-button";
 import { ScalingHandler } from "../components/scale-button";
 import { setPinned } from "../utils/bit-pinning-helper";
 import { getPromotionTokenForFile } from "../utils/media-utils";
-import { get } from "react-hook-form";
 
 // Working variables.
 const _vec3_1 = new Vector3();
