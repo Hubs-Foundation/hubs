@@ -1,8 +1,12 @@
+import { hasComponent } from "bitecs";
 import { HubsWorld } from "../app";
-import { FileInfo } from "../bit-components";
+import { FileInfo, Pinnable } from "../bit-components";
+import { FILE_INFO_FLAGS } from "../inflators/file-info";
 import { createEntityState, deleteEntityState } from "./entity-state-utils";
 import HubChannel from "./hub-channel";
+import { EntityID } from "./networking-types";
 import { takeOwnership } from "./take-ownership";
+import { getPromotionTokenForFile } from "./media-utils";
 
 export const setPinned = async (hubChannel: HubChannel, world: HubsWorld, eid: number, shouldPin: boolean) => {
   _signInAndPinOrUnpinElement(hubChannel, world, eid, shouldPin);
@@ -46,4 +50,10 @@ const _signInAndPinOrUnpinElement = (hubChannel: HubChannel, world: HubsWorld, e
   // TODO: Perform conditional sign in
 
   action();
+};
+
+export const isPinnable = (world: HubsWorld, eid: EntityID) => {
+  const fileId = APP.getString(FileInfo.id[eid]);
+  const isPromoted = FileInfo.flags[eid] & FILE_INFO_FLAGS.IS_PERMANENT;
+  return hasComponent(world, Pinnable, eid) && !!(isPromoted || (fileId && getPromotionTokenForFile(fileId)));
 };

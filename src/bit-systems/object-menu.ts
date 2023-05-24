@@ -1,14 +1,12 @@
-import { addComponent, defineQuery, enterQuery, entityExists, exitQuery, hasComponent, removeComponent } from "bitecs";
+import { defineQuery, enterQuery, entityExists, exitQuery, hasComponent } from "bitecs";
 import { Matrix4, Quaternion, Vector3 } from "three";
 import type { HubsWorld } from "../app";
 import {
   HeldRemoteRight,
   HoveredRemoteRight,
   Interacted,
-  FileInfo,
   ObjectMenu,
   ObjectMenuTarget,
-  Pinnable,
   Pinned,
   RemoteRight,
   Rigidbody
@@ -22,9 +20,7 @@ import { deleteTheDeletableAncestor } from "./delete-entity-system";
 import { createMessageDatas } from "./networking";
 import { TRANSFORM_MODE } from "../components/transform-object-button";
 import { ScalingHandler } from "../components/scale-button";
-import { setPinned } from "../utils/bit-pinning-helper";
-import { getPromotionTokenForFile } from "../utils/media-utils";
-import { FILE_INFO_FLAGS } from "../inflators/file-info";
+import { isPinnable, setPinned } from "../utils/bit-pinning-helper";
 
 // Working variables.
 const _vec3_1 = new Vector3();
@@ -208,14 +204,11 @@ function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
   const obj = world.eid2obj.get(menu)!;
   obj.visible = visible;
 
-  const isPinnable = hasComponent(world, Pinnable, target);
+  const canPin = isPinnable(world, target);
   const isPinned = hasComponent(world, Pinned, target);
-  const fileId = APP.getString(FileInfo.id[target]);
-  const isPromoted = FileInfo.flags[target] & FILE_INFO_FLAGS.IS_PERMANENT;
-  const canPin = !!(isPromoted || (fileId && getPromotionTokenForFile(fileId)));
 
-  world.eid2obj.get(ObjectMenu.unpinButtonRef[menu])!.visible = visible && isPinnable && isPinned;
-  world.eid2obj.get(ObjectMenu.pinButtonRef[menu])!.visible = visible && isPinnable && !isPinned && canPin;
+  world.eid2obj.get(ObjectMenu.unpinButtonRef[menu])!.visible = visible && isPinned;
+  world.eid2obj.get(ObjectMenu.pinButtonRef[menu])!.visible = visible && !isPinned && canPin;
 
   [
     ObjectMenu.cameraFocusButtonRef[menu],
