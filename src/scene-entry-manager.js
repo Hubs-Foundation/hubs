@@ -477,8 +477,8 @@ export default class SceneEntryManager {
         // agentObj.add(axesHelper);
         
         agentObj.position.copy(avatar_POV_position.add(forward));
-        agentObj.lookAt(avatarPov.getWorldPosition(new THREE.Vector3()));
-        agentObj.rotateOnAxis(new THREE.Vector3(0,1,0),-1.5707963268 );
+        // agentObj.lookAt(avatarPov.getWorldPosition(new THREE.Vector3()));
+        // agentObj.rotateOnAxis(new THREE.Vector3(0,1,0),-1.5707963268 );
         this.scene.emit("agent-spawned");
       }
     });

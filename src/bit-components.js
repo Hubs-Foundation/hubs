@@ -8,8 +8,13 @@ export const $isStringType = Symbol("isStringType");
 
 export const Agent = defineComponent({
   language: Types.ui8,
-  flags: Types.ui8
-})
+  modelRef: Types.eid,
+  panelRef: Types.eid
+});
+
+export const LookAtUser = defineComponent();
+export const agentText = defineComponent();
+
 export const Networked = defineComponent({
   id: Types.ui32,
   creator: Types.ui32,

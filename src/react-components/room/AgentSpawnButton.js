@@ -22,7 +22,6 @@ export function AgenSpawnButton({scene}){
       }
 
     scene.addEventListener("agent-removed", () => setFlag(false));
-
     scene.addEventListener("agent-spawned", () => setFlag(true));
 
     return (

@@ -39,7 +39,8 @@ import {
   VideoTextureSource,
   Mirror,
   MixerAnimatableInitialize,
-  Agent
+  Agent,
+  LookAtUser
 } from "../bit-components";
 
 import { inflateMediaLoader } from "../inflators/media-loader";
@@ -97,7 +98,6 @@ import { BoxColliderParams, inflateBoxCollider } from "../inflators/box-collider
 import { inflateTrimesh } from "../inflators/trimesh";
 import { HeightFieldParams, inflateHeightField } from "../inflators/heightfield";
 import { inflateAudioSettings } from "../inflators/audio-settings";
-import { AgentParams, inflateAgent } from "../inflators/agent";
 
 preload(
   new Promise(resolve => {
@@ -353,6 +353,12 @@ export interface JSXComponentData extends ComponentData {
     captureDurLblRef: Ref;
     sndToggleRef: Ref;
   };
+  agent?: {
+    language: number;
+    panelRef: Ref;
+    modelRef: Ref;
+    textRef: Ref;
+  };
   mediaLoader?: MediaLoaderParams;
   mixerAnimatable?: boolean;
   sceneRoot?: boolean;
@@ -363,7 +369,8 @@ export interface JSXComponentData extends ComponentData {
   waypointPreview?: boolean;
   pdf?: PDFParams;
   loopAnimation?: LoopAnimationParams;
-  agent?: AgentParams;
+ 
+  lookatuser?: any;
 }
 
 export interface GLTFComponentData extends ComponentData {
@@ -476,7 +483,9 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   image: inflateImage,
   video: inflateVideo,
 
-  agent: inflateAgent
+  // agent: inflateAgent
+  agent: createDefaultInflator(Agent),
+  lookatuser: createDefaultInflator(LookAtUser)
 };
 
 export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorFn }> = {

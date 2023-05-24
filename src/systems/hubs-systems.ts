@@ -79,6 +79,7 @@ import { linearTransformSystem } from "../bit-systems/linear-transform";
 import { mixerAnimatableSystem } from "../bit-systems/mixer-animatable";
 import { loopAnimationSystem } from "../bit-systems/loop-animation";
 import { AgentSystem } from "../bit-systems/agent-system";
+import { lookAtUserSystem } from "../bit-systems/look-at-user";
 
 declare global {
   interface Window {
@@ -264,7 +265,8 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   simpleWaterSystem(world);
   linearTransformSystem(world);
   mixerAnimatableSystem(world);
-  loopAnimationSystem(world);
+  loopAnimationSystem(world);  
+  lookAtUserSystem(world);
   AgentSystem(world);
 
   // All systems that update text properties should run before this
