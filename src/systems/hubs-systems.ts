@@ -76,6 +76,7 @@ import { textSystem } from "../bit-systems/text";
 import { audioTargetSystem } from "../bit-systems/audio-target-system";
 import { scenePreviewCameraSystem } from "../bit-systems/scene-preview-camera-system";
 import { linearTransformSystem } from "../bit-systems/linear-transform";
+import { quackSystem } from "../bit-systems/quack";
 import { mixerAnimatableSystem } from "../bit-systems/mixer-animatable";
 import { loopAnimationSystem } from "../bit-systems/loop-animation";
 import { AgentSystem } from "../bit-systems/agent-system";
@@ -263,6 +264,8 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   hubsSystems.nameTagSystem.tick();
   simpleWaterSystem(world);
   linearTransformSystem(world);
+  quackSystem(world);
+  
   mixerAnimatableSystem(world);
   loopAnimationSystem(world);
   AgentSystem(world);

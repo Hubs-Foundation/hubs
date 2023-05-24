@@ -143,13 +143,7 @@ export default class MessageDispatch extends EventTarget {
       case "duck":
         if (qsTruthy("newLoader")) {
           const avatarPov = document.querySelector("#avatar-pov-node").object3D;
-          const eid = createNetworkedEntity(APP.world, "media", {
-            src: getAbsoluteHref(location.href, ducky),
-            resize: true,
-            recenter: true,
-            animateLoad: true,
-            isObjectMenuTarget: true
-          });
+          const eid = createNetworkedEntity(APP.world, "duck");
           const obj = APP.world.eid2obj.get(eid);
           obj.position.copy(avatarPov.localToWorld(new THREE.Vector3(0, 0, -1.5)));
           obj.lookAt(avatarPov.getWorldPosition(new THREE.Vector3()));

@@ -345,3 +345,4 @@ export const LinearScale = defineComponent({
   targetY: Types.f32,
   targetZ: Types.f32
 });
+export const Quack = defineComponent();
