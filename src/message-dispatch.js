@@ -270,7 +270,7 @@ export default class MessageDispatch extends EventTarget {
       case "clear":
         {
           if (this.hubChannel.can("pin_objects")) {
-            clearState(this.hubChannel, APP.world);
+            clearState(APP.world);
           }
         }
         break;
