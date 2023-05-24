@@ -1,4 +1,4 @@
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import React from "react";
 import "./utils/configs";
 import "./react-components/styles/global.scss";
@@ -14,6 +14,7 @@ import { store } from "./utils/store-instance";
 import registerTelemetry from "./telemetry";
 import { FormattedMessage } from "react-intl";
 import { ThemeProvider } from "./react-components/styles/theme";
+import { root } from "./signin";
 
 registerTelemetry("/cloud", "Hubs Cloud Landing Page");
 
@@ -119,7 +120,7 @@ function HubsCloudPage() {
 
 window.APP = { store };
 
-function Root() {
+function CloudRoot() {
   return (
     <WrappedIntlProvider>
       <ThemeProvider store={store}>
@@ -132,5 +133,5 @@ function Root() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  ReactDOM.render(<Root />, document.getElementById("ui-root"));
+  root.render(<CloudRoot />);
 });

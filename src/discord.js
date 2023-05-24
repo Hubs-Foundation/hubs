@@ -1,4 +1,4 @@
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import React, { Component } from "react";
 import "./utils/configs";
 import { FormattedMessage } from "react-intl";
@@ -12,6 +12,7 @@ import discordBotVideoWebM from "./assets/video/discord.webm";
 import registerTelemetry from "./telemetry";
 import { ThemeProvider } from "./react-components/styles/theme";
 import { store } from "./utils/store-instance";
+import { root } from "./signin";
 
 registerTelemetry("/discord", "Discord Landing Page");
 
@@ -82,5 +83,5 @@ class DiscordPage extends Component {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  ReactDOM.render(<DiscordPage />, document.getElementById("ui-root"));
+  root.render(<DiscordPage />);
 });

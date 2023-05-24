@@ -5,7 +5,6 @@ console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
 import "aframe";
 import "./utils/logging";
 
-import ReactDOM from "react-dom";
 import React from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
@@ -28,6 +27,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faClone } from "@fortawesome/free-solid-svg-icons/faClone";
 import { ThemeProvider } from "./react-components/styles/theme";
 import Store from "./storage/store";
+import { root } from "./signin";
 
 const qs = new URLSearchParams(location.search);
 window.APP = { store: new Store() };
@@ -147,12 +147,12 @@ class AvatarPage extends React.Component {
 document.addEventListener("DOMContentLoaded", () => {
   const avatarId = qs.get("avatar_id") || document.location.pathname.substring(1).split("/")[1];
   console.log(`Avatar ID: ${avatarId}`);
-  ReactDOM.render(
+
+  root.render(
     <WrappedIntlProvider>
       <ThemeProvider store={window.APP.store}>
         <AvatarPage avatarId={avatarId} store={window.APP.store} />
       </ThemeProvider>
-    </WrappedIntlProvider>,
-    document.getElementById("ui-root")
+    </WrappedIntlProvider>
   );
 });

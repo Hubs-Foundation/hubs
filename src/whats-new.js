@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import InfiniteScroll from "react-infinite-scroller";
 import markdownit from "markdown-it";
 import { FormattedMessage } from "react-intl";
@@ -15,6 +15,7 @@ import "./assets/stylesheets/whats-new.scss";
 import { PageContainer } from "./react-components/layout/PageContainer";
 import { Spinner } from "./react-components/misc/Spinner";
 import { ThemeProvider } from "./react-components/styles/theme";
+import { root } from "./signin";
 
 registerTelemetry("/whats-new", "Hubs What's New");
 
@@ -111,14 +112,13 @@ class WhatsNew extends Component {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  ReactDOM.render(
+  root.render(
     <WrappedIntlProvider>
       <ThemeProvider store={store}>
         <AuthContextProvider store={store}>
           <WhatsNew />
         </AuthContextProvider>
       </ThemeProvider>
-    </WrappedIntlProvider>,
-    document.getElementById("ui-root")
+    </WrappedIntlProvider>
   );
 });

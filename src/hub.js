@@ -140,7 +140,6 @@ import "./components/avatar-inspect-collider";
 import "./components/video-texture-target";
 import "./components/mirror";
 
-import ReactDOM from "react-dom";
 import React from "react";
 import { Router, Route } from "react-router-dom";
 import { createBrowserHistory, createMemoryHistory } from "history";
@@ -266,6 +265,7 @@ import { listenForNetworkMessages } from "./utils/listen-for-network-messages";
 import { exposeBitECSDebugHelpers } from "./bitecs-debug-helpers";
 import { loadLegacyRoomObjects } from "./utils/load-legacy-room-objects";
 import { loadSavedEntityStates } from "./utils/entity-state-utils";
+import { root } from "./signin";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -344,7 +344,7 @@ function mountUI(props = {}) {
     qsTruthy("allow_idle") || (process.env.NODE_ENV === "development" && !qs.get("idle_timeout"));
   const forcedVREntryType = qsVREntryType;
 
-  ReactDOM.render(
+  root.render(
     <WrappedIntlProvider>
       <ThemeProvider store={store}>
         <Router history={history}>
@@ -372,8 +372,7 @@ function mountUI(props = {}) {
           />
         </Router>
       </ThemeProvider>
-    </WrappedIntlProvider>,
-    document.getElementById("ui-root")
+    </WrappedIntlProvider>
   );
 }
 

@@ -1,5 +1,5 @@
 import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
 import registerTelemetry from "./telemetry";
 import "./utils/theme";
@@ -16,7 +16,7 @@ registerTelemetry("/signin", "Hubs Sign In Page");
 
 window.APP = { store };
 
-function Root() {
+function SignInRoot() {
   return (
     <WrappedIntlProvider>
       <ThemeProvider store={store}>
@@ -32,4 +32,7 @@ function Root() {
   );
 }
 
-ReactDOM.render(<Root />, document.getElementById("ui-root"));
+const container = document.getElementById("ui-root");
+// export root as React 18 does not allow multiple "createRoot" calls on the same element. Use "render" alone on the first created instance of this root.
+export const root = createRoot(container);
+root.render(<SignInRoot />);
