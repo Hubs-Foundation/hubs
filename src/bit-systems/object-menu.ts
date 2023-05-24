@@ -207,15 +207,13 @@ function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
   const obj = world.eid2obj.get(menu)!;
   obj.visible = visible;
 
-  if (hasComponent(world, Pinnable, target)) {
-    if (hasComponent(world, Pinned, target)) {
-      world.eid2obj.get(ObjectMenu.unpinButtonRef[menu])!.visible = visible;
-    } else {
-      const fileId = APP.getString(MediaLoaded.fileId[target]);
-      const canPin = !fileId || getPromotionTokenForFile(fileId);
-      world.eid2obj.get(ObjectMenu.pinButtonRef[menu])!.visible = visible && canPin;
-    }
-  }
+  const isPinnable = hasComponent(world, Pinnable, target);
+  const isPinned = hasComponent(world, Pinned, target);
+  const fileId = APP.getString(MediaLoaded.fileId[target]);
+
+  world.eid2obj.get(ObjectMenu.unpinButtonRef[menu])!.visible = visible && isPinnable && isPinned;
+  world.eid2obj.get(ObjectMenu.pinButtonRef[menu])!.visible =
+    visible && isPinnable && !isPinned && (!fileId || getPromotionTokenForFile(fileId));
 
   [
     ObjectMenu.cameraFocusButtonRef[menu],
