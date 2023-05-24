@@ -37,6 +37,7 @@ import {
   Billboard,
   MaterialTag,
   VideoTextureSource,
+  Quack,
   Mirror,
   MixerAnimatableInitialize,
   Agent,
@@ -304,6 +305,7 @@ export interface JSXComponentData extends ComponentData {
   deletable?: true;
   makeKinematicOnRelease?: true;
   destroyAtExtremeDistance?: true;
+  quack?: true;
 
   // @TODO Define all the anys
   networked?: any;
@@ -473,6 +475,7 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   waypointPreview: createDefaultInflator(WaypointPreview),
   pdf: inflatePDF,
   mediaLoader: inflateMediaLoader,
+  quack: createDefaultInflator(Quack),
   mixerAnimatable: createDefaultInflator(MixerAnimatableInitialize),
   loopAnimation: inflateLoopAnimationInitialize,
 
