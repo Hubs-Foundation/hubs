@@ -12,6 +12,7 @@ export function MediaPrefab(params: MediaLoaderParams): EntityDef {
       networked
       networkedTransform
       mediaLoader={params}
+      fileInfo={{ id: params.fileId, src: params.src }}
       deletable
       pinnable
       grabbable={{ cursor: true, hand: true }}

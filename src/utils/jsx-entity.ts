@@ -97,6 +97,7 @@ import { BoxColliderParams, inflateBoxCollider } from "../inflators/box-collider
 import { inflateTrimesh } from "../inflators/trimesh";
 import { HeightFieldParams, inflateHeightField } from "../inflators/heightfield";
 import { inflateAudioSettings } from "../inflators/audio-settings";
+import { FileInfoParams, inflateFileInfo } from "../inflators/file-info";
 
 preload(
   new Promise(resolve => {
@@ -355,6 +356,7 @@ export interface JSXComponentData extends ComponentData {
     sndToggleRef: Ref;
   };
   mediaLoader?: MediaLoaderParams;
+  fileInfo?: FileInfoParams;
   mixerAnimatable?: boolean;
   sceneRoot?: boolean;
   sceneLoader?: { src: string };
@@ -470,7 +472,7 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   quack: createDefaultInflator(Quack),
   mixerAnimatable: createDefaultInflator(MixerAnimatableInitialize),
   loopAnimation: inflateLoopAnimationInitialize,
-
+  fileInfo: inflateFileInfo,
   // inflators that create Object3Ds
   object3D: addObject3DComponent,
   slice9: inflateSlice9,

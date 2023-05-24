@@ -1,6 +1,6 @@
 import { addComponent, defineQuery, enterQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
 import { HubsWorld } from "../app";
-import { Networked, Owned, Pinnable, Pinned } from "../bit-components";
+import { FileInfo, Networked, Owned, Pinnable, Pinned } from "../bit-components";
 import { renderAsNetworkedEntity } from "../utils/create-networked-entity";
 import { deleteEntityState, hasSavedEntityState } from "../utils/entity-state-utils";
 import { networkableComponents, schemas, StoredComponent } from "../utils/network-schemas";
@@ -20,6 +20,7 @@ import {
   pendingParts,
   softRemovedEntities
 } from "./networking";
+import { FILE_INFO_FLAGS } from "../inflators/file-info";
 
 export function isCursorBufferUpdateMessage(update: any): update is CursorBufferUpdateMessage {
   return !!update.hasOwnProperty("componentIds");
@@ -229,8 +230,11 @@ export function networkReceiveSystem(world: HubsWorld) {
         removeComponent(world, Owned, eid);
       }
 
-      if (isPinned(eid) && hasComponent(world, Pinnable, eid)) {
-        addComponent(world, Pinned, eid);
+      if (isPinned(eid)) {
+        FileInfo.flags[eid] |= FILE_INFO_FLAGS.IS_PERMANENT;
+        if (hasComponent(world, Pinnable, eid)) {
+          addComponent(world, Pinned, eid);
+        }
       }
 
       Networked.owner[eid] = APP.getSid(updateMessage.owner);

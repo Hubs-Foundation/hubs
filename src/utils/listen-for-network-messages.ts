@@ -10,7 +10,8 @@ import {
 } from "../bit-systems/networking";
 import { EntityState } from "./entity-state-utils";
 import type { ClientID, CreatorChange, Message } from "./networking-types";
-import { Pinnable, Pinned } from "../bit-components";
+import { FileInfo, Pinnable, Pinned } from "../bit-components";
+import { FILE_INFO_FLAGS } from "../inflators/file-info";
 
 type Emitter = {
   on: (event: string, callback: (a: any) => any) => number;
@@ -98,6 +99,9 @@ function onEntityStateCreated(response: { data: EntityState[] }) {
   if (eid) {
     if (hasComponent(APP.world, Pinnable, eid)) {
       addComponent(APP.world, Pinned, eid);
+    }
+    if (hasComponent(APP.world, FileInfo, eid)) {
+      FileInfo.flags[eid] |= FILE_INFO_FLAGS.IS_PERMANENT;
     }
   }
   queueEntityStateAsMessage(response.data[0]!);

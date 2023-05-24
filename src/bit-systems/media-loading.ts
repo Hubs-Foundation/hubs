@@ -4,10 +4,11 @@ import { HubsWorld } from "../app";
 import {
   GLTFModel,
   MediaContentBounds,
-  MediaLoaded,
+  FileInfo,
   MediaLoader,
   Networked,
-  ObjectMenuTarget
+  ObjectMenuTarget,
+  MediaLoaded
 } from "../bit-components";
 import { inflatePhysicsShape, Shape } from "../inflators/physics-shape";
 import { ErrorObject } from "../prefabs/error-object";
@@ -218,8 +219,10 @@ function* loadAndAnimateMedia(world: HubsWorld, eid: EntityID, clearRollbacks: C
     yield* animateScale(world, media);
   }
   addComponent(world, MediaLoaded, eid);
-  MediaLoaded.fileId[eid] = MediaLoader.fileId[eid];
-  MediaLoaded.src[eid] = MediaLoader.src[eid];
+  if (hasComponent(world, FileInfo, eid)) {
+    FileInfo.id[eid] = MediaLoader.fileId[eid];
+    FileInfo.src[eid] = MediaLoader.src[eid];
+  }
   removeComponent(world, MediaLoader, eid);
 
   if (media) {

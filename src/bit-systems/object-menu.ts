@@ -5,7 +5,7 @@ import {
   HeldRemoteRight,
   HoveredRemoteRight,
   Interacted,
-  MediaLoaded,
+  FileInfo,
   ObjectMenu,
   ObjectMenuTarget,
   Pinnable,
@@ -24,6 +24,7 @@ import { TRANSFORM_MODE } from "../components/transform-object-button";
 import { ScalingHandler } from "../components/scale-button";
 import { setPinned } from "../utils/bit-pinning-helper";
 import { getPromotionTokenForFile } from "../utils/media-utils";
+import { FILE_INFO_FLAGS } from "../inflators/file-info";
 
 // Working variables.
 const _vec3_1 = new Vector3();
@@ -209,11 +210,12 @@ function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
 
   const isPinnable = hasComponent(world, Pinnable, target);
   const isPinned = hasComponent(world, Pinned, target);
-  const fileId = APP.getString(MediaLoaded.fileId[target]);
+  const fileId = APP.getString(FileInfo.id[target]);
+  const isPromoted = FileInfo.flags[target] & FILE_INFO_FLAGS.IS_PERMANENT;
+  const canPin = !!(isPromoted || (fileId && getPromotionTokenForFile(fileId)));
 
   world.eid2obj.get(ObjectMenu.unpinButtonRef[menu])!.visible = visible && isPinnable && isPinned;
-  world.eid2obj.get(ObjectMenu.pinButtonRef[menu])!.visible =
-    visible && isPinnable && !isPinned && (!fileId || getPromotionTokenForFile(fileId));
+  world.eid2obj.get(ObjectMenu.pinButtonRef[menu])!.visible = visible && isPinnable && !isPinned && canPin;
 
   [
     ObjectMenu.cameraFocusButtonRef[menu],

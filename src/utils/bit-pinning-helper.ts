@@ -1,5 +1,5 @@
 import { HubsWorld } from "../app";
-import { MediaLoaded } from "../bit-components";
+import { FileInfo } from "../bit-components";
 import { createEntityState, deleteEntityState } from "./entity-state-utils";
 import HubChannel from "./hub-channel";
 import { takeOwnership } from "./take-ownership";
@@ -9,8 +9,8 @@ export const setPinned = async (hubChannel: HubChannel, world: HubsWorld, eid: n
 };
 
 const _pinElement = async (hubChannel: HubChannel, world: HubsWorld, eid: number) => {
-  const src = APP.getString(MediaLoaded.src[eid]);
-  const fileId = APP.getString(MediaLoaded.fileId[eid]);
+  const src = APP.getString(FileInfo.src[eid]);
+  const fileId = APP.getString(FileInfo.id[eid]);
   let fileAccessToken, promotionToken;
   if (src) {
     fileAccessToken = new URL(src).searchParams.get("token") as string;
