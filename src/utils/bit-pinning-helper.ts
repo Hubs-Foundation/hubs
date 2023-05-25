@@ -41,7 +41,11 @@ const _pinElement = async (hubChannel: HubChannel, world: HubsWorld, eid: number
 };
 
 const unpinElement = (hubChannel: HubChannel, world: HubsWorld, eid: number) => {
-  deleteEntityState(hubChannel, world, eid);
+  try {
+    deleteEntityState(hubChannel, world, eid);
+  } catch (e) {
+    console.warn(e);
+  }
 };
 
 const _signInAndPinOrUnpinElement = (hubChannel: HubChannel, world: HubsWorld, eid: number, shouldPin: boolean) => {
