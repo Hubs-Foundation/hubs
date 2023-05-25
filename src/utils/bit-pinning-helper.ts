@@ -41,8 +41,9 @@ const _pinElement = async (hubChannel: HubChannel, world: HubsWorld, eid: number
 };
 
 const unpinElement = (hubChannel: HubChannel, world: HubsWorld, eid: number) => {
+  const fileId = APP.getString(FileInfo.id[eid]);
   try {
-    deleteEntityState(hubChannel, world, eid);
+    deleteEntityState(hubChannel, world, eid, fileId!);
   } catch (e) {
     console.warn(e);
   }

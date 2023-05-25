@@ -69,7 +69,7 @@ export async function updateEntityState(hubChannel: HubChannel, world: HubsWorld
   return push(hubChannel, "update_entity_state", payload);
 }
 
-export async function deleteEntityState(hubChannel: HubChannel, world: HubsWorld, eid: EntityID) {
+export async function deleteEntityState(hubChannel: HubChannel, world: HubsWorld, eid: EntityID, fileId?: string) {
   if (!isNetworkInstantiated(eid)) {
     throw new Error("Tried to delete entity state for non-network instantiated entity.");
   }
@@ -80,6 +80,10 @@ export async function deleteEntityState(hubChannel: HubChannel, world: HubsWorld
     nid: APP.getString(Networked.id[eid])! as NetworkID
   };
   // console.log("delete_entity_state",  payload);
+
+  if (fileId) {
+    payload.file_id = fileId;
+  }
   return push(hubChannel, "delete_entity_state", payload);
 }
 
