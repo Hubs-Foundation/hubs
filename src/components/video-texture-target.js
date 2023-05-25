@@ -26,6 +26,7 @@ AFRAME.registerComponent("video-texture-source", {
     }
 
     this.camera.layers.enable(Layers.CAMERA_LAYER_THIRD_PERSON_ONLY);
+    this.camera.layers.enable(Layers.CAMERA_LAYER_FX_MASK);
 
     this.camera.aspect = this.data.resolution[0] / this.data.resolution[1];
 
