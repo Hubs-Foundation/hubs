@@ -96,11 +96,11 @@ function createRecorder(captureAudio) {
   // if no audio comes through on the listener source. (Eg the room is otherwise silent.)
   // So for now, if we don't have a track, just disable audio capture.
   if (captureAudio && APP.dialog._micProducer?.track) {
-    const context = THREE.AudioContext.getContext();
+    const context = APP.audioCtx;
     const destination = context.createMediaStreamDestination();
-    if (APP.audioListener) {
+    if (APP.audioCtx.listener) {
       // NOTE audio is not captured from camera vantage point for now.
-      APP.audioListener.getInput().connect(destination);
+      APP.audioCtx.listener.connect(destination);
     }
     context.createMediaStreamSource(new MediaStream([APP.dialog._micProducer?.track])).connect(destination);
     srcAudioTrack = destination.stream.getAudioTracks()[0];

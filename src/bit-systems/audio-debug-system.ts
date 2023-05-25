@@ -5,7 +5,7 @@ import { getScene, HubsWorld } from "../app";
 import { NavMesh } from "../bit-components";
 import { DistanceModelType } from "../components/audio-params";
 import { getWebGLVersion } from "../utils/webgl";
-import { AudioObject3D, isPositionalAudio } from "./audio-emitter-system";
+import { AudioNode, getAudioOrientation, getAudioPosition, isPositionalAudio } from "./audio-emitter-system";
 import { Mesh, Material, Vector3, ShaderMaterial } from "three";
 import { disposeMaterial } from "../utils/three-utils";
 import { ElOrEid } from "../utils/bit-utils";
@@ -159,16 +159,17 @@ export function audioDebugSystem(world: HubsWorld) {
       isEnabled && addDebugMaterial(world, navEid);
     });
     let idx = 0;
-    APP.audios.forEach((audio: AudioObject3D, audioEmitterId: ElOrEid) => {
+    APP.audios.forEach((audio: AudioNode, audioEmitterId: ElOrEid) => {
       if (APP.isAudioPaused.has(audioEmitterId) || APP.mutedState.has(audioEmitterId)) {
         return;
       }
       if (idx >= maxDebugEmitters) return;
 
-      audio.getWorldPosition(emitterPos);
-      audio.getWorldDirection(emitterDir);
+      const panner = isPositionalAudio(audio) ? audio : fakePanner;
+      const gain = APP.gains.get(audioEmitterId)!;
 
-      const panner = isPositionalAudio(audio) ? audio.panner : fakePanner;
+      getAudioPosition(audioEmitterId, emitterPos);
+      getAudioOrientation(audioEmitterId, emitterDir);
 
       uniforms.sourcePositions[idx] = emitterPos.clone();
       uniforms.sourceOrientations[idx] = emitterDir.clone();
@@ -185,7 +186,7 @@ export function audioDebugSystem(world: HubsWorld) {
       uniforms.rolloffFactors[idx] = panner.rolloffFactor;
       uniforms.coneInnerAngles[idx] = panner.coneInnerAngle;
       uniforms.coneOuterAngles[idx] = panner.coneOuterAngle;
-      uniforms.gains[idx] = audio.gain.gain.value;
+      uniforms.gains[idx] = gain.gain.value;
       uniforms.clipped[idx] = APP.clippingState.has(audioEmitterId) ? 1 : 0;
 
       idx++;

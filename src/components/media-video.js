@@ -17,12 +17,13 @@ import semver from "semver";
 import { createPlaneBufferGeometry } from "../utils/three-utils";
 import HubsTextureLoader from "../loaders/HubsTextureLoader";
 import { getCurrentAudioSettings, updateAudioSettings } from "../update-audio-settings";
-import { SourceType, AudioType } from "./audio-params";
+import { AudioType, SourceType } from "./audio-params";
 import { errorTexture } from "../utils/error-texture";
 import { scaleToAspectRatio } from "../utils/scale-to-aspect-ratio";
 import { isSafari } from "../utils/detect-safari";
 import { isIOS as detectIOS } from "../utils/is-mobile";
 import { Layers } from "../camera-layers";
+import { isPositionalAudio, updateAudio } from "../bit-systems/audio-emitter-system";
 
 const ONCE_TRUE = { once: true };
 const TYPE_IMG_PNG = { type: "image/png" };
@@ -159,11 +160,13 @@ AFRAME.registerComponent("media-video", {
 
     let { disableLeftRightPanning, audioPanningQuality } = APP.store.state.preferences;
     this.onPreferenceChanged = () => {
+      const audio = APP.audios.get(this.el);
+
       const newDisableLeftRightPanning = APP.store.state.preferences.disableLeftRightPanning;
       const newAudioPanningQuality = APP.store.state.preferences.audioPanningQuality;
 
       const shouldRecreateAudio =
-        disableLeftRightPanning !== newDisableLeftRightPanning && this.audio && this.mediaElementAudioSource;
+        disableLeftRightPanning !== newDisableLeftRightPanning && audio && this.mediaElementAudioSource;
       const shouldUpdateAudioSettings = audioPanningQuality !== newAudioPanningQuality;
 
       disableLeftRightPanning = newDisableLeftRightPanning;
@@ -174,7 +177,7 @@ AFRAME.registerComponent("media-video", {
       } else if (shouldUpdateAudioSettings) {
         // updateAudioSettings() is called in this.setupAudio()
         // so no need to call it if shouldRecreateAudio is true.
-        updateAudioSettings(this.el, this.audio);
+        updateAudioSettings(this.el, audio);
       }
     };
 
@@ -353,26 +356,23 @@ AFRAME.registerComponent("media-video", {
     }
 
     const { audioType } = getCurrentAudioSettings(this.el);
-    const audioListener = this.el.sceneEl.audioListener;
+    let audio;
     if (audioType === AudioType.PannerNode) {
-      this.audio = new THREE.PositionalAudio(audioListener);
+      audio = APP.audioCtx.createPanner();
     } else {
-      this.audio = new THREE.Audio(audioListener);
+      audio = APP.audioCtx.createStereoPanner();
     }
+    const gain = APP.audioCtx.createGain();
+    gain.gain.value = 0;
+    audio.connect(gain);
     // Default to being quiet so it fades in when volume is set by audio systems
-    this.audio.gain.gain.value = 0;
-    this.audioSystem.addAudio({ sourceType: SourceType.MEDIA_VIDEO, node: this.audio });
+    this.audioSystem.addAudio({ sourceType: SourceType.MEDIA_VIDEO, node: gain });
 
-    this.audio.setNodeSource(this.mediaElementAudioSource);
-    this.el.setObject3D("sound", this.audio);
+    this.mediaElementAudioSource.connect(audio);
 
-    // Make sure that the audio is initialized to the right place.
-    // Its matrix may not update if this element is not visible.
-    // See https://github.com/mozilla/hubs/issues/2855
-    this.audio.updateMatrixWorld();
-
-    APP.audios.set(this.el, this.audio);
-    updateAudioSettings(this.el, this.audio);
+    APP.audios.set(this.el, audio);
+    APP.gains.set(this.el, gain);
+    updateAudioSettings(this.el, audio);
     // Original audio source volume can now be restored as audio systems will take over
     this.mediaElementAudioSource.mediaElement.volume = 1;
   },
@@ -413,8 +413,7 @@ AFRAME.registerComponent("media-video", {
         if (!isIOS || semver.satisfies(detect().version, ">=13.1.2")) {
           // TODO FF error here if binding mediastream: The captured HTMLMediaElement is playing a MediaStream. Applying volume or mute status is not currently supported -- not an issue since we have no audio atm in shared video.
           this.mediaElementAudioSource =
-            linkedMediaElementAudioSource ||
-            this.el.sceneEl.audioListener.context.createMediaElementSource(audioSourceEl);
+            linkedMediaElementAudioSource || APP.audioCtx.createMediaElementSource(audioSourceEl);
 
           this.hasAudioTracks && this.setupAudio();
         }
@@ -746,6 +745,8 @@ AFRAME.registerComponent("media-video", {
           this.lastUpdate = now;
         }
       }
+
+      updateAudio(this.el, this.el.object3D);
     };
   })(),
 
@@ -803,10 +804,9 @@ AFRAME.registerComponent("media-video", {
   },
 
   removeAudio() {
-    if (this.audio) {
-      this.el.removeObject3D("sound");
-      this.audioSystem.removeAudio({ node: this.audio });
-      delete this.audio;
+    const audio = APP.audios.get(this.el);
+    if (audio) {
+      this.audioSystem.removeAudio({ node: audio });
     }
   }
 });

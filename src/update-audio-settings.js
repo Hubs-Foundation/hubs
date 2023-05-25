@@ -1,13 +1,14 @@
 import { addComponent } from "bitecs";
 import { AudioSettingsChanged } from "./bit-components";
 import {
-  AudioType,
   SourceType,
   PanningModelType,
   MediaAudioDefaults,
   AvatarAudioDefaults,
-  TargetAudioDefaults
+  TargetAudioDefaults,
+  AudioType
 } from "./components/audio-params";
+import { isPositionalAudio } from "./bit-systems/audio-emitter-system";
 
 const defaultSettingsForSourceType = Object.freeze(
   new Map([
@@ -17,18 +18,20 @@ const defaultSettingsForSourceType = Object.freeze(
   ])
 );
 
-export function applySettings(audio, settings) {
-  if (audio.panner) {
-    audio.setDistanceModel(settings.distanceModel);
-    audio.setRolloffFactor(settings.rolloffFactor);
-    audio.setRefDistance(settings.refDistance);
-    audio.setMaxDistance(settings.maxDistance);
-    audio.panner.panningModel = settings.panningModel;
-    audio.panner.coneInnerAngle = settings.coneInnerAngle;
-    audio.panner.coneOuterAngle = settings.coneOuterAngle;
-    audio.panner.coneOuterGain = settings.coneOuterGain;
+export function applySettings(elOrEid, settings) {
+  const audio = APP.audios.get(elOrEid);
+  if (isPositionalAudio(audio)) {
+    audio.distanceModel = settings.distanceModel;
+    audio.rolloffFactor = settings.rolloffFactor;
+    audio.refDistance = settings.refDistance;
+    audio.maxDistance = settings.maxDistance;
+    audio.panningModel = settings.panningModel;
+    audio.coneInnerAngle = settings.coneInnerAngle;
+    audio.coneOuterAngle = settings.coneOuterAngle;
+    audio.coneOuterGain = settings.coneOuterGain;
   }
-  audio.gain.gain.setTargetAtTime(settings.gain, audio.context.currentTime, 0.1);
+  const gain = APP.gains.get(elOrEid);
+  gain.gain.setTargetAtTime(settings.gain, audio.context.currentTime, 0.1);
 }
 
 export function getOverriddenPanningModelType() {
@@ -97,7 +100,7 @@ export function getCurrentAudioSettingsForSourceType(sourceType) {
 }
 
 // Follow these rules and you'll have a good time:
-// - If a THREE.Audio or THREE.PositionalAudio is created, call this function.
+// - If a PannerNode or Stereo audio is created, call this function.
 // - If audio settings change, call this function.
 export function updateAudioSettings(elOrEid, audio) {
   if (!elOrEid.isEntity) {
@@ -107,19 +110,19 @@ export function updateAudioSettings(elOrEid, audio) {
     const el = elOrEid;
     const settings = getCurrentAudioSettings(el);
     if (
-      (audio.panner === undefined && settings.audioType === AudioType.PannerNode) ||
-      (audio.panner !== undefined && settings.audioType === AudioType.Stereo)
+      (!isPositionalAudio(audio) && settings.audioType === AudioType.PannerNode) ||
+      (isPositionalAudio(audio) && settings.audioType === AudioType.Stereo)
     ) {
       el.emit("audio_type_changed");
     }
-    applySettings(audio, settings);
+    applySettings(elOrEid, settings);
   }
 }
 
 export function shouldAddSupplementaryAttenuation(el, audio) {
   // Never add supplemental attenuation to audios that have a panner node;
   // The panner node adds its own attenuation.
-  if (audio.panner) return false;
+  if (isPositionalAudio(audio)) return false;
 
   // This function must distinguish between Audios that are "incidentally"
   // not PositionalAudios from Audios that are "purposefully" not PositionalAudios:

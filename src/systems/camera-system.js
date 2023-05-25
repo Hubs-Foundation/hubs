@@ -8,6 +8,9 @@ import { qsGet } from "../utils/qs_truthy";
 const customFOV = qsGet("fov");
 const enableThirdPersonMode = qsTruthy("thirdPerson");
 import { Layers } from "../camera-layers";
+import { anyEntityWith } from "../utils/bit-utils";
+import { addComponent, removeComponent } from "bitecs";
+import { AudioListenerTag } from "../bit-components";
 
 function getInspectableInHierarchy(el) {
   let inspectable = el;
@@ -286,12 +289,14 @@ export class CameraSystem {
     if (this.snapshot.audio) {
       this.snapshot.audio.updateMatrices();
       this.snapshot.audioTransform.copy(this.snapshot.audio.matrixWorld);
-      scene.audioListener.updateMatrices();
-      this.audioSourceTargetTransform.makeTranslation(0, 0, -0.25).premultiply(scene.audioListener.matrixWorld);
+      const listenerEid = anyEntityWith(APP.world, AudioListenerTag);
+      const listener = APP.world.eid2obj.get(listenerEid);
+      listener.updateMatrices();
+      this.audioSourceTargetTransform.makeTranslation(0, 0, -0.25).premultiply(listener.matrixWorld);
       setMatrixWorld(this.snapshot.audio, this.audioSourceTargetTransform);
     }
 
-    this.ensureListenerIsParentedCorrectly(scene);
+    this.ensureListenerIsParentedCorrectly();
 
     moveRigSoCameraLooksAtPivot(
       this.viewingRig.object3D,
@@ -352,17 +357,21 @@ export class CameraSystem {
     AFRAME.scenes[0].emit("inspect-lights-changed");
   }
 
-  ensureListenerIsParentedCorrectly(scene) {
-    if (scene.audioListener && this.avatarPOV) {
-      if (this.mode === CAMERA_MODE_INSPECT && scene.audioListener.parent !== this.avatarPOV.object3D) {
-        this.avatarPOV.object3D.add(scene.audioListener);
+  ensureListenerIsParentedCorrectly() {
+    const listenerEid = anyEntityWith(APP.world, AudioListenerTag);
+    const listener = APP.world.eid2obj.get(listenerEid);
+    if (listener && this.avatarPOV) {
+      if (this.mode === CAMERA_MODE_INSPECT && this.avatarPOV.object3D !== listener) {
+        removeComponent(APP.world, AudioListenerTag, listenerEid);
+        addComponent(APP.world, AudioListenerTag, this.avatarPOV.eid);
       } else if (
         (this.mode === CAMERA_MODE_FIRST_PERSON ||
           this.mode === CAMERA_MODE_THIRD_PERSON_NEAR ||
           this.mode === CAMERA_MODE_THIRD_PERSON_FAR) &&
-        scene.audioListener.parent !== this.viewingCamera
+        this.viewingCamera !== listener
       ) {
-        this.viewingCamera.add(scene.audioListener);
+        removeComponent(APP.world, AudioListenerTag, listenerEid);
+        addComponent(APP.world, AudioListenerTag, this.viewingCamera.eid);
       }
     }
   }
@@ -438,7 +447,7 @@ export class CameraSystem {
         this.nextMode();
       }
 
-      this.ensureListenerIsParentedCorrectly(scene);
+      this.ensureListenerIsParentedCorrectly();
 
       if (this.mode === CAMERA_MODE_FIRST_PERSON) {
         this.viewingCameraRotator.on = false;

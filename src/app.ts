@@ -1,6 +1,6 @@
-import { addEntity, createWorld, IWorld } from "bitecs";
+import { addComponent, addEntity, createWorld, IWorld } from "bitecs";
 import "./aframe-to-bit-components";
-import { AEntity, Networked, Object3DTag, Owned } from "./bit-components";
+import { AEntity, AudioListenerTag, Networked, Object3DTag, Owned } from "./bit-components";
 import MediaSearchStore from "./storage/media-search-store";
 import Store from "./storage/store";
 import qsTruthy from "./utils/qs_truthy";
@@ -10,17 +10,7 @@ import HubChannel from "./utils/hub-channel";
 import MediaDevicesManager from "./utils/media-devices-manager";
 
 import { EffectComposer, EffectPass } from "postprocessing";
-import {
-  Audio,
-  AudioListener,
-  Material,
-  Object3D,
-  PerspectiveCamera,
-  PositionalAudio,
-  Scene,
-  sRGBEncoding,
-  WebGLRenderer
-} from "three";
+import { Camera, Material, Object3D, PerspectiveCamera, Scene, sRGBEncoding, WebGLRenderer } from "three";
 import { AudioSettings, SourceType } from "./components/audio-params";
 import { createEffectsComposer } from "./effects";
 import { DialogAdapter } from "./naf-dialog-adapter";
@@ -28,8 +18,9 @@ import { mainTick } from "./systems/hubs-systems";
 import { waitForPreloads } from "./utils/preload";
 import SceneEntryManager from "./scene-entry-manager";
 import { store } from "./utils/store-instance";
-import { addObject3DComponent } from "./utils/jsx-entity";
 import { ElOrEid } from "./utils/bit-utils";
+import { AudioNode } from "./bit-systems/audio-emitter-system";
+import { addObject3DComponent } from "./utils/jsx-entity";
 
 declare global {
   interface Window {
@@ -79,7 +70,8 @@ export class App {
 
   mediaSearchStore = new MediaSearchStore();
 
-  audios = new Map<ElOrEid, PositionalAudio | Audio>();
+  audios = new Map<ElOrEid, AudioNode>();
+  gains = new Map<ElOrEid, GainNode>();
   sourceType = new Map<ElOrEid, SourceType>();
   audioOverrides = new Map<ElOrEid, Partial<AudioSettings>>();
   zoneOverrides = new Map<ElOrEid, Partial<AudioSettings>>();
@@ -98,7 +90,8 @@ export class App {
   sid2str: Map<number, string | null>;
   nextSid = 1;
 
-  audioListener: AudioListener;
+  audioCtx: AudioContext;
+  camera: Camera;
 
   dialog = new DialogAdapter();
 
@@ -123,6 +116,8 @@ export class App {
     this.world.nid2eid = new Map();
     this.world.deletedNids = new Set();
     this.world.ignoredNids = new Set();
+
+    this.audioCtx = new AudioContext();
 
     // used in aframe and networked aframe to avoid imports
     this.world.nameToComponent = {
@@ -166,7 +161,7 @@ export class App {
     canvas.dataset.aframeCanvas = "true";
 
     // TODO this comes from aframe and prevents zoom on ipad.
-    // This should alreeady be handleed by disable-ios-zoom but it does not appear to work
+    // This should already be handled by disable-ios-zoom but it does not appear to work
     canvas.addEventListener("touchmove", function (event) {
       event.preventDefault();
     });
@@ -196,13 +191,11 @@ export class App {
     sceneEl.appendChild(renderer.domElement);
 
     const camera = new PerspectiveCamera(80, window.innerWidth / window.innerHeight, 0.05, 10000);
-
-    const audioListener = new AudioListener();
-    this.audioListener = audioListener;
-    const audioListenerEid = addEntity(this.world);
-    addObject3DComponent(this.world, audioListenerEid, this.audioListener);
-
-    camera.add(audioListener);
+    const listenerEid = addEntity(this.world);
+    addObject3DComponent(this.world, listenerEid, camera);
+    addComponent(this.world, AudioListenerTag, listenerEid);
+    const audioListener = this.audioCtx.listener;
+    this.camera = camera;
 
     this.world.time = {
       delta: 0,
@@ -215,7 +208,7 @@ export class App {
     this.world.scene = scene;
     resolvePromiseToScene(scene);
 
-    // We manually call scene.updateMatrixWolrd in mainTick
+    // We manually call scene.updateMatrixWorld in mainTick
     scene.autoUpdate = false;
 
     if (enablePostEffects) {

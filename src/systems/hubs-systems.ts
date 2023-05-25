@@ -78,6 +78,7 @@ import { scenePreviewCameraSystem } from "../bit-systems/scene-preview-camera-sy
 import { linearTransformSystem } from "../bit-systems/linear-transform";
 import { mixerAnimatableSystem } from "../bit-systems/mixer-animatable";
 import { loopAnimationSystem } from "../bit-systems/loop-animation";
+import { audioListenerSystem } from "../bit-systems/audio-listener-system";
 
 declare global {
   interface Window {
@@ -256,6 +257,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   hubsSystems.audioZonesSystem.tick(hubsSystems.el);
   audioZoneSystem(world);
   audioEmitterSystem(world, hubsSystems.audioSystem);
+  audioListenerSystem(world);
   audioTargetSystem(world, hubsSystems.audioSystem);
   hubsSystems.gainSystem.tick();
   hubsSystems.nameTagSystem.tick();

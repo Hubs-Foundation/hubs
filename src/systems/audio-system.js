@@ -20,14 +20,10 @@ function performDelayedReconnect(gainNode) {
 import * as sdpTransform from "sdp-transform";
 import MediaDevicesManager from "../utils/media-devices-manager";
 
-function isThreeAudio(node) {
-  return node instanceof THREE.Audio || node instanceof THREE.PositionalAudio;
-}
-
 async function enableChromeAEC(gainNode) {
   /**
    *  workaround for: https://bugs.chromium.org/p/chromium/issues/detail?id=687574
-   *  1. grab the GainNode from the scene's THREE.AudioListener
+   *  1. grab the listener from the audio context
    *  2. disconnect the GainNode from the AudioDestinationNode (basically the audio out), this prevents hearing the audio twice.
    *  3. create a local webrtc connection between two RTCPeerConnections (see this example: https://webrtc.github.io/samples/src/content/peerconnection/pc1/)
    *  4. create a new MediaStreamDestination from the scene's THREE.AudioContext and connect the GainNode to it.
@@ -40,7 +36,7 @@ async function enableChromeAEC(gainNode) {
   audioEl.setAttribute("autoplay", "autoplay");
   audioEl.setAttribute("playsinline", "playsinline");
 
-  const context = THREE.AudioContext.getContext();
+  const context = APP.audioCtx;
   const loopbackDestination = context.createMediaStreamDestination();
   const outboundPeerConnection = new RTCPeerConnection();
   const inboundPeerConnection = new RTCPeerConnection();
@@ -124,7 +120,7 @@ export class AudioSystem {
   constructor(sceneEl) {
     this._sceneEl = sceneEl;
 
-    this.audioContext = THREE.AudioContext.getContext();
+    this.audioContext = APP.audioCtx;
     this.audioNodes = new Map();
     this.mediaStreamDestinationNode = this.audioContext.createMediaStreamDestination(); // Voice, camera, screenshare
     this.audioDestination = this.audioContext.createMediaStreamDestination(); // Media elements
@@ -144,9 +140,9 @@ export class AudioSystem {
       [SourceType.AUDIO_TARGET]: this.mediaGain,
       [SourceType.SFX]: this.audioContext.createGain()
     };
-    this.mixer[SourceType.AVATAR_AUDIO_SOURCE].connect(this._sceneEl.audioListener.getInput());
-    this.mixer[SourceType.MEDIA_VIDEO].connect(this._sceneEl.audioListener.getInput());
-    this.mixer[SourceType.SFX].connect(this._sceneEl.audioListener.getInput());
+    this.mixer[SourceType.AVATAR_AUDIO_SOURCE].connect(APP.audioCtx.destination);
+    this.mixer[SourceType.MEDIA_VIDEO].connect(APP.audioCtx.destination);
+    this.mixer[SourceType.SFX].connect(APP.audioCtx.destination);
 
     // Analyser to show the output audio level
     this.mixerAnalyser = this.audioContext.createAnalyser();
@@ -186,21 +182,13 @@ export class AudioSystem {
     }
   }
 
-  addAudio({ sourceType, node }) {
-    let outputNode = node;
-    if (isThreeAudio(node)) {
-      node.gain.disconnect();
-      outputNode = node.gain;
-    }
-    outputNode.connect(this.mixer[sourceType]);
+  addAudio({ node, sourceType }) {
+    node.disconnect();
+    node.connect(this.mixer[sourceType]);
   }
 
   removeAudio({ node }) {
-    let outputNode = node;
-    if (isThreeAudio(node)) {
-      outputNode = node.gain;
-    }
-    outputNode.disconnect();
+    node.disconnect();
   }
 
   updatePrefs() {
@@ -222,7 +210,7 @@ export class AudioSystem {
       const sinkId = APP.mediaDevicesManager.selectedSpeakersDeviceId;
       const isDefault = sinkId === APP.mediaDevicesManager.defaultOutputDeviceId;
       if ((!this.outputMediaAudio && isDefault) || sinkId === this.outputMediaAudio?.sinkId) return;
-      const sink = isDefault ? this._sceneEl.audioListener.getInput() : this.audioDestination;
+      const sink = isDefault ? APP.audioCtx.destination : this.audioDestination;
       this.mixer[SourceType.AVATAR_AUDIO_SOURCE].disconnect();
       this.mixer[SourceType.AVATAR_AUDIO_SOURCE].connect(sink);
       this.mixer[SourceType.AVATAR_AUDIO_SOURCE].connect(this.mixerAnalyser);
@@ -269,7 +257,7 @@ export class AudioSystem {
       if (this.audioContext.state === "running") {
         const disableAEC = window.APP.store.state.preferences.disableEchoCancellation;
         if (!AFRAME.utils.device.isMobile() && /chrome/i.test(navigator.userAgent) && !disableAEC) {
-          enableChromeAEC(this._sceneEl.audioListener.gain);
+          enableChromeAEC(APP.audioCtx.listener);
         }
 
         document.body.removeEventListener("touchend", this._resumeAudioContext, false);

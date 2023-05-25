@@ -224,7 +224,7 @@ async function mediaInflator(el, componentName, componentData, components, fitTo
       // The way we are handling it is wrong. If a user created a scene with this old version
       // of the component, all of these parameters will be present whether the user explicitly set
       // the values for them or not. But really, they should only count as "overrides" if the user
-      // meant for them to take precendence over the app and scene defaults.
+      // meant for them to take precedence over the app and scene defaults.
       // TODO: Fix this issue. One option is to just ignore this component data, which might break old scenes
       //       but simplifying the handling. Another option is to compare the component data here with
       //       the "defaults" and only save the values that are different from the defaults. However,

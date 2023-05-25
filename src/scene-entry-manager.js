@@ -544,7 +544,7 @@ export default class SceneEntryManager {
       if (isNaN(audioVolume)) {
         audioVolume = 1.0;
       }
-      const audioContext = THREE.AudioContext.getContext();
+      const audioContext = APP.audioCtx;
       const audioSource = audioContext.createMediaStreamSource(audioStream);
       const audioDestination = audioContext.createMediaStreamDestination();
       const gainNode = audioContext.createGain();

@@ -55,7 +55,7 @@ AFRAME.registerComponent("networked-audio-analyser", {
     this.el.addEventListener(
       "sound-source-set",
       event => {
-        const ctx = THREE.AudioContext.getContext();
+        const ctx = APP.audioCtx;
         this.analyser = ctx.createAnalyser();
         this.analyser.fftSize = 32;
         this.levels = new Uint8Array(this.analyser.fftSize);

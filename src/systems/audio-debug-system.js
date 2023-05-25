@@ -3,6 +3,7 @@ import audioDebugFrag from "./audio-debug.frag";
 import { DistanceModelType } from "../components/audio-params";
 import { getWebGLVersion } from "../utils/webgl";
 import { getMeshes } from "../utils/aframe-utils";
+import { getAudioOrientation, getAudioPosition, isPositionalAudio } from "../bit-systems/audio-emitter-system";
 
 const fakePanner = {
   distanceModel: DistanceModelType.Inverse,
@@ -117,12 +118,13 @@ AFRAME.registerSystem("audio-debug", {
         if (sourceNum >= this.maxDebugSources) continue;
         if (APP.isAudioPaused.has(el)) continue;
 
-        audio.getWorldPosition(sourcePos);
-        audio.getWorldDirection(sourceDir);
-        this.sourcePositions[sourceNum] = sourcePos; // TODO: Use Vector3 pool
-        this.sourceOrientations[sourceNum] = sourceDir;
+        const panner = isPositionalAudio(audio) ? audio : fakePanner;
+        const gain = APP.gains.get(el);
 
-        const panner = audio.panner || fakePanner;
+        getAudioPosition(el, sourcePos);
+        getAudioOrientation(el, sourceDir);
+        this.sourcePositions[sourceNum] = sourcePos.clone();
+        this.sourceOrientations[sourceNum] = sourceDir.clone();
 
         this.distanceModels[sourceNum] = 0;
         if (panner.distanceModel === DistanceModelType.Linear) {
@@ -138,7 +140,7 @@ AFRAME.registerSystem("audio-debug", {
         this.coneInnerAngles[sourceNum] = panner.coneInnerAngle;
         this.coneOuterAngles[sourceNum] = panner.coneOuterAngle;
 
-        this.gains[sourceNum] = audio.gain.gain.value;
+        this.gains[sourceNum] = gain.gain.value;
         this.clipped[sourceNum] = APP.clippingState.has(el);
         sourceNum++;
       }

@@ -1,6 +1,6 @@
 import { AComponent, AElement } from "aframe";
 import { addComponent, defineQuery, enterQuery, exitQuery } from "bitecs";
-import { Vector3, Object3D, LineSegments, WireframeGeometry, SphereBufferGeometry, PositionalAudio } from "three";
+import { Vector3, Object3D, LineSegments, WireframeGeometry, SphereBufferGeometry } from "three";
 import { HubsWorld } from "../app";
 import { AudioSettingsChanged, AudioSource, AudioTarget } from "../bit-components";
 import { SourceType } from "../components/audio-params";
@@ -30,30 +30,7 @@ const addSourceToAudioTarget = (audioSourceEid: number, source: AudioNode) => {
   audioTargetEids?.forEach(audioTargetEid => {
     const audioEid = Emitter2Audio.get(audioTargetEid)!;
     const targetAudio = APP.audios.get(audioEid)!;
-    try {
-      // The WebAudio API doesn't support checking if an audio node is already connected so we always disconnect it but don't log as it's an expected behavior and the error is not meaningful.
-      targetAudio.disconnect();
-    } catch (e) {}
-    if (targetAudio instanceof PositionalAudio) {
-      targetAudio.panner.connect(targetAudio.gain);
-    }
-    targetAudio.setNodeSource(source as AudioBufferSourceNode);
-    targetAudio.connect();
-  });
-};
-
-const removeSourceFromAudioTarget = (audioSourceEid: number) => {
-  const audioTargetEids = source2Target.get(audioSourceEid);
-  audioTargetEids?.forEach(audioTargetEid => {
-    const audioEid = Emitter2Audio.get(audioTargetEid)!;
-    const targetAudio = APP.audios.get(audioEid)!;
-    try {
-      // The WebAudio API doesn't support checking if an audio node is already connected so we always disconnect it but don't log as it's an expected behavior and the error is not meaningful.
-      targetAudio.disconnect();
-    } catch (e) {}
-    if (targetAudio instanceof PositionalAudio) {
-      targetAudio.panner.connect(targetAudio.gain);
-    }
+    source.connect(targetAudio);
   });
 };
 
@@ -64,7 +41,7 @@ const connectSourceToTarget = (audioSourceEid: number, audioTargetEid: number) =
     targetEids.push(audioTargetEid);
     source2Target.set(audioSourceEid, targetEids);
     if (AudioSource.flags[audioSourceEid] & AUDIO_SOURCE_FLAGS.DEBUG) {
-      const whiteNoise = createWhiteNoise(APP.audioListener.context, 0.01);
+      const whiteNoise = createWhiteNoise(APP.audioCtx, 0.01);
       source2Noise.set(audioSourceEid, whiteNoise);
       addSourceToAudioTarget(audioSourceEid, whiteNoise);
     }
@@ -72,6 +49,7 @@ const connectSourceToTarget = (audioSourceEid: number, audioTargetEid: number) =
 };
 
 const source2Noise = new Map<number, AudioBufferSourceNode>();
+const source2Node = new Map<number, AudioNode>();
 const source2Target = new Map<number, Array<number>>();
 const source2Emitter = new Map<number, AElement>();
 const source2Radius = new Map<number, number>();
@@ -88,7 +66,7 @@ export function audioTargetSystem(world: HubsWorld, audioSystem: AudioSystem) {
   const audioTargetEids = audioTargetQuery(world);
   const audioSourceEids = audioSourceQuery(world);
   audioTargetEnterQuery(world).forEach(audioTargetEid => {
-    const ctx = APP.audioListener.context;
+    const ctx = APP.audioCtx;
     const audioEid = makeAudioEntity(world, audioTargetEid, SourceType.AUDIO_TARGET, audioSystem);
     Emitter2Audio.set(audioTargetEid, audioEid);
     const audioObj = world.eid2obj.get(audioEid)!;
@@ -101,7 +79,9 @@ export function audioTargetSystem(world: HubsWorld, audioSystem: AudioSystem) {
       const audio = APP.audios.get(audioEid)!;
       const delayNode = ctx.createDelay(maxDelay);
       delayNode.delayTime.value = THREE.MathUtils.randFloat(minDelay, maxDelay);
-      audio.setFilters([delayNode]);
+      audio.disconnect();
+      audio.connect(delayNode);
+      audioSystem.addAudio({ node: delayNode, sourceType: SourceType.AUDIO_TARGET });
     }
 
     const audioSourceEid = AudioTarget.source[audioTargetEid];
@@ -139,11 +119,13 @@ export function audioTargetSystem(world: HubsWorld, audioSystem: AudioSystem) {
     }
   });
   audioSourceExitQuery(world).forEach(audioSourceEid => {
-    removeSourceFromAudioTarget(audioSourceEid);
-    source2Target.delete(audioSourceEid);
-    const noise = source2Noise.get(audioSourceEid);
-    noise?.disconnect();
+    const noise = source2Noise.get(audioSourceEid)!;
+    noise.disconnect();
     source2Noise.delete(audioSourceEid);
+    const node = source2Node.get(audioSourceEid)!;
+    node.disconnect();
+    source2Node.delete(audioSourceEid);
+    source2Target.delete(audioSourceEid);
     source2Radius.delete(audioSourceEid);
     source2Emitter.delete(audioSourceEid);
     if (AudioSource.flags[audioSourceEid] & AUDIO_SOURCE_FLAGS.DEBUG) {
@@ -199,12 +181,13 @@ export function audioTargetSystem(world: HubsWorld, audioSystem: AudioSystem) {
           const muteSelf = AudioSource.flags[audioSourceEid] & AUDIO_SOURCE_FLAGS.MUTE_SELF;
           const isOwnAvatar = avatar.id === "avatar-rig";
           if (muteSelf && isOwnAvatar) {
-            removeSourceFromAudioTarget(audioSourceEid);
+            const node = source2Node.get(audioSourceEid)!;
+            node.disconnect();
+            source2Node.delete(audioSourceEid);
           } else {
             getMediaStream(avatar).then(stream => {
-              const audioListener = APP.audioListener;
-              const ctx = audioListener.context;
-              const node = ctx.createMediaStreamSource(stream);
+              const node = APP.audioCtx.createMediaStreamSource(stream);
+              source2Node.set(audioSourceEid, node);
               addSourceToAudioTarget(audioSourceEid, node);
             });
           }

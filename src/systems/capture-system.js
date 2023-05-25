@@ -39,11 +39,10 @@ AFRAME.registerSystem("capture-system", {
   },
 
   _tryAddingAudioTrack() {
-    if (this._gotAudioTrack || !this.el.audioListener) return;
+    if (this._gotAudioTrack) return;
 
-    const listener = this.el.audioListener;
-    const destination = listener.context.createMediaStreamDestination();
-    listener.getInput().connect(destination);
+    const destination = APP.audioCtx.createMediaStreamDestination();
+    APP.audioCtx.listener.connect(destination);
     const audio = destination.stream.getAudioTracks()[0];
 
     this._stream.addTrack(audio);

@@ -1,3 +1,6 @@
+import { AudioListenerTag } from "../bit-components";
+import { anyEntityWith } from "../utils/bit-utils";
+
 // We apply the most restrictive audio parameters
 function paramsReducer(acc, curr) {
   if (!curr && !acc) return {};
@@ -154,15 +157,18 @@ export class AudioZonesSystem {
   tick = (function () {
     const listenerPosition = new THREE.Vector3();
     return function (scene) {
-      if (!scene.is("entered")) return;
+      if (!scene.is("entered") || this.zones.length === 0 || this.sources.length === 0) return;
+
+      const listenerEid = anyEntityWith(APP.world, AudioListenerTag);
+      const listener = APP.world.eid2obj.get(listenerEid);
+      listener.getWorldPosition(listenerPosition);
 
       if (!this.didRegisterAudioListener) {
         this.didRegisterAudioListener = true;
-        this.registerEntity(scene.audioListener);
+        this.registerEntity(listener);
       }
 
-      const currListenerZones = this.currZones.get(scene.audioListener);
-      scene.audioListener.getWorldPosition(listenerPosition);
+      const currListenerZones = this.currZones.get(listener);
       this.zones.forEach(zone => {
         addOrRemoveZone(currListenerZones, zone, listenerPosition);
         this.sources.forEach(source => {
@@ -170,7 +176,7 @@ export class AudioZonesSystem {
         });
       });
 
-      const isListenerUpdated = isUpdated(currListenerZones, this.prevZones.get(scene.audioListener));
+      const isListenerUpdated = isUpdated(currListenerZones, this.prevZones.get(listener));
       this.sources
         .filter(source => {
           return isListenerUpdated || isUpdated(this.currZones.get(source), this.prevZones.get(source));

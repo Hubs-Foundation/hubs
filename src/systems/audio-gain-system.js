@@ -1,8 +1,11 @@
+import { AudioListenerTag } from "../bit-components";
+import { getAudioPosition, isPositionalAudio } from "../bit-systems/audio-emitter-system";
 import {
   getCurrentAudioSettings,
   shouldAddSupplementaryAttenuation,
   updateAudioSettings
 } from "../update-audio-settings";
+import { anyEntityWith } from "../utils/bit-utils";
 
 const distanceModels = {
   linear: function (distance, rolloffFactor, refDistance, maxDistance) {
@@ -20,15 +23,17 @@ const calculateAttenuation = (() => {
   const listenerPos = new THREE.Vector3();
   const sourcePos = new THREE.Vector3();
   return (el, audio) => {
-    APP.audioListener.getWorldPosition(listenerPos);
-    audio.getWorldPosition(sourcePos);
+    const listenerEid = anyEntityWith(APP.world, AudioListenerTag);
+    const listener = APP.world.eid2obj.get(listenerEid);
+    listener.getWorldPosition(listenerPos);
+    getAudioPosition(el, sourcePos);
     const distance = sourcePos.distanceTo(listenerPos);
-    if (audio.panner) {
-      return distanceModels[audio.panner.distanceModel](
+    if (isPositionalAudio(audio)) {
+      return distanceModels[audio.distanceModel](
         distance,
-        audio.panner.rolloffFactor,
-        audio.panner.refDistance,
-        audio.panner.maxDistance
+        audio.rolloffFactor,
+        audio.refDistance,
+        audio.maxDistance
         // TODO: Why are coneInnerAngle, coneOuterAngle and coneOuterGain not used?
       );
     } else {

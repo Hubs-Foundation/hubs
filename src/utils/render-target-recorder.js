@@ -23,7 +23,7 @@ function blitFramebuffer(renderer, src, srcX0, srcY0, srcX1, srcY1, dest, dstX0,
   }
 }
 const createBlankAudioTrack = () => {
-  const context = THREE.AudioContext.getContext();
+  const context = APP.audioCtx;
   const oscillator = context.createOscillator();
   const gain = context.createGain();
   const destination = context.createMediaStreamDestination();

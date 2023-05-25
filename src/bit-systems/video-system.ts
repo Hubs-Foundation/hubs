@@ -42,8 +42,6 @@ export function videoSystem(world: HubsWorld, audioSystem: AudioSystem) {
     Emitter2Audio.set(videoEid, audioEid);
     const audio = world.eid2obj.get(audioEid)!;
     videoObj.add(audio);
-    // Note in media-video we call updateMatrixWorld here to force PositionalAudio's updateMatrixWorld to run even
-    // if it has an invisible parent. We don't want to have invisible parents now.
   });
   mediaLoadedQuery(world).forEach(videoEid => {
     const audioParamsEid = findAncestorWithComponent(world, AudioParams, videoEid);

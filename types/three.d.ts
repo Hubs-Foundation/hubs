@@ -4,6 +4,7 @@ import { Object3D, Mesh, WebGLRenderer, Scene, Camera } from "three";
 declare module "three" {
   interface Object3D {
     matrixNeedsUpdate: boolean;
+    matrixIsModified: boolean;
     childrenNeedMatrixWorldUpdate: boolean;
     eid?: number;
     el?: AElement;

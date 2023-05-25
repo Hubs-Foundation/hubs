@@ -2,17 +2,21 @@
 // Analyses audio source volume and adjusts gain value
 // to make it in a certain range.
 export class AudioNormalizer {
-  constructor(audio) {
-    this.audio = audio;
-    this.analyser = audio.context.createAnalyser();
-    this.connected = false;
+  constructor(elOrEid) {
+    this.audio = APP.audios.get(elOrEid);
+    this.audioGain = APP.gains.get(elOrEid);
+
+    this.analyser = APP.audioCtx.createAnalyser();
 
     // To analyse volume, 32 fftsize may be good enough
     this.analyser.fftSize = 32;
-    this.gain = audio.context.createGain();
+    this.gain = APP.audioCtx.createGain();
     this.timeData = new Uint8Array(this.analyser.frequencyBinCount);
     this.volumes = [];
     this.volumeSum = 0;
+
+    this.analyser.connect(this.gain);
+    this.connected = false;
   }
 
   apply() {
@@ -59,31 +63,20 @@ export class AudioNormalizer {
   }
 
   connect() {
-    // Hacks. THREE.Audio connects audio nodes when source is set.
-    // If audio is not played yet, THREE.Audio.setFilters() doesn't
-    // reset connections. Then manually caling .connect()/disconnect() here.
-    // This might be a bug of Three.js and should be fixed in Three.js side?
-    if (this.audio.source && !this.audio.isPlaying) {
+    if (!this.connected) {
       this.audio.disconnect();
+      this.audio.connect(this.analyser);
+      this.gain.connect(this.audioGain);
+      this.connected = true;
     }
-    const filters = this.audio.getFilters();
-    filters.unshift(this.analyser, this.gain);
-    this.audio.setFilters(filters);
-    if (this.audio.source && !this.audio.isPlaying) {
-      this.audio.connect();
-    }
-    this.connected = true;
   }
 
   disconnect() {
-    if (this.audio.source && !this.audio.isPlaying) {
+    if (this.connected) {
+      this.gain.disconnect();
       this.audio.disconnect();
+      this.audio.connect(this.audioGain);
+      this.connected = false;
     }
-    const filters = [this.analyser, this.gain];
-    this.audio.setFilters(this.audio.getFilters().filter(filter => !filters.includes(filter)));
-    if (this.audio.source && !this.audio.isPlaying) {
-      this.audio.connect();
-    }
-    this.connected = false;
   }
 }

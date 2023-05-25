@@ -1,6 +1,5 @@
 import { defineQuery, exitQuery, hasComponent, removeEntity } from "bitecs";
 import {
-  AudioEmitter,
   EnvironmentSettings,
   GLTFModel,
   LightTag,
@@ -22,7 +21,6 @@ import { gltfCache } from "../components/gltf-model-plus";
 import { releaseTextureByKey } from "../utils/load-texture";
 import { disposeMaterial, traverseSome, disposeNode } from "../utils/three-utils";
 import { forEachMaterial } from "../utils/material-utils";
-import { cleanupAudio } from "../bit-systems/audio-emitter-system";
 import { cleanupAudioDebugNavMesh } from "../bit-systems/audio-debug-system";
 import { cleanupMediaFrame } from "./bit-media-frames";
 
@@ -53,7 +51,6 @@ const cleanupGLTFs = cleanupObjOnExit(GLTFModel, obj => {
 const cleanupLights = cleanupObjOnExit(LightTag, obj => obj.dispose());
 const cleanupTexts = cleanupObjOnExit(TextTag, obj => obj.dispose());
 const cleanupMediaFrames = cleanupObjOnExit(MediaFrame, cleanupMediaFrame);
-const cleanupAudioEmitters = cleanupObjOnExit(AudioEmitter, cleanupAudio);
 const cleanupImages = cleanupObjOnExit(MediaImage, obj => {
   releaseTextureByKey(APP.getString(MediaImage.cacheKey[obj.eid]));
   obj.geometry.dispose();
@@ -134,7 +131,6 @@ export function removeObject3DSystem(world) {
   cleanupImages(world);
   cleanupVideos(world);
   cleanupEnvironmentSettings(world);
-  cleanupAudioEmitters(world);
   cleanupSkyboxes(world);
   cleanupSimpleWaters(world);
   cleanupMirrors(world);

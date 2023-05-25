@@ -15,9 +15,9 @@ import URL_MEDIA_LOADED from "../assets/sfx/A_bendUp.mp3";
 import URL_MEDIA_LOADING from "../assets/sfx/suspense.mp3";
 import URL_SPAWN_EMOJI from "../assets/sfx/emoji.mp3";
 import URL_SPEAKER_TONE from "../assets/sfx/tone.mp3";
-import { setMatrixWorld } from "../utils/three-utils";
 import { SourceType } from "../components/audio-params";
 import { getOverriddenPanningModelType } from "../update-audio-settings";
+import { isPositionalAudio, updateAudio, updatePannerNode } from "../bit-systems/audio-emitter-system";
 
 let soundEnum = 0;
 export const SOUND_HOVER_OR_GRAB = soundEnum++;
@@ -57,11 +57,11 @@ function decodeAudioData(audioContext, arrayBuffer) {
 export class SoundEffectsSystem {
   constructor(scene) {
     this.pendingAudioSourceNodes = [];
-    this.pendingPositionalAudios = [];
     this.positionalAudiosStationary = [];
     this.positionalAudiosFollowingObject3Ds = [];
+    this.positionalAudiosSources = new Map();
 
-    this.audioContext = THREE.AudioContext.getContext();
+    this.audioContext = APP.audioCtx;
     this.scene = scene;
 
     const soundsAndUrls = [
@@ -110,9 +110,9 @@ export class SoundEffectsSystem {
       });
     });
 
-    this.isDisabled = window.APP.store.state.preferences.disableSoundEffects;
-    window.APP.store.addEventListener("statechanged", () => {
-      const shouldBeDisabled = window.APP.store.state.preferences.disableSoundEffects;
+    this.isDisabled = APP.store.state.preferences.disableSoundEffects;
+    APP.store.addEventListener("statechanged", () => {
+      const shouldBeDisabled = APP.store.state.preferences.disableSoundEffects;
       if (shouldBeDisabled && !this.isDisabled) {
         this.stopAllPositionalAudios();
         // TODO: Technically we should stop any other sounds that have been started,
@@ -141,38 +141,50 @@ export class SoundEffectsSystem {
     const audioBuffer = this.sounds.get(sound);
     if (!audioBuffer) return null;
 
-    const disablePositionalAudio = window.APP.store.state.preferences.disableLeftRightPanning;
-    const positionalAudio = disablePositionalAudio
-      ? new THREE.Audio(this.scene.audioListener)
-      : new THREE.PositionalAudio(this.scene.audioListener);
-    positionalAudio.setBuffer(audioBuffer);
-    positionalAudio.loop = loop;
+    const disablePositionalAudio = APP.store.state.preferences.disableLeftRightPanning;
+    let positionalAudio;
+    if (disablePositionalAudio) {
+      positionalAudio = APP.audioCtx.createStereoPanner();
+    } else {
+      positionalAudio = APP.audioCtx.createPanner();
+    }
+    const source = APP.audioCtx.createBufferSource();
+    source.buffer = audioBuffer;
+    source.loop = loop;
+    source.connect(positionalAudio);
     if (!disablePositionalAudio) {
       const overriddenPanningModelType = getOverriddenPanningModelType();
       if (overriddenPanningModelType !== null) {
-        positionalAudio.panner.panningModel = overriddenPanningModelType;
+        positionalAudio.panningModel = overriddenPanningModelType;
       }
     }
-    this.pendingPositionalAudios.push(positionalAudio);
+    this.pendingAudioSourceNodes.push(source);
     this.scene.systems["hubs-systems"].audioSystem.addAudio({
       sourceType: SourceType.SFX,
       node: positionalAudio
     });
-    return positionalAudio;
+    return { positionalAudio, source };
   }
 
   playPositionalSoundAt(sound, position, loop) {
-    const positionalAudio = this.enqueuePositionalSound(sound, loop);
+    const { positionalAudio, source } = this.enqueuePositionalSound(sound, loop);
     if (!positionalAudio) return null;
-    positionalAudio.position.copy(position);
-    positionalAudio.matrixWorldNeedsUpdate = true;
+    if (positionalAudio instanceof PannerNode) {
+      positionalAudio.positionX.value = position.X;
+      positionalAudio.positionY.value = position.Y;
+      positionalAudio.positionZ.value = position.Z;
+    }
+    source.addEventListener("ended", () => this.stopPositionalAudio(positionalAudio));
     this.positionalAudiosStationary.push(positionalAudio);
+    this.positionalAudiosSources.set(positionalAudio, source);
   }
 
   playPositionalSoundFollowing(sound, object3D, loop) {
-    const positionalAudio = this.enqueuePositionalSound(sound, loop);
+    const { positionalAudio, source } = this.enqueuePositionalSound(sound, loop);
     if (!positionalAudio) return null;
+    source.addEventListener("ended", () => this.stopPositionalAudio(positionalAudio));
     this.positionalAudiosFollowingObject3Ds.push({ positionalAudio, object3D });
+    this.positionalAudiosSources.set(positionalAudio, source);
     return positionalAudio;
   }
 
@@ -203,24 +215,28 @@ export class SoundEffectsSystem {
     const index = this.pendingAudioSourceNodes.indexOf(node);
     if (index !== -1) {
       this.pendingAudioSourceNodes.splice(index, 1);
-    } else {
-      node.stop();
-      this.scene.systems["hubs-systems"].audioSystem.removeAudio({ node });
     }
+    node.stop();
+    this.scene.systems["hubs-systems"].audioSystem.removeAudio({ node });
   }
 
   stopPositionalAudio(inPositionalAudio) {
-    const pendingIndex = this.pendingPositionalAudios.indexOf(inPositionalAudio);
-    if (pendingIndex !== -1) {
-      this.pendingPositionalAudios.splice(pendingIndex, 1);
-    } else {
-      if (inPositionalAudio.isPlaying) {
-        inPositionalAudio.stop();
-      }
-      if (inPositionalAudio.parent) {
-        inPositionalAudio.removeFromParent();
-      }
+    const source = this.positionalAudiosSources.get(inPositionalAudio);
+    if (source) {
+      source.stop();
+      source.disconnect();
     }
+    let index = this.positionalAudiosStationary.indexOf(inPositionalAudio);
+    if (index !== -1) {
+      this.positionalAudiosStationary.splice(index, 1);
+      this.positionalAudiosStationary.delete(inPositionalAudio);
+    }
+    index = this.positionalAudiosFollowingObject3Ds.indexOf(inPositionalAudio);
+    if (index !== -1) {
+      this.positionalAudiosFollowingObject3Ds.splice(index, 1);
+      this.positionalAudiosFollowingObject3Ds.delete(inPositionalAudio);
+    }
+    this.positionalAudiosSources.delete(inPositionalAudio);
     this.positionalAudiosStationary = this.positionalAudiosStationary.filter(
       positionalAudio => positionalAudio !== inPositionalAudio
     );
@@ -249,34 +265,16 @@ export class SoundEffectsSystem {
     }
 
     for (let i = 0; i < this.pendingAudioSourceNodes.length; i++) {
-      this.pendingAudioSourceNodes[i].start();
+      const source = this.pendingAudioSourceNodes[i];
+      source.start();
     }
     this.pendingAudioSourceNodes.length = 0;
-
-    for (let i = 0; i < this.pendingPositionalAudios.length; i++) {
-      const pendingPositionalAudio = this.pendingPositionalAudios[i];
-      this.scene.object3D.add(pendingPositionalAudio);
-      pendingPositionalAudio.play();
-    }
-    this.pendingPositionalAudios.length = 0;
-
-    for (let i = this.positionalAudiosStationary.length - 1; i >= 0; i--) {
-      const positionalAudio = this.positionalAudiosStationary[i];
-      if (!positionalAudio.isPlaying) {
-        this.stopPositionalAudio(positionalAudio);
-      }
-    }
 
     for (let i = this.positionalAudiosFollowingObject3Ds.length - 1; i >= 0; i--) {
       const positionalAudioAndObject3D = this.positionalAudiosFollowingObject3Ds[i];
       const positionalAudio = positionalAudioAndObject3D.positionalAudio;
       const object3D = positionalAudioAndObject3D.object3D;
-      if (!positionalAudio.isPlaying || !object3D.parent) {
-        this.stopPositionalAudio(positionalAudio);
-      } else {
-        object3D.updateMatrices();
-        setMatrixWorld(positionalAudio, object3D.matrixWorld);
-      }
+      updatePannerNode(positionalAudio, object3D);
     }
   }
 }
