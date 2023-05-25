@@ -1,7 +1,7 @@
 import { AudioType, SourceType } from "./audio-params";
 import { getCurrentAudioSettings, updateAudioSettings } from "../update-audio-settings";
 import { isRoomOwner } from "../utils/hub-utils";
-import { isPositionalAudio, updateAudio } from "../bit-systems/audio-emitter-system";
+import { updateAudio } from "../bit-systems/audio-emitter-system";
 const INFO_INIT_FAILED = "Failed to initialize avatar-audio-source.";
 const INFO_NO_NETWORKED_EL = "Could not find networked el.";
 const INFO_NO_OWNER = "Networked component has no owner.";
