@@ -59,5 +59,7 @@ const _signInAndPinOrUnpinElement = (hubChannel: HubChannel, world: HubsWorld, e
 export const isPinnable = (world: HubsWorld, eid: EntityID) => {
   const fileId = APP.getString(FileInfo.id[eid]);
   const isPromoted = FileInfo.flags[eid] & FILE_INFO_FLAGS.IS_PERMANENT;
-  return hasComponent(world, Pinnable, eid) && !!(isPromoted || (fileId && getPromotionTokenForFile(fileId)));
+  const isPublic = !fileId;
+  const isMine = !!(fileId && getPromotionTokenForFile(fileId));
+  return hasComponent(world, Pinnable, eid) && (isPromoted || isPublic || isMine);
 };
