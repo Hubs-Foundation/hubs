@@ -26,23 +26,35 @@ const createWhiteNoise = (audioContext: AudioContext, gain: number): AudioBuffer
 };
 
 const addSourceToAudioTarget = (audioSourceEid: number, source: AudioNode) => {
+  removeSourceFromAudioTarget(audioSourceEid);
   const audioTargetEids = source2Target.get(audioSourceEid);
   audioTargetEids?.forEach(audioTargetEid => {
-    const targetAudio = APP.audios.get(audioTargetEid)!;
-    source.connect(targetAudio);
+    const target = target2Node.get(audioTargetEid)!;
+    source.connect(target);
   });
+  source2Node.set(audioSourceEid, source);
 };
 
-const connectSourceToTarget = (audioSourceEid: number, audioTargetEid: number) => {
+const removeSourceFromAudioTarget = (audioSourceEid: number) => {
+  const node = source2Node.get(audioSourceEid)!;
+  node && node.disconnect();
+  if (AudioSource.flags[audioSourceEid] & AUDIO_SOURCE_FLAGS.DEBUG) {
+    const whiteNoise = source2Noise.get(audioSourceEid)!;
+    whiteNoise.disconnect();
+  }
+  source2Node.delete(audioSourceEid);
+};
+
+const connectSourceToTargets = (audioSourceEid: number, audioTargetEid: number) => {
   let targetEids = source2Target.get(audioSourceEid);
   if (!targetEids?.includes(audioTargetEid)) {
     !targetEids && (targetEids = new Array<number>());
     targetEids.push(audioTargetEid);
     source2Target.set(audioSourceEid, targetEids);
-    if (AudioSource.flags[audioSourceEid] & AUDIO_SOURCE_FLAGS.DEBUG) {
-      const whiteNoise = createWhiteNoise(APP.audioCtx, 0.01);
-      source2Noise.set(audioSourceEid, whiteNoise);
-      addSourceToAudioTarget(audioSourceEid, whiteNoise);
+    const source = source2Node.get(audioSourceEid);
+    const target = target2Node.get(audioTargetEid);
+    if (source && target) {
+      source.connect(target);
     }
   }
 };
@@ -54,6 +66,7 @@ const source2Emitter = new Map<number, AElement>();
 const source2Radius = new Map<number, number>();
 const source2Debug = new Map<number, Object3D>();
 const sourceWorldPos = new Vector3();
+const target2Node = new Map<number, AudioNode>();
 
 const audioTargetQuery = defineQuery([AudioTarget]);
 const audioTargetEnterQuery = enterQuery(audioTargetQuery);
@@ -67,24 +80,25 @@ export function audioTargetSystem(world: HubsWorld, audioSystem: AudioSystem) {
   audioTargetEnterQuery(world).forEach(audioTargetEid => {
     const ctx = APP.audioCtx;
     makeAudioEntity(world, audioTargetEid, SourceType.AUDIO_TARGET, audioSystem);
-    const audioObj = world.eid2obj.get(audioTargetEid)!;
-    const audioTarget = world.eid2obj.get(audioTargetEid)!;
-    audioTarget.add(audioObj);
 
+    const audio = APP.audios.get(audioTargetEid)!;
     const maxDelay = AudioTarget.maxDelay[audioTargetEid];
     const minDelay = AudioTarget.minDelay[audioTargetEid];
     if (maxDelay > 0) {
-      const audio = APP.audios.get(audioTargetEid)!;
       const delayNode = ctx.createDelay(maxDelay);
       delayNode.delayTime.value = THREE.MathUtils.randFloat(minDelay, maxDelay);
       audio.disconnect();
       audio.connect(delayNode);
       audioSystem.addAudio({ node: delayNode, sourceType: SourceType.AUDIO_TARGET });
+      target2Node.set(audioTargetEid, delayNode);
+    } else {
+      audioSystem.addAudio({ node: audio, sourceType: SourceType.AUDIO_TARGET });
+      target2Node.set(audioTargetEid, audio);
     }
 
     const audioSourceEid = AudioTarget.source[audioTargetEid];
     if (audioSourceEids.includes(audioSourceEid)) {
-      connectSourceToTarget(audioSourceEid, audioTargetEid);
+      connectSourceToTargets(audioSourceEid, audioTargetEid);
     }
 
     const audioSettings = APP.audioOverrides.get(audioTargetEid)!;
@@ -94,13 +108,21 @@ export function audioTargetSystem(world: HubsWorld, audioSystem: AudioSystem) {
   audioTargetExitQuery(world).forEach(audioTargetEid => {
     const audioSourceEid = AudioTarget.source[audioTargetEid];
     source2Target.delete(audioSourceEid);
+    const node = target2Node.get(audioTargetEid)!;
+    node.disconnect();
+    target2Node.delete(audioTargetEid);
     APP.audioOverrides.delete(audioTargetEid);
   });
   audioSourceEnterQuery(world).forEach(audioSourceEid => {
     const audioTargetEid = audioTargetEids.find(
       audioTargetEid => AudioTarget.source[audioTargetEid] === audioSourceEid
     );
-    audioTargetEid && connectSourceToTarget(audioSourceEid, audioTargetEid);
+    if (AudioSource.flags[audioSourceEid] & AUDIO_SOURCE_FLAGS.DEBUG) {
+      const whiteNoise = createWhiteNoise(APP.audioCtx, 0.01);
+      source2Noise.set(audioSourceEid, whiteNoise);
+      addSourceToAudioTarget(audioSourceEid, whiteNoise);
+    }
+    audioTargetEid && connectSourceToTargets(audioSourceEid, audioTargetEid);
 
     // TODO this should probably be using bounds similar to media-frames and trigger-volume.
     // Doing the simple thing for now since we only support avatar audio sources currently
@@ -116,11 +138,8 @@ export function audioTargetSystem(world: HubsWorld, audioSystem: AudioSystem) {
     }
   });
   audioSourceExitQuery(world).forEach(audioSourceEid => {
-    const noise = source2Noise.get(audioSourceEid)!;
-    noise.disconnect();
+    removeSourceFromAudioTarget(audioSourceEid);
     source2Noise.delete(audioSourceEid);
-    const node = source2Node.get(audioSourceEid)!;
-    node.disconnect();
     source2Node.delete(audioSourceEid);
     source2Target.delete(audioSourceEid);
     source2Radius.delete(audioSourceEid);
@@ -178,13 +197,10 @@ export function audioTargetSystem(world: HubsWorld, audioSystem: AudioSystem) {
           const muteSelf = AudioSource.flags[audioSourceEid] & AUDIO_SOURCE_FLAGS.MUTE_SELF;
           const isOwnAvatar = avatar.id === "avatar-rig";
           if (muteSelf && isOwnAvatar) {
-            const node = source2Node.get(audioSourceEid)!;
-            node.disconnect();
-            source2Node.delete(audioSourceEid);
+            removeSourceFromAudioTarget(audioSourceEid);
           } else {
             getMediaStream(avatar).then(stream => {
               const node = APP.audioCtx.createMediaStreamSource(stream);
-              source2Node.set(audioSourceEid, node);
               addSourceToAudioTarget(audioSourceEid, node);
             });
           }

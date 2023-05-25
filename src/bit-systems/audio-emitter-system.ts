@@ -1,4 +1,4 @@
-import { addComponent, addEntity, defineQuery, exitQuery, removeComponent } from "bitecs";
+import { addComponent, defineQuery, exitQuery, removeComponent } from "bitecs";
 import { MeshStandardMaterial, Mesh, Vector3, Object3D, Quaternion } from "three";
 import { HubsWorld } from "../app";
 import { AudioEmitter, AudioSettingsChanged } from "../bit-components";
@@ -152,8 +152,6 @@ export function makeAudioEntity(
   addComponent(world, AudioEmitter, eid);
   audioSystem.addAudio({ sourceType, node: gain });
   updateAudioSettings(eid, audio);
-
-  return eid;
 }
 
 const staleAudioEmittersQuery = defineQuery([AudioEmitter, AudioSettingsChanged]);

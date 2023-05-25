@@ -1,4 +1,4 @@
-import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent } from "bitecs";
+import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent } from "bitecs";
 import { Mesh, MeshStandardMaterial } from "three";
 import { HubsWorld } from "../app";
 import {
@@ -39,8 +39,6 @@ export function videoSystem(world: HubsWorld, audioSystem: AudioSystem) {
       });
     }
     makeAudioEntity(world, videoEid, SourceType.MEDIA_VIDEO, audioSystem);
-    const audio = world.eid2obj.get(videoEid)!;
-    videoObj.add(audio);
   });
   mediaLoadedQuery(world).forEach(videoEid => {
     const audioParamsEid = findAncestorWithComponent(world, AudioParams, videoEid);
