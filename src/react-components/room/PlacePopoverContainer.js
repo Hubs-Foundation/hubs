@@ -12,20 +12,12 @@ import { ReactComponent as UploadIcon } from "../icons/Upload.svg";
 import { PlacePopoverButton } from "./PlacePopover";
 import { ObjectUrlModalContainer } from "./ObjectUrlModalContainer";
 import configs from "../../utils/configs";
-import { FormattedMessage, defineMessage, useIntl } from "react-intl";
+import { FormattedMessage } from "react-intl";
 import { anyEntityWith } from "../../utils/bit-utils";
 import { MyCameraTool } from "../../bit-components";
-import { ToolTip } from "@mozilla/lilypad-ui";
-
-const placeTooltipDescription = defineMessage({
-  id: "place-tooltip.description",
-  defaultMessage: "Select from a variety of objects and tools to edit your room"
-});
 
 export function PlacePopoverContainer({ scene, mediaSearchStore, showNonHistoriedDialog, hubChannel }) {
   const [items, setItems] = useState([]);
-  const intl = useIntl();
-  const description = intl.formatMessage(placeTooltipDescription);
 
   useEffect(() => {
     function updateItems() {
@@ -119,11 +111,7 @@ export function PlacePopoverContainer({ scene, mediaSearchStore, showNonHistorie
     };
   }, [hubChannel, mediaSearchStore, showNonHistoriedDialog, scene]);
 
-  return (
-    <ToolTip description={description}>
-      <PlacePopoverButton items={items} />
-    </ToolTip>
-  );
+  return <PlacePopoverButton items={items} />;
 }
 
 PlacePopoverContainer.propTypes = {
