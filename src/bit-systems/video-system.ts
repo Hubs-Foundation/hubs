@@ -13,7 +13,7 @@ import {
 import { SourceType } from "../components/audio-params";
 import { AudioSystem } from "../systems/audio-system";
 import { findAncestorWithComponent } from "../utils/bit-utils";
-import { Emitter2Audio, Emitter2Params, makeAudioEntity } from "./audio-emitter-system";
+import { Emitter2Params, makeAudioEntity } from "./audio-emitter-system";
 import { takeSoftOwnership } from "../utils/take-soft-ownership";
 
 enum Flags {
@@ -38,26 +38,23 @@ export function videoSystem(world: HubsWorld, audioSystem: AudioSystem) {
         console.error("Error auto-playing video.");
       });
     }
-    const audioEid = makeAudioEntity(world, videoEid, SourceType.MEDIA_VIDEO, audioSystem);
-    Emitter2Audio.set(videoEid, audioEid);
-    const audio = world.eid2obj.get(audioEid)!;
+    makeAudioEntity(world, videoEid, SourceType.MEDIA_VIDEO, audioSystem);
+    const audio = world.eid2obj.get(videoEid)!;
     videoObj.add(audio);
   });
   mediaLoadedQuery(world).forEach(videoEid => {
     const audioParamsEid = findAncestorWithComponent(world, AudioParams, videoEid);
     if (audioParamsEid) {
       const audioSettings = APP.audioOverrides.get(audioParamsEid)!;
-      const audioEid = Emitter2Audio.get(videoEid)!;
-      APP.audioOverrides.set(audioEid, audioSettings);
+      APP.audioOverrides.set(videoEid, audioSettings);
       Emitter2Params.set(videoEid, audioParamsEid);
-      addComponent(world, AudioSettingsChanged, audioEid);
+      addComponent(world, AudioSettingsChanged, videoEid);
     }
   });
   mediaVideoExitQuery(world).forEach(videoEid => {
     const audioParamsEid = Emitter2Params.get(videoEid);
     audioParamsEid && APP.audioOverrides.delete(audioParamsEid);
     Emitter2Params.delete(videoEid);
-    Emitter2Audio.delete(videoEid);
   });
 
   networkedVideoEnterQuery(world).forEach(function (eid) {

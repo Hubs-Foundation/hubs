@@ -1,4 +1,4 @@
-import { addComponent, addEntity, defineQuery, enterQuery, exitQuery, removeComponent } from "bitecs";
+import { addComponent, addEntity, defineQuery, exitQuery, removeComponent } from "bitecs";
 import { MeshStandardMaterial, Mesh, Vector3, Object3D, Quaternion } from "three";
 import { HubsWorld } from "../app";
 import { AudioEmitter, AudioSettingsChanged } from "../bit-components";
@@ -10,7 +10,6 @@ import { ElOrEid } from "../utils/bit-utils";
 
 export type AudioNode = PannerNode | StereoPannerNode;
 
-export const Emitter2Audio = (AudioEmitter as any).audios as Map<number, number>;
 export const Emitter2Params = (AudioEmitter as any).params as Map<number, number>;
 
 export function isPositionalAudio(node: AudioNode): node is PannerNode {
@@ -109,24 +108,22 @@ export function cleanupAudio(eid: EntityID, audioSystem: AudioSystem) {
 
 function swapAudioType(world: HubsWorld, audioSystem: AudioSystem, eid: number, type: AudioType) {
   cleanupAudio(eid, audioSystem);
-  APP.audios;
   makeAudioEntity(world, eid, APP.sourceType.get(eid)!, audioSystem, type);
 }
 
 export function makeAudioEntity(
   world: HubsWorld,
-  source: number,
+  eid: number,
   sourceType: SourceType,
   audioSystem: AudioSystem,
   overrideAudioType?: AudioType
 ) {
-  const eid = addEntity(world);
   APP.sourceType.set(eid, sourceType);
 
   let { audioType } = getCurrentAudioSettings(eid);
   overrideAudioType && (audioType = overrideAudioType);
   let audio;
-  if (audioType === PannerNode) {
+  if (audioType === AudioType.PannerNode) {
     audio = APP.audioCtx.createPanner();
   } else {
     audio = APP.audioCtx.createStereoPanner();
@@ -138,7 +135,7 @@ export function makeAudioEntity(
   APP.gains.set(eid, gain);
 
   if (sourceType === SourceType.MEDIA_VIDEO) {
-    const videoObj = world.eid2obj.get(source) as Mesh;
+    const videoObj = world.eid2obj.get(eid) as Mesh;
     const video = (videoObj.material as MeshStandardMaterial).map!.image as HTMLVideoElement;
     if (video.paused) {
       APP.isAudioPaused.add(eid);
@@ -161,7 +158,6 @@ export function makeAudioEntity(
 
 const staleAudioEmittersQuery = defineQuery([AudioEmitter, AudioSettingsChanged]);
 const audioEmitterQuery = defineQuery([AudioEmitter]);
-const audioEmitterEnter = enterQuery(audioEmitterQuery);
 const audioEmitterExit = exitQuery(audioEmitterQuery);
 export function audioEmitterSystem(world: HubsWorld, audioSystem: AudioSystem) {
   staleAudioEmittersQuery(world).forEach(function (eid) {
@@ -183,7 +179,7 @@ export function audioEmitterSystem(world: HubsWorld, audioSystem: AudioSystem) {
     const audioSystem = APP.scene?.systems["hubs-systems"].audioSystem;
     cleanupAudio(eid, audioSystem);
   });
-  audioEmitterEnter(world).forEach(eid => {
+  audioEmitterQuery(world).forEach(eid => {
     const obj = APP.world.eid2obj.get(eid)!;
     updateAudio(eid, obj);
   });

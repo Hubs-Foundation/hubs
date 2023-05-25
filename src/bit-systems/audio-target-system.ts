@@ -7,7 +7,7 @@ import { SourceType } from "../components/audio-params";
 import { getMediaStream } from "../components/avatar-audio-source";
 import { AUDIO_SOURCE_FLAGS } from "../inflators/audio-source";
 import { AudioSystem } from "../systems/audio-system";
-import { Emitter2Audio, makeAudioEntity } from "./audio-emitter-system";
+import { makeAudioEntity } from "./audio-emitter-system";
 
 const createWhiteNoise = (audioContext: AudioContext, gain: number): AudioBufferSourceNode => {
   const bufferSize = 2 * audioContext.sampleRate,
@@ -28,8 +28,7 @@ const createWhiteNoise = (audioContext: AudioContext, gain: number): AudioBuffer
 const addSourceToAudioTarget = (audioSourceEid: number, source: AudioNode) => {
   const audioTargetEids = source2Target.get(audioSourceEid);
   audioTargetEids?.forEach(audioTargetEid => {
-    const audioEid = Emitter2Audio.get(audioTargetEid)!;
-    const targetAudio = APP.audios.get(audioEid)!;
+    const targetAudio = APP.audios.get(audioTargetEid)!;
     source.connect(targetAudio);
   });
 };
@@ -67,16 +66,15 @@ export function audioTargetSystem(world: HubsWorld, audioSystem: AudioSystem) {
   const audioSourceEids = audioSourceQuery(world);
   audioTargetEnterQuery(world).forEach(audioTargetEid => {
     const ctx = APP.audioCtx;
-    const audioEid = makeAudioEntity(world, audioTargetEid, SourceType.AUDIO_TARGET, audioSystem);
-    Emitter2Audio.set(audioTargetEid, audioEid);
-    const audioObj = world.eid2obj.get(audioEid)!;
+    makeAudioEntity(world, audioTargetEid, SourceType.AUDIO_TARGET, audioSystem);
+    const audioObj = world.eid2obj.get(audioTargetEid)!;
     const audioTarget = world.eid2obj.get(audioTargetEid)!;
     audioTarget.add(audioObj);
 
     const maxDelay = AudioTarget.maxDelay[audioTargetEid];
     const minDelay = AudioTarget.minDelay[audioTargetEid];
     if (maxDelay > 0) {
-      const audio = APP.audios.get(audioEid)!;
+      const audio = APP.audios.get(audioTargetEid)!;
       const delayNode = ctx.createDelay(maxDelay);
       delayNode.delayTime.value = THREE.MathUtils.randFloat(minDelay, maxDelay);
       audio.disconnect();
@@ -90,11 +88,10 @@ export function audioTargetSystem(world: HubsWorld, audioSystem: AudioSystem) {
     }
 
     const audioSettings = APP.audioOverrides.get(audioTargetEid)!;
-    APP.audioOverrides.set(audioEid, audioSettings);
-    addComponent(world, AudioSettingsChanged, audioEid);
+    APP.audioOverrides.set(audioTargetEid, audioSettings);
+    addComponent(world, AudioSettingsChanged, audioTargetEid);
   });
   audioTargetExitQuery(world).forEach(audioTargetEid => {
-    Emitter2Audio.delete(audioTargetEid);
     const audioSourceEid = AudioTarget.source[audioTargetEid];
     source2Target.delete(audioSourceEid);
     APP.audioOverrides.delete(audioTargetEid);

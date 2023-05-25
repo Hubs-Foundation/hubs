@@ -222,7 +222,6 @@ export const VideoMenu = defineComponent({
 export const AudioEmitter = defineComponent({
   flags: Types.ui8
 });
-AudioEmitter.audios = new Map();
 AudioEmitter.params = new Map();
 export const AudioSettingsChanged = defineComponent();
 export const Deletable = defineComponent();
