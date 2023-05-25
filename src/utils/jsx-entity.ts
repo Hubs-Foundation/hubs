@@ -371,7 +371,6 @@ export interface JSXComponentData extends ComponentData {
   waypointPreview?: boolean;
   pdf?: PDFParams;
   loopAnimation?: LoopAnimationParams;
- 
   lookatuser?: any;
 }
 

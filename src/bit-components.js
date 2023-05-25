@@ -9,11 +9,11 @@ export const $isStringType = Symbol("isStringType");
 export const Agent = defineComponent({
   language: Types.ui8,
   modelRef: Types.eid,
-  panelRef: Types.eid
+  panelRef: Types.eid,
+  textRef: Types.eid
 });
 
 export const LookAtUser = defineComponent();
-export const agentText = defineComponent();
 
 export const Networked = defineComponent({
   id: Types.ui32,

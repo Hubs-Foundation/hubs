@@ -32,7 +32,7 @@ export function AgentEntity() {
   return(     
     <entity name="Agent" agent={{ language, panelRef, modelRef, textRef}} scale={[1, 1, 1]} ref={agentRef} lookatuser>
 
-      <AgentTextPanel text={"This is a text"} panelRef={panelRef} />
+      <AgentTextPanel textRef={textRef} text={text} panelRef={panelRef} />
       <entity lookatuser name="agentObject" mediaLoader={agentMediaParams} ref={modelRef} scale={[1, 1, 1]}/>
 
     </entity>
