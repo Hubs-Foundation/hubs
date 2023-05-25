@@ -78,18 +78,10 @@ export const updatePannerNode = (() => {
 
 export const updateAudio = (elOrEid: ElOrEid, obj: Object3D) => {
   const audio = APP.audios.get(elOrEid)!;
-  // const gain = APP.gains.get(elOrEid)!;
   const muted = !!APP.mutedState.has(elOrEid);
   const clipped = !!APP.clippingState.has(elOrEid);
   const isAudioPaused = !!APP.isAudioPaused.has(elOrEid);
-  if (
-    isPositionalAudio(audio) &&
-    // (!gain || gain.gain.value > 0.00001) &&
-    !muted &&
-    !clipped &&
-    !isAudioPaused &&
-    obj.matrixIsModified
-  ) {
+  if (isPositionalAudio(audio) && !muted && !clipped && !isAudioPaused && obj.matrixIsModified) {
     updatePannerNode(audio, obj);
   }
 };
