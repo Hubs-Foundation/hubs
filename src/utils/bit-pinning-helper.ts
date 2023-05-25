@@ -9,6 +9,10 @@ import { takeOwnership } from "./take-ownership";
 import { getPromotionTokenForFile } from "./media-utils";
 
 export const setPinned = async (hubChannel: HubChannel, world: HubsWorld, eid: number, shouldPin: boolean) => {
+  if (!hasComponent(world, Pinnable, eid) || !hasComponent(world, FileInfo, eid)) {
+    console.warn("PinningHelper: Attempted pin/unpin on an entity without both Pinnable and FileInfo component", eid);
+    return;
+  }
   _signInAndPinOrUnpinElement(hubChannel, world, eid, shouldPin);
 };
 
