@@ -17,7 +17,7 @@ import URL_SPAWN_EMOJI from "../assets/sfx/emoji.mp3";
 import URL_SPEAKER_TONE from "../assets/sfx/tone.mp3";
 import { SourceType } from "../components/audio-params";
 import { getOverriddenPanningModelType } from "../update-audio-settings";
-import { isPositionalAudio, updateAudio, updatePannerNode } from "../bit-systems/audio-emitter-system";
+import { updatePannerNode } from "../bit-systems/audio-emitter-system";
 
 let soundEnum = 0;
 export const SOUND_HOVER_OR_GRAB = soundEnum++;

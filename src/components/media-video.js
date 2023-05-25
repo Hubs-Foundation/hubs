@@ -23,7 +23,7 @@ import { scaleToAspectRatio } from "../utils/scale-to-aspect-ratio";
 import { isSafari } from "../utils/detect-safari";
 import { isIOS as detectIOS } from "../utils/is-mobile";
 import { Layers } from "../camera-layers";
-import { isPositionalAudio, updateAudio } from "../bit-systems/audio-emitter-system";
+import { updateAudio } from "../bit-systems/audio-emitter-system";
 
 const ONCE_TRUE = { once: true };
 const TYPE_IMG_PNG = { type: "image/png" };
