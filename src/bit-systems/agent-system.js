@@ -1,52 +1,46 @@
-import { defineQuery, entityExists, exitQuery, hasComponent } from "bitecs";
-import { TextRenderInfo } from "troika-three-text";
-import { Agent } from "../bit-components";
+import { defineQuery, enterQuery, exitQuery } from "bitecs";
+import { Agent, Interacted } from "../bit-components";
+import { lowerIndex, raiseIndex } from "./agent-panel-system";
+import { hasComponent } from "bitecs";
 
-let flag = true;
-export function AgentSystem(world){
+const agentQuery = defineQuery([Agent]);
+const enterAgentQuery = enterQuery(agentQuery);
+const exitAgentQuery = exitQuery(agentQuery);
 
-    const agentQuery = defineQuery([Agent]);
+function clicked(eid) {
+  return hasComponent(APP.world, Interacted, eid);
+}
 
-    agentQuery(world).forEach(eid =>{
+export function AgentSystem(world) {
+  enterAgentQuery(world).forEach(eid => {
+    const sliceref = Agent.panelRef[eid];
+    const panelObj = world.eid2obj.get(sliceref);
+    const axesHelper = new THREE.AxesHelper(5);
+    panelObj.add(axesHelper);
+  });
 
-        const sliceref = Agent.panelRef[eid];
-        const modelref = Agent.modelRef[eid];
-        const textref = Agent.textRef[eid];
+  agentQuery(world).forEach(eid => {
+    const modelref = Agent.modelRef[eid];
+    const agentObj = world.eid2obj.get(eid);
+    const modelObj = world.eid2obj.get(modelref);
+    var avatarPovObj = document.querySelector("#avatar-pov-node").object3D;
 
-        const agentObj = world.eid2obj.get(eid);
-        const modelObj = world.eid2obj.get(modelref);
-        const panelObj = world.eid2obj.get(sliceref);
-        const textObj = world.eid2obj.get(textref); 
-        let textVector = new THREE.Vector3();
-        
+    const dist = agentObj.position.distanceTo(avatarPovObj.getWorldPosition(new THREE.Vector3()));
 
-        if (flag){
-            const axesHelper = new THREE.AxesHelper(5);
-            const axesHelper1 = new THREE.AxesHelper(5);
-            panelObj.add(axesHelper);
-            modelObj.add(axesHelper1);
-            textVector = textObj.geometry.boundingBox.getSize(textVector);
+    if (dist > 5) {
+      APP.scene.emit("agent-toggle");
+    }
 
-            console.log(textObj.geometry.boundingBox);
-            console.log(textVector);
-            flag = false;
-        }
-        textVector = textObj.geometry.boundingBox.getSize(textVector);
+    if (dist < 0.3) agentObj.visible = false;
+    else agentObj.visible = true;
+    modelObj.rotateOnAxis(new THREE.Vector3(0, 1, 0), -1.5707963268);
 
-        console.log(textObj.geometry.boundingBox);
-        console.log(textVector);
-        console.log(textObj.textLayout);
+    if (clicked(Agent.nextRef[eid])) {
+      raiseIndex();
+    }
 
-        var avatarPovObj = document.querySelector("#avatar-pov-node").object3D;
-        const dist = agentObj.position.distanceTo(avatarPovObj.getWorldPosition(new THREE.Vector3()));
-              
-
-        if (dist > 5){
-            APP.scene.emit("agent-toggle");
-        }
-
-        if (dist < 0.3) agentObj.visible = false;
-        else agentObj.visible = true;
-        modelObj.rotateOnAxis(new THREE.Vector3(0,1,0),-1.5707963268 );
-    })
-  }
+    if (clicked(Agent.prevRef[eid])) {
+      lowerIndex();
+    }
+  });
+}

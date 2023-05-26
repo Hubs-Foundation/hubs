@@ -81,6 +81,7 @@ import { mixerAnimatableSystem } from "../bit-systems/mixer-animatable";
 import { loopAnimationSystem } from "../bit-systems/loop-animation";
 import { AgentSystem } from "../bit-systems/agent-system";
 import { lookAtUserSystem } from "../bit-systems/look-at-user";
+import { PanelIndexSystem } from "../bit-systems/agent-panel-system";
 
 declare global {
   interface Window {
@@ -151,7 +152,6 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   const sceneEl = AFRAME.scenes[0];
   const aframeSystems = sceneEl.systems;
   const hubsSystems = aframeSystems["hubs-systems"];
-
 
   // TODO does anything actually ever pause the scene?
   if (!sceneEl.isPlaying && !hubsSystems.DOMContentDidLoad) return;
@@ -266,13 +266,14 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   simpleWaterSystem(world);
   linearTransformSystem(world);
   quackSystem(world);
-  
+
   mixerAnimatableSystem(world);
-  loopAnimationSystem(world);  
+  loopAnimationSystem(world);
   lookAtUserSystem(world);
   AgentSystem(world);
 
   // All systems that update text properties should run before this
+  PanelIndexSystem(world);
   textSystem(world);
 
   videoTextureSystem(world);

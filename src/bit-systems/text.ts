@@ -1,7 +1,7 @@
-import { defineQuery } from "bitecs";
+import { defineQuery, hasComponent } from "bitecs";
 import { Text as TroikaText } from "troika-three-text";
 import { HubsWorld } from "../app";
-import { TextTag } from "../bit-components";
+import { TextTag, AgentTextPanel } from "../bit-components";
 
 const textQuery = defineQuery([TextTag]);
 
@@ -28,6 +28,13 @@ export function textSystem(world: HubsWorld) {
     // Assumes it is safe even if text object is
     // disposed before the async processing is done
     // because TroikaText properly handles
-    text.sync();
+
+    const callback = () => {
+      if (hasComponent(world, AgentTextPanel, eid)) {
+        console.log("there is some agentpaneltext");
+      } else console.log("no agent panel text");
+    };
+
+    text.sync(callback);
   });
 }

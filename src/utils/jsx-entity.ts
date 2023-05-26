@@ -41,7 +41,9 @@ import {
   Mirror,
   MixerAnimatableInitialize,
   Agent,
-  LookAtUser
+  LookAtUser,
+  AgentTextPanel,
+  PanelIndex
 } from "../bit-components";
 
 import { inflateMediaLoader } from "../inflators/media-loader";
@@ -360,7 +362,11 @@ export interface JSXComponentData extends ComponentData {
     panelRef: Ref;
     modelRef: Ref;
     textRef: Ref;
+    nextRef: Ref;
+    prevRef: Ref;
   };
+  agentTextPanel?: any;
+  panelIndex?: { index: number };
   mediaLoader?: MediaLoaderParams;
   mixerAnimatable?: boolean;
   sceneRoot?: boolean;
@@ -487,7 +493,9 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
 
   // agent: inflateAgent
   agent: createDefaultInflator(Agent),
-  lookatuser: createDefaultInflator(LookAtUser)
+  lookatuser: createDefaultInflator(LookAtUser),
+  agentTextPanel: createDefaultInflator(AgentTextPanel),
+  panelIndex: createDefaultInflator(PanelIndex)
 };
 
 export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorFn }> = {

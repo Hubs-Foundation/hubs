@@ -10,7 +10,15 @@ export const Agent = defineComponent({
   language: Types.ui8,
   modelRef: Types.eid,
   panelRef: Types.eid,
-  textRef: Types.eid
+  textRef: Types.eid,
+  nextRef: Types.eid,
+  prevRef: Types.eid
+});
+
+export const AgentTextPanel = defineComponent();
+
+export const PanelIndex = defineComponent({
+  index: Types.ui8
 });
 
 export const LookAtUser = defineComponent();
