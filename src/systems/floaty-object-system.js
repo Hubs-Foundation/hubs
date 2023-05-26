@@ -20,6 +20,7 @@ import {
 } from "../bit-components";
 
 export const MakeStaticWhenAtRest = defineComponent();
+export const BodyAtRest = defineComponent();
 
 const makeStaticAtRestQuery = defineQuery([FloatyObject, Rigidbody, Not(Constraint), MakeStaticWhenAtRest]);
 function makeStaticAtRest(world) {
@@ -44,6 +45,7 @@ function makeStaticAtRest(world) {
       });
       physicsSystem.updateRigidBody(eid, bodyData.options);
       removeComponent(world, MakeStaticWhenAtRest, eid);
+      addComponent(world, BodyAtRest, eid);
     }
   });
 }
@@ -54,6 +56,7 @@ function makeKinematicOnRelease(world) {
   makeKinematicOnReleaseExitQuery(world).forEach(eid => {
     if (!entityExists(world, eid) || !hasComponent(world, Owned, eid)) return;
     physicsSystem.updateRigidBodyOptions(eid, { type: "kinematic" });
+    addComponent(world, BodyAtRest, eid);
   });
 }
 
@@ -84,6 +87,7 @@ export const floatyObjectSystem = world => {
       type: "dynamic",
       collisionFilterMask: COLLISION_LAYERS.HANDS | COLLISION_LAYERS.MEDIA_FRAMES
     });
+    removeComponent(world, BodyAtRest, eid);
   });
 
   exitedHeldFloatyObjectsQuery(world).forEach(eid => {
@@ -119,6 +123,7 @@ export const floatyObjectSystem = world => {
         collisionFilterMask: COLLISION_LAYERS.DEFAULT_INTERACTABLE,
         gravity: { x: 0, y: -9.8, z: 0 }
       });
+      removeComponent(world, BodyAtRest, eid);
     }
   });
 

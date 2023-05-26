@@ -26,7 +26,7 @@ AFRAME.registerComponent("body-helper", {
       default: ACTIVATION_STATE.ACTIVE_TAG,
       oneOf: ACTIVATION_STATES
     },
-    type: { default: "dynamic", oneOf: [TYPE.STATIC, TYPE.DYNAMIC, TYPE.KINEMATIC] },
+    type: { default: "static", oneOf: [TYPE.STATIC, TYPE.DYNAMIC, TYPE.KINEMATIC] },
     emitCollisionEvents: { default: false },
     disableCollision: { default: false },
     collisionFilterGroup: { default: 1 }, //32-bit mask,

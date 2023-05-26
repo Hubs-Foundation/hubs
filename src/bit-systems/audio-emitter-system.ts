@@ -1,4 +1,4 @@
-import { addComponent, defineQuery, exitQuery, removeComponent } from "bitecs";
+import { addComponent, defineQuery, exitQuery, hasComponent, removeComponent } from "bitecs";
 import { MeshStandardMaterial, Mesh, Vector3, Object3D, Quaternion } from "three";
 import { HubsWorld } from "../app";
 import { AudioEmitter, AudioSettingsChanged } from "../bit-components";
@@ -7,6 +7,7 @@ import { AudioSystem } from "../systems/audio-system";
 import { applySettings, getCurrentAudioSettings, updateAudioSettings } from "../update-audio-settings";
 import { EntityID } from "../utils/networking-types";
 import { ElOrEid } from "../utils/bit-utils";
+import { BodyAtRest } from "../systems/floaty-object-system";
 
 export type AudioNode = PannerNode | StereoPannerNode;
 
@@ -81,7 +82,13 @@ export const updateAudio = (elOrEid: ElOrEid, obj: Object3D) => {
   const muted = !!APP.mutedState.has(elOrEid);
   const clipped = !!APP.clippingState.has(elOrEid);
   const isAudioPaused = !!APP.isAudioPaused.has(elOrEid);
-  if (isPositionalAudio(audio) && !muted && !clipped && !isAudioPaused && obj.matrixIsModified) {
+  let atRest;
+  if (typeof elOrEid === "number") {
+    atRest = hasComponent(APP.world, BodyAtRest, elOrEid);
+  } else {
+    atRest = hasComponent(APP.world, BodyAtRest, elOrEid.eid);
+  }
+  if (isPositionalAudio(audio) && !muted && !clipped && !isAudioPaused && !atRest) {
     updatePannerNode(audio, obj);
   }
 };

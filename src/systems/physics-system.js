@@ -159,6 +159,7 @@ export class PhysicsSystem {
               console.error("Physics body exists but object3D has no parent.");
               continue;
             }
+
             if (type === TYPE.DYNAMIC) {
               matrix.fromArray(
                 this.objectMatricesFloatArray,
@@ -171,7 +172,9 @@ export class PhysicsSystem {
               object3D.matrixNeedsUpdate = true;
             }
 
-            object3D.updateMatrices();
+            if (type !== TYPE.STATIC) {
+              object3D.updateMatrices();
+            }
 
             this.objectMatricesFloatArray.set(
               object3D.matrixWorld.elements,
