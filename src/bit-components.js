@@ -56,6 +56,10 @@ export const PointLightTag = defineComponent();
 export const SpotLightTag = defineComponent();
 export const CursorRaycastable = defineComponent();
 export const RemoteHoverTarget = defineComponent();
+/**
+ * @type {Map<EntityId, RemoteHoverTargetDatum>}
+ */
+export const RemoteHoverTargetData = new Map();
 export const NotRemoteHoverTarget = defineComponent();
 export const Holdable = defineComponent();
 export const RemoveNetworkedEntityButton = defineComponent();

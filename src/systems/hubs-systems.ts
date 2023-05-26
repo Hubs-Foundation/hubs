@@ -79,6 +79,7 @@ import { linearTransformSystem } from "../bit-systems/linear-transform";
 import { quackSystem } from "../bit-systems/quack";
 import { mixerAnimatableSystem } from "../bit-systems/mixer-animatable";
 import { loopAnimationSystem } from "../bit-systems/loop-animation";
+import { objectHoverSystem } from "../bit-systems/object-hover-system";
 
 declare global {
   interface Window {
@@ -263,7 +264,8 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   simpleWaterSystem(world);
   linearTransformSystem(world);
   quackSystem(world);
-  
+  objectHoverSystem(world, sceneEl.is("frozen"));
+
   mixerAnimatableSystem(world);
   loopAnimationSystem(world);
 

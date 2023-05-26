@@ -1,5 +1,5 @@
 import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
-import { Box3, Euler, Vector3 } from "three";
+import { Box3, Euler, Mesh, Vector3 } from "three";
 import { HubsWorld } from "../app";
 import {
   GLTFModel,
@@ -7,7 +7,9 @@ import {
   MediaLoaded,
   MediaLoader,
   Networked,
-  ObjectMenuTarget
+  ObjectMenuTarget,
+  RemoteHoverTarget,
+  RemoteHoverTargetData
 } from "../bit-components";
 import { inflatePhysicsShape, Shape } from "../inflators/physics-shape";
 import { ErrorObject } from "../prefabs/error-object";
@@ -25,8 +27,9 @@ import { loadPDF } from "../utils/load-pdf";
 import { loadVideo } from "../utils/load-video";
 import { loadAudio } from "../utils/load-audio";
 import { loadHtml } from "../utils/load-html";
-import { MediaType, mediaTypeName, resolveMediaInfo } from "../utils/media-utils";
+import { MediaType, injectCustomShaderChunks, mediaTypeName, resolveMediaInfo } from "../utils/media-utils";
 import { EntityID } from "../utils/networking-types";
+import { HoverShaderUniforms, RemoteHoverTargetDatum } from "./object-hover-system";
 
 const getBox = (() => {
   const rotation = new Euler();
@@ -79,8 +82,9 @@ const loaderForMediaType = {
     { accessibleUrl, contentType }: { accessibleUrl: string; contentType: string }
   ) => loadModel(world, accessibleUrl, contentType, true),
   [MediaType.PDF]: (world: HubsWorld, { accessibleUrl }: { accessibleUrl: string }) => loadPDF(world, accessibleUrl),
-  [MediaType.AUDIO]: (world: HubsWorld, { accessibleUrl }: { accessibleUrl: string }) => loadAudio(world, accessibleUrl),
-  [MediaType.HTML]: (world: HubsWorld, { canonicalUrl, thumbnail }: { canonicalUrl: string, thumbnail: string }) =>
+  [MediaType.AUDIO]: (world: HubsWorld, { accessibleUrl }: { accessibleUrl: string }) =>
+    loadAudio(world, accessibleUrl),
+  [MediaType.HTML]: (world: HubsWorld, { canonicalUrl, thumbnail }: { canonicalUrl: string; thumbnail: string }) =>
     loadHtml(world, canonicalUrl, thumbnail)
 };
 
@@ -176,6 +180,29 @@ type MediaInfo = {
   thumbnail: string;
 };
 
+function* injectHoverShader(world: HubsWorld, eid: EntityID) {
+  const obj = world.eid2obj.get(eid)!;
+  const uniforms = injectCustomShaderChunks(obj) as HoverShaderUniforms[];
+  let maxFrames = 3; // TODO: Find way to detect shader compile
+  while (uniforms.length === 0 && maxFrames-- > 0) {
+    yield crNextFrame();
+  }
+  if (maxFrames <= 0) {
+    return;
+  }
+  const boundingBox = new THREE.Box3();
+  const boundingSphere = new THREE.Sphere();
+  boundingBox.setFromObject(obj as Mesh);
+  boundingBox.getBoundingSphere(boundingSphere);
+  const geometryRadius = boundingSphere.radius / obj.scale.y;
+  const hoverTargetDatum = {
+    sweepParams: [0, 0],
+    geometryRadius,
+    uniforms
+  } as RemoteHoverTargetDatum;
+  RemoteHoverTargetData.set(eid, hoverTargetDatum);
+}
+
 function* loadMedia(world: HubsWorld, eid: EntityID) {
   let loadingObjEid = 0;
   const addLoadingObjectTimeout = crTimeout(() => {
@@ -216,6 +243,7 @@ function* loadAndAnimateMedia(world: HubsWorld, eid: EntityID, clearRollbacks: C
   if (MediaLoader.flags[eid] & MEDIA_LOADER_FLAGS.ANIMATE_LOAD) {
     yield* animateScale(world, media);
   }
+  yield* injectHoverShader(world, eid);
   removeComponent(world, MediaLoader, eid);
 
   if (media) {
