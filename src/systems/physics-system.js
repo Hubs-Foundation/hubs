@@ -171,12 +171,6 @@ export class PhysicsSystem {
               object3D.matrixNeedsUpdate = true;
             }
 
-            // const activationState = this.workerHelpers.getBodyOptions(uuid).activationState;
-            // if (activationState === "active" || activationState === "disableDeactivation") {
-            //   object3D.updateMatrices();
-            // } else {
-            //   object3D.matrixIsModified = false;
-            // }
             object3D.updateMatrices();
 
             this.objectMatricesFloatArray.set(
