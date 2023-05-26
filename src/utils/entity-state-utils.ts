@@ -1,6 +1,6 @@
 import { defineQuery, hasComponent } from "bitecs";
 import { HubsWorld } from "../app";
-import { Networked } from "../bit-components";
+import { FileInfo, Networked } from "../bit-components";
 import { createMessageDatas, isNetworkInstantiated, isPinned, localClientID } from "../bit-systems/networking";
 import { findAncestorEntity } from "./bit-utils";
 import HubChannel from "./hub-channel";
@@ -45,20 +45,9 @@ export function hasSavedEntityState(world: HubsWorld, eid: EntityID) {
   });
 }
 
-export async function createEntityState(
-  hubChannel: HubChannel,
-  world: HubsWorld,
-  eid: EntityID,
-  fileId?: string,
-  fileAccessToken?: string,
-  promotionToken?: string
-) {
+export async function createEntityState(hubChannel: HubChannel, world: HubsWorld, eid: EntityID) {
   const payload = createEntityStatePayload(world, eid);
-  if (fileId && promotionToken) {
-    payload.file_id = fileId;
-    payload.file_access_token = fileAccessToken;
-    payload.promotion_token = promotionToken;
-  }
+
   // console.log("save_entity_state",  payload);
   return push(hubChannel, "save_entity_state", payload);
 }
@@ -158,11 +147,32 @@ function createEntityStatePayload(world: HubsWorld, rootEid: EntityID): CreateEn
     }
   });
 
-  return {
+  const payload = {
     nid: rootNid,
     create_message,
     updates
-  };
+  } as CreateEntityStatePayload;
+
+  const src = APP.getString(FileInfo.src[rootEid]);
+  const fileId = APP.getString(FileInfo.id[rootEid]);
+  let fileAccessToken, promotionToken;
+  if (src) {
+    fileAccessToken = new URL(src).searchParams.get("token") as string;
+    const storedPromotionToken = APP.store.state.uploadPromotionTokens.find(
+      (upload: { fileId: string }) => upload.fileId === fileId
+    );
+    if (storedPromotionToken) {
+      promotionToken = storedPromotionToken.promotionToken;
+    }
+  }
+
+  if (fileId && promotionToken) {
+    payload.file_id = fileId;
+    payload.file_access_token = fileAccessToken;
+    payload.promotion_token = promotionToken;
+  }
+
+  return payload;
 }
 
 const networkedQuery = defineQuery([Networked]);

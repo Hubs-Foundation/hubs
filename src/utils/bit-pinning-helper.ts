@@ -8,7 +8,7 @@ import { EntityID } from "./networking-types";
 import { takeOwnership } from "./take-ownership";
 import { getPromotionTokenForFile } from "./media-utils";
 
-export const setPinned = async (hubChannel: HubChannel, world: HubsWorld, eid: number, shouldPin: boolean) => {
+export const setPinned = async (hubChannel: HubChannel, world: HubsWorld, eid: EntityID, shouldPin: boolean) => {
   if (!hasComponent(world, Pinnable, eid) || !hasComponent(world, FileInfo, eid)) {
     console.warn("PinningHelper: Attempted pin/unpin on an entity without both Pinnable and FileInfo component", eid);
     return;
@@ -16,22 +16,9 @@ export const setPinned = async (hubChannel: HubChannel, world: HubsWorld, eid: n
   _signInAndPinOrUnpinElement(hubChannel, world, eid, shouldPin);
 };
 
-const _pinElement = async (hubChannel: HubChannel, world: HubsWorld, eid: number) => {
-  const src = APP.getString(FileInfo.src[eid]);
-  const fileId = APP.getString(FileInfo.id[eid]);
-  let fileAccessToken, promotionToken;
-  if (src) {
-    fileAccessToken = new URL(src).searchParams.get("token") as string;
-    const storedPromotionToken = APP.store.state.uploadPromotionTokens.find(
-      (upload: { fileId: string }) => upload.fileId === fileId
-    );
-    if (storedPromotionToken) {
-      promotionToken = storedPromotionToken.promotionToken;
-    }
-  }
-
+const _pinElement = async (hubChannel: HubChannel, world: HubsWorld, eid: EntityID) => {
   try {
-    await createEntityState(hubChannel, world, eid, fileId!, fileAccessToken, promotionToken);
+    await createEntityState(hubChannel, world, eid);
     takeOwnership(world, eid);
   } catch (e) {
     if (e.reason === "invalid_token") {
@@ -44,11 +31,11 @@ const _pinElement = async (hubChannel: HubChannel, world: HubsWorld, eid: number
   }
 };
 
-const unpinElement = (hubChannel: HubChannel, world: HubsWorld, eid: number) => {
+const unpinElement = (hubChannel: HubChannel, world: HubsWorld, eid: EntityID) => {
   deleteEntityState(hubChannel, world, eid);
 };
 
-const _signInAndPinOrUnpinElement = (hubChannel: HubChannel, world: HubsWorld, eid: number, shouldPin: boolean) => {
+const _signInAndPinOrUnpinElement = (hubChannel: HubChannel, world: HubsWorld, eid: EntityID, shouldPin: boolean) => {
   const action = shouldPin ? () => _pinElement(hubChannel, world, eid) : () => unpinElement(hubChannel, world, eid);
 
   // TODO: Perform conditional sign in
