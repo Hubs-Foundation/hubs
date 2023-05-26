@@ -11,6 +11,12 @@ import { Row } from "../layout/Row";
 import { HandRaisedButton } from "./ReactionButton";
 import styles from "./ReactionPopover.scss";
 import { Button } from "../input/Button";
+import { ToolTip } from "@mozilla/lilypad-ui";
+
+const reactTooltipDescription = defineMessage({
+  id: "react-tooltip.description",
+  defaultMessage: "Reactions"
+});
 
 const reactionPopoverTitle = defineMessage({
   id: "reaction-popover.title",
@@ -65,6 +71,7 @@ export function ReactionPopoverButton({ items, presence, onToggleHandRaised }) {
   const [isTooltipVisible, setIsTooltipVisible] = useState(false);
   const intl = useIntl();
   const title = intl.formatMessage(reactionPopoverTitle);
+  const description = intl.formatMessage(reactTooltipDescription);
   const popoverApiRef = useRef();
 
   const onTooltipHandLowered = useCallback(() => {
@@ -101,28 +108,30 @@ export function ReactionPopoverButton({ items, presence, onToggleHandRaised }) {
       disableFullscreen={isTooltipVisible}
     >
       {({ togglePopover, popoverVisible, triggerRef }) => (
-        <ToolbarButton
-          ref={triggerRef}
-          icon={
-            presence.hand_raised ? (
-              <HandRaisedIcon width="32px" height="32px" style={{ marginLeft: "5px" }} />
-            ) : (
-              <ReactionIcon />
-            )
-          }
-          selected={popoverVisible}
-          onClick={() => {
-            setIsReactionsVisible(!isReactionsVisible);
-            if (presence.hand_raised) {
-              setIsTooltipVisible(!isTooltipVisible);
-            } else {
-              setIsTooltipVisible(false);
-              togglePopover();
+        <ToolTip description={description}>
+          <ToolbarButton
+            ref={triggerRef}
+            icon={
+              presence.hand_raised ? (
+                <HandRaisedIcon width="32px" height="32px" style={{ marginLeft: "5px" }} />
+              ) : (
+                <ReactionIcon />
+              )
             }
-          }}
-          label={title}
-          preset="accent2"
-        />
+            selected={popoverVisible}
+            onClick={() => {
+              setIsReactionsVisible(!isReactionsVisible);
+              if (presence.hand_raised) {
+                setIsTooltipVisible(!isTooltipVisible);
+              } else {
+                setIsTooltipVisible(false);
+                togglePopover();
+              }
+            }}
+            label={title}
+            preset="accent2"
+          />
+        </ToolTip>
       )}
     </Popover>
   );
