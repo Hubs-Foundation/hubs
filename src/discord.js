@@ -12,7 +12,6 @@ import discordBotVideoWebM from "./assets/video/discord.webm";
 import registerTelemetry from "./telemetry";
 import { ThemeProvider } from "./react-components/styles/theme";
 import { store } from "./utils/store-instance";
-import { root } from "./signin";
 
 registerTelemetry("/discord", "Discord Landing Page");
 
@@ -83,5 +82,8 @@ class DiscordPage extends Component {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  const container = document.getElementById("discord-ui-root");
+
+  const root = createRoot(container);
   root.render(<DiscordPage />);
 });

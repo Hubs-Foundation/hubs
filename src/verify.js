@@ -11,7 +11,6 @@ import { PageContainer } from "./react-components/layout/PageContainer";
 import { Center } from "./react-components/layout/Center";
 import { ThemeProvider } from "./react-components/styles/theme";
 import { store } from "./utils/store-instance";
-import { root } from "./signin";
 
 registerTelemetry("/verify", "Hubs Verify Email Page");
 
@@ -33,4 +32,7 @@ function VerifyRoot() {
   );
 }
 
+const container = document.getElementById("verify-ui-root");
+
+const root = createRoot(container);
 root.render(<VerifyRoot />);

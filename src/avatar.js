@@ -1,11 +1,11 @@
 // We should technically be able to just include three here, but our dependancies are tangled such that not having aframe is a bit difficult
 import "./utils/theme";
 console.log(`Hubs version: ${process.env.BUILD_VERSION || "?"}`);
-
 import "aframe";
 import "./utils/logging";
 
 import React from "react";
+import { createRoot } from "react-dom/client";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import { FormattedMessage } from "react-intl";
@@ -27,7 +27,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faClone } from "@fortawesome/free-solid-svg-icons/faClone";
 import { ThemeProvider } from "./react-components/styles/theme";
 import Store from "./storage/store";
-import { root } from "./signin";
 
 const qs = new URLSearchParams(location.search);
 window.APP = { store: new Store() };
@@ -148,6 +147,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const avatarId = qs.get("avatar_id") || document.location.pathname.substring(1).split("/")[1];
   console.log(`Avatar ID: ${avatarId}`);
 
+  const container = document.getElementById("avatar-ui-root");
+
+  const root = createRoot(container);
   root.render(
     <WrappedIntlProvider>
       <ThemeProvider store={window.APP.store}>

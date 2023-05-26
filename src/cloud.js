@@ -14,7 +14,6 @@ import { store } from "./utils/store-instance";
 import registerTelemetry from "./telemetry";
 import { FormattedMessage } from "react-intl";
 import { ThemeProvider } from "./react-components/styles/theme";
-import { root } from "./signin";
 
 registerTelemetry("/cloud", "Hubs Cloud Landing Page");
 
@@ -133,5 +132,8 @@ function CloudRoot() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  const container = document.getElementById("cloud-ui-root");
+
+  const root = createRoot(container);
   root.render(<CloudRoot />);
 });

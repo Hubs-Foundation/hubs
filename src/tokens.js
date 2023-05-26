@@ -11,7 +11,6 @@ import { TokenPageLayout } from "./react-components/tokens/TokenPageLayout";
 import configs from "./utils/configs";
 import { ThemeProvider } from "./react-components/styles/theme";
 import { store } from "./utils/store-instance";
-import { root } from "./signin";
 
 registerTelemetry("/tokens", "Backend API Tokens Page");
 
@@ -29,4 +28,7 @@ function TokensRoot() {
   );
 }
 
+const container = document.getElementById("tokens-ui-root");
+
+const root = createRoot(container);
 root.render(<TokensRoot />);

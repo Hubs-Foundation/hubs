@@ -32,7 +32,7 @@ function SignInRoot() {
   );
 }
 
-const container = document.getElementById("ui-root");
-// export root as React 18 does not allow multiple "createRoot" calls on the same element. Use "render" alone on the first created instance of this root.
-export const root = createRoot(container);
+const container = document.getElementById("signin-ui-root");
+
+const root = createRoot(container);
 root.render(<SignInRoot />);

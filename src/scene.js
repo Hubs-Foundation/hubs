@@ -11,9 +11,11 @@ import { disableiOSZoom } from "./utils/disable-ios-zoom";
 import { connectToReticulum, fetchReticulumAuthenticatedWithToken } from "./utils/phoenix-utils";
 import "./utils/theme";
 import { store } from "./utils/store-instance";
-import { root } from "./signin";
 
 function mountUI(props = {}) {
+  const container = document.getElementById("scene-ui-root");
+
+  const root = createRoot(container);
   root.render(
     <WrappedIntlProvider>
       <ThemeProvider store={props.store}>
