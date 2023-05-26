@@ -14,6 +14,12 @@ import { FromatNewText } from "../bit-systems/agent-slideshow-system";
 
 preload(loadModel(agentModelSrc, null, true));
 const panelTexture = textureLoader.load(nametagSrc);
+const slideRefs = [];
+
+// for (let i = 0; i < 25; i++) {
+//   const ref = createRef();
+//   slideRefs.push(ref);
+// }
 
 const agentMediaParams: MediaLoaderParams = {
   src: agentModelSrc,
@@ -42,7 +48,14 @@ export function AgentEntity() {
       lookatuser
     >
       <entity lookatuser name="agentObject" mediaLoader={agentMediaParams} ref={modelRef} scale={[1, 1, 1]} />
-      <AgentPanel textRef={textRef} text={text} panelRef={panelRef} nextRef={nextRef} prevRef={prevRef} />
+      <AgentPanel
+        textRef={textRef}
+        text={text}
+        panelRef={panelRef}
+        nextRef={nextRef}
+        prevRef={prevRef}
+        maxSlideCount={25}
+      />
     </entity>
   );
 }

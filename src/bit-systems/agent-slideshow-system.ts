@@ -49,11 +49,6 @@ export function FromatNewText(newText: string) {
   const words = newText.trim().split(" ");
   const segments = [];
 
-  if (words.length > 50) {
-    console.warn("New text exceeds the size limits, try again");
-    return [];
-  }
-
   for (let i = 0; i < words.length; i += 10) {
     const segment = words.slice(i, i + 10).join(" ");
     segments.push(segment);
@@ -66,9 +61,10 @@ export function UpdateTextSystem(world: HubsWorld, newFormatedText: Array<string
   agentSlideQuery(world).forEach(eid => {
     const panelObj = world.eid2obj.get(eid) as Text;
     if (PanelIndex.index[eid] >= newFormatedText.length) {
-      panelObj.text = "";
+      panelObj.visible = false;
     } else {
       panelObj.text = newFormatedText[PanelIndex.index[eid]];
+      panelObj.visible = true;
     }
     maxValue = newFormatedText.length - 1;
   });

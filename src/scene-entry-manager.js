@@ -450,16 +450,13 @@ export default class SceneEntryManager {
   };
 
   _setupAgent = () => {
-    this.scene.addEventListener("agent-toggle", () =>{
-
+    this.scene.addEventListener("agent-toggle", () => {
       const myAgent = anyEntityWith(APP.world, Agent);
 
-      if(myAgent){
+      if (myAgent) {
         removeEntity(APP.world, myAgent);
         this.scene.emit("agent-removed");
-      }
-      else{
-
+      } else {
         const avatarPov = document.querySelector("#avatar-pov-node").object3D;
         var POVForward = new THREE.Vector3();
         var avatar_POV_position = new THREE.Vector3();
@@ -468,14 +465,14 @@ export default class SceneEntryManager {
         POVForward = avatarPov.getWorldDirection(POVForward);
 
         const forward = new THREE.Vector3(-POVForward.x, 0, -POVForward.z).normalize();
-       
+
         const agentID = addAgentToScene(APP.world);
         const agentObj = APP.world.eid2obj.get(agentID);
 
         //axis helper
         // const axesHelper = new THREE.AxesHelper(5);
         // agentObj.add(axesHelper);
-        
+
         agentObj.position.copy(avatar_POV_position.add(forward));
         // agentObj.lookAt(avatarPov.getWorldPosition(new THREE.Vector3()));
         // agentObj.rotateOnAxis(new THREE.Vector3(0,1,0),-1.5707963268 );

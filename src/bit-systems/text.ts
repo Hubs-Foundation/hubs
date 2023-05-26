@@ -1,7 +1,7 @@
 import { defineQuery, hasComponent } from "bitecs";
 import { Text as TroikaText } from "troika-three-text";
 import { HubsWorld } from "../app";
-import { TextTag, AgentTextPanel } from "../bit-components";
+import { TextTag, PanelIndex } from "../bit-components";
 
 const textQuery = defineQuery([TextTag]);
 
@@ -30,11 +30,10 @@ export function textSystem(world: HubsWorld) {
     // because TroikaText properly handles
 
     const callback = () => {
-      if (hasComponent(world, AgentTextPanel, eid)) {
-        console.log("there is some agentpaneltext");
-      } else console.log("no agent panel text");
+      if (!hasComponent(world, PanelIndex, eid)) {
+        console.log("no agent panel text");
+      }
     };
-
     text.sync(callback);
   });
 }

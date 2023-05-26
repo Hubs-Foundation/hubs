@@ -13,12 +13,32 @@ export interface PanelParams {
   textRef: Ref;
   nextRef: Ref;
   prevRef: Ref;
+  maxSlideCount: number;
 }
 
-export function AgentPanel({ text, panelRef, textRef, nextRef, prevRef }: PanelParams) {
+export function AgentPanel({ text, panelRef, nextRef, prevRef, textRef, maxSlideCount }: PanelParams) {
   const buttonScale = [0.4, 0.4, 0.4];
-  const smallButtonScale = [0.2, 0.2, 0.2];
   const buttonHeight = 0.2;
+  let slidesArray = [];
+
+  for (let i = 0; i < maxSlideCount; i++) {
+    slidesArray.push(
+      <entity
+        name={`slide ${i}`}
+        panelIndex={{ index: i }}
+        position={[0, 0, 0.01]}
+        text={{
+          value: text[i],
+          color: "#000000",
+          textAlign: "center",
+          anchorX: "center",
+          anchorY: "middle",
+          fontSize: 0.05,
+          maxWidth: 0.5
+        }}
+      />
+    );
+  }
 
   return (
     <entity
@@ -28,80 +48,7 @@ export function AgentPanel({ text, panelRef, textRef, nextRef, prevRef }: PanelP
       position={[0, 0.2, 0.1]}
       scale={[1.0, 1.0, 1.0]}
     >
-      <entity
-        name="text"
-        panelIndex={{ index: 0 }}
-        position={[0, 0, 0.01]}
-        text={{
-          value: text[0],
-          color: "#000000",
-          textAlign: "center",
-          anchorX: "center",
-          anchorY: "middle",
-          fontSize: 0.05,
-          maxWidth: 0.5
-        }}
-      />
-
-      <entity
-        name="text"
-        panelIndex={{ index: 1 }}
-        position={[0, 0, 0.01]}
-        text={{
-          value: text[1],
-          color: "#000000",
-          textAlign: "center",
-          anchorX: "center",
-          anchorY: "middle",
-          fontSize: 0.05,
-          maxWidth: 0.5
-        }}
-      />
-
-      <entity
-        name="text"
-        panelIndex={{ index: 2 }}
-        position={[0, 0, 0.01]}
-        text={{
-          value: text[2],
-          color: "#000000",
-          textAlign: "center",
-          anchorX: "center",
-          anchorY: "middle",
-          fontSize: 0.05,
-          maxWidth: 0.5
-        }}
-      />
-
-      <entity
-        name="text"
-        panelIndex={{ index: 3 }}
-        position={[0, 0, 0.01]}
-        text={{
-          value: text[3],
-          color: "#000000",
-          textAlign: "center",
-          anchorX: "center",
-          anchorY: "middle",
-          fontSize: 0.05,
-          maxWidth: 0.5
-        }}
-      />
-
-      <entity
-        name="text"
-        panelIndex={{ index: 4 }}
-        position={[0, 0, 0.01]}
-        text={{
-          value: text[4],
-          color: "#000000",
-          textAlign: "center",
-          anchorX: "center",
-          anchorY: "middle",
-          fontSize: 0.05,
-          maxWidth: 0.5
-        }}
-      />
+      {slidesArray}
 
       <Button3D
         ref={prevRef}
