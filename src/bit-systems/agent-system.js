@@ -1,7 +1,8 @@
 import { defineQuery, enterQuery, exitQuery } from "bitecs";
 import { Agent, Interacted } from "../bit-components";
-import { lowerIndex, raiseIndex } from "./agent-panel-system";
+import { FromatNewText, UpdateTextSystem, lowerIndex, raiseIndex } from "./agent-slideshow-system";
 import { hasComponent } from "bitecs";
+import { paradigms } from "./text-paradigms";
 
 const agentQuery = defineQuery([Agent]);
 const enterAgentQuery = enterQuery(agentQuery);
@@ -9,6 +10,20 @@ const exitAgentQuery = exitQuery(agentQuery);
 
 function clicked(eid) {
   return hasComponent(APP.world, Interacted, eid);
+}
+
+export function getRandomInt(max) {
+  return Math.floor(Math.random() * max);
+}
+
+function hideArrows(world, prevArrowEid, nextArrowEid) {
+  world.eid2obj.get(prevArrowEid).visible = false;
+  world.eid2obj.get(nextArrowEid).visible = false;
+}
+
+function showArrows(world, prevArrowEid, nextArrowEid) {
+  world.eid2obj.get(prevArrowEid).visible = true;
+  world.eid2obj.get(nextArrowEid).visible = true;
 }
 
 export function AgentSystem(world) {
@@ -41,6 +56,15 @@ export function AgentSystem(world) {
 
     if (clicked(Agent.prevRef[eid])) {
       lowerIndex();
+    }
+    if (clicked(Agent.textRef[eid])) {
+      let newText = paradigms[getRandomInt(paradigms.length)];
+
+      const renderArrows = UpdateTextSystem(world, FromatNewText(newText));
+
+      if (renderArrows) {
+        hideArrows(world, Agent.prevRef[eid], Agent.nextRef[eid]);
+      } else showArrows(world, Agent.prevRef[eid], Agent.nextRef[eid]);
     }
   });
 }

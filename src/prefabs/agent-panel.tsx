@@ -39,7 +39,7 @@ export function AgentPanel({ text, panelRef, textRef, nextRef, prevRef }: PanelP
           anchorX: "center",
           anchorY: "middle",
           fontSize: 0.05,
-          maxWidth: 0.3
+          maxWidth: 0.5
         }}
       />
 
@@ -54,7 +54,7 @@ export function AgentPanel({ text, panelRef, textRef, nextRef, prevRef }: PanelP
           anchorX: "center",
           anchorY: "middle",
           fontSize: 0.05,
-          maxWidth: 0.3
+          maxWidth: 0.5
         }}
       />
 
@@ -69,7 +69,7 @@ export function AgentPanel({ text, panelRef, textRef, nextRef, prevRef }: PanelP
           anchorX: "center",
           anchorY: "middle",
           fontSize: 0.05,
-          maxWidth: 0.3
+          maxWidth: 0.5
         }}
       />
 
@@ -84,7 +84,7 @@ export function AgentPanel({ text, panelRef, textRef, nextRef, prevRef }: PanelP
           anchorX: "center",
           anchorY: "middle",
           fontSize: 0.05,
-          maxWidth: 0.3
+          maxWidth: 0.5
         }}
       />
 
@@ -99,15 +99,15 @@ export function AgentPanel({ text, panelRef, textRef, nextRef, prevRef }: PanelP
           anchorX: "center",
           anchorY: "middle",
           fontSize: 0.05,
-          maxWidth: 0.3
+          maxWidth: 0.5
         }}
       />
 
       <Button3D
         ref={prevRef}
-        scale={[0.2, 0.2, 0.2]}
+        scale={[buttonScale[0], buttonScale[1], buttonScale[2]]}
         type={BUTTON_TYPES.DEFAULT}
-        position={[-0.15, 0, 0.01]}
+        position={[-0.4, 0, 0.03]}
         width={buttonHeight}
         height={buttonHeight}
         text={"<"}
@@ -115,12 +115,22 @@ export function AgentPanel({ text, panelRef, textRef, nextRef, prevRef }: PanelP
 
       <Button3D
         ref={nextRef}
-        scale={[0.2, 0.2, 0.2]}
+        scale={[buttonScale[0], buttonScale[1], buttonScale[2]]}
         type={BUTTON_TYPES.DEFAULT}
-        position={[0.15, 0, 0.01]}
+        position={[0.4, 0, 0.03]}
         width={buttonHeight}
         height={buttonHeight}
         text={">"}
+      />
+
+      <Button3D
+        ref={textRef}
+        scale={[buttonScale[0], buttonScale[1], buttonScale[2]]}
+        type={BUTTON_TYPES.ACTION}
+        position={[0, -0.2, 0.03]}
+        width={0.6}
+        height={buttonHeight}
+        text={"Change Text"}
       />
     </entity>
   );

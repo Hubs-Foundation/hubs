@@ -1,10 +1,12 @@
 import { defineQuery, enterQuery, entityExists, exitQuery, hasComponent } from "bitecs";
 import { PanelIndex } from "../bit-components";
 import { HubsWorld } from "../app";
+import { paradigms } from "./text-paradigms";
+import { Text } from "troika-three-text";
 
 let activeIndex = 0;
 let updated = false;
-const maxValue = 4;
+let maxValue = 4;
 const minValue = 0;
 const agentSlideQuery = defineQuery([PanelIndex]);
 const agentEnterQuery = enterQuery(agentSlideQuery);
@@ -41,4 +43,37 @@ export function PanelIndexSystem(world: HubsWorld) {
     console.log("New index:", activeIndex);
     updated = false;
   }
+}
+
+export function FromatNewText(newText: string) {
+  const words = newText.trim().split(" ");
+  const segments = [];
+
+  if (words.length > 50) {
+    console.warn("New text exceeds the size limits, try again");
+    return [];
+  }
+
+  for (let i = 0; i < words.length; i += 10) {
+    const segment = words.slice(i, i + 10).join(" ");
+    segments.push(segment);
+  }
+
+  return segments;
+}
+
+export function UpdateTextSystem(world: HubsWorld, newFormatedText: Array<string>) {
+  agentSlideQuery(world).forEach(eid => {
+    const panelObj = world.eid2obj.get(eid) as Text;
+    if (PanelIndex.index[eid] >= newFormatedText.length) {
+      panelObj.text = "";
+    } else {
+      panelObj.text = newFormatedText[PanelIndex.index[eid]];
+    }
+    maxValue = newFormatedText.length - 1;
+  });
+
+  resetIndex();
+
+  return newFormatedText.length === 1;
 }

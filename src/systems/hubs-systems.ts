@@ -81,7 +81,7 @@ import { mixerAnimatableSystem } from "../bit-systems/mixer-animatable";
 import { loopAnimationSystem } from "../bit-systems/loop-animation";
 import { AgentSystem } from "../bit-systems/agent-system";
 import { lookAtUserSystem } from "../bit-systems/look-at-user";
-import { PanelIndexSystem } from "../bit-systems/agent-panel-system";
+import { PanelIndexSystem } from "../bit-systems/agent-slideshow-system";
 
 declare global {
   interface Window {

@@ -7,7 +7,10 @@ import { HubsWorld } from "../app";
 import { MediaLoaderParams } from "../inflators/media-loader";
 import nametagSrc from "../assets/hud/nametag.9.png";
 import { textureLoader } from "../utils/media-utils";
-import { AgentPanel } from "./agent-text-panel";
+import { AgentPanel } from "./agent-panel";
+import { greetingPhrases } from "../bit-systems/text-paradigms";
+import { getRandomInt } from "../bit-systems/agent-system";
+import { FromatNewText } from "../bit-systems/agent-slideshow-system";
 
 preload(loadModel(agentModelSrc, null, true));
 const panelTexture = textureLoader.load(nametagSrc);
@@ -28,9 +31,7 @@ export function AgentEntity() {
   const textRef = createRef();
   const nextRef = createRef();
   const prevRef = createRef();
-  const text = ["Slide0", "Slide1", "Slide2", "Slide3", "Slide4"];
-  const maxWords = 50;
-  const render = true;
+  const text = FromatNewText(greetingPhrases[getRandomInt(greetingPhrases.length)]);
 
   return (
     <entity
