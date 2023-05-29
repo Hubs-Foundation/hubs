@@ -1,25 +1,21 @@
 /** @jsx createElementEntity */
 import { Attrs, createElementEntity, createRef, Ref } from "../utils/jsx-entity";
 import { Layers } from "../camera-layers";
-import buttonSrc from "../assets/hud/button.9.png";
+import micSrc from "../assets/images/mic_level@2x.png";
+import backgroundSrc from "../assets/hud/button.9.png";
 import { textureLoader } from "../utils/media-utils";
 import { Texture } from "three";
-const buttonTexture = textureLoader.load(buttonSrc);
+import { BUTTON_TYPES } from "./button3D";
+const backTexture = textureLoader.load(backgroundSrc);
+const micTexture = textureLoader.load(micSrc);
 
-export enum BUTTON_TYPES {
-  DEFAULT = 0,
-  ACTION = 1,
-  MIC = 2
-}
-
-type ButtonType = BUTTON_TYPES.DEFAULT | BUTTON_TYPES.ACTION;
+type ButtonType = BUTTON_TYPES.DEFAULT | BUTTON_TYPES.ACTION | BUTTON_TYPES.MIC;
 
 export interface Refable {
   ref?: Ref;
 }
 
-export interface Button3DParams extends Attrs {
-  text: string;
+export interface Mic3DParams extends Attrs {
   width: number;
   height: number;
   texture?: Texture;
@@ -30,32 +26,25 @@ export interface Button3DParams extends Attrs {
   holdableButton?: true;
 }
 
-export function Button3D({
-  text,
-  width,
-  height,
-  texture = buttonTexture,
-  name = "Button",
-  type,
-  ...props
-}: Button3DParams) {
+export function Mic3D({ width, height, name = "Button", type, ...props }: Mic3DParams) {
   const labelRef = createRef();
   return (
     <entity
       name={name}
-      slice9={{ size: [width, height], insets: [64, 66, 64, 66], texture }}
+      slice9={{ size: [width, height], insets: [64, 66, 64, 66], texture: backTexture }}
       cursorRaycastable
       remoteHoverTarget
       hoverButton={{ type }}
-      textButton={{ labelRef }}
+      imageButton={{ labelRef }}
       singleActionButton
+      micButtonTag
       layers={1 << Layers.CAMERA_LAYER_UI}
       {...props}
     >
       <entity
         ref={labelRef}
         layers={1 << Layers.CAMERA_LAYER_UI}
-        text={{ value: text, color: "#000000", textAlign: "center", anchorX: "center", anchorY: "middle" }}
+        slice9={{ size: [width, height], insets: [64, 66, 64, 66], texture: micTexture }}
         position={[0, 0, 0.01]}
         name={`${name} Label`}
       />

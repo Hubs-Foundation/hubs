@@ -23,6 +23,7 @@ import {
   RemoteHoverTarget,
   SingleActionButton,
   TextButton,
+  ImageButton,
   NetworkedVideo,
   VideoMenu,
   VideoMenuItem,
@@ -43,7 +44,8 @@ import {
   Agent,
   LookAtUser,
   AgentTextPanel,
-  PanelIndex
+  PanelIndex,
+  MicButtonTag
 } from "../bit-components";
 
 import { inflateMediaLoader } from "../inflators/media-loader";
@@ -312,6 +314,7 @@ export interface JSXComponentData extends ComponentData {
   // @TODO Define all the anys
   networked?: any;
   textButton?: any;
+  imageButton?: any;
   hoverButton?: any;
   rigidbody?: OptionalParams<RigidBodyParams>;
   physicsShape?: OptionalParams<PhysicsShapeParams>;
@@ -361,7 +364,7 @@ export interface JSXComponentData extends ComponentData {
     language: number;
     panelRef: Ref;
     modelRef: Ref;
-    textRef: Ref;
+    micRef: Ref;
     nextRef: Ref;
     prevRef: Ref;
   };
@@ -378,6 +381,7 @@ export interface JSXComponentData extends ComponentData {
   pdf?: PDFParams;
   loopAnimation?: LoopAnimationParams;
   lookatuser?: any;
+  micButtonTag?: any;
 }
 
 export interface GLTFComponentData extends ComponentData {
@@ -455,6 +459,7 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   singleActionButton: createDefaultInflator(SingleActionButton),
   holdableButton: createDefaultInflator(HoldableButton),
   textButton: createDefaultInflator(TextButton),
+  imageButton: createDefaultInflator(ImageButton),
   hoverButton: createDefaultInflator(HoverButton),
   holdable: createDefaultInflator(Holdable),
   deletable: createDefaultInflator(Deletable),
@@ -495,7 +500,8 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   agent: createDefaultInflator(Agent),
   lookatuser: createDefaultInflator(LookAtUser),
   agentTextPanel: createDefaultInflator(AgentTextPanel),
-  panelIndex: createDefaultInflator(PanelIndex)
+  panelIndex: createDefaultInflator(PanelIndex),
+  micButtonTag: createDefaultInflator(MicButtonTag)
 };
 
 export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorFn }> = {

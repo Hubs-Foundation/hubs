@@ -25,7 +25,7 @@ function showArrows(world, prevArrowEid, nextArrowEid) {
   world.eid2obj.get(prevArrowEid).visible = true;
   world.eid2obj.get(nextArrowEid).visible = true;
 }
-
+let init = true;
 export function AgentSystem(world) {
   enterAgentQuery(world).forEach(eid => {
     const sliceref = Agent.panelRef[eid];
@@ -40,10 +40,16 @@ export function AgentSystem(world) {
     const modelObj = world.eid2obj.get(modelref);
     var avatarPovObj = document.querySelector("#avatar-pov-node").object3D;
 
-    const dist = agentObj.position.distanceTo(avatarPovObj.getWorldPosition(new THREE.Vector3()));
+    const agentPos = agentObj.getWorldPosition(new THREE.Vector3());
+    const avatarPos = avatarPovObj.getWorldPosition(new THREE.Vector3());
 
-    if (dist > 5) {
-      APP.scene.emit("agent-toggle");
+    const dist = agentPos.distanceTo(avatarPos);
+
+    if (init || dist > 2) {
+      const dir = new THREE.Vector3().subVectors(avatarPos, agentPos).normalize();
+      const newPos = new THREE.Vector3().copy(avatarPos.sub(dir.multiplyScalar(2)));
+      agentObj.position.copy(newPos);
+      init = false;
     }
 
     if (dist < 0.3) agentObj.visible = false;
@@ -57,7 +63,7 @@ export function AgentSystem(world) {
     if (clicked(Agent.prevRef[eid])) {
       lowerIndex();
     }
-    if (clicked(Agent.textRef[eid])) {
+    if (clicked(Agent.micRef[eid])) {
       let newText = paradigms[getRandomInt(paradigms.length)];
 
       const renderArrows = UpdateTextSystem(world, FromatNewText(newText));

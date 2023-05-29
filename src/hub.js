@@ -754,7 +754,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   subscriptions.register();
 
   const scene = document.querySelector("a-scene");
- 
+
   //axis helper
   getScene().then(scene => {
     const axesHelper = new THREE.AxesHelper(5);
@@ -854,15 +854,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         entryManager._setPlayerInfoFromProfile(true);
       }
     }
-
-    // const agentID = addAgentToScene(APP.world);
-    // const agentObj = APP.world.eid2obj.get(agentID);
-
-    // const avatarPov = document.querySelector("#avatar-pov-node").object3D;
-    // agentObj.position.copy(avatarPov.localToWorld(new THREE.Vector3(0, 0, -1.5)));
-    // agentObj.lookAt(avatarPov.getWorldPosition(new THREE.Vector3()));
-
-    // console.log("aaaaaaaaaaaaaaaa", agentObj);
   });
 
   remountUI({

@@ -4,19 +4,20 @@ import { createElementEntity, renderAsEntity, Ref, createRef } from "../utils/js
 import nametagSrc from "../assets/hud/nametag.9.png";
 import { textureLoader } from "../utils/media-utils";
 import { Button3D, BUTTON_TYPES } from "./button3D";
+import { Mic3D } from "./Mic3D";
 
 const panelTexture = textureLoader.load(nametagSrc);
 
 export interface PanelParams {
   text: Array<string>;
   panelRef: Ref;
-  textRef: Ref;
+  micRef: Ref;
   nextRef: Ref;
   prevRef: Ref;
   maxSlideCount: number;
 }
 
-export function AgentPanel({ text, panelRef, nextRef, prevRef, textRef, maxSlideCount }: PanelParams) {
+export function AgentPanel({ text, panelRef, nextRef, prevRef, micRef, maxSlideCount }: PanelParams) {
   const buttonScale = [0.4, 0.4, 0.4];
   const buttonHeight = 0.2;
   let slidesArray = [];
@@ -70,7 +71,7 @@ export function AgentPanel({ text, panelRef, nextRef, prevRef, textRef, maxSlide
         text={">"}
       />
 
-      <Button3D
+      {/* <Button3D
         ref={textRef}
         scale={[buttonScale[0], buttonScale[1], buttonScale[2]]}
         type={BUTTON_TYPES.ACTION}
@@ -78,6 +79,15 @@ export function AgentPanel({ text, panelRef, nextRef, prevRef, textRef, maxSlide
         width={0.6}
         height={buttonHeight}
         text={"Change Text"}
+      /> */}
+
+      <Mic3D
+        ref={micRef}
+        scale={[buttonScale[0], buttonScale[1], buttonScale[2]]}
+        type={BUTTON_TYPES.DEFAULT}
+        position={[0.18, -0.25, 0.03]}
+        width={buttonHeight}
+        height={buttonHeight}
       />
     </entity>
   );

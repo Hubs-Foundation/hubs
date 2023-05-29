@@ -82,9 +82,11 @@ export default class SceneEntryManager {
 
     if (useNewLoader) {
       moveToSpawnPoint(APP.world, this.scene.systems["hubs-systems"].characterController);
+      console.log("using new system..");
     } else {
       const waypointSystem = this.scene.systems["hubs-systems"].waypointSystem;
       waypointSystem.moveToSpawnPoint();
+      console.log("using old system");
     }
 
     if (isMobile || forceEnableTouchscreen || qsTruthy("force_enable_touchscreen")) {
@@ -100,8 +102,8 @@ export default class SceneEntryManager {
     if (qsTruthy("offline")) return;
 
     this._spawnAvatar();
-
     this.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_ENTER_SCENE);
+    this.scene.emit("agent-toggle");
 
     if (isBotMode) {
       this._runBot();
@@ -468,14 +470,8 @@ export default class SceneEntryManager {
 
         const agentID = addAgentToScene(APP.world);
         const agentObj = APP.world.eid2obj.get(agentID);
-
-        //axis helper
-        // const axesHelper = new THREE.AxesHelper(5);
-        // agentObj.add(axesHelper);
-
-        agentObj.position.copy(avatar_POV_position.add(forward));
-        // agentObj.lookAt(avatarPov.getWorldPosition(new THREE.Vector3()));
-        // agentObj.rotateOnAxis(new THREE.Vector3(0,1,0),-1.5707963268 );
+        agentObj.position.copy(avatarPov.getWorldPosition(new THREE.Vector3()).add(forward));
+        console.log("avatarPos", avatarPov.getWorldPosition(new THREE.Vector3()));
         this.scene.emit("agent-spawned");
       }
     });

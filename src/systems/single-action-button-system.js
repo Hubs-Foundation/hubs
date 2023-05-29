@@ -5,6 +5,7 @@ import {
   HoveredHandRight,
   HoveredRemoteLeft,
   HoveredRemoteRight,
+  ImageButton,
   Interacted,
   SingleActionButton,
   TextButton
@@ -79,6 +80,12 @@ function applyTheme() {
     textColor: new THREE.Color(0xffffff),
     textHoverColor: new THREE.Color(0xffffff)
   };
+  buttonStyles[BUTTON_TYPES.MIC] = {
+    color: new THREE.Color(getThemeColor("action-color")),
+    hoverColor: new THREE.Color(getThemeColor("action-color-highlight")),
+    textColor: new THREE.Color(0xffffff),
+    textHoverColor: new THREE.Color(0xffffff)
+  };
 }
 onThemeChanged(applyTheme);
 applyTheme();
@@ -95,6 +102,10 @@ function hoverButtonSystem(world) {
     if (hasComponent(world, TextButton, eid)) {
       const lbl = world.eid2obj.get(TextButton.labelRef[eid]);
       lbl.color = isHovered ? style.textHoverColor : style.textColor;
+    }
+    if (hasComponent(world, ImageButton, eid)) {
+      const lbl = world.eid2obj.get(ImageButton.labelRef[eid]);
+      lbl.material.color.copy(isHovered ? style.textHoverColor : style.textColor);
     }
   });
 }
