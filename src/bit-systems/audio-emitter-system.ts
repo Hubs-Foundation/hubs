@@ -31,6 +31,7 @@ export const getAudioPosition = (() => {
         eid = eid.eid;
       }
       const obj = APP.world.eid2obj.get(eid)!;
+      obj.updateMatrixWorld();
       obj.matrixWorld.decompose(_position, _quaternion, _scale);
       position.copy(_position);
     }
@@ -51,6 +52,7 @@ export const getAudioOrientation = (() => {
         eid = eid.eid;
       }
       const obj = APP.world.eid2obj.get(eid)!;
+      obj.updateMatrixWorld();
       obj.matrixWorld.decompose(_position, _quaternion, _scale);
       orientation.set(0, 0, -1).applyQuaternion(_quaternion);
     }
