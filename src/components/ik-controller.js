@@ -117,6 +117,8 @@ AFRAME.registerComponent("ik-controller", {
     this.isInView = true;
     this.hasConvergedHips = false;
     this.lastCameraTransform = new THREE.Matrix4();
+    this.lastCameraWorldTransform = new THREE.Matrix4();
+    this.transformUpdated = false;
     waitForDOMContentLoaded().then(() => {
       this.playerCamera = document.getElementById("viewing-camera").getObject3D("camera");
     });
@@ -180,7 +182,7 @@ AFRAME.registerComponent("ik-controller", {
 
     camera.object3D.updateMatrix();
 
-    this.transformUpdated = !this.lastCameraTransform.equals(camera.object3D.matrix);
+    const hasNewCameraTransform = !this.lastCameraTransform.equals(camera.object3D.matrix);
 
     // Optimization: if the camera hasn't moved and the hips converged to the target orientation on a previous frame,
     // then the avatar does not need any IK this frame.
@@ -189,9 +191,9 @@ AFRAME.registerComponent("ik-controller", {
     if (
       this.data.alwaysUpdate ||
       this.forceIkUpdate ||
-      (this.isInView && (this.transformUpdated || !this.hasConvergedHips))
+      (this.isInView && (hasNewCameraTransform || !this.hasConvergedHips))
     ) {
-      if (this.transformUpdated) {
+      if (hasNewCameraTransform) {
         this.lastCameraTransform.copy(camera.object3D.matrix);
       }
 
@@ -236,6 +238,11 @@ AFRAME.registerComponent("ik-controller", {
 
       if (this._hadFirstTick) {
         camera.object3D.updateMatrices();
+        this.transformUpdated = !this.lastCameraWorldTransform.equals(camera.object3D.matrixWorld);
+        if (this.transformUpdated) {
+          this.lastCameraWorldTransform.copy(camera.object3D.matrixWorld);
+        }
+
         avatar.updateMatrices();
         // Note: Camera faces down -Z, avatar faces down +Z
         const yDelta = Math.PI - angleOnXZPlaneBetweenMatrixRotations(camera.object3D.matrixWorld, avatar.matrixWorld);
