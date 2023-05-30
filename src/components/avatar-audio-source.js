@@ -73,9 +73,9 @@ AFRAME.registerComponent("avatar-audio-source", {
       createSilentAudioEl(stream); // TODO: Do the audio els need to get cleaned up?
     }
 
-    this.destination = audio.context.createMediaStreamDestination();
-    this.mediaStreamSource = audio.context.createMediaStreamSource(stream);
-    const destinationSource = audio.context.createMediaStreamSource(this.destination.stream);
+    this.destination = APP.audioCtx.createMediaStreamDestination();
+    this.mediaStreamSource = APP.audioCtx.createMediaStreamSource(stream);
+    const destinationSource = APP.audioCtx.createMediaStreamSource(this.destination.stream);
     this.mediaStreamSource.connect(this.destination);
     destinationSource.connect(audio);
     this.el.emit("sound-source-set", { soundSource: destinationSource });
@@ -162,7 +162,7 @@ AFRAME.registerComponent("avatar-audio-source", {
 
         if (newStream) {
           this.mediaStreamSource.disconnect();
-          this.mediaStreamSource = audio.context.createMediaStreamSource(newStream);
+          this.mediaStreamSource = APP.audioCtx.createMediaStreamSource(newStream);
           this.mediaStreamSource.connect(this.destination);
         }
       }
@@ -190,15 +190,15 @@ AFRAME.registerComponent("avatar-audio-source", {
   }
 });
 
-function createWhiteNoise(audioContext, gain) {
-  const bufferSize = 2 * audioContext.sampleRate,
-    noiseBuffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate),
+function createWhiteNoise(gain) {
+  const bufferSize = 2 * APP.audioCtx.sampleRate,
+    noiseBuffer = APP.audioCtx.createBuffer(1, bufferSize, APP.audioCtx.sampleRate),
     gainFilter = noiseBuffer.getChannelData(0);
   for (let i = 0; i < bufferSize; i++) {
     gainFilter[i] = (Math.random() * 2 - 1) * gain;
   }
 
-  const whiteNoise = audioContext.createBufferSource();
+  const whiteNoise = APP.audioCtx.createBufferSource();
   whiteNoise.buffer = noiseBuffer;
   whiteNoise.loop = true;
   whiteNoise.start(0);
@@ -225,7 +225,7 @@ AFRAME.registerComponent("zone-audio-source", {
   init() {
     this.gainFilter = APP.audioCtx.createGain();
     if (this.data.debug) {
-      this.whiteNoise = createWhiteNoise(APP.audioCtx, 0.01);
+      this.whiteNoise = createWhiteNoise(0.01);
       this.setInput(this.whiteNoise);
     }
 
