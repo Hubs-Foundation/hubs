@@ -123,6 +123,8 @@ export class AudioSystem {
     this.audioContext = APP.audioCtx;
     this.audioNodes = new Map();
     this.mediaStreamDestinationNode = this.audioContext.createMediaStreamDestination(); // Voice, camera, screenshare
+    this.destinationGain = APP.audioCtx.createGain();
+    this.destinationGain.connect(APP.audioCtx.destination);
     this.audioDestination = this.audioContext.createMediaStreamDestination(); // Media elements
     this.outboundStream = this.mediaStreamDestinationNode.stream;
     this.outboundGainNode = this.audioContext.createGain();
@@ -140,9 +142,9 @@ export class AudioSystem {
       [SourceType.AUDIO_TARGET]: this.mediaGain,
       [SourceType.SFX]: this.audioContext.createGain()
     };
-    this.mixer[SourceType.AVATAR_AUDIO_SOURCE].connect(APP.audioCtx.destination);
-    this.mixer[SourceType.MEDIA_VIDEO].connect(APP.audioCtx.destination);
-    this.mixer[SourceType.SFX].connect(APP.audioCtx.destination);
+    this.mixer[SourceType.AVATAR_AUDIO_SOURCE].connect(this.destinationGain);
+    this.mixer[SourceType.MEDIA_VIDEO].connect(this.destinationGain);
+    this.mixer[SourceType.SFX].connect(this.destinationGain);
 
     // Analyser to show the output audio level
     this.mixerAnalyser = this.audioContext.createAnalyser();
@@ -210,7 +212,7 @@ export class AudioSystem {
       const sinkId = APP.mediaDevicesManager.selectedSpeakersDeviceId;
       const isDefault = sinkId === APP.mediaDevicesManager.defaultOutputDeviceId;
       if ((!this.outputMediaAudio && isDefault) || sinkId === this.outputMediaAudio?.sinkId) return;
-      const sink = isDefault ? APP.audioCtx.destination : this.audioDestination;
+      const sink = isDefault ? this.destinationGain : this.audioDestination;
       this.mixer[SourceType.AVATAR_AUDIO_SOURCE].disconnect();
       this.mixer[SourceType.AVATAR_AUDIO_SOURCE].connect(sink);
       this.mixer[SourceType.AVATAR_AUDIO_SOURCE].connect(this.mixerAnalyser);
@@ -227,7 +229,7 @@ export class AudioSystem {
           this.outputMediaAudio = null;
         }
       } else {
-        // Swithing the audio sync is only supported in Chrome at the time of writing this.
+        // Switching the audio sync is only supported in Chrome at the time of writing this.
         // It also seems to have some limitations and it only works on audio elements. We are piping all our media through the Audio Context
         // and that doesn't seem to work.
         // To workaround that we need to use a MediaStreamAudioDestinationNode that is set as the source of the audio element where we switch the sink.
@@ -257,7 +259,7 @@ export class AudioSystem {
       if (this.audioContext.state === "running") {
         const disableAEC = window.APP.store.state.preferences.disableEchoCancellation;
         if (!AFRAME.utils.device.isMobile() && /chrome/i.test(navigator.userAgent) && !disableAEC) {
-          enableChromeAEC(APP.audioCtx.listener);
+          enableChromeAEC(this.destinationGain);
         }
 
         document.body.removeEventListener("touchend", this._resumeAudioContext, false);
