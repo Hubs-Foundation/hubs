@@ -29,7 +29,7 @@ import {
   SimpleForm,
   TextField,
   TextInput,
-  refreshView
+  // refreshView
 } from "react-admin";
 
 const styles = {
@@ -44,7 +44,7 @@ const AccountFilter = props => (
   </Filter>
 );
 
-export const AccountList = withStyles(connect(undefined, { refreshView })(
+export const AccountList = withStyles(connect(undefined)(
   class AccountList extends Component {
     state = {
       emailSearch: "",
@@ -158,7 +158,7 @@ export const AccountList = withStyles(connect(undefined, { refreshView })(
           createResults: results
         });
       }
-      this.props.refreshView();
+      // this.props.refreshView();
       // Quickfix snackbar component does not always close
       // Setting snackbar message to empty string closes
       this.clearCreateStatusTimer();
@@ -170,7 +170,7 @@ export const AccountList = withStyles(connect(undefined, { refreshView })(
     render() {
       // refreshView() is only needed in onCreateAccounts()
       // eslint-disable-next-line no-unused-vars
-      const { classes, refreshView, ...other } = this.props;
+      const { classes, ...other } = this.props;
       return <>
         <Card className={classes.searchCard}>
           <CardContent>
