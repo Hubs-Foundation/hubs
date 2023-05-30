@@ -73,12 +73,9 @@ AFRAME.registerComponent("avatar-audio-source", {
       createSilentAudioEl(stream); // TODO: Do the audio els need to get cleaned up?
     }
 
-    this.destination = APP.audioCtx.createMediaStreamDestination();
     this.mediaStreamSource = APP.audioCtx.createMediaStreamSource(stream);
-    const destinationSource = APP.audioCtx.createMediaStreamSource(this.destination.stream);
-    this.mediaStreamSource.connect(this.destination);
-    destinationSource.connect(audio);
-    this.el.emit("sound-source-set", { soundSource: destinationSource });
+    this.mediaStreamSource.connect(audio);
+    this.el.emit("sound-source-set", { soundSource: audio });
 
     getOwnerId(this.el).then(async ownerId => {
       if (isRoomOwner(ownerId)) {
@@ -163,7 +160,8 @@ AFRAME.registerComponent("avatar-audio-source", {
         if (newStream) {
           this.mediaStreamSource.disconnect();
           this.mediaStreamSource = APP.audioCtx.createMediaStreamSource(newStream);
-          this.mediaStreamSource.connect(this.destination);
+          const audio = APP.audios.get(this.el);
+          this.mediaStreamSource.connect(audio);
         }
       }
     });
