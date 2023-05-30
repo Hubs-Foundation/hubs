@@ -153,11 +153,6 @@ AFRAME.registerComponent("avatar-audio-source", {
   },
 
   async _onStreamUpdated(peerId, kind) {
-    const audio = APP.audios.get(this.el);
-    if (!audio) return;
-    const stream = audio.source.mediaStream;
-    if (!stream) return;
-
     getOwnerId(this.el).then(async ownerId => {
       if (ownerId === peerId && kind === "audio") {
         // The audio stream for this peer has been updated
