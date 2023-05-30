@@ -1,4 +1,4 @@
-import { defineQuery, enterQuery, entityExists, exitQuery, hasComponent } from "bitecs";
+import { addComponent, defineQuery, enterQuery, entityExists, exitQuery, hasComponent, removeComponent } from "bitecs";
 import { Matrix4, Quaternion, Vector3 } from "three";
 import type { HubsWorld } from "../app";
 import {
@@ -20,6 +20,7 @@ import { deleteTheDeletableAncestor } from "./delete-entity-system";
 import { createMessageDatas, isPinned } from "./networking";
 import { TRANSFORM_MODE } from "../components/transform-object-button";
 import { ScalingHandler } from "../components/scale-button";
+import { BodyAtRest } from "../systems/floaty-object-system";
 
 // Working variables.
 const _vec3_1 = new Vector3();
@@ -88,11 +89,13 @@ function startRotation(world: HubsWorld, targetEid: EntityID) {
   transformSystem.startTransform(world.eid2obj.get(targetEid)!, world.eid2obj.get(rightCursorEid)!, {
     mode: TRANSFORM_MODE.CURSOR
   });
+  removeComponent(APP.world, BodyAtRest, targetEid);
 }
 
-function stopRotation() {
+function stopRotation(world: HubsWorld, targetEid: EntityID) {
   const transformSystem = APP.scene!.systems["transform-selected-object"];
   transformSystem.stopTransform();
+  addComponent(APP.world, BodyAtRest, targetEid);
 }
 
 function startScaling(world: HubsWorld, targetEid: EntityID) {
@@ -188,7 +191,7 @@ function handleHeldEnter(world: HubsWorld, eid: EntityID, menuEid: EntityID) {
 function handleHeldExit(world: HubsWorld, eid: EntityID, menuEid: EntityID) {
   switch (eid) {
     case ObjectMenu.rotateButtonRef[menuEid]:
-      stopRotation();
+      stopRotation(world, ObjectMenu.targetRef[menuEid]);
       break;
     case ObjectMenu.scaleButtonRef[menuEid]:
       stopScaling(world);

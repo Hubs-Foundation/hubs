@@ -1,6 +1,8 @@
 import { paths } from "../systems/userinput/paths";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { COLLISION_LAYERS } from "../constants";
+import { addComponent, removeComponent } from "bitecs";
+import { BodyAtRest } from "../systems/floaty-object-system";
 const AMMO_BODY_ATTRIBUTES = { type: "kinematic", collisionFilterMask: COLLISION_LAYERS.HANDS };
 
 export const TRANSFORM_MODE = {
@@ -145,6 +147,7 @@ AFRAME.registerSystem("transform-selected-object", {
           pInv.invert();
           this.target.quaternion.copy(pInv).multiply(q);
           this.target.matrixNeedsUpdate = true;
+          addComponent(APP.world, BodyAtRest, this.target.el.eid);
         }
       }
     };
@@ -241,6 +244,7 @@ AFRAME.registerSystem("transform-selected-object", {
       .premultiply(controllerOrientationDelta)
       .premultiply(controllerOrientationDelta);
     this.target.matrixNeedsUpdate = true;
+    removeComponent(APP.world, BodyAtRest, this.target.el.eid);
   },
 
   cursorAxisOrScaleTick() {
@@ -295,6 +299,7 @@ AFRAME.registerSystem("transform-selected-object", {
         q2.setFromAxisAngle(v, this.dxApplied);
 
         this.target.quaternion.premultiply(q).premultiply(q2);
+        removeComponent(APP.world, BodyAtRest, this.target.el.eid);
       }
 
       this.target.matrixNeedsUpdate = true;
@@ -305,6 +310,7 @@ AFRAME.registerSystem("transform-selected-object", {
 
       this.target.quaternion.multiply(q.setFromAxisAngle(this.axis, -this.sign * this.dxApplied));
       this.target.matrixNeedsUpdate = true;
+      removeComponent(APP.world, BodyAtRest, this.target.el.eid);
     }
 
     previousPointOnPlane.copy(currentPointOnPlane);
@@ -323,6 +329,7 @@ AFRAME.registerSystem("transform-selected-object", {
       this.el.camera.getWorldPosition(CAMERA_WORLD_POSITION);
       this.target.lookAt(CAMERA_WORLD_POSITION);
       this.transforming = false;
+      removeComponent(APP.world, BodyAtRest, this.target.el.eid);
       return;
     }
 
