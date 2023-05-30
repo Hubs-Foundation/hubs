@@ -7,6 +7,9 @@ const _position = new Vector3();
 const _quaternion = new Quaternion();
 const _scale = new Vector3();
 const _orientation = new Vector3();
+const lastPosition = new Vector3();
+const lastOrientation = new Vector3();
+const lastUp = new Vector3();
 
 const audioListenerQuery = defineQuery([AudioListenerTag]);
 export function audioListenerSystem(world: HubsWorld) {
@@ -22,22 +25,30 @@ export function audioListenerSystem(world: HubsWorld) {
 
     _orientation.set(0, 0, -1).applyQuaternion(_quaternion);
 
-    if (listener.positionX) {
-      // code path for Chrome (see #14393)
-      const endTime = APP.audioCtx.currentTime + timeDelta;
-      listener.positionX.linearRampToValueAtTime(_position.x, endTime);
-      listener.positionY.linearRampToValueAtTime(_position.y, endTime);
-      listener.positionZ.linearRampToValueAtTime(_position.z, endTime);
-      listener.forwardX.linearRampToValueAtTime(_orientation.x, endTime);
-      listener.forwardY.linearRampToValueAtTime(_orientation.y, endTime);
-      listener.forwardZ.linearRampToValueAtTime(_orientation.z, endTime);
-      listener.upX.linearRampToValueAtTime(up.x, endTime);
-      listener.upY.linearRampToValueAtTime(up.y, endTime);
-      listener.upZ.linearRampToValueAtTime(up.z, endTime);
-    } else {
-      // Although these methods are deprecated they are currently the only way to set the orientation and position in Firefox.
-      listener.setPosition(_position.x, _position.y, _position.z);
-      listener.setOrientation(_orientation.x, _orientation.y, _orientation.z, up.x, up.y, up.z);
+    const positionUpdated = !lastPosition.equals(_position);
+    const orientationUpdated = !lastOrientation.equals(_orientation);
+    const lastUpUpdated = !lastUp.equals(up);
+    if (positionUpdated || orientationUpdated || lastUpUpdated) {
+      if (listener.positionX) {
+        // code path for Chrome (see #14393)
+        const endTime = APP.audioCtx.currentTime + timeDelta;
+        listener.positionX.linearRampToValueAtTime(_position.x, endTime);
+        listener.positionY.linearRampToValueAtTime(_position.y, endTime);
+        listener.positionZ.linearRampToValueAtTime(_position.z, endTime);
+        listener.forwardX.linearRampToValueAtTime(_orientation.x, endTime);
+        listener.forwardY.linearRampToValueAtTime(_orientation.y, endTime);
+        listener.forwardZ.linearRampToValueAtTime(_orientation.z, endTime);
+        listener.upX.linearRampToValueAtTime(up.x, endTime);
+        listener.upY.linearRampToValueAtTime(up.y, endTime);
+        listener.upZ.linearRampToValueAtTime(up.z, endTime);
+      } else {
+        // Although these methods are deprecated they are currently the only way to set the orientation and position in Firefox.
+        listener.setPosition(_position.x, _position.y, _position.z);
+        listener.setOrientation(_orientation.x, _orientation.y, _orientation.z, up.x, up.y, up.z);
+      }
     }
+    lastPosition.copy(_position);
+    lastOrientation.copy(_orientation);
+    lastUp.copy(up);
   });
 }

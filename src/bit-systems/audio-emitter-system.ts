@@ -1,12 +1,12 @@
-import { addComponent, defineQuery, exitQuery, hasComponent, removeComponent } from "bitecs";
+import { addComponent, defineQuery, exitQuery, removeComponent } from "bitecs";
 import { MeshStandardMaterial, Mesh, Vector3, Object3D, Quaternion } from "three";
 import { HubsWorld } from "../app";
-import { AudioEmitter, AudioSettingsChanged } from "../bit-components";
+import { AudioEmitter, AudioSettingsChanged, FloatyObject, Held } from "../bit-components";
 import { AudioType, SourceType } from "../components/audio-params";
 import { AudioSystem } from "../systems/audio-system";
 import { applySettings, getCurrentAudioSettings, updateAudioSettings } from "../update-audio-settings";
 import { EntityID } from "../utils/networking-types";
-import { ElOrEid } from "../utils/bit-utils";
+import { ElOrEid, findAncestorWithComponent } from "../utils/bit-utils";
 import { BodyAtRest } from "../systems/floaty-object-system";
 
 export type AudioNode = PannerNode | StereoPannerNode;
@@ -77,19 +77,15 @@ export const updatePannerNode = (() => {
   };
 })();
 
-export const updateAudio = (elOrEid: ElOrEid, obj: Object3D) => {
+export const updateAudio = (elOrEid: ElOrEid, obj: Object3D, force?: false) => {
   const audio = APP.audios.get(elOrEid)!;
   const muted = !!APP.mutedState.has(elOrEid);
   const clipped = !!APP.clippingState.has(elOrEid);
   const isAudioPaused = !!APP.isAudioPaused.has(elOrEid);
-  let atRest;
-  if (typeof elOrEid === "number") {
-    atRest = hasComponent(APP.world, BodyAtRest, elOrEid);
-  } else {
-    atRest = hasComponent(APP.world, BodyAtRest, elOrEid.eid);
-  }
-  if (isPositionalAudio(audio) && !muted && !clipped && !isAudioPaused && !atRest) {
-    updatePannerNode(audio, obj);
+  if (isPositionalAudio(audio)) {
+    if (force || (!muted && !clipped && !isAudioPaused)) {
+      updatePannerNode(audio, obj);
+    }
   }
 };
 
@@ -146,6 +142,7 @@ export function makeAudioEntity(
     mediaElement.connect(audio);
     // Original audio source volume can now be restored as audio systems will take over
     audioSrcEl.volume = 1;
+    updateAudio(eid, videoObj);
   }
 
   addComponent(world, AudioEmitter, eid);
@@ -177,7 +174,12 @@ export function audioEmitterSystem(world: HubsWorld, audioSystem: AudioSystem) {
     cleanupAudio(eid, audioSystem);
   });
   audioEmitterQuery(world).forEach(eid => {
-    const obj = APP.world.eid2obj.get(eid)!;
-    updateAudio(eid, obj);
+    // For now we are only interested in updating movable media
+    const isFloaty = findAncestorWithComponent(APP.world, FloatyObject, eid);
+    const isAtRest = findAncestorWithComponent(APP.world, BodyAtRest, eid);
+    if (isFloaty && !isAtRest) {
+      const obj = APP.world.eid2obj.get(eid)!;
+      updateAudio(eid, obj);
+    }
   });
 }

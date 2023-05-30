@@ -2,6 +2,7 @@ import { AudioType, SourceType } from "./audio-params";
 import { getCurrentAudioSettings, updateAudioSettings } from "../update-audio-settings";
 import { isRoomOwner } from "../utils/hub-utils";
 import { updateAudio } from "../bit-systems/audio-emitter-system";
+import { findAncestorWithComponent } from "../utils/scene-graph";
 const INFO_INIT_FAILED = "Failed to initialize avatar-audio-source.";
 const INFO_NO_NETWORKED_EL = "Could not find networked el.";
 const INFO_NO_OWNER = "Networked component has no owner.";
@@ -88,6 +89,10 @@ AFRAME.registerComponent("avatar-audio-source", {
       APP.audios.set(this.el, audio);
       APP.gains.set(this.el, gain);
       updateAudioSettings(this.el, audio);
+      updateAudio(this.el, this.el.object3D, true);
+
+      this.ikRootEl = findAncestorWithComponent(this.el, "ik-root");
+      this.ikController = this.ikRootEl.querySelector(".AvatarRoot").components["ik-controller"];
     });
   },
 
@@ -184,7 +189,9 @@ AFRAME.registerComponent("avatar-audio-source", {
   },
 
   tick: function () {
-    updateAudio(this.el, this.el.object3D);
+    if (this.ikController && this.ikController.transformUpdated) {
+      updateAudio(this.el, this.el.object3D, true);
+    }
   }
 });
 

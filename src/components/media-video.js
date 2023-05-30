@@ -24,6 +24,9 @@ import { isSafari } from "../utils/detect-safari";
 import { isIOS as detectIOS } from "../utils/is-mobile";
 import { Layers } from "../camera-layers";
 import { updateAudio } from "../bit-systems/audio-emitter-system";
+import { hasComponent } from "bitecs";
+import { FloatyObject } from "../bit-components";
+import { BodyAtRest } from "../systems/floaty-object-system";
 
 const ONCE_TRUE = { once: true };
 const TYPE_IMG_PNG = { type: "image/png" };
@@ -375,6 +378,8 @@ AFRAME.registerComponent("media-video", {
     updateAudioSettings(this.el, audio);
     // Original audio source volume can now be restored as audio systems will take over
     this.mediaElementAudioSource.mediaElement.volume = 1;
+
+    updateAudio(this.el, this.el.object3D, true);
   },
 
   async updateSrc(oldData) {
@@ -746,7 +751,11 @@ AFRAME.registerComponent("media-video", {
         }
       }
 
-      updateAudio(this.el, this.el.object3D);
+      const isFloaty = hasComponent(APP.world, FloatyObject, this.el.eid);
+      const isAtRest = hasComponent(APP.world, BodyAtRest, this.el.eid);
+      if (isFloaty && !isAtRest) {
+        updateAudio(this.el, this.el.object3D);
+      }
     };
   })(),
 

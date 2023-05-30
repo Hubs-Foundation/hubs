@@ -180,7 +180,7 @@ AFRAME.registerComponent("ik-controller", {
 
     camera.object3D.updateMatrix();
 
-    const hasNewCameraTransform = !this.lastCameraTransform.equals(camera.object3D.matrix);
+    this.transformUpdated = !this.lastCameraTransform.equals(camera.object3D.matrix);
 
     // Optimization: if the camera hasn't moved and the hips converged to the target orientation on a previous frame,
     // then the avatar does not need any IK this frame.
@@ -189,9 +189,9 @@ AFRAME.registerComponent("ik-controller", {
     if (
       this.data.alwaysUpdate ||
       this.forceIkUpdate ||
-      (this.isInView && (hasNewCameraTransform || !this.hasConvergedHips))
+      (this.isInView && (this.transformUpdated || !this.hasConvergedHips))
     ) {
-      if (hasNewCameraTransform) {
+      if (this.transformUpdated) {
         this.lastCameraTransform.copy(camera.object3D.matrix);
       }
 

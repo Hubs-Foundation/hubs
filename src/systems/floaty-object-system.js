@@ -79,6 +79,7 @@ export const floatyObjectSystem = world => {
       type: "kinematic",
       gravity: { x: 0, y: 0, z: 0 }
     });
+    addComponent(world, BodyAtRest, eid);
   });
 
   enterHeldFloatyObjectsQuery(world).forEach(eid => {
