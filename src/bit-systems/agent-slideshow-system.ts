@@ -58,9 +58,12 @@ export function FromatNewText(newText: string) {
 }
 
 export function UpdateTextSystem(world: HubsWorld, newFormatedText: Array<string>) {
+  const textCount = newFormatedText.length;
+
   agentSlideQuery(world).forEach(eid => {
     const panelObj = world.eid2obj.get(eid) as Text;
-    if (PanelIndex.index[eid] >= newFormatedText.length) {
+
+    if (PanelIndex.index[eid] >= textCount) {
       panelObj.visible = false;
     } else {
       panelObj.text = newFormatedText[PanelIndex.index[eid]];
@@ -71,5 +74,5 @@ export function UpdateTextSystem(world: HubsWorld, newFormatedText: Array<string
 
   resetIndex();
 
-  return newFormatedText.length === 1;
+  return textCount === 1;
 }

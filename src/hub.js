@@ -735,6 +735,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  console.log("here");
+
   const hubId = getCurrentHubId();
   console.log(`Hub ID: ${hubId}`);
 

@@ -25,6 +25,51 @@ function showArrows(world, prevArrowEid, nextArrowEid) {
   world.eid2obj.get(prevArrowEid).visible = true;
   world.eid2obj.get(nextArrowEid).visible = true;
 }
+
+function stopRecording(mediaRecorder) {
+  if (mediaRecorder && mediaRecorder.state !== "inactive") {
+    mediaRecorder.stop();
+  }
+}
+
+function saveRecording(blob) {
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "recording.wav";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  // Clean up
+  URL.revokeObjectURL(url);
+
+  return [];
+}
+
+function recordUser() {
+  const audioTrack = APP.mediaDevicesManager.audioTrack;
+  const audioStream = new MediaStream([audioTrack]);
+  const mediaRecorder = new MediaRecorder(audioStream);
+  let chunks = [];
+  mediaRecorder.start();
+
+  mediaRecorder.ondataavailable = function (e) {
+    chunks.push(e.data);
+  };
+
+  mediaRecorder.onstop = function () {
+    const recordingBlob = new Blob(chunks, { type: "audio/wav" });
+    chunks = saveRecording(recordingBlob);
+  };
+
+  setTimeout(function () {
+    stopRecording(mediaRecorder);
+  }, 3000);
+
+  console.log(audioTrack);
+}
 let init = true;
 export function AgentSystem(world) {
   enterAgentQuery(world).forEach(eid => {
@@ -71,6 +116,8 @@ export function AgentSystem(world) {
       if (renderArrows) {
         hideArrows(world, Agent.prevRef[eid], Agent.nextRef[eid]);
       } else showArrows(world, Agent.prevRef[eid], Agent.nextRef[eid]);
+
+      recordUser();
     }
   });
 }
