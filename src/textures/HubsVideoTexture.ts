@@ -1,9 +1,10 @@
 import { LinearFilter, Texture } from "three";
-import { Mapping, TextureDataType, TextureFilter, PixelFormat, Wrapping, Source } from "three";
+import { Mapping, TextureDataType, TextureFilter, PixelFormat, Wrapping } from "three";
 
 export class HubsVideoTexture extends Texture {
   isVideoTexture: boolean;
   wasPaused: boolean;
+  video: HTMLVideoElement;
 
   constructor(
     video: HTMLVideoElement,

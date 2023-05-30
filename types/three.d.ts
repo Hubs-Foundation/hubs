@@ -24,8 +24,4 @@ declare module "three" {
   interface Mesh {
     reflectionProbeMode: "static" | "dynamic" | false;
   }
-
-  interface Texture {
-    video: HTMLVideoElement;
-  }
 }
