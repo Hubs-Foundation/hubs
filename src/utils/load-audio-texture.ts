@@ -9,6 +9,7 @@ export async function loadAudioTexture(
   const videoEl = createVideoOrAudioEl("video") as HTMLVideoElement;
   const imageEl = new Image();
   imageEl.src = audioIcon;
+  imageEl.crossOrigin = "anonymous";
   const texture = new HubsVideoTexture(videoEl, imageEl);
   imageEl.onload = () => {
     texture.needsUpdate = true;
