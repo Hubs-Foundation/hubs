@@ -42,7 +42,8 @@ AFRAME.registerSystem("capture-system", {
     if (this._gotAudioTrack) return;
 
     const destination = APP.audioCtx.createMediaStreamDestination();
-    APP.audioCtx.listener.connect(destination);
+    const audioSystem = APP.scene.systems["hubs-systems"].audioSystem;
+    audioSystem.getListenerInput().connect(destination);
     const audio = destination.stream.getAudioTracks()[0];
 
     this._stream.addTrack(audio);

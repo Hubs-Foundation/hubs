@@ -184,6 +184,10 @@ export class AudioSystem {
     }
   }
 
+  getListenerInput() {
+    return this.destinationGain;
+  }
+
   addAudio({ node, sourceType }) {
     node.disconnect();
     node.connect(this.mixer[sourceType]);
