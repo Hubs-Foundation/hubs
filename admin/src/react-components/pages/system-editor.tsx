@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { withStyles } from "@material-ui/core/styles";
+import { withStyles } from 'tss-react/mui';
 import { fetchReticulumAuthenticated } from "hubs/src/utils/phoenix-utils";
 import withCommonStyles from "../../utils/with-common-styles";
 import { getAdminInfo, getEditableConfig } from "../../utils/ita";
@@ -365,4 +365,4 @@ const SystemEditorComponent = ({ classes }) => {
   );
 };
 
-export const SystemEditor = withStyles(styles)(SystemEditorComponent);
+export const SystemEditor = withStyles(SystemEditorComponent, styles);

@@ -1,8 +1,7 @@
-import { queryParameters } from "ra-core/lib/util/fetch";
-import HttpError from "ra-core/lib/util/HttpError";
-import { GET_LIST, GET_ONE, GET_MANY, GET_MANY_REFERENCE, CREATE, UPDATE, DELETE, DELETE_MANY } from "react-admin";
+import { GET_LIST, GET_ONE, GET_MANY, GET_MANY_REFERENCE, CREATE, UPDATE, DELETE, DELETE_MANY, HttpError } from "react-admin";
 import { AUTH_LOGIN, AUTH_LOGOUT, AUTH_ERROR } from "react-admin";
 import json2ParseBigint from "./json_parse_bigint";
+import { queryParameters } from "ra-core/dist/cjs/dataProvider/fetch";
 
 // NOTE: The current perms token (and refresh) is used when we are talking directly to PostgREST over a tunnel.
 // The current auth token, if set, is used when we're talking to reticulum proxying PostgREST.

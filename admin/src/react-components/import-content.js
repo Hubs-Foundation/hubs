@@ -1,35 +1,35 @@
 /* eslint-disable @calm/react-intl/missing-formatted-message*/
 /* eslint-disable react/prop-types */
 import React, { Component } from "react";
-import { withStyles } from "@material-ui/core/styles";
-import Typography from "@material-ui/core/Typography";
-import Card from "@material-ui/core/Card";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import CardContent from "@material-ui/core/CardContent";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemText from "@material-ui/core/ListItemText";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import Done from "@material-ui/icons/Done";
-import Warning from "@material-ui/icons/Warning";
-import Snackbar from "@material-ui/core/Snackbar";
-import SnackbarContent from "@material-ui/core/SnackbarContent";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import FormControl from "@material-ui/core/FormControl";
-import FormGroup from "@material-ui/core/FormGroup";
-import Checkbox from "@material-ui/core/Checkbox";
-import Icon from "@material-ui/core/Icon";
-import IconButton from "@material-ui/core/IconButton";
-import CloseIcon from "@material-ui/icons/Close";
-import Table from "@material-ui/core/Table";
-import TableBody from "@material-ui/core/TableBody";
-import TableHead from "@material-ui/core/TableHead";
-import TableCell from "@material-ui/core/TableCell";
-import TableRow from "@material-ui/core/TableRow";
-import Paper from "@material-ui/core/Paper";
+import { withStyles } from 'tss-react/mui';
+import Typography from "@mui/material/Typography";
+import Card from "@mui/material/Card";
+import CircularProgress from "@mui/material/CircularProgress";
+import CardContent from "@mui/material/CardContent";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemText from "@mui/material/ListItemText";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import Done from "@mui/icons-material/Done";
+import Warning from "@mui/icons-material/Warning";
+import Snackbar from "@mui/material/Snackbar";
+import SnackbarContent from "@mui/material/SnackbarContent";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import FormControl from "@mui/material/FormControl";
+import FormGroup from "@mui/material/FormGroup";
+import Checkbox from "@mui/material/Checkbox";
+import Icon from "@mui/material/Icon";
+import IconButton from "@mui/material/IconButton";
+import CloseIcon from "@mui/icons-material/Close";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableHead from "@mui/material/TableHead";
+import TableCell from "@mui/material/TableCell";
+import TableRow from "@mui/material/TableRow";
+import Paper from "@mui/material/Paper";
 import { Title } from "react-admin";
-import TextField from "@material-ui/core/TextField";
-import Button from "@material-ui/core/Button";
+import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
 import { fetchReticulumAuthenticated } from "hubs/src/utils/phoenix-utils";
 import clsx from "classnames";
 import { GET_MANY_REFERENCE } from "react-admin";
@@ -509,9 +509,10 @@ class ImportContentComponent extends Component {
             </List>
           )}
           <form className={this.props.classes.info}>
-            <FormControl>
+            <FormControl variant="standard">
               <FormGroup>
                 <TextField
+                  variant="standard"
                   key="url"
                   id="url"
                   label="Avatar or Scene URLs or .pack file"
@@ -519,8 +520,7 @@ class ImportContentComponent extends Component {
                   onChange={this.handleUrlChanged.bind(this)}
                   type="text"
                   fullWidth
-                  margin="normal"
-                />
+                  margin="normal" />
               </FormGroup>
             </FormControl>
             {!this.state.isLoading && (
@@ -576,7 +576,7 @@ class ImportContentComponent extends Component {
                   key="close"
                   color="inherit"
                   onClick={() => this.setState({ importFailed: false, lastImportedUrl: null })}
-                >
+                  size="large">
                   <CloseIcon className={this.props.classes.icon} />
                 </IconButton>
               ]}
@@ -588,4 +588,4 @@ class ImportContentComponent extends Component {
   }
 }
 
-export const ImportContent = withStyles(styles)(ImportContentComponent);
+export const ImportContent = withStyles(ImportContentComponent, styles);

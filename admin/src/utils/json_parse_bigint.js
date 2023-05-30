@@ -346,4 +346,4 @@ export default (function () {
         })({ "": result }, "")
       : result;
   };
-})();
+}());

@@ -3,19 +3,19 @@ import React, { Component } from "react";
 import classNames from "classnames";
 import inflection from "inflection";
 import { connect } from "react-redux";
-import { getResources } from "react-admin";
-import { withRouter, NavLink } from "react-router-dom";
-import { withStyles } from "@material-ui/core/styles";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import ListItemText from "@material-ui/core/ListItemText";
-import HomeIcon from "@material-ui/icons/Home";
-import LibraryBooksIcon from "@material-ui/icons/LibraryBooks";
-import BackupIcon from "@material-ui/icons/Backup";
-import ViewIcon from "@material-ui/icons/ViewList";
-import SettingsIcon from "@material-ui/icons/Settings";
-import Collapse from "@material-ui/core/Collapse";
+import { useResourceDefinitions } from "react-admin";
+import { NavLink } from "react-router-dom";
+import { withStyles } from 'tss-react/mui';
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import HomeIcon from "@mui/icons-material/Home";
+import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
+import BackupIcon from "@mui/icons-material/Backup";
+import ViewIcon from "@mui/icons-material/ViewList";
+import SettingsIcon from "@mui/icons-material/Settings";
+import Collapse from "@mui/material/Collapse";
 import { getServiceDisplayName } from "../utils/ita";
 import configs from "../utils/configs";
 import { hasPaidFeature } from "../utils/feature_flags";
@@ -93,6 +93,8 @@ function getResourceDisplayName(resource) {
 }
 
 class Menu extends Component {
+   const resourcesDefinitions = useResourceDefinitions();
+ const resources = Object.keys(resourcesDefinitions).map(name => resourcesDefinitions[name]);
   renderService(service) {
     return (
       <ListItem
@@ -346,4 +348,4 @@ class Menu extends Component {
   }
 }
 
-export const AdminMenu = withRouter(connect(mapStateToProps)(withStyles(styles)(Menu)));
+export const AdminMenu = connect(mapStateToProps)(withStyles(Menu, styles));

@@ -1,8 +1,8 @@
 /* eslint-disable @calm/react-intl/missing-formatted-message*/
 import React from "react";
 import PropTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
-import LaunchIcon from "@material-ui/icons/Launch";
+import { withStyles } from 'tss-react/mui';
+import LaunchIcon from "@mui/icons-material/Launch";
 import { getReticulumFetchUrl, getUploadsUrl } from "hubs/src/utils/phoenix-utils";
 import { ReferenceField } from "react-admin";
 
@@ -39,12 +39,12 @@ ConditionalReferenceField.propTypes = {
   defaultValue: PropTypes.element
 };
 
-const OwnedFileImageInternal = withStyles(styles)(({ record = {}, aspect = "wide", classes }) => {
+const OwnedFileImageInternal = withStyles(({ record = {}, aspect = "wide", classes }) => {
   const src = getUploadsUrl(`/files/${record.owned_file_uuid}`);
-  return <img src={src} className={classes[`ownedFileImageAspect_${aspect}`]} />;
-});
+  return <img src={src} className={classes[`ownedFileImageAspect_${aspect}`]} />
+}, styles);
 
-export const OwnedFileImage = withStyles(styles)(({ basePath, record, source, aspect, classes, defaultImage }) => {
+export const OwnedFileImage = withStyles(({ basePath, record, source, aspect, classes, defaultImage }) => {
   return (
     <ConditionalReferenceField
       basePath={basePath}
@@ -57,7 +57,7 @@ export const OwnedFileImage = withStyles(styles)(({ basePath, record, source, as
       <OwnedFileImageInternal source="owned_file_uuid" aspect={aspect} />
     </ConditionalReferenceField>
   );
-});
+}, styles);
 
 OwnedFileImage.propTypes = {
   record: PropTypes.object,
@@ -129,7 +129,7 @@ OwnedFileSizeFieldInternal.propTypes = {
   }
 };
 
-export const OwnedFileSizeField = withStyles(styles)(({ label, basePath, record, source }) => {
+export const OwnedFileSizeField = withStyles(({ label, basePath, record, source }) => {
   return (
     <ConditionalReferenceField
       label={label}
@@ -143,9 +143,9 @@ export const OwnedFileSizeField = withStyles(styles)(({ label, basePath, record,
       <OwnedFileSizeFieldInternal />
     </ConditionalReferenceField>
   );
-});
+}, styles);
 
-export const SceneLink = withStyles(styles)(({ source, record = {}, classes }) => {
+export const SceneLink = withStyles(({ source, record = {}, classes }) => {
   const src = getReticulumFetchUrl(`/scenes/${record.scene_sid || record.scene_listing_sid}`);
   return (
     <a href={src} className={classes.fieldLink} target="_blank" rel="noopener noreferrer">
@@ -153,7 +153,7 @@ export const SceneLink = withStyles(styles)(({ source, record = {}, classes }) =
       <LaunchIcon className={classes.icon} />
     </a>
   );
-});
+}, styles);
 
 SceneLink.propTypes = {
   source: PropTypes.string.isRequired,
@@ -161,7 +161,7 @@ SceneLink.propTypes = {
   classes: PropTypes.object
 };
 
-export const AvatarLink = withStyles(styles)(({ source, record = {}, classes }) => {
+export const AvatarLink = withStyles(({ source, record = {}, classes }) => {
   const src = getReticulumFetchUrl(`/avatars/${record.avatar_sid || record.avatar_listing_sid}`);
   return (
     <a href={src} className={classes.avatarLink} target="_blank" rel="noopener noreferrer">
@@ -169,7 +169,7 @@ export const AvatarLink = withStyles(styles)(({ source, record = {}, classes }) 
       <LaunchIcon className={classes.icon} />
     </a>
   );
-});
+}, styles);
 
 AvatarLink.propTypes = {
   source: PropTypes.string.isRequired,
@@ -177,17 +177,17 @@ AvatarLink.propTypes = {
   classes: PropTypes.object
 };
 
-export const IdentityEditLink = withStyles(styles)(({ record = {}, classes }) => (
+export const IdentityEditLink = withStyles(({ record = {}, classes }) => (
   <a href={`#/identities/${record.id}`} className={classes.fieldLink}>
     Edit Identity
   </a>
-));
+), styles);
 
-export const IdentityCreateLink = withStyles(styles)(({ record, classes }) => (
+export const IdentityCreateLink = withStyles(({ record, classes }) => (
   <a href={`#/identities/create?account_id=${record.id}`} className={classes.fieldLink}>
     Create Identity
   </a>
-));
+), styles);
 
 SceneLink.propTypes = {
   source: PropTypes.string.isRequired,

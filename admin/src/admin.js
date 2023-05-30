@@ -34,7 +34,8 @@ import { ContentCDN } from "./react-components/content-cdn";
 import { ImportContent } from "./react-components/import-content";
 import { AutoEndSessionDialog } from "./react-components/auto-end-session-dialog";
 import registerTelemetry from "hubs/src/telemetry";
-import { createMuiTheme, withStyles } from "@material-ui/core/styles";
+import { createTheme, adaptV4Theme } from "@mui/material/styles";
+import { withStyles } from 'tss-react/mui';
 import { UnauthorizedPage } from "./react-components/unauthorized";
 import { store } from "hubs/src/utils/store-instance";
 
@@ -46,7 +47,7 @@ registerTelemetry("/admin", "Hubs Admin");
 
 let itaSchemas;
 
-const theme = createMuiTheme({
+const theme = createTheme(adaptV4Theme({
   overrides: {
     MuiDrawer: {
       docked: {
@@ -66,7 +67,7 @@ const theme = createMuiTheme({
   typography: {
     fontFamily: "Inter,Arial"
   }
-});
+}));
 
 class AdminUI extends Component {
   static propTypes = {
@@ -220,15 +221,15 @@ const mountUI = async (retPhxChannel, customRoutes, layout) => {
     document.getElementById("ui-root")
   );
 };
-const HiddenAppBar = withStyles({
+const HiddenAppBar = withStyles(props => {
+  const { classes, ...other } = props;
+  return <AppBar {...other} className={classes.hideOnDesktop} />;
+},{
   hideOnDesktop: {
     "@media (min-width: 768px) and (min-height: 480px)": {
       display: "none"
     }
   }
-})(props => {
-  const { classes, ...other } = props;
-  return <AppBar {...other} className={classes.hideOnDesktop} />;
 });
 
 document.addEventListener("DOMContentLoaded", async () => {
