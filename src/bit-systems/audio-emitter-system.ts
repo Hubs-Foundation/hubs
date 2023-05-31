@@ -79,15 +79,13 @@ export const updatePannerNode = (() => {
   };
 })();
 
-export const updateAudio = (elOrEid: ElOrEid, obj: Object3D, force?: false) => {
+export const updateAudio = (elOrEid: ElOrEid, obj: Object3D) => {
   const audio = APP.audios.get(elOrEid)!;
   const muted = !!APP.mutedState.has(elOrEid);
   const clipped = !!APP.clippingState.has(elOrEid);
   const isAudioPaused = !!APP.isAudioPaused.has(elOrEid);
-  if (isPositionalAudio(audio)) {
-    if (force || (!muted && !clipped && !isAudioPaused)) {
-      updatePannerNode(audio, obj);
-    }
+  if (isPositionalAudio(audio) && !muted && !clipped && !isAudioPaused) {
+    updatePannerNode(audio, obj);
   }
 };
 

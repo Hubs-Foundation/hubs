@@ -23,7 +23,7 @@ import { scaleToAspectRatio } from "../utils/scale-to-aspect-ratio";
 import { isSafari } from "../utils/detect-safari";
 import { isIOS as detectIOS } from "../utils/is-mobile";
 import { Layers } from "../camera-layers";
-import { updateAudio } from "../bit-systems/audio-emitter-system";
+import { updateAudio, updatePannerNode } from "../bit-systems/audio-emitter-system";
 import { hasComponent } from "bitecs";
 import { FloatyObject } from "../bit-components";
 import { BodyAtRest } from "../systems/floaty-object-system";
@@ -379,7 +379,7 @@ AFRAME.registerComponent("media-video", {
     // Original audio source volume can now be restored as audio systems will take over
     this.mediaElementAudioSource.mediaElement.volume = 1;
 
-    updateAudio(this.el, this.el.object3D, true);
+    updatePannerNode(audio, this.el.object3D);
   },
 
   async updateSrc(oldData) {
