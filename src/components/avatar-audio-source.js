@@ -184,7 +184,7 @@ AFRAME.registerComponent("avatar-audio-source", {
 
   tick: function () {
     if (this.ikController && this.ikController.transformUpdated) {
-      updateAudio(this.el, this.el.object3D, true);
+      updateAudio(this.el, this.el.object3);
     }
   }
 });
