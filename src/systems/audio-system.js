@@ -165,10 +165,6 @@ export class AudioSystem {
     window.APP.store.addEventListener("statechanged", this.onPrefsUpdated);
   }
 
-  setMasterVolume(vol) {
-    this._sceneEl.audioListener.setMasterVolume(vol);
-  }
-
   addStreamToOutboundAudio(id, mediaStream) {
     if (this.audioNodes.has(id)) {
       this.removeStreamFromOutboundAudio(id);
