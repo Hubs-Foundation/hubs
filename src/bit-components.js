@@ -202,6 +202,10 @@ export const MediaVideo = defineComponent({
   autoPlay: Types.ui8,
   ratio: Types.f32
 });
+/**
+ * @type {Map<EntityId, HTMLVideoElement}>}
+ */
+export const MediaVideoData = new Map();
 export const MixerAnimatableInitialize = defineComponent({});
 export const MixerAnimatable = defineComponent({});
 /**
