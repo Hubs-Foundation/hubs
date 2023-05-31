@@ -73,6 +73,9 @@ AFRAME.registerComponent("avatar-audio-source", {
       createSilentAudioEl(stream); // TODO: Do the audio els need to get cleaned up?
     }
 
+    APP.audios.set(this.el, audio);
+    APP.gains.set(this.el, gain);
+
     this.mediaStreamSource = APP.audioCtx.createMediaStreamSource(stream);
     this.mediaStreamSource.connect(audio);
     this.el.emit("sound-source-set", { soundSource: audio });
@@ -83,8 +86,6 @@ AFRAME.registerComponent("avatar-audio-source", {
       } else {
         APP.moderatorAudioSource.delete(this.el);
       }
-      APP.audios.set(this.el, audio);
-      APP.gains.set(this.el, gain);
       updateAudioSettings(this.el, audio);
       updateAudio(this.el, this.el.object3D, true);
 
