@@ -1,13 +1,16 @@
 /** @jsx createElementEntity */
 import { Attrs, createElementEntity, createRef, Ref } from "../utils/jsx-entity";
 import { Layers } from "../camera-layers";
-import micSrc from "../assets/images/mic_level@2x.png";
 import backgroundSrc from "../assets/hud/button.9.png";
+import startRecButtonSrc from "../assets/hud/button.9.png";
+import endRecButtonSrc from "../assets/hud/nametag.9.png";
 import { textureLoader } from "../utils/media-utils";
 import { Texture } from "three";
 import { BUTTON_TYPES } from "./button3D";
-const backTexture = textureLoader.load(backgroundSrc);
-const micTexture = textureLoader.load(micSrc);
+
+export const backTexture = textureLoader.load(backgroundSrc);
+export const startRecButtonTexture = textureLoader.load(startRecButtonSrc);
+export const stopRecButtonTexture = textureLoader.load(endRecButtonSrc);
 
 type ButtonType = BUTTON_TYPES.DEFAULT | BUTTON_TYPES.ACTION | BUTTON_TYPES.MIC;
 
@@ -44,7 +47,8 @@ export function Mic3D({ width, height, name = "Button", type, ...props }: Mic3DP
       <entity
         ref={labelRef}
         layers={1 << Layers.CAMERA_LAYER_UI}
-        slice9={{ size: [width, height], insets: [64, 66, 64, 66], texture: micTexture }}
+        slice9={{ size: [width, height], insets: [64, 66, 64, 66], texture: startRecButtonTexture }}
+        scale={[0.4, 0.4, 0.4]}
         position={[0, 0, 0.01]}
         name={`${name} Label`}
       />

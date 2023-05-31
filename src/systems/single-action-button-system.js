@@ -15,6 +15,8 @@ import { hasAnyComponent } from "../utils/bit-utils";
 import { getThemeColor, onThemeChanged } from "../utils/theme";
 import { CAMERA_MODE_INSPECT } from "./camera-system";
 import { paths } from "./userinput/paths";
+import { isRecording } from "../bit-systems/agent-system";
+import { startRecButtonTexture, stopRecButtonTexture } from "../prefabs/Mic3D";
 
 function interact(world, entities, path, interactor) {
   if (AFRAME.scenes[0].systems.userinput.get(path)) {
@@ -72,19 +74,19 @@ function applyTheme() {
     color: new THREE.Color(0xffffff),
     hoverColor: new THREE.Color(0xaaaaaa),
     textColor: new THREE.Color(getThemeColor("action-color")),
-    textHoverColor: new THREE.Color(getThemeColor("action-color-highlight"))
+    textHoverColor: new THREE.Color(getThemeColor("action-color-highlight")),
+
+    RecColor: new THREE.Color(0xd6362b),
+    RecHoverColor: new THREE.Color(getThemeColor("action-color"))
   };
   buttonStyles[BUTTON_TYPES.ACTION] = {
     color: new THREE.Color(getThemeColor("action-color")),
     hoverColor: new THREE.Color(getThemeColor("action-color-highlight")),
     textColor: new THREE.Color(0xffffff),
-    textHoverColor: new THREE.Color(0xffffff)
-  };
-  buttonStyles[BUTTON_TYPES.MIC] = {
-    color: new THREE.Color(getThemeColor("action-color")),
-    hoverColor: new THREE.Color(getThemeColor("action-color-highlight")),
-    textColor: new THREE.Color(0xffffff),
-    textHoverColor: new THREE.Color(0xffffff)
+    textHoverColor: new THREE.Color(0xffffff),
+
+    RecColor: new THREE.Color(0xd6362b),
+    RecHoverColor: new THREE.Color(getThemeColor("action-color"))
   };
 }
 onThemeChanged(applyTheme);
@@ -105,7 +107,13 @@ function hoverButtonSystem(world) {
     }
     if (hasComponent(world, ImageButton, eid)) {
       const lbl = world.eid2obj.get(ImageButton.labelRef[eid]);
-      lbl.material.color.copy(isHovered ? style.textHoverColor : style.textColor);
+      if (isRecording) {
+        changeShape(lbl, true);
+        lbl.material.color.copy(isHovered ? style.textHoverColor : style.textColor);
+      } else {
+        changeShape(lbl, false);
+        lbl.material.color.copy(isHovered ? style.RecHoverColor : style.RecColor);
+      }
     }
   });
 }
@@ -113,4 +121,14 @@ function hoverButtonSystem(world) {
 export function buttonSystems(world) {
   hoverButtonSystem(world);
   singleActionButtonSystem(world);
+}
+
+function changeShape(obj, makeRect) {
+  let newMaterial;
+  if (makeRect)
+    newMaterial = new THREE.MeshBasicMaterial({ map: stopRecButtonTexture, transparent: true, toneMapped: false });
+  else newMaterial = new THREE.MeshBasicMaterial({ map: startRecButtonTexture, transparent: true, toneMapped: false });
+  if (newMaterial) {
+    obj.material = newMaterial;
+  }
 }

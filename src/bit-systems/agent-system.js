@@ -26,7 +26,7 @@ function showArrows(world, prevArrowEid, nextArrowEid) {
   world.eid2obj.get(nextArrowEid).visible = true;
 }
 
-function stopRecording(mediaRecorder) {
+function stopRecording() {
   if (mediaRecorder && mediaRecorder.state !== "inactive") {
     mediaRecorder.stop();
   }
@@ -50,9 +50,11 @@ function saveRecording(blob) {
 
 function recordUser() {
   const audioTrack = APP.mediaDevicesManager.audioTrack;
-  const audioStream = new MediaStream([audioTrack]);
-  const mediaRecorder = new MediaRecorder(audioStream);
+  const recordingTrack = audioTrack.clone();
+  const recordingStream = new MediaStream([recordingTrack]);
+  mediaRecorder = new MediaRecorder(recordingStream);
   let chunks = [];
+  audioTrack.enabled = false;
   mediaRecorder.start();
 
   mediaRecorder.ondataavailable = function (e) {
@@ -62,15 +64,16 @@ function recordUser() {
   mediaRecorder.onstop = function () {
     const recordingBlob = new Blob(chunks, { type: "audio/wav" });
     chunks = saveRecording(recordingBlob);
+    audioTrack.enabled = true;
+    recordingStream.removeTrack(recordingTrack);
+    recordingTrack.stop();
   };
-
-  setTimeout(function () {
-    stopRecording(mediaRecorder);
-  }, 3000);
-
-  console.log(audioTrack);
 }
+
 let init = true;
+export let isRecording = false;
+let mediaRecorder;
+
 export function AgentSystem(world) {
   enterAgentQuery(world).forEach(eid => {
     const sliceref = Agent.panelRef[eid];
@@ -109,15 +112,21 @@ export function AgentSystem(world) {
       lowerIndex();
     }
     if (clicked(Agent.micRef[eid])) {
-      let newText = paradigms[getRandomInt(paradigms.length)];
+      if (!isRecording) {
+        recordUser();
+        isRecording = true;
+      } else {
+        stopRecording();
+        isRecording = false;
+      }
 
-      const renderArrows = UpdateTextSystem(world, FromatNewText(newText));
+      // let newText = paradigms[getRandomInt(paradigms.length)];
 
-      if (renderArrows) {
-        hideArrows(world, Agent.prevRef[eid], Agent.nextRef[eid]);
-      } else showArrows(world, Agent.prevRef[eid], Agent.nextRef[eid]);
+      // const renderArrows = UpdateTextSystem(world, FromatNewText(newText));
 
-      recordUser();
+      // if (renderArrows) {
+      //   hideArrows(world, Agent.prevRef[eid], Agent.nextRef[eid]);
+      // } else showArrows(world, Agent.prevRef[eid], Agent.nextRef[eid]);
     }
   });
 }
