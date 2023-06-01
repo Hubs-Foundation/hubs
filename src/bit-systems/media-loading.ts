@@ -214,7 +214,6 @@ function* loadAndAnimateMedia(world: HubsWorld, eid: EntityID, clearRollbacks: C
   if (MediaLoader.flags[eid] & MEDIA_LOADER_FLAGS.ANIMATE_LOAD) {
     yield* animateScale(world, media);
   }
-  addComponent(world, MediaLoaded, eid);
   if (hasComponent(world, FileInfo, eid)) {
     FileInfo.id[eid] = MediaLoader.fileId[eid];
     FileInfo.src[eid] = MediaLoader.src[eid];
