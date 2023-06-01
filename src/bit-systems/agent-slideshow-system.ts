@@ -29,22 +29,6 @@ export function resetIndex() {
   updated = true;
 }
 
-export function PanelIndexSystem(world: HubsWorld) {
-  if (agentEnterQuery(world).length || agentExitQuery(world).length) {
-    resetIndex();
-  }
-
-  agentSlideQuery(world).forEach(eid => {
-    const panelObj = world.eid2obj.get(eid);
-    panelObj!.visible = PanelIndex.index[eid] === activeIndex;
-  });
-
-  if (updated) {
-    console.log("New index:", activeIndex);
-    updated = false;
-  }
-}
-
 export function FromatNewText(newText: string) {
   const words = newText.trim().split(" ");
   const segments = [];
@@ -75,4 +59,22 @@ export function UpdateTextSystem(world: HubsWorld, newFormatedText: Array<string
   resetIndex();
 
   return textCount === 1;
+}
+
+export function setMicStatus() {}
+
+export function PanelIndexSystem(world: HubsWorld) {
+  if (agentEnterQuery(world).length || agentExitQuery(world).length) {
+    resetIndex();
+  }
+
+  agentSlideQuery(world).forEach(eid => {
+    const panelObj = world.eid2obj.get(eid);
+    panelObj!.visible = PanelIndex.index[eid] === activeIndex;
+  });
+
+  if (updated) {
+    console.log("New index:", activeIndex);
+    updated = false;
+  }
 }

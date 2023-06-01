@@ -3,6 +3,7 @@ import { Agent, Hidden, Interacted } from "../bit-components";
 import { FromatNewText, UpdateTextSystem, lowerIndex, raiseIndex } from "./agent-slideshow-system";
 import { hasComponent } from "bitecs";
 import { paradigms } from "./text-paradigms";
+import { anyEntityWith } from "../utils/bit-utils";
 
 const agentQuery = defineQuery([Agent]);
 const enterAgentQuery = enterQuery(agentQuery);
@@ -68,6 +69,13 @@ function saveRecording(blob) {
   return [];
 }
 
+function setMicStatus(world) {
+  const agenteid = anyEntityWith(world, Agent);
+  const micEid = Agent.micRef[agenteid];
+  const micObj = world.eid2obj.get(micEid);
+  micObj.visible = APP.mediaDevicesManager.isMicEnabled;
+}
+
 function entered(world) {
   enterAgentQuery(world).forEach(agentEid => {
     const sliceref = Agent.panelRef[agentEid];
@@ -75,6 +83,7 @@ function entered(world) {
     const axesHelper = new THREE.AxesHelper(5);
     panelObj.add(axesHelper);
     eid = agentEid;
+    APP.dialog.on("mic-state-changed", () => setMicStatus(world));
   });
 
   if (eid) return true;
