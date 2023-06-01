@@ -71,16 +71,6 @@ export function AgentPanel({ text, panelRef, nextRef, prevRef, micRef, maxSlideC
         text={">"}
       />
 
-      {/* <Button3D
-        ref={textRef}
-        scale={[buttonScale[0], buttonScale[1], buttonScale[2]]}
-        type={BUTTON_TYPES.ACTION}
-        position={[0, -0.2, 0.03]}
-        width={0.6}
-        height={buttonHeight}
-        text={"Change Text"}
-      /> */}
-
       <Mic3D
         ref={micRef}
         scale={[buttonScale[0], buttonScale[1], buttonScale[2]]}

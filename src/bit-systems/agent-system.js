@@ -3,6 +3,7 @@ import { Agent, Interacted } from "../bit-components";
 import { FromatNewText, UpdateTextSystem, lowerIndex, raiseIndex } from "./agent-slideshow-system";
 import { hasComponent } from "bitecs";
 import { paradigms } from "./text-paradigms";
+import { anyEntityWith } from "../utils/bit-utils";
 
 const agentQuery = defineQuery([Agent]);
 const enterAgentQuery = enterQuery(agentQuery);
@@ -16,14 +17,9 @@ export function getRandomInt(max) {
   return Math.floor(Math.random() * max);
 }
 
-function hideArrows(world, prevArrowEid, nextArrowEid) {
-  world.eid2obj.get(prevArrowEid).visible = false;
-  world.eid2obj.get(nextArrowEid).visible = false;
-}
-
-function showArrows(world, prevArrowEid, nextArrowEid) {
-  world.eid2obj.get(prevArrowEid).visible = true;
-  world.eid2obj.get(nextArrowEid).visible = true;
+function setArrows(world, prevArrowEid, nextArrowEid, status) {
+  world.eid2obj.get(prevArrowEid).visible = status;
+  world.eid2obj.get(nextArrowEid).visible = status;
 }
 
 function stopRecording() {
@@ -70,6 +66,13 @@ function recordUser() {
   };
 }
 
+function setMicStatus(world) {
+  const agenteid = anyEntityWith(world, Agent);
+  const micEid = Agent.micRef[agenteid];
+  const micObj = world.eid2obj.get(micEid);
+  micObj.visible = APP.mediaDevicesManager.isMicEnabled;
+}
+
 let init = true;
 export let isRecording = false;
 let mediaRecorder;
@@ -80,6 +83,7 @@ export function AgentSystem(world) {
     const panelObj = world.eid2obj.get(sliceref);
     const axesHelper = new THREE.AxesHelper(5);
     panelObj.add(axesHelper);
+    APP.dialog.on("mic-state-changed", () => setMicStatus(world));
   });
 
   agentQuery(world).forEach(eid => {
