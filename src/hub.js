@@ -574,10 +574,25 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
 
   console.log(`Dialog host: ${hub.host}:${hub.port}`);
 
+  // Mute media until the scene has been fully loaded.
+  // We intentionally want voice to be unmuted.
+  const { globalMediaVolume } = APP.store.state.preferences;
+  APP.store.update({
+    preferences: {
+      globalMediaVolume: 0
+    }
+  });
   remountUI({
     messageDispatch: messageDispatch,
     onSendMessage: messageDispatch.dispatch,
-    onLoaded: () => store.executeOnLoadActions(scene),
+    onLoaded: () => {
+      APP.store.update({
+        preferences: {
+          globalMediaVolume
+        }
+      });
+      store.executeOnLoadActions(scene);
+    },
     onMediaSearchResultEntrySelected: (entry, selectAction) =>
       scene.emit("action_selected_media_result_entry", { entry, selectAction }),
     onMediaSearchCancelled: entry => scene.emit("action_media_search_cancelled", entry),
