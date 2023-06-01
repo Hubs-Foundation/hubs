@@ -1,4 +1,3 @@
-import { addComponent, hasComponent, removeComponent } from "bitecs";
 import {
   connectedClientIds,
   disconnectedClientIds,
@@ -10,8 +9,6 @@ import {
 } from "../bit-systems/networking";
 import { EntityState } from "./entity-state-utils";
 import type { ClientID, CreatorChange, Message } from "./networking-types";
-import { FileInfo, Pinnable, Pinned } from "../bit-components";
-import { FILE_INFO_FLAGS } from "../inflators/file-info";
 
 type Emitter = {
   on: (event: string, callback: (a: any) => any) => number;
@@ -94,16 +91,6 @@ export function queueEntityStateAsMessage(entityState: EntityState) {
 }
 
 function onEntityStateCreated(response: { data: EntityState[] }) {
-  const rootNid = APP.getSid(response.data[0]!.create_message.networkId);
-  const eid = APP.world.nid2eid.get(rootNid);
-  if (eid) {
-    if (hasComponent(APP.world, Pinnable, eid)) {
-      addComponent(APP.world, Pinned, eid);
-    }
-    if (hasComponent(APP.world, FileInfo, eid)) {
-      FileInfo.flags[eid] |= FILE_INFO_FLAGS.IS_PERMANENT;
-    }
-  }
   queueEntityStateAsMessage(response.data[0]!);
 }
 
@@ -112,10 +99,5 @@ function onEntityStateUpdated(_response: any) {
 }
 
 function onEntityStateDeleted(response: CreatorChange) {
-  const rootNid = APP.getSid(response.nid);
-  const eid = APP.world.nid2eid.get(rootNid);
-  if (eid) {
-    removeComponent(APP.world, Pinned, eid);
-  }
   pendingCreatorChanges.push(response);
 }

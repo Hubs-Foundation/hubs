@@ -4,7 +4,6 @@ import { HubsWorld } from "../app";
 import {
   GLTFModel,
   MediaContentBounds,
-  FileInfo,
   MediaLoader,
   Networked,
   ObjectMenuTarget,
@@ -213,10 +212,6 @@ function* loadAndAnimateMedia(world: HubsWorld, eid: EntityID, clearRollbacks: C
   setNetworkedDataWithoutRoot(world, APP.getString(Networked.id[eid])!, media);
   if (MediaLoader.flags[eid] & MEDIA_LOADER_FLAGS.ANIMATE_LOAD) {
     yield* animateScale(world, media);
-  }
-  if (hasComponent(world, FileInfo, eid)) {
-    FileInfo.id[eid] = MediaLoader.fileId[eid];
-    FileInfo.src[eid] = MediaLoader.src[eid];
   }
   removeComponent(world, MediaLoader, eid);
 

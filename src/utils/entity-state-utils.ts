@@ -1,6 +1,6 @@
 import { defineQuery, hasComponent } from "bitecs";
 import { HubsWorld } from "../app";
-import { FileInfo, Networked } from "../bit-components";
+import { Networked } from "../bit-components";
 import { createMessageDatas, isNetworkInstantiated, isPinned, localClientID } from "../bit-systems/networking";
 import { findAncestorEntity } from "./bit-utils";
 import HubChannel from "./hub-channel";
@@ -153,25 +153,22 @@ function createEntityStatePayload(world: HubsWorld, rootEid: EntityID): CreateEn
     updates
   } as CreateEntityStatePayload;
 
-  const src = APP.getString(FileInfo.src[rootEid]);
-  const fileId = APP.getString(FileInfo.id[rootEid]);
-  let fileAccessToken, promotionToken;
-  if (src) {
-    fileAccessToken = new URL(src).searchParams.get("token") as string;
-    const storedPromotionToken = APP.store.state.uploadPromotionTokens.find(
+  const {
+    prefabName,
+    initialData: { fileId, src }
+  } = createMessageDatas.get(rootEid)!;
+
+  if (prefabName == "media" && fileId && src) {
+    const fileAccessToken = new URL(src).searchParams.get("token") as string;
+    const { promotionToken } = APP.store.state.uploadPromotionTokens.find(
       (upload: { fileId: string }) => upload.fileId === fileId
     );
-    if (storedPromotionToken) {
-      promotionToken = storedPromotionToken.promotionToken;
+    if (promotionToken) {
+      payload.file_id = fileId;
+      payload.file_access_token = fileAccessToken;
+      payload.promotion_token = promotionToken;
     }
   }
-
-  if (fileId && promotionToken) {
-    payload.file_id = fileId;
-    payload.file_access_token = fileAccessToken;
-    payload.promotion_token = promotionToken;
-  }
-
   return payload;
 }
 

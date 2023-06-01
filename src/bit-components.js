@@ -159,13 +159,6 @@ export const MediaLoader = defineComponent({
 MediaLoader.src[$isStringType] = true;
 MediaLoader.fileId[$isStringType] = true;
 export const MediaLoaded = defineComponent();
-export const FileInfo = defineComponent({
-  id: Types.ui32,
-  src: Types.ui32,
-  flags: Types.ui8
-});
-FileInfo.id[$isStringType] = true;
-FileInfo.src[$isStringType] = true;
 export const MediaContentBounds = defineComponent({
   bounds: [Types.f32, 3]
 });

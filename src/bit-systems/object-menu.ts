@@ -17,10 +17,10 @@ import HubChannel from "../utils/hub-channel";
 import type { EntityID } from "../utils/networking-types";
 import { setMatrixWorld } from "../utils/three-utils";
 import { deleteTheDeletableAncestor } from "./delete-entity-system";
-import { createMessageDatas } from "./networking";
+import { createMessageDatas, isPinned } from "./networking";
 import { TRANSFORM_MODE } from "../components/transform-object-button";
 import { ScalingHandler } from "../components/scale-button";
-import { isPinnable, setPinned } from "../utils/bit-pinning-helper";
+import { canPin, setPinned } from "../utils/bit-pinning-helper";
 
 // Working variables.
 const _vec3_1 = new Vector3();
@@ -204,11 +204,9 @@ function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
   const obj = world.eid2obj.get(menu)!;
   obj.visible = visible;
 
-  const canPin = isPinnable(world, target);
-  const isPinned = hasComponent(world, Pinned, target);
-
-  world.eid2obj.get(ObjectMenu.unpinButtonRef[menu])!.visible = visible && isPinned;
-  world.eid2obj.get(ObjectMenu.pinButtonRef[menu])!.visible = visible && !isPinned && canPin;
+  world.eid2obj.get(ObjectMenu.unpinButtonRef[menu])!.visible = visible && isPinned(target);
+  world.eid2obj.get(ObjectMenu.pinButtonRef[menu])!.visible =
+    visible && !isPinned(target) && canPin(APP.hubChannel!, world, target);
 
   [
     ObjectMenu.cameraFocusButtonRef[menu],

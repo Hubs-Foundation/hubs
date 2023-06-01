@@ -3,7 +3,6 @@ import { addComponent, removeComponent, defineQuery, hasComponent } from "bitecs
 import {
   Held,
   Holdable,
-  Pinned,
   HoveredRemoteRight,
   HeldRemoteRight,
   HoveredRemoteLeft,
@@ -15,6 +14,7 @@ import {
   AEntity
 } from "../bit-components";
 import { canMove } from "../utils/permissions-utils";
+import { isPinned } from "../bit-systems/networking";
 
 const GRAB_REMOTE_RIGHT = paths.actions.cursor.right.grab;
 const DROP_REMOTE_RIGHT = paths.actions.cursor.right.drop;
@@ -35,7 +35,7 @@ function grab(world, userinput, queryHovered, held, grabPath) {
   if (
     hovered &&
     userinput.get(grabPath) &&
-    (!hasComponent(world, Pinned, hovered) || AFRAME.scenes[0].is("frozen")) &&
+    (!isPinned(hovered) || AFRAME.scenes[0].is("frozen")) &&
     hasPermissionToGrab(world, hovered)
   ) {
     addComponent(world, held, hovered);
