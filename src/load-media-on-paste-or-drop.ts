@@ -96,6 +96,8 @@ async function onPaste(e: ClipboardEvent) {
 
 let lastDebugScene: string;
 function onDrop(e: DragEvent) {
+  e.preventDefault();
+
   if (!(AFRAME as any).scenes[0].is("entered")) {
     return;
   }
@@ -111,12 +113,10 @@ function onDrop(e: DragEvent) {
 
   const files = e.dataTransfer?.files;
   if (files && files.length) {
-    e.preventDefault();
     return spawnFromFileList(files);
   }
   const url = e.dataTransfer?.getData("url") || e.dataTransfer?.getData("text");
   if (url) {
-    e.preventDefault();
     return spawnFromUrl(url);
   }
 }

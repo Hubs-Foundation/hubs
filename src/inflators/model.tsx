@@ -1,5 +1,5 @@
 import { addComponent, addEntity, hasComponent } from "bitecs";
-import { Material, Object3D } from "three";
+import { Material, Mesh, Object3D } from "three";
 import { HubsWorld } from "../app";
 import { GLTFModel, MaterialTag, MixerAnimatableInitialize } from "../bit-components";
 import { addMaterialComponent, addObject3DComponent, gltfInflatorExists, gltfInflators } from "../utils/jsx-entity";
@@ -95,8 +95,10 @@ export function inflateModel(world: HubsWorld, rootEid: number, { model }: Model
       if (obj === model) {
         throw new Error("Failed to inflate model. Can't inflate alternative object type on root scene.");
       }
+      if (replacement instanceof Mesh) replacement.reflectionProbeMode = "dynamic";
       swap.push([obj, replacement]);
     } else {
+      if (obj instanceof Mesh) obj.reflectionProbeMode = "dynamic";
       addObject3DComponent(world, eid, obj);
     }
   });
