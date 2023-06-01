@@ -82,6 +82,7 @@ import { loopAnimationSystem } from "../bit-systems/loop-animation";
 import { AgentSystem } from "../bit-systems/agent-system";
 import { lookAtUserSystem } from "../bit-systems/look-at-user";
 import { PanelIndexSystem } from "../bit-systems/agent-slideshow-system";
+import { HiddenSystem } from "../bit-systems/hidden-system";
 
 declare global {
   interface Window {
@@ -270,7 +271,10 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   mixerAnimatableSystem(world);
   loopAnimationSystem(world);
   lookAtUserSystem(world);
+
   AgentSystem(world);
+
+  HiddenSystem(world);
 
   // All systems that update text properties should run before this
   PanelIndexSystem(world);

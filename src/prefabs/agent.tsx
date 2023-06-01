@@ -11,6 +11,8 @@ import { AgentPanel } from "./agent-panel";
 import { greetingPhrases } from "../bit-systems/text-paradigms";
 import { getRandomInt } from "../bit-systems/agent-system";
 import { FromatNewText } from "../bit-systems/agent-slideshow-system";
+import { addComponent } from "bitecs";
+import { Hidden } from "../bit-components";
 
 preload(loadModel(agentModelSrc, null, true));
 const panelTexture = textureLoader.load(nametagSrc);
@@ -62,6 +64,7 @@ export function AgentEntity() {
 
 export function addAgentToScene(world: HubsWorld) {
   const eid = renderAsEntity(world, AgentEntity());
+  addComponent(world, Hidden, eid);
   const obj = world.eid2obj.get(eid)!;
   AFRAME.scenes[0].object3D.add(obj);
   return eid;

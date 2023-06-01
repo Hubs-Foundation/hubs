@@ -18,11 +18,8 @@ export function AgenSpawnButton({ scene }) {
 
   const clickCallback = () => {
     scene.emit("agent-toggle");
-    setFlag(!!anyEntityWith(APP.world, Agent));
+    setFlag(!flag);
   };
-
-  scene.addEventListener("agent-removed", () => setFlag(false));
-  scene.addEventListener("agent-spawned", () => setFlag(true));
 
   return (
     <ToolTip description={description}>

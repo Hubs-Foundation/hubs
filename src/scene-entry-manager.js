@@ -22,8 +22,8 @@ import { ObjectContentOrigins } from "./object-types";
 import { getAvatarSrc, getAvatarType } from "./utils/avatar-utils";
 import { SOUND_ENTER_SCENE } from "./systems/sound-effects-system";
 import { MediaDevices, MediaDevicesEvents } from "./utils/media-devices-utils";
-import { addComponent, removeEntity } from "bitecs";
-import { Agent, MyCameraTool } from "./bit-components";
+import { addComponent, hasComponent, removeComponent, removeEntity } from "bitecs";
+import { Agent, Hidden, MyCameraTool } from "./bit-components";
 import { anyEntityWith } from "./utils/bit-utils";
 import { moveToSpawnPoint } from "./bit-systems/waypoint";
 import { spawnFromFileList, spawnFromUrl } from "./load-media-on-paste-or-drop";
@@ -452,27 +452,14 @@ export default class SceneEntryManager {
   };
 
   _setupAgent = () => {
+    const eid = addAgentToScene(APP.world);
     this.scene.addEventListener("agent-toggle", () => {
-      const myAgent = anyEntityWith(APP.world, Agent);
+      const hidden = hasComponent(APP.world, Hidden, eid);
 
-      if (myAgent) {
-        removeEntity(APP.world, myAgent);
-        this.scene.emit("agent-removed");
+      if (hidden) {
+        removeComponent(APP.world, Hidden, eid);
       } else {
-        const avatarPov = document.querySelector("#avatar-pov-node").object3D;
-        var POVForward = new THREE.Vector3();
-        var avatar_POV_position = new THREE.Vector3();
-
-        avatar_POV_position = avatarPov.getWorldPosition(avatar_POV_position);
-        POVForward = avatarPov.getWorldDirection(POVForward);
-
-        const forward = new THREE.Vector3(-POVForward.x, 0, -POVForward.z).normalize();
-
-        const agentID = addAgentToScene(APP.world);
-        const agentObj = APP.world.eid2obj.get(agentID);
-        agentObj.position.copy(avatarPov.getWorldPosition(new THREE.Vector3()).add(forward));
-        console.log("avatarPos", avatarPov.getWorldPosition(new THREE.Vector3()));
-        this.scene.emit("agent-spawned");
+        addComponent(APP.world, Hidden, eid);
       }
     });
   };
