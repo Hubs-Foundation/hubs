@@ -8,7 +8,7 @@ import {
   TargetAudioDefaults,
   AudioType
 } from "./components/audio-params";
-import { isPositionalAudio } from "./bit-systems/audio-emitter-system";
+import { isPositionalAudio, swapAudioType, updatePannerNode } from "./bit-systems/audio-emitter-system";
 
 const defaultSettingsForSourceType = Object.freeze(
   new Map([
@@ -113,7 +113,12 @@ export function updateAudioSettings(elOrEid, audio) {
       (!isPositionalAudio(audio) && settings.audioType === AudioType.PannerNode) ||
       (isPositionalAudio(audio) && settings.audioType === AudioType.Stereo)
     ) {
-      el.emit("audio_type_changed");
+      swapAudioType(elOrEid);
+      audio = APP.audios.get(elOrEid);
+      if (isPositionalAudio(audio)) {
+        const obj = APP.world.eid2obj.get(elOrEid.eid);
+        updatePannerNode(audio, obj);
+      }
     }
     applySettings(elOrEid, settings);
   }

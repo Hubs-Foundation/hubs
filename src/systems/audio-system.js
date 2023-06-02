@@ -1,5 +1,5 @@
 import { LogMessageType } from "../react-components/room/ChatSidebar";
-import { GAIN_TIME_CONST, SourceType } from "../components/audio-params";
+import { AudioType, GAIN_TIME_CONST, SourceType } from "../components/audio-params";
 
 let delayedReconnectTimeout = null;
 function performDelayedReconnect(gainNode) {
@@ -19,6 +19,8 @@ function performDelayedReconnect(gainNode) {
 
 import * as sdpTransform from "sdp-transform";
 import MediaDevicesManager from "../utils/media-devices-manager";
+import { isPositionalAudio, swapAudioType, updatePannerNode } from "../bit-systems/audio-emitter-system";
+import { getCurrentAudioSettings, updateAudioSettings } from "../update-audio-settings";
 
 async function enableChromeAEC(gainNode) {
   /**
@@ -159,8 +161,11 @@ export class AudioSystem {
     document.body.addEventListener("touchend", this._resumeAudioContext, false);
     document.body.addEventListener("mouseup", this._resumeAudioContext, false);
 
+    const { disableLeftRightPanning, audioPanningQuality } = APP.store.state.preferences;
+    this.disableLeftRightPanning = disableLeftRightPanning;
+    this.audioPanningQuality = audioPanningQuality;
     this.onPrefsUpdated = this.updatePrefs.bind(this);
-    window.APP.store.addEventListener("statechanged", this.onPrefsUpdated);
+    APP.store.addEventListener("statechanged", this.onPrefsUpdated);
   }
 
   addStreamToOutboundAudio(id, mediaStream) {
@@ -198,7 +203,7 @@ export class AudioSystem {
   }
 
   updatePrefs() {
-    const { globalVoiceVolume, globalMediaVolume, globalSFXVolume } = window.APP.store.state.preferences;
+    const { globalVoiceVolume, globalMediaVolume, globalSFXVolume } = APP.store.state.preferences;
     let newGain = globalMediaVolume / 100;
     this.mixer[SourceType.MEDIA_VIDEO].gain.setTargetAtTime(newGain, this.audioContext.currentTime, GAIN_TIME_CONST);
 
@@ -215,41 +220,71 @@ export class AudioSystem {
     if (MediaDevicesManager.isAudioOutputSelectEnabled && APP.mediaDevicesManager) {
       const sinkId = APP.mediaDevicesManager.selectedSpeakersDeviceId;
       const isDefault = sinkId === APP.mediaDevicesManager.defaultOutputDeviceId;
-      if ((!this.outputMediaAudio && isDefault) || sinkId === this.outputMediaAudio?.sinkId) return;
-      const sink = isDefault ? this.destinationGain : this.audioDestination;
-      this.mixer[SourceType.AVATAR_AUDIO_SOURCE].disconnect();
-      this.mixer[SourceType.AVATAR_AUDIO_SOURCE].connect(sink);
-      this.mixer[SourceType.AVATAR_AUDIO_SOURCE].connect(this.mixerAnalyser);
-      this.mixer[SourceType.MEDIA_VIDEO].disconnect();
-      this.mixer[SourceType.MEDIA_VIDEO].connect(sink);
-      this.mixer[SourceType.MEDIA_VIDEO].connect(this.mixerAnalyser);
-      this.mixer[SourceType.SFX].disconnect();
-      this.mixer[SourceType.SFX].connect(sink);
-      this.mixer[SourceType.SFX].connect(this.mixerAnalyser);
-      if (isDefault) {
-        if (this.outputMediaAudio) {
-          this.outputMediaAudio.pause();
-          this.outputMediaAudio.srcObject = null;
-          this.outputMediaAudio = null;
-        }
-      } else {
-        // Switching the audio sync is only supported in Chrome at the time of writing this.
-        // It also seems to have some limitations and it only works on audio elements. We are piping all our media through the Audio Context
-        // and that doesn't seem to work.
-        // To workaround that we need to use a MediaStreamAudioDestinationNode that is set as the source of the audio element where we switch the sink.
-        // This is very hacky but there don't seem to have any better alternatives at the time of writing this.
-        // https://stackoverflow.com/a/67043782
-        if (!this.outputMediaAudio) {
-          this.outputMediaAudio = new Audio();
-          this.outputMediaAudio.srcObject = this.audioDestination.stream;
-        }
-        if (this.outputMediaAudio.sinkId !== sinkId) {
-          this.outputMediaAudio.setSinkId(sinkId).then(() => {
-            this.outputMediaAudio.play();
-          });
+      if ((this.outputMediaAudio || !isDefault) && sinkId !== this.outputMediaAudio?.sinkId) {
+        const sink = isDefault ? this.destinationGain : this.audioDestination;
+        this.mixer[SourceType.AVATAR_AUDIO_SOURCE].disconnect();
+        this.mixer[SourceType.AVATAR_AUDIO_SOURCE].connect(sink);
+        this.mixer[SourceType.AVATAR_AUDIO_SOURCE].connect(this.mixerAnalyser);
+        this.mixer[SourceType.MEDIA_VIDEO].disconnect();
+        this.mixer[SourceType.MEDIA_VIDEO].connect(sink);
+        this.mixer[SourceType.MEDIA_VIDEO].connect(this.mixerAnalyser);
+        this.mixer[SourceType.SFX].disconnect();
+        this.mixer[SourceType.SFX].connect(sink);
+        this.mixer[SourceType.SFX].connect(this.mixerAnalyser);
+        if (isDefault) {
+          if (this.outputMediaAudio) {
+            this.outputMediaAudio.pause();
+            this.outputMediaAudio.srcObject = null;
+            this.outputMediaAudio = null;
+          }
+        } else {
+          // Switching the audio sync is only supported in Chrome at the time of writing this.
+          // It also seems to have some limitations and it only works on audio elements. We are piping all our media through the Audio Context
+          // and that doesn't seem to work.
+          // To workaround that we need to use a MediaStreamAudioDestinationNode that is set as the source of the audio element where we switch the sink.
+          // This is very hacky but there don't seem to have any better alternatives at the time of writing this.
+          // https://stackoverflow.com/a/67043782
+          if (!this.outputMediaAudio) {
+            this.outputMediaAudio = new Audio();
+            this.outputMediaAudio.srcObject = this.audioDestination.stream;
+          }
+          if (this.outputMediaAudio.sinkId !== sinkId) {
+            this.outputMediaAudio.setSinkId(sinkId).then(() => {
+              this.outputMediaAudio.play();
+            });
+          }
         }
       }
     }
+
+    const newDisableLeftRightPanning = APP.store.state.preferences.disableLeftRightPanning;
+    const newAudioPanningQuality = APP.store.state.preferences.audioPanningQuality;
+
+    const shouldRecreateAudio = this.disableLeftRightPanning !== newDisableLeftRightPanning;
+    const shouldUpdateAudioSettings = this.audioPanningQuality !== newAudioPanningQuality;
+
+    this.disableLeftRightPanning = newDisableLeftRightPanning;
+    this.audioPanningQuality = newAudioPanningQuality;
+
+    APP.audios.forEach((audio, elOrEid) => {
+      if (shouldRecreateAudio) {
+        const { audioType } = getCurrentAudioSettings(elOrEid);
+        if (
+          (!isPositionalAudio(audio) && audioType === AudioType.PannerNode) ||
+          (isPositionalAudio(audio) && audioType === AudioType.Stereo)
+        ) {
+          swapAudioType(elOrEid);
+          audio = APP.audios.get(elOrEid);
+          if (isPositionalAudio(audio)) {
+            const obj = APP.world.eid2obj.get(elOrEid.eid);
+            updatePannerNode(audio, obj);
+          }
+        }
+      } else if (shouldUpdateAudioSettings) {
+        const audio = APP.audios.get(elOrEid);
+        updateAudioSettings(elOrEid, audio);
+      }
+    });
   }
 
   /**

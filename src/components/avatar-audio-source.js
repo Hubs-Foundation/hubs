@@ -47,8 +47,6 @@ export async function getMediaStream(el) {
 
 AFRAME.registerComponent("avatar-audio-source", {
   createAudio: async function () {
-    this.removeAudio();
-
     this.isCreatingAudio = true;
     const stream = await getMediaStream(this.el);
     this.isCreatingAudio = false;
@@ -60,6 +58,7 @@ AFRAME.registerComponent("avatar-audio-source", {
     let audio = APP.audios.get(this.el);
     if (audioType === AudioType.PannerNode) {
       audio = APP.audioCtx.createPanner();
+      updatePannerNode(audio, this.el.object3D);
     } else {
       audio = APP.audioCtx.createStereoPanner();
     }
@@ -76,8 +75,9 @@ AFRAME.registerComponent("avatar-audio-source", {
     APP.audios.set(this.el, audio);
     APP.gains.set(this.el, gain);
 
-    this.mediaStreamSource = APP.audioCtx.createMediaStreamSource(stream);
-    this.mediaStreamSource.connect(audio);
+    const mediaStreamSource = APP.audioCtx.createMediaStreamSource(stream);
+    APP.audioSources.set(this.el, mediaStreamSource);
+    mediaStreamSource.connect(audio);
     this.el.emit("sound-source-set", { soundSource: audio });
 
     getOwnerId(this.el).then(async ownerId => {
@@ -87,20 +87,10 @@ AFRAME.registerComponent("avatar-audio-source", {
         APP.moderatorAudioSource.delete(this.el);
       }
       updateAudioSettings(this.el, audio);
-      updatePannerNode(audio, this.el.object3D);
 
       this.ikRootEl = findAncestorWithComponent(this.el, "ik-root");
       this.ikController = this.ikRootEl.querySelector(".AvatarRoot").components["ik-controller"];
     });
-  },
-
-  removeAudio() {
-    const audio = APP.audios.get(this.el);
-    if (audio) {
-      this.audioSystem.removeAudio({ node: audio });
-      APP.audios.delete(this.el);
-      APP.gains.delete(this.el);
-    }
   },
 
   init() {
@@ -113,28 +103,6 @@ AFRAME.registerComponent("avatar-audio-source", {
     APP.dialog.on("stream_updated", this._onStreamUpdated, this);
     this.createAudio();
 
-    let { disableLeftRightPanning, audioPanningQuality } = APP.store.state.preferences;
-    this.onPreferenceChanged = () => {
-      const newDisableLeftRightPanning = APP.store.state.preferences.disableLeftRightPanning;
-      const newAudioPanningQuality = APP.store.state.preferences.audioPanningQuality;
-
-      const shouldRecreateAudio = disableLeftRightPanning !== newDisableLeftRightPanning && !this.isCreatingAudio;
-      const shouldUpdateAudioSettings = audioPanningQuality !== newAudioPanningQuality;
-
-      disableLeftRightPanning = newDisableLeftRightPanning;
-      audioPanningQuality = newAudioPanningQuality;
-
-      if (shouldRecreateAudio) {
-        this.createAudio();
-      } else if (shouldUpdateAudioSettings) {
-        // updateAudioSettings() is called in this.createAudio()
-        // so no need to call it if shouldRecreateAudio is true.
-        const audio = APP.audios.get(this.el);
-        updateAudioSettings(this.el, audio);
-      }
-    };
-    APP.store.addEventListener("statechanged", this.onPreferenceChanged);
-    this.el.addEventListener("audio_type_changed", this.createAudio);
     APP.hubChannel.addEventListener("permissions_updated", this.onPermissionsUpdated);
   },
 
@@ -159,10 +127,12 @@ AFRAME.registerComponent("avatar-audio-source", {
         });
 
         if (newStream) {
-          this.mediaStreamSource.disconnect();
-          this.mediaStreamSource = APP.audioCtx.createMediaStreamSource(newStream);
+          let mediaStreamSource = APP.audioSources.get(this.el);
+          mediaStreamSource.disconnect();
+          mediaStreamSource = APP.audioCtx.createMediaStreamSource(newStream);
           const audio = APP.audios.get(this.el);
-          this.mediaStreamSource.connect(audio);
+          mediaStreamSource.connect(audio);
+          APP.audioSources.set(this.el, mediaStreamSource);
         }
       }
     });
@@ -172,14 +142,15 @@ AFRAME.registerComponent("avatar-audio-source", {
     APP.dialog.off("stream_updated", this._onStreamUpdated);
     APP.hubChannel.removeEventListener("permissions_updated", this.onPermissionsUpdated);
 
-    window.APP.store.removeEventListener("statechanged", this.onPreferenceChanged);
-    this.el.removeEventListener("audio_type_changed", this.createAudio);
-
+    const gain = APP.gains.get(this.el);
+    this.audioSystem.removeAudio({ node: gain });
+    APP.gains.delete(this.el);
     APP.audios.delete(this.el);
+    APP.audioSources.delete(this.el);
+    APP.isAudioPaused.delete(this.el);
+    APP.gainMultipliers.delete(this.el);
     APP.sourceType.delete(this.el);
     APP.supplementaryAttenuation.delete(this.el);
-
-    this.removeAudio();
   },
 
   tick: function () {
@@ -223,6 +194,7 @@ AFRAME.registerComponent("zone-audio-source", {
 
   init() {
     this.gainFilter = APP.audioCtx.createGain();
+    APP.audioSources.set(this.el, this.gainFilter);
     if (this.data.debug) {
       this.whiteNoise = createWhiteNoise(0.01);
       this.setInput(this.whiteNoise);
@@ -320,7 +292,6 @@ AFRAME.registerComponent("audio-target", {
     this.el.setAttribute("audio-zone-source");
 
     this.createAudio = this.createAudio.bind(this);
-    this.el.addEventListener("audio_type_changed", this.createAudio);
   },
 
   remove: function () {
@@ -328,20 +299,30 @@ AFRAME.registerComponent("audio-target", {
     APP.audios.delete(this.el);
     APP.sourceType.delete(this.el);
 
-    this.removeAudio();
+    const gain = APP.gains.get(this.el);
+    if (this.delayNode) {
+      this.audioSystem.removeAudio({ node: this.delayNode });
+    } else {
+      this.audioSystem.removeAudio({ node: gain });
+    }
+    APP.gains.delete(this.el);
+    APP.audios.delete(this.el);
+    APP.audioSources.delete(this.el);
+    APP.isAudioPaused.delete(this.el);
+    APP.gainMultipliers.delete(this.el);
+    APP.sourceType.delete(this.el);
+    APP.supplementaryAttenuation.delete(this.el);
 
     this.el.removeAttribute("audio-zone-source");
-    this.el.removeEventListener("audio_type_changed", this.createAudio);
   },
 
   createAudio: function () {
-    this.removeAudio();
-
     APP.sourceType.set(this.el, SourceType.AUDIO_TARGET);
     const { audioType } = getCurrentAudioSettings(this.el);
     let audio = APP.audios.get(this.el);
     if (audioType === AudioType.PannerNode) {
       audio = APP.audioCtx.createPanner();
+      updatePannerNode(audio, this.el.object3D);
     } else {
       audio = APP.audioCtx.createStereoPanner();
     }
@@ -352,10 +333,10 @@ AFRAME.registerComponent("audio-target", {
     if (this.data.maxDelay > 0) {
       this.delayNode = APP.audioCtx.createDelay(this.data.maxDelay);
       this.delayNode.delayTime.value = THREE.MathUtils.randFloat(this.data.minDelay, this.data.maxDelay);
-      audio.connect(this.delayNode);
+      gain.connect(this.delayNode);
       this.audioSystem.addAudio({ sourceType: SourceType.AVATAR_AUDIO_SOURCE, node: this.delayNode });
     } else {
-      this.audioSystem.addAudio({ sourceType: SourceType.AVATAR_AUDIO_SOURCE, node: audio });
+      this.audioSystem.addAudio({ sourceType: SourceType.AVATAR_AUDIO_SOURCE, node: gain });
     }
 
     APP.audios.set(this.el, audio);
@@ -369,25 +350,10 @@ AFRAME.registerComponent("audio-target", {
     const node = srcZone && srcZone.getGainFilter();
     if (node) {
       const audio = APP.audios.get(this.el);
-      if (audio) {
-        node.connect(audio);
-      }
+      APP.audioSources.set(this.el, node);
+      node.connect(audio);
     } else {
       console.warn(`Failed to get audio from source for ${this.el.className}`, srcEl);
-    }
-  },
-
-  removeAudio() {
-    const audio = APP.audios.get(this.el);
-    if (audio) {
-      audio.disconnect();
-      if (this.delayNode) {
-        this.audioSystem.removeAudio({ node: this.delayNode });
-      } else {
-        this.audioSystem.removeAudio({ node: audio });
-      }
-      APP.audios.delete(this.el);
-      APP.gains.delete(this.el);
     }
   }
 });

@@ -160,32 +160,6 @@ AFRAME.registerComponent("media-video", {
         // Non-networked
         this.updatePlaybackState();
       });
-
-    let { disableLeftRightPanning, audioPanningQuality } = APP.store.state.preferences;
-    this.onPreferenceChanged = () => {
-      const audio = APP.audios.get(this.el);
-
-      const newDisableLeftRightPanning = APP.store.state.preferences.disableLeftRightPanning;
-      const newAudioPanningQuality = APP.store.state.preferences.audioPanningQuality;
-
-      const shouldRecreateAudio =
-        disableLeftRightPanning !== newDisableLeftRightPanning && audio && this.mediaElementAudioSource;
-      const shouldUpdateAudioSettings = audioPanningQuality !== newAudioPanningQuality;
-
-      disableLeftRightPanning = newDisableLeftRightPanning;
-      audioPanningQuality = newAudioPanningQuality;
-
-      if (shouldRecreateAudio) {
-        this.setupAudio();
-      } else if (shouldUpdateAudioSettings) {
-        // updateAudioSettings() is called in this.setupAudio()
-        // so no need to call it if shouldRecreateAudio is true.
-        updateAudioSettings(this.el, audio);
-      }
-    };
-
-    APP.store.addEventListener("statechanged", this.onPreferenceChanged);
-    this.el.addEventListener("audio_type_changed", this.setupAudio);
   },
 
   play() {
@@ -348,8 +322,6 @@ AFRAME.registerComponent("media-video", {
   },
 
   setupAudio() {
-    this.removeAudio();
-
     APP.sourceType.set(this.el, SourceType.MEDIA_VIDEO);
 
     if (this.data.videoPaused) {
@@ -362,6 +334,7 @@ AFRAME.registerComponent("media-video", {
     let audio;
     if (audioType === AudioType.PannerNode) {
       audio = APP.audioCtx.createPanner();
+      updatePannerNode(audio, this.el.object3D);
     } else {
       audio = APP.audioCtx.createStereoPanner();
     }
@@ -371,15 +344,14 @@ AFRAME.registerComponent("media-video", {
     // Default to being quiet so it fades in when volume is set by audio systems
     this.audioSystem.addAudio({ sourceType: SourceType.MEDIA_VIDEO, node: gain });
 
-    this.mediaElementAudioSource.connect(audio);
+    const mediaElementAudioSource = APP.audioSources.get(this.el);
+    mediaElementAudioSource.connect(audio);
 
     APP.audios.set(this.el, audio);
     APP.gains.set(this.el, gain);
     updateAudioSettings(this.el, audio);
     // Original audio source volume can now be restored as audio systems will take over
-    this.mediaElementAudioSource.mediaElement.volume = 1;
-
-    updatePannerNode(audio, this.el.object3D);
+    mediaElementAudioSource.mediaElement.volume = 1;
   },
 
   async updateSrc(oldData) {
@@ -412,13 +384,15 @@ AFRAME.registerComponent("media-video", {
         return;
       }
 
-      this.mediaElementAudioSource = null;
+      APP.audioSources.delete(this.el);
       if (!src.startsWith("hubs://")) {
         // iOS video audio is broken on ios safari < 13.1.2, see: https://github.com/mozilla/hubs/issues/1797
         if (!isIOS || semver.satisfies(detect().version, ">=13.1.2")) {
           // TODO FF error here if binding mediastream: The captured HTMLMediaElement is playing a MediaStream. Applying volume or mute status is not currently supported -- not an issue since we have no audio atm in shared video.
-          this.mediaElementAudioSource =
-            linkedMediaElementAudioSource || APP.audioCtx.createMediaElementSource(audioSourceEl);
+          APP.audioSources.set(
+            this.el,
+            linkedMediaElementAudioSource || APP.audioCtx.createMediaElementSource(audioSourceEl)
+          );
 
           this.hasAudioTracks && this.setupAudio();
         }
@@ -768,8 +742,6 @@ AFRAME.registerComponent("media-video", {
   remove() {
     this.cleanUp();
 
-    APP.isAudioPaused.delete(this.el);
-
     if (this.mesh) {
       this.el.removeObject3D("mesh");
     }
@@ -779,12 +751,15 @@ AFRAME.registerComponent("media-video", {
       this._audioSyncInterval = null;
     }
 
-    APP.gainMultipliers.delete(this.el);
+    const gain = APP.gains.get(this.el);
+    this.audioSystem.removeAudio({ node: gain });
+    APP.gains.delete(this.el);
     APP.audios.delete(this.el);
+    APP.audioSources.delete(this.el);
+    APP.isAudioPaused.delete(this.el);
+    APP.gainMultipliers.delete(this.el);
     APP.sourceType.delete(this.el);
     APP.supplementaryAttenuation.delete(this.el);
-
-    this.removeAudio();
 
     if (this.networkedEl) {
       this.networkedEl.removeEventListener("pinned", this.updateHoverMenu);
@@ -806,16 +781,6 @@ AFRAME.registerComponent("media-video", {
       this.seekForwardButton.object3D.removeEventListener("interact", this.seekForward);
       this.seekBackButton.object3D.removeEventListener("interact", this.seekBack);
       this.snapButton.object3D.removeEventListener("interact", this.snap);
-    }
-
-    window.APP.store.removeEventListener("statechanged", this.onPreferenceChanged);
-    this.el.addEventListener("audio_type_changed", this.setupAudio);
-  },
-
-  removeAudio() {
-    const audio = APP.audios.get(this.el);
-    if (audio) {
-      this.audioSystem.removeAudio({ node: audio });
     }
   }
 });

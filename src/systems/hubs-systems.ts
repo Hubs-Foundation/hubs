@@ -256,7 +256,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   mediaFramesSystem(world, hubsSystems.physicsSystem);
   hubsSystems.audioZonesSystem.tick(hubsSystems.el);
   audioZoneSystem(world);
-  audioEmitterSystem(world, hubsSystems.audioSystem);
+  audioEmitterSystem(world);
   audioListenerSystem(world);
   audioTargetSystem(world, hubsSystems.audioSystem);
   hubsSystems.gainSystem.tick();

@@ -17,7 +17,7 @@ import URL_SPAWN_EMOJI from "../assets/sfx/emoji.mp3";
 import URL_SPEAKER_TONE from "../assets/sfx/tone.mp3";
 import { SourceType } from "../components/audio-params";
 import { getOverriddenPanningModelType } from "../update-audio-settings";
-import { updatePannerNode } from "../bit-systems/audio-emitter-system";
+import { isPositionalAudio, updatePannerNode } from "../bit-systems/audio-emitter-system";
 
 let soundEnum = 0;
 export const SOUND_HOVER_OR_GRAB = soundEnum++;
@@ -274,7 +274,9 @@ export class SoundEffectsSystem {
       const positionalAudioAndObject3D = this.positionalAudiosFollowingObject3Ds[i];
       const positionalAudio = positionalAudioAndObject3D.positionalAudio;
       const object3D = positionalAudioAndObject3D.object3D;
-      updatePannerNode(positionalAudio, object3D);
+      if (isPositionalAudio(positionalAudio)) {
+        updatePannerNode(positionalAudio, object3D);
+      }
     }
   }
 }
