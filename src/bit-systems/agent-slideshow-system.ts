@@ -8,9 +8,9 @@ let activeIndex = 0;
 let updated = false;
 let maxValue = 4;
 const minValue = 0;
-const agentSlideQuery = defineQuery([PanelIndex]);
-const agentEnterQuery = enterQuery(agentSlideQuery);
-const agentExitQuery = exitQuery(agentSlideQuery);
+const SlideQuery = defineQuery([PanelIndex]);
+const slideEnterQuery = enterQuery(SlideQuery);
+const slideExitQuery = exitQuery(SlideQuery);
 
 export function raiseIndex() {
   activeIndex++;
@@ -44,7 +44,7 @@ export function FromatNewText(newText: string) {
 export function UpdateTextSystem(world: HubsWorld, newFormatedText: Array<string>) {
   const textCount = newFormatedText.length;
 
-  agentSlideQuery(world).forEach(eid => {
+  SlideQuery(world).forEach(eid => {
     const panelObj = world.eid2obj.get(eid) as Text;
 
     if (PanelIndex.index[eid] >= textCount) {
@@ -61,14 +61,10 @@ export function UpdateTextSystem(world: HubsWorld, newFormatedText: Array<string
   return textCount === 1;
 }
 
-export function setMicStatus() {}
-
 export function PanelIndexSystem(world: HubsWorld) {
-  if (agentEnterQuery(world).length || agentExitQuery(world).length) {
-    resetIndex();
-  }
+  if (slideEnterQuery(world).length || slideExitQuery(world).length) resetIndex();
 
-  agentSlideQuery(world).forEach(eid => {
+  SlideQuery(world).forEach(eid => {
     const panelObj = world.eid2obj.get(eid);
     panelObj!.visible = PanelIndex.index[eid] === activeIndex;
   });

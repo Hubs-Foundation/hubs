@@ -2,6 +2,7 @@ import { defineQuery, enterQuery, exitQuery } from "bitecs";
 import { Agent, Hidden, Interacted } from "../bit-components";
 import { FromatNewText, UpdateTextSystem, lowerIndex, raiseIndex } from "./agent-slideshow-system";
 import { hasComponent } from "bitecs";
+import { PermissionStatus } from "../utils/media-devices-utils";
 import { paradigms } from "./text-paradigms";
 import { anyEntityWith } from "../utils/bit-utils";
 
@@ -70,10 +71,11 @@ function saveRecording(blob) {
 }
 
 function setMicStatus(world) {
-  const agenteid = anyEntityWith(world, Agent);
-  const micEid = Agent.micRef[agenteid];
+  const micEid = Agent.micRef[eid];
   const micObj = world.eid2obj.get(micEid);
-  micObj.visible = APP.mediaDevicesManager.isMicEnabled;
+  const permissionsGranted = APP.mediaDevicesManager.getPermissionsStatus("microphone") === PermissionStatus.GRANTED;
+  const isMicNotDisabled = APP.mediaDevicesManager.isMicEnabled !== false;
+  micObj.visible = permissionsGranted && isMicNotDisabled;
 }
 
 function entered(world) {
@@ -84,6 +86,7 @@ function entered(world) {
     panelObj.add(axesHelper);
     eid = agentEid;
     APP.dialog.on("mic-state-changed", () => setMicStatus(world));
+    setMicStatus(world);
   });
 
   if (eid) return true;
@@ -116,6 +119,13 @@ export function AgentSystem(world) {
   } else {
     agentObj.visible = true;
   }
+
+  console.log(
+    `is mic enabled`,
+    APP.mediaDevicesManager.deviceId,
+    `permission status`,
+    APP.mediaDevicesManager.getPermissionsStatus(`microphone`)
+  );
 
   modelObj.rotateOnAxis(new THREE.Vector3(0, 1, 0), -1.5707963268);
 
