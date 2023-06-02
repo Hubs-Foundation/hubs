@@ -6,8 +6,8 @@ export enum LinkType {
   LINK = 0,
   AVATAR = 1,
   SCENE = 2,
-  LOCAL_ROOM = 3,
-  EXTERNAL_ROOM = 4,
+  ROOM = 3,
+  ROOM_URL = 4,
   WAYPOINT = 5
 }
 

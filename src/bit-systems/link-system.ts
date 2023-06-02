@@ -21,9 +21,9 @@ export function linkSystem(world: HubsWorld) {
       if (url.hash && APP.hub!.hub_id === hubId) {
         Link.type[eid] = LinkType.WAYPOINT;
       } else if (await isLocalHubsUrl(src)) {
-        Link.type[eid] = LinkType.LOCAL_ROOM;
+        Link.type[eid] = LinkType.ROOM;
       } else {
-        Link.type[eid] = LinkType.EXTERNAL_ROOM;
+        Link.type[eid] = LinkType.ROOM_URL;
       }
     }
   });

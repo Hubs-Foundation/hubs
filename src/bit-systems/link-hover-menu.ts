@@ -70,13 +70,13 @@ async function handleLinkClick(world: HubsWorld, button: EntityID) {
       // move to waypoint w/o writing to history
       window.history.replaceState(null, "", window.location.href.split("#")[0] + url.hash);
       break;
-    case LinkType.LOCAL_ROOM:
+    case LinkType.ROOM:
       const waypoint = url.hash && url.hash.substring(1);
       // move to new room without page load or entry flow
       const hubId = hubIdFromUrl(url);
       changeHub(hubId, true, waypoint);
       break;
-    case LinkType.EXTERNAL_ROOM:
+    case LinkType.ROOM_URL:
       await exitImmersive();
       location.href = src;
       break;
@@ -107,8 +107,8 @@ function updateButtonText(world: HubsWorld, menu: EntityID, button: EntityID) {
     case LinkType.WAYPOINT:
       label = "go to";
       break;
-    case LinkType.LOCAL_ROOM:
-    case LinkType.EXTERNAL_ROOM:
+    case LinkType.ROOM:
+    case LinkType.ROOM_URL:
       label = "visit room";
       break;
   }
