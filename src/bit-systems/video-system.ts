@@ -16,6 +16,7 @@ import { AudioSystem } from "../systems/audio-system";
 import { findAncestorWithComponent } from "../utils/bit-utils";
 import { Emitter2Audio, Emitter2Params, makeAudioEntity } from "./audio-emitter-system";
 import { takeSoftOwnership } from "../utils/take-soft-ownership";
+import { VIDEO_FLAGS } from "../inflators/video";
 
 enum Flags {
   PAUSED = 1 << 0
@@ -33,7 +34,7 @@ export function videoSystem(world: HubsWorld, audioSystem: AudioSystem) {
   mediaVideoEnterQuery(world).forEach(function (videoEid) {
     const videoObj = world.eid2obj.get(videoEid) as Mesh;
     const video = MediaVideoData.get(videoEid)!;
-    if (MediaVideo.autoPlay[videoEid]) {
+    if (MediaVideo.flags[videoEid] & VIDEO_FLAGS.AUTOPLAY) {
       video.play().catch(() => {
         // Need to deal with the fact play() may fail if user has not interacted with browser yet.
         console.error("Error auto-playing video.");

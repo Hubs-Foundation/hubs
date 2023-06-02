@@ -45,7 +45,7 @@ import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
 import { GrabbableParams, inflateGrabbable } from "../inflators/grabbable";
 import { inflateImage } from "../inflators/image";
-import { inflateVideo } from "../inflators/video";
+import { inflateVideo, VideoParams } from "../inflators/video";
 import { inflateModel, ModelParams } from "../inflators/model";
 import { inflatePDFLoader, PDFLoaderParams } from "../inflators/pdf-loader";
 import { inflateVideoLoader, VideoLoaderParams } from "../inflators/video-loader";
@@ -275,13 +275,7 @@ export interface JSXComponentData extends ComponentData {
     alphaMode: typeof AlphaMode.Blend | typeof AlphaMode.Mask | typeof AlphaMode.Opaque;
     cacheKey: string;
   };
-  video?: {
-    texture: HubsVideoTexture;
-    ratio: number;
-    projection: ProjectionMode;
-    autoPlay: boolean;
-    video: HTMLVideoElement;
-  };
+  video?: VideoParams;
   networkedVideo?: true;
   videoMenu?: {
     sliderRef: Ref;

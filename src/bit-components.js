@@ -180,8 +180,8 @@ export const MediaPDF = defineComponent({
 MediaPDF.map = new Map();
 
 export const MediaVideo = defineComponent({
-  autoPlay: Types.ui8,
-  ratio: Types.f32
+  ratio: Types.f32,
+  flags: Types.ui8
 });
 /**
  * @type {Map<EntityId, HTMLVideoElement}>}

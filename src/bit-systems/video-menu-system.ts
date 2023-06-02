@@ -23,6 +23,7 @@ import { coroutine } from "../utils/coroutine";
 import { easeOutQuadratic } from "../utils/easing";
 import { isFacingCamera } from "../utils/three-utils";
 import { Emitter2Audio } from "./audio-emitter-system";
+import { VIDEO_FLAGS } from "../inflators/video";
 
 const videoMenuQuery = defineQuery([VideoMenu]);
 const hoverRightVideoQuery = defineQuery([HoveredRemoteRight, MediaVideo]);
@@ -71,12 +72,14 @@ export function videoMenuSystem(world: HubsWorld, userinput: any) {
   }
 
   hoverRightVideoEnterQuery(world).forEach(function (eid) {
-    const menu = rightVideoMenu;
-    VideoMenu.videoRef[menu] = eid;
-    const menuObj = world.eid2obj.get(menu)!;
-    const videoObj = world.eid2obj.get(eid)!;
-    videoObj.add(menuObj);
-    setCursorRaycastable(world, menu, true);
+    if (MediaVideo.flags[eid] & VIDEO_FLAGS.CONTROLS) {
+      const menu = rightVideoMenu;
+      VideoMenu.videoRef[menu] = eid;
+      const menuObj = world.eid2obj.get(menu)!;
+      const videoObj = world.eid2obj.get(eid)!;
+      videoObj.add(menuObj);
+      setCursorRaycastable(world, menu, true);
+    }
   });
 
   videoMenuQuery(world).forEach(function (eid) {

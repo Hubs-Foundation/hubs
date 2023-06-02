@@ -69,21 +69,28 @@ export function* waitForMediaLoaded(world: HubsWorld, eid: EntityID) {
 const loaderForMediaType = {
   [MediaType.IMAGE]: (
     world: HubsWorld,
-    { accessibleUrl, contentType }: { accessibleUrl: string; contentType: string }
+    eid: EntityID,
+    { accessibleUrl, contentType }: { accessibleUrl: string, contentType: string }
   ) => loadImage(world, accessibleUrl, contentType),
   [MediaType.VIDEO]: (
     world: HubsWorld,
-    { accessibleUrl, contentType }: { accessibleUrl: string; contentType: string }
-  ) => loadVideo(world, accessibleUrl, contentType),
+    eid: EntityID,
+    { accessibleUrl, contentType }: { accessibleUrl: string, contentType: string }
+  ) => loadVideo(world, eid, accessibleUrl, contentType),
   [MediaType.MODEL]: (
     world: HubsWorld,
-    { accessibleUrl, contentType }: { accessibleUrl: string; contentType: string }
+    eid: EntityID,
+    { accessibleUrl, contentType }: { accessibleUrl: string, contentType: string }
   ) => loadModel(world, accessibleUrl, contentType, true),
-  [MediaType.PDF]: (world: HubsWorld, { accessibleUrl }: { accessibleUrl: string }) => loadPDF(world, accessibleUrl),
-  [MediaType.AUDIO]: (world: HubsWorld, { accessibleUrl }: { accessibleUrl: string }) =>
-    loadAudio(world, accessibleUrl),
-  [MediaType.HTML]: (world: HubsWorld, { canonicalUrl, thumbnail }: { canonicalUrl: string; thumbnail: string }) =>
-    loadHtml(world, canonicalUrl, thumbnail)
+  [MediaType.PDF]: (world: HubsWorld, eid: EntityID, { accessibleUrl }: { accessibleUrl: string }) =>
+    loadPDF(world, accessibleUrl),
+  [MediaType.AUDIO]: (world: HubsWorld, eid: EntityID, { accessibleUrl }: { accessibleUrl: string }) =>
+    loadAudio(world, eid, accessibleUrl),
+  [MediaType.HTML]: (
+    world: HubsWorld,
+    eid: EntityID,
+    { canonicalUrl, thumbnail }: { canonicalUrl: string, thumbnail: string }
+  ) => loadHtml(world, canonicalUrl, thumbnail)
 };
 
 export const MEDIA_LOADER_FLAGS = {
@@ -197,7 +204,7 @@ function* loadMedia(world: HubsWorld, eid: EntityID) {
     if (!loader) {
       throw new UnsupportedMediaTypeError(eid, urlData.mediaType);
     }
-    media = yield* loader(world, urlData);
+    media = yield* loader(world, eid, urlData);
     addComponent(world, MediaLoaded, media);
   } catch (e) {
     console.error(e);
