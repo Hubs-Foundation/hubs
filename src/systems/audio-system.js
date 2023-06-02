@@ -276,7 +276,7 @@ export class AudioSystem {
           swapAudioType(elOrEid);
           audio = APP.audios.get(elOrEid);
           if (isPositionalAudio(audio)) {
-            const obj = APP.world.eid2obj.get(elOrEid.eid);
+            const obj = APP.world.eid2obj.get(elOrEid.isEntity ? elOrEid.eid : elOrEid);
             updatePannerNode(audio, obj);
           }
         }
