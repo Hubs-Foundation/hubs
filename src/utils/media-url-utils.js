@@ -197,11 +197,10 @@ export const isLocalHubsSceneUrl = async url => (await isHubsSceneUrl(url)) && (
 export const isHubsAvatarUrl = async url => (await isHubsServer(url)) && hubsAvatarRegex.test(url);
 export const isLocalHubsAvatarUrl = async url => (await isHubsAvatarUrl(url)) && (await isLocalHubsUrl(url));
 
+export const hubIdFromUrl = url => url.match(hubsRoomRegex)?.groups.id || url.match(localHubsRoomRegex)?.groups.id;
+
 export const isHubsRoomUrl = async url =>
-  (await isHubsServer(url)) &&
-  !(await isHubsAvatarUrl(url)) &&
-  !(await isHubsSceneUrl(url)) &&
-  ((await url.match(hubsRoomRegex)?.groups.id) || (await url.match(localHubsRoomRegex)?.groups.id));
+  (await isHubsServer(url)) && !(await isHubsAvatarUrl(url)) && !(await isHubsSceneUrl(url)) && hubIdFromUrl(url);
 
 export const isHubsDestinationUrl = async url =>
   (await isHubsServer(url)) && ((await isHubsSceneUrl(url)) || (await isHubsRoomUrl(url)));
