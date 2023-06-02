@@ -66,14 +66,12 @@ export const updatePannerNode = (() => {
     obj.updateMatrices();
     obj.matrixWorld.decompose(_position, _quaternion, _scale);
     _orientation.set(0, 0, -1).applyQuaternion(_quaternion);
-    const timeDelta = APP.world.time.delta / 1000;
-    const endTime = APP.audioCtx.currentTime + timeDelta;
-    audio.positionX.linearRampToValueAtTime(_position.x, endTime);
-    audio.positionY.linearRampToValueAtTime(_position.y, endTime);
-    audio.positionZ.linearRampToValueAtTime(_position.z, endTime);
-    audio.orientationX.linearRampToValueAtTime(_orientation.x, endTime);
-    audio.orientationY.linearRampToValueAtTime(_orientation.y, endTime);
-    audio.orientationZ.linearRampToValueAtTime(_orientation.z, endTime);
+    audio.positionX.setValueAtTime(_position.x, 0);
+    audio.positionY.setValueAtTime(_position.y, 0);
+    audio.positionZ.setValueAtTime(_position.z, 0);
+    audio.orientationX.setValueAtTime(_orientation.x, 0);
+    audio.orientationY.setValueAtTime(_orientation.y, 0);
+    audio.orientationZ.setValueAtTime(_orientation.z, 0);
   };
 })();
 

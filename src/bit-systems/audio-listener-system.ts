@@ -19,8 +19,6 @@ export function audioListenerSystem(world: HubsWorld) {
 
     const up = obj.up;
 
-    const timeDelta = world.time.delta / 1000;
-
     obj.matrixWorld.decompose(_position, _quaternion, _scale);
 
     _orientation.set(0, 0, -1).applyQuaternion(_quaternion);
@@ -31,16 +29,15 @@ export function audioListenerSystem(world: HubsWorld) {
     if (positionUpdated || orientationUpdated || lastUpUpdated) {
       if (listener.positionX) {
         // code path for Chrome (see #14393)
-        const endTime = APP.audioCtx.currentTime + timeDelta;
-        listener.positionX.linearRampToValueAtTime(_position.x, endTime);
-        listener.positionY.linearRampToValueAtTime(_position.y, endTime);
-        listener.positionZ.linearRampToValueAtTime(_position.z, endTime);
-        listener.forwardX.linearRampToValueAtTime(_orientation.x, endTime);
-        listener.forwardY.linearRampToValueAtTime(_orientation.y, endTime);
-        listener.forwardZ.linearRampToValueAtTime(_orientation.z, endTime);
-        listener.upX.linearRampToValueAtTime(up.x, endTime);
-        listener.upY.linearRampToValueAtTime(up.y, endTime);
-        listener.upZ.linearRampToValueAtTime(up.z, endTime);
+        listener.positionX.setValueAtTime(_position.x, 0);
+        listener.positionY.setValueAtTime(_position.y, 0);
+        listener.positionZ.setValueAtTime(_position.z, 0);
+        listener.forwardX.setValueAtTime(_orientation.x, 0);
+        listener.forwardY.setValueAtTime(_orientation.y, 0);
+        listener.forwardZ.setValueAtTime(_orientation.z, 0);
+        listener.upX.setValueAtTime(up.x, 0);
+        listener.upY.setValueAtTime(up.y, 0);
+        listener.upZ.setValueAtTime(up.z, 0);
       } else {
         // Although these methods are deprecated they are currently the only way to set the orientation and position in Firefox.
         listener.setPosition(_position.x, _position.y, _position.z);
