@@ -1,6 +1,8 @@
 import { HubsWorld } from "../app";
+import { MediaVideo } from "../bit-components";
 import { ProjectionMode } from "../utils/projection-mode";
 import { inflateMediaLoader } from "./media-loader";
+import { VIDEO_FLAGS } from "./video";
 
 export interface VideoLoaderParams {
   src: string;
@@ -19,5 +21,13 @@ export function inflateVideoLoader(world: HubsWorld, eid: number, params: VideoL
     isObjectMenuTarget: false
   });
 
-  // TODO: Use the rest of VideoLoaderParams
+  const { autoPlay, controls, loop, projection } = params;
+  autoPlay && (MediaVideo.flags[eid] |= VIDEO_FLAGS.AUTOPLAY);
+  loop && (MediaVideo.flags[eid] |= VIDEO_FLAGS.LOOP);
+  controls && (MediaVideo.flags[eid] |= VIDEO_FLAGS.CONTROLS);
+  if (projection === ProjectionMode.SPHERE_EQUIRECTANGULAR) {
+    MediaVideo.flags[eid] |= VIDEO_FLAGS.PROJECTION_EQUIRECT;
+  } else {
+    MediaVideo.flags[eid] |= VIDEO_FLAGS.PROJECTION_FLAT;
+  }
 }
