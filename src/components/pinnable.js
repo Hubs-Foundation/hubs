@@ -1,5 +1,3 @@
-import { addComponent, removeComponent } from "bitecs";
-
 AFRAME.registerComponent("pinnable", {
   schema: {
     pinned: { default: false }
