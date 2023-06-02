@@ -20,7 +20,7 @@ export function linkSystem(world: HubsWorld) {
       const url = new URL(src);
       if (url.hash && APP.hub!.hub_id === hubId) {
         Link.type[eid] = LinkType.WAYPOINT;
-      } else if (await isLocalHubsUrl(this.src)) {
+      } else if (await isLocalHubsUrl(src)) {
         Link.type[eid] = LinkType.LOCAL_ROOM;
       } else {
         Link.type[eid] = LinkType.EXTERNAL_ROOM;
