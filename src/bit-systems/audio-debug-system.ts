@@ -5,7 +5,7 @@ import { getScene, HubsWorld } from "../app";
 import { NavMesh } from "../bit-components";
 import { DistanceModelType } from "../components/audio-params";
 import { getWebGLVersion } from "../utils/webgl";
-import { AudioNode, getAudioOrientation, getAudioPosition, isPositionalAudio } from "./audio-emitter-system";
+import { getAudioOrientation, getAudioPosition, isPositionalAudio } from "./audio-emitter-system";
 import { Mesh, Material, Vector3, ShaderMaterial } from "three";
 import { disposeMaterial } from "../utils/three-utils";
 import { ElOrEid } from "../utils/bit-utils";

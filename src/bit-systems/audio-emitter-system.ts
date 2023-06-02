@@ -9,8 +9,6 @@ import { EntityID } from "../utils/networking-types";
 import { ElOrEid, findAncestorWithComponent } from "../utils/bit-utils";
 import { BodyAtRest } from "../systems/floaty-object-system";
 
-export type AudioNode = PannerNode | StereoPannerNode;
-
 export const Emitter2Params = (AudioEmitter as any).params as Map<number, number>;
 
 export function isPositionalAudio(node: AudioNode): node is PannerNode {

@@ -19,7 +19,6 @@ import { waitForPreloads } from "./utils/preload";
 import SceneEntryManager from "./scene-entry-manager";
 import { store } from "./utils/store-instance";
 import { ElOrEid } from "./utils/bit-utils";
-import { AudioNode } from "./bit-systems/audio-emitter-system";
 import { addObject3DComponent } from "./utils/jsx-entity";
 
 declare global {

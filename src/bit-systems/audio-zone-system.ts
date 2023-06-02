@@ -5,7 +5,7 @@ import { Box3, BoxGeometry, DoubleSide, MeshBasicMaterial, Object3D, Ray, Vector
 import { AUDIO_ZONE_FLAGS } from "../inflators/audio-zone";
 import { disposeMaterial, disposeNode } from "../utils/three-utils";
 import { AudioSettings } from "../components/audio-params";
-import { AudioNode, getAudioPosition, isPositionalAudio } from "./audio-emitter-system";
+import { getAudioPosition } from "./audio-emitter-system";
 import { ElOrEid, anyEntityWith } from "../utils/bit-utils";
 import { updateAudioSettings } from "../update-audio-settings";
 
