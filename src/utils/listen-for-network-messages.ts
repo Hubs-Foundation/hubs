@@ -91,6 +91,7 @@ export function queueEntityStateAsMessage(entityState: EntityState) {
 }
 
 function onEntityStateCreated(response: { data: EntityState[] }) {
+  // console.log("entity_state_saved", response);
   queueEntityStateAsMessage(response.data[0]!);
 }
 
@@ -99,5 +100,6 @@ function onEntityStateUpdated(_response: any) {
 }
 
 function onEntityStateDeleted(response: CreatorChange) {
+  // console.log("entity_state_deleted", response);
   pendingCreatorChanges.push(response);
 }

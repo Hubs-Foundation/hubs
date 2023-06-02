@@ -39,8 +39,7 @@ import {
   VideoTextureSource,
   Quack,
   Mirror,
-  MixerAnimatableInitialize,
-  Pinnable
+  MixerAnimatableInitialize
 } from "../bit-components";
 import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
@@ -312,7 +311,6 @@ export interface JSXComponentData extends ComponentData {
   rigidbody?: OptionalParams<RigidBodyParams>;
   physicsShape?: OptionalParams<PhysicsShapeParams>;
   floatyObject?: any;
-  pinnable?: any;
   networkedFloatyObject?: any;
   networkedTransform?: any;
   objectMenu?: {
@@ -453,7 +451,6 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   networkedTransform: createDefaultInflator(NetworkedTransform),
   networked: createDefaultInflator(Networked),
   objectMenu: createDefaultInflator(ObjectMenu),
-  pinnable: createDefaultInflator(Pinnable),
   linkHoverMenu: createDefaultInflator(LinkHoverMenu),
   linkHoverMenuItem: createDefaultInflator(LinkHoverMenuItem),
   pdfMenu: createDefaultInflator(PDFMenu),

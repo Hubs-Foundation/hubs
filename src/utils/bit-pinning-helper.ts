@@ -1,4 +1,3 @@
-import { hasComponent } from "bitecs";
 import { HubsWorld } from "../app";
 import { createEntityState, deleteEntityState } from "./entity-state-utils";
 import HubChannel from "./hub-channel";
@@ -40,7 +39,7 @@ export const canPin = (hubChannel: HubChannel, world: HubsWorld, eid: EntityID):
   } = createMessageDatas.get(eid)!;
   const hasFile = !!fileId;
   const hasPromotableFile =
-    hasFile && APP.store.state.uploadPromotionTokens.some((upload: { fileId: string }) => upload.fileId === fileId);
+    hasFile && APP.store.state.uploadPromotionTokens.some((upload: any) => upload.fileId === fileId);
   return (
     isNetworkInstantiated(eid) &&
     !isPinned(eid) &&

@@ -4,10 +4,10 @@ import { HubsWorld } from "../app";
 import {
   GLTFModel,
   MediaContentBounds,
+  MediaLoaded,
   MediaLoader,
   Networked,
-  ObjectMenuTarget,
-  MediaLoaded
+  ObjectMenuTarget
 } from "../bit-components";
 import { inflatePhysicsShape, Shape } from "../inflators/physics-shape";
 import { ErrorObject } from "../prefabs/error-object";

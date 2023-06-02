@@ -13,7 +13,6 @@ export function MediaPrefab(params: MediaLoaderParams): EntityDef {
       networkedTransform
       mediaLoader={params}
       deletable
-      pinnable
       grabbable={{ cursor: true, hand: true }}
       destroyAtExtremeDistance
       floatyObject={{
