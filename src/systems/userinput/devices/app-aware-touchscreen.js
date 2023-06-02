@@ -5,16 +5,9 @@ import { findRemoteHoverTarget } from "../../../components/cursor-controller";
 // import { canMove } from "../../../utils/permissions-utils";
 import ResizeObserver from "resize-observer-polyfill";
 import { hasComponent } from "bitecs";
-import {
-  AEntity,
-  HeldRemoteRight,
-  OffersRemoteConstraint,
-  Pinnable,
-  Pinned,
-  SingleActionButton,
-  Static
-} from "../../../bit-components";
+import { AEntity, HeldRemoteRight, OffersRemoteConstraint, SingleActionButton, Static } from "../../../bit-components";
 import { anyEntityWith } from "../../../utils/bit-utils";
+import { isPinned } from "../../../bit-systems/networking";
 
 const MOVE_CURSOR_JOB = "MOVE CURSOR";
 const MOVE_CAMERA_JOB = "MOVE CAMERA";
@@ -70,14 +63,12 @@ function shouldMoveCursor(touch, rect, raycaster) {
         .get(remoteHoverTarget)
         .el.matches(".interactable, .interactable *, .occupiable-waypoint-icon, .teleport-waypoint-icon"));
 
-  const isPinned =
-    hasComponent(APP.world, Pinnable, remoteHoverTarget) && hasComponent(APP.world, Pinned, remoteHoverTarget);
   const isSceneFrozen = AFRAME.scenes[0].is("frozen");
 
   // TODO isStatic is likely a superfluous check for things matched via OffersRemoteConstraint
   const isStatic = hasComponent(APP.world, Static, remoteHoverTarget);
   return (
-    isSingleActionButton || (isInteractable && (isSceneFrozen || !isPinned) && !isStatic)
+    isSingleActionButton || (isInteractable && (isSceneFrozen || !isPinned(remoteHoverTarget)) && !isStatic)
     // TODO check canMove
     //&& (remoteHoverTarget && canMove(remoteHoverTarget))
   );

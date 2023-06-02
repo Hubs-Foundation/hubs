@@ -3,11 +3,8 @@ import { removeNetworkedObject } from "../../utils/removeNetworkedObject";
 import { rotateInPlaceAroundWorldUp, affixToWorldUp } from "../../utils/three-utils";
 import { getPromotionTokenForFile } from "../../utils/media-utils";
 import { hasComponent } from "bitecs";
-import { Pinnable, Pinned, Static } from "../../bit-components";
-
-function getPinnedState(el) {
-  return !!(hasComponent(APP.world, Pinnable, el.eid) && hasComponent(APP.world, Pinned, el.eid));
-}
+import { Static } from "../../bit-components";
+import { isPinned } from "../../bit-systems/networking";
 
 export function isMe(object) {
   return object.el.id === "avatar-rig";
@@ -31,7 +28,7 @@ export function getObjectUrl(object) {
 }
 
 export function usePinObject(hubChannel, scene, object) {
-  const [isPinned, setIsPinned] = useState(getPinnedState(object.el));
+  const [isPinned, setIsPinned] = useState(isPinned(object.el.eid));
 
   const pinObject = useCallback(() => {
     const el = object.el;
@@ -57,11 +54,11 @@ export function usePinObject(hubChannel, scene, object) {
     const el = object.el;
 
     function onPinStateChanged() {
-      setIsPinned(getPinnedState(el));
+      setIsPinned(isPinned(el.eid));
     }
     el.addEventListener("pinned", onPinStateChanged);
     el.addEventListener("unpinned", onPinStateChanged);
-    setIsPinned(getPinnedState(el));
+    setIsPinned(isPinned(el.eid));
     return () => {
       el.removeEventListener("pinned", onPinStateChanged);
       el.removeEventListener("unpinned", onPinStateChanged);
@@ -125,7 +122,7 @@ export function useRemoveObject(hubChannel, scene, object) {
   const canRemoveObject = !!(
     scene.is("entered") &&
     !isPlayer(object) &&
-    !getPinnedState(el) &&
+    !isPinned(el.eid) &&
     !hasComponent(APP.world, Static, el.eid) &&
     hubChannel.can("spawn_and_move_media")
   );

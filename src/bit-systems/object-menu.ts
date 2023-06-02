@@ -7,7 +7,6 @@ import {
   Interacted,
   ObjectMenu,
   ObjectMenuTarget,
-  Pinned,
   RemoteRight,
   Rigidbody
 } from "../bit-components";
