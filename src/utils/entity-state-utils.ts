@@ -67,6 +67,12 @@ export async function deleteEntityState(hubChannel: HubChannel, world: HubsWorld
   const payload: DeleteEntityStatePayload = {
     nid: APP.getString(Networked.id[eid])! as NetworkID
   };
+  const {
+    initialData: { fileId }
+  } = createMessageDatas.get(eid)!;
+  if (fileId) {
+    payload.file_id = fileId;
+  }
   // console.log("delete_entity_state",  payload);
   return push(hubChannel, "delete_entity_state", payload);
 }
