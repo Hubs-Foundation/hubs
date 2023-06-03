@@ -136,6 +136,7 @@ export class AudioSystem {
     this.outboundGainNode.connect(this.outboundAnalyser);
     this.outboundAnalyser.connect(this.mediaStreamDestinationNode);
     this.audioContextNeedsToBeResumed = false;
+    this.mediaGainOverride = 1;
 
     this.mediaGain = this.audioContext.createGain();
     this.mixer = {
@@ -163,6 +164,11 @@ export class AudioSystem {
 
     this.onPrefsUpdated = this.updatePrefs.bind(this);
     window.APP.store.addEventListener("statechanged", this.onPrefsUpdated);
+  }
+
+  setMediaGainOverride(gain) {
+    this.mediaGainOverride = gain;
+    this.updatePrefs();
   }
 
   addStreamToOutboundAudio(id, mediaStream) {
@@ -205,7 +211,7 @@ export class AudioSystem {
 
   updatePrefs() {
     const { globalVoiceVolume, globalMediaVolume, globalSFXVolume } = window.APP.store.state.preferences;
-    let newGain = globalMediaVolume / 100;
+    let newGain = this.mediaGainOverride * (globalMediaVolume / 100);
     this.mixer[SourceType.MEDIA_VIDEO].gain.setTargetAtTime(newGain, this.audioContext.currentTime, GAIN_TIME_CONST);
 
     newGain = globalSFXVolume / 100;
