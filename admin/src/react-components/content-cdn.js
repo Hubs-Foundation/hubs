@@ -1,23 +1,23 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable @calm/react-intl/missing-formatted-message*/
 import React, { Component } from "react";
-import { withStyles } from 'tss-react/mui';
-import Typography from "@mui/material/Typography";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import Checkbox from "@mui/material/Checkbox";
-import CircularProgress from "@mui/material/CircularProgress";
-import LinearProgress from "@mui/material/LinearProgress";
-import FormControlLabel from "@mui/material/FormControlLabel";
+import { withStyles } from "@material-ui/core/styles";
+import Typography from "@material-ui/core/Typography";
+import Card from "@material-ui/core/Card";
+import CardContent from "@material-ui/core/CardContent";
+import Checkbox from "@material-ui/core/Checkbox";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import LinearProgress from "@material-ui/core/LinearProgress";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
 import { Title } from "react-admin";
-import Button from "@mui/material/Button";
+import Button from "@material-ui/core/Button";
 import withCommonStyles from "../utils/with-common-styles";
 import { getAdminInfo, getEditableConfig, getConfig, putConfig } from "../utils/ita";
-import Snackbar from "@mui/material/Snackbar";
-import SnackbarContent from "@mui/material/SnackbarContent";
-import Icon from "@mui/material/Icon";
-import IconButton from "@mui/material/IconButton";
-import CloseIcon from "@mui/icons-material/Close";
+import Snackbar from "@material-ui/core/Snackbar";
+import SnackbarContent from "@material-ui/core/SnackbarContent";
+import Icon from "@material-ui/core/Icon";
+import IconButton from "@material-ui/core/IconButton";
+import CloseIcon from "@material-ui/icons/Close";
 import clsx from "classnames";
 import configs from "../utils/configs";
 
@@ -427,11 +427,7 @@ class ContentCDNComponent extends Component {
               </span>
             }
             action={[
-              <IconButton
-                key="close"
-                color="inherit"
-                onClick={() => this.setState({ saved: false })}
-                size="large">
+              <IconButton key="close" color="inherit" onClick={() => this.setState({ saved: false })}>
                 <CloseIcon className={this.props.classes.icon} />
               </IconButton>
             ]}
@@ -442,4 +438,4 @@ class ContentCDNComponent extends Component {
   }
 }
 
-export const ContentCDN = withStyles(ContentCDNComponent, styles);
+export const ContentCDN = withStyles(styles)(ContentCDNComponent);

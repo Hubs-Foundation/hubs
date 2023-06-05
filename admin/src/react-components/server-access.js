@@ -2,12 +2,12 @@
 /* eslint-disable @calm/react-intl/missing-formatted-message*/
 
 import React, { Component } from "react";
-import { withStyles } from 'tss-react/mui';
-import Typography from "@mui/material/Typography";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
+import { withStyles } from "@material-ui/core/styles";
+import Typography from "@material-ui/core/Typography";
+import Card from "@material-ui/core/Card";
+import CardContent from "@material-ui/core/CardContent";
 import { Title } from "react-admin";
-import Button from "@mui/material/Button";
+import Button from "@material-ui/core/Button";
 import withCommonStyles from "../utils/with-common-styles";
 import { getAdminInfo } from "../utils/ita";
 
@@ -108,4 +108,4 @@ class ServerAccessComponent extends Component {
   }
 }
 
-export const ServerAccess = withStyles(ServerAccessComponent, styles);
+export const ServerAccess = withStyles(styles)(ServerAccessComponent);

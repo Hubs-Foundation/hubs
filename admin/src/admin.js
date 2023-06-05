@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import "./webxr-bypass-hacks";
 import configs from "./utils/configs";
-import { createRoot } from "react-dom/client";
+import ReactDOM from "react-dom";
 import React, { Component } from "react";
 import { Route } from "react-router-dom";
 import PropTypes from "prop-types";
@@ -34,8 +34,7 @@ import { ContentCDN } from "./react-components/content-cdn";
 import { ImportContent } from "./react-components/import-content";
 import { AutoEndSessionDialog } from "./react-components/auto-end-session-dialog";
 import registerTelemetry from "hubs/src/telemetry";
-import { createTheme, adaptV4Theme } from "@mui/material/styles";
-import { withStyles } from 'tss-react/mui';
+import { createMuiTheme, withStyles } from "@material-ui/core/styles";
 import { UnauthorizedPage } from "./react-components/unauthorized";
 import { store } from "hubs/src/utils/store-instance";
 
@@ -47,7 +46,7 @@ registerTelemetry("/admin", "Hubs Admin");
 
 let itaSchemas;
 
-const theme = createTheme(adaptV4Theme({
+const theme = createMuiTheme({
   overrides: {
     MuiDrawer: {
       docked: {
@@ -67,7 +66,7 @@ const theme = createTheme(adaptV4Theme({
   typography: {
     fontFamily: "Inter,Arial"
   }
-}));
+});
 
 class AdminUI extends Component {
   static propTypes = {
@@ -208,9 +207,7 @@ const mountUI = async (retPhxChannel, customRoutes, layout) => {
     retPhxChannel.socket.disconnect();
   };
 
-  const container = document.getElementById("admin-ui-root");
-  const root = createRoot(container)
-  root.render(
+  ReactDOM.render(
     <IntlProvider locale={lang} messages={messages}>
       <AdminUI
         dataProvider={dataProvider}
@@ -219,18 +216,19 @@ const mountUI = async (retPhxChannel, customRoutes, layout) => {
         layout={layout}
         onEndSession={onEndSession}
       />
-    </IntlProvider>
+    </IntlProvider>,
+    document.getElementById("ui-root")
   );
 };
-const HiddenAppBar = withStyles(props => {
-  const { classes, ...other } = props;
-  return <AppBar {...other} className={classes.hideOnDesktop} />;
-},{
+const HiddenAppBar = withStyles({
   hideOnDesktop: {
     "@media (min-width: 768px) and (min-height: 480px)": {
       display: "none"
     }
   }
+})(props => {
+  const { classes, ...other } = props;
+  return <AppBar {...other} className={classes.hideOnDesktop} />;
 });
 
 document.addEventListener("DOMContentLoaded", async () => {

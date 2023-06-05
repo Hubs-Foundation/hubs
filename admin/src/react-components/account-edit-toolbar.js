@@ -2,9 +2,9 @@
 
 import React, { useState } from "react";
 import { Toolbar, SaveButton } from "react-admin";
-import { withStyles } from 'tss-react/mui';
-import Button from "@mui/material/Button";
-import { Dialog, DialogContent, DialogContentText, DialogActions } from "@mui/material";
+import { withStyles } from "@material-ui/core/styles";
+import Button from "@material-ui/core/Button";
+import { Dialog, DialogContent, DialogContentText, DialogActions } from "@material-ui/core";
 
 const accountEditToolbarStyles = {
   spaceBetween: { justifyContent: "space-between" },
@@ -18,7 +18,7 @@ const DeleteStates = Object.freeze({
   Failed: Symbol("failed")
 });
 
-export const AccountEditToolbar = withStyles(props => {
+export const AccountEditToolbar = withStyles(accountEditToolbarStyles)(props => {
   const { classes, ...other } = props;
   const { Confirming, Deleting, Succeeded, Failed } = DeleteStates;
   const [openConfirmationDialog, setOpenConfirmationDialog] = useState(false);
@@ -105,4 +105,5 @@ export const AccountEditToolbar = withStyles(props => {
         </DialogActions>
       </Dialog>
     </Toolbar>
-  )},accountEditToolbarStyles);
+  );
+});

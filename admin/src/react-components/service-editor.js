@@ -2,25 +2,25 @@
 /* eslint-disable @calm/react-intl/missing-formatted-message*/
 
 import React, { Component } from "react";
-import { withStyles } from 'tss-react/mui';
-import CircularProgress from "@mui/material/CircularProgress";
-import RefreshIcon from "@mui/icons-material/Refresh";
+import { withStyles } from "@material-ui/core/styles";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import RefreshIcon from "@material-ui/icons/Refresh";
 import ExpandIcon from "./shared/icons/ExpandIcon";
 import PictureIcon from "./shared/icons/PictureIcon";
-import Card from "@mui/material/Card";
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
-import CardContent from "@mui/material/CardContent";
-import Snackbar from "@mui/material/Snackbar";
-import SnackbarContent from "@mui/material/SnackbarContent";
-import TextField from "@mui/material/TextField";
-import Switch from "@mui/material/Switch";
-import Typography from "@mui/material/Typography";
-import Icon from "@mui/material/Icon";
-import IconButton from "@mui/material/IconButton";
-import CloseIcon from "@mui/icons-material/Close";
-import Button from "@mui/material/Button";
-import LinearProgress from "@mui/material/LinearProgress";
+import Card from "@material-ui/core/Card";
+import Tabs from "@material-ui/core/Tabs";
+import Tab from "@material-ui/core/Tab";
+import CardContent from "@material-ui/core/CardContent";
+import Snackbar from "@material-ui/core/Snackbar";
+import SnackbarContent from "@material-ui/core/SnackbarContent";
+import TextField from "@material-ui/core/TextField";
+import Switch from "@material-ui/core/Switch";
+import Typography from "@material-ui/core/Typography";
+import Icon from "@material-ui/core/Icon";
+import IconButton from "@material-ui/core/IconButton";
+import CloseIcon from "@material-ui/icons/Close";
+import Button from "@material-ui/core/Button";
+import LinearProgress from "@material-ui/core/LinearProgress";
 import clsx from "classnames";
 import { Title } from "react-admin";
 import theme from "../utils/sample-theme";
@@ -233,7 +233,6 @@ class ConfigurationEditor extends Component {
     const inputType = descriptor.type === "number" ? "number" : "text";
     return (
       <TextField
-        variant="standard"
         key={displayPath}
         id={displayPath}
         label={descriptor.name || displayPath}
@@ -243,7 +242,8 @@ class ConfigurationEditor extends Component {
         helperText={descriptor.description}
         type={inputType}
         fullWidth
-        margin="normal" />
+        margin="normal"
+      />
     );
   }
 
@@ -265,7 +265,6 @@ class ConfigurationEditor extends Component {
     return (
       <div className={this.props.classes.longInput} key={displayPath}>
         <TextField
-          variant="standard"
           multiline
           rows={20}
           key={displayPath}
@@ -301,7 +300,8 @@ class ConfigurationEditor extends Component {
           helperText={description}
           type="text"
           fullWidth
-          margin="normal" />
+          margin="normal"
+        />
 
         {isTheme && (
           <div className="flex-end">
@@ -622,7 +622,7 @@ class ConfigurationEditor extends Component {
                 key="close"
                 color="inherit"
                 onClick={() => this.setState({ saved: false, warningMessage: null })}
-                size="large">
+              >
                 <CloseIcon className={this.props.classes.icon} />
               </IconButton>
             ]}
@@ -633,32 +633,32 @@ class ConfigurationEditor extends Component {
   }
 }
 
-class ServiceEditorComp extends ConfigurationEditor {
-  getConfig(service) {
-    return getEditableConfig(service);
-  }
-  putConfig(service, config) {
-    return putConfig(service, config);
-  }
-}
-
-const ServiceEditor = withStyles(ServiceEditorComp ,styles);
-
-class AppConfigEditorComp extends ConfigurationEditor {
-  constructor(props) {
-    super(props);
-    if (store.state && store.state.credentials && store.state.credentials.token) {
-      AppConfigUtils.setAuthToken(store.state.credentials.token);
+const ServiceEditor = withStyles(styles)(
+  class ServiceEditor extends ConfigurationEditor {
+    getConfig(service) {
+      return getEditableConfig(service);
+    }
+    putConfig(service, config) {
+      return putConfig(service, config);
     }
   }
-  getConfig() {
-    return AppConfigUtils.getConfig();
-  }
-  putConfig(service, config) {
-    return AppConfigUtils.putConfig(config);
-  }
-}
+);
 
-const AppConfigEditor = withStyles(AppConfigEditorComp ,styles);
+const AppConfigEditor = withStyles(styles)(
+  class AppConfigEditor extends ConfigurationEditor {
+    constructor(props) {
+      super(props);
+      if (store.state && store.state.credentials && store.state.credentials.token) {
+        AppConfigUtils.setAuthToken(store.state.credentials.token);
+      }
+    }
+    getConfig() {
+      return AppConfigUtils.getConfig();
+    }
+    putConfig(service, config) {
+      return AppConfigUtils.putConfig(config);
+    }
+  }
+);
 
 export { ServiceEditor, AppConfigEditor };

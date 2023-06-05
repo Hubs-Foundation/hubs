@@ -1,6 +1,6 @@
 /* eslint-disable @calm/react-intl/missing-formatted-message */
 import React from "react";
-import { withStyles } from 'tss-react/mui';
+import { withStyles } from "@material-ui/core/styles";
 import {
   Create,
   Datagrid,
@@ -26,7 +26,7 @@ const IdentityFilter = props => (
   </Filter>
 );
 
-export const IdentityList = withStyles(props => (
+export const IdentityList = withStyles(styles)(props => (
   <List {...props} filters={<IdentityFilter />}>
     <Datagrid>
       <DateField source="inserted_at" />
@@ -38,7 +38,7 @@ export const IdentityList = withStyles(props => (
       <EditButton />
     </Datagrid>
   </List>
-), styles);
+));
 
 export const IdentityEdit = props => (
   <Edit {...props}>

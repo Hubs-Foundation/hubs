@@ -20,24 +20,17 @@
     "test": "npm run lint"
   },
   "dependencies": {
-    "@emotion/react": "^11.11.0",
-    "@emotion/styled": "^11.11.0",
     "@iarna/toml": "^2.2.3",
     "@mozilla/lilypad-ui": "^1.8.2",
-    "@mui/icons-material": "^5.11.16",
-    "@mui/material": "^5.13.2",
     "aframe": "github:mozillareality/aframe#hubs/master",
     "bitecs": "github:mozilla/bitECS#hubs-patches",
     "classnames": "^2.2.5",
     "hubs": "file:..",
-    "ra-core": "^4.11.0",
     "react": "^18.2.0",
     "react-admin": "^4.10.3",
     "react-dom": "^18.2.0",
     "react-intl": "^6.4.2",
-    "react-redux": "^8.0.5",
-    "three": "github:mozillareality/three.js#hubs-patches-141",
-    "tss-react": "^4.8.4"
+    "three": "github:mozillareality/three.js#hubs-patches-141"
   },
   "devDependencies": {
     "@babel/core": "^7.18.9",

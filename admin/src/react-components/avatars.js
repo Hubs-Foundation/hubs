@@ -19,7 +19,7 @@ import {
   BooleanField,
   Filter
 } from "react-admin";
-import { withStyles } from 'tss-react/mui';
+import { withStyles } from "@material-ui/core/styles";
 
 // Quite ugly but simplest way to have AvatarPreview work is to import aframe.
 // We can technically untangle the dependencies for this, but doesn't seem worth it for admin.
@@ -60,12 +60,12 @@ const styles = {
   }
 };
 
-const Preview = withStyles(({ record, classes, source = "avatar_sid" }) => (
+const Preview = withStyles(styles)(({ record, classes, source = "avatar_sid" }) => (
   <AvatarPreview
     className={classes.preview}
     avatarGltfUrl={getReticulumFetchUrl(`/api/v1/avatars/${record[source]}/avatar.gltf?v=${record.updated_at}`)}
   />
-), styles);
+));
 
 const rowStyle = record => ({
   opacity: record.state === "removed" ? 0.3 : 1

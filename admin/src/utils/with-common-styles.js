@@ -1,4 +1,4 @@
-import { blue, green, amber } from "@mui/material/colors";
+import { blue, green, amber } from "@material-ui/core/colors";
 
 const getCommon = theme => ({
   container: {
