@@ -132,6 +132,7 @@ import { createElementEntity } from "./utils/jsx-entity";
 import { setInitialNetworkedData } from "./utils/assign-network-ids";
 /** @jsx createElementEntity */ createElementEntity;
 
+// eslint-disable-next-line react/no-unknown-property
 AFRAME.GLTFModelPlus.registerComponent("media-frame", "media-frame", (el, _componentName, componentData) => {
   const eid = renderAsEntity(APP.world, <entity mediaFrame={componentData} />);
 

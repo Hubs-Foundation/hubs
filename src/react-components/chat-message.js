@@ -50,6 +50,8 @@ function renderChatMessage(body, from, allowEmojiRender) {
 
   const EntryDom = ({ callback }) => (
     <div
+    // callback is passed in here as part of React 18 createRoot method.
+    // eslint-disable-next-line react/no-unknown-property
       callback={callback}
       className={classNames({
         [styles.presenceLogEntry]: !isEmoji,
@@ -60,6 +62,11 @@ function renderChatMessage(body, from, allowEmojiRender) {
       {content}
     </div>
   );
+
+  EntryDom.propTypes = {
+    callback: PropTypes.func
+  };
+  
 
   return new Promise((resolve, reject) => {
     const root = createRoot(el);
