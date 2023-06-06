@@ -148,6 +148,7 @@ export function videoTextureSystem(world: HubsWorld) {
     }
 
     camera.layers.enable(Layers.CAMERA_LAYER_THIRD_PERSON_ONLY);
+    camera.layers.enable(Layers.CAMERA_LAYER_FX_MASK);
 
     const resolution = VideoTextureSource.resolution[eid];
     camera.aspect = resolution[0] / resolution[1];

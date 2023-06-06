@@ -183,6 +183,10 @@ export const MediaVideo = defineComponent({
   autoPlay: Types.ui8,
   ratio: Types.f32
 });
+/**
+ * @type {Map<EntityId, HTMLVideoElement}>}
+ */
+export const MediaVideoData = new Map();
 export const MixerAnimatableInitialize = defineComponent({});
 export const MixerAnimatable = defineComponent({});
 /**
@@ -341,3 +345,4 @@ export const LinearScale = defineComponent({
   targetY: Types.f32,
   targetZ: Types.f32
 });
+export const Quack = defineComponent();

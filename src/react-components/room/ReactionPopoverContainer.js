@@ -3,13 +3,7 @@ import PropTypes from "prop-types";
 import { useState, useEffect } from "react";
 import { ReactionPopoverButton } from "./ReactionPopover";
 import { spawnEmojiInFrontOfUser, emojis } from "../../components/emoji";
-import { defineMessage, defineMessages, useIntl } from "react-intl";
-import { ToolTip } from "@mozilla/lilypad-ui";
-
-const reactTooltipDescription = defineMessage({
-  id: "react-tooltip.description",
-  defaultMessage: "Reactions"
-});
+import { defineMessages, useIntl } from "react-intl";
 
 const emojiLabels = defineMessages({
   smile: { id: "reaction-popover.emoji-label.smile", defaultMessage: "Smile" },
@@ -38,7 +32,6 @@ function usePresence(scene, initialPresence) {
 export function ReactionPopoverContainer({ scene, initialPresence }) {
   const intl = useIntl();
   const presence = usePresence(scene, initialPresence);
-  const description = intl.formatMessage(reactTooltipDescription);
 
   const items = emojis.map(emoji => ({
     src: emoji.particleEmitterConfig.src,
@@ -55,11 +48,7 @@ export function ReactionPopoverContainer({ scene, initialPresence }) {
     }
   }, [presence]);
 
-  return (
-    <ToolTip description={description}>
-      <ReactionPopoverButton items={items} presence={presence} onToggleHandRaised={onToggleHandRaised} />
-    </ToolTip>
-  );
+  return <ReactionPopoverButton items={items} presence={presence} onToggleHandRaised={onToggleHandRaised} />;
 }
 
 ReactionPopoverContainer.propTypes = {

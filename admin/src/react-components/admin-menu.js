@@ -18,7 +18,7 @@ import SettingsIcon from "@material-ui/icons/Settings";
 import Collapse from "@material-ui/core/Collapse";
 import { getServiceDisplayName } from "../utils/ita";
 import configs from "../utils/configs";
-import { hasPaidFeature } from "../utils/feature_flags";
+import { hasPaidFeature, isBrandingDisabled } from "../utils/feature_flags";
 import HubsLogo from "../assets/images/hubs_logo.png";
 
 const mapStateToProps = state => ({
@@ -187,7 +187,7 @@ class Menu extends Component {
                 <ListItemText className={this.props.classes.text} primary="App Settings" />
               </ListItem>
 
-              {hasPaidFeature() && (
+              {hasPaidFeature() && !isBrandingDisabled() && (
                 <>
                   {/* IMAGE SETTING  */}
                   <ListItem

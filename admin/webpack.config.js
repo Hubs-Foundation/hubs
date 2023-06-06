@@ -295,6 +295,7 @@ module.exports = (env, argv) => {
       new webpack.DefinePlugin({
         "process.browser": true,
         "process.env": JSON.stringify({
+          DISABLE_BRANDING: process.env.DISABLE_BRANDING,
           NODE_ENV: argv.mode,
           BUILD_VERSION: process.env.BUILD_VERSION,
           CONFIGURABLE_SERVICES: process.env.CONFIGURABLE_SERVICES,
