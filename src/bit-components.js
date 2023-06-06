@@ -167,9 +167,14 @@ export const SceneLoader = defineComponent({ src: Types.ui32 });
 SceneLoader.src[$isStringType] = true;
 
 export const MediaImage = defineComponent({
-  cacheKey: Types.ui32
+  cacheKey: Types.ui32,
+  projection: Types.ui8,
+  alphaMode: Types.ui8,
+  alphaCutoff: Types.f32
 });
 MediaImage.cacheKey[$isStringType] = true;
+MediaImage.projection[$isStringType] = true;
+MediaImage.alphaMode[$isStringType] = true;
 
 export const NetworkedPDF = defineComponent({
   pageNumber: Types.ui8

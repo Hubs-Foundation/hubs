@@ -71,7 +71,7 @@ const loaderForMediaType = {
     world: HubsWorld,
     eid: EntityID,
     { accessibleUrl, contentType }: { accessibleUrl: string, contentType: string }
-  ) => loadImage(world, accessibleUrl, contentType),
+  ) => loadImage(world, eid, accessibleUrl, contentType),
   [MediaType.VIDEO]: (
     world: HubsWorld,
     eid: EntityID,
