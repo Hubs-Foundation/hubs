@@ -8,9 +8,12 @@ import { FormattedMessage } from "react-intl";
 
 export function AvatarSettingsContent({
   displayName,
+  pronouns,
   displayNameInputRef,
+  pronounsInputRef,
   disableDisplayNameInput,
   onChangeDisplayName,
+  onChangePronouns,
   avatarPreview,
   displayNamePattern,
   onChangeAvatar,
@@ -34,6 +37,14 @@ export function AvatarSettingsContent({
         }
         ref={displayNameInputRef}
       />
+      <TextInputField
+        label={<FormattedMessage id="avatar-settings-content.pronouns-label" defaultMessage="Pronouns" />}
+        value={pronouns}
+        // pattern={displayNamePattern}
+        spellCheck="false"
+        onChange={onChangePronouns}
+        ref={pronounsInputRef}
+      />
       <div className={styles.avatarPreviewContainer}>
         {avatarPreview || <div />}
         <Button type="button" preset="basic" onClick={onChangeAvatar}>
@@ -48,10 +59,13 @@ export function AvatarSettingsContent({
 AvatarSettingsContent.propTypes = {
   className: PropTypes.string,
   displayName: PropTypes.string,
+  pronounds: PropTypes.string,
   displayNameInputRef: PropTypes.func,
+  pronounsInputRef: PropTypes.func,
   disableDisplayNameInput: PropTypes.bool,
   displayNamePattern: PropTypes.string,
   onChangeDisplayName: PropTypes.func,
+  onChangePronouns: PropTypes.func,
   avatarPreview: PropTypes.node,
   onChangeAvatar: PropTypes.func
 };

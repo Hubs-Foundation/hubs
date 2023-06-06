@@ -65,6 +65,7 @@ export const SCHEMA = {
       properties: {
         displayName: { type: "string", pattern: "^[A-Za-z0-9_~ -]{3,32}$" },
         avatarId: { type: "string" },
+        pronouns: { type: "string" },
         // personalAvatarId is obsolete, but we need it here for backwards compatibility.
         personalAvatarId: { type: "string" }
       }

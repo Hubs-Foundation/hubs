@@ -28,7 +28,8 @@ export default class ProfileEntryPanel extends Component {
   state = {
     avatarId: null,
     displayName: null,
-    avatar: null
+    avatar: null,
+    pronouns: null
   };
 
   constructor(props) {
@@ -42,8 +43,8 @@ export default class ProfileEntryPanel extends Component {
   }
 
   getStateFromProfile = () => {
-    const { displayName, avatarId } = this.props.store.state.profile;
-    return { displayName, avatarId };
+    const { displayName, avatarId, pronouns } = this.props.store.state.profile;
+    return { displayName, avatarId, pronouns };
   };
 
   storeUpdated = () => this.setState(this.getStateFromProfile());
@@ -51,18 +52,24 @@ export default class ProfileEntryPanel extends Component {
   saveStateAndFinish = e => {
     e && e.preventDefault();
 
-    const { displayName } = this.props.store.state.profile;
-    const { hasChangedName } = this.props.store.state.activity;
+    const { displayName, pronouns } = this.props.store.state.profile;
+    const { hasChangedName, hasChangedPronouns } = this.props.store.state.activity;
 
-    const hasChangedNowOrPreviously = hasChangedName || this.state.displayName !== displayName;
+    const hasChangedNowOrPreviously =
+      hasChangedName ||
+      hasChangedPronouns ||
+      this.state.displayName !== displayName ||
+      this.state.pronouns !== pronouns;
     this.props.store.update({
       activity: {
         hasChangedName: hasChangedNowOrPreviously,
+        hasChangedPronouns: hasChangedNowOrPreviously,
         hasAcceptedProfile: true
       },
       profile: {
         displayName: this.state.displayName,
-        avatarId: this.state.avatarId
+        avatarId: this.state.avatarId,
+        pronouns: this.state.pronouns
       }
     });
     this.props.finished();
@@ -90,6 +97,12 @@ export default class ProfileEntryPanel extends Component {
       this.nameInput.addEventListener("keypress", this.stopPropagation);
       this.nameInput.addEventListener("keyup", this.stopPropagation);
     }
+    if (this.pronounsInput) {
+      // stop propagation so that avatar doesn't move when wasd'ing during text input.
+      this.pronounsInput.addEventListener("keydown", this.stopPropagation);
+      this.pronounsInput.addEventListener("keypress", this.stopPropagation);
+      this.pronounsInput.addEventListener("keyup", this.stopPropagation);
+    }
     this.scene.addEventListener("action_selected_media_result_entry", this.setAvatarFromMediaResult);
     // This handles editing avatars in the entry_step, since this component remains mounted with the same avatarId
     this.scene.addEventListener("action_avatar_saved", this.refetchAvatar);
@@ -110,6 +123,11 @@ export default class ProfileEntryPanel extends Component {
       this.nameInput.removeEventListener("keypress", this.stopPropagation);
       this.nameInput.removeEventListener("keyup", this.stopPropagation);
     }
+    if (this.pronounsInput) {
+      this.pronounsInput.removeEventListener("keydown", this.stopPropagation);
+      this.pronounsInput.removeEventListener("keypress", this.stopPropagation);
+      this.pronounsInput.removeEventListener("keyup", this.stopPropagation);
+    }
     this.scene.removeEventListener("action_selected_media_result_entry", this.setAvatarFromMediaResult);
     this.scene.removeEventListener("action_avatar_saved", this.refetchAvatar);
   }
@@ -123,10 +141,12 @@ export default class ProfileEntryPanel extends Component {
   render() {
     const avatarSettingsProps = {
       displayNameInputRef: inp => (this.nameInput = inp),
+      pronounsInputRef: inp => (this.pronounsInput = inp),
       disableDisplayNameInput: !!this.props.displayNameOverride,
       displayName: this.props.displayNameOverride ? this.props.displayNameOverride : this.state.displayName,
       displayNamePattern: this.props.store.schema.definitions.profile.properties.displayName.pattern,
       onChangeDisplayName: e => this.setState({ displayName: e.target.value }),
+      onChangePronouns: e => this.setState({ pronouns: e.target.value }),
       avatarPreview: <AvatarPreview avatarGltfUrl={this.state.avatar && this.state.avatar.gltf_url} />,
       onChangeAvatar: e => {
         e.preventDefault();
