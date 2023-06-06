@@ -10,9 +10,7 @@ import { Texture } from "three";
 export const VIDEO_FLAGS = {
   AUTOPLAY: 1 << 0,
   LOOP: 1 << 1,
-  CONTROLS: 1 << 2,
-  PROJECTION_FLAT: 1 << 3,
-  PROJECTION_EQUIRECT: 1 << 4
+  CONTROLS: 1 << 2
 };
 
 export interface VideoParams {
@@ -34,13 +32,17 @@ export function inflateVideo(world: HubsWorld, eid: EntityID, params: VideoParam
   addObject3DComponent(world, eid, mesh);
   addComponent(world, MediaVideo, eid);
 
-  autoPlay && (MediaVideo.flags[eid] |= VIDEO_FLAGS.AUTOPLAY);
-  loop && (MediaVideo.flags[eid] |= VIDEO_FLAGS.LOOP);
-  controls && (MediaVideo.flags[eid] |= VIDEO_FLAGS.CONTROLS);
-  if (projection === ProjectionMode.SPHERE_EQUIRECTANGULAR) {
-    MediaVideo.flags[eid] |= VIDEO_FLAGS.PROJECTION_EQUIRECT;
-  } else {
-    MediaVideo.flags[eid] |= VIDEO_FLAGS.PROJECTION_FLAT;
+  if (autoPlay) {
+    MediaVideo.flags[eid] |= VIDEO_FLAGS.AUTOPLAY;
+  }
+  if (loop) {
+    MediaVideo.flags[eid] |= VIDEO_FLAGS.LOOP;
+  }
+  if (controls) {
+    MediaVideo.flags[eid] |= VIDEO_FLAGS.CONTROLS;
+  }
+  if (projection) {
+    MediaVideo.projection[eid] = APP.getSid(projection);
   }
 
   MediaVideo.ratio[eid] = ratio;

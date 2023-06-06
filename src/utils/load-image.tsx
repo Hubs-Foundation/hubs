@@ -14,7 +14,7 @@ export function* createImageDef(world: HubsWorld, url: string, contentType: stri
   const { texture, ratio, cacheKey }: { texture: Texture; ratio: number; cacheKey: string } =
     yield loadTextureCancellable(url, 1, contentType);
 
-  // TODO it would be nice if we could be less agressive with transparency here.
+  // TODO it would be nice if we could be less aggressive with transparency here.
   // Doing so requires inspecting the raw file data upstream of here and passing
   // that info through somehow which feels tricky.
   let alphaMode: AlphaMode = AlphaMode.Blend;
@@ -39,12 +39,18 @@ export function* loadImage(world: HubsWorld, eid: EntityID, url: string, content
 
   if (MediaImage.projection[eid]) {
     imageDef.projection = APP.getString(MediaImage.projection[eid]) as ProjectionMode;
+  } else {
+    imageDef.projection = ProjectionMode.FLAT;
   }
   if (MediaImage.alphaMode[eid]) {
     imageDef.alphaMode = APP.getString(MediaImage.alphaMode[eid]) as AlphaMode;
+  } else {
+    imageDef.alphaMode = AlphaMode.Opaque;
   }
   if (MediaImage.alphaCutoff[eid]) {
     imageDef.alphaCutoff = MediaImage.alphaCutoff[eid];
+  } else {
+    imageDef.alphaCutoff = 0.5;
   }
 
   return renderAsEntity(world, <entity name="Image" image={imageDef} />);

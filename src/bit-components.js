@@ -186,8 +186,10 @@ MediaPDF.map = new Map();
 
 export const MediaVideo = defineComponent({
   ratio: Types.f32,
-  flags: Types.ui8
+  flags: Types.ui8,
+  projection: Types.ui8
 });
+MediaVideo.projection[$isStringType] = true;
 /**
  * @type {Map<EntityId, HTMLVideoElement}>}
  */

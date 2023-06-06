@@ -21,7 +21,7 @@ export function inflateImageLoader(world: HubsWorld, eid: number, params: ImageL
   });
 
   const { projection, alphaMode, alphaCutoff } = params;
-  MediaImage.projection[eid] = APP.getSid(projection ? projection : ProjectionMode.FLAT);
-  MediaImage.alphaMode[eid] = APP.getSid(alphaMode ? alphaMode : AlphaMode.Opaque);
-  alphaCutoff && (MediaImage.alphaCutoff[eid] = alphaCutoff);
+  MediaImage.projection[eid] = APP.getSid(projection !== undefined ? projection : ProjectionMode.FLAT);
+  MediaImage.alphaMode[eid] = APP.getSid(alphaMode !== undefined ? alphaMode : AlphaMode.Opaque);
+  MediaImage.alphaCutoff[eid] = alphaCutoff !== undefined ? alphaCutoff : 0.5;
 }

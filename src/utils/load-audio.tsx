@@ -13,15 +13,20 @@ export function* loadAudio(world: HubsWorld, eid: EntityID, url: string) {
   let loop = true;
   let autoPlay = true;
   let controls = true;
-  let projection = ProjectionMode.FLAT;
   if (MediaVideo.flags[eid]) {
-    autoPlay = (MediaVideo.flags[eid] & VIDEO_FLAGS.AUTOPLAY) !== 0;
     loop = (MediaVideo.flags[eid] & VIDEO_FLAGS.LOOP) !== 0;
+    autoPlay = (MediaVideo.flags[eid] & VIDEO_FLAGS.AUTOPLAY) !== 0;
     controls = (MediaVideo.flags[eid] & VIDEO_FLAGS.CONTROLS) !== 0;
-    projection =
-      (MediaVideo.flags[eid] & VIDEO_FLAGS.PROJECTION_EQUIRECT) !== 0
-        ? ProjectionMode.SPHERE_EQUIRECTANGULAR
-        : ProjectionMode.FLAT;
+  } else {
+    MediaVideo.flags[eid] |= VIDEO_FLAGS.AUTOPLAY;
+    MediaVideo.flags[eid] |= VIDEO_FLAGS.LOOP;
+    MediaVideo.flags[eid] |= VIDEO_FLAGS.CONTROLS;
+  }
+  let projection = ProjectionMode.FLAT;
+  if (MediaVideo.projection[eid]) {
+    projection = APP.getString(MediaVideo.projection[eid]) as ProjectionMode;
+  } else {
+    MediaVideo.projection[eid] = APP.getSid(ProjectionMode.FLAT);
   }
 
   const { texture, ratio, video }: { texture: HubsVideoTexture; ratio: number; video: HTMLVideoElement } =
