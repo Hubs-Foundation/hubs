@@ -272,7 +272,7 @@ export interface JSXComponentData extends ComponentData {
     texture: Texture;
     ratio: number;
     projection: ProjectionMode;
-    alphaMode: typeof AlphaMode.Blend | typeof AlphaMode.Mask | typeof AlphaMode.Opaque;
+    alphaMode: AlphaMode.Blend | AlphaMode.Mask | AlphaMode.Opaque;
     cacheKey: string;
   };
   video?: VideoParams;
