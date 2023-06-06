@@ -22,12 +22,8 @@ export function inflateVideoLoader(world: HubsWorld, eid: number, params: VideoL
   });
 
   const { autoPlay, controls, loop, projection } = params;
-  autoPlay && (MediaVideo.flags[eid] |= VIDEO_FLAGS.AUTOPLAY);
-  loop && (MediaVideo.flags[eid] |= VIDEO_FLAGS.LOOP);
-  controls && (MediaVideo.flags[eid] |= VIDEO_FLAGS.CONTROLS);
-  if (projection === ProjectionMode.SPHERE_EQUIRECTANGULAR) {
-    MediaVideo.flags[eid] |= VIDEO_FLAGS.PROJECTION_EQUIRECT;
-  } else {
-    MediaVideo.flags[eid] |= VIDEO_FLAGS.PROJECTION_FLAT;
-  }
+  autoPlay !== false && (MediaVideo.flags[eid] |= VIDEO_FLAGS.AUTOPLAY);
+  loop !== false && (MediaVideo.flags[eid] |= VIDEO_FLAGS.LOOP);
+  controls !== false && (MediaVideo.flags[eid] |= VIDEO_FLAGS.CONTROLS);
+  MediaVideo.projection[eid] = APP.getSid(projection != undefined ? projection : ProjectionMode.FLAT);
 }

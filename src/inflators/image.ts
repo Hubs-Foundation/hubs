@@ -7,14 +7,6 @@ import { Texture } from "three";
 import { HubsWorld } from "../app";
 import { EntityID } from "../utils/networking-types";
 
-export const IMAGE_FLAGS = {
-  ALPHA_MODE_OPAQUE: 1 << 0,
-  ALPHA_MODE_BLEND: 1 << 1,
-  ALPHA_MODE_MASK: 1 << 2,
-  PROJECTION_FLAT: 1 << 3,
-  PROJECTION_EQUIRECT: 1 << 4
-};
-
 export interface ImageParams {
   cacheKey: string;
   texture: Texture;
@@ -32,6 +24,17 @@ export function inflateImage(world: HubsWorld, eid: EntityID, params: ImageParam
       : createImageMesh(texture, ratio, alphaMode, alphaCutoff);
   addObject3DComponent(world, eid, mesh);
   addComponent(world, MediaImage, eid);
+
+  if (projection) {
+    MediaImage.projection[eid] = APP.getSid(projection);
+  }
+  if (alphaMode) {
+    MediaImage.alphaMode[eid] = APP.getSid(alphaMode);
+  }
+  if (alphaCutoff) {
+    MediaImage.alphaCutoff[eid] = alphaCutoff;
+  }
+
   MediaImage.cacheKey[eid] = APP.getSid(cacheKey);
   return eid;
 }
