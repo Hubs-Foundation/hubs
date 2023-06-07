@@ -87,8 +87,9 @@ function getPersonName(person, intl) {
     id: "people-sidebar.person-name.you",
     defaultMessage: "You"
   });
+  const suffix = person.isMe ? `(${you})` : person.profile?.pronouns ? `(${person.profile.pronouns})` : "";
 
-  return person.profile.displayName + (person.isMe ? ` (${you})` : "");
+  return `${person.profile.displayName} ${suffix}`;
 }
 
 export function PeopleSidebar({
@@ -131,7 +132,7 @@ export function PeopleSidebar({
           filteredPeople.map(person => {
             const DeviceIcon = getDeviceIconComponent(person.context);
             const VoiceIcon = getVoiceIconComponent(person.micPresence);
-
+            console.log(person);
             return (
               <ButtonListItem
                 className={styles.person}

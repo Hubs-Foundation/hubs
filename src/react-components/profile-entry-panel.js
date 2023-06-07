@@ -140,6 +140,7 @@ export default class ProfileEntryPanel extends Component {
       pronounsInputRef: inp => (this.pronounsInput = inp),
       disableDisplayNameInput: !!this.props.displayNameOverride,
       displayName: this.props.displayNameOverride ? this.props.displayNameOverride : this.state.displayName,
+      pronouns: this.state.pronouns,
       displayNamePattern: this.props.store.schema.definitions.profile.properties.displayName.pattern,
       pronounsPattern: this.props.store.schema.definitions.profile.properties.pronouns.pattern,
       onChangeDisplayName: e => this.setState({ displayName: e.target.value }),
