@@ -53,17 +53,13 @@ export default class ProfileEntryPanel extends Component {
     e && e.preventDefault();
 
     const { displayName, pronouns } = this.props.store.state.profile;
-    const { hasChangedName, hasChangedPronouns } = this.props.store.state.activity;
+    const { hasChangedNameOrPronouns } = this.props.store.state.activity;
 
     const hasChangedNowOrPreviously =
-      hasChangedName ||
-      hasChangedPronouns ||
-      this.state.displayName !== displayName ||
-      this.state.pronouns !== pronouns;
+      hasChangedNameOrPronouns || this.state.displayName !== displayName || this.state.pronouns !== pronouns;
     this.props.store.update({
       activity: {
-        hasChangedName: hasChangedNowOrPreviously,
-        hasChangedPronouns: hasChangedNowOrPreviously,
+        hasChangedNameOrPronouns: hasChangedNowOrPreviously,
         hasAcceptedProfile: true
       },
       profile: {
@@ -145,6 +141,7 @@ export default class ProfileEntryPanel extends Component {
       disableDisplayNameInput: !!this.props.displayNameOverride,
       displayName: this.props.displayNameOverride ? this.props.displayNameOverride : this.state.displayName,
       displayNamePattern: this.props.store.schema.definitions.profile.properties.displayName.pattern,
+      pronounsPattern: this.props.store.schema.definitions.profile.properties.pronouns.pattern,
       onChangeDisplayName: e => this.setState({ displayName: e.target.value }),
       onChangePronouns: e => this.setState({ pronouns: e.target.value }),
       avatarPreview: <AvatarPreview avatarGltfUrl={this.state.avatar && this.state.avatar.gltf_url} />,
@@ -156,7 +153,7 @@ export default class ProfileEntryPanel extends Component {
       onClose: this.props.onClose,
       onBack: this.props.onBack
     };
-
+    console.log(this.props.containerType, this.props);
     if (this.props.containerType === "sidebar") {
       return <AvatarSettingsSidebar {...avatarSettingsProps} showBackButton={this.props.showBackButton} />;
     }
