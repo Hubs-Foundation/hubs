@@ -87,17 +87,11 @@ export default class ProfileEntryPanel extends Component {
   };
 
   componentDidMount() {
-    if (this.nameInput) {
+    if (this.nameInput || this.pronounsInput) {
       // stop propagation so that avatar doesn't move when wasd'ing during text input.
       this.nameInput.addEventListener("keydown", this.stopPropagation);
       this.nameInput.addEventListener("keypress", this.stopPropagation);
       this.nameInput.addEventListener("keyup", this.stopPropagation);
-    }
-    if (this.pronounsInput) {
-      // stop propagation so that avatar doesn't move when wasd'ing during text input.
-      this.pronounsInput.addEventListener("keydown", this.stopPropagation);
-      this.pronounsInput.addEventListener("keypress", this.stopPropagation);
-      this.pronounsInput.addEventListener("keyup", this.stopPropagation);
     }
     this.scene.addEventListener("action_selected_media_result_entry", this.setAvatarFromMediaResult);
     // This handles editing avatars in the entry_step, since this component remains mounted with the same avatarId
@@ -114,15 +108,10 @@ export default class ProfileEntryPanel extends Component {
 
   componentWillUnmount() {
     this.props.store.removeEventListener("statechanged", this.storeUpdated);
-    if (this.nameInput) {
+    if (this.nameInput || this.pronounsInput) {
       this.nameInput.removeEventListener("keydown", this.stopPropagation);
       this.nameInput.removeEventListener("keypress", this.stopPropagation);
       this.nameInput.removeEventListener("keyup", this.stopPropagation);
-    }
-    if (this.pronounsInput) {
-      this.pronounsInput.removeEventListener("keydown", this.stopPropagation);
-      this.pronounsInput.removeEventListener("keypress", this.stopPropagation);
-      this.pronounsInput.removeEventListener("keyup", this.stopPropagation);
     }
     this.scene.removeEventListener("action_selected_media_result_entry", this.setAvatarFromMediaResult);
     this.scene.removeEventListener("action_avatar_saved", this.refetchAvatar);
@@ -154,7 +143,7 @@ export default class ProfileEntryPanel extends Component {
       onClose: this.props.onClose,
       onBack: this.props.onBack
     };
-    console.log(this.props.containerType, this.props);
+
     if (this.props.containerType === "sidebar") {
       return <AvatarSettingsSidebar {...avatarSettingsProps} showBackButton={this.props.showBackButton} />;
     }
