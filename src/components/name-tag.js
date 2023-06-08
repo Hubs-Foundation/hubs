@@ -70,6 +70,7 @@ AFRAME.registerComponent("name-tag", {
     this.recordingBadge = this.el.querySelector(".recordingBadge").object3D;
     this.modBadge = this.el.querySelector(".modBadge").object3D;
     this.nametagText = this.el.querySelector(".nametag-text").object3D;
+    this.pronounsText = this.el.querySelector(".pronouns-text").object3D;
 
     this.handRaised = new THREE.Mesh(handRaisedGeometry, handRaisedMaterial);
     this.handRaised.position.set(0, -0.3, 0.001);
@@ -207,6 +208,7 @@ AFRAME.registerComponent("name-tag", {
     this.isHandRaised = !!presenceMeta.hand_raised;
     if (this.isAvatarReady) {
       this.updateDisplayName();
+      this.updatePronouns();
       this.updateHandRaised();
       this.resizeNameTag();
     }
@@ -242,6 +244,40 @@ AFRAME.registerComponent("name-tag", {
     }
   },
 
+  updatePronouns() {
+    console.log(this.pronouns);
+    if (this.pronouns && this.pronouns !== this.prevPronouns) {
+      console.log(this.nametagBackground, this.pronounsText);
+      // this.nametagBackground.el.setAttribute(
+      //   "slice9",
+      //   "width: 1; height: 0.7; left: 64; top: 64; right: 66; bottom: 66; opacity: 0.5; alphaTest: 0.1; src: nametag;"
+      // );
+      // this.nametagStatusBorder.el.setAttribute(
+      //   "slice9",
+      //   "width: 0.45; height: 0.7; left: 64; top: 64; right: 66; bottom: 66; transparent: false; alphaTest: 0.1; src: nametag-border;"
+      // );
+      console.log(this.nametagBackground, this.pronounsText);
+      this.pronounsText.el.addEventListener(
+        "text-updated",
+        () => {
+          if (this.pronounsText.el) {
+            this.pronounsText.el.components["text"].getSize(this.size);
+            this.size.x = Math.max(this.size.x, NAMETAG_MIN_WIDTH);
+            this.resizeNameTag();
+          }
+        },
+        { once: true }
+      );
+      if (this.pronouns.length > DISPLAY_NAME_LENGTH) {
+        this.pronouns = this.pronouns.slice(0, DISPLAY_NAME_LENGTH).concat("...");
+      }
+      this.pronounsText.el.setAttribute("text", {
+        value: this.pronouns
+      });
+      this.prevPronouns = this.pronouns;
+    }
+  },
+
   onModelLoading() {
     this.model = null;
     this.isAvatarReady = false;
@@ -269,6 +305,7 @@ AFRAME.registerComponent("name-tag", {
     this.isAvatarReady = true;
 
     this.updateDisplayName();
+    this.updatePronouns();
     this.updateHandRaised();
     this.resizeNameTag();
   },
