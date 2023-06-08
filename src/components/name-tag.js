@@ -40,6 +40,7 @@ AFRAME.registerComponent("name-tag", {
   init() {
     this.store = window.APP.store;
     this.displayName = null;
+    this.pronouns = null;
     this.identityName = null;
     this.isTalking = false;
     this.isTyping = false;
@@ -198,6 +199,7 @@ AFRAME.registerComponent("name-tag", {
 
   updateFromPresenceMeta(presenceMeta) {
     this.displayName = presenceMeta.profile.displayName;
+    this.pronouns = presenceMeta.profile.pronouns;
     this.identityName = presenceMeta.profile.identityName;
     this.isRecording = !!(presenceMeta.streaming || presenceMeta.recording);
     this.isOwner = !!(presenceMeta.roles && presenceMeta.roles.owner);
