@@ -43,19 +43,19 @@ const messageBodyDom = (body, from, fromSessionId, onViewProfile, emojiClassName
 
 const bubbleColorRegEx = /^.*\s?(-color=)(#?[0-9a-fA-Z]{6}|[0-9a-fA-Z]{3})\s?.*$/;
 function renderChatMessage(body, from, allowEmojiRender) {
-  const matches = body.match(bubbleColorRegEx);
-  let bubbleColor;
-  if (matches) {
-    matches.shift();
-    bubbleColor = matches[1];
-    body = matches.reduce((acc, cur) => acc.replace(cur, ""), body);
-  }
-
   const { content, emoji, multiline } = messageBodyDom(body, from, null, null, styles.emoji);
   const isEmoji = allowEmojiRender && emoji;
   const el = document.createElement("div");
   el.setAttribute("class", `${styles.presenceLog} ${styles.presenceLogSpawn}`);
   document.body.appendChild(el);
+
+  let bubbleColor;
+  const matches = body.match(bubbleColorRegEx);
+  if (matches) {
+    matches.shift();
+    bubbleColor = matches[1];
+    body = matches.reduce((acc, cur) => acc.replace(cur, ""), body);
+  }
 
   const entryDom = (
     <div
@@ -64,7 +64,7 @@ function renderChatMessage(body, from, allowEmojiRender) {
         [styles.presenceLogEntryOneLine]: !isEmoji && !multiline,
         [styles.presenceLogEmoji]: isEmoji
       })}
-      style={{ backgroundColor: `${bubbleColor}` }}
+      style={bubbleColor && { backgroundColor: `${bubbleColor}` }}
     >
       {content}
     </div>
