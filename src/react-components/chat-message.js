@@ -41,21 +41,21 @@ const messageBodyDom = (body, from, fromSessionId, onViewProfile, emojiClassName
   return { content, multiline, emoji };
 };
 
-const bubbleColorRegEx = /^.*\s?(-color=)(#?[0-9a-fA-Z]{6}|[0-9a-fA-Z]{3})\s?.*$/;
+const bubbleColorRegEx = RegExp("^.*\\n?(-color=)(#?[0-9a-fA-Z]{6}|[0-9a-fA-Z]{3})\\n?.*$", "m");
 function renderChatMessage(body, from, allowEmojiRender) {
-  const { content, emoji, multiline } = messageBodyDom(body, from, null, null, styles.emoji);
-  const isEmoji = allowEmojiRender && emoji;
-  const el = document.createElement("div");
-  el.setAttribute("class", `${styles.presenceLog} ${styles.presenceLogSpawn}`);
-  document.body.appendChild(el);
-
-  let bubbleColor;
   const matches = body.match(bubbleColorRegEx);
+  let bubbleColor;
   if (matches) {
     matches.shift();
     bubbleColor = matches[1];
     body = matches.reduce((acc, cur) => acc.replace(cur, ""), body);
   }
+
+  const { content, emoji, multiline } = messageBodyDom(body, from, null, null, styles.emoji);
+  const isEmoji = allowEmojiRender && emoji;
+  const el = document.createElement("div");
+  el.setAttribute("class", `${styles.presenceLog} ${styles.presenceLogSpawn}`);
+  document.body.appendChild(el);
 
   const entryDom = (
     <div
