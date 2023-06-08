@@ -28,7 +28,7 @@ function TokensRoot() {
   );
 }
 
-const container = document.getElementById("tokens-ui-root");
+const container = document.getElementById("ui-root");
 
 const root = createRoot(container);
 root.render(<TokensRoot />);

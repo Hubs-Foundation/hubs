@@ -32,7 +32,7 @@ function SignInRoot() {
   );
 }
 
-const container = document.getElementById("signin-ui-root");
+const container = document.getElementById("ui-root");
 
 const root = createRoot(container);
 root.render(<SignInRoot />);

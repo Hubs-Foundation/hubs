@@ -132,7 +132,7 @@ function CloudRoot() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  const container = document.getElementById("cloud-ui-root");
+  const container = document.getElementById("ui-root");
 
   const root = createRoot(container);
   root.render(<CloudRoot />);

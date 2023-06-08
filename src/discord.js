@@ -82,7 +82,7 @@ class DiscordPage extends Component {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  const container = document.getElementById("discord-ui-root");
+  const container = document.getElementById("ui-root");
 
   const root = createRoot(container);
   root.render(<DiscordPage />);

@@ -147,7 +147,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const avatarId = qs.get("avatar_id") || document.location.pathname.substring(1).split("/")[1];
   console.log(`Avatar ID: ${avatarId}`);
 
-  const container = document.getElementById("avatar-ui-root");
+  const container = document.getElementById("ui-root");
 
   const root = createRoot(container);
   root.render(

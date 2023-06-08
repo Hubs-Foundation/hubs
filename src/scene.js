@@ -13,7 +13,7 @@ import "./utils/theme";
 import { store } from "./utils/store-instance";
 
 function mountUI(props = {}) {
-  const container = document.getElementById("scene-ui-root");
+  const container = document.getElementById("ui-root");
 
   const root = createRoot(container);
   root.render(

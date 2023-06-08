@@ -111,7 +111,7 @@ class WhatsNew extends Component {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  const container = document.getElementById("whatsnew-ui-root");
+  const container = document.getElementById("ui-root");
 
   const root = createRoot(container);
   root.render(

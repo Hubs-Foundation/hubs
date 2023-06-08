@@ -32,7 +32,7 @@ function VerifyRoot() {
   );
 }
 
-const container = document.getElementById("verify-ui-root");
+const container = document.getElementById("ui-root");
 
 const root = createRoot(container);
 root.render(<VerifyRoot />);
