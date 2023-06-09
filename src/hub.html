@@ -4,29 +4,36 @@
 <head>
     <!-- DO NOT REMOVE/EDIT THIS COMMENT - META_TAGS -->
 
-    <meta charset="utf-8">
+    <meta charset="utf-8" />
     <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no, minimal-ui, viewport-fit=cover">
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no, minimal-ui, viewport-fit=cover" />
 
-    <link rel="icon" sizes="16x16 24x24 32x32 48x48 64x64" href="/favicon.ico">
+    <link rel="icon" sizes="16x16 24x24 32x32 48x48 64x64" href="/favicon.ico" />
     <!-- Web-App Manifest (https://w3c.github.io/manifest/) -->
-    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="manifest" href="/manifest.webmanifest" />
     <!-- iOS (for "Add to Homescreen") -->
-    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes" />
     <title>Room | App by Company</title>
-    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,700;1,400&display=swap"
-        rel="stylesheet">
+        rel="stylesheet" />
     <!-- Google Analytics -->
     <!-- NOTE GA tracking is disabled by default. You'll need to set the GA_TRACKING_ID build variable to enable it. -->
     <script>
         if (navigator.doNotTrack !== "1") {
             (function (i, s, o, g, r, a, m) {
-                i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
-                    (i[r].q = i[r].q || []).push(arguments)
-                }, i[r].l = 1 * new Date(); a = s.createElement(o),
-                    m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
-            })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+                i["GoogleAnalyticsObject"] = r;
+                (i[r] =
+                    i[r] ||
+                    function () {
+                        (i[r].q = i[r].q || []).push(arguments);
+                    }),
+                    (i[r].l = 1 * new Date());
+                (a = s.createElement(o)), (m = s.getElementsByTagName(o)[0]);
+                a.async = 1;
+                a.src = g;
+                m.parentNode.insertBefore(a, m);
+            })(window, document, "script", "https://www.google-analytics.com/analytics.js", "ga");
         }
     </script>
     <style>
@@ -40,7 +47,7 @@
             right: 0;
             bottom: 0;
             top: 0;
-            background: var(--loading-screen-background, radial-gradient(50% 50% at 50% 50%, #FFFFFF 0%, #EEEEEE 100%));
+            background: var(--loading-screen-background, radial-gradient(50% 50% at 50% 50%, #ffffff 0%, #eeeeee 100%));
         }
 
         #preload-overlay.loaded {
@@ -433,8 +440,7 @@
                     body-helper="type: dynamic; mass: 1; collisionFilterGroup: 1; collisionFilterMask: 15;"
                     is-remote-hover-target tags="togglesHoveredActionSet: true; inspectable: true;"
                     set-unowned-body-kinematic set-yxz-order>
-                    <a-entity class="ui interactable-ui">
-                    </a-entity>
+                    <a-entity class="ui interactable-ui"> </a-entity>
                 </a-entity>
             </template>
 
@@ -559,7 +565,6 @@
                     </a-entity>
                 </a-entity>
             </template>
-
 
             <template id="hubs-destination-hover-menu">
                 <a-entity class="ui interactable-ui hover-container" visible="false">
@@ -699,7 +704,6 @@
 
         <a-entity id="drawing-manager" drawing-manager="penSpawner: #pen-spawner"></a-entity>
 
-
         <a-entity id="right-cursor" remote-right
             body-helper="type: kinematic; disableCollision: true; collisionFilterGroup: 8; collisionFilterMask: 0; scaleAutoUpdate: false; activationState: disable_deactivation;"
             shape-helper="type: sphere; sphereRadius: 0.02; fit: manual;">
@@ -792,7 +796,6 @@
                 </a-entity>
             </a-entity>
 
-
             <a-entity id="player-left-controller" class="left-controller" hand-left
                 track-pose="path: /actions/leftHand/matrix" visibility-by-path="path: /actions/leftHand/matrix"
                 hand-controls2="left"
@@ -830,7 +833,6 @@
                 <template data-name="RightHand">
                     <a-entity bone-visibility="updateWhileInvisible: true;" hover-visuals="hand: right;"></a-entity>
                 </template>
-
             </a-entity>
         </a-entity>
 
@@ -876,8 +878,7 @@
                     scale="0.075 0.075 0.075" position="0 0 0.001"></a-entity>
             </a-entity>
         </a-entity>
-        <a-entity id="scene-preview-node">
-        </a-entity>
+        <a-entity id="scene-preview-node"> </a-entity>
     </a-scene>
 
     <div id="ui-root"></div>
