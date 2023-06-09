@@ -245,35 +245,27 @@ AFRAME.registerComponent("name-tag", {
   },
 
   updatePronouns() {
-    console.log(this.pronouns);
-    if (this.pronouns && this.pronouns !== this.prevPronouns) {
-      console.log(this.nametagBackground, this.pronounsText);
-      // this.nametagBackground.el.setAttribute(
-      //   "slice9",
-      //   "width: 1; height: 0.7; left: 64; top: 64; right: 66; bottom: 66; opacity: 0.5; alphaTest: 0.1; src: nametag;"
-      // );
-      // this.nametagStatusBorder.el.setAttribute(
-      //   "slice9",
-      //   "width: 0.45; height: 0.7; left: 64; top: 64; right: 66; bottom: 66; transparent: false; alphaTest: 0.1; src: nametag-border;"
-      // );
-      console.log(this.nametagBackground, this.pronounsText);
+    if ((this.pronouns && this.pronouns !== this.prevPronouns) || (this.prevPronouns && !this.pronouns)) {
       this.pronounsText.el.addEventListener(
         "text-updated",
         () => {
-          if (this.pronounsText.el) {
+          if (this.pronounsText.el && this.nameTagText.el) {
             this.pronounsText.el.components["text"].getSize(this.size);
+            this.nameTagText.el.components["text"].getSize(this.size);
             this.size.x = Math.max(this.size.x, NAMETAG_MIN_WIDTH);
             this.resizeNameTag();
           }
         },
         { once: true }
       );
-      if (this.pronouns.length > DISPLAY_NAME_LENGTH) {
+      if (this.pronouns.length > this.displayName.length && this.pronouns.length > DISPLAY_NAME_LENGTH) {
         this.pronouns = this.pronouns.slice(0, DISPLAY_NAME_LENGTH).concat("...");
       }
+
       this.pronounsText.el.setAttribute("text", {
-        value: this.pronouns
+        value: this.pronouns ? `(${this.pronouns})` : ""
       });
+
       this.prevPronouns = this.pronouns;
     }
   },
