@@ -150,6 +150,7 @@ UserProfileSidebar.propTypes = {
   className: PropTypes.string,
   userId: PropTypes.string,
   displayName: PropTypes.string,
+  pronouns: PropTypes.string,
   identityName: PropTypes.string,
   avatarPreview: PropTypes.node,
   hasMicPresence: PropTypes.bool,

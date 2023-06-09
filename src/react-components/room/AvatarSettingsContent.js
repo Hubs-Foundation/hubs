@@ -60,7 +60,7 @@ export function AvatarSettingsContent({
 AvatarSettingsContent.propTypes = {
   className: PropTypes.string,
   displayName: PropTypes.string,
-  pronounds: PropTypes.string,
+  pronouns: PropTypes.string,
   displayNameInputRef: PropTypes.func,
   pronounsInputRef: PropTypes.func,
   disableDisplayNameInput: PropTypes.bool,
