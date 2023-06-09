@@ -245,7 +245,7 @@ AFRAME.registerComponent("name-tag", {
   },
 
   updatePronouns() {
-    if ((this.pronouns && this.pronouns !== this.prevPronouns) || (this.prevPronouns && !this.pronouns)) {
+    if (this.pronouns !== this.prevPronouns) {
       this.pronounsText.el.addEventListener(
         "text-updated",
         () => {
