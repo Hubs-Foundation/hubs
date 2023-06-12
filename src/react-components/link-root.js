@@ -88,10 +88,10 @@ class LinkRoot extends Component {
       .then(response => {
         // If there is a profile from the linked device, copy it over if we don't have one yet.
         if (response.profile) {
-          const { hasChangedName } = this.props.store.state.activity;
+          const { hasChangedNameOrPronouns } = this.props.store.state.activity;
 
-          if (!hasChangedName) {
-            this.props.store.update({ activity: { hasChangedName: true }, profile: response.profile });
+          if (!hasChangedNameOrPronouns) {
+            this.props.store.update({ activity: { hasChangedNameOrPronouns: true }, profile: response.profile });
           }
         }
         this.props.store.update({ credentials: response.credentials });
