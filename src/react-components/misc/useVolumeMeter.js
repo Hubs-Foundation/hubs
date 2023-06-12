@@ -30,7 +30,6 @@ function updateVolume(analyser, meter) {
 export function useVolumeMeter({ analyser, update, updateRate = 50 }) {
   const movingAvgRef = useRef();
   const meterRef = useRef({ levels: [], volume: 0, prevVolume: 0, max: 0 });
-  console.log("render");
   useEffect(() => {
     if (!update) return;
     if (!movingAvgRef.current) {
