@@ -85,7 +85,7 @@ export const SCHEMA = {
       additionalProperties: false,
       properties: {
         hasFoundFreeze: { type: "boolean" },
-        hasChangedName: { type: "boolean" },
+        hasChangedNameOrPronouns: { type: "boolean" },
         hasAcceptedProfile: { type: "boolean" },
         lastEnteredAt: { type: "string" },
         hasPinned: { type: "boolean" },
@@ -320,7 +320,7 @@ export default class Store extends EventTarget {
     }
 
     // Regenerate name to encourage users to change it.
-    if (!this.state.activity.hasChangedName) {
+    if (!this.state.activity.hasChangedNameOrPronouns) {
       this.update({ profile: { displayName: generateRandomName() } });
     }
   };

@@ -219,7 +219,6 @@ AFRAME.registerComponent("name-tag", {
       this.pronounsText?.el && this.pronounsText.el.components["text"].getSize(this.size);
       const pronounsTextSize = this.size.x || 0;
       this.nametagText.el.components["text"].getSize(this.size);
-      console.log(pronounsTextSize, this.size.x);
       this.size.x = Math.max(this.size.x, pronounsTextSize, NAMETAG_MIN_WIDTH);
       this.resizeNameTag();
     }
