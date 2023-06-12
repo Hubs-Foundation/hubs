@@ -22,7 +22,7 @@ function setArrows(world, prevArrowEid, nextArrowEid, value) {
   world.eid2obj.get(nextArrowEid).visible = value;
 }
 
-function recordUser() {
+function recordUser(world) {
   isRecording = true;
   const audioTrack = APP.mediaDevicesManager.audioTrack;
   const recordingTrack = audioTrack.clone();
@@ -40,7 +40,7 @@ function recordUser() {
 
   mediaRecorder.onstop = function () {
     const recordingBlob = new Blob(chunks, { type: "audio/wav" });
-    chunks = saveRecording(recordingBlob);
+    chunks = saveRecording(world, recordingBlob);
     audioTrack.enabled = true;
     recordingStream.removeTrack(recordingTrack);
     recordingTrack.stop();
@@ -54,18 +54,53 @@ function stopRecording() {
   }
 }
 
-function saveRecording(blob) {
-  const url = URL.createObjectURL(blob);
+async function saveRecording(world, blob) {
+  const apiURL = "http:/localhost:8888/transcribe_audio_files";
 
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "recording.wav";
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+  const headers = new Headers();
+  const formData = new FormData();
 
-  // Clean up
-  URL.revokeObjectURL(url);
+  const sourceLanguage = "el";
+
+  formData.append("audio_files", blob, "recording.wav");
+
+  const hie = fetch(apiURL + "?source_language=" + sourceLanguage, { method: "POST", body: formData })
+    .then(response => {
+      if (response.ok) {
+        return response.json();
+      } else {
+        throw new Error("Error: " + response.status);
+      }
+    })
+    .then(data => {
+      const responseText = data.transcriptions[0];
+      UpdateTextSystem(world, FromatNewText(responseText));
+    })
+    .catch(error => {
+      console.log(error);
+    });
+
+  // let data;
+  // try {
+  //   const response = await fetch(apiURL + "?source_language=" + sourceLanguage, { method: "POST", body: formData });
+  //   data = await response.json();
+  // } catch (error) {
+  //   console.log(error);
+  // }
+  // UpdateTextSystem(FromatNewText(data.transcriptions[0]));
+  // console.log(typeof data.transcriptions[0]);
+
+  // const url = URL.createObjectURL(blob);
+
+  // const a = document.createElement("a");
+  // a.href = url;
+  // a.download = "recording.wav";
+  // document.body.appendChild(a);
+  // a.click();
+  // document.body.removeChild(a);
+
+  // // Clean up
+  // URL.revokeObjectURL(url);
 
   return [];
 }
@@ -120,13 +155,6 @@ export function AgentSystem(world) {
     agentObj.visible = true;
   }
 
-  console.log(
-    `is mic enabled`,
-    APP.mediaDevicesManager.deviceId,
-    `permission status`,
-    APP.mediaDevicesManager.getPermissionsStatus(`microphone`)
-  );
-
   modelObj.rotateOnAxis(new THREE.Vector3(0, 1, 0), -1.5707963268);
 
   if (clicked(Agent.nextRef[eid])) {
@@ -138,7 +166,7 @@ export function AgentSystem(world) {
   }
 
   if (clicked(Agent.micRef[eid])) {
-    if (!isRecording) recordUser();
+    if (!isRecording) recordUser(world);
     else stopRecording();
   }
 

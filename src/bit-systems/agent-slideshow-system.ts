@@ -42,6 +42,7 @@ export function FromatNewText(newText: string) {
 }
 
 export function UpdateTextSystem(world: HubsWorld, newFormatedText: Array<string>) {
+  console.log("update input: ", newFormatedText);
   const textCount = newFormatedText.length;
 
   SlideQuery(world).forEach(eid => {
