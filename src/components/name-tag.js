@@ -214,19 +214,22 @@ AFRAME.registerComponent("name-tag", {
     }
   },
 
+  updateNametagWidth(name) {
+    if (name) {
+      this.pronounsText?.el && this.pronounsText.el.components["text"].getSize(this.size);
+      const pronounsTextSize = this.size.x || 0;
+      this.nametagText.el.components["text"].getSize(this.size);
+      console.log(pronounsTextSize, this.size.x);
+      this.size.x = Math.max(this.size.x, pronounsTextSize, NAMETAG_MIN_WIDTH);
+      this.resizeNameTag();
+    }
+  },
+
   updateDisplayName() {
     if (this.displayName && this.displayName !== this.prevDisplayName) {
-      this.nametagText.el.addEventListener(
-        "text-updated",
-        () => {
-          if (this.nametagText.el) {
-            this.nametagText.el.components["text"].getSize(this.size);
-            this.size.x = Math.max(this.size.x, NAMETAG_MIN_WIDTH);
-            this.resizeNameTag();
-          }
-        },
-        { once: true }
-      );
+      this.nametagText.el.addEventListener("text-updated", () => this.updateNametagWidth(this.nametagText?.el), {
+        once: true
+      });
       if (this.displayName.length > DISPLAY_NAME_LENGTH) {
         this.displayName = this.displayName.slice(0, DISPLAY_NAME_LENGTH).concat("...");
       }
@@ -246,26 +249,15 @@ AFRAME.registerComponent("name-tag", {
 
   updatePronouns() {
     if (this.pronouns !== this.prevPronouns) {
-      this.pronounsText.el.addEventListener(
-        "text-updated",
-        () => {
-          if (this.pronounsText.el && this.nameTagText.el) {
-            this.pronounsText.el.components["text"].getSize(this.size);
-            this.nameTagText.el.components["text"].getSize(this.size);
-            this.size.x = Math.max(this.size.x, NAMETAG_MIN_WIDTH);
-            this.resizeNameTag();
-          }
-        },
-        { once: true }
-      );
-      if (this.pronouns.length > this.displayName.length && this.pronouns.length > DISPLAY_NAME_LENGTH) {
+      this.pronounsText.el.addEventListener("text-updated", () => this.updateNametagWidth(this.nametagText?.el), {
+        once: true
+      });
+      if (this.pronouns.length > DISPLAY_NAME_LENGTH) {
         this.pronouns = this.pronouns.slice(0, DISPLAY_NAME_LENGTH).concat("...");
       }
-
       this.pronounsText.el.setAttribute("text", {
         value: this.pronouns ? `(${this.pronouns})` : ""
       });
-
       this.prevPronouns = this.pronouns;
     }
   },
@@ -292,8 +284,10 @@ AFRAME.registerComponent("name-tag", {
       this.avatarAABBSize.y / 2 +
       NAMETAG_OFFSET;
     this.nametagElPosY = this.nametagHeight + (this.isHandRaised ? NAMETAG_OFFSET : 0);
+    this.pronounsText.el && this.pronounsText.el.components["text"].getSize(this.size);
+    const pronounsTextSize = this.size.x;
     this.nametagText.el.components["text"].getSize(this.size);
-    this.size.x = Math.max(this.size.x, NAMETAG_MIN_WIDTH);
+    this.size.x = Math.max(this.size.x, pronounsTextSize, NAMETAG_MIN_WIDTH);
     this.isAvatarReady = true;
 
     this.updateDisplayName();
