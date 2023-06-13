@@ -105,8 +105,7 @@ export function PeopleSidebar({
   const me = people.find(person => !!person.isMe);
   const filteredPeople = people
     .filter(person => !person.isMe)
-    // eslint-disable-next-line no-unused-vars
-    .sort((a, _b) => {
+    .sort(a => {
       return a.hand_raised ? -1 : 1;
     });
   me && filteredPeople.unshift(me);
