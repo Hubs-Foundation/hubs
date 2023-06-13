@@ -24,3 +24,12 @@
 :local(.slider-input-container) {
   width: 209px;
 }
+
+:local(.displayName) {
+  font-weight: 400;
+  color: theme.$text1-color;
+}
+
+:local(.pronouns) {
+  color: theme.$text2-color;
+}
