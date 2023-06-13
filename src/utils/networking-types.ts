@@ -15,6 +15,9 @@ export type CreateMessage = {
   prefabName: PrefabName;
   initialData: InitialData;
 };
+export type SaveMessage = {
+  networkId: NetworkID;
+};
 export interface CursorBuffer extends Array<any> {
   cursor?: number;
 }
@@ -38,6 +41,7 @@ export type Message = {
   creates: CreateMessage[];
   updates: UpdateMessage[];
   deletes: DeleteMessage[];
+  saves: SaveMessage[];
 };
 export interface StorableMessage extends Message {
   version: 1;

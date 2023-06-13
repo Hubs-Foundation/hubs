@@ -2,7 +2,7 @@ import { addComponent, defineQuery, enterQuery, hasComponent, removeComponent, r
 import { HubsWorld } from "../app";
 import { Networked, Owned } from "../bit-components";
 import { renderAsNetworkedEntity } from "../utils/create-networked-entity";
-import { deleteEntityState, hasSavedEntityState } from "../utils/entity-state-utils";
+import { createEntityState, deleteEntityState, hasSavedEntityState } from "../utils/entity-state-utils";
 import { networkableComponents, schemas, StoredComponent } from "../utils/network-schemas";
 import type { ClientID, CursorBufferUpdateMessage, EntityID, StringID, UpdateMessage } from "../utils/networking-types";
 import { hasPermissionToSpawn } from "../utils/permissions";
@@ -145,6 +145,29 @@ export function networkReceiveSystem(world: HubsWorld) {
     }
   }
 
+  // Handle save entity messages
+  for (let i = 0; i < pendingMessages.length; i++) {
+    const message = pendingMessages[i];
+
+    for (let j = 0; j < message.saves.length; j++) {
+      const { networkId: nidString } = message.saves[j];
+      const nid = APP.getSid(nidString);
+      const eid = world.nid2eid.get(nid);
+
+      if (!eid) {
+        console.warn(`Received save message for unknown entity ${nidString}.`);
+        continue;
+      }
+
+      if (!isNetworkInstantiated(eid)) {
+        console.warn(`Received save message for non-network-instantiated entity ${nidString}.`);
+        continue;
+      }
+
+      createEntityState(APP.hubChannel!, world, eid);
+    }
+  }
+
   {
     // If reticulum told us to reassign an entity's creator, do so now
     pendingCreatorChanges.forEach(({ nid, creator }) => {
@@ -183,7 +206,7 @@ export function networkReceiveSystem(world: HubsWorld) {
       }
 
       // Process the stored message before other updates
-      pendingMessages.unshift({ creates: [], updates, deletes: [] });
+      pendingMessages.unshift({ creates: [], updates, deletes: [], saves: [] });
       storedUpdates.delete(nid);
     }
   });

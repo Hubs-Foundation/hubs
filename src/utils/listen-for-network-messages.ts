@@ -82,7 +82,8 @@ export function queueEntityStateAsMessage(entityState: EntityState) {
     fromClientId: "reticulum",
     creates: [entityState.create_message],
     updates: entityState.update_messages,
-    deletes: []
+    deletes: [],
+    saves: []
   });
   pendingCreatorChanges.push({
     nid: rootNid,
