@@ -37,6 +37,7 @@ export default function useAvatarVolume(sessionId, onMultiplierChanged) {
     },
     [controls]
   );
+
   useEffect(() => {
     if (!controlsEl) return;
     controlsEl.addEventListener("gain_multiplier_updated", onMultiplierUpdated);
