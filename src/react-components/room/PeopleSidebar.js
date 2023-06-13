@@ -104,7 +104,11 @@ export function PeopleSidebar({
 }) {
   const intl = useIntl();
   const me = people.find(person => !!person.isMe);
-  const filteredPeople = people.filter(person => !person.isMe);
+  const filteredPeople = people
+    .filter(person => !person.isMe)
+    .sort(a => {
+      return a.hand_raised ? -1 : 1;
+    });
   me && filteredPeople.unshift(me);
 
   return (
