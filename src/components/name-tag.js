@@ -62,6 +62,7 @@ AFRAME.registerComponent("name-tag", {
     this.onModelLoaded = this.onModelLoaded.bind(this);
     this.onModelIkFirstTick = this.onModelIkFirstTick.bind(this);
     this.onStateChanged = this.onStateChanged.bind(this);
+    this.updateNametagWidth = this.updateNametagWidth.bind(this);
 
     this.nametag = this.el.object3D;
     this.nametagIdentityName = this.el.querySelector(".identityName").object3D;
@@ -214,19 +215,17 @@ AFRAME.registerComponent("name-tag", {
     }
   },
 
-  updateNametagWidth(name) {
-    if (name) {
-      this.pronounsText?.el && this.pronounsText.el.components["text"].getSize(this.size);
-      const pronounsTextSize = this.size.x || 0;
-      this.nametagText.el.components["text"].getSize(this.size);
-      this.size.x = Math.max(this.size.x, pronounsTextSize, NAMETAG_MIN_WIDTH);
-      this.resizeNameTag();
-    }
+  updateNametagWidth() {
+    this.pronounsText.el.components["text"].getSize(this.size);
+    const pronounsTextSize = this.size.x || 0;
+    this.nametagText.el.components["text"].getSize(this.size);
+    this.size.x = Math.max(this.size.x, pronounsTextSize, NAMETAG_MIN_WIDTH);
+    this.resizeNameTag();
   },
 
   updateDisplayName() {
     if (this.displayName && this.displayName !== this.prevDisplayName) {
-      this.nametagText.el.addEventListener("text-updated", () => this.updateNametagWidth(this.nametagText?.el), {
+      this.nametagText.el.addEventListener("text-updated", () => this.updateNametagWidth(), {
         once: true
       });
       if (this.displayName.length > DISPLAY_NAME_LENGTH) {
@@ -248,7 +247,7 @@ AFRAME.registerComponent("name-tag", {
 
   updatePronouns() {
     if (this.pronouns !== this.prevPronouns) {
-      this.pronounsText.el.addEventListener("text-updated", () => this.updateNametagWidth(this.nametagText?.el), {
+      this.pronounsText.el.addEventListener("text-updated", () => this.updateNametagWidth(), {
         once: true
       });
       if (this.pronouns.length > DISPLAY_NAME_LENGTH) {
