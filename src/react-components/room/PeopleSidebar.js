@@ -105,7 +105,7 @@ export function PeopleSidebar({
   const me = people.find(person => !!person.isMe);
   const filteredPeople = people
     .filter(person => !person.isMe)
-    .sort((a, b) => {
+    .sort((a, _b) => {
       return a.hand_raised ? -1 : 1;
     });
   me && filteredPeople.unshift(me);
