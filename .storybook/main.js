@@ -10,7 +10,7 @@ if (fs.existsSync(themesPath)) {
 }
 module.exports = {
   stories: ["../src/react-components/**/*.stories.mdx", "../src/react-components/**/*.stories.js"],
-  addons: ["@storybook/addon-links", "@storybook/addon-essentials", "storybook-addon-designs"],
+  addons: ["@storybook/addon-links", "@storybook/addon-essentials"],
   webpackFinal: async config => {
     config.module.rules.push({
       test: /\.scss$/,
