@@ -12,7 +12,6 @@ import type {
   EntityID,
   Message,
   NetworkID,
-  SaveMessage,
   StorableUpdateMessage
 } from "./networking-types";
 
@@ -37,8 +36,7 @@ export function messageFor(
   const message: Message = {
     creates: [],
     updates: [],
-    deletes: [],
-    saves: []
+    deletes: []
   };
 
   created.forEach(eid => {
@@ -112,7 +110,6 @@ export interface LegacyRoomObject {
 export function messageForLegacyRoomObjects(objects: LegacyRoomObject[]) {
   const message: Message = {
     creates: [],
-    saves: [],
     updates: [],
     deletes: []
   };
@@ -133,13 +130,6 @@ export function messageForLegacyRoomObjects(objects: LegacyRoomObject[]) {
       initialData
     };
     message.creates.push(createMessage);
-
-    if (obj.extensions.HUBS_components.pinnable.pinned) {
-      const saveMessage: SaveMessage = {
-        networkId: nid
-      };
-      message.saves.push(saveMessage);
-    }
 
     const updateMessage: StorableUpdateMessage = {
       data: {

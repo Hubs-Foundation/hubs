@@ -1,4 +1,4 @@
-import { pendingMessages } from "../bit-systems/networking";
+import { pendingLegacyObjectSaves, pendingMessages } from "../bit-systems/networking";
 import { messageForLegacyRoomObjects } from "./message-for";
 import { StorableMessage } from "./networking-types";
 import { getReticulumFetchUrl } from "./phoenix-utils";
@@ -28,6 +28,13 @@ export async function loadLegacyRoomObjects(hubId: string) {
 
   if (hubId === APP.hub!.hub_id) {
     const message = messageForLegacyRoomObjects(legacyRoomObjects);
+
+    for (const obj of legacyRoomObjects) {
+      if (obj.extensions.HUBS_components.pinnable.pinned) {
+        pendingLegacyObjectSaves.push(obj.name);
+      }
+    }
+
     if (message) {
       message.fromClientId = "reticulum";
 

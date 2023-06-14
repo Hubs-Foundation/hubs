@@ -1,6 +1,13 @@
 import { defineQuery } from "bitecs";
 import { Networked } from "../bit-components";
-import type { CreateMessageData, CreatorChange, EntityID, Message, StringID } from "../utils/networking-types";
+import type {
+  CreateMessageData,
+  CreatorChange,
+  EntityID,
+  Message,
+  NetworkID,
+  StringID
+} from "../utils/networking-types";
 export let localClientID: StringID | null = null;
 export function setLocalClientID(clientId: StringID) {
   connectedClientIds.add(clientId);
@@ -12,6 +19,7 @@ export const connectedClientIds = new Set<StringID>();
 export const disconnectedClientIds = new Set<StringID>();
 export const pendingMessages: Message[] = [];
 export const pendingCreatorChanges: CreatorChange[] = [];
+export const pendingLegacyObjectSaves: NetworkID[] = [];
 export const pendingJoins: StringID[] = [];
 export const pendingParts: StringID[] = [];
 export const softRemovedEntities = new Set<EntityID>();

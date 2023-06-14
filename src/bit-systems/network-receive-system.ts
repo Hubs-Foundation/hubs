@@ -15,6 +15,7 @@ import {
   localClientID,
   networkedQuery,
   pendingCreatorChanges,
+  pendingLegacyObjectSaves,
   pendingMessages,
   pendingParts,
   softRemovedEntities
@@ -145,27 +146,25 @@ export function networkReceiveSystem(world: HubsWorld) {
     }
   }
 
-  // Handle save entity messages
-  for (let i = 0; i < pendingMessages.length; i++) {
-    const message = pendingMessages[i];
-
-    for (let j = 0; j < message.saves.length; j++) {
-      const { networkId: nidString } = message.saves[j];
+  {
+    // Save entity state for loaded legacy objects
+    pendingLegacyObjectSaves.forEach(nidString => {
       const nid = APP.getSid(nidString);
       const eid = world.nid2eid.get(nid);
 
       if (!eid) {
-        console.warn(`Received save message for unknown entity ${nidString}.`);
-        continue;
+        console.warn(`Received save message for unknown legacy entity ${nidString}.`);
+        return;
       }
 
       if (!isNetworkInstantiated(eid)) {
-        console.warn(`Received save message for non-network-instantiated entity ${nidString}.`);
-        continue;
+        console.warn(`Received save message for non-network-instantiated legacy entity ${nidString}.`);
+        return;
       }
 
       createEntityState(APP.hubChannel!, world, eid);
-    }
+    });
+    pendingLegacyObjectSaves.length = 0;
   }
 
   {
@@ -206,7 +205,7 @@ export function networkReceiveSystem(world: HubsWorld) {
       }
 
       // Process the stored message before other updates
-      pendingMessages.unshift({ creates: [], updates, deletes: [], saves: [] });
+      pendingMessages.unshift({ creates: [], updates, deletes: [] });
       storedUpdates.delete(nid);
     }
   });
