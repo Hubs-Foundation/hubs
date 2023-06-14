@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unknown-property */
 /** @jsx createElementEntity */
 import { BoxGeometry, Mesh, MeshBasicMaterial } from "three";
 import { createElementEntity } from "../utils/jsx-entity";

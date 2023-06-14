@@ -1,9 +1,6 @@
 const path = require("path");
-
 const fs = require("fs");
-
 const themesPath = path.resolve(__dirname, "..", "themes.json");
-
 if (fs.existsSync(themesPath)) {
   const appConfig = {};
   const themesString = fs.readFileSync(themesPath).toString();
@@ -11,10 +8,9 @@ if (fs.existsSync(themesPath)) {
   appConfig.theme.themes = JSON.parse(themesString);
   process.env.STORYBOOK_APP_CONFIG = JSON.stringify(appConfig);
 }
-
 module.exports = {
   stories: ["../src/react-components/**/*.stories.mdx", "../src/react-components/**/*.stories.js"],
-  addons: ["@storybook/addon-links", "@storybook/addon-essentials", "storybook-addon-designs"],
+  addons: ["@storybook/addon-links", "@storybook/addon-essentials"],
   webpackFinal: async config => {
     config.module.rules.push({
       test: /\.scss$/,
@@ -44,7 +40,9 @@ module.exports = {
           loader: "@svgr/webpack",
           options: {
             titleProp: true,
-            replaceAttrValues: { "#000": "currentColor" },
+            replaceAttrValues: {
+              "#000": "currentColor"
+            },
             exportType: "named",
             svgo: true,
             svgoConfig: {
@@ -73,7 +71,8 @@ module.exports = {
     });
     return config;
   },
-  core: {
-    builder: "webpack5"
+  framework: {
+    name: "@storybook/react-webpack5",
+    options: {}
   }
 };
