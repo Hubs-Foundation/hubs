@@ -772,7 +772,7 @@ class UIRoot extends Component {
 
   setSidebar(sidebarId, otherState) {
     console.log(sidebarId, otherState);
-    this.setState({ sidebarId, chatPrefix: "", chatAutofoucs: false, selectedUserId: null, ...(otherState || {}) });
+    this.setState({ sidebarId, chatPrefix: "", chatAutofocus: false, selectedUserId: null, ...(otherState || {}) });
   }
 
   toggleSidebar(sidebarId, otherState) {
