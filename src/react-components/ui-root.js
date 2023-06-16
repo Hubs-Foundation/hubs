@@ -771,7 +771,8 @@ class UIRoot extends Component {
   pushHistoryState = (k, v) => pushHistoryState(this.props.history, k, v);
 
   setSidebar(sidebarId, otherState) {
-    this.setState({ sidebarId, chatPrefix: "", chatAutofoucs: false, selectedUserId: null, ...otherState });
+    console.log(sidebarId, otherState);
+    this.setState({ sidebarId, chatPrefix: "", chatAutofoucs: false, selectedUserId: null, ...(otherState || {}) });
   }
 
   toggleSidebar(sidebarId, otherState) {
