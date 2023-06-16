@@ -32,7 +32,13 @@ export function RoomSettingsSidebar({
   onChangeScene
 }) {
   const intl = useIntl();
-  const { handleSubmit, register, watch, errors, setValue } = useForm({
+  const {
+    handleSubmit,
+    register,
+    watch,
+    formState: { errors },
+    setValue
+  } = useForm({
     defaultValues: room
   });
 
@@ -71,7 +77,7 @@ export function RoomSettingsSidebar({
           maxLength={64}
           label={<FormattedMessage id="room-settings-sidebar.name" defaultMessage="Room Name" />}
           ref={register}
-          error={errors.name}
+          error={errors?.name?.message}
           fullWidth
         />
         <TextAreaInputField
@@ -84,7 +90,7 @@ export function RoomSettingsSidebar({
           label={<FormattedMessage id="room-settings-sidebar.description" defaultMessage="Room Description" />}
           minRows={3}
           ref={register}
-          error={errors.description}
+          error={errors?.description?.message}
           fullWidth
         />
         <NumericInputField
@@ -98,7 +104,7 @@ export function RoomSettingsSidebar({
           })}
           label={<FormattedMessage id="room-settings-sidebar.room-size" defaultMessage="Room Size" />}
           ref={register}
-          error={errors.room_size}
+          error={errors?.room_size?.message}
           fullWidth
         />
         <RadioInputField
@@ -116,7 +122,7 @@ export function RoomSettingsSidebar({
               />
             }
             ref={register}
-            error={errors.entry_mode}
+            error={errors?.entry_mode?.message}
           />
           <RadioInputOption
             name="entry_mode"
@@ -129,7 +135,7 @@ export function RoomSettingsSidebar({
               />
             }
             ref={register}
-            error={errors.entry_mode}
+            error={errors?.entry_mode?.message}
           />
         </RadioInputField>
         {entryMode === "invite" && (
