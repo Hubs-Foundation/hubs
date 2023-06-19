@@ -31,9 +31,14 @@ export function RoomSettingsSidebar({
   canChangeScene,
   onChangeScene
 }) {
-  console.log("ROOM INFO SETTINGS");
   const intl = useIntl();
-  const { handleSubmit, register, watch, errors, setValue } = useForm({
+  const {
+    handleSubmit,
+    register,
+    watch,
+    formState: { errors },
+    setValue
+  } = useForm({
     defaultValues: room
   });
 

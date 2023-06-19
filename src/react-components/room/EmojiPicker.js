@@ -1,8 +1,10 @@
 import React from "react";
 import Picker from "emoji-picker-react";
 
-import "./EmojiPicker.scss";
-
 export function EmojiPicker(props) {
-  return <Picker {...props} />;
+  const {
+    state: { preferences: theme }
+  } = window.APP.store;
+
+  return <Picker {...props} Theme={theme.theme.includes("dark") ? "dark" : "light"} />;
 }

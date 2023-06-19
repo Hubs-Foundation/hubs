@@ -59,6 +59,8 @@ export const EmojiPickerPopoverButton = React.memo(({ onSelectEmoji, disabled })
   return (
     <Popover
       title=""
+      popoverClass={styles.emojiPopover}
+      showHeader={false}
       content={({ closePopover }) => (
         <EmojiPicker
           onEmojiClick={emoji => {
