@@ -62,7 +62,6 @@ export const EmojiPickerPopoverButton = React.memo(({ onSelectEmoji, disabled })
       content={({ closePopover }) => (
         <EmojiPicker
           onEmojiClick={emoji => {
-            console.log(emoji);
             const keepPickerOpen = shiftKeyDown.current;
             onSelectEmoji({ emoji: emoji.emoji, pickerRemainedOpen: keepPickerOpen });
             // Keep the picker open if the Shift key was held down to allow
