@@ -4,6 +4,7 @@ export const AVAILABLE_LOCALES = {
   "zh-cn": "简体中文",
   pt: "Portugês (Brasil)",
   ja: "日本語",
+  ca: "Català",
   es: "Español",
   ru: "Pусский",
   fr: "Français",
