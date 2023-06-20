@@ -118,7 +118,7 @@ export function ChatSidebarContainer({
 
   const onSelectEmoji = useCallback(
     ({ emoji, pickerRemainedOpen }) => {
-      setMessage(message => message + emoji.native);
+      setMessage(message => message + emoji);
       // If the picker remained open, avoid selecting the input so that the
       // user can keep picking emojis.
       if (!pickerRemainedOpen) inputRef.current.select();
