@@ -179,6 +179,7 @@ export class App {
       depth: !enablePostEffects,
       stencil: false,
       powerPreference: "high-performance",
+      preserveDrawingBuffer: true,
       canvas
     });
 

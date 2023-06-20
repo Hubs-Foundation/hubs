@@ -79,7 +79,7 @@ import { linearTransformSystem } from "../bit-systems/linear-transform";
 import { quackSystem } from "../bit-systems/quack";
 import { mixerAnimatableSystem } from "../bit-systems/mixer-animatable";
 import { loopAnimationSystem } from "../bit-systems/loop-animation";
-import { AgentSystem } from "../bit-systems/agent-system";
+import { AgentSystem, getDepthMap } from "../bit-systems/agent-system";
 import { lookAtUserSystem } from "../bit-systems/look-at-user";
 import { PanelIndexSystem } from "../bit-systems/agent-slideshow-system";
 import { HiddenSystem } from "../bit-systems/hidden-system";
@@ -273,6 +273,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   lookAtUserSystem(world);
 
   AgentSystem(world);
+  getDepthMap(camera, scene);
 
   HiddenSystem(world);
 

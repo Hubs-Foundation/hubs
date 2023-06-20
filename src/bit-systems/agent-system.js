@@ -9,6 +9,8 @@ import { anyEntityWith } from "../utils/bit-utils";
 const agentQuery = defineQuery([Agent]);
 const enterAgentQuery = enterQuery(agentQuery);
 
+let flag = false;
+
 function clicked(eid) {
   return hasComponent(APP.world, Interacted, eid);
 }
@@ -20,6 +22,16 @@ export function getRandomInt(max) {
 function setArrows(world, prevArrowEid, nextArrowEid, value) {
   world.eid2obj.get(prevArrowEid).visible = value;
   world.eid2obj.get(nextArrowEid).visible = value;
+}
+
+function snapPOV() {
+  const renderer = AFRAME.scenes[0].renderer;
+  const pictureUrl = renderer.domElement.toDataURL("image/png");
+  const link = document.createElement("a");
+  link.href = pictureUrl;
+  link.download = "camera_pov.png";
+  link.click();
+  flag = !flag;
 }
 
 function recordUser(world) {
@@ -79,28 +91,6 @@ async function saveRecording(world, blob) {
     .catch(error => {
       console.log(error);
     });
-
-  // let data;
-  // try {
-  //   const response = await fetch(apiURL + "?source_language=" + sourceLanguage, { method: "POST", body: formData });
-  //   data = await response.json();
-  // } catch (error) {
-  //   console.log(error);
-  // }
-  // UpdateTextSystem(FromatNewText(data.transcriptions[0]));
-  // console.log(typeof data.transcriptions[0]);
-
-  // const url = URL.createObjectURL(blob);
-
-  // const a = document.createElement("a");
-  // a.href = url;
-  // a.download = "recording.wav";
-  // document.body.appendChild(a);
-  // a.click();
-  // document.body.removeChild(a);
-
-  // // Clean up
-  // URL.revokeObjectURL(url);
 
   return [];
 }
@@ -166,8 +156,9 @@ export function AgentSystem(world) {
   }
 
   if (clicked(Agent.micRef[eid])) {
-    if (!isRecording) recordUser(world);
-    else stopRecording();
+    // if (!isRecording) recordUser(world);
+    // else stopRecording();
+    snapPOV();
   }
 
   agentObj.updateMatrix();
@@ -180,3 +171,61 @@ export function AgentSystem(world) {
 // if (renderArrows) {
 //   hideArrows(world, Agent.prevRef[eid], Agent.nextRef[eid]);
 // } else showArrows(world, Agent.prevRef[eid], Agent.nextRef[eid]);
+
+const renderer = new THREE.WebGLRenderer();
+const depthShader = {
+  uniforms: {
+    tDepth: { value: null },
+    nearClip: { value: 0 },
+    farClip: { value: 0 }
+  },
+  vertexShader: `
+    varying vec2 vUv;
+    void main() {
+      vUv = uv;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `,
+  fragmentShader: `
+    varying vec2 vUv;
+    uniform sampler2D tDepth;
+    uniform float nearClip;
+    uniform float farClip;
+    void main() {
+      float depth = texture2D(tDepth, vUv).r;
+      float viewZ = perspectiveDepthToViewZ(depth, nearClip, farClip);
+      gl_FragColor = vec4(vec3(viewZ), 1.0);
+    }
+  `
+};
+
+export function getDepthMap(camera, scene) {
+  if (!flag) return;
+
+  const height = camera.getFilmHeight();
+  const width = camera.getFilmWidth();
+  const depthMaterial = new THREE.ShaderMaterial(depthShader);
+  const renderer = AFRAME.scenes[0].renderer;
+
+  const depthRenderTarget = new THREE.WebGLRenderTarget(width, height, {
+    format: THREE.RGBAFormat,
+    type: THREE.UnsignedByteType
+  });
+
+  // Create a custom depth material
+
+  // Create a render target to store the depth values
+
+  renderer.setRenderTarget(depthRenderTarget);
+
+  renderer.render(scene, camera);
+
+  depthShader.uniforms.tDepth.value = depthRenderTarget.texture;
+  depthShader.uniforms.nearClip.value = camera.near;
+  depthShader.uniforms.farClip.value = camera.far;
+
+  snapPOV();
+
+  // Render the scene as usual
+  renderer.setRenderTarget(null);
+}
