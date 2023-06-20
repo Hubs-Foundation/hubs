@@ -1,5 +1,5 @@
 import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import PropTypes from "prop-types";
 import styles from "../assets/stylesheets/presence-log.scss";
 import classNames from "classnames";
@@ -41,38 +41,60 @@ const messageBodyDom = (body, from, fromSessionId, onViewProfile, emojiClassName
   return { content, multiline, emoji };
 };
 
+const bubbleColorRegEx = RegExp("^.*\\n?(-color=)(#?[0-9a-fA-Z]{6}|[0-9a-fA-Z]{3})\\n?.*$", "m");
 function renderChatMessage(body, from, allowEmojiRender) {
+  const matches = body.match(bubbleColorRegEx);
+  let bubbleColor;
+  if (matches) {
+    matches.shift();
+    bubbleColor = matches[1];
+    body = matches.reduce((acc, cur) => acc.replace(cur, ""), body);
+  }
+
   const { content, emoji, multiline } = messageBodyDom(body, from, null, null, styles.emoji);
   const isEmoji = allowEmojiRender && emoji;
   const el = document.createElement("div");
   el.setAttribute("class", `${styles.presenceLog} ${styles.presenceLogSpawn}`);
   document.body.appendChild(el);
 
-  const entryDom = (
+  const EntryDom = ({ callback }) => (
     <div
+      // callback is passed in here as part of React 18 createRoot method.
+      // eslint-disable-next-line react/no-unknown-property
+      callback={callback}
       className={classNames({
         [styles.presenceLogEntry]: !isEmoji,
         [styles.presenceLogEntryOneLine]: !isEmoji && !multiline,
         [styles.presenceLogEmoji]: isEmoji
       })}
+      style={bubbleColor && { backgroundColor: `${bubbleColor}` }}
     >
       {content}
     </div>
   );
 
+  EntryDom.propTypes = {
+    callback: PropTypes.func
+  };
+
   return new Promise((resolve, reject) => {
-    ReactDOM.render(entryDom, el, () => {
-      const width = el.offsetWidth;
-      const height = el.offsetHeight;
-      const ratio = height / width;
-      const scale = (CHAT_MESSAGE_TEXTURE_SIZE * Math.min(1.0, 1.0 / ratio)) / el.offsetWidth;
-      html2canvas(el, { backgroundColor: null, scale, logging: false })
-        .then(canvas => {
-          canvas.toBlob(blob => resolve([blob, width, height]), "image/png");
-          el.remove();
-        })
-        .catch(reject);
-    });
+    const root = createRoot(el);
+    root.render(
+      <EntryDom
+        callback={() => {
+          const width = el.offsetWidth;
+          const height = el.offsetHeight;
+          const ratio = height / width;
+          const scale = (CHAT_MESSAGE_TEXTURE_SIZE * Math.min(1.0, 1.0 / ratio)) / el.offsetWidth;
+          html2canvas(el, { backgroundColor: null, scale, logging: false })
+            .then(canvas => {
+              canvas.toBlob(blob => resolve([blob, width, height]), "image/png");
+              el.remove();
+            })
+            .catch(reject);
+        }}
+      />
+    );
   });
 }
 

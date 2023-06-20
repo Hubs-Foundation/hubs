@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unknown-property */
 /** @jsx createElementEntity */
 import { createElementEntity } from "../utils/jsx-entity";
 import { ProjectionMode } from "../utils/projection-mode";

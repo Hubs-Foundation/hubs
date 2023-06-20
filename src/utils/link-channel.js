@@ -59,7 +59,7 @@ export default class LinkChannel {
               const data = { path: location.pathname };
 
               // Copy profile data to link'ed device if it's been set.
-              if (this.store.state.activity.hasChangedName) {
+              if (this.store.state.activity.hasChangedNameOrPronouns) {
                 data.profile = { ...this.store.state.profile };
               }
               data.credentials = { ...this.store.state.credentials };

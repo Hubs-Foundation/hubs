@@ -1,6 +1,6 @@
 import jwtDecode from "jwt-decode";
 import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import "./assets/stylesheets/scene.scss";
 import SceneUI from "./react-components/scene-ui";
 import "./react-components/styles/global.scss";
@@ -13,13 +13,15 @@ import "./utils/theme";
 import { store } from "./utils/store-instance";
 
 function mountUI(props = {}) {
-  ReactDOM.render(
+  const container = document.getElementById("ui-root");
+
+  const root = createRoot(container);
+  root.render(
     <WrappedIntlProvider>
       <ThemeProvider store={props.store}>
         <SceneUI {...props} />
       </ThemeProvider>
-    </WrappedIntlProvider>,
-    document.getElementById("ui-root")
+    </WrappedIntlProvider>
   );
 }
 

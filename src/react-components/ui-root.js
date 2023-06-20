@@ -820,9 +820,9 @@ class UIRoot extends Component {
   };
 
   renderEntryStartPanel = () => {
-    const { hasAcceptedProfile, hasChangedName } = this.props.store.state.activity;
+    const { hasAcceptedProfile, hasChangedNameOrPronouns } = this.props.store.state.activity;
     const isLockedDownDemo = isLockedDownDemoRoom();
-    const promptForNameAndAvatarBeforeEntry = this.props.hubIsBound ? !hasAcceptedProfile : !hasChangedName;
+    const promptForNameAndAvatarBeforeEntry = this.props.hubIsBound ? !hasAcceptedProfile : !hasChangedNameOrPronouns;
 
     // TODO: What does onEnteringCanceled do?
     return (
@@ -1686,21 +1686,23 @@ function UIRootHooksWrapper(props) {
 
   useEffect(() => {
     const el = document.getElementById("preload-overlay");
-    el.classList.add("loaded");
+    if (el) {
+      el.classList.add("loaded");
 
-    const sceneEl = props.scene;
+      const sceneEl = props.scene;
 
-    sceneEl.classList.add(roomLayoutStyles.scene);
+      sceneEl.classList.add(roomLayoutStyles.scene);
 
-    // Remove the preload overlay after the animation has finished.
-    const timeout = setTimeout(() => {
-      el.remove();
-    }, 500);
+      // Remove the preload overlay after the animation has finished.
+      const timeout = setTimeout(() => {
+        el.remove();
+      }, 500);
 
-    return () => {
-      clearTimeout(timeout);
-      sceneEl.classList.remove(roomLayoutStyles.scene);
-    };
+      return () => {
+        clearTimeout(timeout);
+        sceneEl.classList.remove(roomLayoutStyles.scene);
+      };
+    }
   }, [props.scene]);
 
   return (
