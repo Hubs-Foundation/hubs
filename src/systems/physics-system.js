@@ -7,7 +7,8 @@ import { updateRigiBodyParams } from "../inflators/rigid-body";
 
 const MESSAGE_TYPES = CONSTANTS.MESSAGE_TYPES,
   TYPE = CONSTANTS.TYPE,
-  BUFFER_CONFIG = CONSTANTS.BUFFER_CONFIG;
+  BUFFER_CONFIG = CONSTANTS.BUFFER_CONFIG,
+  BUFFER_STATE = CONSTANTS.BUFFER_STATE;
 
 const WORLD_CONFIG = {
   debugDrawMode: AmmoDebugConstants.DrawWireframe,
@@ -35,20 +36,33 @@ export class PhysicsSystem {
     this.nextBodyUuid = 1;
     this.nextShapeUuid = 1;
 
-    const arrayBuffer = new ArrayBuffer(4 * BUFFER_CONFIG.BODY_DATA_SIZE * MAX_BODIES);
-    this.objectMatricesFloatArray = new Float32Array(arrayBuffer);
-    this.objectMatricesIntArray = new Int32Array(arrayBuffer);
-
-    this.ammoWorker.postMessage(
-      {
-        type: MESSAGE_TYPES.INIT,
-        worldConfig: WORLD_CONFIG,
-        arrayBuffer,
-        maxBodies: MAX_BODIES,
-        wasmUrl: new URL(ammoWasmUrl, configs.BASE_ASSETS_PATH || window.location).href
-      },
-      [arrayBuffer]
+    const sharedArrayBuffer = new window.SharedArrayBuffer(
+      4 * BUFFER_CONFIG.HEADER_LENGTH + //header
+      4 * BUFFER_CONFIG.BODY_DATA_SIZE * MAX_BODIES + //matrices
+        4 * BUFFER_CONFIG.MAX_BODIES //velocities
     );
+    this.headerIntArray = new Int32Array(sharedArrayBuffer, 0, BUFFER_CONFIG.HEADER_LENGTH);
+    this.headerFloatArray = new Int32Array(sharedArrayBuffer, 0, BUFFER_CONFIG.HEADER_LENGTH);
+    this.objectMatricesIntArray = new Int32Array(
+      sharedArrayBuffer,
+      BUFFER_CONFIG.HEADER_LENGTH * 4,
+      BUFFER_CONFIG.BODY_DATA_SIZE * MAX_BODIES
+    );
+    this.objectMatricesFloatArray = new Float32Array(
+      sharedArrayBuffer,
+      BUFFER_CONFIG.HEADER_LENGTH * 4,
+      BUFFER_CONFIG.BODY_DATA_SIZE * MAX_BODIES
+    );
+
+    this.headerIntArray[0] = BUFFER_STATE.UNINITIALIZED;
+
+    this.ammoWorker.postMessage({
+      type: MESSAGE_TYPES.INIT,
+      worldConfig: WORLD_CONFIG,
+      sharedArrayBuffer,
+      maxBodies: MAX_BODIES,
+      wasmUrl: new URL(ammoWasmUrl, configs.BASE_ASSETS_PATH || window.location).href
+    });
 
     this.ammoWorker.onmessage = async event => {
       if (event.data.type === MESSAGE_TYPES.READY) {
@@ -72,10 +86,6 @@ export class PhysicsSystem {
         } else {
           console.warn(`Shape initialized on worker but body is missing.`);
         }
-      } else if (event.data.type === MESSAGE_TYPES.TRANSFER_DATA) {
-        this.objectMatricesFloatArray = event.data.objectMatricesFloatArray;
-        this.objectMatricesIntArray = new Int32Array(this.objectMatricesFloatArray.buffer);
-        this.stepDuration = event.data.stepDuration;
       }
     };
   }
@@ -147,7 +157,8 @@ export class PhysicsSystem {
          * 18-25  first 8 Collisions (ints)
          */
 
-        if (this.objectMatricesFloatArray.buffer.byteLength !== 0) {
+        if (window.Atomics.load(this.headerIntArray, 0) === BUFFER_STATE.READY) {
+          this.stepDuration = window.Atomics.load(this.headerFloatArray, 1);
           for (let i = 0; i < this.bodyUuids.length; i++) {
             const uuid = this.bodyUuids[i];
             const body = this.bodyUuidToData.get(uuid);
@@ -202,10 +213,7 @@ export class PhysicsSystem {
             }
           }
 
-          this.ammoWorker.postMessage(
-            { type: MESSAGE_TYPES.TRANSFER_DATA, objectMatricesFloatArray: this.objectMatricesFloatArray },
-            [this.objectMatricesFloatArray.buffer]
-          );
+          window.Atomics.store(this.headerIntArray, 0, BUFFER_STATE.CONSUMED);
         }
 
         /* DEBUG RENDERING */
