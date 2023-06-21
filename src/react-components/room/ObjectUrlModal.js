@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback } from "react";
 import PropTypes from "prop-types";
 import { Modal } from "../modal/Modal";
 import { CloseButton } from "../input/CloseButton";
@@ -13,34 +13,22 @@ import classNames from "classnames";
 import { FormattedMessage } from "react-intl";
 
 export function ObjectUrlModal({ showModelCollectionLink, modelCollectionUrl, onSubmit, onClose }) {
-  const { handleSubmit, register, watch, setValue } = useForm();
-
-  useEffect(() => {
-    register("url");
-  }, [register]);
+  const {
+    handleSubmit,
+    register,
+    watch,
+    resetField,
+    formState: { errors }
+  } = useForm();
 
   const file = watch("file");
   const hasFile = file && file.length > 0;
   const fileName = hasFile ? file[0].name : undefined;
 
   const onClear = useCallback(() => {
-    if (hasFile) {
-      setValue("file", undefined);
-    } else {
-      setValue("url", "");
-    }
-  }, [hasFile, setValue]);
-
-  const onChange = useCallback(
-    e => {
-      if (hasFile) {
-        return;
-      }
-
-      setValue("url", e.target.value);
-    },
-    [hasFile, setValue]
-  );
+    resetField("url");
+    resetField("file");
+  }, [resetField]);
 
   const url = watch("url", "");
 
@@ -96,12 +84,12 @@ export function ObjectUrlModal({ showModelCollectionLink, modelCollectionUrl, on
           )}
         </p>
         <TextInputField
-          name="url"
           label={<FormattedMessage id="object-url-modal.url-field-label" defaultMessage="Object URL or File" />}
           placeholder="https://example.com/avatar.glb"
           type={hasFile ? "text" : "url"}
           value={fileName || url || ""}
-          onChange={onChange}
+          {...register("url")}
+          error={hasFile ? errors?.file?.message : errors?.url?.message}
           afterInput={
             <>
               {showCloseButton && <CloseButton onClick={onClear} />}
@@ -111,7 +99,7 @@ export function ObjectUrlModal({ showModelCollectionLink, modelCollectionUrl, on
                 htmlFor="file"
               >
                 <AttachIcon />
-                <input id="file" className={styles.hidden} name="file" type="file" ref={register} />
+                <input id="file" className={styles.hidden} type="file" {...register("file")} />
               </IconButton>
             </>
           }
