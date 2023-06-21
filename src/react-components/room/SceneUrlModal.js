@@ -56,12 +56,10 @@ export function SceneUrlModal({ enableSpoke, editorName, onValidateUrl, onSubmit
           )}
         </p>
         <TextInputField
-          name="url"
           label={<FormattedMessage id="scene-url-modal.url-input" defaultMessage="Scene URL" />}
           placeholder="https://example.com/scene.glb"
           type="url"
-          required
-          ref={register({ validate: onValidateUrl })}
+          {...register("url", { validate: onValidateUrl, required: true })}
           error={errors?.url?.message}
         />
         <Button type="submit" preset="accept" disabled={isSubmitting}>
@@ -95,5 +93,5 @@ SceneUrlModal.propTypes = {
   editorName: PropTypes.string,
   onSubmit: PropTypes.func,
   onClose: PropTypes.func,
-  onValidateUrl: PropTypes.isRequired
+  onValidateUrl: PropTypes.func.isRequired
 };
