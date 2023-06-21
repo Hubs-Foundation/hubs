@@ -17,8 +17,9 @@ export function AvatarUrlModal({ onSubmit, onClose }) {
           label={<FormattedMessage id="avatar-url-modal.avatar-url-label" defaultMessage="Avatar GLB URL" />}
           placeholder="https://example.com/avatar.glb"
           type="url"
-          required
-          {...register("url")}
+          {...register("url", {
+            required: true
+          })}
           description={
             <a href="https://hubs.mozilla.com/docs/intro-avatars.html" target="_blank" rel="noopener noreferrer">
               <FormattedMessage
