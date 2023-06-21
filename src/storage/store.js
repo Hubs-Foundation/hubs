@@ -63,7 +63,7 @@ export const SCHEMA = {
       type: "object",
       additionalProperties: false,
       properties: {
-        displayName: { type: "string", pattern: "^[A-Za-z0-9_~ -]{3,32}$" },
+        displayName: { type: "string", pattern: "^(?:[A-Z]|[a-z]|[0-9]|[_~\\-]|\\s){3,32}$" },
         avatarId: { type: "string" },
         pronouns: { type: "string", pattern: "^[a-zA-Z///a-zA-Z]{2,32}$" },
         // personalAvatarId is obsolete, but we need it here for backwards compatibility.
