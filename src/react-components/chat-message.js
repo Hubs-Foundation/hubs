@@ -59,9 +59,7 @@ function renderChatMessage(body, from, allowEmojiRender) {
 
   const EntryDom = ({ callback }) => (
     <div
-      // callback is passed in here as part of React 18 createRoot method.
-      // eslint-disable-next-line react/no-unknown-property
-      callback={callback}
+      ref={callback}
       className={classNames({
         [styles.presenceLogEntry]: !isEmoji,
         [styles.presenceLogEntryOneLine]: !isEmoji && !multiline,
