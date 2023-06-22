@@ -7,7 +7,6 @@ import { useForm } from "react-hook-form";
 import { Button } from "../input/Button";
 import { Column } from "../layout/Column";
 import { IconButton } from "../input/IconButton";
-import { ReactComponent as AttachIcon } from "../icons/Attach.svg";
 import styles from "./ObjectUrlModal.scss";
 import classNames from "classnames";
 import { FormattedMessage } from "react-intl";
@@ -102,7 +101,9 @@ export function ObjectUrlModal({ showModelCollectionLink, modelCollectionUrl, on
               >
                 {!showCloseButton && (
                   <div className={styles.browse}>
-                    <span>Browse</span>
+                    <span>
+                      <FormattedMessage id="object-url-modal.browse" defaultMessage="Browse" />
+                    </span>
                   </div>
                 )}
                 <input id="file" className={styles.hidden} type="file" {...register("file")} />
