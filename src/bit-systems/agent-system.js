@@ -3,13 +3,69 @@ import { Agent, Hidden, Interacted } from "../bit-components";
 import { FromatNewText, UpdateTextSystem, lowerIndex, raiseIndex } from "./agent-slideshow-system";
 import { hasComponent } from "bitecs";
 import { PermissionStatus } from "../utils/media-devices-utils";
-import { paradigms } from "./text-paradigms";
-import { anyEntityWith } from "../utils/bit-utils";
 
 const agentQuery = defineQuery([Agent]);
 const enterAgentQuery = enterQuery(agentQuery);
+const params = {
+  format: THREE.DepthFormat,
+  type: THREE.UnsignedShortType
+};
 
-let flag = false;
+let target, plane, format, type, depthTexture, postMaterial, mediaRecorder, eid;
+
+export let isRecording = false;
+
+function init() {
+  format = parseFloat(params.format);
+  type = parseFloat(params.type);
+
+  target = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight);
+  target.texture.minFilter = THREE.NearestFilter;
+  target.texture.magFilter = THREE.NearestFilter;
+  target.stencilBuffer = format === THREE.DepthStencilFormat ? true : false;
+  target.depthTexture = new THREE.DepthTexture();
+  target.depthTexture.format = format;
+  target.depthTexture.type = type;
+
+  depthTexture = target.depthTexture;
+  postMaterial = new THREE.ShaderMaterial({
+    vertexShader: `
+      varying vec2 vUv;
+  
+      void main() {
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `
+      #include <packing>  
+      varying vec2 vUv;
+      uniform sampler2D tDiffuse;
+      uniform sampler2D tDepth;
+      uniform float cameraNear;
+      uniform float cameraFar;
+  
+      float readDepth( sampler2D depthSampler, vec2 coord ) {
+        float fragCoordZ = texture2D( depthSampler, coord ).x;
+        float viewZ = perspectiveDepthToViewZ( fragCoordZ, cameraNear, cameraFar );
+        return viewZToOrthographicDepth( viewZ, cameraNear, cameraFar );
+      } 
+      
+      void main() {
+        float depth = readDepth(tDepth, vUv);
+        float normalizedDepth = (depth - cameraNear) / (cameraFar - cameraNear);
+        gl_FragColor.rgb = vec3(1.0-depth);
+        gl_FragColor.a = 1.0;
+    }  
+    `,
+    uniforms: {
+      cameraNear: { value: 0.1 },
+      cameraFar: { value: 20 },
+      tDiffuse: { value: null },
+      tDepth: { value: null }
+    }
+  });
+}
 
 function clicked(eid) {
   return hasComponent(APP.world, Interacted, eid);
@@ -24,15 +80,35 @@ function setArrows(world, prevArrowEid, nextArrowEid, value) {
   world.eid2obj.get(nextArrowEid).visible = value;
 }
 
-function snapPOV() {
+function captureDepthPOV() {
   const renderer = AFRAME.scenes[0].renderer;
-  const pictureUrl = renderer.domElement.toDataURL("image/png");
-  const link = document.createElement("a");
-  link.href = pictureUrl;
-  link.download = "camera_pov.png";
-  link.click();
-  flag = !flag;
+  const scene = AFRAME.scenes[0].object3D;
+  const camera = AFRAME.scenes[0].camera;
+
+  if (target) target.dispose();
+  scene.remove(plane);
+
+  renderer.setRenderTarget(target);
+  renderer.render(scene, camera);
+
+  var planeGeometry = new THREE.PlaneGeometry(8, 4.5);
+  postMaterial.uniforms.tDiffuse.value = target.texture;
+  postMaterial.uniforms.tDepth.value = target.depthTexture;
+  plane = new THREE.Mesh(planeGeometry, postMaterial);
+  scene.add(plane);
+
+  renderer.setRenderTarget(null);
+  renderer.render(scene, camera);
 }
+
+function snapPOV() {}
+
+// Save POV as image
+// const pictureUrl = renderer.domElement.toDataURL("image/png");
+// const link = document.createElement("a");
+// link.href = pictureUrl;
+// link.download = "camera_pov.png";
+// link.click();
 
 function recordUser(world) {
   isRecording = true;
@@ -118,10 +194,6 @@ function entered(world) {
   else return false;
 }
 
-export let isRecording = false;
-let mediaRecorder;
-let eid;
-
 export function AgentSystem(world) {
   if (!entered(world) || hasComponent(world, Hidden, eid)) return;
 
@@ -158,7 +230,8 @@ export function AgentSystem(world) {
   if (clicked(Agent.micRef[eid])) {
     // if (!isRecording) recordUser(world);
     // else stopRecording();
-    snapPOV();
+    // snapPOV();
+    captureDepthPOV();
   }
 
   agentObj.updateMatrix();
@@ -172,60 +245,4 @@ export function AgentSystem(world) {
 //   hideArrows(world, Agent.prevRef[eid], Agent.nextRef[eid]);
 // } else showArrows(world, Agent.prevRef[eid], Agent.nextRef[eid]);
 
-const renderer = new THREE.WebGLRenderer();
-const depthShader = {
-  uniforms: {
-    tDepth: { value: null },
-    nearClip: { value: 0 },
-    farClip: { value: 0 }
-  },
-  vertexShader: `
-    varying vec2 vUv;
-    void main() {
-      vUv = uv;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-    }
-  `,
-  fragmentShader: `
-    varying vec2 vUv;
-    uniform sampler2D tDepth;
-    uniform float nearClip;
-    uniform float farClip;
-    void main() {
-      float depth = texture2D(tDepth, vUv).r;
-      float viewZ = perspectiveDepthToViewZ(depth, nearClip, farClip);
-      gl_FragColor = vec4(vec3(viewZ), 1.0);
-    }
-  `
-};
-
-export function getDepthMap(camera, scene) {
-  if (!flag) return;
-
-  const height = camera.getFilmHeight();
-  const width = camera.getFilmWidth();
-  const depthMaterial = new THREE.ShaderMaterial(depthShader);
-  const renderer = AFRAME.scenes[0].renderer;
-
-  const depthRenderTarget = new THREE.WebGLRenderTarget(width, height, {
-    format: THREE.RGBAFormat,
-    type: THREE.UnsignedByteType
-  });
-
-  // Create a custom depth material
-
-  // Create a render target to store the depth values
-
-  renderer.setRenderTarget(depthRenderTarget);
-
-  renderer.render(scene, camera);
-
-  depthShader.uniforms.tDepth.value = depthRenderTarget.texture;
-  depthShader.uniforms.nearClip.value = camera.near;
-  depthShader.uniforms.farClip.value = camera.far;
-
-  snapPOV();
-
-  // Render the scene as usual
-  renderer.setRenderTarget(null);
-}
+init();

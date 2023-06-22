@@ -100,7 +100,10 @@ function hoverButtonSystem(world) {
     const obj = world.eid2obj.get(eid);
     const isHovered = hasAnyComponent(world, hoverComponents, eid);
     const style = buttonStyles[HoverButton.type[eid]];
-    obj.material.color.copy(isHovered ? style.hoverColor : style.color);
+    if (obj.material.color) {
+      obj.material.color.copy(isHovered ? style.hoverColor : style.color);
+    }
+
     if (hasComponent(world, TextButton, eid)) {
       const lbl = world.eid2obj.get(TextButton.labelRef[eid]);
       lbl.color = isHovered ? style.textHoverColor : style.textColor;

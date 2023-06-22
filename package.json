@@ -115,7 +115,7 @@
     "normalize.css": "^8.0.1",
     "pdfjs-dist": "^2.14.305",
     "phoenix": "github:gfodor/phoenix-js#master",
-    "postprocessing": "^6.28.7",
+    "postprocessing": "^6.32.1",
     "prop-types": "^15.7.2",
     "raven-js": "^3.20.1",
     "react": "^18.2.0",

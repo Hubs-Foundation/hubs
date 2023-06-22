@@ -176,7 +176,7 @@ export class App {
     const renderer = new WebGLRenderer({
       alpha: true,
       antialias: !enablePostEffects,
-      depth: !enablePostEffects,
+      depth: true,
       stencil: false,
       powerPreference: "high-performance",
       preserveDrawingBuffer: true,
