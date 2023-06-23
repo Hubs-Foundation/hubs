@@ -7,7 +7,6 @@ import { useForm } from "react-hook-form";
 import { Button } from "../input/Button";
 import { Column } from "../layout/Column";
 import { IconButton } from "../input/IconButton";
-import { ReactComponent as AttachIcon } from "../icons/Attach.svg";
 import styles from "./ObjectUrlModal.scss";
 import classNames from "classnames";
 import { FormattedMessage } from "react-intl";
@@ -40,11 +39,11 @@ export function ObjectUrlModal({ showModelCollectionLink, modelCollectionUrl, on
       beforeTitle={<CloseButton onClick={onClose} />}
     >
       <Column as="form" padding center onSubmit={handleSubmit(onSubmit)}>
-        <p>
+        <p className={styles.text}>
           {showModelCollectionLink ? (
             <FormattedMessage
               id="object-url-modal.message-with-collection"
-              defaultMessage="Upload or paste a URL to an image, video, model, or scene. Models can be found on <sketchfablink>Sketchfab</sketchfablink> or our <collectionlink>collection</collectionlink>."
+              defaultMessage="Upload or paste a link to an image, video, model, or scene. Models can be found on <sketchfablink>Sketchfab</sketchfablink> or in our <collectionlink>collection</collectionlink>."
               values={{
                 // eslint-disable-next-line react/display-name
                 sketchfablink: chunks => (
@@ -67,7 +66,7 @@ export function ObjectUrlModal({ showModelCollectionLink, modelCollectionUrl, on
           ) : (
             <FormattedMessage
               id="object-url-modal.message"
-              defaultMessage="Upload or paste a URL to an image, video, model, or scene. Models can be found on <sketchfablink>Sketchfab</sketchfablink>."
+              defaultMessage="Upload or paste a link to an image, video, model, or scene. Models can be found on <sketchfablink>Sketchfab</sketchfablink>."
               values={{
                 // eslint-disable-next-line react/display-name
                 sketchfablink: chunks => (
@@ -90,15 +89,23 @@ export function ObjectUrlModal({ showModelCollectionLink, modelCollectionUrl, on
           value={fileName || url || ""}
           {...register("url")}
           error={hasFile ? errors?.file?.message : errors?.url?.message}
+          fullWidth
+          className={styles.input}
           afterInput={
             <>
-              {showCloseButton && <CloseButton onClick={onClear} />}
+              {showCloseButton && <CloseButton onClick={onClear} className={styles.close} />}
               <IconButton
                 as="label"
-                className={classNames({ [styles.hidden]: showCloseButton }, styles.urlInput)}
+                className={classNames({ [styles.hidden]: showCloseButton }, styles.urlInput, styles.container)}
                 htmlFor="file"
               >
-                <AttachIcon />
+                {!showCloseButton && (
+                  <div className={styles.browse}>
+                    <span>
+                      <FormattedMessage id="object-url-modal.browse" defaultMessage="Browse" />
+                    </span>
+                  </div>
+                )}
                 <input id="file" className={styles.hidden} type="file" {...register("file")} />
               </IconButton>
             </>
@@ -110,7 +117,7 @@ export function ObjectUrlModal({ showModelCollectionLink, modelCollectionUrl, on
             />
           }
         />
-        <Button type="submit" preset="accept">
+        <Button type="submit" preset="accent4">
           <FormattedMessage id="object-url-modal.create-object-button" defaultMessage="Create Object" />
         </Button>
       </Column>
