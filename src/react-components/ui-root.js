@@ -787,10 +787,15 @@ class UIRoot extends Component {
   }
 
   onFocusChat = e => {
-    this.setSidebar("chat", {
-      chatPrefix: e.detail.prefix,
-      chatAutofocus: true
-    });
+    // Close chat sidebar when hotkey is pressed whilst chat input is not in focus
+    if (this.state.sidebarId === "chat") {
+      this.setSidebar(null);
+    } else {
+      this.setSidebar("chat", {
+        chatPrefix: e.detail.prefix,
+        chatAutofocus: true
+      });
+    }
   };
 
   renderInterstitialPrompt = () => {
