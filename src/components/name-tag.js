@@ -250,7 +250,7 @@ AFRAME.registerComponent("name-tag", {
       this.pronounsText.el.addEventListener("text-updated", () => this.updateNametagWidth(), {
         once: true
       });
-      if (this.pronouns.length > DISPLAY_NAME_LENGTH) {
+      if (this.pronouns && this.pronouns.length > DISPLAY_NAME_LENGTH) {
         this.pronouns = this.pronouns.slice(0, DISPLAY_NAME_LENGTH).concat("...");
       }
       this.pronounsText.el.setAttribute("text", {

@@ -95,7 +95,7 @@
     "detect-browser": "^3.0.1",
     "downshift": "^6.0.5",
     "draft-js": "^0.11.7",
-    "emoji-mart": "^5.5.2",
+    "emoji-picker-react": "^4.4.9",
     "event-target-shim": "^3.0.1",
     "form-data": "^3.0.0",
     "form-urlencoded": "^2.0.4",

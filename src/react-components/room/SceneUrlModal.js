@@ -9,7 +9,12 @@ import { FormattedMessage } from "react-intl";
 import { Column } from "../layout/Column";
 
 export function SceneUrlModal({ enableSpoke, editorName, onValidateUrl, onSubmit, onClose }) {
-  const { isSubmitting, handleSubmit, register, errors } = useForm();
+  const {
+    isSubmitting,
+    handleSubmit,
+    register,
+    formState: { errors }
+  } = useForm();
   return (
     <Modal
       title={<FormattedMessage id="scene-url-modal.title" defaultMessage="Custom Scene URL" />}
@@ -51,13 +56,11 @@ export function SceneUrlModal({ enableSpoke, editorName, onValidateUrl, onSubmit
           )}
         </p>
         <TextInputField
-          name="url"
           label={<FormattedMessage id="scene-url-modal.url-input" defaultMessage="Scene URL" />}
           placeholder="https://example.com/scene.glb"
           type="url"
-          required
-          ref={register({ validate: onValidateUrl })}
-          error={errors.url && errors.url.message}
+          {...register("url", { validate: onValidateUrl, required: true })}
+          error={errors?.url?.message}
         />
         <Button type="submit" preset="accept" disabled={isSubmitting}>
           <FormattedMessage id="scene-url-modal.change-scene-button" defaultMessage="Change Scene" />
@@ -90,5 +93,5 @@ SceneUrlModal.propTypes = {
   editorName: PropTypes.string,
   onSubmit: PropTypes.func,
   onClose: PropTypes.func,
-  onValidateUrl: PropTypes.isRequired
+  onValidateUrl: PropTypes.func.isRequired
 };

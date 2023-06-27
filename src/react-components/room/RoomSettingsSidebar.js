@@ -32,7 +32,13 @@ export function RoomSettingsSidebar({
   onChangeScene
 }) {
   const intl = useIntl();
-  const { handleSubmit, register, watch, errors, setValue } = useForm({
+  const {
+    handleSubmit,
+    register,
+    watch,
+    formState: { errors },
+    setValue
+  } = useForm({
     defaultValues: room
   });
 
@@ -59,7 +65,6 @@ export function RoomSettingsSidebar({
           onChangeScene={onChangeScene}
         />
         <TextInputField
-          name="name"
           type="text"
           required
           autoComplete="off"
@@ -70,12 +75,11 @@ export function RoomSettingsSidebar({
           minLength={1}
           maxLength={64}
           label={<FormattedMessage id="room-settings-sidebar.name" defaultMessage="Room Name" />}
-          ref={register}
-          error={errors.name}
+          error={errors?.name?.message}
           fullWidth
+          {...register("name")}
         />
         <TextAreaInputField
-          name="description"
           autoComplete="off"
           placeholder={intl.formatMessage({
             id: "room-settings-sidebar.description-placeholder",
@@ -83,12 +87,11 @@ export function RoomSettingsSidebar({
           })}
           label={<FormattedMessage id="room-settings-sidebar.description" defaultMessage="Room Description" />}
           minRows={3}
-          ref={register}
-          error={errors.description}
+          error={errors?.description?.message}
           fullWidth
+          {...register("description")}
         />
         <NumericInputField
-          name="room_size"
           required
           min={0}
           max={maxRoomSize}
@@ -97,16 +100,15 @@ export function RoomSettingsSidebar({
             defaultMessage: "Member Limit"
           })}
           label={<FormattedMessage id="room-settings-sidebar.room-size" defaultMessage="Room Size" />}
-          ref={register}
-          error={errors.room_size}
+          error={errors?.room_size?.message}
           fullWidth
+          {...register("room_size")}
         />
         <RadioInputField
           label={<FormattedMessage id="room-settings-sidebar.room-access" defaultMessage="Room Access" />}
           fullWidth
         >
           <RadioInputOption
-            name="entry_mode"
             value="allow"
             label={<FormattedMessage id="room-settings-sidebar.access-shared-link" defaultMessage="Shared link" />}
             description={
@@ -115,11 +117,10 @@ export function RoomSettingsSidebar({
                 defaultMessage="Only those with the link can join"
               />
             }
-            ref={register}
-            error={errors.entry_mode}
+            error={errors?.entry_mode?.message}
+            {...register("entry_mode")}
           />
           <RadioInputOption
-            name="entry_mode"
             value="invite"
             label={<FormattedMessage id="room-settings-sidebar.access-invite" defaultMessage="Invite only" />}
             description={
@@ -128,8 +129,8 @@ export function RoomSettingsSidebar({
                 defaultMessage="Invite people with a link that can be revoked"
               />
             }
-            ref={register}
-            error={errors.entry_mode}
+            error={errors?.entry_mode?.message}
+            {...register("entry_mode")}
           />
         </RadioInputField>
         {entryMode === "invite" && (
@@ -137,7 +138,6 @@ export function RoomSettingsSidebar({
         )}
         {showPublicRoomSetting && (
           <ToggleInput
-            name="allow_promotion"
             label={<FormattedMessage id="room-settings-sidebar.access-public" defaultMessage="Public" />}
             description={
               <FormattedMessage
@@ -145,7 +145,7 @@ export function RoomSettingsSidebar({
                 defaultMessage="Listed on the homepage"
               />
             }
-            ref={register}
+            {...register("allow_promotion")}
           />
         )}
         <InputField
@@ -154,53 +154,45 @@ export function RoomSettingsSidebar({
         >
           <div className={styles.roomPermissions}>
             <ToggleInput
-              name="member_permissions.voice_chat"
               label={<FormattedMessage id="room-settings-sidebar.voice-chat" defaultMessage="Voice chat" />}
-              ref={register}
+              {...register("member_permissions.voice_chat")}
             />
             <ToggleInput
-              name="member_permissions.text_chat"
               label={<FormattedMessage id="room-settings-sidebar.text-chat" defaultMessage="Text chat" />}
-              ref={register}
+              {...register("member_permissions.text_chat")}
             />
             <ToggleInput
-              name="member_permissions.spawn_and_move_media"
               label={
                 <FormattedMessage
                   id="room-settings-sidebar.spawn-and-move-media"
                   defaultMessage="Create and move objects"
                 />
               }
-              ref={register}
+              {...register("member_permissions.spawn_and_move_media")}
             />
             <div className={styles.permissionsGroup}>
               <ToggleInput
-                name="member_permissions.spawn_camera"
                 label={<FormattedMessage id="room-settings-sidebar.spawn-camera" defaultMessage="Create cameras" />}
-                ref={register}
                 disabled={!spawnAndMoveMedia}
+                {...register("member_permissions.spawn_camera")}
               />
               <ToggleInput
-                name="member_permissions.pin_objects"
                 label={<FormattedMessage id="room-settings-sidebar.pin-objects" defaultMessage="Pin objects" />}
-                ref={register}
                 disabled={!spawnAndMoveMedia}
+                {...register("member_permissions.pin_objects")}
               />
             </div>
             <ToggleInput
-              name="member_permissions.spawn_drawing"
               label={<FormattedMessage id="room-settings-sidebar.spawn-drawing" defaultMessage="Create drawings" />}
-              ref={register}
+              {...register("member_permissions.spawn_drawing")}
             />
             <ToggleInput
-              name="member_permissions.spawn_emoji"
               label={<FormattedMessage id="room-settings-sidebar.spawn-emoji" defaultMessage="Create emoji" />}
-              ref={register}
+              {...register("member_permissions.spawn_emoji")}
             />
             <ToggleInput
-              name="member_permissions.fly"
               label={<FormattedMessage id="room-settings-sidebar.fly" defaultMessage="Allow flying" />}
-              ref={register}
+              {...register("member_permissions.fly")}
             />
           </div>
         </InputField>
