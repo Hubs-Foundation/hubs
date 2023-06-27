@@ -14,7 +14,13 @@ const NAMETAG_BACKGROUND_PADDING = 0.05;
 const NAMETAG_STATUS_BORDER_PADDING = 0.035;
 const NAMETAG_MIN_WIDTH = 0.6;
 const NAMETAG_HEIGHT = 0.25;
+const NAMETAG_PRONOUN_HEIGHT = 0.325;
 const NAMETAG_OFFSET = 0.2;
+const NAMETAG_PRONOUN_OFFSET = 0.25;
+const NAMETAG_VOLUME_Y = -0.075;
+const NAMETAG_VOLUME_PRONOUN_Y = -0.12;
+const NAMETAG_TEXT_Y = 0.1;
+const NAMETAG_TEXT_PRONOUN_Y = 0.125;
 const TYPING_ANIM_SPEED = 150;
 const DISPLAY_NAME_LENGTH = 18;
 
@@ -56,6 +62,10 @@ AFRAME.registerComponent("name-tag", {
     this.nametagHeight = 0;
     this.isAvatarReady = false;
     this.lastUpdateTime = Date.now();
+    this.nameTagHeight = NAMETAG_HEIGHT;
+    this.nameTagOffset = NAMETAG_OFFSET;
+    this.nameTagVolumeY = NAMETAG_VOLUME_Y;
+    this.nameTagTextY = NAMETAG_TEXT_Y;
 
     this.onPresenceUpdated = this.onPresenceUpdated.bind(this);
     this.onModelLoading = this.onModelLoading.bind(this);
@@ -63,6 +73,7 @@ AFRAME.registerComponent("name-tag", {
     this.onModelIkFirstTick = this.onModelIkFirstTick.bind(this);
     this.onStateChanged = this.onStateChanged.bind(this);
     this.updateNametagWidth = this.updateNametagWidth.bind(this);
+    this.updateElements = this.updateElements.bind(this);
 
     this.nametag = this.el.object3D;
     this.nametagIdentityName = this.el.querySelector(".identityName").object3D;
@@ -75,16 +86,19 @@ AFRAME.registerComponent("name-tag", {
 
     this.handRaised = new THREE.Mesh(handRaisedGeometry, handRaisedMaterial);
     this.handRaised.position.set(0, -0.3, 0.001);
+    this.handRaised.matrixNeedsUpdate = true;
     this.el.object3D.add(this.handRaised);
 
     this.nametagVolume = new THREE.Mesh(nametagVolumeGeometry, nametagVolumeMaterial);
-    this.nametagVolume.position.set(0, -0.075, 0.001);
+    this.nametagVolume.position.set(0, this.nameTagVolumeY, 0.001);
+    this.nametagVolume.matrixNeedsUpdate = true;
     this.nametagVolume.visible = false;
     this.el.object3D.add(this.nametagVolume);
 
-    // TODO this is horribly inneficient draw call and geometry wise. Replace with custom shader code or at least a uv-croll image
+    // TODO this is horribly inefficient draw call and geometry wise. Replace with custom shader code or at least a uv-croll image
     this.nametagTyping = new THREE.Group();
-    this.nametagTyping.position.set(0, -0.075, 0.001);
+    this.nametagTyping.position.set(0, this.nameTagVolumeY, 0.001);
+    this.nametagTyping.matrixNeedsUpdate = true;
     for (let i = 0; i < 5; i++) {
       const dot = new THREE.Mesh(
         nametagTypingGeometry,
@@ -208,10 +222,7 @@ AFRAME.registerComponent("name-tag", {
     this.isTyping = !!presenceMeta.typing;
     this.isHandRaised = !!presenceMeta.hand_raised;
     if (this.isAvatarReady) {
-      this.updateDisplayName();
-      this.updatePronouns();
-      this.updateHandRaised();
-      this.resizeNameTag();
+      this.updateElements();
     }
   },
 
@@ -243,6 +254,9 @@ AFRAME.registerComponent("name-tag", {
       }
       this.nametagIdentityName.el.setAttribute("text", { value: this.identityName });
     }
+
+    this.nametagText.position.set(0, this.nameTagTextY, 0.001);
+    this.nametagText.matrixNeedsUpdate = true;
   },
 
   updatePronouns() {
@@ -275,18 +289,38 @@ AFRAME.registerComponent("name-tag", {
     this.neck = this.ikRoot.el.querySelector(".Neck").object3D;
     this.audioAnalyzer = this.ikRoot.el.querySelector(".AvatarRoot").components["networked-audio-analyser"];
 
+    this.updateElements();
+    this.isAvatarReady = true;
+  },
+
+  updateElements() {
+    if (this.pronouns) {
+      this.nameTagHeight = NAMETAG_PRONOUN_HEIGHT;
+      this.nameTagOffset = NAMETAG_PRONOUN_OFFSET;
+      this.nameTagVolumeY = NAMETAG_VOLUME_PRONOUN_Y;
+      this.nameTagTextY = NAMETAG_TEXT_PRONOUN_Y;
+    } else {
+      this.nameTagHeight = NAMETAG_HEIGHT;
+      this.nameTagOffset = NAMETAG_OFFSET;
+      this.nameTagVolumeY = NAMETAG_VOLUME_Y;
+      this.nameTagTextY = NAMETAG_TEXT_Y;
+    }
+
     this.updateAvatarModelAABB();
     const tmpVector = new THREE.Vector3();
     this.nametagHeight =
       Math.abs(tmpVector.subVectors(this.ikRoot.position, this.avatarAABBCenter).y) +
       this.avatarAABBSize.y / 2 +
-      NAMETAG_OFFSET;
-    this.nametagElPosY = this.nametagHeight + (this.isHandRaised ? NAMETAG_OFFSET : 0);
+      this.nameTagOffset;
+    this.nametagElPosY = this.nametagHeight + (this.isHandRaised ? this.nameTagOffset : 0);
     this.pronounsText.el && this.pronounsText.el.components["text"].getSize(this.size);
     const pronounsTextSize = this.size.x;
     this.nametagText.el.components["text"].getSize(this.size);
     this.size.x = Math.max(this.size.x, pronounsTextSize, NAMETAG_MIN_WIDTH);
-    this.isAvatarReady = true;
+    this.nametagVolume.position.set(0, this.nameTagVolumeY, 0.001);
+    this.nametagVolume.matrixNeedsUpdate = true;
+    this.nametagTyping.position.set(0, this.nameTagVolumeY, 0.001);
+    this.nametagTyping.matrixNeedsUpdate = true;
 
     this.updateDisplayName();
     this.updatePronouns();
@@ -312,11 +346,11 @@ AFRAME.registerComponent("name-tag", {
   resizeNameTag() {
     this.nametagBackground.el.setAttribute("slice9", {
       width: this.size.x + NAMETAG_BACKGROUND_PADDING * 2,
-      height: NAMETAG_HEIGHT
+      height: this.nameTagHeight
     });
     this.nametagStatusBorder.el.setAttribute("slice9", {
       width: this.size.x + NAMETAG_BACKGROUND_PADDING * 2 + NAMETAG_STATUS_BORDER_PADDING,
-      height: NAMETAG_HEIGHT + NAMETAG_STATUS_BORDER_PADDING
+      height: this.nameTagHeight + NAMETAG_STATUS_BORDER_PADDING
     });
   },
 
@@ -351,7 +385,7 @@ AFRAME.registerComponent("name-tag", {
       targets: {
         y: this.nametagElPosY
       },
-      y: this.nametagHeight + (this.isHandRaised ? NAMETAG_OFFSET : 0),
+      y: this.nametagHeight + (this.isHandRaised ? this.nameTagOffset : 0),
       update: anim => {
         this.nametagElPosY = anim.animatables[0].target.y;
       }
