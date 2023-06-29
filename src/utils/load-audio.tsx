@@ -1,18 +1,14 @@
 /** @jsx createElementEntity */
 import { createElementEntity } from "../utils/jsx-entity";
 import { ProjectionMode } from "./projection-mode";
-import { VideoTexture } from "three";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { loadAudioTexture } from "../utils/load-audio-texture";
 import { HubsWorld } from "../app";
+import { HubsVideoTexture } from "../textures/HubsVideoTexture";
 
 export function* loadAudio(world: HubsWorld, url: string) {
-  const { texture, ratio }: { texture: VideoTexture; ratio: number } = yield loadAudioTexture(url);
-
-  // TODO: VideoTexture.image must be content that be played
-  //       in video-system. And it is also used to render.
-  //       It is audio here so the object will be rendered as
-  //       black. Audio icon must be rendered. Fix this.
+  const { texture, ratio, video }: { texture: HubsVideoTexture; ratio: number; video: HTMLVideoElement } =
+    yield loadAudioTexture(url);
 
   return renderAsEntity(
     world,
@@ -27,7 +23,8 @@ export function* loadAudio(world: HubsWorld, url: string) {
         texture,
         ratio,
         autoPlay: true,
-        projection: ProjectionMode.FLAT
+        projection: ProjectionMode.FLAT,
+        video
       }}
     ></entity>
   );

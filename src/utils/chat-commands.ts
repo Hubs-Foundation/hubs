@@ -40,6 +40,7 @@ const FLAG_ANIMATE_LOAD = "--animate";
 const FLAG_NO_OBJECT_MENU = "--no-menu";
 const ADD_FLAGS = [FLAG_RESIZE, FLAG_RECENTER, FLAG_ANIMATE_LOAD, FLAG_NO_OBJECT_MENU];
 export function add(world: HubsWorld, avatarPov: Object3D, args: string[]) {
+  if (!APP.hubChannel!.can("spawn_and_move_media")) return;
   args = args.filter(arg => arg);
   if (args.length) {
     const initialData = {

@@ -12,19 +12,13 @@
   }
 }
 
-:local(.logo-container) {
-  padding: 0 16px;
-  margin-top: 16px;
-  margin-bottom: 32px;
-}
-
 :local(.logo) {
   height: auto;
-  max-height: 250px;
-  height: 100%;
+  max-width: 260px;
+  max-height: 140px;
   object-fit: contain;
   object-position: center;
-  min-width: 172px;
+  margin: 16px 16px 32px;
 }
 
 :local(.room-name) {

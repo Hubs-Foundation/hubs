@@ -87,8 +87,9 @@ function getPersonName(person, intl) {
     id: "people-sidebar.person-name.you",
     defaultMessage: "You"
   });
+  const suffix = person.isMe ? `(${you})` : person.profile?.pronouns ? `(${person.profile.pronouns})` : "";
 
-  return person.profile.displayName + (person.isMe ? ` (${you})` : "");
+  return `${person.profile.displayName} ${suffix}`;
 }
 
 export function PeopleSidebar({
@@ -103,7 +104,11 @@ export function PeopleSidebar({
 }) {
   const intl = useIntl();
   const me = people.find(person => !!person.isMe);
-  const filteredPeople = people.filter(person => !person.isMe);
+  const filteredPeople = people
+    .filter(person => !person.isMe)
+    .sort(a => {
+      return a.hand_raised ? -1 : 1;
+    });
   me && filteredPeople.unshift(me);
 
   return (

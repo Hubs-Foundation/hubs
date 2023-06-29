@@ -11,45 +11,106 @@ export default {
 
 export const AllPermissions = () => (
   <RoomLayout
-    sidebar={<UserProfileSidebar displayName="Robert" volume={4} isSignedIn canHide canKick canMute canPromote />}
+    sidebar={
+      <UserProfileSidebar
+        displayName="Robert"
+        pronouns="he/him"
+        volume={4}
+        isSignedIn
+        canHide
+        canKick
+        canMute
+        canPromote
+      />
+    }
   />
 );
 
 export const CanDemote = () => (
   <RoomLayout
-    sidebar={<UserProfileSidebar displayName="Robert" volume={4} isSignedIn canHide canKick canMute canDemote />}
+    sidebar={
+      <UserProfileSidebar
+        displayName="Robert"
+        pronouns="he/him"
+        volume={4}
+        isSignedIn
+        canHide
+        canKick
+        canMute
+        canDemote
+      />
+    }
   />
 );
 
 export const CanUnhide = () => (
-  <RoomLayout sidebar={<UserProfileSidebar displayName="Robert" volume={4} isSignedIn canHide isHidden />} />
+  <RoomLayout
+    sidebar={<UserProfileSidebar displayName="Robert" pronouns="he/him" volume={4} isSignedIn canHide isHidden />}
+  />
 );
 
 export const NotSignedIn = () => (
   <RoomLayout
-    sidebar={<UserProfileSidebar displayName="Robert" volume={4} isSignedIn canHide canKick canMute canPromote />}
+    sidebar={
+      <UserProfileSidebar
+        displayName="Robert"
+        pronouns="he/him"
+        volume={4}
+        isSignedIn
+        canHide
+        canKick
+        canMute
+        canPromote
+      />
+    }
   />
 );
 
 export const NotSignedInCanDemote = () => (
-  <RoomLayout sidebar={<UserProfileSidebar displayName="Robert" volume={4} canHide canKick canMute canDemote />} />
+  <RoomLayout
+    sidebar={<UserProfileSidebar displayName="Robert" pronouns="he/him" volume={4} canHide canKick canMute canDemote />}
+  />
 );
 
 export const NotSignedInCanUnhide = () => (
-  <RoomLayout sidebar={<UserProfileSidebar displayName="Robert" volume={4} canHide isHidden />} />
+  <RoomLayout sidebar={<UserProfileSidebar displayName="Robert" pronouns="he/him" volume={4} canHide isHidden />} />
 );
 
-export const NoPermissions = () => <RoomLayout sidebar={<UserProfileSidebar displayName="Robert" volume={4} />} />;
+export const NoPermissions = () => (
+  <RoomLayout sidebar={<UserProfileSidebar displayName="Robert" pronouns="he/him" volume={4} />} />
+);
 
 export const NetworkMuted = () => (
   <RoomLayout
-    sidebar={<UserProfileSidebar displayName="Robert" volume={4} isMuted isSignedIn canHide canKick canPromote />}
+    sidebar={
+      <UserProfileSidebar
+        displayName="Robert"
+        pronouns="he/him"
+        volume={4}
+        isMuted
+        isSignedIn
+        canHide
+        canKick
+        canPromote
+      />
+    }
   />
 );
 
 export const LocalMuted = () => (
   <RoomLayout
-    sidebar={<UserProfileSidebar displayName="Robert" volume={0} isSignedIn canHide canKick canMute canPromote />}
+    sidebar={
+      <UserProfileSidebar
+        displayName="Robert"
+        pronouns="he/him"
+        volume={0}
+        isSignedIn
+        canHide
+        canKick
+        canMute
+        canPromote
+      />
+    }
   />
 );
 
@@ -58,6 +119,7 @@ export const ShowBackButton = () => (
     sidebar={
       <UserProfileSidebar
         displayName="Robert"
+        pronouns="he/him"
         volume={4}
         showBackButton
         isSignedIn

@@ -2,9 +2,9 @@ import { create360ImageMesh, createImageMesh } from "../utils/create-image-mesh"
 import { addComponent } from "bitecs";
 import { addObject3DComponent } from "../utils/jsx-entity";
 import { ProjectionMode } from "../utils/projection-mode";
-import { MediaVideo } from "../bit-components";
+import { MediaVideo, MediaVideoData } from "../bit-components";
 
-export function inflateVideo(world, eid, { texture, ratio, projection, autoPlay }) {
+export function inflateVideo(world, eid, { texture, ratio, projection, autoPlay, video }) {
   const mesh =
     projection === ProjectionMode.SPHERE_EQUIRECTANGULAR
       ? create360ImageMesh(texture, ratio)
@@ -13,5 +13,6 @@ export function inflateVideo(world, eid, { texture, ratio, projection, autoPlay 
   addComponent(world, MediaVideo, eid);
   MediaVideo.autoPlay[eid] = autoPlay ? 1 : 0;
   MediaVideo.ratio[eid] = ratio;
+  MediaVideoData.set(eid, video);
   return eid;
 }

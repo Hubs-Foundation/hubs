@@ -14,7 +14,6 @@ import { FormattedMessage } from "react-intl";
 import cone from "../../assets/images/cone.png";
 
 const Banner = () => {
-  const [email, setEmail] = useState("");
   const [confirm, setConfirm] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [responseStatus, setResponseStatus] = useState(false);
@@ -91,16 +90,6 @@ const Banner = () => {
     }
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
-
-  /**
-   * Emain input change
-   */
-  const onChangeEmail = useCallback(
-    e => {
-      setEmail(e.target.value);
-    },
-    [setEmail]
-  );
 
   /**
    * Checkbox Confirm
@@ -310,13 +299,11 @@ const Banner = () => {
                   ) : (
                     <div className={styles.expand_form_fields}>
                       <TextInputField
-                        ref={register}
-                        name="email"
+                        {...register("email", {
+                          required: true
+                        })}
                         type="email"
                         label={<FormattedMessage id="banner.email-address" defaultMessage="Email Address" />}
-                        required
-                        value={email}
-                        onChange={onChangeEmail}
                         placeholder="name@email.com"
                         className={styles.expand_form_field}
                       />
@@ -327,17 +314,15 @@ const Banner = () => {
                       >
                         <RadioInputOption
                           className={styles.radio_override}
-                          name="email_format"
                           value="html"
                           label={<FormattedMessage id="banner.format-html" defaultMessage="HTML" />}
-                          ref={register}
+                          {...register("email_format")}
                         />
                         <RadioInputOption
                           className={styles.radio_override}
-                          name="email_format"
                           value="text"
                           label={<FormattedMessage id="banner.format-text" defaultMessage="Text" />}
-                          ref={register}
+                          {...register("email_format")}
                         />
                       </RadioInputField>
 

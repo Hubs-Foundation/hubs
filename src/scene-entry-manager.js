@@ -256,7 +256,7 @@ export default class SceneEntryManager {
           spawnFromFileList([src]);
         }
       } else {
-        spawnMediaInfrontOfPlayerAndReturn(src, contentOrigin).eid;
+        spawnMediaInfrontOfPlayerAndReturn(src, contentOrigin);
       }
     };
 
@@ -365,10 +365,12 @@ export default class SceneEntryManager {
         } else {
           currentVideoShareEntity = spawnMediaInfrontOfPlayerAndReturn(this.mediaDevicesManager.mediaStream, undefined);
           // Wire up custom removal event which will stop the stream.
-          currentVideoShareEntity.setAttribute(
-            "emit-scene-event-on-remove",
-            `event:${MediaDevicesEvents.VIDEO_SHARE_ENDED}`
-          );
+          if (currentVideoShareEntity) {
+            currentVideoShareEntity.setAttribute(
+              "emit-scene-event-on-remove",
+              `event:${MediaDevicesEvents.VIDEO_SHARE_ENDED}`
+            );
+          }
         }
 
         this.scene.emit("share_video_enabled", { source: isDisplayMedia ? MediaDevices.SCREEN : MediaDevices.CAMERA });

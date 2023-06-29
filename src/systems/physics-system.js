@@ -22,6 +22,7 @@ export class PhysicsSystem {
     this.workerHelpers = new WorkerHelpers(this.ammoWorker);
 
     this.bodyUuids = [];
+    this.bodiesToRemove = [];
     this.indexToUuid = {};
     this.bodyUuidToData = new Map();
 
@@ -146,7 +147,7 @@ export class PhysicsSystem {
          * 17     Angular Velocity (float)
          * 18-25  first 8 Collisions (ints)
          */
-
+        this.bodiesToRemove.length = 0;
         if (this.objectMatricesFloatArray.buffer.byteLength !== 0) {
           for (let i = 0; i < this.bodyUuids.length; i++) {
             const uuid = this.bodyUuids[i];
@@ -155,8 +156,8 @@ export class PhysicsSystem {
             const type = body.options.type ? body.options.type : TYPE.DYNAMIC;
             const object3D = body.object3D;
             if (!object3D.parent) {
-              // TODO: Fix me
-              console.error("Physics body exists but object3D has no parent.");
+              console.warn("Physics body exists but object3D had no parent; removing the body.");
+              this.bodiesToRemove.push(uuid);
               continue;
             }
             if (type === TYPE.DYNAMIC) {
@@ -206,6 +207,10 @@ export class PhysicsSystem {
             { type: MESSAGE_TYPES.TRANSFER_DATA, objectMatricesFloatArray: this.objectMatricesFloatArray },
             [this.objectMatricesFloatArray.buffer]
           );
+        }
+
+        for (let i = this.bodiesToRemove.length - 1; i >= 0; i--) {
+          this.removeBody(this.bodiesToRemove[i]);
         }
 
         /* DEBUG RENDERING */
