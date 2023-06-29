@@ -148,9 +148,9 @@ function cloneObject(world: HubsWorld, sourceEid: EntityID) {
 
 function handleClicks(world: HubsWorld, menu: EntityID, hubChannel: HubChannel) {
   if (clicked(world, ObjectMenu.pinButtonRef[menu])) {
-    createEntityState(hubChannel, world, ObjectMenu.targetRef[menu]);
+    createEntityState(hubChannel, world, ObjectMenu.targetRef[menu]).catch(console.warn);
   } else if (clicked(world, ObjectMenu.unpinButtonRef[menu])) {
-    deleteEntityState(hubChannel, world, ObjectMenu.targetRef[menu]);
+    deleteEntityState(hubChannel, world, ObjectMenu.targetRef[menu]).catch(console.warn);
   } else if (clicked(world, ObjectMenu.cameraFocusButtonRef[menu])) {
     console.log("Clicked focus");
   } else if (clicked(world, ObjectMenu.cameraTrackButtonRef[menu])) {

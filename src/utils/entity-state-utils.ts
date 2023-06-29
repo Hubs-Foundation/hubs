@@ -69,8 +69,12 @@ export async function deleteEntityState(hubChannel: HubChannel, world: HubsWorld
 }
 
 export async function loadSavedEntityStates(hubChannel: HubChannel) {
-  const list = await listEntityStates(hubChannel);
-  list.data.forEach(entityState => queueEntityStateAsMessage(entityState));
+  try {
+    const list = await listEntityStates(hubChannel);
+    list.data.forEach(entityState => queueEntityStateAsMessage(entityState));
+  } catch (e) {
+    console.warn(e);
+  }
 }
 
 function entityStateCreateMessage(eid: EntityID): CreateMessage {
@@ -115,8 +119,7 @@ function push(hubChannel: HubChannel, command: HubChannelCommand, payload?: HubC
       hubChannel.channel.push(command, payload).receive("ok", resolve).receive("error", reject);
     });
   } else {
-    console.warn("Entity state API is inactive. Would have sent:", { command, payload });
-    return Promise.reject();
+    return Promise.reject(`Entity state API is inactive. Would have sent: ${command}, ${JSON.stringify(payload)}`);
   }
 }
 
@@ -176,9 +179,11 @@ function downloadAsJson(exportObj: any, exportName: string) {
 }
 
 async function downloadSavedEntityStates(hubChannel: HubChannel) {
-  listEntityStates(hubChannel).then(list => {
-    downloadAsJson(list, `hub-${hubChannel.hubId}`);
-  });
+  listEntityStates(hubChannel)
+    .then(list => {
+      downloadAsJson(list, `hub-${hubChannel.hubId}`);
+    })
+    .catch(console.warn);
 }
 
 // For debugging
@@ -197,7 +202,7 @@ function rebroadcastEntityState(hubChannel: HubChannel, entityState: EntityState
         update_message: update
       };
     })
-  });
+  }).catch(console.warn);
 }
 
 function rewriteNidsForEntityState(entityState: EntityState) {

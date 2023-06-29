@@ -19,7 +19,7 @@ function* saveEntityStateJob(hubChannel: HubChannel, world: HubsWorld, eid: Enti
   // Don't save entity state if this entity is no longer persistent
   if (!hasSavedEntityState(world, eid)) return;
 
-  updateEntityState(hubChannel, world, eid);
+  updateEntityState(hubChannel, world, eid).catch(console.warn);
 }
 
 // TODO type for coroutine

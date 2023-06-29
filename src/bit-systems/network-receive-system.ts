@@ -79,7 +79,7 @@ export function networkReceiveSystem(world: HubsWorld) {
       if (eid) {
         if (hasSavedEntityState(world, eid)) {
           console.warn("Received delete message for a persistent entity. Deleting its entity state...");
-          deleteEntityState(APP.hubChannel!, world, eid);
+          deleteEntityState(APP.hubChannel!, world, eid).catch(console.warn);
         }
         createMessageDatas.delete(eid);
         world.nid2eid.delete(nid);

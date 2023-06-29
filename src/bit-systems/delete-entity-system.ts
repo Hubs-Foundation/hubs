@@ -16,7 +16,7 @@ export type Coroutine = Generator<Promise<void>, void, unknown>;
 const END_SCALE = new Vector3().setScalar(0.001);
 function* animateThenRemoveEntity(world: HubsWorld, eid: number): Coroutine {
   if (hasSavedEntityState(world, eid)) {
-    deleteEntityState(APP.hubChannel!, world, eid);
+    deleteEntityState(APP.hubChannel!, world, eid).catch(console.warn);
   }
   addComponent(world, Deleting, eid);
   const obj = world.eid2obj.get(eid)!;
