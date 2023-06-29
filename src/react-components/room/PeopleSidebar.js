@@ -158,7 +158,9 @@ export function PeopleSidebar({
                   />
                 )}
                 {store._preferences?.avatarVoiceLevels?.[person.id]?.muted && (
-                  <span className={styles.isMuted}>muted</span>
+                  <span className={styles.isMuted}>
+                    {intl.formatMessage({ id: "people-sidebar.muted-label", defaultMessage: "muted" })}
+                  </span>
                 )}
                 <p className={styles.presence}>{getPresenceMessage(person.presence, intl)}</p>
               </ButtonListItem>
