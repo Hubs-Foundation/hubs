@@ -22,3 +22,8 @@
   flex: 1;
   justify-content: flex-end;
 }
+
+:local(.isMuted) {
+  font-style: italic;
+  color: theme.$color-semantic-warning;
+}

@@ -110,6 +110,7 @@ export function PeopleSidebar({
       return a.hand_raised ? -1 : 1;
     });
   me && filteredPeople.unshift(me);
+  const store = window.APP.store;
 
   return (
     <Sidebar
@@ -155,6 +156,9 @@ export function PeopleSidebar({
                     width={12}
                     height={12}
                   />
+                )}
+                {store._preferences?.avatarVoiceLevels?.[person.id]?.muted && (
+                  <span className={styles.isMuted}>muted</span>
                 )}
                 <p className={styles.presence}>{getPresenceMessage(person.presence, intl)}</p>
               </ButtonListItem>
