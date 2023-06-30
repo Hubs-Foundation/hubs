@@ -482,6 +482,66 @@ class GLTFHubsPlugin {
   }
 }
 
+const OBJECT3D_EXT = [
+  "ambient-light",
+  "audio",
+  "directional-light",
+  "hemisphere-light",
+  "image",
+  "link",
+  "model",
+  "particle-emitter",
+  "pdf",
+  "point-light",
+  "reflection-probe",
+  "simple-water",
+  "skybox",
+  "spot-light",
+  "text",
+  "video"
+];
+
+/**
+ * This extension guarantees that components that add Object3Ds (ie. through addObject3DComponent) are not attached to non-Object3D
+ * entities as it's not supported in the BitECS loader.
+ * This was supported by the AFrame loader so this extension ensures backwards compatibility with all the existing scenes.
+ * For more context about this see: https://github.com/mozilla/hubs/pull/6121
+ */
+class GLTFHubsCompatExtension {
+  constructor(parser) {
+    this.parser = parser;
+  }
+
+  beforeRoot() {
+    const nodes = this.parser.json.nodes;
+    nodes.forEach(node => {
+      if (node.mesh !== undefined || node.camera !== undefined) {
+        const exts = node.extensions?.MOZ_hubs_components;
+        if (exts) {
+          const children = [];
+          for (const [key, value] of Object.entries(exts)) {
+            if (OBJECT3D_EXT.includes(key)) {
+              const newNode = {
+                name: `${node.name}_${key}`,
+                extensions: {
+                  MOZ_hubs_components: { [key]: value }
+                }
+              };
+              delete exts[key];
+              children.push(newNode);
+            }
+          }
+          node.children = node.children || [];
+          children.forEach(child => {
+            const idx = nodes.push(child) - 1;
+            node.children.push(idx);
+          });
+        }
+      }
+    });
+  }
+}
+
 class GLTFHubsComponentsExtension {
   constructor(parser) {
     this.parser = parser;
@@ -683,6 +743,9 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
   const loadingManager = new THREE.LoadingManager();
   loadingManager.setURLModifier(getCustomGLTFParserURLResolver(gltfUrl));
   const gltfLoader = new GLTFLoader(loadingManager);
+  if (qsTruthy("newLoader")) {
+    gltfLoader.register(parser => new GLTFHubsCompatExtension(parser));
+  }
   gltfLoader
     .register(parser => new GLTFHubsComponentsExtension(parser))
     .register(parser => new GLTFHubsPlugin(parser, jsonPreprocessor))
