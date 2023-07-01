@@ -15,7 +15,6 @@ import {
   localClientID,
   networkedQuery,
   pendingCreatorChanges,
-  pendingLegacyObjectSaves,
   pendingMessages,
   pendingParts,
   softRemovedEntities
@@ -144,27 +143,6 @@ export function networkReceiveSystem(world: HubsWorld) {
       }
       renderAsNetworkedEntity(world, prefabName, initialData, nidString, creator);
     }
-  }
-
-  {
-    // Save entity state for loaded legacy objects
-    pendingLegacyObjectSaves.forEach(nidString => {
-      const nid = APP.getSid(nidString);
-      const eid = world.nid2eid.get(nid);
-
-      if (!eid) {
-        console.warn(`Received save message for unknown legacy entity ${nidString}.`);
-        return;
-      }
-
-      if (!isNetworkInstantiated(eid)) {
-        console.warn(`Received save message for non-network-instantiated legacy entity ${nidString}.`);
-        return;
-      }
-
-      createEntityState(APP.hubChannel!, world, eid);
-    });
-    pendingLegacyObjectSaves.length = 0;
   }
 
   {

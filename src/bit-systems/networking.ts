@@ -19,7 +19,6 @@ export const connectedClientIds = new Set<StringID>();
 export const disconnectedClientIds = new Set<StringID>();
 export const pendingMessages: Message[] = [];
 export const pendingCreatorChanges: CreatorChange[] = [];
-export const pendingLegacyObjectSaves: NetworkID[] = [];
 export const pendingJoins: StringID[] = [];
 export const pendingParts: StringID[] = [];
 export const softRemovedEntities = new Set<EntityID>();

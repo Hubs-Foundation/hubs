@@ -47,6 +47,14 @@ export function hasSavedEntityState(world: HubsWorld, eid: EntityID) {
 
 export async function createEntityState(hubChannel: HubChannel, world: HubsWorld, eid: EntityID) {
   const payload = createEntityStatePayload(world, eid);
+  return createEntityStateWithPayload(hubChannel, world, payload);
+}
+
+export async function createEntityStateWithPayload(
+  hubChannel: HubChannel,
+  world: HubsWorld,
+  payload: CreateEntityStatePayload
+) {
   // console.log("save_entity_state",  payload);
   return push(hubChannel, "save_entity_state", payload).catch(err => {
     console.warn("Failed to save entity state", err);
