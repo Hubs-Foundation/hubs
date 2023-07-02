@@ -9,7 +9,8 @@ const buttonTexture = textureLoader.load(buttonSrc);
 export enum BUTTON_TYPES {
   DEFAULT = 0,
   ACTION = 1,
-  MIC = 2
+  MIC = 2,
+  CAMERA = 3
 }
 
 type ButtonType = BUTTON_TYPES.DEFAULT | BUTTON_TYPES.ACTION;

@@ -37,14 +37,16 @@ export function AgentEntity() {
   const panelRef = createRef();
   const modelRef = createRef();
   const micRef = createRef();
+  const snapRef = createRef();
   const nextRef = createRef();
   const prevRef = createRef();
-  const text = FromatNewText(greetingPhrases[getRandomInt(greetingPhrases.length)]);
+  const text = ["", ""];
+  // FromatNewText(greetingPhrases[getRandomInt(greetingPhrases.length)]);
 
   return (
     <entity
       name="Agent"
-      agent={{ language, panelRef, modelRef, micRef, nextRef, prevRef }}
+      agent={{ language, panelRef, modelRef, micRef, snapRef, nextRef, prevRef }}
       scale={[1, 1, 1]}
       ref={agentRef}
       lookatuser
@@ -52,6 +54,7 @@ export function AgentEntity() {
       <entity lookatuser name="agentObject" mediaLoader={agentMediaParams} ref={modelRef} scale={[1, 1, 1]} />
       <AgentPanel
         micRef={micRef}
+        snapRef={snapRef}
         text={text}
         panelRef={panelRef}
         nextRef={nextRef}

@@ -770,12 +770,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const scene = document.querySelector("a-scene");
 
-  //axis helper
-  getScene().then(scene => {
-    const axesHelper = new THREE.AxesHelper(5);
-    scene.add(axesHelper);
-  });
-
   const onSceneLoaded = () => {
     const physicsSystem = scene.systems["hubs-systems"].physicsSystem;
     physicsSystem.setDebug(isDebug || physicsSystem.debug);

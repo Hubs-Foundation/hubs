@@ -1,5 +1,8 @@
 import { defineQuery, enterQuery, exitQuery } from "bitecs";
 import { Hidden } from "../bit-components";
+import { FromatNewText, UpdateTextSystem } from "./agent-slideshow-system";
+import { greetingPhrases } from "./text-paradigms";
+import { getRandomInt } from "./agent-system";
 
 const hiddenQuery = defineQuery([Hidden]);
 const enterhiddenQuery = enterQuery(hiddenQuery);
@@ -20,6 +23,7 @@ export function HiddenSystem(world) {
     const agentObj = world.eid2obj.get(eid);
     agentObj.position.copy(POVPos.add(forward));
     agentObj.updateMatrix();
+    UpdateTextSystem(world, FromatNewText(greetingPhrases[getRandomInt(greetingPhrases.length)]));
     agentObj.visible = true;
   });
 }

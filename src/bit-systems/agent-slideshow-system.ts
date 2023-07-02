@@ -1,8 +1,9 @@
 import { defineQuery, enterQuery, entityExists, exitQuery, hasComponent } from "bitecs";
 import { PanelIndex } from "../bit-components";
 import { HubsWorld } from "../app";
-import { paradigms } from "./text-paradigms";
+import { greetingPhrases, paradigms } from "./text-paradigms";
 import { Text } from "troika-three-text";
+import { getRandomInt, handleArrows } from "./agent-system";
 
 let activeIndex = 0;
 let updated = false;
@@ -59,11 +60,15 @@ export function UpdateTextSystem(world: HubsWorld, newFormatedText: Array<string
 
   resetIndex();
 
+  handleArrows(world, textCount !== 1);
+
   return textCount === 1;
 }
 
 export function PanelIndexSystem(world: HubsWorld) {
-  if (slideEnterQuery(world).length || slideExitQuery(world).length) resetIndex();
+  if (slideEnterQuery(world).length || slideExitQuery(world).length) {
+    UpdateTextSystem(world, FromatNewText(greetingPhrases[getRandomInt(greetingPhrases.length)]));
+  }
 
   SlideQuery(world).forEach(eid => {
     const panelObj = world.eid2obj.get(eid);

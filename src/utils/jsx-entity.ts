@@ -23,7 +23,7 @@ import {
   RemoteHoverTarget,
   SingleActionButton,
   TextButton,
-  ImageButton,
+  IconButton,
   NetworkedVideo,
   VideoMenu,
   VideoMenuItem,
@@ -316,7 +316,7 @@ export interface JSXComponentData extends ComponentData {
   // @TODO Define all the anys
   networked?: any;
   textButton?: any;
-  imageButton?: any;
+  iconButton?: any;
   hoverButton?: any;
   rigidbody?: OptionalParams<RigidBodyParams>;
   physicsShape?: OptionalParams<PhysicsShapeParams>;
@@ -367,6 +367,7 @@ export interface JSXComponentData extends ComponentData {
     panelRef: Ref;
     modelRef: Ref;
     micRef: Ref;
+    snapRef: Ref;
     nextRef: Ref;
     prevRef: Ref;
   };
@@ -461,7 +462,7 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   singleActionButton: createDefaultInflator(SingleActionButton),
   holdableButton: createDefaultInflator(HoldableButton),
   textButton: createDefaultInflator(TextButton),
-  imageButton: createDefaultInflator(ImageButton),
+  iconButton: createDefaultInflator(IconButton),
   hoverButton: createDefaultInflator(HoverButton),
   holdable: createDefaultInflator(Holdable),
   deletable: createDefaultInflator(Deletable),

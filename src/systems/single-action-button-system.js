@@ -5,7 +5,7 @@ import {
   HoveredHandRight,
   HoveredRemoteLeft,
   HoveredRemoteRight,
-  ImageButton,
+  IconButton,
   Interacted,
   SingleActionButton,
   TextButton
@@ -15,8 +15,8 @@ import { hasAnyComponent } from "../utils/bit-utils";
 import { getThemeColor, onThemeChanged } from "../utils/theme";
 import { CAMERA_MODE_INSPECT } from "./camera-system";
 import { paths } from "./userinput/paths";
-import { isRecording } from "../bit-systems/agent-system";
-import { startRecButtonTexture, stopRecButtonTexture } from "../prefabs/Mic3D";
+import { updateButton, ToggleUpdateButton, isRecording } from "../bit-systems/agent-system";
+import { startRecButtonTexture, stopRecButtonTexture } from "../prefabs/icon-button";
 
 function interact(world, entities, path, interactor) {
   if (AFRAME.scenes[0].systems.userinput.get(path)) {
@@ -37,6 +37,8 @@ function interact(world, entities, path, interactor) {
 const interactedQuery = defineQuery([Interacted]);
 const rightRemoteQuery = defineQuery([SingleActionButton, HoveredRemoteRight]);
 const leftRemoteQuery = defineQuery([SingleActionButton, HoveredRemoteLeft]);
+const recMaterial = new THREE.MeshBasicMaterial({ map: startRecButtonTexture, transparent: true, toneMapped: false });
+const stopMaterial = new THREE.MeshBasicMaterial({ map: stopRecButtonTexture, transparent: true, toneMapped: false });
 
 function singleActionButtonSystem(world) {
   // Clear the interactions from previous frames
@@ -74,19 +76,25 @@ function applyTheme() {
     color: new THREE.Color(0xffffff),
     hoverColor: new THREE.Color(0xaaaaaa),
     textColor: new THREE.Color(getThemeColor("action-color")),
-    textHoverColor: new THREE.Color(getThemeColor("action-color-highlight")),
-
-    RecColor: new THREE.Color(0xd6362b),
-    RecHoverColor: new THREE.Color(getThemeColor("action-color"))
+    textHoverColor: new THREE.Color(getThemeColor("action-color-highlight"))
   };
   buttonStyles[BUTTON_TYPES.ACTION] = {
     color: new THREE.Color(getThemeColor("action-color")),
     hoverColor: new THREE.Color(getThemeColor("action-color-highlight")),
     textColor: new THREE.Color(0xffffff),
-    textHoverColor: new THREE.Color(0xffffff),
-
-    RecColor: new THREE.Color(0xd6362b),
-    RecHoverColor: new THREE.Color(getThemeColor("action-color"))
+    textHoverColor: new THREE.Color(0xffffff)
+  };
+  buttonStyles[BUTTON_TYPES.MIC] = {
+    color: new THREE.Color(0xffffff),
+    hoverColor: new THREE.Color(0xaaaaaa),
+    iconColor: new THREE.Color(0xd6362b),
+    iconHoverColor: new THREE.Color(getThemeColor("action-color-highlight"))
+  };
+  buttonStyles[BUTTON_TYPES.CAMERA] = {
+    color: new THREE.Color(0xffffff),
+    hoverColor: new THREE.Color(0xaaaaaa),
+    iconColor: new THREE.Color(getThemeColor("action-color")),
+    iconHoverColor: new THREE.Color(getThemeColor("action-color-highlight"))
   };
 }
 onThemeChanged(applyTheme);
@@ -97,9 +105,18 @@ const hoverComponents = [HoveredRemoteRight, HoveredRemoteLeft, HoveredHandRight
 const hoverButtonsQuery = defineQuery([HoverButton]);
 function hoverButtonSystem(world) {
   hoverButtonsQuery(world).forEach(function (eid) {
+    let shouldChange = false;
+
+    if (HoverButton.type[eid] == BUTTON_TYPES.MIC)
+      if (updateButton) {
+        changeColor();
+        shouldChange = true;
+      }
+
     const obj = world.eid2obj.get(eid);
     const isHovered = hasAnyComponent(world, hoverComponents, eid);
     const style = buttonStyles[HoverButton.type[eid]];
+
     if (obj.material.color) {
       obj.material.color.copy(isHovered ? style.hoverColor : style.color);
     }
@@ -108,15 +125,11 @@ function hoverButtonSystem(world) {
       const lbl = world.eid2obj.get(TextButton.labelRef[eid]);
       lbl.color = isHovered ? style.textHoverColor : style.textColor;
     }
-    if (hasComponent(world, ImageButton, eid)) {
-      const lbl = world.eid2obj.get(ImageButton.labelRef[eid]);
-      if (isRecording) {
-        changeShape(lbl, true);
-        lbl.material.color.copy(isHovered ? style.textHoverColor : style.textColor);
-      } else {
-        changeShape(lbl, false);
-        lbl.material.color.copy(isHovered ? style.RecHoverColor : style.RecColor);
-      }
+
+    if (hasComponent(world, IconButton, eid)) {
+      const lbl = world.eid2obj.get(IconButton.labelRef[eid]);
+      if (shouldChange) changeShape(lbl);
+      lbl.material.color.copy(isHovered ? style.iconHoverColor : style.iconColor);
     }
   });
 }
@@ -126,12 +139,19 @@ export function buttonSystems(world) {
   singleActionButtonSystem(world);
 }
 
-function changeShape(obj, makeRect) {
-  let newMaterial;
-  if (makeRect)
-    newMaterial = new THREE.MeshBasicMaterial({ map: stopRecButtonTexture, transparent: true, toneMapped: false });
-  else newMaterial = new THREE.MeshBasicMaterial({ map: startRecButtonTexture, transparent: true, toneMapped: false });
-  if (newMaterial) {
-    obj.material = newMaterial;
+function changeColor() {
+  if (isRecording) {
+    buttonStyles[BUTTON_TYPES.MIC].iconColor = new THREE.Color(getThemeColor("action-color"));
+  } else {
+    buttonStyles[BUTTON_TYPES.MIC].iconColor = new THREE.Color(0xd6362b);
   }
+}
+
+function changeShape(obj) {
+  if (isRecording) {
+    obj.material = stopMaterial;
+  } else {
+    obj.material = recMaterial;
+  }
+  ToggleUpdateButton();
 }

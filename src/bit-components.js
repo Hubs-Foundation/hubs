@@ -11,6 +11,7 @@ export const Agent = defineComponent({
   modelRef: Types.eid,
   panelRef: Types.eid,
   micRef: Types.eid,
+  snapRef: Types.eid,
   nextRef: Types.eid,
   prevRef: Types.eid
 });
@@ -103,7 +104,7 @@ export const OffersHandConstraint = defineComponent();
 export const TogglesHoveredActionSet = defineComponent();
 export const HoverButton = defineComponent({ type: Types.ui8 });
 export const TextButton = defineComponent({ labelRef: Types.eid });
-export const ImageButton = defineComponent({ labelRef: Types.eid });
+export const IconButton = defineComponent({ labelRef: Types.eid });
 export const HoldableButton = defineComponent();
 export const SingleActionButton = defineComponent();
 export const Pen = defineComponent();

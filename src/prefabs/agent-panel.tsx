@@ -4,7 +4,7 @@ import { createElementEntity, renderAsEntity, Ref, createRef } from "../utils/js
 import nametagSrc from "../assets/hud/nametag.9.png";
 import { textureLoader } from "../utils/media-utils";
 import { Button3D, BUTTON_TYPES } from "./button3D";
-import { Mic3D } from "./Mic3D";
+import { IconButton } from "./icon-button";
 
 const panelTexture = textureLoader.load(nametagSrc);
 
@@ -14,10 +14,11 @@ export interface PanelParams {
   micRef: Ref;
   nextRef: Ref;
   prevRef: Ref;
+  snapRef: Ref;
   maxSlideCount: number;
 }
 
-export function AgentPanel({ text, panelRef, nextRef, prevRef, micRef, maxSlideCount }: PanelParams) {
+export function AgentPanel({ text, panelRef, nextRef, prevRef, micRef, snapRef, maxSlideCount }: PanelParams) {
   const buttonScale = [0.4, 0.4, 0.4];
   const buttonHeight = 0.2;
   let slidesArray = [];
@@ -29,7 +30,7 @@ export function AgentPanel({ text, panelRef, nextRef, prevRef, micRef, maxSlideC
         panelIndex={{ index: i }}
         position={[0, 0, 0.01]}
         text={{
-          value: text[i],
+          value: "",
           color: "#000000",
           textAlign: "center",
           anchorX: "center",
@@ -71,11 +72,20 @@ export function AgentPanel({ text, panelRef, nextRef, prevRef, micRef, maxSlideC
         text={">"}
       />
 
-      <Mic3D
+      <IconButton
         ref={micRef}
         scale={[buttonScale[0], buttonScale[1], buttonScale[2]]}
-        type={BUTTON_TYPES.DEFAULT}
+        type={BUTTON_TYPES.MIC}
         position={[0.18, -0.25, 0.03]}
+        width={buttonHeight}
+        height={buttonHeight}
+      />
+
+      <IconButton
+        ref={snapRef}
+        scale={[buttonScale[0], buttonScale[1], buttonScale[2]]}
+        type={BUTTON_TYPES.CAMERA}
+        position={[-0.18, -0.25, 0.03]}
         width={buttonHeight}
         height={buttonHeight}
       />

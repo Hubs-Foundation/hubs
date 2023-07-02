@@ -76,7 +76,15 @@ const postMaterial = new THREE.ShaderMaterial({
 });
 
 let mediaRecorder, eid, width, height;
+let prevArrowRef, nextArrowRef, modelref, agentObj, avatarPovObj, micButtonRef, snapButtonRef;
+let prevArrowObj, nextArrowObj, modelObj;
+
+export let updateButton = false;
 export let isRecording = false;
+
+export function ToggleUpdateButton() {
+  updateButton = !updateButton;
+}
 
 function clicked(eid) {
   return hasComponent(APP.world, Interacted, eid);
@@ -84,11 +92,6 @@ function clicked(eid) {
 
 export function getRandomInt(max) {
   return Math.floor(Math.random() * max);
-}
-
-function setArrows(world, prevArrowEid, nextArrowEid, value) {
-  world.eid2obj.get(prevArrowEid).visible = value;
-  world.eid2obj.get(nextArrowEid).visible = value;
 }
 
 function captureDepthPOV() {
@@ -132,7 +135,7 @@ function captureDepthPOV() {
   link.click();
 }
 
-function snapPOV(agentObj) {
+function snapPOV(world, agentObj) {
   const renderer = AFRAME.scenes[0].renderer;
   const scene = AFRAME.scenes[0].object3D;
   const camera = AFRAME.scenes[0].camera;
@@ -140,15 +143,11 @@ function snapPOV(agentObj) {
   agentObj.visible = false;
   renderer.render(scene, camera);
 
-  const pictureUrl = renderer.domElement.toDataURL("image/png");
   const canvas = renderer.domElement;
   canvas.toBlob(blob => {
-    // Step 2: Create FormData object and append the Blob
     const formData = new FormData();
     formData.append("file", blob, "camera_pov.png");
-
-    // Step 3: Send the FormData to the API using fetch
-    const apiEndpoint = "https://192.168.169.219:5035/cap_lxmert/"; // Replace with your API endpoint
+    const apiEndpoint = "https://192.168.169.219:5035/cap_lxmert/";
 
     fetch(apiEndpoint, {
       method: "POST",
@@ -156,53 +155,24 @@ function snapPOV(agentObj) {
     })
       .then(response => {
         if (!response.ok) {
-          throw new Error("Error posting image to API");
+          console.log("Error posting image to API");
         }
         return response.json();
       })
       .then(data => {
-        // Handle the API response
-        console.log(data);
+        console.log(data["Prediction by LXMERT"]);
+        UpdateTextSystem(world, data["Prediction by LXMERT"]);
       })
       .catch(error => {
-        // Handle any errors that occur during the fetch request
-        console.error(error);
+        UpdateTextSystem(world, FromatNewText("Something went wrong when trying to connect to the VLmodel API"));
       });
   }, "image/png");
-
-  // const formData = new FormData();
-  // formData.append('file', blob, 'camera_pov.png');
-  // const requestData = { file: pictureUrl };
-
-  // //send to api
-
-  // const apiURL = "https://192.168.169.219:5035/cap_lxmert/";
-
-  // fetch(apiURL, { method: "POST", headers: { "Content-type": "multipart/form-data" }, JSON.stringify(requestData)})
-  //   .then(response => {
-  //     if (response.ok) {
-  //       return response.json();
-  //     } else {
-  //       throw new Error("Error: " + response.status);
-  //     }
-  //   })
-  //   .then(data => {
-  //     const responseText = data.transcriptions[0];
-  //     UpdateTextSystem(world, FromatNewText(responseText));
-  //   })
-  //   .catch(error => {
-  //     console.log(error);
-  //   });
-
-  // const link = document.createElement("a");
-
-  // link.href = pictureUrl;
-  // link.download = "camera_pov.png";
-  // link.click();
 }
 
 function recordUser(world) {
   isRecording = true;
+  ToggleUpdateButton();
+  console.log("Recording...", isRecording, updateButton);
   const audioTrack = APP.mediaDevicesManager.audioTrack;
   const recordingTrack = audioTrack.clone();
   const recordingStream = new MediaStream([recordingTrack]);
@@ -228,6 +198,9 @@ function recordUser(world) {
 
 function stopRecording() {
   isRecording = false;
+  ToggleUpdateButton();
+  console.log("Recording...", isRecording, updateButton);
+
   if (mediaRecorder && mediaRecorder.state !== "inactive") {
     mediaRecorder.stop();
   }
@@ -235,15 +208,11 @@ function stopRecording() {
 
 async function saveRecording(world, blob) {
   const apiURL = "http:/localhost:8888/transcribe_audio_files";
-
-  const headers = new Headers();
   const formData = new FormData();
-
   const sourceLanguage = "el";
-
   formData.append("audio_files", blob, "recording.wav");
 
-  const hie = fetch(apiURL + "?source_language=" + sourceLanguage, { method: "POST", body: formData })
+  fetch(apiURL + "?source_language=" + sourceLanguage, { method: "POST", body: formData })
     .then(response => {
       if (response.ok) {
         return response.json();
@@ -256,7 +225,8 @@ async function saveRecording(world, blob) {
       UpdateTextSystem(world, FromatNewText(responseText));
     })
     .catch(error => {
-      console.log(error);
+      console.log("Failed to connect to the API");
+      UpdateTextSystem(world, FromatNewText("Failed to connect to the ASR API"));
     });
 
   return [];
@@ -272,11 +242,15 @@ function setMicStatus(world) {
 
 function entered(world) {
   enterAgentQuery(world).forEach(agentEid => {
-    const sliceref = Agent.panelRef[agentEid];
-    const panelObj = world.eid2obj.get(sliceref);
-    const axesHelper = new THREE.AxesHelper(5);
-    panelObj.add(axesHelper);
     eid = agentEid;
+    nextArrowRef = Agent.nextRef[eid];
+    prevArrowRef = Agent.prevRef[eid];
+    micButtonRef = Agent.micRef[eid];
+    snapButtonRef = Agent.snapRef[eid];
+    modelref = Agent.modelRef[eid];
+    agentObj = world.eid2obj.get(eid);
+    modelObj = world.eid2obj.get(modelref);
+    avatarPovObj = document.querySelector("#avatar-pov-node").object3D;
     APP.dialog.on("mic-state-changed", () => setMicStatus(world));
     setMicStatus(world);
   });
@@ -288,10 +262,6 @@ function entered(world) {
 export function AgentSystem(world) {
   if (!entered(world) || hasComponent(world, Hidden, eid)) return;
 
-  const modelref = Agent.modelRef[eid];
-  const agentObj = world.eid2obj.get(eid);
-  const modelObj = world.eid2obj.get(modelref);
-  const avatarPovObj = document.querySelector("#avatar-pov-node").object3D;
   const agentPos = agentObj.getWorldPosition(new THREE.Vector3());
   const avatarPos = avatarPovObj.getWorldPosition(new THREE.Vector3());
   const dist = agentPos.distanceTo(avatarPos);
@@ -310,29 +280,22 @@ export function AgentSystem(world) {
 
   modelObj.rotateOnAxis(new THREE.Vector3(0, 1, 0), -1.5707963268);
 
-  if (clicked(Agent.nextRef[eid])) {
-    raiseIndex();
+  if (clicked(nextArrowRef)) raiseIndex();
+  if (clicked(prevArrowRef)) lowerIndex();
+
+  if (clicked(micButtonRef)) {
+    if (!isRecording) recordUser(world);
+    else stopRecording();
   }
 
-  if (clicked(Agent.prevRef[eid])) {
-    lowerIndex();
-  }
-
-  if (clicked(Agent.micRef[eid])) {
-    // if (!isRecording) recordUser(world);
-    // else stopRecording();
-
-    snapPOV(agentObj);
+  if (clicked(snapButtonRef)) {
+    snapPOV(world, agentObj);
     captureDepthPOV();
   }
 
   agentObj.updateMatrix();
 }
-
-// let newText = paradigms[getRandomInt(paradigms.length)];
-
-// const renderArrows = UpdateTextSystem(world, FromatNewText(newText));
-
-// if (renderArrows) {
-//   hideArrows(world, Agent.prevRef[eid], Agent.nextRef[eid]);
-// } else showArrows(world, Agent.prevRef[eid], Agent.nextRef[eid]);
+export function handleArrows(world, renderArrows) {
+  world.eid2obj.get(nextArrowRef).visible = renderArrows;
+  world.eid2obj.get(prevArrowRef).visible = renderArrows;
+}
