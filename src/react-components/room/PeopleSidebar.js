@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { ToolTip } from "@mozilla/lilypad-ui";
 import styles from "./PeopleSidebar.scss";
 import { Sidebar } from "../sidebar/Sidebar";
 import { CloseButton } from "../input/CloseButton";
@@ -13,9 +14,16 @@ import { ReactComponent as VolumeOffIcon } from "../icons/VolumeOff.svg";
 import { ReactComponent as VolumeHighIcon } from "../icons/VolumeHigh.svg";
 import { ReactComponent as VolumeMutedIcon } from "../icons/VolumeMuted.svg";
 import { ReactComponent as HandRaisedIcon } from "../icons/HandRaised.svg";
+import { ReactComponent as UserSoundOnIcon } from "../icons/UserSoundOn.svg";
+import { ReactComponent as UserSoundOffIcon } from "../icons/UserSoundOff.svg";
 import { List, ButtonListItem } from "../layout/List";
-import { FormattedMessage, useIntl } from "react-intl";
+import { FormattedMessage, defineMessage, useIntl } from "react-intl";
 import { PermissionNotification } from "./PermissionNotifications";
+
+const toolTipDescription = defineMessage({
+  id: "people-sidebar.muted-tooltip",
+  defaultMessage: "User is {mutedState}"
+});
 
 function getDeviceLabel(ctx, intl) {
   if (ctx) {
@@ -112,6 +120,10 @@ export function PeopleSidebar({
   me && filteredPeople.unshift(me);
   const store = window.APP.store;
 
+  function getToolTipDescription(isMuted) {
+    return intl.formatMessage(toolTipDescription, { mutedState: isMuted ? "muted" : "not muted" });
+  }
+
   return (
     <Sidebar
       title={
@@ -148,6 +160,13 @@ export function PeopleSidebar({
                 {person.hand_raised && <HandRaisedIcon />}
                 {<DeviceIcon title={getDeviceLabel(person.context, intl)} />}
                 {!person.context.discord && VoiceIcon && <VoiceIcon title={getVoiceLabel(person.micPresence, intl)} />}
+                <ToolTip description={getToolTipDescription(store._preferences?.avatarVoiceLevels?.[person.id]?.muted)}>
+                  {store._preferences?.avatarVoiceLevels?.[person.id]?.muted ? (
+                    <UserSoundOffIcon />
+                  ) : (
+                    <UserSoundOnIcon />
+                  )}
+                </ToolTip>
                 <p>{getPersonName(person, intl)}</p>
                 {person.roles.owner && (
                   <StarIcon
@@ -156,11 +175,6 @@ export function PeopleSidebar({
                     width={12}
                     height={12}
                   />
-                )}
-                {store._preferences?.avatarVoiceLevels?.[person.id]?.muted && (
-                  <span className={styles.isMuted}>
-                    {intl.formatMessage({ id: "people-sidebar.muted-label", defaultMessage: "muted" })}
-                  </span>
                 )}
                 <p className={styles.presence}>{getPresenceMessage(person.presence, intl)}</p>
               </ButtonListItem>
