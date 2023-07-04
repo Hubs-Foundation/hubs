@@ -29,7 +29,7 @@ AFRAME.registerComponent("avatar-volume-controls", {
     this.onRemoteMuteUpdated = this.onRemoteMuteUpdated.bind(this);
     this.playerInfo.el.addEventListener("remote_mute_updated", this.onRemoteMuteUpdated);
     this.muteButton.object3D.visible = this.playerInfo.data.muted;
-    const volumePref = getAvatarVolumePref(this.playerInfo.playerSessionId);
+    const volumePref = getAvatarVolumePref(this.playerInfo.displayName);
     this.updateGainMultiplier(volumePref === undefined ? DEFAULT_VOLUME_BAR_MULTIPLIER : volumePref.gainMultiplier);
     this.updateLocalMuted(volumePref === undefined ? false : volumePref.muted);
   },
@@ -48,7 +48,7 @@ AFRAME.registerComponent("avatar-volume-controls", {
     this.updateVolumeLabel();
     this.el.emit("gain_multiplier_updated", { gainMultiplier });
     const isLocalMuted = APP.mutedState.has(this.audioEl);
-    updatePref && updateAvatarVolumesPref(this.playerInfo.playerSessionId, gainMultiplier, isLocalMuted);
+    updatePref && updateAvatarVolumesPref(this.playerInfo.displayName, gainMultiplier, isLocalMuted);
     // If the gainMultiplier is lowered to 0, updated muted status in local storage
     if (!gainMultiplier) {
       this.updateLocalMuted(true, true);
@@ -69,7 +69,7 @@ AFRAME.registerComponent("avatar-volume-controls", {
     this.el.emit("local_muted_updated", { muted });
     const gainMultiplier = APP.gainMultipliers.get(this.audioEl);
     const isLocalMuted = APP.mutedState.has(this.audioEl);
-    updatePref && updateAvatarVolumesPref(this.playerInfo.playerSessionId, gainMultiplier, isLocalMuted);
+    updatePref && updateAvatarVolumesPref(this.playerInfo.displayName, gainMultiplier, isLocalMuted);
   },
 
   volumeUp() {

@@ -49,6 +49,7 @@ AFRAME.registerComponent("player-info", {
 
     this.isLocalPlayerInfo = this.el.id === "avatar-rig";
     this.playerSessionId = null;
+    this.displayName = null;
 
     if (!this.isLocalPlayerInfo) {
       NAF.utils.getNetworkedEntity(this.el).then(networkedEntity => {
@@ -56,6 +57,7 @@ AFRAME.registerComponent("player-info", {
         const playerPresence = window.APP.hubChannel.presence.state[this.playerSessionId];
         if (playerPresence) {
           this.permissions = playerPresence.metas[0].permissions;
+          this.displayName = playerPresence.metas[0].profile.displayName;
         }
       });
     }

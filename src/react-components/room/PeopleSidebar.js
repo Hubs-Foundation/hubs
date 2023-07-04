@@ -160,13 +160,20 @@ export function PeopleSidebar({
                 {person.hand_raised && <HandRaisedIcon />}
                 {<DeviceIcon title={getDeviceLabel(person.context, intl)} />}
                 {!person.context.discord && VoiceIcon && <VoiceIcon title={getVoiceLabel(person.micPresence, intl)} />}
-                <ToolTip description={getToolTipDescription(store._preferences?.avatarVoiceLevels?.[person.id]?.muted)}>
-                  {store._preferences?.avatarVoiceLevels?.[person.id]?.muted ? (
-                    <UserSoundOffIcon />
-                  ) : (
-                    <UserSoundOnIcon />
-                  )}
-                </ToolTip>
+                {!person.isMe && (
+                  <ToolTip
+                    classProp="tooltip"
+                    description={getToolTipDescription(
+                      store._preferences?.avatarVoiceLevels?.[person.profile.displayName]?.muted
+                    )}
+                  >
+                    {store._preferences?.avatarVoiceLevels?.[person.profile.displayName]?.muted ? (
+                      <UserSoundOffIcon />
+                    ) : (
+                      <UserSoundOnIcon />
+                    )}
+                  </ToolTip>
+                )}
                 <p>{getPersonName(person, intl)}</p>
                 {person.roles.owner && (
                   <StarIcon

@@ -3,7 +3,7 @@
 :local(.person) {
   font-size: theme.$font-size-sm;
   color: theme.$text1-color;
-
+  position: relative;
   & > * {
     margin-right: 8px;
 
@@ -21,4 +21,10 @@
   display: flex;
   flex: 1;
   justify-content: flex-end;
+}
+
+:local(.tooltip) {
+  z-index: 100;
+  position: fixed;
+  position: absolute;
 }
