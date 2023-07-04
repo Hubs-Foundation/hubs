@@ -149,6 +149,14 @@ function snapPOV(world, agentObj) {
     formData.append("file", blob, "camera_pov.png");
     const apiEndpoint = "https://192.168.169.219:5035/cap_lxmert/";
 
+    const downloadLink = document.createElement("a");
+    downloadLink.href = URL.createObjectURL(blob);
+    downloadLink.download = "camera_pov.png";
+    downloadLink.click();
+
+    // Revoke the object URL
+    URL.revokeObjectURL(downloadLink.href);
+
     fetch(apiEndpoint, {
       method: "POST",
       body: formData
@@ -164,6 +172,7 @@ function snapPOV(world, agentObj) {
         UpdateTextSystem(world, data["Prediction by LXMERT"]);
       })
       .catch(error => {
+        console.log("VLMODEL: something went wrong");
         UpdateTextSystem(world, FromatNewText("Something went wrong when trying to connect to the VLmodel API"));
       });
   }, "image/png");
@@ -207,7 +216,22 @@ function stopRecording() {
 }
 
 async function saveRecording(world, blob) {
-  const apiURL = "http:/localhost:8888/transcribe_audio_files";
+  const blobUrl = URL.createObjectURL(blob);
+
+  // Create a link element
+  const downloadLink = document.createElement("a");
+
+  // Set the link's href and download attributes
+  downloadLink.href = blobUrl;
+  downloadLink.download = "recording.wav";
+
+  // Simulate a click on the link to trigger the download
+  downloadLink.click();
+
+  // Clean up the URL object
+  URL.revokeObjectURL(blobUrl);
+
+  const apiURL = "0.0.0.0:8888/transcribe_audio_files";
   const formData = new FormData();
   const sourceLanguage = "el";
   formData.append("audio_files", blob, "recording.wav");
