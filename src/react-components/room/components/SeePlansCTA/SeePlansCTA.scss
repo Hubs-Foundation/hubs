@@ -1,0 +1,24 @@
+@use "../../../styles/theme.scss";
+
+.see_plans_button {
+  line-height: 24px;
+  border-radius: 20px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
+  text-transform: capitalize;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  text-align: center;
+  overflow: hidden;
+  text-decoration: none;
+  cursor: pointer;
+  background-color: transparent;
+  border: solid 2px theme.$color-brand-cool;
+  color: theme.$color-brand-cool;
+
+  &:hover {
+    border: solid 2px theme.$color-brand-cool;
+    color: theme.$color-brand-cool;
+  }
+}
