@@ -9,6 +9,14 @@ import { useIntl, defineMessage } from "react-intl";
 
 function MoreMenuItem({ item, closePopover }) {
   const Icon = item.icon;
+  const imageAlt =
+    item.icon?.alt &&
+    defineMessage({
+      id: "{label}.{alt}",
+      defaultMessage: "{alt}"
+    });
+  const intl = useIntl();
+  const imageAltText = imageAlt && intl.formatMessage(imageAlt, { label: item.label, alt: item.icon.alt });
 
   return (
     <li onClick={closePopover}>
@@ -19,12 +27,12 @@ function MoreMenuItem({ item, closePopover }) {
           target={item.target || "_blank"}
           rel="noopener noreferrer"
         >
-          <Icon />
+          {item.icon?.src ? <img src={item.icon.src} alt={imageAltText} /> : <Icon />}
           <span>{item.label}</span>
         </a>
       ) : (
         <button className={styles.moreMenuItemTarget} onClick={event => item.onClick(item, event)}>
-          <Icon />
+          {item.icon?.src ? <img src={item.icon.src} alt={imageAltText} /> : <Icon />}
           <span>{item.label}</span>
         </button>
       )}
@@ -36,7 +44,10 @@ MoreMenuItem.propTypes = {
   item: PropTypes.shape({
     href: PropTypes.string,
     target: PropTypes.string,
-    icon: PropTypes.elementType.isRequired,
+    icon: PropTypes.oneOfType([
+      PropTypes.elementType,
+      PropTypes.shape({ src: PropTypes.oneOfType([PropTypes.string, PropTypes.node]), alt: PropTypes.string })
+    ]).isRequired,
     label: PropTypes.node.isRequired,
     onClick: PropTypes.func
   }).isRequired,
