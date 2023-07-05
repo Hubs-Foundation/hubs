@@ -1,24 +1,52 @@
-@use "../../../styles/theme.scss";
-
-.see_plans_button {
+:local(.see_plans_button) {
   line-height: 24px;
+  position: relative;
   border-radius: 20px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
-  text-transform: capitalize;
+  border: solid transparent 2px;
+  background: var(--background1-color);
+  background-clip: padding-box;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
   text-align: center;
-  overflow: hidden;
   text-decoration: none;
   cursor: pointer;
-  background-color: transparent;
-  border: solid 2px theme.$color-brand-cool;
-  color: theme.$color-brand-cool;
+  color: var(--color-interaction-primary);
+  width: fit-content;
+  min-width: 132px;
+  font-size: 14px;
+  font-weight: 600;
+  height: 40px;
+  padding: 2px;
+
+  &:before {
+    position: absolute;
+    content: "";
+    z-index: -1;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-radius: inherit;
+    background: var(--color-brand-cool);
+    margin: -2px;
+  }
 
   &:hover {
-    border: solid 2px theme.$color-brand-cool;
-    color: theme.$color-brand-cool;
+    color: var(--color-interaction-primary-hover);
+    background: var(--color-interaction-secondary-hover);
+    background-clip: padding-box;
+
+    &:before {
+      background: var(--color-interaction-primary-hover);
+    }
   }
+}
+
+:local(.logo) {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  margin-right: 10px;
 }
