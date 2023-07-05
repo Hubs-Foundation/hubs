@@ -201,7 +201,7 @@ export const LoopAnimationInitialize = defineComponent({});
  *          paused: boolean,
  *          startOffset: number,
  *          timeScale: number
- *        }[]>}
+ *        }>}
  */
 export const LoopAnimationInitializeData = new Map();
 export const LoopAnimation = defineComponent();

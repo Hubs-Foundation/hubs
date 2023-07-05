@@ -258,6 +258,7 @@ export interface ComponentData {
   audioParams?: AudioSettings;
   mediaFrame?: any;
   text?: TextParams;
+  loopAnimation?: LoopAnimationParams;
 }
 
 type OptionalParams<T> = Partial<T> | true;
@@ -363,7 +364,6 @@ export interface JSXComponentData extends ComponentData {
   networkDebug?: boolean;
   waypointPreview?: boolean;
   pdf?: PDFParams;
-  loopAnimation?: LoopAnimationParams;
 }
 
 export interface GLTFComponentData extends ComponentData {
@@ -427,7 +427,8 @@ export const commonInflators: Required<{ [K in keyof ComponentData]: InflatorFn 
   audioZone: inflateAudioZone,
   audioParams: inflateAudioParams,
   mediaFrame: inflateMediaFrame,
-  text: inflateText
+  text: inflateText,
+  loopAnimation: inflateLoopAnimationInitialize
 };
 
 const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
