@@ -34,7 +34,9 @@
   z-index: -1;
 
   @media (max-width: theme.$breakpoint-lg) {
-    width: unset;
+    width: 100%;
     position: relative;
+    justify-content: space-around;
+    gap: unset;
   }
 }

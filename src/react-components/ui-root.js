@@ -1198,7 +1198,7 @@ class UIRoot extends Component {
           (this.props.breakpoint === "sm" || this.props.breakpoint === "md") &&
             isLockedDownDemo && {
               id: "see-plans",
-              label: <FormattedMessage id="more-menu.see-plans-cta" defaultMessage={"See Plans"} />,
+              label: <FormattedMessage id="more-menu.see-plans-cta" defaultMessage="See Plans" />,
               icon: { src: hubsLogo, alt: "Logo" },
               href: "https://hubs.mozilla.com/#subscribe"
             }
