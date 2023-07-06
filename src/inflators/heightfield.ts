@@ -1,5 +1,7 @@
+import { addComponent } from "bitecs";
 import { HubsWorld } from "../app";
 import { Fit, inflatePhysicsShape, Shape } from "./physics-shape";
+import { HeightFieldTag } from "../bit-components";
 
 export type HeightFieldParams = {
   distance: number;
@@ -16,4 +18,5 @@ export function inflateHeightField(world: HubsWorld, eid: number, params: Height
     heightfieldDistance: params.distance,
     heightfieldData: params.data
   });
+  addComponent(world, HeightFieldTag, eid);
 }
