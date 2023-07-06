@@ -10,13 +10,20 @@ import { useIntl, defineMessage } from "react-intl";
 function MoreMenuItem({ item, closePopover }) {
   const Icon = item.icon;
   const imageAlt =
-    item.icon?.alt &&
+    Icon?.alt &&
     defineMessage({
       id: "{label}.{alt}",
       defaultMessage: "{alt}"
     });
   const intl = useIntl();
-  const imageAltText = imageAlt && intl.formatMessage(imageAlt, { label: item.label, alt: item.icon.alt });
+  const imageAltText = imageAlt && intl.formatMessage(imageAlt, { label: item.label, alt: Icon.alt });
+
+  const Row = (
+    <>
+      {Icon?.src ? <img src={Icon.src} alt={imageAltText} /> : <Icon />}
+      <span>{item.label}</span>
+    </>
+  );
 
   return (
     <li onClick={closePopover}>
@@ -27,13 +34,11 @@ function MoreMenuItem({ item, closePopover }) {
           target={item.target || "_blank"}
           rel="noopener noreferrer"
         >
-          {item.icon?.src ? <img src={item.icon.src} alt={imageAltText} /> : <Icon />}
-          <span>{item.label}</span>
+          {Row}
         </a>
       ) : (
         <button className={styles.moreMenuItemTarget} onClick={event => item.onClick(item, event)}>
-          {item.icon?.src ? <img src={item.icon.src} alt={imageAltText} /> : <Icon />}
-          <span>{item.label}</span>
+          {Row}
         </button>
       )}
     </li>

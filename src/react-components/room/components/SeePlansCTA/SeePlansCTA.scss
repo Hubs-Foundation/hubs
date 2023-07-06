@@ -14,11 +14,11 @@
   cursor: pointer;
   color: var(--color-interaction-primary);
   width: fit-content;
-  min-width: 132px;
-  font-size: 14px;
-  font-weight: 600;
+  min-width: 140px;
   height: 40px;
-  padding: 2px;
+  padding: 2px 16px;
+  font-weight: 600;
+  font-size: 14px;
 
   &:before {
     position: absolute;
