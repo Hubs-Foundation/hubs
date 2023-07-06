@@ -84,10 +84,6 @@ AFRAME.registerComponent("avatar-volume-controls", {
     const step = -calcGainStepDown(gainMultiplier);
     gainMultiplier = THREE.MathUtils.clamp(gainMultiplier + step, 0, MAX_GAIN_MULTIPLIER);
     this.updateGainMultiplier(gainMultiplier, true);
-    // If the gainMultiplier is lowered to 0, updated muted status in local storage
-    if (!gainMultiplier) {
-      this.updateLocalMuted(true, true);
-    }
   },
 
   updateVolumeLabel() {
