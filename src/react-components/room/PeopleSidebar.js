@@ -163,6 +163,7 @@ export function PeopleSidebar({
                 {!person.isMe && (
                   <ToolTip
                     classProp="tooltip"
+                    location="bottom"
                     description={getToolTipDescription(
                       store._preferences?.avatarVoiceLevels?.[person.profile.displayName]?.muted
                     )}
