@@ -300,6 +300,11 @@ body[data-theme="light"],
   --color-interactions-menu: #000000;
   --color-interactions-menu-hover: #2f2f2f;
   --color-interactions-menu-inactive: #757575;
+
+  /**
+  BRAND
+  **/
+  --color-brand-cool: linear-gradient(90deg, #6ae1d9 0%, #9898ff 100%);
 }
 
 // PLACE HOLDER FOR DARK VALUES
@@ -404,6 +409,11 @@ body[data-theme="dark"] {
   --color-interactions-menu: #ffffff;
   --color-interactions-menu-hover: #2f2f2f;
   --color-interactions-menu-inactive: #757575;
+
+  /**
+  BRAND
+  **/
+  --color-brand-cool: linear-gradient(90deg, #6ae1d9 0%, #9898ff 100%);
 }
 
 /**
