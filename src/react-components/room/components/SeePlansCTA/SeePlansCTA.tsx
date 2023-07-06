@@ -13,7 +13,7 @@ const SeePlansCTA = () => {
   const logoAltText = intl.formatMessage(logoAlt);
 
   return (
-    <a className={styles.see_plans_button} href="https://hubs.mozilla.com/#subscribe" target="_blank">
+    <a className={styles.see_plans_button} href="https://rebrand.ly/3sncpqx" target="_blank">
       <img className={styles.logo} src={hubsLogo} alt={logoAltText} />
       <FormattedMessage id="see-plans-cta.button" defaultMessage={"See Plans"} />
     </a>
