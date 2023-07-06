@@ -1,4 +1,4 @@
-@use '../styles/theme';
+@use "../styles/theme";
 
 :local(.toolbar) {
   height: 96px;
@@ -6,6 +6,7 @@
   padding: 12px;
   background-color: theme.$background1-color;
   border-top: 1px solid theme.$border1-color;
+  position: relative;
 
   @media (min-width: theme.$breakpoint-lg) {
     padding: 12px 24px;
@@ -17,16 +18,25 @@
   display: flex;
   flex: 1;
   justify-content: space-around;
+  align-items: center;
+  gap: 0 24px;
 
   @media (min-width: theme.$breakpoint-lg) {
     flex: 0;
+  }
+}
 
-    & > * {
-      margin-right: 24px;
-    }
+:local(.center_content) {
+  position: absolute;
+  display: flex;
+  width: calc(100% - 48px);
+  justify-content: center;
+  z-index: -1;
 
-    &:last-child {
-      margin-right: 0px;
-    }
+  @media (max-width: theme.$breakpoint-lg) {
+    width: 100%;
+    position: relative;
+    justify-content: space-around;
+    gap: unset;
   }
 }

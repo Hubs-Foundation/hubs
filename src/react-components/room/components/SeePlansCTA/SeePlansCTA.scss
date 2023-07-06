@@ -1,0 +1,52 @@
+:local(.see_plans_button) {
+  line-height: 24px;
+  position: relative;
+  border-radius: 20px;
+  border: solid transparent 2px;
+  background: var(--background1-color);
+  background-clip: padding-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  color: var(--color-interaction-primary);
+  width: fit-content;
+  min-width: 140px;
+  height: 40px;
+  padding: 2px 16px;
+  font-weight: 600;
+  font-size: 14px;
+
+  &:before {
+    position: absolute;
+    content: "";
+    z-index: -1;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-radius: inherit;
+    background: var(--color-brand-cool);
+    margin: -2px;
+  }
+
+  &:hover {
+    color: var(--color-interaction-primary-hover);
+    background: var(--color-interaction-secondary-hover);
+    background-clip: padding-box;
+
+    &:before {
+      background: var(--color-interaction-primary-hover);
+    }
+  }
+}
+
+:local(.logo) {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  margin-right: 10px;
+}
