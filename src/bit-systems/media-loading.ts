@@ -67,17 +67,22 @@ export function* waitForMediaLoaded(world: HubsWorld, eid: EntityID) {
 
 // prettier-ignore
 const loaderForMediaType = {
-  [MediaType.IMAGE]: (world: HubsWorld, { accessibleUrl, contentType }: { accessibleUrl: string, contentType: string }) =>
-    loadImage(world, accessibleUrl, contentType),
-  [MediaType.VIDEO]: (world: HubsWorld, { accessibleUrl, contentType }: { accessibleUrl: string, contentType: string }) =>
-    loadVideo(world, accessibleUrl, contentType),
-  [MediaType.MODEL]: (world: HubsWorld, { accessibleUrl, contentType }: { accessibleUrl: string, contentType: string }) =>
-    loadModel(world, accessibleUrl, contentType, true),
-  [MediaType.PDF]: (world: HubsWorld, { accessibleUrl }: { accessibleUrl: string }) =>
-    loadPDF(world, accessibleUrl),
+  [MediaType.IMAGE]: (
+    world: HubsWorld,
+    { accessibleUrl, contentType }: { accessibleUrl: string; contentType: string }
+  ) => loadImage(world, accessibleUrl, contentType),
+  [MediaType.VIDEO]: (
+    world: HubsWorld,
+    { accessibleUrl, contentType }: { accessibleUrl: string; contentType: string }
+  ) => loadVideo(world, accessibleUrl, contentType),
+  [MediaType.MODEL]: (
+    world: HubsWorld,
+    { accessibleUrl, contentType }: { accessibleUrl: string; contentType: string }
+  ) => loadModel(world, accessibleUrl, contentType, true),
+  [MediaType.PDF]: (world: HubsWorld, { accessibleUrl }: { accessibleUrl: string }) => loadPDF(world, accessibleUrl),
   [MediaType.AUDIO]: (world: HubsWorld, { accessibleUrl }: { accessibleUrl: string }) =>
     loadAudio(world, accessibleUrl),
-  [MediaType.HTML]: (world: HubsWorld, { canonicalUrl, thumbnail }: { canonicalUrl: string, thumbnail: string }) =>
+  [MediaType.HTML]: (world: HubsWorld, { canonicalUrl, thumbnail }: { canonicalUrl: string; thumbnail: string }) =>
     loadHtml(world, canonicalUrl, thumbnail)
 };
 

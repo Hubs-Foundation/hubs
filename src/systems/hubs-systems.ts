@@ -189,8 +189,6 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   sceneLoadingSystem(world, hubsSystems.environmentSystem, hubsSystems.characterController);
   mediaLoadingSystem(world);
 
-  physicsCompatSystem(world, hubsSystems.physicsSystem);
-
   networkedTransformSystem(world);
 
   aframeSystems.userinput.tick2(xrFrame);
@@ -198,7 +196,11 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   interactionSystem(world, hubsSystems.cursorTargettingSystem, t, aframeSystems);
 
   buttonSystems(world);
+
+  physicsCompatSystem(world, hubsSystems.physicsSystem);
+  hubsSystems.physicsSystem.tick(dt);
   constraintsSystem(world, hubsSystems.physicsSystem);
+  floatyObjectSystem(world);
 
   // We run this earlier in the frame so things have a chance to override properties run by animations
   hubsSystems.animationMixerSystem.tick(dt);
@@ -221,8 +223,6 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   hubsSystems.positionAtBorderSystem.tick();
   hubsSystems.twoPointStretchingSystem.tick();
 
-  floatyObjectSystem(world);
-
   hubsSystems.holdableButtonSystem.tick();
   hubsSystems.hoverButtonSystem.tick();
   hubsSystems.drawingMenuSystem.tick();
@@ -237,7 +237,6 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   hubsSystems.soundEffectsSystem.tick();
   hubsSystems.scenePreviewCameraSystem.tick();
   scenePreviewCameraSystem(world, hubsSystems.cameraSystem);
-  hubsSystems.physicsSystem.tick(dt);
   hubsSystems.inspectYourselfSystem.tick(hubsSystems.el, aframeSystems.userinput, hubsSystems.cameraSystem);
   hubsSystems.cameraSystem.tick(hubsSystems.el, dt);
   cameraToolSystem(world);
@@ -263,7 +262,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   simpleWaterSystem(world);
   linearTransformSystem(world);
   quackSystem(world);
-  
+
   mixerAnimatableSystem(world);
   loopAnimationSystem(world);
 
