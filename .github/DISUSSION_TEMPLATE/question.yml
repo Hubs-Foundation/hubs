@@ -1,0 +1,35 @@
+title: "[General] " 
+labels: ["Questions"]
+body:
+- type: dropdown
+  id: Product type
+  attributes:
+    label: What Product type are having issue with ? 
+    options:
+      - Hubs Cloud
+      - Custom Client Hubs Cloud. 
+      - Manged Hubs Service 
+  validations:
+    required: true 
+- type: input
+  attributes:
+   label: Summary
+   description: Quick Description of Problem 
+  validations:
+    required: true 
+- type: textarea
+    id: Steps to Reproduce 
+  attributes:
+      label: How to Reproduce ? 
+      description: "Add any steps to reproduce and error sceenshots"
+      value: |
+       How to reproduce:
+       
+
+       errors: 
+
+      render: bash
+  validations:
+      required: true
+
+
