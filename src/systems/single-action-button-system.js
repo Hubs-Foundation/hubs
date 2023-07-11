@@ -15,8 +15,8 @@ import { hasAnyComponent } from "../utils/bit-utils";
 import { getThemeColor, onThemeChanged } from "../utils/theme";
 import { CAMERA_MODE_INSPECT } from "./camera-system";
 import { paths } from "./userinput/paths";
-import { updateButton, ToggleUpdateButton, isRecording } from "../bit-systems/agent-system";
 import { startRecButtonTexture, stopRecButtonTexture } from "../prefabs/icon-button";
+import { isRecording } from "../utils/asr-adapter";
 
 function interact(world, entities, path, interactor) {
   if (AFRAME.scenes[0].systems.userinput.get(path)) {
@@ -39,6 +39,13 @@ const rightRemoteQuery = defineQuery([SingleActionButton, HoveredRemoteRight]);
 const leftRemoteQuery = defineQuery([SingleActionButton, HoveredRemoteLeft]);
 const recMaterial = new THREE.MeshBasicMaterial({ map: startRecButtonTexture, transparent: true, toneMapped: false });
 const stopMaterial = new THREE.MeshBasicMaterial({ map: stopRecButtonTexture, transparent: true, toneMapped: false });
+
+let updateMicButton = false;
+let shouldChange = false;
+
+export function stageUpdate() {
+  updateMicButton = true;
+}
 
 function singleActionButtonSystem(world) {
   // Clear the interactions from previous frames
@@ -105,10 +112,8 @@ const hoverComponents = [HoveredRemoteRight, HoveredRemoteLeft, HoveredHandRight
 const hoverButtonsQuery = defineQuery([HoverButton]);
 function hoverButtonSystem(world) {
   hoverButtonsQuery(world).forEach(function (eid) {
-    let shouldChange = false;
-
     if (HoverButton.type[eid] == BUTTON_TYPES.MIC)
-      if (updateButton) {
+      if (updateMicButton) {
         changeColor();
         shouldChange = true;
       }
@@ -153,5 +158,7 @@ function changeShape(obj) {
   } else {
     obj.material = recMaterial;
   }
-  ToggleUpdateButton();
+  updateMicButton = false;
+  shouldChange = false;
+  console.log("shape changed");
 }

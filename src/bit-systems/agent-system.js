@@ -3,6 +3,10 @@ import { Agent, Hidden, Interacted } from "../bit-components";
 import { FromatNewText, UpdateTextSystem, lowerIndex, raiseIndex } from "./agent-slideshow-system";
 import { hasComponent } from "bitecs";
 import { PermissionStatus } from "../utils/media-devices-utils";
+import { stageUpdate } from "../systems/single-action-button-system";
+import { custom_fragment, custom_vertex } from "../utils/custom-shaders";
+import { nmtModule, routerModule, toggleRecording, vlModule } from "../utils/asr-adapter";
+import { ASR, LANGUAGES, RECORDER_CODES, VL_TEXT, VL } from "../utils/ml-types";
 
 const startWidth = window.innerWidth;
 const startHeight = window.innerHeight;
@@ -38,35 +42,8 @@ orthoCamera.position.z = 5;
 orthoScene.add(plane);
 
 const postMaterial = new THREE.ShaderMaterial({
-  vertexShader: `
-    varying vec2 vUv;
-
-    void main() {
-      vUv = uv;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-    }
-  `,
-  fragmentShader: `
-    #include <packing>  
-    varying vec2 vUv;
-    uniform sampler2D tDiffuse;
-    uniform sampler2D tDepth;
-    uniform float cameraNear;
-    uniform float cameraFar;
-
-    float readDepth( sampler2D depthSampler, vec2 coord ) {
-      float fragCoordZ = texture2D( depthSampler, coord ).x;
-      float viewZ = perspectiveDepthToViewZ( fragCoordZ, cameraNear, cameraFar );
-      return viewZToOrthographicDepth( viewZ, cameraNear, cameraFar );
-    } 
-    
-    void main() {
-      float depth = readDepth(tDepth, vUv);
-      float normalizedDepth = (depth - cameraNear) / (cameraFar - cameraNear);
-      gl_FragColor.rgb = vec3(1.0-depth);
-      gl_FragColor.a = 1.0;
-  }  
-  `,
+  vertexShader: custom_vertex,
+  fragmentShader: custom_fragment,
   uniforms: {
     cameraNear: { value: 0.1 },
     cameraFar: { value: 20 },
@@ -77,14 +54,8 @@ const postMaterial = new THREE.ShaderMaterial({
 
 let mediaRecorder, eid, width, height;
 let prevArrowRef, nextArrowRef, modelref, agentObj, avatarPovObj, micButtonRef, snapButtonRef;
+let camera, scene, renderer;
 let prevArrowObj, nextArrowObj, modelObj;
-
-export let updateButton = false;
-export let isRecording = false;
-
-export function ToggleUpdateButton() {
-  updateButton = !updateButton;
-}
 
 function clicked(eid) {
   return hasComponent(APP.world, Interacted, eid);
@@ -94,166 +65,142 @@ export function getRandomInt(max) {
   return Math.floor(Math.random() * max);
 }
 
-function captureDepthPOV() {
-  width = window.innerWidth;
-  height = window.innerHeight;
+// function snapPOV(world, agentObj) {
+//   const renderer = AFRAME.scenes[0].renderer;
+//   const scene = AFRAME.scenes[0].object3D;
+//   const camera = AFRAME.scenes[0].camera;
 
-  const renderer = AFRAME.scenes[0].renderer;
-  const scene = AFRAME.scenes[0].object3D;
-  const camera = AFRAME.scenes[0].camera;
+//   console.log(AFRAME.scenes[0]);
 
-  orthoRenderTarget.setSize(width, height);
-  depthRenderTarget.setSize(width, height);
+//   agentObj.visible = false;
+//   renderer.render(scene, camera);
 
-  if (width / 2 !== orthoCamera.right || height / 2 !== orthoCamera.top) {
-    Object.assign(orthoCamera, {
-      left: -width / 2,
-      right: width / 2,
-      top: height / 2,
-      bottom: -height / 2
-    });
-  }
+//   return new Promise(resolve => {
+//     renderer.render(scene, camera);
 
-  plane.geometry.parameters.width = width;
-  plane.geometry.parameters.height = height;
+//     const canvas = renderer.domElement;
+//     canvas.toBlob(async blob => {
+//       const formData = new FormData();
+//       formData.append("file", blob, "camera_pov.png");
+//       const apiEndpoint = "https://192.168.169.219:5035/cap_lxmert/";
 
-  postMaterial.uniforms.tDiffuse.value = depthRenderTarget.texture;
-  postMaterial.uniforms.tDepth.value = depthRenderTarget.depthTexture;
-  plane.material = postMaterial;
+//       const downloadLink = document.createElement("a");
+//       downloadLink.href = URL.createObjectURL(blob);
+//       downloadLink.download = "camera_pov.png";
+//       downloadLink.click();
 
-  renderer.setRenderTarget(depthRenderTarget);
-  renderer.render(scene, camera);
+//       // Revoke the object URL
+//       URL.revokeObjectURL(downloadLink.href);
 
-  renderer.setRenderTarget(null);
-  renderer.render(orthoScene, orthoCamera);
+//       try {
+//         const response = await fetch(apiEndpoint, {
+//           method: "POST",
+//           body: formData
+//         });
 
-  const pictureUrl = renderer.domElement.toDataURL("image/png");
-  const link = document.createElement("a");
+//         if (!response.ok) {
+//           console.log("Error posting image to API");
+//           throw new Error("Error posting image to API");
+//         }
 
-  link.href = pictureUrl;
-  link.download = "depth.png";
-  link.click();
-}
+//         const data = await response.json();
+//         console.log(data["Prediction by LXMERT"]);
+//         UpdateTextSystem(world, data["Prediction by LXMERT"]);
+//       } catch (error) {
+//         console.log("VLMODEL: something went wrong");
+//         UpdateTextSystem(world, FromatNewText("Something went wrong when trying to connect to the VLmodel API"));
+//       }
 
-function snapPOV(world, agentObj) {
-  const renderer = AFRAME.scenes[0].renderer;
-  const scene = AFRAME.scenes[0].object3D;
-  const camera = AFRAME.scenes[0].camera;
+//       resolve();
+//     }, "image/png");
+//   });
+// }
 
-  agentObj.visible = false;
-  renderer.render(scene, camera);
+async function POV(agentObj, savefile) {
+  return new Promise((resolve, reject) => {
+    const renderer = AFRAME.scenes[0].renderer;
+    const scene = AFRAME.scenes[0].object3D;
+    const camera = AFRAME.scenes[0].camera;
+    agentObj.visible = false;
+    renderer.render(scene, camera);
+    const canvas = renderer.domElement;
+    canvas.toBlob(async blob => {
+      if (blob) {
+        if (savefile) {
+          const formData = new FormData();
+          formData.append("file", blob, "camera_pov.png");
 
-  const canvas = renderer.domElement;
-  canvas.toBlob(blob => {
-    const formData = new FormData();
-    formData.append("file", blob, "camera_pov.png");
-    const apiEndpoint = "https://192.168.169.219:5035/cap_lxmert/";
+          const downloadLink = document.createElement("a");
+          downloadLink.href = URL.createObjectURL(blob);
+          downloadLink.download = "camera_pov.png";
+          downloadLink.click();
 
-    const downloadLink = document.createElement("a");
-    downloadLink.href = URL.createObjectURL(blob);
-    downloadLink.download = "camera_pov.png";
-    downloadLink.click();
-
-    // Revoke the object URL
-    URL.revokeObjectURL(downloadLink.href);
-
-    fetch(apiEndpoint, {
-      method: "POST",
-      body: formData
-    })
-      .then(response => {
-        if (!response.ok) {
-          console.log("Error posting image to API");
+          // Revoke the object URL
+          URL.revokeObjectURL(downloadLink.href);
         }
-        return response.json();
-      })
-      .then(data => {
-        console.log(data["Prediction by LXMERT"]);
-        UpdateTextSystem(world, data["Prediction by LXMERT"]);
-      })
-      .catch(error => {
-        console.log("VLMODEL: something went wrong");
-        UpdateTextSystem(world, FromatNewText("Something went wrong when trying to connect to the VLmodel API"));
-      });
-  }, "image/png");
-}
-
-function recordUser(world) {
-  isRecording = true;
-  ToggleUpdateButton();
-  console.log("Recording...", isRecording, updateButton);
-  const audioTrack = APP.mediaDevicesManager.audioTrack;
-  const recordingTrack = audioTrack.clone();
-  const recordingStream = new MediaStream([recordingTrack]);
-  mediaRecorder = new MediaRecorder(recordingStream);
-
-  audioTrack.enabled = false;
-
-  mediaRecorder.start();
-
-  let chunks = [];
-  mediaRecorder.ondataavailable = function (e) {
-    chunks.push(e.data);
-  };
-
-  mediaRecorder.onstop = function () {
-    const recordingBlob = new Blob(chunks, { type: "audio/wav" });
-    chunks = saveRecording(world, recordingBlob);
-    audioTrack.enabled = true;
-    recordingStream.removeTrack(recordingTrack);
-    recordingTrack.stop();
-  };
-}
-
-function stopRecording() {
-  isRecording = false;
-  ToggleUpdateButton();
-  console.log("Recording...", isRecording, updateButton);
-
-  if (mediaRecorder && mediaRecorder.state !== "inactive") {
-    mediaRecorder.stop();
-  }
-}
-
-async function saveRecording(world, blob) {
-  const blobUrl = URL.createObjectURL(blob);
-
-  // Create a link element
-  const downloadLink = document.createElement("a");
-
-  // Set the link's href and download attributes
-  downloadLink.href = blobUrl;
-  downloadLink.download = "recording.wav";
-
-  // Simulate a click on the link to trigger the download
-  downloadLink.click();
-
-  // Clean up the URL object
-  URL.revokeObjectURL(blobUrl);
-
-  const apiURL = "0.0.0.0:8888/transcribe_audio_files";
-  const formData = new FormData();
-  const sourceLanguage = "el";
-  formData.append("audio_files", blob, "recording.wav");
-
-  fetch(apiURL + "?source_language=" + sourceLanguage, { method: "POST", body: formData })
-    .then(response => {
-      if (response.ok) {
-        return response.json();
+        resolve(blob);
       } else {
-        throw new Error("Error: " + response.status);
+        reject(new Error("Failed to generate pov"));
       }
-    })
-    .then(data => {
-      const responseText = data.transcriptions[0];
-      UpdateTextSystem(world, FromatNewText(responseText));
-    })
-    .catch(error => {
-      console.log("Failed to connect to the API");
-      UpdateTextSystem(world, FromatNewText("Failed to connect to the ASR API"));
-    });
+    }, "image/png");
+  });
+}
 
-  return [];
+async function DepthPOV(savefile) {
+  return new Promise((resolve, reject) => {
+    width = window.innerWidth;
+    height = window.innerHeight;
+
+    const renderer = AFRAME.scenes[0].renderer;
+    const scene = AFRAME.scenes[0].object3D;
+    const camera = AFRAME.scenes[0].camera;
+
+    orthoRenderTarget.setSize(width, height);
+    depthRenderTarget.setSize(width, height);
+
+    if (width / 2 !== orthoCamera.right || height / 2 !== orthoCamera.top) {
+      Object.assign(orthoCamera, {
+        left: -width / 2,
+        right: width / 2,
+        top: height / 2,
+        bottom: -height / 2
+      });
+    }
+
+    plane.geometry.parameters.width = width;
+    plane.geometry.parameters.height = height;
+
+    postMaterial.uniforms.tDiffuse.value = depthRenderTarget.texture;
+    postMaterial.uniforms.tDepth.value = depthRenderTarget.depthTexture;
+    plane.material = postMaterial;
+
+    renderer.setRenderTarget(depthRenderTarget);
+    renderer.render(scene, camera);
+
+    renderer.setRenderTarget(null);
+    renderer.render(orthoScene, orthoCamera);
+
+    const canvas = renderer.domElement;
+    canvas.toBlob(async blob => {
+      if (blob) {
+        if (savefile) {
+          const formData = new FormData();
+          formData.append("file", blob, "depth_pov.png");
+
+          const downloadLink = document.createElement("a");
+          downloadLink.href = URL.createObjectURL(blob);
+          downloadLink.download = "depth_pov.png";
+          downloadLink.click();
+
+          // Revoke the object URL
+          URL.revokeObjectURL(downloadLink.href);
+        }
+        resolve(blob);
+      } else {
+        reject(new Error("Failed to generate pov"));
+      }
+    }, "image/png");
+  });
 }
 
 function setMicStatus(world) {
@@ -274,6 +221,9 @@ function entered(world) {
     modelref = Agent.modelRef[eid];
     agentObj = world.eid2obj.get(eid);
     modelObj = world.eid2obj.get(modelref);
+    scene = AFRAME.scenes[0];
+    camera = scene.camera;
+    renderer = scene.renderer;
     avatarPovObj = document.querySelector("#avatar-pov-node").object3D;
     APP.dialog.on("mic-state-changed", () => setMicStatus(world));
     setMicStatus(world);
@@ -308,13 +258,47 @@ export function AgentSystem(world) {
   if (clicked(prevArrowRef)) lowerIndex();
 
   if (clicked(micButtonRef)) {
-    if (!isRecording) recordUser(world);
-    else stopRecording();
+    stageUpdate();
+
+    toggleRecording(true)
+      .then(result => {
+        console.log(result);
+        if (result.status.code === RECORDER_CODES.SUCCESSFUL) {
+          nmtModule(result, LANGUAGES.SPANISH, ASR.TRANSCRIBE_AUDIO_FILES)
+            .then(asrResult => {
+              console.log(asrResult);
+              routerModule(asrResult)
+                .then(routerResults => {
+                  console.log(routerResults);
+                })
+                .catch(routerError => {
+                  console.log(routerError);
+                });
+            })
+            .catch(asrError => {
+              console.log(asrError);
+            });
+        }
+      })
+      .catch(error => {
+        console.log(error);
+      });
   }
 
   if (clicked(snapButtonRef)) {
-    snapPOV(world, agentObj);
-    captureDepthPOV();
+    Promise.all([POV(agentObj, false), DepthPOV(false)])
+      .then(values => {
+        vlModule(values[0], VL.GPT)
+          .then(snapResponse => {
+            console.log(snapResponse);
+          })
+          .catch(snapError => {
+            console.log(snapError);
+          });
+      })
+      .catch(error => {
+        console.log(error);
+      });
   }
 
   agentObj.updateMatrix();
