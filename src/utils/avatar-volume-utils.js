@@ -30,9 +30,9 @@ export function calcGainMultiplier(level) {
   );
 }
 
-export function updateAvatarVolumesPref(playerSessionId, gainMultiplier, muted) {
+export function updateAvatarVolumesPref(displayName, gainMultiplier, muted) {
   const avatarVoiceLevels = APP.store.state.preferences.avatarVoiceLevels || {};
-  avatarVoiceLevels[playerSessionId] = {
+  avatarVoiceLevels[displayName] = {
     gainMultiplier,
     muted
   };
@@ -43,6 +43,6 @@ export function updateAvatarVolumesPref(playerSessionId, gainMultiplier, muted) 
   });
 }
 
-export function getAvatarVolumePref(playerSessionId) {
-  return APP.store.state.preferences.avatarVoiceLevels?.[playerSessionId];
+export function getAvatarVolumePref(displayName) {
+  return APP.store.state.preferences.avatarVoiceLevels?.[displayName];
 }
