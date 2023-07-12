@@ -51,6 +51,7 @@ export function UserProfileSidebar({
     [updateMultiplier]
   );
   const newLevel = calcLevel(multiplier);
+
   return (
     <Sidebar
       beforeTitle={showBackButton ? <BackButton onClick={onBack} /> : <CloseButton onClick={onClose} />}
