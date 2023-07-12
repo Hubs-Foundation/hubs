@@ -22,7 +22,7 @@ export async function isValidGLB(url) {
 export async function isValidSceneUrl(url) {
   if (url.trim() === "") return false;
   if (!url.startsWith("http")) return false;
-  if (await isLocalHubsSceneUrl(url)) {
+  if (isLocalHubsSceneUrl(url)) {
     return true;
   } else {
     return isValidGLB(proxiedUrlFor(url));

@@ -569,12 +569,12 @@ AFRAME.registerComponent("media-loader", {
           async () => {
             const mayChangeScene = this.el.sceneEl.systems.permissions.can("update_hub");
 
-            if (await isLocalHubsAvatarUrl(src)) {
+            if (isLocalHubsAvatarUrl(src)) {
               this.el.setAttribute("hover-menu__hubs-item", {
                 template: "#avatar-link-hover-menu",
                 isFlat: true
               });
-            } else if ((await isHubsRoomUrl(src)) || ((await isLocalHubsSceneUrl(src)) && mayChangeScene)) {
+            } else if ((await isHubsRoomUrl(src)) || (isLocalHubsSceneUrl(src) && mayChangeScene)) {
               this.el.setAttribute("hover-menu__hubs-item", {
                 template: "#hubs-destination-hover-menu",
                 isFlat: true
