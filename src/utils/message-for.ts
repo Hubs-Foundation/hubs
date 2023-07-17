@@ -107,51 +107,46 @@ export interface LegacyRoomObject {
   scale: [number, number, number];
 }
 
-export function messageForLegacyRoomObjects(objects: LegacyRoomObject[]) {
+export function messageForLegacyRoomObject(obj: LegacyRoomObject) {
   const message: Message = {
     creates: [],
     updates: [],
     deletes: []
   };
 
-  objects.forEach(obj => {
-    const nid = obj.name;
-    const initialData: MediaLoaderParams = {
-      src: obj.extensions.HUBS_components.media.src,
-      resize: true,
-      recenter: true,
-      animateLoad: true,
-      isObjectMenuTarget: true
-    };
-    const createMessage: CreateMessage = {
-      version: 1,
-      networkId: nid,
-      prefabName: "media",
-      initialData
-    };
-    message.creates.push(createMessage);
+  const nid = obj.name;
+  const initialData: MediaLoaderParams = {
+    src: obj.extensions.HUBS_components.media.src,
+    resize: true,
+    recenter: true,
+    animateLoad: true,
+    isObjectMenuTarget: true
+  };
+  const createMessage: CreateMessage = {
+    version: 1,
+    networkId: nid,
+    prefabName: "media",
+    initialData
+  };
+  message.creates.push(createMessage);
 
-    const updateMessage: StorableUpdateMessage = {
-      data: {
-        "networked-transform": {
-          version: 1,
-          data: {
-            position: obj.translation || [0, 0, 0],
-            rotation: obj.rotation || [0, 0, 0, 1],
-            scale: obj.scale || [1, 1, 1]
-          }
+  const updateMessage: StorableUpdateMessage = {
+    data: {
+      "networked-transform": {
+        version: 1,
+        data: {
+          position: obj.translation || [0, 0, 0],
+          rotation: obj.rotation || [0, 0, 0, 1],
+          scale: obj.scale || [1, 1, 1]
         }
-      },
-      nid,
-      lastOwnerTime: 1,
-      timestamp: 1,
-      owner: "reticulum"
-    };
-    message.updates.push(updateMessage);
-  });
+      }
+    },
+    nid,
+    lastOwnerTime: 1,
+    timestamp: 1,
+    owner: "reticulum"
+  };
+  message.updates.push(updateMessage);
 
-  if (message.creates.length || message.updates.length) {
-    return message;
-  }
-  return null;
+  return message;
 }

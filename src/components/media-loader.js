@@ -13,7 +13,11 @@ import {
   proxiedUrlFor,
   isHubsRoomUrl,
   isLocalHubsSceneUrl,
-  isLocalHubsAvatarUrl
+  isLocalHubsAvatarUrl,
+  isHubsDestinationUrl,
+  isHubsAvatarUrl,
+  hubsRoomRegex,
+  localHubsRoomRegex
 } from "../utils/media-url-utils";
 import { addAnimationComponents } from "../utils/animation";
 
@@ -363,10 +367,16 @@ AFRAME.registerComponent("media-loader", {
 
       // We want to resolve and proxy some hubs urls, like rooms and scene links,
       // but want to avoid proxying assets in order for this to work in dev environments
-      const isLocalModelAsset =
-        isNonCorsProxyDomain(parsedUrl.hostname) && (guessContentType(src) || "").startsWith("model/gltf");
+      const isLocalAsset =
+        isNonCorsProxyDomain(parsedUrl.hostname) &&
+        !(await isHubsDestinationUrl(src)) &&
+        !(await isHubsAvatarUrl(src)) &&
+        !src.match(hubsRoomRegex)?.groups.id &&
+        !src.match(localHubsRoomRegex)?.groups.id;
 
-      if (this.data.resolve && !src.startsWith("data:") && !src.startsWith("hubs:") && !isLocalModelAsset) {
+      console.log("IS LOCAL ASSET?", isLocalAsset, src);
+
+      if (this.data.resolve && !src.startsWith("data:") && !src.startsWith("hubs:") && !isLocalAsset) {
         const is360 = !!(this.data.mediaOptions.projection && this.data.mediaOptions.projection.startsWith("360"));
         const quality = getDefaultResolveQuality(is360);
         const result = await resolveUrl(src, quality, version, forceLocalRefresh);

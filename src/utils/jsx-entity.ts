@@ -469,7 +469,6 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   quack: createDefaultInflator(Quack),
   mixerAnimatable: createDefaultInflator(MixerAnimatableInitialize),
   loopAnimation: inflateLoopAnimationInitialize,
-
   // inflators that create Object3Ds
   object3D: addObject3DComponent,
   slice9: inflateSlice9,

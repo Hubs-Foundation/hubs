@@ -124,8 +124,6 @@ export const PhysicsShape = defineComponent({
   heightfieldDistance: Types.f32,
   flags: Types.ui8
 });
-export const Pinnable = defineComponent();
-export const Pinned = defineComponent();
 export const DestroyAtExtremeDistance = defineComponent();
 export const MediaLoading = defineComponent();
 export const FloatyObject = defineComponent({ flags: Types.ui8, releaseGravity: Types.f32 });
@@ -153,9 +151,11 @@ export const CameraTool = defineComponent({
 export const MyCameraTool = defineComponent();
 export const MediaLoader = defineComponent({
   src: Types.ui32,
-  flags: Types.ui8
+  flags: Types.ui8,
+  fileId: Types.ui32
 });
 MediaLoader.src[$isStringType] = true;
+MediaLoader.fileId[$isStringType] = true;
 export const MediaLoaded = defineComponent();
 export const MediaContentBounds = defineComponent({
   bounds: [Types.f32, 3]

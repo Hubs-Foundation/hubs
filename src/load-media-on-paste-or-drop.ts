@@ -51,6 +51,7 @@ export async function spawnFromFileList(files: FileList) {
           recenter: true,
           resize: !qsTruthy("noResize"),
           animateLoad: true,
+          fileId: response.file_id,
           isObjectMenuTarget: true
         };
       })
@@ -61,6 +62,7 @@ export async function spawnFromFileList(files: FileList) {
           recenter: true,
           resize: !qsTruthy("noResize"),
           animateLoad: true,
+          fileId: null,
           isObjectMenuTarget: true
         };
       });

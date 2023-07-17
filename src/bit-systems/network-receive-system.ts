@@ -2,7 +2,7 @@ import { addComponent, defineQuery, enterQuery, hasComponent, removeComponent, r
 import { HubsWorld } from "../app";
 import { Networked, Owned } from "../bit-components";
 import { renderAsNetworkedEntity } from "../utils/create-networked-entity";
-import { deleteEntityState, hasSavedEntityState } from "../utils/entity-state-utils";
+import { createEntityState, deleteEntityState, hasSavedEntityState } from "../utils/entity-state-utils";
 import { networkableComponents, schemas, StoredComponent } from "../utils/network-schemas";
 import type { ClientID, CursorBufferUpdateMessage, EntityID, StringID, UpdateMessage } from "../utils/networking-types";
 import { hasPermissionToSpawn } from "../utils/permissions";
@@ -141,7 +141,6 @@ export function networkReceiveSystem(world: HubsWorld) {
         world.ignoredNids.add(nid);
         continue;
       }
-
       renderAsNetworkedEntity(world, prefabName, initialData, nidString, creator);
     }
   }

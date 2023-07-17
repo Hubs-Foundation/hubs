@@ -29,6 +29,9 @@ export type CreateEntityStatePayload = {
   nid: NetworkID;
   create_message: CreateMessage;
   updates: UpdateEntityStatePayload[];
+  file_id?: string;
+  file_access_token?: string;
+  promotion_token?: string;
 };
 
 export type DeleteEntityStatePayload = {
@@ -44,13 +47,23 @@ export function hasSavedEntityState(world: HubsWorld, eid: EntityID) {
 
 export async function createEntityState(hubChannel: HubChannel, world: HubsWorld, eid: EntityID) {
   const payload = createEntityStatePayload(world, eid);
+  return createEntityStateWithPayload(hubChannel, world, payload);
+}
+
+export async function createEntityStateWithPayload(
+  hubChannel: HubChannel,
+  world: HubsWorld,
+  payload: CreateEntityStatePayload
+) {
   // console.log("save_entity_state",  payload);
-  return push(hubChannel, "save_entity_state", payload);
+  return push(hubChannel, "save_entity_state", payload).catch(err => {
+    console.warn("Failed to save entity state", err);
+  });
 }
 
 export async function updateEntityState(hubChannel: HubChannel, world: HubsWorld, eid: EntityID) {
   const payload = updateEntityStatePayload(world, eid);
-  // console.log("update_entity_state",  payload);
+  // console.log("update_entity_state", payload);
   return push(hubChannel, "update_entity_state", payload);
 }
 
@@ -64,6 +77,12 @@ export async function deleteEntityState(hubChannel: HubChannel, world: HubsWorld
   const payload: DeleteEntityStatePayload = {
     nid: APP.getString(Networked.id[eid])! as NetworkID
   };
+  const {
+    initialData: { fileId }
+  } = createMessageDatas.get(eid)!;
+  if (fileId) {
+    payload.file_id = fileId;
+  }
   // console.log("delete_entity_state",  payload);
   return push(hubChannel, "delete_entity_state", payload);
 }
@@ -143,11 +162,29 @@ function createEntityStatePayload(world: HubsWorld, rootEid: EntityID): CreateEn
     }
   });
 
-  return {
+  const payload = {
     nid: rootNid,
     create_message,
     updates
-  };
+  } as CreateEntityStatePayload;
+
+  const {
+    prefabName,
+    initialData: { fileId, src }
+  } = createMessageDatas.get(rootEid)!;
+
+  if (prefabName == "media" && fileId && src) {
+    const fileAccessToken = new URL(src).searchParams.get("token") as string;
+    const { promotionToken } = APP.store.state.uploadPromotionTokens.find(
+      (upload: { fileId: string }) => upload.fileId === fileId
+    );
+    if (promotionToken) {
+      payload.file_id = fileId;
+      payload.file_access_token = fileAccessToken;
+      payload.promotion_token = promotionToken;
+    }
+  }
+  return payload;
 }
 
 const networkedQuery = defineQuery([Networked]);
