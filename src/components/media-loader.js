@@ -374,8 +374,6 @@ AFRAME.registerComponent("media-loader", {
         !src.match(hubsRoomRegex)?.groups.id &&
         !src.match(localHubsRoomRegex)?.groups.id;
 
-      console.log("IS LOCAL ASSET?", isLocalAsset, src);
-
       if (this.data.resolve && !src.startsWith("data:") && !src.startsWith("hubs:") && !isLocalAsset) {
         const is360 = !!(this.data.mediaOptions.projection && this.data.mediaOptions.projection.startsWith("360"));
         const quality = getDefaultResolveQuality(is360);
