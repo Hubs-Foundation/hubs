@@ -201,7 +201,7 @@ export const isHubsRoomUrl = async url =>
   (await isHubsServer(url)) &&
   !(await isHubsAvatarUrl(url)) &&
   !(await isHubsSceneUrl(url)) &&
-  !url.match(hubsRoomRegex)?.groups.id;
+  ((await url.match(hubsRoomRegex)?.groups.id) || (await url.match(localHubsRoomRegex)?.groups.id));
 
 export const isHubsDestinationUrl = async url =>
   (await isHubsServer(url)) && ((await isHubsSceneUrl(url)) || (await isHubsRoomUrl(url)));
