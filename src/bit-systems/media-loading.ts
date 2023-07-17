@@ -67,11 +67,11 @@ export function* waitForMediaLoaded(world: HubsWorld, eid: EntityID) {
 
 // prettier-ignore
 const loaderForMediaType = {
-  [MediaType.IMAGE]: (world: HubsWorld, { accessibleUrl, contentType }: { accessibleUrl: string; contentType: string }) =>
+  [MediaType.IMAGE]: (world: HubsWorld, { accessibleUrl, contentType }: { accessibleUrl: string, contentType: string }) =>
     loadImage(world, accessibleUrl, contentType),
-  [MediaType.VIDEO]: (world: HubsWorld, { accessibleUrl, contentType }: { accessibleUrl: string; contentType: string }) =>
+  [MediaType.VIDEO]: (world: HubsWorld, { accessibleUrl, contentType }: { accessibleUrl: string, contentType: string }) =>
     loadVideo(world, accessibleUrl, contentType),
-  [MediaType.MODEL]: (world: HubsWorld, { accessibleUrl, contentType }: { accessibleUrl: string; contentType: string }) =>
+  [MediaType.MODEL]: (world: HubsWorld, { accessibleUrl, contentType }: { accessibleUrl: string, contentType: string }) =>
     loadModel(world, accessibleUrl, contentType, true),
   [MediaType.PDF]: (world: HubsWorld, { accessibleUrl }: { accessibleUrl: string }) =>
     loadPDF(world, accessibleUrl),
@@ -96,6 +96,10 @@ function resizeAndRecenter(world: HubsWorld, media: EntityID, eid: EntityID) {
   const mediaObj = world.eid2obj.get(media)!;
   const box = new Box3();
   box.setFromObject(mediaObj);
+
+  // The AABB can be empty here for interactables that fetch  media (ie. gltf with an empty that has a video component).
+  // If we don't return the interactable would be wrongly positioned at the (0,0,0).
+  if (box.isEmpty()) return;
 
   let scalar = 1;
   if (resize) {

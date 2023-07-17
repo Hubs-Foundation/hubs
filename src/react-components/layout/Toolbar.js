@@ -7,9 +7,9 @@ import styleUtils from "../styles/style-utils.scss";
 export function Toolbar({ className, left, center, right, ...rest }) {
   return (
     <div className={classNames(styles.toolbar, className)} {...rest}>
-      <div className={classNames(styles.content, styles.leftContent, styleUtils.showLg)}>{left}</div>
-      <div className={classNames(styles.content, styles.centerContent)}>{center}</div>
-      <div className={classNames(styles.content, styles.rightContent, styleUtils.showLg)}>{right}</div>
+      <div className={classNames(styles.content, styles.left_content, styleUtils.showLg)}>{left}</div>
+      <div className={classNames(styles.content, styles.center_content)}>{center}</div>
+      <div className={classNames(styles.content, styles.right_content, styleUtils.showLg)}>{right}</div>
     </div>
   );
 }

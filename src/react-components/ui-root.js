@@ -70,6 +70,7 @@ import { ReactComponent as VRIcon } from "./icons/VR.svg";
 import { ReactComponent as LeaveIcon } from "./icons/Leave.svg";
 import { ReactComponent as EnterIcon } from "./icons/Enter.svg";
 import { ReactComponent as InviteIcon } from "./icons/Invite.svg";
+import hubsLogo from "../assets/images/hubs-logo.png";
 import { PeopleSidebarContainer, userFromPresence } from "./room/PeopleSidebarContainer";
 import { ObjectListProvider } from "./room/hooks/useObjectList";
 import { ObjectsSidebarContainer } from "./room/ObjectsSidebarContainer";
@@ -101,6 +102,7 @@ import { NotificationsContainer } from "./room/NotificationsContainer";
 import { usePermissions } from "./room/hooks/usePermissions";
 import { ChatContextProvider } from "./room/contexts/ChatContext";
 import ChatToolbarButton from "./room/components/ChatToolbarButton/ChatToolbarButton";
+import SeePlansCTA from "./room/components/SeePlansCTA/SeePlansCTA";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -1192,7 +1194,14 @@ class UIRoot extends Component {
             label: <FormattedMessage id="more-menu.preferences" defaultMessage="Preferences" />,
             icon: SettingsIcon,
             onClick: () => this.setState({ showPrefs: true })
-          }
+          },
+          (this.props.breakpoint === "sm" || this.props.breakpoint === "md") &&
+            isLockedDownDemo && {
+              id: "see-plans",
+              label: <FormattedMessage id="more-menu.see-plans-cta" defaultMessage="See Plans" />,
+              icon: { src: hubsLogo, alt: "Logo" },
+              href: "https://hubs.mozilla.com/#subscribe"
+            }
         ].filter(item => item)
       },
       {
@@ -1580,12 +1589,15 @@ class UIRoot extends Component {
                 }
                 modal={this.state.dialog}
                 toolbarLeft={
-                  <InvitePopoverContainer
-                    hub={this.props.hub}
-                    hubChannel={this.props.hubChannel}
-                    scene={this.props.scene}
-                    store={this.props.store}
-                  />
+                  <>
+                    <InvitePopoverContainer
+                      hub={this.props.hub}
+                      hubChannel={this.props.hubChannel}
+                      scene={this.props.scene}
+                      store={this.props.store}
+                    />
+                    {isLockedDownDemo && <SeePlansCTA />}
+                  </>
                 }
                 toolbarCenter={
                   <>
