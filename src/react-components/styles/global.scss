@@ -196,6 +196,7 @@ body {
   height: 100%;
   overflow: auto;
   overscroll-behavior-y: none;
+  color: var(--text1-color);
 }
 
 body[data-theme="light"],
@@ -637,6 +638,7 @@ small,
 strong {
   font-size: theme.$font-size-xs;
   font-weight: theme.$font-weight-bold;
+  color: theme.$text2-color;
 }
 
 small {
