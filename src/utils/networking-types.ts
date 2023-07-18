@@ -1,7 +1,8 @@
+import { MediaLoaderParams } from "../inflators/media-loader";
 import { PrefabName } from "../prefabs/prefabs";
 
 export type EntityID = number;
-export type InitialData = any;
+export type InitialData = MediaLoaderParams | any;
 export interface CreateMessageData {
   prefabName: PrefabName;
   initialData: InitialData;
