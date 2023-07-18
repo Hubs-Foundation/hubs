@@ -4,7 +4,7 @@ import { FloatyObject, Held, HeldRemoteRight, Interacted, ObjectSpawner } from "
 import { FLOATY_OBJECT_FLAGS } from "../systems/floaty-object-system";
 import { sleep } from "../utils/async-utils";
 import { coroutine } from "../utils/coroutine";
-import { createNetworkedEntity } from "../utils/create-networked-entity";
+import { createNetworkedMedia } from "../utils/create-networked-entity";
 import { EntityID } from "../utils/networking-types";
 import { setMatrixWorld } from "../utils/three-utils";
 import { animateScale, waitForMediaLoaded } from "./media-loading";
@@ -15,8 +15,8 @@ export enum OBJECT_SPAWNER_FLAGS {
 }
 
 function* spawnObjectJob(world: HubsWorld, spawner: EntityID) {
-  const spawned = createNetworkedEntity(world, "media", {
-    src: APP.getString(ObjectSpawner.src[spawner]),
+  const spawned = createNetworkedMedia(world, {
+    src: APP.getString(ObjectSpawner.src[spawner])!,
     recenter: false,
     resize: false,
     animateLoad: false,
