@@ -10,6 +10,13 @@ export enum Type {
   KINEMATIC
 }
 
+export enum CollisionGroup {
+  OBJECTS = "objects",
+  ENVIRONMENT = "environment",
+  TRIGGERS = "triggers",
+  AVATARS = "avatars"
+}
+
 export enum ActivationState {
   ACTIVE_TAG = 0,
   ISLAND_SLEEPING = 1,
@@ -158,7 +165,6 @@ export interface GLTFRigidBodyParams
 export function inflateGLTFRigidBody(world: HubsWorld, eid: number, params: GLTFRigidBodyParams) {
   const bodyParams = Object.assign({}, GLTF_DEFAULTS, params);
 
-  addComponent(world, Rigidbody, eid);
   inflateRigidBody(world, eid, {
     ...bodyParams,
     type: Object.values(GLTFRigidBodyType).indexOf(bodyParams.type),

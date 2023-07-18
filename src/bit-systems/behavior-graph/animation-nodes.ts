@@ -18,7 +18,7 @@ import {
   NormalAnimationBlendMode
 } from "three";
 import { HubsWorld } from "../../app";
-import { MixerAnimatable } from "../../bit-components";
+import { MixerAnimatableData } from "../../bit-components";
 import { EntityID } from "../../utils/networking-types";
 import { definitionListToMap } from "./utils";
 
@@ -58,7 +58,7 @@ const createAnimationActionDef = makeFlowNodeDefinition({
     const rootEid = graph.getDependency<EntityID>("rootEntity")!;
     const world = graph.getDependency<HubsWorld>("world")!;
     const obj = world.eid2obj.get(rootEid)!;
-    const mixer = MixerAnimatable.mixers.get(rootEid)!;
+    const mixer = MixerAnimatableData.get(rootEid)!;
 
     const action = mixer.clipAction(AnimationClip.findByName(obj.animations, clipName));
     action.blendMode = additiveBlending ? AdditiveAnimationBlendMode : NormalAnimationBlendMode;

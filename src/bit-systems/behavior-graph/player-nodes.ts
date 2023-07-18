@@ -9,6 +9,7 @@ import { Euler, Matrix4, Object3D, Quaternion, Vector3 } from "three";
 import { getPlayerInfo } from "../../utils/component-utils";
 import { ClientID } from "../../utils/networking-types";
 import { definitionListToMap } from "./utils";
+import { AElement } from "aframe";
 
 export const playerValueDefs = {
   player: new ValueType(
@@ -165,7 +166,7 @@ export const playerNodedefs = definitionListToMap([
     in: [{ player: "player" }],
     out: [{ position: "vec3" }, { rotation: "euler" }, { scale: "vec3" }],
     exec: (player: ClientID) => {
-      const info = getPlayerInfo(player);
+      const info = getPlayerInfo(player)!;
       const obj = info.el.object3D as Object3D;
       return {
         // TODO this is largely so that variables work since they are set using =. We can add support for .copy()-able things
@@ -182,8 +183,9 @@ export const playerNodedefs = definitionListToMap([
     in: [{ player: "player" }],
     out: [{ position: "vec3" }, { rotation: "euler" }, { scale: "vec3" }],
     exec: (player: ClientID) => {
-      const info = getPlayerInfo(player);
-      const obj = info.el.querySelector(".camera").object3D as Object3D;
+      const info = getPlayerInfo(player)!;
+      const camera = info.el.querySelector(".camera")! as AElement;
+      const obj = camera.object3D as Object3D;
       return {
         // TODO this is largely so that variables work since they are set using =. We can add support for .copy()-able things
         position: obj.position.clone(),
@@ -199,8 +201,9 @@ export const playerNodedefs = definitionListToMap([
     in: [{ player: "player" }],
     out: [{ position: "vec3" }, { rotation: "euler" }, { scale: "vec3" }],
     exec: (player: ClientID) => {
-      const info = getPlayerInfo(player);
-      const obj = info.el.querySelector(".camera").object3D as Object3D;
+      const info = getPlayerInfo(player)!;
+      const camera = info.el.querySelector(".camera")! as AElement;
+      const obj = camera.object3D as Object3D;
       obj.updateMatrices();
       const position = new Vector3();
       const rotation = new Quaternion();

@@ -15,9 +15,8 @@ import {
   writeNodeSpecsToJSON
 } from "@oveddan-behave-graph/core";
 import { defineQuery, enterQuery, exitQuery, hasComponent } from "bitecs";
-import { AnimationMixer } from "three";
 import { HubsWorld } from "../app";
-import { BehaviorGraph, CustomTags, Interacted, LocalAvatar, MixerAnimatable, RemoteAvatar, Rigidbody } from "../bit-components";
+import { BehaviorGraph, CustomTags, Interacted, LocalAvatar, RemoteAvatar, Rigidbody } from "../bit-components";
 import { findAncestorEntity } from "../utils/bit-utils";
 import { ClientID, EntityID } from "../utils/networking-types";
 import { AnimationNodes, animationValueDefs } from "./behavior-graph/animation-nodes";
@@ -62,43 +61,18 @@ const registry: IRegistry = {
   }
 };
 
-
-const easingNode = registry.nodes["math/easing"] as any; 
+const easingNode = registry.nodes["math/easing"] as any;
 easingNode.in.easingMode.choices = easingNode.in.easingMode.options.map((v: any) => ({ text: v, value: v }));
 easingNode.in.easingFunction.choices = easingNode.in.easingFunction.options.map((v: any) => ({ text: v, value: v }));
 
-const orders = ["XYZ", "YXZ", "ZXY", "ZYX", "YZX", "XZY" ].map(v => ({text: v, value: v}));
+const orders = ["XYZ", "YXZ", "ZXY", "ZYX", "YZX", "XZY"].map(v => ({ text: v, value: v }));
 const eulerCombineNode = registry.nodes["math/euler/combine"] as any;
-eulerCombineNode.in()[3].choices = orders
-eulerCombineNode.in()[3].defaultValue = orders[0].value
+eulerCombineNode.in()[3].choices = orders;
+eulerCombineNode.in()[3].defaultValue = orders[0].value;
 
 const nodeSpec = cleanupNodespac(writeNodeSpecsToJSON({ ...registry, dependencies: {} }));
 console.log("registry", registry, nodeSpec);
 console.log(JSON.stringify(nodeSpec, null, 2));
-
-const mixerAnimatableQuery = defineQuery([MixerAnimatable]);
-const mixerAnimatableEnteryQuery = enterQuery(mixerAnimatableQuery);
-const mixerAnimatableExitQuery = exitQuery(mixerAnimatableQuery);
-function stubAnimationMixerSystem(world: HubsWorld) {
-  mixerAnimatableEnteryQuery(world).forEach(eid => {
-    const obj = world.eid2obj.get(eid)!;
-    const mixer = new AnimationMixer(obj);
-    MixerAnimatable.mixers.set(eid, mixer);
-
-    // TODO remove, only for debug
-    (obj as any).mixer = mixer;
-  });
-
-  mixerAnimatableExitQuery(world).forEach(eid => {
-    const mixer = MixerAnimatable.mixers.get(eid)!;
-    mixer.stopAllAction();
-    MixerAnimatable.mixers.delete(eid);
-  });
-
-  mixerAnimatableQuery(world).forEach(eid => {
-    MixerAnimatable.mixers.get(eid)!.update(world.time.delta / 1000);
-  });
-}
 
 type EngineState = {
   engine: Engine;
@@ -113,8 +87,6 @@ const interactedQuery = defineQuery([Interacted]);
 const customTagsExitQuery = exitQuery(defineQuery([CustomTags]));
 
 export function behaviorGraphSystem(world: HubsWorld) {
-  stubAnimationMixerSystem(world);
-
   behaviorGraphEnterQuery(world).forEach(function (eid) {
     const obj = world.eid2obj.get(eid)!;
     const graphJson = obj.userData.behaviorGraph as GraphJSON;
@@ -174,13 +146,13 @@ export function behaviorGraphSystem(world: HubsWorld) {
   });
 
   customTagsExitQuery(world).forEach(function (eid) {
-    CustomTags.tags.delete(eid)
-  })
+    CustomTags.tags.delete(eid);
+  });
 
   // TODO allocations
-  const collisionCheckEntiteis = entityEvents.keys();
+  const collisionCheckEntities = entityEvents.keys();
   // TODO lots of traversal and can probably be simplified a good deal
-  for (const eid of collisionCheckEntiteis) {
+  for (const eid of collisionCheckEntities) {
     const triggerState = entityEvents.get(eid)!;
 
     const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;

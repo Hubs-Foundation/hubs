@@ -361,7 +361,7 @@ export function mediaFramesSystem(world, physicsSystem) {
 
     if (capturedEid && isCapturedOwned && !isCapturedHeld && !isFrameDeleting && isCapturedColliding) {
       snapToFrame(world, frame, capturedEid);
-      physicsSystem.updateRigidBodyOptions(capturedEid, { type: "kinematic" });
+      physicsSystem.updateRigidBody(capturedEid, { type: "kinematic" });
     } else if (
       (isFrameOwned && MediaFrame.capturedNid[frame] && world.deletedNids.has(MediaFrame.capturedNid[frame])) ||
       (capturedEid && isCapturedOwned && !isCapturedColliding) ||
@@ -392,7 +392,7 @@ export function mediaFramesSystem(world, physicsSystem) {
         obj.updateMatrices();
         tmpVec3.setFromMatrixScale(obj.matrixWorld).toArray(NetworkedMediaFrame.scale[frame]);
         snapToFrame(world, frame, capturable);
-        physicsSystem.updateRigidBodyOptions(capturable, { type: "kinematic" });
+        physicsSystem.updateRigidBody(capturable, { type: "kinematic" });
       }
     }
 
@@ -405,7 +405,7 @@ export function mediaFramesSystem(world, physicsSystem) {
       // TODO: If you are resetting scale because you lost a race for the frame,
       //       you should probably also move the object away from the frame.
       setMatrixScale(world.eid2obj.get(capturedEid), MediaFrame.scale[frame]);
-      physicsSystem.updateRigidBodyOptions(capturedEid, { type: "dynamic" });
+      physicsSystem.updateRigidBody(capturedEid, { type: "dynamic" });
     }
 
     MediaFrame.capturedNid[frame] = NetworkedMediaFrame.capturedNid[frame];

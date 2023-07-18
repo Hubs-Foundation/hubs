@@ -142,7 +142,7 @@ function makeObjectPropertyFlowNode<T extends keyof Object3D>(property: T, value
         return;
       }
       const value = read(property) as Object3D[T];
-      const prop = obj[property];
+      const prop = obj[property]!;
       if (typeof prop === "object" && "copy" in prop) {
         prop.copy(value);
         if (["position", "rotation", "scale"].includes(property)) obj.matrixNeedsUpdate = true;

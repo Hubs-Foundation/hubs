@@ -29,17 +29,11 @@ const ELEMENT_DEFAULTS: Required<ElementParams> = {
   timeScale: 1.0
 };
 
-const DEFAULTS: Required<LoopAnimationParams> = [ELEMENT_DEFAULTS];
-
 export function inflateLoopAnimationInitialize(
   world: HubsWorld,
   eid: number,
   params: LoopAnimationParams = []
 ): number {
-  if (params.length === 0) {
-    params = DEFAULTS;
-  }
-
   const componentParams = [];
   for (let i = 0; i < params.length; i++) {
     const requiredParams = Object.assign({}, ELEMENT_DEFAULTS, params[i]) as Required<ElementParams>;
