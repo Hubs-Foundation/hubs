@@ -185,6 +185,9 @@
   --tile-button-bg-color-hover: var(--basic-color-hover);
   --tile-button-bg-color-pressed: var(--basic-color-pressed);
   --tile-button-border-color: var(--basic-border-color);
+
+  --nametag-color: #{theme.$black};
+  --nametag-text-color: #{theme.$white};
 }
 
 html {
