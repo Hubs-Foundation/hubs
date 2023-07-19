@@ -14,9 +14,10 @@ const chatTooltipDescription = defineMessage({
 
 type ChatToolbarButtonProps = {
   onClick: () => void;
+  selected: boolean
 };
 
-const ChatToolbarButton = ({ onClick }: ChatToolbarButtonProps) => {
+const ChatToolbarButton = ({ onClick, selected }: ChatToolbarButtonProps) => {
   const { unreadMessages } = useContext(ChatContext);
   const intl = useIntl();
   const description = intl.formatMessage(chatTooltipDescription);
@@ -31,6 +32,7 @@ const ChatToolbarButton = ({ onClick }: ChatToolbarButtonProps) => {
         icon={<ChatIcon />}
         preset="accent4"
         label={<FormattedMessage id="chat-toolbar-button" defaultMessage="Chat" />}
+        selected={selected}
       />
     </ToolTip>
   );

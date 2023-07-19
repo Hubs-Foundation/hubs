@@ -1646,6 +1646,7 @@ class UIRoot extends Component {
                     {!isLockedDownDemo && (
                       <ChatToolbarButton
                         onClick={() => this.toggleSidebar("chat", { chatPrefix: "", chatAutofocus: false })}
+                        selected={this.state.sidebarId === "chat"}
                       />
                     )}
                     {entered && isMobileVR && (
