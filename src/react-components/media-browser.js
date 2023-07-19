@@ -386,7 +386,8 @@ class MediaBrowserContainer extends Component {
     const hasPrevious = !!searchParams.get("cursor");
 
     const customObjectType =
-      this.state.result && isSceneApiType ? "scene" : urlSource === "avatars" ? "avatar" : "object";
+    
+      isSceneApiType ? "scene" : urlSource === "avatars" ? "avatar" : "object";
 
     let searchDescription;
 
