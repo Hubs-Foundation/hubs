@@ -30,12 +30,22 @@ function hasPermissionToGrab(world, eid) {
   return canMove(world.eid2obj.get(eid).el);
 }
 
+function isAEntityPinned(world, eid) {
+  if (hasComponent(world, AEntity, eid)) {
+    const el = world.eid2obj.get(eid).el;
+    return !!el.components?.pinnable?.data?.pinned;
+  }
+  return false;
+}
+
 function grab(world, userinput, queryHovered, held, grabPath) {
   const hovered = queryHovered(world)[0];
+  const isEntityPinned = isPinned(hovered) || isAEntityPinned(world, hovered);
+
   if (
     hovered &&
     userinput.get(grabPath) &&
-    (!isPinned(hovered) || AFRAME.scenes[0].is("frozen")) &&
+    (!isEntityPinned || AFRAME.scenes[0].is("frozen")) &&
     hasPermissionToGrab(world, hovered)
   ) {
     addComponent(world, held, hovered);
