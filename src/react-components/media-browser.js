@@ -386,7 +386,7 @@ class MediaBrowserContainer extends Component {
     const hasPrevious = !!searchParams.get("cursor");
 
     const customObjectType = isSceneApiType ? "scene" : urlSource === "avatars" ? "avatar" : "object";
-console.log(this.props.mediaSearchStore.isFetching, "IS FETCHING")
+
     let searchDescription;
 
     if (!hideSearch && urlSource !== "scenes" && urlSource !== "avatars" && urlSource !== "favorites") {
