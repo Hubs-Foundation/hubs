@@ -385,10 +385,8 @@ class MediaBrowserContainer extends Component {
     const hasNext = !!(meta && meta.next_cursor);
     const hasPrevious = !!searchParams.get("cursor");
 
-    const customObjectType =
-    
-      isSceneApiType ? "scene" : urlSource === "avatars" ? "avatar" : "object";
-
+    const customObjectType = isSceneApiType ? "scene" : urlSource === "avatars" ? "avatar" : "object";
+console.log(this.props.mediaSearchStore.isFetching, "IS FETCHING")
     let searchDescription;
 
     if (!hideSearch && urlSource !== "scenes" && urlSource !== "avatars" && urlSource !== "favorites") {
@@ -470,7 +468,7 @@ class MediaBrowserContainer extends Component {
           showCustomOption && (
             <IconButton lg onClick={() => handleCustomClicked(urlSource)}>
               {["scenes", "avatars"].includes(urlSource) ? <LinkIcon /> : <UploadIcon />}
-              <p>{intl.formatMessage(customObjectMessages[customObjectType])}</p>
+               <p>{intl.formatMessage(customObjectMessages[customObjectType])}</p>
             </IconButton>
           )
         }
