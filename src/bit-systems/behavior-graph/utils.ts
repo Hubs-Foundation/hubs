@@ -8,11 +8,11 @@ export function definitionListToMap(list: NodeDefinition[]): NodeDefinitionsMap 
 }
 
 const skipExport = [
-  "customEvent/onTriggered",
-  "customEvent/trigger",
   "debug/expectTrue",
   "flow/sequence",
-  "flow/waitAll"
+  "flow/waitAll",
+  "customEvent/onCustomEvent",
+  "customEvent/customEvent"
 ];
 export function cleanupNodespac(nodeSpec: NodeSpecJSON[]) {
   nodeSpec = nodeSpec.filter(node => {
