@@ -10,7 +10,7 @@ const mixerExitQuery = exitQuery(mixerQuery);
 
 export function mixerAnimatableSystem(world: HubsWorld): void {
   initializeEnterQuery(world).forEach(eid => {
-    if (entityExists(world, eid)) {
+    if (!entityExists(world, eid)) {
       console.warn("Skipping nonexistant entity."); // TODO Why does this happen?
       return;
     }
