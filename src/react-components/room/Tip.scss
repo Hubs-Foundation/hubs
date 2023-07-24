@@ -3,10 +3,10 @@
 :local(.tip) {
   pointer-events: all;
   min-height: 48px;
-  background-color: theme.$tip-bg-color;
+  background-color: theme.$accent4-color;
   border-radius: 16px;
   display: flex;
-  color: theme.$tip-text-color;
+  color: theme.$text4-color;
   align-items: center;
 
   @media (min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
@@ -31,7 +31,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 1px solid theme.$tip-button-color;
+  border: 1px solid theme.$accent4-color-pressed;
   margin-right: 8px;
   margin-bottom: 8px;
   min-width: 48px;
@@ -40,13 +40,13 @@
   align-self: flex-end;
 
   &:hover {
-    border-color: theme.$tip-button-color-hover;
-    background-color: theme.$tip-button-color-hover;
+    border-color: theme.$accent4-color-hover;
+    background-color: theme.$accent4-color-hover;
   }
 
   &:active {
-    border-color: theme.$tip-button-color-pressed;
-    background-color: theme.$tip-button-color-pressed;
+    border-color: theme.$accent4-color-pressed;
+    background-color: theme.$accent4-color-pressed;
   }
 }
 
