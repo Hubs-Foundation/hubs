@@ -1,6 +1,8 @@
 @use "../styles/theme.scss";
 
-:local(.media), :local(.media) img, :local(.media) video {
+:local(.media),
+:local(.media) img,
+:local(.media) video {
   border-radius: theme.$border-radius-regular;
   background-color: theme.$tile-bg-color;
 }
@@ -9,13 +11,13 @@
   position: relative;
   display: flex;
   width: 100%;
-  border: 1px solid theme.$border3-color;
+  border: 1px solid theme.$darkgrey;
   border-radius: theme.$border-radius-regular;
   color: theme.$text1-color;
   min-height: 5em;
   padding: theme.$spacing-xs;
 
-  &:focus-within  {
+  &:focus-within {
     border-color: theme.$input-outline-color;
     box-shadow: 0 0 0 2px theme.$input-outline-color;
   }
@@ -33,7 +35,7 @@
   bottom: theme.$spacing-2xs;
   right: theme.$spacing-2xs;
 
-  @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
+  @media (min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
     display: block;
   }
 }

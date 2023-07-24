@@ -86,7 +86,6 @@
 
   --border1-color: #{theme.$lightgrey};
   --border2-color: #{theme.$grey};
-  --border3-color: #{theme.$darkgrey};
 
   --outline-color: #{theme.$black};
 
@@ -110,7 +109,7 @@
 
   --input-bg-color: var(--background1-color);
   --input-icon-color: var(--text2-color);
-  --input-border-color: var(--border3-color);
+  --input-border-color: #{theme.$darkgrey};
   --input-border-color-hover: var(--primary-color-hover);
   --input-outline-color: var(--primary-color);
 
