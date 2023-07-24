@@ -660,19 +660,19 @@
 }
 
 :local(.status-enabled) {
-  background-color: theme.$status-enabled-color;
+  background-color: theme.$accept-color;
 }
 
 :local(.status-disabled) {
-  background-color: theme.$status-disabled-color;
+  background-color: theme.$cancel-color;
 }
 
 :local(.status-unread) {
-  background-color: theme.$status-unread-color;
+  background-color: theme.$orange;
 }
 
 :local(.status-recording) {
-  background-color: theme.$status-recording-color;
+  background-color: theme.$red;
 }
 
 :local(.left) {

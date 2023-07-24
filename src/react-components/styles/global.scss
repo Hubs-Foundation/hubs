@@ -152,11 +152,6 @@
   --error-color-hover: var(--cancel-color-hover);
   --error-color-pressed: var(--cancel-color-pressed);
 
-  --status-unread-color: #{theme.$orange};
-  --status-recording-color: #{theme.$red};
-  --status-enabled-color: var(--accept-color);
-  --status-disabled-color: var(--cancel-color);
-
   --overlay-bg-color: rgba(0, 0, 0, 0.5);
   --overlay-text-color: #{theme.$white};
   --overlay-border-color: #{theme.$grey};
