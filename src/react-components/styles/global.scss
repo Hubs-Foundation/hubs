@@ -113,9 +113,6 @@
   --input-border-color-hover: var(--primary-color-hover);
   --input-outline-color: var(--primary-color);
 
-  --list-bg-color-hover: var(--basic-color-hover);
-  --list-bg-color-pressed: var(--basic-color-pressed);
-
   --dropdown-bg-color: var(--background1-color);
   --dropdown-border-color: var(--border1-color);
   --dropdown-shadow-color: var(--shadow-color);
@@ -139,8 +136,6 @@
 
   --favorite-color: #{theme.$yellow};
 
-  --admin-color: var(--accent1-color);
-
   --error-color: var(--cancel-color);
   --error-color-hover: var(--cancel-color-hover);
   --error-color-pressed: var(--cancel-color-pressed);
@@ -148,7 +143,6 @@
   --overlay-bg-color: rgba(0, 0, 0, 0.5);
   --overlay-text-color: #{theme.$white};
   --overlay-border-color: #{theme.$grey};
-  --overlay-outline-color: #{theme.$white};
 
   --toolbar-icon-color: var(--text5-color);
   --toolbar-icon-selected-bg: var(--transparent);
