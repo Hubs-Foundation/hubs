@@ -176,7 +176,7 @@
   --toolbar-label-accent4: var(--accent4-color);
   --toolbar-label-accent5: var(--accent5-color);
 
-  --tile-text-color: var(--text4-color);
+  --tile-text-color: var(--text2-color);
   --tile-bg-color: var(--secondary-color);
   --tile-bg-color-hover: var(--secondary-color-hover);
   --tile-bg-color-pressed: var(--secondary-color-pressed);
@@ -196,6 +196,7 @@ body {
   height: 100%;
   overflow: auto;
   overscroll-behavior-y: none;
+  color: var(--text1-color);
 }
 
 body[data-theme="light"],
