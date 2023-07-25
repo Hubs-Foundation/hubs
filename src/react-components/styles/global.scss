@@ -84,7 +84,6 @@
 
   --border1-color: #{theme.$lightgrey};
   --border2-color: #{theme.$grey};
-  --border3-color: #{theme.$darkgrey};
 
   --outline-color: #{theme.$black};
 
@@ -108,16 +107,9 @@
 
   --input-bg-color: var(--background1-color);
   --input-icon-color: var(--text2-color);
-  --input-border-color: var(--border3-color);
+  --input-border-color: #{theme.$darkgrey};
   --input-border-color-hover: var(--primary-color-hover);
   --input-outline-color: var(--primary-color);
-
-  --list-bg-color-hover: var(--basic-color-hover);
-  --list-bg-color-pressed: var(--basic-color-pressed);
-
-  --dropdown-bg-color: var(--background1-color);
-  --dropdown-border-color: var(--border1-color);
-  --dropdown-shadow-color: var(--shadow-color);
 
   --button-text-color: var(--text1-color);
   --button-border-color: var(--border1-color);
@@ -136,27 +128,13 @@
   --chat-bubble-link-color-sent-pressed: var(--basic-color-pressed);
   --chat-bubble-bg-color-received: var(--background3-color);
 
-  --tip-text-color: var(--text5-color);
-  --tip-bg-color: var(--accent4-color);
-  --tip-button-color: var(--accent-4color-pressed);
-  --tip-button-color-hover: var(--accent4-color-hover);
-  --tip-button-color-pressed: var(--accent4-color-pressed);
-
   --favorite-color: #{theme.$yellow};
 
-  --admin-color: var(--accent1-color);
-
   --error-color: var(--cancel-color);
-
-  --status-unread-color: #{theme.$orange};
-  --status-recording-color: #{theme.$red};
-  --status-enabled-color: var(--accept-color);
-  --status-disabled-color: var(--cancel-color);
 
   --overlay-bg-color: rgba(0, 0, 0, 0.5);
   --overlay-text-color: #{theme.$white};
   --overlay-border-color: #{theme.$grey};
-  --overlay-outline-color: #{theme.$white};
 
   --toolbar-icon-color: var(--text5-color);
   --toolbar-icon-selected-bg: var(--transparent);
