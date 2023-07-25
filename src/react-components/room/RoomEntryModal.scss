@@ -28,13 +28,14 @@
 
   h5 {
     font-size: theme.$font-size-xs;
-    color: theme.$grey;
+    color: theme.$text3-color;
     margin-bottom: 4px;
   }
 
   p {
     font-size: theme.$font-size-sm;
     text-align: center;
+    color: theme.$text1-color;
 
     @media (min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
       font-size: 20px;

@@ -62,14 +62,14 @@
 :local(.transparent) {
   :local(.icon-container) {
     border-color: theme.$toolbar-basic-border-color;
-    background-color: theme.$transparent;
+    background-color: theme.$background1-color;
     svg {
       color: theme.$toolbar-basic-icon-color;
     }
 
     &:disabled,
     &[disabled] {
-      border-color: theme.$transparent;
+      border-color: theme.$background1-color;
       background-color: theme.$disabled-bg-color;
       svg {
         color: theme.$disabled-icon-color;
