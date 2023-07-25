@@ -1167,7 +1167,7 @@ class UIRoot extends Component {
             onClick: () =>
               this.showNonHistoriedDialog(LeaveRoomModal, {
                 destinationUrl: "/",
-                reason: LeaveReason.createRoom,
+                reason: LeaveReason.createRoom
               })
           },
           !isLockedDownDemo && {
@@ -1254,7 +1254,7 @@ class UIRoot extends Component {
               onClick: () => {
                 this.showNonHistoriedDialog(LeaveRoomModal, {
                   destinationUrl: "/",
-                  reason: LeaveReason.leaveRoom,
+                  reason: LeaveReason.leaveRoom
                 });
               }
             },
@@ -1678,13 +1678,13 @@ class UIRoot extends Component {
                         preset="cancel"
                         selected={!!this.state.leaving}
                         onClick={() => {
-                          this.setState({leaving: true})
+                          this.setState({ leaving: true });
                           this.showNonHistoriedDialog(LeaveRoomModal, {
                             destinationUrl: "/",
                             reason: LeaveReason.leaveRoom,
                             onClose: () => {
-                              this.setState({leaving: false})
-                              this.closeDialog()
+                              this.setState({ leaving: false });
+                              this.closeDialog();
                             }
                           });
                         }}
