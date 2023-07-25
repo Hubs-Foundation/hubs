@@ -364,7 +364,7 @@
     }
 
     label {
-      color: theme.$toolbar-label-accent1;
+      color: theme.$accent1-color;
     }
 
     &:hover {
@@ -435,7 +435,7 @@
     }
 
     label {
-      color: theme.$toolbar-label-accent2;
+      color: theme.$accent2-color;
     }
 
     &:hover {
@@ -499,7 +499,7 @@
     }
 
     label {
-      color: theme.$toolbar-label-accent3;
+      color: theme.$accent3-color;
     }
 
     &:hover {
@@ -563,7 +563,7 @@
     }
 
     label {
-      color: theme.$toolbar-label-accent4;
+      color: theme.$accent4-color;
     }
 
     &:hover {
@@ -627,7 +627,7 @@
     }
 
     label {
-      color: theme.$toolbar-label-accent5;
+      color: theme.$accent5-color;
     }
 
     &:hover {
@@ -660,19 +660,19 @@
 }
 
 :local(.status-enabled) {
-  background-color: theme.$status-enabled-color;
+  background-color: theme.$accept-color;
 }
 
 :local(.status-disabled) {
-  background-color: theme.$status-disabled-color;
+  background-color: theme.$cancel-color;
 }
 
 :local(.status-unread) {
-  background-color: theme.$status-unread-color;
+  background-color: theme.$orange;
 }
 
 :local(.status-recording) {
-  background-color: theme.$status-recording-color;
+  background-color: theme.$red;
 }
 
 :local(.left) {

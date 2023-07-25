@@ -48,13 +48,13 @@ $input-height: 40px;
   top: $input-height + 4px;
   display: none;
   flex-direction: column;
-  background-color: theme.$dropdown-bg-color;
+  background-color: theme.$input-bg-color;
   border-radius: 8px;
   padding: 8px 0;
   z-index: 99999;
   left: 0;
   right: 0;
-  box-shadow: -1px -1px 1px theme.$dropdown-border-color, 3px 3px 6px theme.$dropdown-shadow-color;
+  box-shadow: -1px -1px 1px theme.$border1-color, 3px 3px 6px theme.$shadow-color;
   max-height: 320px;
   overflow-y: auto;
 }

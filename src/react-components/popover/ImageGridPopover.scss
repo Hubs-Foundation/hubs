@@ -1,6 +1,5 @@
 @use "../styles/theme.scss";
 
-
 :local(.image-grid-popover) {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(48px, 1fr));
@@ -19,12 +18,11 @@
     min-height: 56px;
 
     &:hover {
-      background-color: theme.$list-bg-color-hover;
+      background-color: theme.$basic-color-hover;
     }
 
     &:active {
-      background-color: theme.$list-bg-color-pressed;
+      background-color: theme.$basic-color-pressed;
     }
   }
 }
-

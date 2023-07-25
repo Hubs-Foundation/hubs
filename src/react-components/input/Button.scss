@@ -85,7 +85,6 @@
   &:hover {
     color: theme.$text5-color-hover;
     background-color: theme.$accept-color-hover;
-    border: 2px solid theme.$accept-border-color;
   }
 
   &:active {
@@ -97,6 +96,7 @@
 :local(.cancel) {
   color: theme.$text5-color;
   background-color: theme.$cancel-color;
+  border: 2px solid theme.$cancel-color;
 
   svg {
     color: theme.$text5-color;
@@ -116,6 +116,7 @@
 :local(.accent1) {
   color: theme.$text5-color;
   background-color: theme.$accent1-color;
+  border: 2px solid theme.$accent1-border-color;
 
   svg {
     color: theme.$text5-color;
@@ -144,7 +145,6 @@
   &:hover {
     color: theme.$text5-color-hover;
     background-color: theme.$accent2-color-hover;
-    border: 2px solid theme.$accent2-border-color;
   }
 
   &:active {
@@ -156,6 +156,7 @@
 :local(.accent3) {
   color: theme.$text5-color;
   background-color: theme.$accent3-color;
+  border: 2px solid theme.$accent3-border-color;
 
   svg {
     color: theme.$text5-color;
@@ -184,7 +185,6 @@
   &:hover {
     color: theme.$text5-color-hover;
     background-color: theme.$accent4-color-hover;
-    border: 2px solid theme.$accent4-border-color;
   }
 
   &:active {
@@ -205,7 +205,6 @@
   &:hover {
     color: theme.$text5-color-hover;
     background-color: theme.$accent5-color-hover;
-    border: 2px solid theme.$accent5-border-color;
   }
 
   &:active {
@@ -217,6 +216,7 @@
 :local(.accent6) {
   color: theme.$text5-color;
   background-color: theme.$accent6-color;
+  border: 2px solid theme.$accent6-color;
 
   svg {
     color: theme.$text5-color;
