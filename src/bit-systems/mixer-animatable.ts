@@ -1,4 +1,4 @@
-import { addComponent, defineQuery, enterQuery, exitQuery, removeComponent } from "bitecs";
+import { addComponent, defineQuery, enterQuery, entityExists, exitQuery, removeComponent } from "bitecs";
 import { AnimationMixer } from "three";
 import { MixerAnimatable, MixerAnimatableInitialize, MixerAnimatableData, Object3DTag } from "../bit-components";
 import { HubsWorld } from "../app";
@@ -10,6 +10,10 @@ const mixerExitQuery = exitQuery(mixerQuery);
 
 export function mixerAnimatableSystem(world: HubsWorld): void {
   initializeEnterQuery(world).forEach(eid => {
+    if (!entityExists(world, eid)) {
+      console.warn("Skipping nonexistant entity."); // TODO Why does this happen?
+      return;
+    }
     addComponent(world, MixerAnimatable, eid);
 
     const object = world.eid2obj.get(eid)!;

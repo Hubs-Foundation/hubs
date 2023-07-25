@@ -177,6 +177,7 @@ class UIRoot extends Component {
     enterInVR: false,
     entered: false,
     entering: false,
+    leaving: false,
     dialog: null,
     showShareDialog: false,
     linkCode: null,
@@ -1166,7 +1167,7 @@ class UIRoot extends Component {
             onClick: () =>
               this.showNonHistoriedDialog(LeaveRoomModal, {
                 destinationUrl: "/",
-                reason: LeaveReason.createRoom
+                reason: LeaveReason.createRoom,
               })
           },
           !isLockedDownDemo && {
@@ -1253,7 +1254,7 @@ class UIRoot extends Component {
               onClick: () => {
                 this.showNonHistoriedDialog(LeaveRoomModal, {
                   destinationUrl: "/",
-                  reason: LeaveReason.leaveRoom
+                  reason: LeaveReason.leaveRoom,
                 });
               }
             },
@@ -1646,6 +1647,7 @@ class UIRoot extends Component {
                     {!isLockedDownDemo && (
                       <ChatToolbarButton
                         onClick={() => this.toggleSidebar("chat", { chatPrefix: "", chatAutofocus: false })}
+                        selected={this.state.sidebarId === "chat"}
                       />
                     )}
                     {entered && isMobileVR && (
@@ -1674,10 +1676,16 @@ class UIRoot extends Component {
                         icon={<LeaveIcon />}
                         label={<FormattedMessage id="toolbar.leave-room-button" defaultMessage="Leave" />}
                         preset="cancel"
+                        selected={!!this.state.leaving}
                         onClick={() => {
+                          this.setState({leaving: true})
                           this.showNonHistoriedDialog(LeaveRoomModal, {
                             destinationUrl: "/",
-                            reason: LeaveReason.leaveRoom
+                            reason: LeaveReason.leaveRoom,
+                            onClose: () => {
+                              this.setState({leaving: false})
+                              this.closeDialog()
+                            }
                           });
                         }}
                       />

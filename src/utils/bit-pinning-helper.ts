@@ -33,10 +33,12 @@ const _signInAndPinOrUnpinElement = (hubChannel: HubChannel, world: HubsWorld, e
   action();
 };
 
-export const canPin = (hubChannel: HubChannel, world: HubsWorld, eid: EntityID): boolean => {
-  const {
-    initialData: { fileId }
-  } = createMessageDatas.get(eid)!;
+export const canPin = (hubChannel: HubChannel, eid: EntityID): boolean => {
+  const createMessageData = createMessageDatas.get(eid)!;
+  if (createMessageData.prefabName !== "media") {
+    return false;
+  }
+  const fileId = createMessageData.initialData.fileId;
   const hasFile = !!fileId;
   const hasPromotableFile =
     hasFile && APP.store.state.uploadPromotionTokens.some((upload: any) => upload.fileId === fileId);

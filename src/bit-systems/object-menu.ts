@@ -205,7 +205,7 @@ function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
 
   world.eid2obj.get(ObjectMenu.unpinButtonRef[menu])!.visible = visible && isPinned(target);
   world.eid2obj.get(ObjectMenu.pinButtonRef[menu])!.visible =
-    visible && !isPinned(target) && canPin(APP.hubChannel!, world, target);
+    visible && !isPinned(target) && canPin(APP.hubChannel!, target);
 
   [
     ObjectMenu.cameraFocusButtonRef[menu],

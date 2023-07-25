@@ -1,3 +1,4 @@
+//  Breakpoints
 // default below 576px (Portrait Phones)
 $breakpoint-sm: 576px; // Landscape Phones
 $breakpoint-md: 768px; // Tablets
@@ -6,6 +7,31 @@ $breakpoint-xl: 1200px; // Large Desktops
 $breakpoint-xxl: 1600px; // Extra Large Desktops
 $breakpoint-vr: 600px; // Standalone VR Browsers
 
+// Font styles
+$font-size-xs: 10px;
+$font-size-sm: 12px;
+$font-size-md: 14px;
+$font-size-lg: 20px;
+$font-size-xl: 24px;
+$font-size-2xl: 28px;
+
+$font-weight-regular: 400;
+$font-weight-medium: 500;
+$font-weight-bold: 700;
+
+// Border styles
+$border-radius-regular: 8px;
+$border-radius-small: 6px;
+
+// Spacing
+$spacing-2xs: 4px;
+$spacing-xs: 8px;
+$spacing-sm: 12px;
+$spacing-md: 16px;
+$spacing-lg: 20px;
+$spacing-xl: 24px;
+
+// Utility colors
 $transparent: transparent;
 $transparent-hover: rgba(0, 0, 0, 0.08);
 $transparent-pressed: rgba(0, 0, 0, 0.12);
@@ -66,29 +92,6 @@ $discord-text1-color: white;
 $discord-text2-color: #a3a3a3;
 $discord-text3-color: rgb(127, 127, 127);
 $discord-text4-color: rgb(64, 64, 64);
-
-$font-size-xs: 10px;
-$font-size-sm: 12px;
-$font-size-md: 14px;
-$font-size-lg: 20px;
-$font-size-xl: 24px;
-$font-size-2xl: 28px;
-
-$font-weight-regular: 400;
-$font-weight-medium: 500;
-$font-weight-bold: 700;
-
-$border-radius-regular: 8px;
-$border-radius-small: 6px;
-
-$outline-width: 3px;
-
-$spacing-2xs: 4px;
-$spacing-xs: 8px;
-$spacing-sm: 12px;
-$spacing-md: 16px;
-$spacing-lg: 20px;
-$spacing-xl: 24px;
 
 // Theme SCSS Variables:
 // Reference these variables in the Hubs codebase.
@@ -268,7 +271,7 @@ $tile-button-bg-color-hover: var(--tile-button-bg-color-hover);
 $tile-button-bg-color-pressed: var(--tile-button-bg-color-pressed);
 $tile-button-border-color: var(--tile-button-border-color);
 
-// Lilypad compatible variables (to eventually replace the above)
+// Mozilla Lilypad compatible variables
 
 /**
   PRIMARY INTERACTION

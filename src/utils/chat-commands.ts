@@ -3,7 +3,7 @@ import { Object3D } from "three";
 import { HubsWorld } from "../app";
 import { moveToSpawnPoint } from "../bit-systems/waypoint";
 import { CharacterControllerSystem } from "../systems/character-controller-system";
-import { createNetworkedEntity } from "./create-networked-entity";
+import { createNetworkedMedia } from "./create-networked-entity";
 import qsTruthy from "./qs_truthy";
 
 function checkFlag(args: string[], flag: string) {
@@ -51,7 +51,7 @@ export function add(world: HubsWorld, avatarPov: Object3D, args: string[]) {
       isObjectMenuTarget: !checkFlag(args, FLAG_NO_OBJECT_MENU)
     };
     console.log("Adding media", initialData);
-    const eid = createNetworkedEntity(world, "media", initialData);
+    const eid = createNetworkedMedia(world, initialData);
     const obj = APP.world.eid2obj.get(eid)!;
     obj.position.copy(avatarPov.localToWorld(new THREE.Vector3(0, 0, -1.5)));
     obj.lookAt(avatarPov.getWorldPosition(new THREE.Vector3()));
