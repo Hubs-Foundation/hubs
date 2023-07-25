@@ -90,7 +90,11 @@ export function MicSetupModal({
                         checked={isMicrophoneMuted}
                         onChange={onChangeMicrophoneMuted}
                       />
-                      <ToolTip category="primary" description="Toggle mic on/off anytime after you enter the room (M)">
+                      <ToolTip
+                        location="right"
+                        category="primary"
+                        description="Toggle mic on/off anytime after you enter the room (M)"
+                      >
                         <InfoIcon className={styles.infoIcon} />
                       </ToolTip>
                     </>

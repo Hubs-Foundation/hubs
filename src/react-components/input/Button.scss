@@ -23,6 +23,16 @@
   }
 }
 
+:local(.basic) {
+  border: 2px solid theme.$basic-border-color;
+  background-color: theme.$basic-color;
+}
+
+:local(.transparent) {
+  border-color: theme.$background1-color;
+  background-color: theme.$background1-color;
+}
+
 :local(.basic),
 :local(.transparent) {
   color: theme.$text2-color;
@@ -42,11 +52,6 @@
     color: theme.$text2-color-pressed;
     background-color: theme.$basic-color-pressed;
   }
-}
-
-:local(.transparent) {
-  border-color: theme.$transparent;
-  background-color: theme.$transparent;
 }
 
 :local(.primary) {

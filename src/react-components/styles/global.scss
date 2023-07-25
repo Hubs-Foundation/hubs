@@ -74,8 +74,6 @@
   --primary-color-pressed: #{theme.$blue-pressed};
 
   --secondary-color: #{theme.$lightgrey};
-  --secondary-color-hover: #{theme.$lightgrey-hover};
-  --secondary-color-pressed: #{theme.$lightgrey-pressed};
 
   --background1-color: #{theme.$white};
   --background2-color: #{theme.$recessed-bg};
@@ -149,8 +147,6 @@
   --admin-color: var(--accent1-color);
 
   --error-color: var(--cancel-color);
-  --error-color-hover: var(--cancel-color-hover);
-  --error-color-pressed: var(--cancel-color-pressed);
 
   --status-unread-color: #{theme.$orange};
   --status-recording-color: #{theme.$red};
