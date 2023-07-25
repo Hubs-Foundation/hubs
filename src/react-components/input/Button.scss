@@ -23,30 +23,35 @@
   }
 }
 
+:local(.basic) {
+  border: 2px solid theme.$basic-border-color;
+  background-color: theme.$basic-color;
+}
+
+:local(.transparent) {
+  border-color: theme.$background1-color;
+  background-color: theme.$background1-color;
+}
+
 :local(.basic),
 :local(.transparent) {
-  color: theme.$text4-color;
+  color: theme.$text2-color;
   border: 2px solid theme.$basic-border-color;
   background-color: theme.$basic-color;
 
   svg {
-    color: theme.$text4-color;
+    color: theme.$text2-color;
   }
 
   &:hover {
-    color: theme.$text4-color-hover;
+    color: theme.$text2-color-hover;
     background-color: theme.$basic-color-hover;
   }
 
   &:active {
-    color: theme.$text4-color-pressed;
+    color: theme.$text2-color-pressed;
     background-color: theme.$basic-color-pressed;
   }
-}
-
-:local(.transparent) {
-  border-color: theme.$transparent;
-  background-color: theme.$transparent;
 }
 
 :local(.primary) {
@@ -80,7 +85,6 @@
   &:hover {
     color: theme.$text5-color-hover;
     background-color: theme.$accept-color-hover;
-    border: 2px solid theme.$accept-border-color;
   }
 
   &:active {
@@ -92,6 +96,7 @@
 :local(.cancel) {
   color: theme.$text5-color;
   background-color: theme.$cancel-color;
+  border: 2px solid theme.$cancel-color;
 
   svg {
     color: theme.$text5-color;
@@ -111,6 +116,7 @@
 :local(.accent1) {
   color: theme.$text5-color;
   background-color: theme.$accent1-color;
+  border: 2px solid theme.$accent1-border-color;
 
   svg {
     color: theme.$text5-color;
@@ -139,7 +145,6 @@
   &:hover {
     color: theme.$text5-color-hover;
     background-color: theme.$accent2-color-hover;
-    border: 2px solid theme.$accent2-border-color;
   }
 
   &:active {
@@ -151,6 +156,7 @@
 :local(.accent3) {
   color: theme.$text5-color;
   background-color: theme.$accent3-color;
+  border: 2px solid theme.$accent3-border-color;
 
   svg {
     color: theme.$text5-color;
@@ -179,7 +185,6 @@
   &:hover {
     color: theme.$text5-color-hover;
     background-color: theme.$accent4-color-hover;
-    border: 2px solid theme.$accent4-border-color;
   }
 
   &:active {
@@ -200,7 +205,6 @@
   &:hover {
     color: theme.$text5-color-hover;
     background-color: theme.$accent5-color-hover;
-    border: 2px solid theme.$accent5-border-color;
   }
 
   &:active {
@@ -212,6 +216,7 @@
 :local(.accent6) {
   color: theme.$text5-color;
   background-color: theme.$accent6-color;
+  border: 2px solid theme.$accent6-color;
 
   svg {
     color: theme.$text5-color;
