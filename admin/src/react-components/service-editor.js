@@ -406,6 +406,9 @@ class ConfigurationEditor extends Component {
   }
 
   renderCategory(schema, category, config) {
+    console.log("SCHEMA", schema)
+    console.log("config", config)
+    console.log("category", category)
     switch (category) {
       case "theme":
         return this.renderThemeSection(schema.theme, config);
