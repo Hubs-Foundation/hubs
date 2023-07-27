@@ -105,7 +105,8 @@ function getCurrentTheme() {
 
 function getThemeColor(name) {
   const theme = getCurrentTheme();
-  return theme?.variables?.[name] || DEFAULT_COLORS[name];
+  // config?.theme?.[name] ensures legacy variables for nametag colors are taken into account
+  return theme?.variables?.[name] || config?.theme?.[name] || DEFAULT_COLORS[name];
 }
 
 function updateTextButtonColors() {
