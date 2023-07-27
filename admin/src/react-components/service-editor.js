@@ -459,6 +459,7 @@ class ConfigurationEditor extends Component {
               className={this.props.classes.button}
               variant="contained"
               color="primary"
+              disabled={this.state.warningMessage}
             >
               Save
             </Button>
