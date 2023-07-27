@@ -234,7 +234,7 @@ module.exports = async (env, argv) => {
   /**
    * Initialize the Webpack build envrionment for the provided environment.
    */
-  
+
   if (argv.mode !== "production" || env.bundleAnalyzer) {
     if (env.loadAppConfig || process.env.LOAD_APP_CONFIG) {
       if (!env.localDev) {
