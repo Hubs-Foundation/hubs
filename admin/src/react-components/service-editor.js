@@ -38,6 +38,7 @@ import {
   getAdminInfo
 } from "../utils/ita";
 import * as AppConfigUtils from "../utils/app-config";
+import ThemeBuilder from "./ThemeBuilder/ThemeBuilder";
 
 const qs = new URLSearchParams(location.hash.split("?")[1]);
 
@@ -429,7 +430,8 @@ class ConfigurationEditor extends Component {
     const configurables = this.getFilteredDescriptors(theme);
     const getInput = ([path, descriptor]) => this.renderConfigurable(path, descriptor, getConfigValue(config, path));
 
-    return (
+    return (<>
+    <ThemeBuilder config={config}/>
       <form onSubmit={this.onSubmit.bind(this)}>
         <h3 className="heading-sm mb-24">Nametags</h3>
         {getInput(configurables[0])}
@@ -466,6 +468,7 @@ class ConfigurationEditor extends Component {
           )}
         </div>
       </form>
+      </>
     );
   }
 
