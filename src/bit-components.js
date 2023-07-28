@@ -396,3 +396,10 @@ const _CustomTags = defineComponent();
  */
 export const CustomTags = _CustomTags;
 CustomTags.tags = new Map();
+export const NetworkedAnimation = defineComponent({
+  timestamp: Types.ui32
+});
+/**
+ * @type {Map<EntityId, Map<number, AnimationActionData>}>}
+ */
+export const NetworkedAnimationActionsData = new Map();

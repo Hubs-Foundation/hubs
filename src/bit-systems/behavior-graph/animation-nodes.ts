@@ -18,9 +18,25 @@ import {
   NormalAnimationBlendMode
 } from "three";
 import { HubsWorld } from "../../app";
-import { MixerAnimatableData } from "../../bit-components";
+import {
+  NetworkedAnimationActionsData,
+  BehaviorGraph,
+  MixerAnimatableData,
+  Networked,
+  NetworkedAnimation,
+  Owned
+} from "../../bit-components";
 import { EntityID } from "../../utils/networking-types";
 import { definitionListToMap } from "./utils";
+import { defineQuery, enterQuery, exitQuery, hasComponent } from "bitecs";
+
+export const ANIMATION_FLAGS = {
+  RUNNING: 1 << 0,
+  PAUSED: 1 << 1,
+  LOOP: 1 << 2,
+  CLAMP_WHEN_FINISHED: 1 << 3,
+  ADDITIVE_BLENDING: 1 << 4
+};
 
 export const animationValueDefs = {
   animationAction: new ValueType(
@@ -31,6 +47,72 @@ export const animationValueDefs = {
     (start: AnimationAction, _end: AnimationAction, _t: number) => start
   )
 };
+
+export type AnimationActionDataT = {
+  time: number;
+  timeScale: number;
+  weight: number;
+  flags: number;
+};
+export type AnimationActionDataMapT = Map<number, AnimationActionDataT>;
+export class AnimationActionsDataMap extends Map<number, AnimationActionDataT> {}
+export class AnimationActionsMap extends Map<EntityID, AnimationActionsDataMap> {}
+
+const id2action = new Map<number, AnimationAction>();
+const id2time = new Map<number, number>();
+
+function actionData2Action(actionData: AnimationActionDataT, action: AnimationAction) {
+  const clampWhenFinished = actionData.flags & ANIMATION_FLAGS.CLAMP_WHEN_FINISHED ? true : false;
+  const loop = actionData.flags & ANIMATION_FLAGS.LOOP ? LoopRepeat : LoopOnce;
+  const blendMode =
+    actionData.flags & ANIMATION_FLAGS.ADDITIVE_BLENDING ? AdditiveAnimationBlendMode : NormalAnimationBlendMode;
+  const running = actionData.flags & ANIMATION_FLAGS.RUNNING ? true : false;
+  const paused = actionData.flags & ANIMATION_FLAGS.PAUSED ? true : false;
+
+  action.paused = paused;
+  action.blendMode = blendMode;
+  if (action.loop != loop) {
+    action.setLoop(loop, Infinity);
+  }
+  action.clampWhenFinished = clampWhenFinished;
+  action.timeScale = actionData.timeScale;
+  action.weight = actionData.weight;
+  action.time = actionData.time;
+  if (running != action.isRunning()) {
+    if (running) {
+      action.play();
+    } else {
+      action.stop();
+    }
+  }
+}
+
+function action2ActionData(action: AnimationAction): AnimationActionDataT {
+  let flags = 0;
+  if (action.clampWhenFinished) flags |= ANIMATION_FLAGS.CLAMP_WHEN_FINISHED;
+  if (action.blendMode === AdditiveAnimationBlendMode) flags |= ANIMATION_FLAGS.ADDITIVE_BLENDING;
+  if (action.loop === LoopRepeat) flags |= ANIMATION_FLAGS.LOOP;
+  if (action.isRunning()) flags |= ANIMATION_FLAGS.RUNNING;
+  if (action.paused) flags |= ANIMATION_FLAGS.PAUSED;
+
+  return { time: action.time, timeScale: action.timeScale, weight: action.weight, flags };
+}
+
+function syncAnimationAction(world: HubsWorld, action: AnimationAction) {
+  if (
+    action.eid !== undefined &&
+    hasComponent(world, NetworkedAnimation, action.eid) &&
+    hasComponent(world, Owned, action.eid)
+  ) {
+    const actionDatas = NetworkedAnimationActionsData.get(action.eid);
+    if (actionDatas) {
+      actionDatas.set(action.id!, action2ActionData(action));
+    }
+    const timestamp = performance.now();
+    NetworkedAnimation.timestamp[action.eid] = timestamp;
+    id2time.set(action.id!, timestamp);
+  }
+}
 
 const createAnimationActionDef = makeFlowNodeDefinition({
   typeName: "animation/createAnimationAction",
@@ -43,7 +125,8 @@ const createAnimationActionDef = makeFlowNodeDefinition({
     { key: "clampWhenFinished", valueType: "boolean", defaultValue: false },
     { key: "weight", valueType: "float", defaultValue: 1 },
     { key: "timeScale", valueType: "float", defaultValue: 1 },
-    { key: "additiveBlending", valueType: "boolean", defaultValue: false }
+    { key: "additiveBlending", valueType: "boolean", defaultValue: false },
+    { key: "entity", valueType: "entity" }
   ],
   initialState: undefined,
   out: { flow: "flow", action: "animationAction" },
@@ -54,6 +137,7 @@ const createAnimationActionDef = makeFlowNodeDefinition({
     const weight = read("weight") as number;
     const timeScale = read("timeScale") as number;
     const additiveBlending = read("additiveBlending") as boolean;
+    const targetEid = read("entity") as EntityID;
 
     const rootEid = graph.getDependency<EntityID>("rootEntity")!;
     const world = graph.getDependency<HubsWorld>("world")!;
@@ -66,6 +150,24 @@ const createAnimationActionDef = makeFlowNodeDefinition({
     action.clampWhenFinished = clampWhenFinished;
     action.weight = weight;
     action.timeScale = timeScale;
+
+    if (hasComponent(world, NetworkedAnimation, targetEid)) {
+      action.id = id2action.size;
+      action.eid = targetEid;
+      if (!NetworkedAnimationActionsData.has(targetEid)) {
+        NetworkedAnimationActionsData.set(targetEid, new AnimationActionsDataMap());
+      }
+      const actionsData = NetworkedAnimationActionsData.get(targetEid)!;
+      if (Networked.owner[targetEid] !== APP.str2sid.get("reticulum")) {
+        const actionData = actionsData.get(action.id);
+        if (actionData) {
+          actionData2Action(actionData, action);
+        }
+      } else {
+        actionsData.set(action.id, action2ActionData(action));
+      }
+      id2action.set(action.id, action);
+    }
 
     write("action", action);
     commit("flow");
@@ -129,8 +231,9 @@ export class PlayAnimationNode extends AsyncNode {
     this.state.onFinished = (e: { action: AnimationAction }) => {
       if (e.action != this.state.action) return;
       console.log("FINISH", e.action.getClip().name, APP.world.time.tick);
-      // TODO HACK when transitioning to another animation in this event, even on the same frame, the object seems to reset to its base pisition momentarily without this
+      // TODO HACK when transitioning to another animation in this event, even on the same frame, the object seems to reset to its base position momentarily without this
       e.action.enabled = true;
+
       this.clearState();
       engine.commitToNewFiber(this, "finished");
     };
@@ -152,6 +255,9 @@ export class PlayAnimationNode extends AsyncNode {
     action.paused = false;
     action.play();
     console.log("PLAY", action.getClip().name, APP.world.time.tick);
+
+    const world = this.graph.getDependency("world") as HubsWorld;
+    syncAnimationAction(world, action);
 
     engine.commitToNewFiber(this, "flow");
     finished();
@@ -176,9 +282,12 @@ export const AnimationNodes = definitionListToMap([
     ],
     initialState: undefined,
     out: { flow: "flow" },
-    triggered: ({ read, commit }) => {
+    triggered: ({ read, commit, graph }) => {
       const action = read("action") as AnimationAction;
       action.stop();
+
+      const world = graph.getDependency("world") as HubsWorld;
+      syncAnimationAction(world, action);
 
       console.log("STOP", action.getClip().name, APP.world.time.tick);
       action.getMixer().dispatchEvent({ type: "hubs_stopped", action });
@@ -218,10 +327,14 @@ export const AnimationNodes = definitionListToMap([
     ],
     initialState: undefined,
     out: { flow: "flow" },
-    triggered: ({ read, commit }) => {
+    triggered: ({ read, commit, graph }) => {
       const action = read("action") as AnimationAction;
       const timeScale = read("timeScale") as number;
       action.timeScale = timeScale;
+
+      const world = graph.getDependency("world") as HubsWorld;
+      syncAnimationAction(world, action);
+
       commit("flow");
     }
   }),
@@ -236,3 +349,33 @@ export const AnimationNodes = definitionListToMap([
     }
   })
 ]);
+
+const behaviorGraphsQuery = defineQuery([BehaviorGraph]);
+const behaviorGraphExitQuery = exitQuery(behaviorGraphsQuery);
+const animationQuery = defineQuery([Networked, NetworkedAnimation]);
+const animationEnterQuery = enterQuery(animationQuery);
+const animationExitQuery = exitQuery(animationQuery);
+export function animationSystem(world: HubsWorld) {
+  behaviorGraphExitQuery(world).forEach(eid => {
+    id2action.clear();
+    id2time.clear();
+    NetworkedAnimationActionsData.clear();
+  });
+  animationEnterQuery(world).forEach(eid => {});
+  animationExitQuery(world).forEach(eid => {
+    NetworkedAnimationActionsData.delete(eid);
+  });
+  animationQuery(world).forEach(eid => {
+    if (NetworkedAnimationActionsData.has(eid) && !hasComponent(world, Owned, eid)) {
+      const actionDatas = NetworkedAnimationActionsData.get(eid)!;
+      actionDatas.forEach((actionData: AnimationActionDataT, actionId: number) => {
+        const action = id2action.get(actionId);
+        // TODO: We should check per animation action timestamps to know if we should update an animation
+        if (action && id2time.get(action.id!) !== NetworkedAnimation.timestamp[action.eid!]) {
+          actionData2Action(actionData, action);
+          id2time.set(action.id!, NetworkedAnimation.timestamp[action.eid!]);
+        }
+      });
+    }
+  });
+}

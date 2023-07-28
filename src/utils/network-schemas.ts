@@ -2,6 +2,7 @@ import { Component } from "bitecs";
 import { HubsWorld } from "../app";
 import {
   $isStringType,
+  NetworkedAnimation,
   NetworkedFloatyObject,
   NetworkedMediaFrame,
   NetworkedPDF,
@@ -15,6 +16,7 @@ import { NetworkedPDFSchema } from "./networked-pdf-schema";
 import { NetworkedTransformSchema } from "./networked-transform-schema";
 import { NetworkedVideoSchema } from "./networked-video-schema";
 import { NetworkedWaypointSchema } from "./networked-waypoint-schema";
+import { NetworkedAnimationSchema } from "./networked-animation-schema";
 import type { CursorBuffer, EntityID } from "./networking-types";
 
 export interface StoredComponent {
@@ -46,6 +48,7 @@ schemas.set(NetworkedFloatyObject, {
   ...defineNetworkSchema(NetworkedFloatyObject)
 });
 schemas.set(NetworkedPDF, NetworkedPDFSchema);
+schemas.set(NetworkedAnimation, NetworkedAnimationSchema);
 
 export const networkableComponents = Array.from(schemas.keys());
 

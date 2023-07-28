@@ -99,6 +99,7 @@ import { HeightFieldParams, inflateHeightField } from "../inflators/heightfield"
 import { inflateAudioSettings } from "../inflators/audio-settings";
 import { HubsVideoTexture } from "../textures/HubsVideoTexture";
 import { CustomTagParams, inflateCustomTags } from "../inflators/custom-tags";
+import { inflateNetworkedAnimation } from "../inflators/networked-animation";
 
 preload(
   new Promise(resolve => {
@@ -385,6 +386,7 @@ export interface GLTFComponentData extends ComponentData {
   // TODO GLTFPhysicsShapeParams
   physicsShape?: AmmoShapeParams;
   customTags?: CustomTagParams;
+  networkedAnimation: true;
 
   // deprecated
   spawnPoint?: true;
@@ -515,7 +517,8 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
   interactable: createDefaultInflator(SingleActionButton),
   rigidbody: inflateGLTFRigidBody,
   physicsShape: inflateAmmoShape,
-  customTags: inflateCustomTags
+  customTags: inflateCustomTags,
+  networkedAnimation: inflateNetworkedAnimation,
 };
 
 function jsxInflatorExists(name: string): name is keyof JSXComponentData {

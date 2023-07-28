@@ -19,7 +19,7 @@ import { HubsWorld } from "../app";
 import { BehaviorGraph, CustomTags, Interacted, LocalAvatar, RemoteAvatar, Rigidbody } from "../bit-components";
 import { findAncestorEntity } from "../utils/bit-utils";
 import { ClientID, EntityID } from "../utils/networking-types";
-import { AnimationNodes, animationValueDefs } from "./behavior-graph/animation-nodes";
+import { AnimationNodes, animationSystem, animationValueDefs } from "./behavior-graph/animation-nodes";
 import { entityEvents, EntityNodes, EntityValue as entityValueDefs } from "./behavior-graph/entity-nodes";
 import { EulerNodes, eulerValueDefs } from "./behavior-graph/euler-nodes";
 import { playerNodedefs, playersSystem, playerValueDefs } from "./behavior-graph/player-nodes";
@@ -210,6 +210,7 @@ export function behaviorGraphSystem(world: HubsWorld) {
   });
 
   playersSystem(world);
+  animationSystem(world);
 }
 function isPlayerEntity(eid: EntityID, world: HubsWorld) {
   return hasComponent(world, RemoteAvatar, eid) || hasComponent(world, LocalAvatar, eid);
