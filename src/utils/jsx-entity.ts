@@ -101,6 +101,7 @@ import { HubsVideoTexture } from "../textures/HubsVideoTexture";
 import { CustomTagParams, inflateCustomTags } from "../inflators/custom-tags";
 import { inflateNetworkedAnimation } from "../inflators/networked-animation";
 import { inflateNetworkedBehavior } from "../inflators/networked-behavior";
+import { inflateNetworkedTransform } from "../inflators/networked-transform";
 
 preload(
   new Promise(resolve => {
@@ -389,6 +390,7 @@ export interface GLTFComponentData extends ComponentData {
   customTags?: CustomTagParams;
   networkedAnimation: true;
   networkedBehavior: true;
+  networkedTransform: true;
 
   // deprecated
   spawnPoint?: true;
@@ -522,6 +524,7 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
   customTags: inflateCustomTags,
   networkedAnimation: inflateNetworkedAnimation,
   networkedBehavior: inflateNetworkedBehavior,
+  networkedTransform: inflateNetworkedTransform
 };
 
 function jsxInflatorExists(name: string): name is keyof JSXComponentData {
