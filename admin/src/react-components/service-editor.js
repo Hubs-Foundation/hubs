@@ -208,7 +208,7 @@ class ConfigurationEditor extends Component {
 
   onSubmit(e) {
     e.preventDefault();
-
+    
     this.setState({ saving: true }, async () => {
       try {
         for (const [service, config] of Object.entries(this.state.config)) {
@@ -430,8 +430,10 @@ class ConfigurationEditor extends Component {
     const configurables = this.getFilteredDescriptors(theme);
     const getInput = ([path, descriptor]) => this.renderConfigurable(path, descriptor, getConfigValue(config, path));
 
+
+
     return (<>
-    <ThemeBuilder config={config}/>
+    <ThemeBuilder config={config} onGlobalChange={this.onChange.bind(this)} onSave={this.onSubmit.bind(this)} path={configurables[2][0]}/>
       <form onSubmit={this.onSubmit.bind(this)}>
         <h3 className="heading-sm mb-24">Nametags</h3>
         {getInput(configurables[0])}
