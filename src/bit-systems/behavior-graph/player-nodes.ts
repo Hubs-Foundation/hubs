@@ -1,8 +1,10 @@
 import {
-  INodeDefinition,
+  EventEmitter,
+  makeEventNodeDefinition,
   makeFlowNodeDefinition,
   makeFunctionNodeDefinition,
   makeInNOutFunctionDesc,
+  NodeCategory,
   ValueType
 } from "@oveddan-behave-graph/core";
 import { Euler, Matrix4, Object3D, Quaternion, Vector3 } from "three";
@@ -10,6 +12,10 @@ import { getPlayerInfo } from "../../utils/component-utils";
 import { ClientID } from "../../utils/networking-types";
 import { definitionListToMap } from "./utils";
 import { AElement } from "aframe";
+import { HubsWorld } from "../../app";
+import { defineQuery, enterQuery, exitQuery } from "bitecs";
+import { BehaviorGraph, EntityID, RemoteAvatar } from "../../bit-components";
+import { clientIdForEntity } from "../behavior-graph";
 
 export const playerValueDefs = {
   player: new ValueType(
@@ -19,6 +25,15 @@ export const playerValueDefs = {
     (value: ClientID) => value,
     (start: ClientID, _end: ClientID, _t: number) => start
   )
+};
+
+type PlayerEventData = {
+  callback?: (target: ClientID) => void;
+};
+
+export const playerEmitters = {
+  onPlayerJoined: new EventEmitter<ClientID>(),
+  onPlayerLeft: new EventEmitter<ClientID>()
 };
 
 export const playerNodedefs = definitionListToMap([
@@ -120,7 +135,7 @@ export const playerNodedefs = definitionListToMap([
     out: [{ displayName: "string" }],
     exec: (player: ClientID) => {
       const presence = APP.hubChannel!.presence.state[player];
-      return { displayName: presence.metas[0].profile.displayName };
+      return { displayName: presence?.metas[0].profile.displayName };
     }
   }),
   makeFlowNodeDefinition({
@@ -215,5 +230,87 @@ export const playerNodedefs = definitionListToMap([
         scale
       };
     }
+  }),
+  makeEventNodeDefinition({
+    typeName: `hubs/onPlayerJoined`,
+    category: "Event" as NodeCategory,
+    label: "On Player Joined",
+    in: {},
+    out: {
+      flow: "flow",
+      player: "player"
+    },
+    initialState: {} as PlayerEventData,
+    init: ({ write, commit }) => {
+      const callback = (clientId: any) => {
+        write("player", clientId);
+        commit("flow");
+      };
+
+      playerEmitters.onPlayerJoined.addListener(callback);
+
+      return { callback };
+    },
+    dispose: ({ state: { callback } }) => {
+      playerEmitters.onPlayerJoined.removeListener(callback as any);
+      return {};
+    }
+  }),
+  makeEventNodeDefinition({
+    typeName: `hubs/onPlayerLeft`,
+    category: "Event" as NodeCategory,
+    label: "On Player Left",
+    in: {},
+    out: {
+      flow: "flow",
+      player: "player"
+    },
+    initialState: {} as PlayerEventData,
+    init: ({ write, commit }) => {
+      const callback = (clientId: any) => {
+        write("player", clientId);
+        commit("flow");
+      };
+
+      playerEmitters.onPlayerLeft.addListener(callback);
+
+      return { callback };
+    },
+    dispose: ({ state: { callback } }) => {
+      playerEmitters.onPlayerLeft.removeListener(callback as any);
+      return {};
+    }
   })
 ]);
+
+const entityIdToClientId = new Map<EntityID, ClientID>();
+
+const behaviorGraphsQuery = defineQuery([BehaviorGraph]);
+const behaviorGraphEnterQuery = enterQuery(behaviorGraphsQuery);
+const playerQuery = defineQuery([RemoteAvatar]);
+const playerJoinedQuery = enterQuery(playerQuery);
+const playerLeftQuery = exitQuery(playerQuery);
+export function playersSystem(world: HubsWorld) {
+  behaviorGraphEnterQuery(world).forEach(eid => {
+    const playerInfos = APP.componentRegistry["player-info"];
+    playerInfos.forEach(playerInfo => {
+      const clientId = clientIdForEntity(world, playerInfo.el.eid);
+      entityIdToClientId.set(eid, clientId);
+      playerEmitters.onPlayerJoined.emit(clientId);
+    });
+  });
+
+  playerJoinedQuery(world).forEach(eid => {
+    const clientId = clientIdForEntity(world, eid);
+    entityIdToClientId.set(eid, clientId);
+    playerEmitters.onPlayerJoined.emit(clientId);
+  });
+
+  playerLeftQuery(world).forEach(eid => {
+    const clientId = entityIdToClientId.get(eid);
+    if (clientId) {
+      playerEmitters.onPlayerLeft.emit(clientId);
+      entityIdToClientId.delete(eid);
+    }
+  });
+}

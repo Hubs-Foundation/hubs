@@ -22,7 +22,7 @@ import { ClientID, EntityID } from "../utils/networking-types";
 import { AnimationNodes, animationValueDefs } from "./behavior-graph/animation-nodes";
 import { entityEvents, EntityNodes, EntityValue as entityValueDefs } from "./behavior-graph/entity-nodes";
 import { EulerNodes, eulerValueDefs } from "./behavior-graph/euler-nodes";
-import { playerNodedefs, playerValueDefs } from "./behavior-graph/player-nodes";
+import { playerNodedefs, playersSystem, playerValueDefs } from "./behavior-graph/player-nodes";
 import { cleanupNodespac, definitionListToMap } from "./behavior-graph/utils";
 import { Vector3Nodes, Vector3Value as vec3ValueDefs } from "./behavior-graph/vec3-nodes";
 
@@ -208,11 +208,13 @@ export function behaviorGraphSystem(world: HubsWorld) {
     lifecycleEmitter.tickEvent.emit();
     engine.executeAllSync(0.1, 100);
   });
+
+  playersSystem(world);
 }
 function isPlayerEntity(eid: EntityID, world: HubsWorld) {
   return hasComponent(world, RemoteAvatar, eid) || hasComponent(world, LocalAvatar, eid);
 }
 
-function clientIdForEntity(world: HubsWorld, playerEid: number): ClientID {
+export function clientIdForEntity(world: HubsWorld, playerEid: number): ClientID {
   return world.eid2obj.get(playerEid)!.el!.components["player-info"].playerSessionId;
 }
