@@ -1,31 +1,22 @@
 import {
   AsyncNode,
   Engine,
-  EventEmitter,
   IGraphApi,
   NodeCategory,
   NodeDescription,
   NodeDescription2,
   Socket,
   SocketsList,
-  makeEventNodeDefinition,
   makeFlowNodeDefinition,
   makeFunctionNodeDefinition,
   makeInNOutFunctionDesc
 } from "@oveddan-behave-graph/core";
 import { definitionListToMap } from "./utils";
-import { EntityID, Networked, NetworkedBehaviorData, NetworkedBehavior, Owned } from "../../bit-components";
+import { EntityID, Networked, NetworkedBehaviorData, Owned } from "../../bit-components";
 import { HubsWorld } from "../../app";
 import { entityExists, hasComponent } from "bitecs";
-import { pendingNetworkEvents } from "../networking";
-import { ClientID, NetworkEventMessage } from "../../utils/networking-types";
+import { ClientID } from "../../utils/networking-types";
 import { takeOwnership } from "../../utils/take-ownership";
-
-export const onCustomNetworkEvent = new EventEmitter<NetworkEventMessage>();
-
-type NetworkEventData = {
-  callback?: (target: NetworkEventMessage) => void;
-};
 
 export class TakeSoftOwnership extends AsyncNode {
   public static Description = new NodeDescription2({
