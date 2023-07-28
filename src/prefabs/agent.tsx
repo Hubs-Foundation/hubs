@@ -8,11 +8,9 @@ import { MediaLoaderParams } from "../inflators/media-loader";
 import nametagSrc from "../assets/hud/nametag.9.png";
 import { textureLoader } from "../utils/media-utils";
 import { AgentPanel } from "./agent-panel";
-import { greetingPhrases } from "../bit-systems/text-paradigms";
-import { getRandomInt } from "../bit-systems/agent-system";
-import { FromatNewText } from "../bit-systems/agent-slideshow-system";
 import { addComponent } from "bitecs";
 import { Hidden } from "../bit-components";
+import { COLLISION_LAYERS } from "../constants";
 
 preload(loadModel(agentModelSrc, null, true));
 const panelTexture = textureLoader.load(nametagSrc);
@@ -51,16 +49,33 @@ export function AgentEntity() {
       ref={agentRef}
       lookatuser
     >
-      <entity lookatuser name="agentObject" mediaLoader={agentMediaParams} ref={modelRef} scale={[1, 1, 1]} />
-      <AgentPanel
-        micRef={micRef}
-        snapRef={snapRef}
-        text={text}
-        panelRef={panelRef}
-        nextRef={nextRef}
-        prevRef={prevRef}
-        maxSlideCount={25}
-      />
+      <entity
+        lookatuser
+        name="agentObject"
+        mediaLoader={agentMediaParams}
+        ref={modelRef}
+        scale={[1, 1, 1]}
+        cursorRaycastable
+        remoteHoverTarget
+        handCollisionTarget
+        offersRemoteConstraint
+        offersHandConstraint
+        makeKinematicOnRelease
+        holdable
+        floatyObject
+        rigidbody={{ collisionGroup: COLLISION_LAYERS.INTERACTABLES, collisionMask: COLLISION_LAYERS.HANDS }}
+        physicsShape={{ halfExtents: [0.22, 0.14, 0.1] }}
+      >
+        <AgentPanel
+          micRef={micRef}
+          snapRef={snapRef}
+          text={text}
+          panelRef={panelRef}
+          nextRef={nextRef}
+          prevRef={prevRef}
+          maxSlideCount={25}
+        />
+      </entity>
     </entity>
   );
 }
@@ -69,6 +84,6 @@ export function addAgentToScene(world: HubsWorld) {
   const eid = renderAsEntity(world, AgentEntity());
   addComponent(world, Hidden, eid);
   const obj = world.eid2obj.get(eid)!;
-  AFRAME.scenes[0].object3D.add(obj);
+  window.APP.scene!.object3D.add(obj);
   return eid;
 }

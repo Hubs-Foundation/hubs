@@ -1,6 +1,6 @@
 import { defineQuery, enterQuery, exitQuery } from "bitecs";
 import { Agent, Hidden, Interacted } from "../bit-components";
-import { FromatNewText, UpdateTextSystem, lowerIndex, raiseIndex } from "./agent-slideshow-system";
+import { lowerIndex, raiseIndex } from "./agent-slideshow-system";
 import { hasComponent } from "bitecs";
 import { PermissionStatus } from "../utils/media-devices-utils";
 import { stageUpdate } from "../systems/single-action-button-system";
@@ -55,7 +55,7 @@ const postMaterial = new THREE.ShaderMaterial({
 let mediaRecorder, eid, width, height;
 let prevArrowRef, nextArrowRef, modelref, agentObj, avatarPovObj, micButtonRef, snapButtonRef;
 let camera, scene, renderer;
-let prevArrowObj, nextArrowObj, modelObj;
+let prevArrowObj, nextArrowObj, modelObj, panelObj;
 
 function clicked(eid) {
   return hasComponent(APP.world, Interacted, eid);
@@ -64,57 +64,6 @@ function clicked(eid) {
 export function getRandomInt(max) {
   return Math.floor(Math.random() * max);
 }
-
-// function snapPOV(world, agentObj) {
-//   const renderer = AFRAME.scenes[0].renderer;
-//   const scene = AFRAME.scenes[0].object3D;
-//   const camera = AFRAME.scenes[0].camera;
-
-//   console.log(AFRAME.scenes[0]);
-
-//   agentObj.visible = false;
-//   renderer.render(scene, camera);
-
-//   return new Promise(resolve => {
-//     renderer.render(scene, camera);
-
-//     const canvas = renderer.domElement;
-//     canvas.toBlob(async blob => {
-//       const formData = new FormData();
-//       formData.append("file", blob, "camera_pov.png");
-//       const apiEndpoint = "https://192.168.169.219:5035/cap_lxmert/";
-
-//       const downloadLink = document.createElement("a");
-//       downloadLink.href = URL.createObjectURL(blob);
-//       downloadLink.download = "camera_pov.png";
-//       downloadLink.click();
-
-//       // Revoke the object URL
-//       URL.revokeObjectURL(downloadLink.href);
-
-//       try {
-//         const response = await fetch(apiEndpoint, {
-//           method: "POST",
-//           body: formData
-//         });
-
-//         if (!response.ok) {
-//           console.log("Error posting image to API");
-//           throw new Error("Error posting image to API");
-//         }
-
-//         const data = await response.json();
-//         console.log(data["Prediction by LXMERT"]);
-//         UpdateTextSystem(world, data["Prediction by LXMERT"]);
-//       } catch (error) {
-//         console.log("VLMODEL: something went wrong");
-//         UpdateTextSystem(world, FromatNewText("Something went wrong when trying to connect to the VLmodel API"));
-//       }
-
-//       resolve();
-//     }, "image/png");
-//   });
-// }
 
 async function POV(agentObj, savefile) {
   return new Promise((resolve, reject) => {
@@ -221,6 +170,8 @@ function entered(world) {
     modelref = Agent.modelRef[eid];
     agentObj = world.eid2obj.get(eid);
     modelObj = world.eid2obj.get(modelref);
+    panelObj = world.eid2obj.get(Agent.panelRef[eid]);
+    // modelObj = agentObj;
     scene = AFRAME.scenes[0];
     camera = scene.camera;
     renderer = scene.renderer;
@@ -251,8 +202,8 @@ export function AgentSystem(world) {
   } else {
     agentObj.visible = true;
   }
-
-  modelObj.rotateOnAxis(new THREE.Vector3(0, 1, 0), -1.5707963268);
+  // panelObj.rotateOnAxis(new THREE.Vector3(0, 1, 0), -1.5707963268);
+  // modelObj.rotateOnAxis(new THREE.Vector3(0, 1, 0), -1.5707963268);
 
   if (clicked(nextArrowRef)) raiseIndex();
   if (clicked(prevArrowRef)) lowerIndex();
@@ -307,3 +258,25 @@ export function handleArrows(world, renderArrows) {
   world.eid2obj.get(nextArrowRef).visible = renderArrows;
   world.eid2obj.get(prevArrowRef).visible = renderArrows;
 }
+
+const mode = {
+  greeting: 0,
+  idle: 1,
+  listening: 2,
+  navigation: 3
+};
+
+export default class VirtualAgent {
+  constructor() {
+    this.entered = false;
+  }
+
+  Enter(eid) {
+    this.eid = eid;
+    this.entered = true;
+    this.visible = false;
+    this.mode = mode.greeting;
+  }
+}
+
+export const virtualAgent = new VirtualAgent();

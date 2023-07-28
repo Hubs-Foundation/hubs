@@ -46,6 +46,7 @@ export function AgentPanel({ text, panelRef, nextRef, prevRef, micRef, snapRef, 
     <entity
       name="agentPanel"
       ref={panelRef}
+      rotation={[0, 0, 0]}
       slice9={{ size: [0.6, 0.3], insets: [64, 66, 64, 66], texture: panelTexture }}
       position={[0, 0.2, 0.1]}
       scale={[1.0, 1.0, 1.0]}
