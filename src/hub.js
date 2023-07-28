@@ -266,6 +266,7 @@ import { listenForNetworkMessages } from "./utils/listen-for-network-messages";
 import { exposeBitECSDebugHelpers } from "./bitecs-debug-helpers";
 import { loadLegacyRoomObjects } from "./utils/load-legacy-room-objects";
 import { loadSavedEntityStates } from "./utils/entity-state-utils";
+import { shouldUseNewLoader } from "./utils/bit-utils";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -420,7 +421,7 @@ export async function updateEnvironmentForHub(hub, entryManager) {
   console.log("Updating environment for hub");
   const sceneUrl = await getSceneUrlForHub(hub);
 
-  if (qsTruthy("newLoader")) {
+  if (shouldUseNewLoader()) {
     console.log("Using new loading path for scenes.");
     swapActiveScene(APP.world, sceneUrl);
     return;
@@ -614,7 +615,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
   scene.addEventListener(
     "didConnectToNetworkedScene",
     () => {
-      if (qsTruthy("newLoader")) {
+      if (shouldUseNewLoader()) {
         loadSavedEntityStates(APP.hubChannel);
         loadLegacyRoomObjects(hub.hub_id);
       } else {

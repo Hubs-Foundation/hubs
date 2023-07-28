@@ -4,6 +4,7 @@ import { guessContentType } from "./utils/media-url-utils";
 import { AElement } from "aframe";
 import { Vector3 } from "three";
 import qsTruthy from "./utils/qs_truthy";
+import { shouldUseNewLoader } from "./utils/bit-utils";
 
 type UploadResponse = {
   file_id: string;
@@ -75,6 +76,7 @@ export async function spawnFromFileList(files: FileList) {
 }
 
 async function onPaste(e: ClipboardEvent) {
+  if (!shouldUseNewLoader()) return;
   if (!(AFRAME as any).scenes[0].is("entered")) {
     return;
   }
@@ -97,6 +99,8 @@ async function onPaste(e: ClipboardEvent) {
 
 let lastDebugScene: string;
 function onDrop(e: DragEvent) {
+  if (!shouldUseNewLoader()) return;
+
   e.preventDefault();
 
   if (!(AFRAME as any).scenes[0].is("entered")) {
@@ -122,7 +126,5 @@ function onDrop(e: DragEvent) {
   }
 }
 
-if (qsTruthy("newLoader")) {
-  document.addEventListener("paste", onPaste);
-  document.addEventListener("drop", onDrop);
-}
+document.addEventListener("paste", onPaste);
+document.addEventListener("drop", onDrop);

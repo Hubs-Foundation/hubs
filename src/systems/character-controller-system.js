@@ -13,6 +13,7 @@ import {
 import { getCurrentPlayerHeight } from "../utils/get-current-player-height";
 import qsTruthy from "../utils/qs_truthy";
 import { releaseOccupiedWaypoint } from "../bit-systems/waypoint";
+import { shouldUseNewLoader } from "../utils/bit-utils";
 //import { m4String } from "../utils/pretty-print";
 const NAV_ZONE = "character";
 const qsAllowWaypointLerp = qsTruthy("waypointLerp");
@@ -335,7 +336,7 @@ export class CharacterControllerSystem {
         ) {
           this.didTeleportSinceLastWaypointTravel = false;
           this.shouldUnoccupyWaypointsOnceMoving = false;
-          if (qsTruthy("newLoader")) {
+          if (shouldUseNewLoader()) {
             releaseOccupiedWaypoint();
           } else {
             this.waypointSystem.releaseAnyOccupiedWaypoints();

@@ -65,6 +65,7 @@ export function getScene() {
 
 interface HubDescription {
   hub_id: string;
+  user_data?: any;
 }
 
 export class App {

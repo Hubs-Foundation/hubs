@@ -4,7 +4,7 @@ import { HubsWorld } from "../app";
 import { moveToSpawnPoint } from "../bit-systems/waypoint";
 import { CharacterControllerSystem } from "../systems/character-controller-system";
 import { createNetworkedMedia } from "./create-networked-entity";
-import qsTruthy from "./qs_truthy";
+import { shouldUseNewLoader } from "./bit-utils";
 
 function checkFlag(args: string[], flag: string) {
   return !!args.find(s => s === flag);
@@ -103,7 +103,7 @@ export function respawn(world: HubsWorld, scene: AScene, characterController: Ch
     return;
   }
 
-  if (!qsTruthy("newLoader")) {
+  if (!shouldUseNewLoader()) {
     console.error("This command only works with the newLoader query string parameter.");
     return;
   }

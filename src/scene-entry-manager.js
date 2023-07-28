@@ -24,12 +24,10 @@ import { SOUND_ENTER_SCENE } from "./systems/sound-effects-system";
 import { MediaDevices, MediaDevicesEvents } from "./utils/media-devices-utils";
 import { addComponent, removeEntity } from "bitecs";
 import { MyCameraTool } from "./bit-components";
-import { anyEntityWith } from "./utils/bit-utils";
+import { anyEntityWith, shouldUseNewLoader } from "./utils/bit-utils";
 import { moveToSpawnPoint } from "./bit-systems/waypoint";
 import { spawnFromFileList, spawnFromUrl } from "./load-media-on-paste-or-drop";
 import { isLockedDownDemoRoom } from "./utils/hub-utils";
-
-const useNewLoader = qsTruthy("newLoader");
 
 export default class SceneEntryManager {
   constructor(hubChannel, authChannel, history) {
@@ -80,7 +78,7 @@ export default class SceneEntryManager {
       await exit2DInterstitialAndEnterVR(true);
     }
 
-    if (useNewLoader) {
+    if (shouldUseNewLoader()) {
       moveToSpawnPoint(APP.world, this.scene.systems["hubs-systems"].characterController);
     } else {
       const waypointSystem = this.scene.systems["hubs-systems"].waypointSystem;
@@ -244,7 +242,7 @@ export default class SceneEntryManager {
     };
 
     const spawnMediaInfrontOfPlayer = (src, contentOrigin) => {
-      if (useNewLoader) {
+      if (shouldUseNewLoader()) {
         console.warn(
           "Spawning newLoader object using `spawnMediaInFrontOfPlayer`. This codepath should likely be made more direct.",
           src,
@@ -293,8 +291,9 @@ export default class SceneEntryManager {
 
     this.scene.addEventListener("action_vr_notice_closed", () => forceExitFrom2DInterstitial());
 
-    if (!useNewLoader) {
+    {
       document.addEventListener("paste", e => {
+        if (shouldUseNewLoader()) return;
         if (
           (e.target.matches("input, textarea") || e.target.contentEditable === "true") &&
           document.activeElement === e.target
@@ -318,6 +317,7 @@ export default class SceneEntryManager {
 
       let lastDebugScene;
       document.addEventListener("drop", e => {
+        if (shouldUseNewLoader()) return;
         e.preventDefault();
 
         if (qsTruthy("debugLocalScene")) {
