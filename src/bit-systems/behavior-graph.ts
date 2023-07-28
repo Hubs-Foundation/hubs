@@ -25,6 +25,7 @@ import { EulerNodes, eulerValueDefs } from "./behavior-graph/euler-nodes";
 import { playerNodedefs, playersSystem, playerValueDefs } from "./behavior-graph/player-nodes";
 import { cleanupNodespac, definitionListToMap } from "./behavior-graph/utils";
 import { Vector3Nodes, Vector3Value as vec3ValueDefs } from "./behavior-graph/vec3-nodes";
+import { NetworkingNodes } from "./behavior-graph/networking-nodes";
 
 const coreValues = getCoreValueTypes();
 const logger = new DefaultLogger();
@@ -35,6 +36,7 @@ const registry: IRegistry = {
     ...Vector3Nodes,
     ...EulerNodes,
     ...AnimationNodes,
+    ...NetworkingNodes,
     ...playerNodedefs,
     ...definitionListToMap([
       makeFlowNodeDefinition({

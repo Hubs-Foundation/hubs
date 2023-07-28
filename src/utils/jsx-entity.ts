@@ -100,6 +100,7 @@ import { inflateAudioSettings } from "../inflators/audio-settings";
 import { HubsVideoTexture } from "../textures/HubsVideoTexture";
 import { CustomTagParams, inflateCustomTags } from "../inflators/custom-tags";
 import { inflateNetworkedAnimation } from "../inflators/networked-animation";
+import { inflateNetworkedBehavior } from "../inflators/networked-behavior";
 
 preload(
   new Promise(resolve => {
@@ -387,6 +388,7 @@ export interface GLTFComponentData extends ComponentData {
   physicsShape?: AmmoShapeParams;
   customTags?: CustomTagParams;
   networkedAnimation: true;
+  networkedBehavior: true;
 
   // deprecated
   spawnPoint?: true;
@@ -519,6 +521,7 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
   physicsShape: inflateAmmoShape,
   customTags: inflateCustomTags,
   networkedAnimation: inflateNetworkedAnimation,
+  networkedBehavior: inflateNetworkedBehavior,
 };
 
 function jsxInflatorExists(name: string): name is keyof JSXComponentData {

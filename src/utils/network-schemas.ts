@@ -3,6 +3,7 @@ import { HubsWorld } from "../app";
 import {
   $isStringType,
   NetworkedAnimation,
+  NetworkedBehavior,
   NetworkedFloatyObject,
   NetworkedMediaFrame,
   NetworkedPDF,
@@ -18,6 +19,7 @@ import { NetworkedVideoSchema } from "./networked-video-schema";
 import { NetworkedWaypointSchema } from "./networked-waypoint-schema";
 import { NetworkedAnimationSchema } from "./networked-animation-schema";
 import type { CursorBuffer, EntityID } from "./networking-types";
+import { NetworkedBehaviorSchema } from "./networked-behavior";
 
 export interface StoredComponent {
   version: number;
@@ -49,6 +51,7 @@ schemas.set(NetworkedFloatyObject, {
 });
 schemas.set(NetworkedPDF, NetworkedPDFSchema);
 schemas.set(NetworkedAnimation, NetworkedAnimationSchema);
+schemas.set(NetworkedBehavior, NetworkedBehaviorSchema);
 
 export const networkableComponents = Array.from(schemas.keys());
 
