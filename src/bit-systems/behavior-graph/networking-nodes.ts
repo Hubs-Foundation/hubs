@@ -17,12 +17,13 @@ import { HubsWorld } from "../../app";
 import { entityExists, hasComponent } from "bitecs";
 import { ClientID } from "../../utils/networking-types";
 import { takeOwnership } from "../../utils/take-ownership";
+import { takeSoftOwnership } from "../../utils/take-soft-ownership";
 
 export class TakeSoftOwnership extends AsyncNode {
   public static Description = new NodeDescription2({
     typeName: "networking/takeSoftOwnership",
     category: "Networking",
-    label: "Take Ownership",
+    label: "Take Soft Ownership",
     factory: (description, graph) => new TakeSoftOwnership(description, graph)
   });
 
@@ -47,7 +48,7 @@ export class TakeSoftOwnership extends AsyncNode {
     const world = this.graph.getDependency("world") as HubsWorld;
     const entity = this.readInput("entity") as EntityID;
 
-    takeOwnership(world, entity);
+    takeSoftOwnership(world, entity);
     setTimeout(() => {
       if (!this.callPending) return;
       this.callPending = false;
@@ -67,6 +68,23 @@ export class TakeSoftOwnership extends AsyncNode {
 
 export const NetworkingNodes = definitionListToMap([
   TakeSoftOwnership.Description,
+  makeFlowNodeDefinition({
+    typeName: "networking/takeOwnership",
+    category: "Networking" as any,
+    label: "Take Ownership",
+    in: () => [
+      { key: "flow", valueType: "flow" },
+      { key: "entity", valueType: "entity" }
+    ],
+    initialState: undefined,
+    out: { flow: "flow" },
+    triggered: ({ read, commit, graph }) => {
+      const entity = read("entity") as EntityID;
+      const world = graph.getDependency("world") as HubsWorld;
+      takeOwnership(world, entity);
+      commit("flow");
+    }
+  }),
   makeInNOutFunctionDesc({
     name: "networking/isMine",
     label: "Is Entity Mine",
