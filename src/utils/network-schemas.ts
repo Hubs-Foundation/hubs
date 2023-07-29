@@ -19,7 +19,7 @@ import { NetworkedVideoSchema } from "./networked-video-schema";
 import { NetworkedWaypointSchema } from "./networked-waypoint-schema";
 import { NetworkedAnimationSchema } from "./networked-animation-schema";
 import type { CursorBuffer, EntityID } from "./networking-types";
-import { NetworkedBehaviorSchema } from "./networked-behavior";
+import { NetworkedBehaviorSchema } from "./networked-behavior-schema";
 
 export interface StoredComponent {
   version: number;
