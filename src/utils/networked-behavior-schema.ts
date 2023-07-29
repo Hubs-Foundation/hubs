@@ -37,7 +37,8 @@ function serialize(eid: EntityID, data: CursorBuffer) {
 }
 
 function deserialize(eid: EntityID, data: CursorBuffer) {
-  const map = JSON.parse(data[0], desMap);
+  const componentData = data[data.cursor!++];
+  const map = JSON.parse(componentData, desMap);
   NetworkedBehaviorData.set(eid, map);
   return true;
 }

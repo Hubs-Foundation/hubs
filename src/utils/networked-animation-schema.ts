@@ -10,17 +10,20 @@ import type { CursorBuffer, EntityID } from "./networking-types";
 
 const migrations = new Map<number, Migration>();
 
+const datas = new Array();
 function serialize(eid: EntityID, data: CursorBuffer) {
   if (NetworkedAnimationActionsData.has(eid)) {
     const actionDatas = NetworkedAnimationActionsData.get(eid)!;
+    datas.length = 0;
     actionDatas.forEach((actionData: AnimationActionDataT, actionId: number) => {
-      data.push([
+      datas.push([
         NetworkedAnimation.timestamp[eid],
         actionId,
         [actionData.time, actionData.timeScale, actionData.weight, actionData.flags]
       ]);
     });
-    return true;
+    data.push(datas);
+    return datas.length > 0;
   } else {
     return false;
   }
@@ -36,16 +39,17 @@ const WEIGHT_IDX = 2;
 const FLAGS_IDX = 3;
 
 function deserialize(eid: EntityID, data: CursorBuffer) {
+  const componentData = data[data.cursor!++];
   if (NetworkedAnimationActionsData.has(eid)) {
     const actionDatas = NetworkedAnimationActionsData.get(eid) || new AnimationActionsMap();
-    for (let i = 0; i < data.length; i++) {
-      NetworkedAnimation.timestamp[eid] = data[i][TIMESTAMP_IDX];
-      const actionId = data[i][ACTION_IDX];
+    for (let i = 0; i < componentData.length; i++) {
+      NetworkedAnimation.timestamp[eid] = componentData[i][TIMESTAMP_IDX];
+      const actionId = componentData[i][ACTION_IDX];
       const actionData = actionDatas.get(actionId) || new AnimationActionsDataMap();
-      actionData.time = data[i][ACTION_DATA_IDX][TIME_IDX];
-      actionData.timeScale = data[i][ACTION_DATA_IDX][TIME_SCALE_IDX];
-      actionData.weight = data[i][ACTION_DATA_IDX][WEIGHT_IDX];
-      actionData.flags = data[i][ACTION_DATA_IDX][FLAGS_IDX];
+      actionData.time = componentData[i][ACTION_DATA_IDX][TIME_IDX];
+      actionData.timeScale = componentData[i][ACTION_DATA_IDX][TIME_SCALE_IDX];
+      actionData.weight = componentData[i][ACTION_DATA_IDX][WEIGHT_IDX];
+      actionData.flags = componentData[i][ACTION_DATA_IDX][FLAGS_IDX];
     }
   }
   return true;
