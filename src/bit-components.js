@@ -403,7 +403,9 @@ export const NetworkedAnimation = defineComponent({
  * @type {Map<EntityId, Map<number, AnimationActionData>}>}
  */
 export const NetworkedAnimationActionsData = new Map();
-export const NetworkedBehavior = defineComponent();
+export const NetworkedBehavior = defineComponent({
+  timestamp: Types.ui32
+});
 /**
  * @type {Map<EntityId, Map}>}
  */

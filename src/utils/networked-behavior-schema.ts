@@ -1,5 +1,6 @@
 import { HubsWorld } from "../app";
-import { NetworkedBehaviorData } from "../bit-components";
+import { NetworkedBehavior, NetworkedBehaviorData } from "../bit-components";
+import { defineNetworkSchema } from "./define-network-schema";
 import { deserializerWithMigrations, Migration, NetworkSchema, read, StoredComponent, write } from "./network-schemas";
 import type { CursorBuffer, EntityID } from "./networking-types";
 
@@ -27,37 +28,39 @@ function desMap(key: any, value: any) {
   return value;
 }
 
-function serialize(eid: EntityID, data: CursorBuffer) {
-  if (NetworkedBehaviorData.has(eid)) {
-    data.push(JSON.stringify(NetworkedBehaviorData.get(eid), serMap));
-    return true;
-  } else {
-    return false;
+function serialize(world: HubsWorld, eid: EntityID, data: CursorBuffer, isFullSync: boolean, writeToShadow: boolean) {
+  let result = false;
+  if (runtimeSerde.serialize(world, eid, data, isFullSync, writeToShadow)) {
+    if (NetworkedBehaviorData.has(eid)) {
+      data[data.length - 1] = [data[data.length - 1], JSON.stringify(NetworkedBehaviorData.get(eid), serMap)];
+      result = true;
+    } else {
+      data.pop();
+      result = false;
+    }
   }
+  return result;
 }
 
-function deserialize(eid: EntityID, data: CursorBuffer) {
+function deserialize(world: HubsWorld, eid: EntityID, data: CursorBuffer) {
+  const updatedPids = data[data.cursor!++] as Array<any>;
   const componentData = data[data.cursor!++];
-  const map = JSON.parse(componentData, desMap);
+  NetworkedBehavior.timestamp[eid] = componentData[0];
+  const map = JSON.parse(componentData[1], desMap);
   NetworkedBehaviorData.set(eid, map);
-  return true;
 }
 
 function apply(eid: EntityID, { version, data }: StoredComponent) {
   if (version !== 1) return false;
-  return deserialize(eid, data);
+  const map = JSON.parse(data, desMap);
+  NetworkedBehaviorData.set(eid, map);
+  return true;
 }
-
+const runtimeSerde = defineNetworkSchema(NetworkedBehavior);
 export const NetworkedBehaviorSchema: NetworkSchema = {
   componentName: "networked-behavior",
-  serialize: (
-    world: HubsWorld,
-    eid: EntityID,
-    data: CursorBuffer,
-    isFullSync: boolean,
-    writeToShadow: boolean
-  ): boolean => serialize(eid, data),
-  deserialize: (world: HubsWorld, eid: EntityID, data: CursorBuffer): boolean => deserialize(eid, data),
+  serialize,
+  deserialize,
   serializeForStorage: function serializeForStorage(eid: EntityID) {
     return {
       version: 1,

@@ -12,7 +12,7 @@ import {
   makeInNOutFunctionDesc
 } from "@oveddan-behave-graph/core";
 import { definitionListToMap } from "./utils";
-import { EntityID, Networked, NetworkedBehaviorData, Owned } from "../../bit-components";
+import { EntityID, Networked, NetworkedBehavior, NetworkedBehaviorData, Owned } from "../../bit-components";
 import { HubsWorld } from "../../app";
 import { entityExists, hasComponent } from "bitecs";
 import { ClientID } from "../../utils/networking-types";
@@ -170,6 +170,7 @@ export const NetworkingNodes = definitionListToMap([
       const value = read(type);
       data.set(name, value);
       NetworkedBehaviorData.set(entity, data);
+      NetworkedBehavior.timestamp[entity] = performance.now();
 
       commit("flow");
     }
