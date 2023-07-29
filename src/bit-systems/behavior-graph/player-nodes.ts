@@ -135,7 +135,7 @@ export const playerNodedefs = definitionListToMap([
     out: [{ displayName: "string" }],
     exec: (player: ClientID) => {
       const presence = APP.hubChannel!.presence.state[player];
-      return { displayName: presence?.metas[0].profile.displayName };
+      return { displayName: presence?.metas[0].profile.displayName || "" };
     }
   }),
   makeFlowNodeDefinition({
