@@ -38,14 +38,31 @@ const ThemeBuilder = ({config, onGlobalChange, onSave, path, setState, disableSa
         }
     }
 
+    const addTheme = e => {
+        const newTheme = {
+            ...themes[0],
+            id: "new-theme", //TO DO: use UUID
+            name: "New Theme"
+        }
+        setThemes(prevState => [...prevState, newTheme])
+        setSelectedTheme(newTheme)
+        onSave(e)
+    }
+
+    const deleteTheme = e => {
+        setThemes(prevState => prevState.filter(theme => theme.id !== selectedTheme.id))
+        setSelectedTheme(themes[0])
+        onSave(e)
+    }
+
     // edit name and validate no duplicates
     // add new theme
+    // duplicate theme
     // generate id from theme name?
     // copy json
     // import theme from json - validate and populate missing variables
     // import theme from web url?? - validate and populate missing variables
     // select from github themes
-    // duplicate theme
     // delete theme
     // populate with defaults
     // calculate darkness or lightness from states
@@ -53,6 +70,8 @@ const ThemeBuilder = ({config, onGlobalChange, onSave, path, setState, disableSa
     return (
         <div>
             <Select label="Themes" options={formattedThemes} name="Themes" value={selectedTheme.id} onChange={onThemeSelect}/>
+            <Button type="button" text="Add theme" label="Add theme" onClick={e => addTheme(e)}/>
+            <Button type="button" text="Delete theme" label="Delete theme" onClick={deleteTheme}/>
             <form onSubmit={onSubmit} >
                 <Input label="Name" name="Name" value={selectedTheme.name} onChange={onNameChange} placeholder="Name your theme" />
                 {Object.entries(selectedTheme.variables).map(([key, value]) => {
