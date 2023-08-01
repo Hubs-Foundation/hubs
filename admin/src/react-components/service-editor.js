@@ -433,8 +433,8 @@ class ConfigurationEditor extends Component {
 
 
     return (<>
-    <ThemeBuilder config={config} onGlobalChange={this.onChange.bind(this)} onSave={this.onSubmit.bind(this)} path={configurables[2][0]}/>
-      <form onSubmit={this.onSubmit.bind(this)}>
+    <ThemeBuilder config={config} onGlobalChange={this.onChange.bind(this)} onSave={this.onSubmit.bind(this)} path={configurables[2][0]} setState={this.setState.bind(this)} disableSave={!!this.state.warningMessage}/>
+      {/* <form onSubmit={this.onSubmit.bind(this)}>
         <h3 className="heading-sm mb-24">Nametags</h3>
         {getInput(configurables[0])}
         {getInput(configurables[1])}
@@ -469,7 +469,7 @@ class ConfigurationEditor extends Component {
             </Button>
           )}
         </div>
-      </form>
+      </form> */}
       </>
     );
   }
