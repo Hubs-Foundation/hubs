@@ -81,6 +81,16 @@ const ThemeBuilder = ({config, onGlobalChange, onSave, path, setState, disableSa
           });
     }
 
+    const duplicateSelectedTheme = () => {
+        const newTheme = {
+            ...selectedTheme,
+            id: `${selectedTheme.id}-copy`, //TO DO: use UUID
+            name: `${selectedTheme.name} Copy`,
+        }
+        setThemes(prevState => [...prevState, newTheme])
+        setSelectedTheme(newTheme)
+    }
+
     // edit name and validate no duplicates
     // add new theme
     // duplicate theme
@@ -99,6 +109,7 @@ const ThemeBuilder = ({config, onGlobalChange, onSave, path, setState, disableSa
             <Button type="button" text="Add theme" label="Add theme" onClick={e => addTheme(e)}/>
             <Button type="button" text="Delete theme" label="Delete theme" onClick={deleteTheme}/>
             <Button type="button" text="Copy theme json" label="Copy theme json" onClick={copyThemeJson}/>
+            <Button type="button" text="Duplicate theme" label="Duplicate theme" onClick={duplicateSelectedTheme}/>
             <form onSubmit={onSubmit} >
                 <Input label="Name" name="Name" value={selectedTheme.name} onChange={onNameChange} placeholder="Name your theme" />
                 {Object.entries(selectedTheme.variables).map(([key, value]) => {
