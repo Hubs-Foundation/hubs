@@ -1,11 +1,27 @@
-import React, {useEffect, useMemo, useState} from 'react';
+import React, { useMemo, useRef, useState} from 'react';
 // import theme from "../../utils/sample-theme";
-import {Button, Input, Select} from '@mozilla/lilypad-ui'
+import {Button, Input, Notification, NotificationInterfaceT, Select} from '@mozilla/lilypad-ui'
+import { NewNotificationT } from '@mozilla/lilypad-ui';
+import { CategoryE } from '@mozilla/lilypad-ui';
+import { NotificationTypesE } from '@mozilla/lilypad-ui';
+import { NotificationLocationE } from '@mozilla/lilypad-ui';
+
+const success: NewNotificationT = {
+    title: "",
+    description: "Copied them JSON to clipboard!",
+    type: NotificationTypesE.SUCCESS,
+    location: NotificationLocationE.BOTTOM_LEFT,
+    autoClose: true,
+    category:CategoryE.CRUMB,
+  };
+const error: NewNotificationT = {...success, type: NotificationTypesE.ERROR, description: "Unable to copy JSON to clipboard."}
 
 const ThemeBuilder = ({config, onGlobalChange, onSave, path, setState, disableSave}) => {
     const [themes, setThemes] =useState(JSON.parse(config?.hubs?.theme?.themes))
     const [selectedTheme, setSelectedTheme] = useState(themes.find(theme => !!theme?.default))
+    const [showCrumb, setShowCrumb] = useState(false);
     const formattedThemes = useMemo(() => themes.map(theme => ({title: theme.name, value: theme.id})), [themes, config]);
+    const notificationRef = useRef<NotificationInterfaceT>();
 
     const onThemeSelect = e => {
         e.preventDefault()
@@ -56,7 +72,13 @@ const ThemeBuilder = ({config, onGlobalChange, onSave, path, setState, disableSa
     }
 
     const copyThemeJson = () => {
-        
+        navigator.clipboard.writeText(JSON.stringify(selectedTheme)).then(() => {
+            notificationRef.current?.dispatchNotification(success);
+            /* text copied to clipboard successfully */
+          },() => {
+            notificationRef.current?.dispatchNotification(error);
+            /* text failed to copy to the clipboard */
+          });
     }
 
     // edit name and validate no duplicates
@@ -84,6 +106,7 @@ const ThemeBuilder = ({config, onGlobalChange, onSave, path, setState, disableSa
                 })}
                 <Button type="submit" text="Submit" label="Submit" disabled={disableSave}/>
             </form>
+            <Notification ref={notificationRef} />
         </div>
     )
 }
