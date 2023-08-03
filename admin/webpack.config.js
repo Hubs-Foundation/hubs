@@ -190,6 +190,36 @@ module.exports = (env, argv) => {
             return /node_modules/.test(modulePath) && !/node_modules\/hubs/.test(modulePath);
           }
         },
+        {
+          test: /\.svg$/,
+          include: [path.resolve(__dirname, "node_modules", "hubs", "src", "react-components")],
+          use: [
+            {
+              loader: "@svgr/webpack",
+              options: {
+                titleProp: true,
+                replaceAttrValues: { "#000": "currentColor" },
+                exportType: "named",
+                svgo: true,
+                svgoConfig: {
+                  plugins: [
+                    {
+                      name: "preset-default",
+                      params: {
+                        overrides: {
+                          removeViewBox: false,
+                          mergePaths: false,
+                          convertShapeToPath: false,
+                          removeHiddenElems: false
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
         // TODO worker-loader has been deprecated, but we need "inline" support which is not available yet
         // ideally instead of inlining workers we should serve them off the root domain instead of CDN.
         {

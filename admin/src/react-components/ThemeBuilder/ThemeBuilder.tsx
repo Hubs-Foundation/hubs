@@ -1,10 +1,12 @@
-import React, { useMemo, useRef, useState} from 'react';
+import React, { useEffect, useMemo, useRef, useState} from 'react';
 // import theme from "../../utils/sample-theme";
 import {Button, Input, Notification, NotificationInterfaceT, Select} from '@mozilla/lilypad-ui'
 import { NewNotificationT } from '@mozilla/lilypad-ui';
 import { CategoryE } from '@mozilla/lilypad-ui';
 import { NotificationTypesE } from '@mozilla/lilypad-ui';
 import { NotificationLocationE } from '@mozilla/lilypad-ui';
+import {Base} from 'hubs/src/react-components/modal/Modal.stories'
+import {RoomToolbar} from 'hubs/src/react-components/input/ToolbarButton.stories'
 
 const success: NewNotificationT = {
     title: "",
@@ -19,7 +21,6 @@ const error: NewNotificationT = {...success, type: NotificationTypesE.ERROR, des
 const ThemeBuilder = ({config, onGlobalChange, onSave, path, setState, disableSave}) => {
     const [themes, setThemes] =useState(JSON.parse(config?.hubs?.theme?.themes))
     const [selectedTheme, setSelectedTheme] = useState(themes.find(theme => !!theme?.default))
-    const [showCrumb, setShowCrumb] = useState(false);
     const formattedThemes = useMemo(() => themes.map(theme => ({title: theme.name, value: theme.id})), [themes, config]);
     const notificationRef = useRef<NotificationInterfaceT>();
 
@@ -91,15 +92,38 @@ const ThemeBuilder = ({config, onGlobalChange, onSave, path, setState, disableSa
         setSelectedTheme(newTheme)
     }
 
+    useEffect(() => {
+        const variables = [];
+        console.log(selectedTheme)
+        for (const key in selectedTheme.variables) {
+          if (!Object.prototype.hasOwnProperty.call(selectedTheme.variables, key)) continue;
+          variables.push(`--${key}: ${selectedTheme.variables[key]};`);
+        }
+    
+        const styleTag = document.createElement("style");
+    
+        styleTag.innerHTML = `:root {
+            ${variables.join("\n")}
+          }`;
+    
+        document.head.appendChild(styleTag);
+    
+        return () => {
+          document.head.removeChild(styleTag);
+        };
+      }, [selectedTheme]);
+
     // edit name and validate no duplicates
     // add new theme
     // duplicate theme
     // generate id from theme name?
     // copy json
+    // delete theme
+    // preview components
+
     // import theme from json - validate and populate missing variables
     // import theme from web url?? - validate and populate missing variables
     // select from github themes
-    // delete theme
     // populate with defaults
     // calculate darkness or lightness from states
 
@@ -118,6 +142,8 @@ const ThemeBuilder = ({config, onGlobalChange, onSave, path, setState, disableSa
                 <Button type="submit" text="Submit" label="Submit" disabled={disableSave}/>
             </form>
             <Notification ref={notificationRef} />
+            <RoomToolbar />
+            <Base />
         </div>
     )
 }
