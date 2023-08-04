@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useState} from 'react';
 // import theme from "../../utils/sample-theme";
-import {Button, Input, Notification, NotificationInterfaceT, Select} from '@mozilla/lilypad-ui'
+import {Button, Input, Notification, NotificationInterfaceT, Select, TextArea} from '@mozilla/lilypad-ui'
 import { NewNotificationT } from '@mozilla/lilypad-ui';
 import { CategoryE } from '@mozilla/lilypad-ui';
 import { NotificationTypesE } from '@mozilla/lilypad-ui';
@@ -19,7 +19,8 @@ const error: NewNotificationT = {...success, type: NotificationTypesE.ERROR, des
 const ThemeBuilder = ({config, onGlobalChange, onSave, path, setState, disableSave}) => {
     const [themes, setThemes] =useState(JSON.parse(config?.hubs?.theme?.themes))
     const [selectedTheme, setSelectedTheme] = useState(themes.find(theme => !!theme?.default))
-    const [showCrumb, setShowCrumb] = useState(false);
+    const [jsonInput, setJsonInput] = useState("")
+    const [jsonError, setJsonError] = useState("")
     const formattedThemes = useMemo(() => themes.map(theme => ({title: theme.name, value: theme.id})), [themes, config]);
     const notificationRef = useRef<NotificationInterfaceT>();
 
@@ -81,6 +82,13 @@ const ThemeBuilder = ({config, onGlobalChange, onSave, path, setState, disableSa
           });
     }
 
+    const importThemeFromJson = e => {
+        e.preventDefault()
+        const newTheme = e.target[0].value;
+        setSelectedTheme(JSON.parse(newTheme))
+        console.log(newTheme)
+    }
+
     const duplicateSelectedTheme = () => {
         const newTheme = {
             ...selectedTheme,
@@ -91,15 +99,34 @@ const ThemeBuilder = ({config, onGlobalChange, onSave, path, setState, disableSa
         setSelectedTheme(newTheme)
     }
 
+    const validateJson = (value:string) => {
+        if(value){ 
+            try {
+                const parsedValue = JSON.parse(value);
+                const containsKeys = ['name', 'variables', 'id'].every(key => !!parsedValue[key])
+                if(!containsKeys){
+                    throw new Error("Missing one of the following keys: name, variables, id")
+                }
+                setJsonError('')
+                return true;
+            } catch (error) {
+                setJsonError(error.message)
+                return false;
+            }
+        }
+        return true
+    }
+
     // edit name and validate no duplicates
     // add new theme
     // duplicate theme
-    // generate id from theme name?
+    // generate id from theme name???
     // copy json
     // import theme from json - validate and populate missing variables
+    // delete theme
+
     // import theme from web url?? - validate and populate missing variables
     // select from github themes
-    // delete theme
     // populate with defaults
     // calculate darkness or lightness from states
 
@@ -110,6 +137,10 @@ const ThemeBuilder = ({config, onGlobalChange, onSave, path, setState, disableSa
             <Button type="button" text="Delete theme" label="Delete theme" onClick={deleteTheme}/>
             <Button type="button" text="Copy theme json" label="Copy theme json" onClick={copyThemeJson}/>
             <Button type="button" text="Duplicate theme" label="Duplicate theme" onClick={duplicateSelectedTheme}/>
+            <form onSubmit={importThemeFromJson}>
+                <TextArea label="Theme" name="Theme" value={jsonInput} validator={validateJson} placeholder={''} customErrorMessage={jsonError} onChange={e => setJsonInput(e.target.value)}/>
+                <Button type="submit" text="Import theme from JSON" label="Import theme from JSON"/>
+            </form>
             <form onSubmit={onSubmit} >
                 <Input label="Name" name="Name" value={selectedTheme.name} onChange={onNameChange} placeholder="Name your theme" />
                 {Object.entries(selectedTheme.variables).map(([key, value]) => {
