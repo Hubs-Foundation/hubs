@@ -119,7 +119,7 @@ function updateButtonText(world: HubsWorld, menu: EntityID, button: EntityID) {
 
 function flushToObject3Ds(world: HubsWorld, menu: EntityID, frozen: boolean) {
   const target = LinkHoverMenu.targetObjectRef[menu];
-  const visible = !!(target && !frozen);
+  const visible = !!target && !frozen;
 
   const obj = world.eid2obj.get(menu)!;
   obj.visible = visible;
