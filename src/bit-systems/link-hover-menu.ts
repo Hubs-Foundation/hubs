@@ -26,7 +26,7 @@ function updateLinkMenuTarget(world: HubsWorld, menu: EntityID, sceneIsFrozen: b
   }
 
   const hovered = hoveredQuery(world);
-  const target = hovered.find(eid => findAncestorWithComponent(world, Link, eid));
+  const target = hovered.find(eid => hasComponent(world, Link, eid));
   if (target) {
     LinkHoverMenu.targetObjectRef[menu] = target;
     LinkHoverMenu.clearTargetTimer[menu] = world.time.elapsed + 1000;
