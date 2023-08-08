@@ -26,14 +26,14 @@ function updateLinkMenuTarget(world: HubsWorld, menu: EntityID, sceneIsFrozen: b
   }
 
   const hovered = hoveredQuery(world);
-  const target = hovered.map(eid => findAncestorWithComponent(world, Link, eid))[0] || 0;
+  const target = hovered.find(eid => findAncestorWithComponent(world, Link, eid));
   if (target) {
     LinkHoverMenu.targetObjectRef[menu] = target;
     LinkHoverMenu.clearTargetTimer[menu] = world.time.elapsed + 1000;
     return;
   }
 
-  if (hovered.some(eid => findAncestorWithComponent(world, LinkHoverMenu, eid))) {
+  if (hovered.find(eid => findAncestorWithComponent(world, LinkHoverMenu, eid))) {
     LinkHoverMenu.clearTargetTimer[menu] = world.time.elapsed + 1000;
     return;
   }
