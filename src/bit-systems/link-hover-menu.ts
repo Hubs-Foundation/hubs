@@ -96,8 +96,11 @@ function updateButtonText(world: HubsWorld, menu: EntityID, button: EntityID) {
   const textObj = world.eid2obj.get(text)! as TroikaText;
   const linkEid = LinkHoverMenu.targetObjectRef[menu];
   const linkType = Link.type[linkEid];
-  let label = "open link";
+  let label = "";
   switch (linkType) {
+    case LinkType.LINK:
+      label = "open link";
+      break;
     case LinkType.AVATAR:
       label = "use avatar";
       break;
