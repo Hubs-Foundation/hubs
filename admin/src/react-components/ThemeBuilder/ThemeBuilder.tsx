@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState} from 'react';
+import React, { useEffect, useMemo, useRef, useState} from 'react';
 // import theme from "../../utils/sample-theme";
 import {Button, Input, Notification, NotificationInterfaceT, Select, TextArea} from '@mozilla/lilypad-ui'
 import { NewNotificationT } from '@mozilla/lilypad-ui';
@@ -18,11 +18,15 @@ const error: NewNotificationT = {...success, type: NotificationTypesE.ERROR, des
 
 const ThemeBuilder = ({config, onGlobalChange, onSave, path, setState, disableSave}) => {
     const [themes, setThemes] =useState(JSON.parse(config?.hubs?.theme?.themes))
-    const [selectedTheme, setSelectedTheme] = useState(themes.find(theme => !!theme?.default))
+    const [selectedTheme, setSelectedTheme] = useState(themes.find(theme => !!theme?.default) || themes[0])
     const [jsonInput, setJsonInput] = useState("")
     const [jsonError, setJsonError] = useState("")
     const formattedThemes = useMemo(() => themes.map(theme => ({title: theme.name, value: theme.id})), [themes, config]);
     const notificationRef = useRef<NotificationInterfaceT>();
+
+    useEffect(() => {
+        console.log(config)
+    }, [config])
 
     const onThemeSelect = e => {
         e.preventDefault()
@@ -46,7 +50,7 @@ const ThemeBuilder = ({config, onGlobalChange, onSave, path, setState, disableSa
         e.persist()
         setSelectedTheme(prevState => ({...prevState, name: e.target.value}))
         onGlobalChange(path, JSON.stringify([...themes.filter(theme => theme.id !== selectedTheme.id), {...selectedTheme, name: e.target.value}]))
-        console.log(themes, e.target.value)
+
         if(themes.find(theme => theme.name === e.target.value)){
             const warningMessage = "Theme already exists with this name. Please use a different name."
             setState({warningMessage})
@@ -55,18 +59,19 @@ const ThemeBuilder = ({config, onGlobalChange, onSave, path, setState, disableSa
         }
     }
 
-    const addTheme = e => {
+    const addTheme = () => {
         const newTheme = {
             ...themes[0],
             id: "new-theme", //TO DO: use UUID
             name: "New Theme"
         }
+        onGlobalChange(path, JSON.stringify([...themes, newTheme]))
         setThemes(prevState => [...prevState, newTheme])
         setSelectedTheme(newTheme)
-        onSave(e)
     }
 
     const deleteTheme = e => {
+        onGlobalChange(path, JSON.stringify(themes.filter(theme => theme.id !== selectedTheme.id)))
         setThemes(prevState => prevState.filter(theme => theme.id !== selectedTheme.id))
         setSelectedTheme(themes[0])
         onSave(e)
@@ -95,7 +100,9 @@ const ThemeBuilder = ({config, onGlobalChange, onSave, path, setState, disableSa
             id: `${selectedTheme.id}-copy`, //TO DO: use UUID
             name: `${selectedTheme.name} Copy`,
         }
+
         setThemes(prevState => [...prevState, newTheme])
+        onGlobalChange(path, JSON.stringify([...themes, newTheme]))
         setSelectedTheme(newTheme)
     }
 
