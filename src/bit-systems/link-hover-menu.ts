@@ -1,4 +1,4 @@
-import { defineQuery, entityExists } from "bitecs";
+import { defineQuery, entityExists, hasComponent } from "bitecs";
 import type { HubsWorld } from "../app";
 import { Link, LinkHoverMenu, HoveredRemoteRight, TextTag, Interacted, LinkHoverMenuItem } from "../bit-components";
 import { findAncestorWithComponent, findChildWithComponent } from "../utils/bit-utils";
@@ -117,7 +117,7 @@ function updateButtonText(world: HubsWorld, menu: EntityID, button: EntityID) {
   textObj.text = label;
 }
 
-function flushToObject3Ds(world: HubsWorld, menu: EntityID, frozen: boolean) {
+function flushToObject3Ds(world: HubsWorld, menu: EntityID, frozen: boolean, force: boolean) {
   const target = LinkHoverMenu.targetObjectRef[menu];
   const visible = !!target && !frozen;
 
@@ -129,7 +129,7 @@ function flushToObject3Ds(world: HubsWorld, menu: EntityID, frozen: boolean) {
   // Parent visibility doesn't block raycasting, so we must set each button to be invisible
   // TODO: Ensure that children of invisible entities aren't raycastable
   if (visible) {
-    if (visible !== buttonObj.visible) {
+    if (visible !== buttonObj.visible || force) {
       updateButtonText(world, menu, linkButtonRef);
       buttonObj.visible = true;
     }
@@ -142,11 +142,13 @@ export function linkHoverMenuSystem(world: HubsWorld, sceneIsFrozen: boolean) {
   // Assumes always only single LinkHoverMenu entity exists for now.
   // TODO: Take into account for more than one for VR
   menuQuery(world).forEach(menu => {
+    const prevTarget = LinkHoverMenu.targetObjectRef[menu];
     updateLinkMenuTarget(world, menu, sceneIsFrozen);
-    if (LinkHoverMenu.targetObjectRef[menu]) {
+    const currTarget = LinkHoverMenu.targetObjectRef[menu];
+    if (currTarget) {
       moveToTarget(world, menu);
       clickedMenuItemQuery(world).forEach(eid => handleLinkClick(world, eid));
     }
-    flushToObject3Ds(world, menu, sceneIsFrozen);
+    flushToObject3Ds(world, menu, sceneIsFrozen, prevTarget != currTarget);
   });
 }
