@@ -477,7 +477,11 @@ class GLTFHubsPlugin {
            * This was supported by the AFrame loader so this extension ensures backwards compatibility with all the existing scenes.
            * For more context about this see: https://github.com/mozilla/hubs/pull/6121
            */
-          if (node.mesh !== undefined || node.camera !== undefined) {
+          if (
+            node.mesh !== undefined ||
+            node.camera !== undefined ||
+            (node.extensions && node.extensions["KHR_lights_punctual"]?.light !== undefined)
+          ) {
             const exts = node.extensions?.MOZ_hubs_components;
             if (exts) {
               const children = [];
