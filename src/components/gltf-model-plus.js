@@ -395,7 +395,7 @@ const convertStandardMaterialsIfNeeded = object => {
 let ktxLoader;
 let dracoLoader;
 
-const OBJECT3D_EXT = [
+const OBJECT3D_EXT = new Set([
   "ambient-light",
   "audio",
   "directional-light",
@@ -412,7 +412,7 @@ const OBJECT3D_EXT = [
   "spot-light",
   "text",
   "video"
-];
+]);
 
 class GLTFHubsPlugin {
   constructor(parser, jsonPreprocessor) {
@@ -481,7 +481,7 @@ class GLTFHubsPlugin {
             if (exts) {
               const children = [];
               for (const [key, value] of Object.entries(exts)) {
-                if (OBJECT3D_EXT.includes(key)) {
+                if (OBJECT3D_EXT.has(key)) {
                   const newNode = {
                     name: `${node.name}_${key}`,
                     extensions: {
