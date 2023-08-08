@@ -59,7 +59,7 @@ async function handleLinkClick(world: HubsWorld, button: EntityID) {
       window.open(src);
       break;
     case LinkType.AVATAR:
-      const avatarId = new URL(src).pathname.split("/").pop();
+      const avatarId = url.pathname.split("/").pop();
       window.APP.store.update({ profile: { avatarId } });
       APP.scene!.emit("avatar_updated");
       break;
