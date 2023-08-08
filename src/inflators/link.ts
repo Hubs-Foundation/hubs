@@ -19,6 +19,6 @@ export type LinkParams = {
 export function inflateLink(world: HubsWorld, eid: number, params: LinkParams): number {
   addComponent(world, Link, eid);
   Link.url[eid] = APP.getSid(params.href);
-  Link.type[eid] = params.type || LinkType.LINK;
+  Link.type[eid] = params.type !== undefined ? params.type : LinkType.LINK;
   return eid;
 }
