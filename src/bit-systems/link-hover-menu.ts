@@ -23,7 +23,6 @@ function updateLinkMenuTarget(world: HubsWorld, menu: EntityID, sceneIsFrozen: b
 
   if (sceneIsFrozen) {
     LinkHoverMenu.targetObjectRef[menu] = 0;
-    return;
   }
 
   const hovered = hoveredQuery(world);
