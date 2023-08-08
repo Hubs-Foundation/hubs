@@ -14,6 +14,7 @@ import { promisifyWorker } from "../utils/promisify-worker.js";
 import qsTruthy from "../utils/qs_truthy";
 import { cloneObject3D, disposeMaterial } from "../utils/three-utils";
 import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
+import { shouldUseNewLoader } from "../utils/bit-utils";
 
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
@@ -469,7 +470,7 @@ class GLTFHubsPlugin {
 
         node.extras.gltfIndex = i;
 
-        if (qsTruthy("newLoader")) {
+        if (shouldUseNewLoader()) {
           /**
            * This guarantees that components that add Object3Ds (ie. through addObject3DComponent) are not attached to non-Object3D
            * entities as it's not supported in the BitECS loader.
