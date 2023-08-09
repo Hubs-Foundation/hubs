@@ -219,7 +219,6 @@ export class SpriteSystem {
     waitForDOMContentLoaded().then(() => {
       for (const type in PNGS) {
         const spritesheetPng = PNGS[type];
-
         createImageTexture(spritesheetPng, getThemeColorShifter(type)).then(spritesheetTexture => {
           const geometry = createGeometry(MAX_SPRITES);
           const material = createMaterial(spritesheetTexture);

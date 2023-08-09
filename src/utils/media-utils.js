@@ -23,7 +23,6 @@ import configs from "../utils/configs";
 import qsTruthy from "../utils/qs_truthy";
 
 import anime from "animejs";
-import { shouldUseNewLoader } from "./bit-utils";
 
 export const MediaType = {
   MODEL: 1 << 0,
@@ -612,7 +611,6 @@ export function parseURL(text) {
 
 export async function resolveMediaInfo(urlString) {
   const url = parseURL(urlString);
-
   if (!url) {
     throw new Error(`Cannot fetch data for URL: ${urlString}`);
   }

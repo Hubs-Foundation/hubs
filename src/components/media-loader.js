@@ -595,7 +595,6 @@ AFRAME.registerComponent("media-loader", {
           { once: true }
         );
         this.el.setAttribute("floaty-object", { reduceAngularFloat: true, releaseGravity: -1 });
-        console.log("thumbnail", thumbnail);
         this.el.setAttribute(
           "media-image",
           Object.assign({}, this.data.mediaOptions, {
