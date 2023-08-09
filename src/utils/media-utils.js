@@ -72,7 +72,6 @@ export const resolveUrl = async (url, quality = null, version = 1, bustCache) =>
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ media: { url, quality: quality || getDefaultResolveQuality() }, version })
   }).then(async response => {
-    console.log("*** medi autils resolveUrl", response);
     if (!response.ok) {
       const message = `Error resolving url "${url}":`;
       try {
@@ -601,7 +600,6 @@ export function parseURL(text) {
   let url;
   try {
     url = new URL(text);
-    console.log("*** URL", url);
   } catch (e) {
     try {
       url = new URL(`https://${text}`);
@@ -614,7 +612,7 @@ export function parseURL(text) {
 
 export async function resolveMediaInfo(urlString) {
   const url = parseURL(urlString);
-  console.log("**** resolveMediaInfo", urlString, url);
+
   if (!url) {
     throw new Error(`Cannot fetch data for URL: ${urlString}`);
   }
@@ -626,8 +624,7 @@ export async function resolveMediaInfo(urlString) {
   // We want to resolve and proxy some hubs urls, like rooms and scene links,
   // but want to avoid proxying assets in order for this to work in dev environments
   const isLocalAsset = isNonCorsProxyDomain(url.hostname) && !(await isHubsDestinationUrl) && !(await isHubsAvatarUrl);
-  console.log("isLocalAsset", isLocalAsset, url);
-  // if (url.protocol != "data:" && url.protocol != "hubs:" && !isLocalAsset) {
+
   if (url.protocol != "data:" && url.protocol != "hubs:" && !isLocalAsset) {
     const response = await resolveUrl(url.href);
     canonicalUrl = response.origin;
@@ -639,7 +636,7 @@ export async function resolveMediaInfo(urlString) {
     if (canonicalAudioUrl && canonicalAudioUrl.startsWith("//")) {
       canonicalAudioUrl = location.protocol + canonicalAudioUrl;
     }
-    console.log("*** RESPONSE", response.meta);
+
     contentType = (response.meta && response.meta.expected_content_type) || contentType;
     thumbnail = response.meta && response.meta.thumbnail && proxiedUrlFor(response.meta.thumbnail);
   }
