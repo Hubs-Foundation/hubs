@@ -1,4 +1,4 @@
-import { defineQuery, entityExists, hasComponent } from "bitecs";
+import { defineQuery, entityExists } from "bitecs";
 import type { HubsWorld } from "../app";
 import { Link, LinkHoverMenu, HoveredRemoteRight, TextTag, Interacted, LinkHoverMenuItem } from "../bit-components";
 import { findAncestorWithComponent, findChildWithComponent } from "../utils/bit-utils";
