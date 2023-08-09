@@ -4,13 +4,15 @@ import { Mesh } from "three";
 import { HubsWorld } from "../app";
 import {
   EnvironmentSettings,
+  HeightFieldTag,
   NavMesh,
   Networked,
   PhysicsShape,
   SceneLoader,
   ScenePreviewCamera,
   SceneRoot,
-  Skybox
+  Skybox,
+  TrimeshTag
 } from "../bit-components";
 import Sky from "../components/skybox";
 import { Fit, inflatePhysicsShape, Shape } from "../inflators/physics-shape";
@@ -104,7 +106,9 @@ function* loadScene(
       }
     });
 
-    if (!findChildWithComponent(world, PhysicsShape, scene)) {
+    if (findChildWithComponent(world, TrimeshTag, scene) || findChildWithComponent(world, HeightFieldTag, scene)) {
+      console.log("heightfield or trimesh found on scene");
+    } else {
       let navMeshEid;
       if (isHighDensity) {
         navMeshEid = findChildWithComponent(world, NavMesh, scene);

@@ -1,5 +1,7 @@
+import { addComponent } from "bitecs";
 import { HubsWorld } from "../app";
 import { Fit, inflatePhysicsShape, Shape } from "./physics-shape";
+import { TrimeshTag } from "../bit-components";
 
 export function inflateTrimesh(world: HubsWorld, eid: number) {
   inflatePhysicsShape(world, eid, {
@@ -8,4 +10,5 @@ export function inflateTrimesh(world: HubsWorld, eid: number) {
     includeInvisible: true,
     margin: 0.01
   });
+  addComponent(world, TrimeshTag, eid);
 }
