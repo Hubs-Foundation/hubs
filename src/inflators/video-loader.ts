@@ -25,5 +25,5 @@ export function inflateVideoLoader(world: HubsWorld, eid: number, params: VideoL
   autoPlay !== false && (MediaVideo.flags[eid] |= VIDEO_FLAGS.AUTOPLAY);
   loop !== false && (MediaVideo.flags[eid] |= VIDEO_FLAGS.LOOP);
   controls !== false && (MediaVideo.flags[eid] |= VIDEO_FLAGS.CONTROLS);
-  MediaVideo.projection[eid] = APP.getSid(projection != undefined ? projection : ProjectionMode.FLAT);
+  MediaVideo.projection[eid] = APP.getSid(projection !== undefined ? projection : ProjectionMode.FLAT);
 }
