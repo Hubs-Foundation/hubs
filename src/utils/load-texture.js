@@ -28,6 +28,7 @@ function createTexture(contentType, src) {
     return createKTX2Texture(src);
   }
   if (contentType.startsWith("image/")) {
+    console.log("*** load-texture createTexture", src);
     return createImageTexture(src);
   }
 

@@ -76,6 +76,7 @@ AFRAME.registerComponent("media-image", {
           } else if (contentType.includes("image/ktx2")) {
             promise = createKTX2Texture(src);
           } else if (contentType.startsWith("image/")) {
+            console.log("*** media-image update", src);
             promise = createImageTexture(src);
           } else {
             throw new Error(`Unknown image content type: ${contentType}`);
