@@ -28,7 +28,6 @@ function createTexture(contentType, src) {
     return createKTX2Texture(src);
   }
   if (contentType.startsWith("image/")) {
-    console.log("*** load-texture createTexture", src);
     return createImageTexture(src);
   }
 
@@ -54,7 +53,6 @@ export async function loadTexture(src, version, contentType) {
   }
 
   const promise = createTexture(contentType, src);
-  console.log("**** createTexture", src);
   inflightTextures.set(inflightKey, promise);
   try {
     const texture = await promise;
@@ -69,7 +67,6 @@ export async function releaseTextureByKey(cacheKey) {
 }
 
 export function loadTextureCancellable(src, version, contentType) {
-  console.log("*** loadTextureCancellable", src);
   const p = loadTexture(src, version, contentType);
   return withRollback(p, () => {
     // TODO: Pass in an AbortSignal through to loadTexture so that we can cancel inflight requests.

@@ -219,7 +219,7 @@ export class SpriteSystem {
     waitForDOMContentLoaded().then(() => {
       for (const type in PNGS) {
         const spritesheetPng = PNGS[type];
-        console.log("*** sprites waitForDOMContentLoaded", spritesheetPng);
+
         createImageTexture(spritesheetPng, getThemeColorShifter(type)).then(spritesheetTexture => {
           const geometry = createGeometry(MAX_SPRITES);
           const material = createMaterial(spritesheetTexture);
@@ -246,7 +246,6 @@ export class SpriteSystem {
         // and textures loading for the new theme is completed earlier than the previous ones,
         // the previous ones are set.
         if (this.meshes[type]) {
-          console.log("*** sprites updateSprites", spritesheetPng);
           createImageTexture(spritesheetPng, getThemeColorShifter(type)).then(newTexture => {
             const oldTexture = this.meshes[type].material.uniforms.u_spritesheet.value;
             this.meshes[type].material.uniforms.u_spritesheet.value = newTexture;

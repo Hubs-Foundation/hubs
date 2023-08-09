@@ -5,7 +5,13 @@ import mediaHighlightFrag from "./media-highlight-frag.glsl";
 import { updateMaterials } from "./material-utils";
 import HubsTextureLoader from "../loaders/HubsTextureLoader";
 import { validMaterials } from "../components/hoverable-visuals";
-import { isNonCorsProxyDomain, proxiedUrlFor, guessContentType } from "../utils/media-url-utils";
+import {
+  isNonCorsProxyDomain,
+  proxiedUrlFor,
+  guessContentType,
+  isHubsDestinationUrl,
+  isHubsAvatarUrl
+} from "../utils/media-url-utils";
 import { isIOS as detectIOS } from "./is-mobile";
 import Linkify from "linkify-it";
 import tlds from "tlds";
@@ -66,7 +72,7 @@ export const resolveUrl = async (url, quality = null, version = 1, bustCache) =>
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ media: { url, quality: quality || getDefaultResolveQuality() }, version })
   }).then(async response => {
-    console.log("*** mediautils resolveUrl", response);
+    console.log("*** medi autils resolveUrl", response);
     if (!response.ok) {
       const message = `Error resolving url "${url}":`;
       try {
@@ -619,7 +625,7 @@ export async function resolveMediaInfo(urlString) {
 
   // We want to resolve and proxy some hubs urls, like rooms and scene links,
   // but want to avoid proxying assets in order for this to work in dev environments
-  const isLocalAsset = isNonCorsProxyDomain(url.hostname);
+  const isLocalAsset = isNonCorsProxyDomain(url.hostname) && !(await isHubsDestinationUrl) && !(await isHubsAvatarUrl);
   console.log("isLocalAsset", isLocalAsset, url);
   // if (url.protocol != "data:" && url.protocol != "hubs:" && !isLocalAsset) {
   if (url.protocol != "data:" && url.protocol != "hubs:" && !isLocalAsset) {

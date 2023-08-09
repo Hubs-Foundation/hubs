@@ -11,7 +11,6 @@ import { AlphaMode } from "./create-image-mesh";
 type AlphaModeType = typeof AlphaMode.Opaque | typeof AlphaMode.Mask | typeof AlphaMode.Blend;
 
 export function* createImageDef(world: HubsWorld, url: string, contentType: string) {
-  console.log("*** createImageDef", url);
   const { texture, ratio, cacheKey }: { texture: Texture; ratio: number; cacheKey: string } =
     yield loadTextureCancellable(url, 1, contentType);
 
@@ -35,7 +34,6 @@ export function* createImageDef(world: HubsWorld, url: string, contentType: stri
 }
 
 export function* loadImage(world: HubsWorld, url: string, contentType: string) {
-  console.log("*** loadImage", url);
   const imageDef = yield* createImageDef(world, url, contentType);
 
   return renderAsEntity(world, <entity name="Image" image={imageDef} />);

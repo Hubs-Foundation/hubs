@@ -71,7 +71,6 @@ export const scaledThumbnailUrlFor = (url, width, height) => {
 };
 
 export const isNonCorsProxyDomain = hostname => {
-  console.log(nonCorsProxyDomains);
   return !!nonCorsProxyDomains.find(domain => hostname.endsWith(domain));
 };
 
