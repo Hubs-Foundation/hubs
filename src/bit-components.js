@@ -175,6 +175,10 @@ export const MediaImage = defineComponent({
 MediaImage.cacheKey[$isStringType] = true;
 MediaImage.projection[$isStringType] = true;
 MediaImage.alphaMode[$isStringType] = true;
+/**
+ * @type {Map<EntityId, ImageLoaderParams}>}
+ */
+export const MediaImageLoaderData = new Map();
 
 export const NetworkedPDF = defineComponent({
   pageNumber: Types.ui8
@@ -190,6 +194,10 @@ export const MediaVideo = defineComponent({
   projection: Types.ui8
 });
 MediaVideo.projection[$isStringType] = true;
+/**
+ * @type {Map<EntityId, VideoLoaderParams}>}
+ */
+export const MediaVideoLoaderData = new Map();
 /**
  * @type {Map<EntityId, HTMLVideoElement}>}
  */

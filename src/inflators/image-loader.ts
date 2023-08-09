@@ -1,8 +1,7 @@
 import { HubsWorld } from "../app";
 import { ProjectionMode } from "../utils/projection-mode";
 import { inflateMediaLoader } from "./media-loader";
-import { MediaImage } from "../bit-components";
-import { AlphaMode } from "../utils/create-image-mesh";
+import { MediaImageLoaderData } from "../bit-components";
 
 export interface ImageLoaderParams {
   src: string;
@@ -20,8 +19,5 @@ export function inflateImageLoader(world: HubsWorld, eid: number, params: ImageL
     isObjectMenuTarget: false
   });
 
-  const { projection, alphaMode, alphaCutoff } = params;
-  MediaImage.projection[eid] = APP.getSid(projection !== undefined ? projection : ProjectionMode.FLAT);
-  MediaImage.alphaMode[eid] = APP.getSid(alphaMode !== undefined ? alphaMode : AlphaMode.Opaque);
-  MediaImage.alphaCutoff[eid] = alphaCutoff !== undefined ? alphaCutoff : 0.5;
+  MediaImageLoaderData.set(eid, params);
 }

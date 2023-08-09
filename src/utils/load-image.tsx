@@ -7,7 +7,7 @@ import { HubsWorld } from "../app";
 import { Texture } from "three";
 import { AlphaMode } from "./create-image-mesh";
 import { EntityID } from "./networking-types";
-import { MediaImage } from "../bit-components";
+import { MediaImageLoaderData } from "../bit-components";
 import { ImageParams } from "../inflators/image";
 
 export function* createImageDef(world: HubsWorld, url: string, contentType: string): Generator<any, ImageParams, any> {
@@ -37,20 +37,12 @@ export function* createImageDef(world: HubsWorld, url: string, contentType: stri
 export function* loadImage(world: HubsWorld, eid: EntityID, url: string, contentType: string) {
   const imageDef = yield* createImageDef(world, url, contentType);
 
-  if (MediaImage.projection[eid]) {
-    imageDef.projection = APP.getString(MediaImage.projection[eid]) as ProjectionMode;
-  } else {
-    imageDef.projection = ProjectionMode.FLAT;
-  }
-  if (MediaImage.alphaMode[eid]) {
-    imageDef.alphaMode = APP.getString(MediaImage.alphaMode[eid]) as AlphaMode;
-  } else {
-    imageDef.alphaMode = AlphaMode.Opaque;
-  }
-  if (MediaImage.alphaCutoff[eid]) {
-    imageDef.alphaCutoff = MediaImage.alphaCutoff[eid];
-  } else {
-    imageDef.alphaCutoff = 0.5;
+  if (MediaImageLoaderData.has(eid)) {
+    const params = MediaImageLoaderData.get(eid)!;
+    imageDef.projection = params.projection as ProjectionMode;
+    imageDef.alphaMode = params.alphaMode as AlphaMode;
+    imageDef.alphaCutoff = params.alphaCutoff;
+    MediaImageLoaderData.delete(eid);
   }
 
   return renderAsEntity(world, <entity name="Image" image={imageDef} />);
