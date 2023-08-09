@@ -17,6 +17,7 @@ import configs from "../utils/configs";
 import qsTruthy from "../utils/qs_truthy";
 
 import anime from "animejs";
+import { shouldUseNewLoader } from "./bit-utils";
 
 export const MediaType = {
   MODEL: 1 << 0,
@@ -65,6 +66,7 @@ export const resolveUrl = async (url, quality = null, version = 1, bustCache) =>
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ media: { url, quality: quality || getDefaultResolveQuality() }, version })
   }).then(async response => {
+    console.log("*** mediautils resolveUrl", response);
     if (!response.ok) {
       const message = `Error resolving url "${url}":`;
       try {
@@ -618,9 +620,9 @@ export async function resolveMediaInfo(urlString) {
   // We want to resolve and proxy some hubs urls, like rooms and scene links,
   // but want to avoid proxying assets in order for this to work in dev environments
   const isLocalAsset = isNonCorsProxyDomain(url.hostname);
-  console.log("isLocalAsset", isLocalAsset);
+  console.log("isLocalAsset", isLocalAsset, url);
   // if (url.protocol != "data:" && url.protocol != "hubs:" && !isLocalAsset) {
-  if (url.protocol != "data:" && url.protocol != "hubs:") {
+  if (url.protocol != "data:" && url.protocol != "hubs:" && !isLocalAsset) {
     const response = await resolveUrl(url.href);
     canonicalUrl = response.origin;
     if (canonicalUrl.startsWith("//")) {
