@@ -11,7 +11,7 @@ import { setMatrixWorld } from "../utils/three-utils";
 import { LinkType } from "../inflators/link";
 
 const menuQuery = defineQuery([LinkHoverMenu]);
-const hoveredQuery = defineQuery([HoveredRemoteRight]);
+const hoveredLinksQuery = defineQuery([HoveredRemoteRight, Link]);
 const clickedMenuItemQuery = defineQuery([Interacted, LinkHoverMenuItem]);
 
 function updateLinkMenuTarget(world: HubsWorld, menu: EntityID, sceneIsFrozen: boolean) {
@@ -25,15 +25,9 @@ function updateLinkMenuTarget(world: HubsWorld, menu: EntityID, sceneIsFrozen: b
     LinkHoverMenu.targetObjectRef[menu] = 0;
   }
 
-  const hovered = hoveredQuery(world);
-  const target = hovered.find(eid => hasComponent(world, Link, eid));
-  if (target) {
-    LinkHoverMenu.targetObjectRef[menu] = target;
-    LinkHoverMenu.clearTargetTimer[menu] = world.time.elapsed + 1000;
-    return;
-  }
-
-  if (hovered.find(eid => findAncestorWithComponent(world, LinkHoverMenu, eid))) {
+  const hoveredLinks = hoveredLinksQuery(world);
+  if (hoveredLinks.length > 0) {
+    LinkHoverMenu.targetObjectRef[menu] = hoveredLinks[0];
     LinkHoverMenu.clearTargetTimer[menu] = world.time.elapsed + 1000;
     return;
   }
