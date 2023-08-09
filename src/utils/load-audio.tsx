@@ -37,10 +37,8 @@ export function* loadAudio(world: HubsWorld, eid: EntityID, url: string) {
       video={{
         texture,
         ratio,
-        autoPlay,
         projection,
         video,
-        loop,
         controls
       }}
     ></entity>
