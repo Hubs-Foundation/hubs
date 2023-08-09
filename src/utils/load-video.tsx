@@ -36,10 +36,8 @@ export function* loadVideo(world: HubsWorld, eid: EntityID, url: string, content
       video={{
         texture,
         ratio,
-        autoPlay,
         projection,
         video,
-        loop,
         controls
       }}
     ></entity>
