@@ -52,7 +52,6 @@ export function findChildWithComponent(world: HubsWorld, component: Component, e
 
 const forceNewLoader = qsTruthy("newLoader");
 export function shouldUseNewLoader() {
-  console.log("***** using new loader", forceNewLoader);
-  // return forceNewLoader || APP.hub?.user_data?.hubsUseNewLoader;
-  return true;
+  console.log("***** using new loader", forceNewLoader, APP.hub?.user_data?.hubsUseNewLoader);
+  return forceNewLoader || APP.hub?.user_data?.hubsUseNewLoader;
 }
