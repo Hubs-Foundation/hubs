@@ -2,12 +2,10 @@ import { addComponent, defineQuery, enterQuery, exitQuery } from "bitecs";
 import { HubsWorld } from "../app";
 import { FloatyObject, Held, HeldRemoteRight, Interacted, ObjectSpawner } from "../bit-components";
 import { FLOATY_OBJECT_FLAGS } from "../systems/floaty-object-system";
-import { sleep } from "../utils/async-utils";
 import { coroutine } from "../utils/coroutine";
 import { createNetworkedMedia } from "../utils/create-networked-entity";
 import { EntityID } from "../utils/networking-types";
 import { setMatrixWorld } from "../utils/three-utils";
-import { animateScale, waitForMediaLoaded } from "./media-loading";
 
 export enum OBJECT_SPAWNER_FLAGS {
   /** Apply gravity to spawned objects */
@@ -17,9 +15,9 @@ export enum OBJECT_SPAWNER_FLAGS {
 function* spawnObjectJob(world: HubsWorld, spawner: EntityID) {
   const spawned = createNetworkedMedia(world, {
     src: APP.getString(ObjectSpawner.src[spawner])!,
-    recenter: false,
-    resize: false,
-    animateLoad: false,
+    recenter: true,
+    resize: true,
+    animateLoad: true,
     isObjectMenuTarget: true
   });
 
@@ -34,14 +32,6 @@ function* spawnObjectJob(world: HubsWorld, spawner: EntityID) {
   spawnerObj.updateMatrices();
   const spawnedObj = world.eid2obj.get(spawned)!;
   setMatrixWorld(spawnedObj, spawnerObj.matrixWorld);
-
-  yield* waitForMediaLoaded(world, spawned);
-  spawnerObj.visible = false;
-  yield sleep(1000);
-  spawnerObj.visible = true;
-
-  // TODO we should come up with a nicer way to get at the media that was loaded by a MediaLoader
-  yield* animateScale(world, spawnerObj.children[0]!.eid!);
 }
 
 // TODO type for coroutine
