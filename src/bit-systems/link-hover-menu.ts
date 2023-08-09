@@ -1,6 +1,14 @@
-import { defineQuery, entityExists } from "bitecs";
+import { Not, defineQuery, entityExists } from "bitecs";
 import type { HubsWorld } from "../app";
-import { Link, LinkHoverMenu, HoveredRemoteRight, TextTag, Interacted, LinkHoverMenuItem } from "../bit-components";
+import {
+  Link,
+  LinkHoverMenu,
+  HoveredRemoteRight,
+  TextTag,
+  Interacted,
+  LinkHoverMenuItem,
+  LinkInitializing
+} from "../bit-components";
 import { findAncestorWithComponent, findChildWithComponent } from "../utils/bit-utils";
 import { hubIdFromUrl } from "../utils/media-url-utils";
 import { Text as TroikaText } from "troika-three-text";
@@ -11,7 +19,8 @@ import { setMatrixWorld } from "../utils/three-utils";
 import { LinkType } from "../inflators/link";
 
 const menuQuery = defineQuery([LinkHoverMenu]);
-const hoveredLinksQuery = defineQuery([HoveredRemoteRight, Link]);
+const hoveredLinksQuery = defineQuery([HoveredRemoteRight, Link, Not(LinkInitializing)]);
+const hoveredMenuItemQuery = defineQuery([HoveredRemoteRight, LinkHoverMenuItem]);
 const clickedMenuItemQuery = defineQuery([Interacted, LinkHoverMenuItem]);
 
 function updateLinkMenuTarget(world: HubsWorld, menu: EntityID, sceneIsFrozen: boolean) {
@@ -24,9 +33,14 @@ function updateLinkMenuTarget(world: HubsWorld, menu: EntityID, sceneIsFrozen: b
     LinkHoverMenu.targetObjectRef[menu] = 0;
   }
 
-  const hoveredLinks = hoveredLinksQuery(world);
-  if (hoveredLinks.length > 0) {
-    LinkHoverMenu.targetObjectRef[menu] = hoveredLinks[0];
+  const hoveredLink = hoveredLinksQuery(world);
+  if (hoveredLink.length > 0) {
+    LinkHoverMenu.targetObjectRef[menu] = hoveredLink[0];
+    LinkHoverMenu.clearTargetTimer[menu] = world.time.elapsed + 1000;
+  }
+
+  const hoveredMenuItem = hoveredMenuItemQuery(world);
+  if (hoveredMenuItem.length > 0) {
     LinkHoverMenu.clearTargetTimer[menu] = world.time.elapsed + 1000;
   }
 

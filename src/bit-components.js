@@ -264,6 +264,7 @@ export const Link = defineComponent({
   type: Types.ui8
 });
 Link.url[$isStringType] = true;
+export const LinkInitializing = defineComponent();
 // TODO: Store this data elsewhere, since only one or two will ever exist.
 export const PDFMenu = defineComponent({
   prevButtonRef: Types.eid,

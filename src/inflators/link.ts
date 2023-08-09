@@ -1,5 +1,5 @@
 import { addComponent } from "bitecs";
-import { Link } from "../bit-components";
+import { Link, LinkInitializing } from "../bit-components";
 import { HubsWorld } from "../app";
 
 export enum LinkType {
@@ -17,6 +17,7 @@ export type LinkParams = {
 };
 
 export function inflateLink(world: HubsWorld, eid: number, params: LinkParams): number {
+  addComponent(world, LinkInitializing, eid);
   addComponent(world, Link, eid);
   Link.url[eid] = APP.getSid(params.href);
   Link.type[eid] = params.type !== undefined ? params.type : LinkType.LINK;
