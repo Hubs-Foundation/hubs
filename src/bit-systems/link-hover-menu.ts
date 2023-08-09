@@ -149,6 +149,6 @@ export function linkHoverMenuSystem(world: HubsWorld, sceneIsFrozen: boolean) {
       moveToTarget(world, menu);
       clickedMenuItemQuery(world).forEach(eid => handleLinkClick(world, eid));
     }
-    flushToObject3Ds(world, menu, sceneIsFrozen, prevTarget != currTarget);
+    flushToObject3Ds(world, menu, sceneIsFrozen, prevTarget !== currTarget);
   });
 }
