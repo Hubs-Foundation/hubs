@@ -14,6 +14,7 @@ import { promisifyWorker } from "../utils/promisify-worker.js";
 import qsTruthy from "../utils/qs_truthy";
 import { cloneObject3D, disposeMaterial } from "../utils/three-utils";
 import SketchfabZipWorker from "../workers/sketchfab-zip.worker.js";
+import { shouldUseNewLoader } from "../utils/bit-utils";
 
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
@@ -395,6 +396,25 @@ const convertStandardMaterialsIfNeeded = object => {
 let ktxLoader;
 let dracoLoader;
 
+const OBJECT3D_EXT = new Set([
+  "ambient-light",
+  "audio",
+  "directional-light",
+  "hemisphere-light",
+  "image",
+  "link",
+  "model",
+  "particle-emitter",
+  "pdf",
+  "point-light",
+  "reflection-probe",
+  "simple-water",
+  "skybox",
+  "spot-light",
+  "text",
+  "video"
+]);
+
 class GLTFHubsPlugin {
   constructor(parser, jsonPreprocessor) {
     this.parser = parser;
@@ -449,6 +469,42 @@ class GLTFHubsPlugin {
         }
 
         node.extras.gltfIndex = i;
+
+        if (shouldUseNewLoader()) {
+          /**
+           * This guarantees that components that add Object3Ds (ie. through addObject3DComponent) are not attached to non-Object3D
+           * entities as it's not supported in the BitECS loader.
+           * This was supported by the AFrame loader so this extension ensures backwards compatibility with all the existing scenes.
+           * For more context about this see: https://github.com/mozilla/hubs/pull/6121
+           */
+          if (
+            node.mesh !== undefined ||
+            node.camera !== undefined ||
+            (node.extensions && node.extensions["KHR_lights_punctual"]?.light !== undefined)
+          ) {
+            const exts = node.extensions?.MOZ_hubs_components;
+            if (exts) {
+              const children = [];
+              for (const [key, value] of Object.entries(exts)) {
+                if (OBJECT3D_EXT.has(key)) {
+                  const newNode = {
+                    name: `${node.name}_${key}`,
+                    extensions: {
+                      MOZ_hubs_components: { [key]: value }
+                    }
+                  };
+                  delete exts[key];
+                  children.push(newNode);
+                }
+              }
+              node.children = node.children || [];
+              children.forEach(child => {
+                const idx = nodes.push(child) - 1;
+                node.children.push(idx);
+              });
+            }
+          }
+        }
       }
     }
   }
