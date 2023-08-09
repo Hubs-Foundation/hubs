@@ -670,6 +670,122 @@ class GLTFMozTextureRGBE {
   }
 }
 
+// Mozilla Hubs loop-animation component has a problem in the spec.
+// The loop-animation component can refer to glTF.animations with
+// animation names but the glTF specification allows non-unique names
+// in glTF.animations so if there are multiple glTF.animations that
+// have the same name no one can know what glTF.animations a
+// loop-component using that names refers to.
+// This plugin converts animation names in the component to
+// animation indices to avoid the problem.
+// The old loop-animation component handler (without bitECS) seems
+// to assume that multiple glTF.animations that have the same name
+// have the same animation data and loop-component refers to the
+// first glTF.animation of the ones having the same name. This
+// plugin follows the assumption for the compatibility.
+// Refer to https://github.com/mozilla/hubs/pull/6153 for details.
+// TODO: Deprecate the loop-animation animation reference with name
+class GLTFHubsLoopAnimationComponent {
+  constructor(parser) {
+    this.parser = parser;
+    this.name = "MOZ_hubs_components.loop-animation";
+  }
+
+  beforeRoot() {
+    const json = this.parser.json;
+
+    if (json.animations === undefined) {
+      return;
+    }
+
+    // TODO: Optimize if needed
+    const findAnimation = name => {
+      for (let animationIndex = 0; animationIndex < json.animations.length; animationIndex++) {
+        const animationDef = json.animations[animationIndex];
+        if (animationDef.name === name) {
+          return animationIndex;
+        }
+      }
+      return null;
+    };
+
+    // TODO: Optimize if needed
+    const collectNodeIndices = (nodeIndex, nodeIndices) => {
+      nodeIndices.add(nodeIndex);
+      const nodeDef = json.nodes[nodeIndex];
+
+      if (nodeDef.children !== undefined) {
+        for (const child of nodeDef.children) {
+          collectNodeIndices(child, nodeIndices);
+        }
+      }
+
+      return nodeIndices;
+    };
+
+    const clonedAnimations = [];
+
+    for (let nodeIndex = 0; nodeIndex < json.nodes.length; nodeIndex++) {
+      const nodeDef = json.nodes[nodeIndex];
+
+      if (nodeDef.extensions?.MOZ_hubs_components?.["loop-animation"] !== undefined) {
+        const extensionDef = nodeDef.extensions.MOZ_hubs_components["loop-animation"];
+
+        if (extensionDef.clip === undefined || extensionDef.clip === "") {
+          continue;
+        }
+
+        // Converts .clip (name based) to .activeClipIndices (index based).
+        // Assumes that .activeClipIndices is undefined
+        // if .clip is defined
+
+        const clipNames = extensionDef.clip.split(",");
+        const activeClipIndices = [];
+        const nodeIndices = collectNodeIndices(nodeIndex, new Set());
+
+        for (const clipName of clipNames) {
+          const animationIndex = findAnimation(clipName);
+
+          if (animationIndex === null) {
+            continue;
+          }
+
+          const clonedAnimation = structuredClone(json.animations[animationIndex]);
+          let updated = false;
+
+          for (const channel of clonedAnimation.channels) {
+            if (channel.target.node !== undefined && !nodeIndices.has(channel.target.node)) {
+              // The old loop-animation handler (without bitECS) seems to retarget
+              // the loop-animation component root node if traget node is unfound
+              // under the loop-animation component root node.
+              // Here follows it for the compatibility, not sure if it's the best approach.
+              // Another approach may be to find a glTF.animation that is likely for
+              // this node. It may be guessed with target node.
+              channel.target.node = nodeIndex;
+              updated = true;
+            }
+          }
+
+          if (updated) {
+            // Retargetted so need to add a new glTF.animation.
+            activeClipIndices.push(json.animations.length + clonedAnimations.length);
+            clonedAnimations.push(clonedAnimation);
+          } else {
+            activeClipIndices.push(animationIndex);
+          }
+        }
+
+        extensionDef.activeClipIndices = activeClipIndices;
+        delete extensionDef.clip;
+      }
+    }
+
+    for (const animation of clonedAnimations) {
+      json.animations.push(animation);
+    }
+  }
+}
+
 export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
   let gltfUrl = src;
   let fileMap;
@@ -689,6 +805,7 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
     .register(parser => new GLTFHubsLightMapExtension(parser))
     .register(parser => new GLTFHubsTextureBasisExtension(parser))
     .register(parser => new GLTFMozTextureRGBE(parser, new RGBELoader().setDataType(THREE.HalfFloatType)))
+    .register(parser => new GLTFHubsLoopAnimationComponent(parser))
     .register(
       parser =>
         new GLTFLodExtension(parser, {
