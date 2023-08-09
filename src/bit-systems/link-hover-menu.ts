@@ -35,6 +35,7 @@ function updateLinkMenuTarget(world: HubsWorld, menu: EntityID, sceneIsFrozen: b
   }
 }
 
+// TODO: Move this to coroutines
 async function handleLinkClick(world: HubsWorld, button: EntityID) {
   const exitImmersive = async () => await handleExitTo2DInterstitial(false, () => {}, true);
 
