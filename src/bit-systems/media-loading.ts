@@ -193,6 +193,7 @@ function* loadMedia(world: HubsWorld, eid: EntityID) {
   let media: EntityID;
   try {
     const urlData = (yield resolveMediaInfo(src)) as MediaInfo;
+    console.log("*** loadMedia", urlData);
     const loader = urlData.mediaType && loaderForMediaType[urlData.mediaType];
     if (!loader) {
       throw new UnsupportedMediaTypeError(eid, urlData.mediaType);
