@@ -18,7 +18,6 @@ function updateLinkMenuTarget(world: HubsWorld, menu: EntityID, sceneIsFrozen: b
   if (LinkHoverMenu.targetObjectRef[menu] && !entityExists(world, LinkHoverMenu.targetObjectRef[menu])) {
     // Clear the invalid entity reference. (The link entity was removed).
     LinkHoverMenu.targetObjectRef[menu] = 0;
-    return;
   }
 
   if (sceneIsFrozen) {
@@ -29,12 +28,10 @@ function updateLinkMenuTarget(world: HubsWorld, menu: EntityID, sceneIsFrozen: b
   if (hoveredLinks.length > 0) {
     LinkHoverMenu.targetObjectRef[menu] = hoveredLinks[0];
     LinkHoverMenu.clearTargetTimer[menu] = world.time.elapsed + 1000;
-    return;
   }
 
   if (world.time.elapsed > LinkHoverMenu.clearTargetTimer[menu]) {
     LinkHoverMenu.targetObjectRef[menu] = 0;
-    return;
   }
 }
 
