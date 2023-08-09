@@ -265,14 +265,14 @@ type OptionalParams<T> = Partial<T> | true;
 export interface JSXComponentData extends ComponentData {
   slice9?: {
     size: [width: number, height: number];
-    insets: [top: number, buttom: number, left: number, right: number];
+    insets: [top: number, bottom: number, left: number, right: number];
     texture: Texture;
   };
   image?: {
     texture: Texture;
     ratio: number;
     projection: ProjectionMode;
-    alphaMode: AlphaMode.Blend | AlphaMode.Mask | AlphaMode.Opaque;
+    alphaMode: AlphaMode;
     cacheKey: string;
   };
   video?: VideoParams;
