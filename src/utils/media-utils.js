@@ -621,7 +621,8 @@ export async function resolveMediaInfo(urlString) {
 
   // We want to resolve and proxy some hubs urls, like rooms and scene links,
   // but want to avoid proxying assets in order for this to work in dev environments
-  const isLocalAsset = isNonCorsProxyDomain(url.hostname) && !(await isHubsDestinationUrl) && !(await isHubsAvatarUrl);
+  const isLocalAsset =
+    isNonCorsProxyDomain(url.hostname) && !(await isHubsDestinationUrl()) && !(await isHubsAvatarUrl());
 
   if (url.protocol != "data:" && url.protocol != "hubs:" && !isLocalAsset) {
     const response = await resolveUrl(url.href);
