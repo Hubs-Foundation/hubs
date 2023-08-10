@@ -190,6 +190,7 @@ function* loadMedia(world: HubsWorld, eid: EntityID) {
   }, 400);
   yield withRollback(Promise.resolve(), () => loadingObjEid && removeEntity(world, loadingObjEid));
   const src = APP.getString(MediaLoader.src[eid]);
+  console.log(src);
   let media: EntityID;
   try {
     const urlData = (yield resolveMediaInfo(src)) as MediaInfo;
@@ -197,7 +198,9 @@ function* loadMedia(world: HubsWorld, eid: EntityID) {
     if (!loader) {
       throw new UnsupportedMediaTypeError(eid, urlData.mediaType);
     }
+    console.log(urlData);
     media = yield* loader(world, urlData);
+    console.log(urlData, media);
     addComponent(world, MediaLoaded, media);
   } catch (e) {
     console.error(e);
