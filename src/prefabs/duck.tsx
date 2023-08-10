@@ -31,8 +31,8 @@ export function DuckPrefab(): EntityDef {
       destroyAtExtremeDistance
       holdable
       rigidbody={{
-        collisionFilterGroup: COLLISION_LAYERS.INTERACTABLES,
-        collisionFilterMask:
+        collisionGroup: COLLISION_LAYERS.INTERACTABLES,
+        collisionMask:
           COLLISION_LAYERS.HANDS |
           COLLISION_LAYERS.ENVIRONMENT |
           COLLISION_LAYERS.INTERACTABLES |

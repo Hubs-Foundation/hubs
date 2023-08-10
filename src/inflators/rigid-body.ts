@@ -37,6 +37,23 @@ export type RigidBodyParams = {
   activationState: ActivationState;
   emitCollisionEvents: boolean;
   disableCollision: boolean;
+  collisionGroup: number;
+  collisionMask: number;
+  scaleAutoUpdate: boolean;
+};
+
+export type BodyParams = {
+  type: Type;
+  mass: number;
+  gravity: [number, number, number];
+  linearDamping: number;
+  angularDamping: number;
+  linearSleepingThreshold: number;
+  angularSleepingThreshold: number;
+  angularFactor: [number, number, number];
+  activationState: ActivationState;
+  emitCollisionEvents: boolean;
+  disableCollision: boolean;
   collisionFilterGroup: number;
   collisionFilterMask: number;
   scaleAutoUpdate: boolean;
@@ -54,8 +71,8 @@ const DEFAULTS = {
   activationState: ActivationState.ACTIVE_TAG,
   emitCollisionEvents: false,
   disableCollision: false,
-  collisionFilterGroup: 1,
-  collisionFilterMask: 1,
+  collisionGroup: 1,
+  collisionMask: 1,
   scaleAutoUpdate: true
 };
 
@@ -96,34 +113,45 @@ export const getBodyFromRigidBody = (eid: number) => {
   };
 };
 
-const updateRigidBody = (eid: number, params: RigidBodyParams) => {
-  Rigidbody.type[eid] = params.type;
-  Rigidbody.mass[eid] = params.mass;
-  Rigidbody.gravity[eid].set(params.gravity);
-  Rigidbody.linearDamping[eid] = params.linearDamping;
-  Rigidbody.angularDamping[eid] = params.angularDamping;
-  Rigidbody.linearSleepingThreshold[eid] = params.linearSleepingThreshold;
-  Rigidbody.angularSleepingThreshold[eid] = params.angularSleepingThreshold;
-  Rigidbody.angularFactor[eid].set(params.angularFactor);
-  Rigidbody.activationState[eid] = params.activationState;
-  params.emitCollisionEvents && (Rigidbody.flags[eid] |= RIGID_BODY_FLAGS.EMIT_COLLISION_EVENTS);
-  params.disableCollision && (Rigidbody.flags[eid] |= RIGID_BODY_FLAGS.DISABLE_COLLISION);
-  Rigidbody.collisionFilterGroup[eid] = params.collisionFilterGroup;
-  Rigidbody.collisionFilterMask[eid] = params.collisionFilterMask;
-  params.scaleAutoUpdate && (Rigidbody.flags[eid] |= RIGID_BODY_FLAGS.SCALE_AUTO_UPDATE);
-};
-
-export const updateRigiBodyParams = (eid: number, params: Partial<RigidBodyParams>) => {
+export const updateRigidBodyParams = (eid: number, params: Partial<BodyParams>) => {
   const currentParams = getBodyFromRigidBody(eid);
-  const bodyParams = Object.assign({}, currentParams, params);
-  updateRigidBody(eid, bodyParams);
+  const bodyParams = Object.assign({}, currentParams, params) as BodyParams;
+
+  Rigidbody.type[eid] = bodyParams.type;
+  Rigidbody.mass[eid] = bodyParams.mass;
+  Rigidbody.gravity[eid].set(bodyParams.gravity);
+  Rigidbody.linearDamping[eid] = bodyParams.linearDamping;
+  Rigidbody.angularDamping[eid] = bodyParams.angularDamping;
+  Rigidbody.linearSleepingThreshold[eid] = bodyParams.linearSleepingThreshold;
+  Rigidbody.angularSleepingThreshold[eid] = bodyParams.angularSleepingThreshold;
+  Rigidbody.angularFactor[eid].set(bodyParams.angularFactor);
+  Rigidbody.activationState[eid] = bodyParams.activationState;
+  bodyParams.emitCollisionEvents && (Rigidbody.flags[eid] |= RIGID_BODY_FLAGS.EMIT_COLLISION_EVENTS);
+  bodyParams.disableCollision && (Rigidbody.flags[eid] |= RIGID_BODY_FLAGS.DISABLE_COLLISION);
+  Rigidbody.collisionFilterGroup[eid] = bodyParams.collisionFilterGroup;
+  Rigidbody.collisionFilterMask[eid] = bodyParams.collisionFilterMask;
+  bodyParams.scaleAutoUpdate && (Rigidbody.flags[eid] |= RIGID_BODY_FLAGS.SCALE_AUTO_UPDATE);
 };
 
 export function inflateRigidBody(world: HubsWorld, eid: number, params: Partial<RigidBodyParams>) {
-  const bodyParams = Object.assign({}, DEFAULTS, params);
+  const bodyParams = Object.assign({}, DEFAULTS, params) as RigidBodyParams;
 
   addComponent(world, Rigidbody, eid);
-  updateRigidBody(eid, bodyParams);
+
+  Rigidbody.type[eid] = bodyParams.type;
+  Rigidbody.mass[eid] = bodyParams.mass;
+  Rigidbody.gravity[eid].set(bodyParams.gravity);
+  Rigidbody.linearDamping[eid] = bodyParams.linearDamping;
+  Rigidbody.angularDamping[eid] = bodyParams.angularDamping;
+  Rigidbody.linearSleepingThreshold[eid] = bodyParams.linearSleepingThreshold;
+  Rigidbody.angularSleepingThreshold[eid] = bodyParams.angularSleepingThreshold;
+  Rigidbody.angularFactor[eid].set(bodyParams.angularFactor);
+  Rigidbody.activationState[eid] = bodyParams.activationState;
+  bodyParams.emitCollisionEvents && (Rigidbody.flags[eid] |= RIGID_BODY_FLAGS.EMIT_COLLISION_EVENTS);
+  bodyParams.disableCollision && (Rigidbody.flags[eid] |= RIGID_BODY_FLAGS.DISABLE_COLLISION);
+  Rigidbody.collisionFilterGroup[eid] = bodyParams.collisionGroup;
+  Rigidbody.collisionFilterMask[eid] = bodyParams.collisionMask;
+  bodyParams.scaleAutoUpdate && (Rigidbody.flags[eid] |= RIGID_BODY_FLAGS.SCALE_AUTO_UPDATE);
 
   return eid;
 }
@@ -144,8 +172,8 @@ export enum GLTFRigidBodyCollisionGroup {
 const GLTF_DEFAULTS = {
   ...DEFAULTS,
   type: GLTFRigidBodyType.DYNAMIC,
-  collisionFilterGroup: GLTFRigidBodyCollisionGroup.OBJECTS,
-  collisionFilterMask: [GLTFRigidBodyCollisionGroup.AVATARS]
+  collisionGroup: GLTFRigidBodyCollisionGroup.OBJECTS,
+  collisionMask: [GLTFRigidBodyCollisionGroup.AVATARS]
 };
 
 const gltfGroupToLayer = {
@@ -156,10 +184,10 @@ const gltfGroupToLayer = {
 } as const;
 
 export interface GLTFRigidBodyParams
-  extends Partial<Omit<RigidBodyParams, "type" | "collisionFilterGroup" | "collisionFilterMask">> {
+  extends Partial<Omit<RigidBodyParams, "type" | "collisionGroup" | "collisionMask">> {
   type?: GLTFRigidBodyType;
-  collisionFilterGroup?: GLTFRigidBodyCollisionGroup;
-  collisionFilterMask?: GLTFRigidBodyCollisionGroup[];
+  collisionGroup?: GLTFRigidBodyCollisionGroup;
+  collisionMask?: GLTFRigidBodyCollisionGroup[];
 }
 
 export function inflateGLTFRigidBody(world: HubsWorld, eid: number, params: GLTFRigidBodyParams) {
@@ -168,8 +196,8 @@ export function inflateGLTFRigidBody(world: HubsWorld, eid: number, params: GLTF
   inflateRigidBody(world, eid, {
     ...bodyParams,
     type: Object.values(GLTFRigidBodyType).indexOf(bodyParams.type),
-    collisionFilterGroup: gltfGroupToLayer[bodyParams.collisionFilterGroup],
-    collisionFilterMask: bodyParams.collisionFilterMask.reduce((acc, m) => acc | gltfGroupToLayer[m], 0)
+    collisionGroup: gltfGroupToLayer[bodyParams.collisionGroup],
+    collisionMask: bodyParams.collisionMask.reduce((acc, m) => acc | gltfGroupToLayer[m], 0)
   });
 
   return eid;

@@ -3,7 +3,7 @@ import { AmmoDebugConstants, DefaultBufferSize } from "ammo-debug-drawer";
 import configs from "../utils/configs";
 import ammoWasmUrl from "ammo.js/builds/ammo.wasm.wasm";
 import { Rigidbody } from "../bit-components";
-import { updateRigiBodyParams } from "../inflators/rigid-body";
+import { updateRigidBodyParams } from "../inflators/rigid-body";
 
 const MESSAGE_TYPES = CONSTANTS.MESSAGE_TYPES,
   TYPE = CONSTANTS.TYPE,
@@ -251,7 +251,7 @@ export class PhysicsSystem {
 
   updateRigidBody(eid, options) {
     const bodyId = Rigidbody.bodyId[eid];
-    updateRigiBodyParams(eid, options);
+    updateRigidBodyParams(eid, options);
     if (this.bodyUuidToData.has(bodyId)) {
       this.bodyUuidToData.get(bodyId).options = options;
       this.workerHelpers.updateBody(bodyId, options);

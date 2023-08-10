@@ -41,8 +41,8 @@ export function inflateSpawner(world: HubsWorld, eid: number, props: SpawnerPara
 
   inflateRigidBody(world, eid, {
     mass: 0,
-    collisionFilterGroup: COLLISION_LAYERS.DEFAULT_SPAWNER,
-    collisionFilterMask: COLLISION_LAYERS.INTERACTABLES,
+    collisionGroup: COLLISION_LAYERS.DEFAULT_SPAWNER,
+    collisionMask: COLLISION_LAYERS.INTERACTABLES,
     disableCollision: true
   });
 }

@@ -71,8 +71,8 @@ export function inflateMediaFrame(world, eid, componentProps) {
 
   inflateRigidBody(world, eid, {
     type: Type.KINEMATIC,
-    collisionFilterGroup: COLLISION_LAYERS.MEDIA_FRAMES,
-    collisionFilterMask: COLLISION_LAYERS.INTERACTABLES,
+    collisionGroup: COLLISION_LAYERS.MEDIA_FRAMES,
+    collisionMask: COLLISION_LAYERS.INTERACTABLES,
     disableCollision: true
   });
   inflatePhysicsShape(world, eid, {
