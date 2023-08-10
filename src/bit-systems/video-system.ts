@@ -77,7 +77,12 @@ export function videoSystem(world: HubsWorld, audioSystem: AudioSystem) {
       let flags = 0;
       flags |= video.paused ? Flags.PAUSED : 0;
       NetworkedVideo.flags[eid] = flags;
+      NetworkedVideo.src[eid] = APP.getSid(video.src);
     } else {
+      const networkedSrc = APP.getString(NetworkedVideo.src[eid])!;
+      if (networkedSrc !== video.src) {
+        video.src = networkedSrc;
+      }
       const networkedPauseState = !!(NetworkedVideo.flags[eid] & Flags.PAUSED);
       if (networkedPauseState !== video.paused) {
         video.paused ? video.play() : video.pause();

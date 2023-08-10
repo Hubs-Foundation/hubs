@@ -245,9 +245,11 @@ export const LoopAnimation = defineComponent();
  */
 export const LoopAnimationData = new Map();
 export const NetworkedVideo = defineComponent({
+  src: Types.ui8,
   time: Types.f32,
   flags: Types.ui8
 });
+NetworkedVideo.src[$isStringType] = true;
 export const VideoMenuItem = defineComponent();
 export const VideoMenu = defineComponent({
   videoRef: Types.eid,

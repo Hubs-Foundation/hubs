@@ -14,7 +14,7 @@ import {
   validateRegistry,
   writeNodeSpecsToJSON
 } from "@oveddan-behave-graph/core";
-import { defineQuery, enterQuery, exitQuery, hasComponent } from "bitecs";
+import { defineQuery, enterQuery, entityExists, exitQuery, hasComponent } from "bitecs";
 import { HubsWorld } from "../app";
 import { BehaviorGraph, CustomTags, Interacted, LocalAvatar, RemoteAvatar, Rigidbody } from "../bit-components";
 import { findAncestorEntity } from "../utils/bit-utils";
@@ -26,6 +26,7 @@ import { playerNodedefs, playersSystem, playerValueDefs } from "./behavior-graph
 import { cleanupNodespac, definitionListToMap } from "./behavior-graph/utils";
 import { Vector3Nodes, Vector3Value as vec3ValueDefs } from "./behavior-graph/vec3-nodes";
 import { NetworkingNodes } from "./behavior-graph/networking-nodes";
+import { MediaNodes, mediaSystem } from "./behavior-graph/media-nodes";
 
 const coreValues = getCoreValueTypes();
 const logger = new DefaultLogger();
@@ -38,6 +39,7 @@ const registry: IRegistry = {
     ...AnimationNodes,
     ...NetworkingNodes,
     ...playerNodedefs,
+    ...MediaNodes,
     ...definitionListToMap([
       makeFlowNodeDefinition({
         typeName: "hubs/displayMessage",
@@ -166,6 +168,12 @@ export function behaviorGraphSystem(world: HubsWorld) {
       continue;
     }
 
+    for (let entity of triggerState.collidingEntities) {
+      if (!entityExists(world, entity)) {
+        triggerState.collidingEntities.delete(entity);
+      }
+    }
+
     triggerState.collidingEntities.forEach(function (collidingEid) {
       const collidingBody = Rigidbody.bodyId[collidingEid];
       const collisions = physicsSystem.getCollisions(collidingBody) as EntityID[];
@@ -213,6 +221,7 @@ export function behaviorGraphSystem(world: HubsWorld) {
 
   playersSystem(world);
   animationSystem(world);
+  mediaSystem(world);
 }
 function isPlayerEntity(eid: EntityID, world: HubsWorld) {
   return hasComponent(world, RemoteAvatar, eid) || hasComponent(world, LocalAvatar, eid);
