@@ -37,8 +37,8 @@ export type RigidBodyParams = {
   activationState: ActivationState;
   emitCollisionEvents: boolean;
   disableCollision: boolean;
-  collisionGroup: number;
-  collisionMask: number;
+  collisionFilterGroup: number;
+  collisionFilterMask: number;
   scaleAutoUpdate: boolean;
 };
 
@@ -54,8 +54,8 @@ const DEFAULTS = {
   activationState: ActivationState.ACTIVE_TAG,
   emitCollisionEvents: false,
   disableCollision: false,
-  collisionGroup: 1,
-  collisionMask: 1,
+  collisionFilterGroup: 1,
+  collisionFilterMask: 1,
   scaleAutoUpdate: true
 };
 
@@ -108,8 +108,8 @@ const updateRigidBody = (eid: number, params: RigidBodyParams) => {
   Rigidbody.activationState[eid] = params.activationState;
   params.emitCollisionEvents && (Rigidbody.flags[eid] |= RIGID_BODY_FLAGS.EMIT_COLLISION_EVENTS);
   params.disableCollision && (Rigidbody.flags[eid] |= RIGID_BODY_FLAGS.DISABLE_COLLISION);
-  Rigidbody.collisionFilterGroup[eid] = params.collisionGroup;
-  Rigidbody.collisionFilterMask[eid] = params.collisionMask;
+  Rigidbody.collisionFilterGroup[eid] = params.collisionFilterGroup;
+  Rigidbody.collisionFilterMask[eid] = params.collisionFilterMask;
   params.scaleAutoUpdate && (Rigidbody.flags[eid] |= RIGID_BODY_FLAGS.SCALE_AUTO_UPDATE);
 };
 
@@ -144,8 +144,8 @@ export enum GLTFRigidBodyCollisionGroup {
 const GLTF_DEFAULTS = {
   ...DEFAULTS,
   type: GLTFRigidBodyType.DYNAMIC,
-  collisionGroup: GLTFRigidBodyCollisionGroup.OBJECTS,
-  collisionMask: [GLTFRigidBodyCollisionGroup.AVATARS]
+  collisionFilterGroup: GLTFRigidBodyCollisionGroup.OBJECTS,
+  collisionFilterMask: [GLTFRigidBodyCollisionGroup.AVATARS]
 };
 
 const gltfGroupToLayer = {
@@ -156,10 +156,10 @@ const gltfGroupToLayer = {
 } as const;
 
 export interface GLTFRigidBodyParams
-  extends Partial<Omit<RigidBodyParams, "type" | "collisionGroup" | "collisionMask">> {
+  extends Partial<Omit<RigidBodyParams, "type" | "collisionFilterGroup" | "collisionFilterMask">> {
   type?: GLTFRigidBodyType;
-  collisionGroup?: GLTFRigidBodyCollisionGroup;
-  collisionMask?: GLTFRigidBodyCollisionGroup[];
+  collisionFilterGroup?: GLTFRigidBodyCollisionGroup;
+  collisionFilterMask?: GLTFRigidBodyCollisionGroup[];
 }
 
 export function inflateGLTFRigidBody(world: HubsWorld, eid: number, params: GLTFRigidBodyParams) {
@@ -168,8 +168,8 @@ export function inflateGLTFRigidBody(world: HubsWorld, eid: number, params: GLTF
   inflateRigidBody(world, eid, {
     ...bodyParams,
     type: Object.values(GLTFRigidBodyType).indexOf(bodyParams.type),
-    collisionGroup: gltfGroupToLayer[bodyParams.collisionGroup],
-    collisionMask: bodyParams.collisionMask.reduce((acc, m) => acc | gltfGroupToLayer[m], 0)
+    collisionFilterGroup: gltfGroupToLayer[bodyParams.collisionFilterGroup],
+    collisionFilterMask: bodyParams.collisionFilterMask.reduce((acc, m) => acc | gltfGroupToLayer[m], 0)
   });
 
   return eid;

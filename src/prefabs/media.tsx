@@ -24,8 +24,8 @@ export function MediaPrefab(params: MediaLoaderParams): EntityDef {
       }}
       rigidbody={{
         type: Type.KINEMATIC,
-        collisionGroup: COLLISION_LAYERS.INTERACTABLES,
-        collisionMask: COLLISION_LAYERS.DEFAULT_INTERACTABLE
+        collisionFilterGroup: COLLISION_LAYERS.INTERACTABLES,
+        collisionFilterMask: COLLISION_LAYERS.DEFAULT_INTERACTABLE
       }}
       scale={[1, 1, 1]}
     />

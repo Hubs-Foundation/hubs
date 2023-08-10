@@ -64,7 +64,7 @@ export function CameraPrefab() {
       makeKinematicOnRelease
       holdable
       floatyObject
-      rigidbody={{ collisionGroup: COLLISION_LAYERS.INTERACTABLES, collisionMask: COLLISION_LAYERS.HANDS }}
+      rigidbody={{ collisionFilterGroup: COLLISION_LAYERS.INTERACTABLES, collisionFilterMask: COLLISION_LAYERS.HANDS }}
       physicsShape={{ halfExtents: [0.22, 0.14, 0.1] }}
       cameraTool={{
         snapMenuRef,
@@ -177,8 +177,8 @@ export function CubeMediaFramePrefab() {
       holdable
       rigidbody={{
         gravity: -9.8,
-        collisionGroup: COLLISION_LAYERS.INTERACTABLES,
-        collisionMask:
+        collisionFilterGroup: COLLISION_LAYERS.INTERACTABLES,
+        collisionFilterMask:
           COLLISION_LAYERS.HANDS |
           COLLISION_LAYERS.ENVIRONMENT |
           COLLISION_LAYERS.INTERACTABLES |
