@@ -363,9 +363,7 @@ export interface JSXComponentData extends ComponentData {
     sndToggleRef: Ref;
   };
   agent?: {
-    language: number;
     panelRef: Ref;
-    modelRef: Ref;
     micRef: Ref;
     snapRef: Ref;
     nextRef: Ref;

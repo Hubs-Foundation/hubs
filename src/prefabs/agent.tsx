@@ -30,7 +30,6 @@ const agentMediaParams: MediaLoaderParams = {
 };
 
 export function AgentEntity() {
-  const language = 0;
   const agentRef = createRef();
   const panelRef = createRef();
   const modelRef = createRef();
@@ -44,38 +43,31 @@ export function AgentEntity() {
   return (
     <entity
       name="Agent"
-      agent={{ language, panelRef, modelRef, micRef, snapRef, nextRef, prevRef }}
-      scale={[1, 1, 1]}
+      agent={{ panelRef, micRef, snapRef, nextRef, prevRef }}
       ref={agentRef}
+      mediaLoader={agentMediaParams}
+      scale={[1, 1, 1]}
+      cursorRaycastable
+      remoteHoverTarget
+      handCollisionTarget
+      offersRemoteConstraint
+      offersHandConstraint
+      makeKinematicOnRelease
+      holdable
+      floatyObject
+      rigidbody={{ collisionGroup: COLLISION_LAYERS.INTERACTABLES, collisionMask: COLLISION_LAYERS.HANDS }}
+      physicsShape={{ halfExtents: [0.22, 0.14, 0.1] }}
       lookatuser
     >
-      <entity
-        lookatuser
-        name="agentObject"
-        mediaLoader={agentMediaParams}
-        ref={modelRef}
-        scale={[1, 1, 1]}
-        cursorRaycastable
-        remoteHoverTarget
-        handCollisionTarget
-        offersRemoteConstraint
-        offersHandConstraint
-        makeKinematicOnRelease
-        holdable
-        floatyObject
-        rigidbody={{ collisionGroup: COLLISION_LAYERS.INTERACTABLES, collisionMask: COLLISION_LAYERS.HANDS }}
-        physicsShape={{ halfExtents: [0.22, 0.14, 0.1] }}
-      >
-        <AgentPanel
-          micRef={micRef}
-          snapRef={snapRef}
-          text={text}
-          panelRef={panelRef}
-          nextRef={nextRef}
-          prevRef={prevRef}
-          maxSlideCount={25}
-        />
-      </entity>
+      <AgentPanel
+        micRef={micRef}
+        snapRef={snapRef}
+        text={text}
+        panelRef={panelRef}
+        nextRef={nextRef}
+        prevRef={prevRef}
+        maxSlideCount={25}
+      />
     </entity>
   );
 }

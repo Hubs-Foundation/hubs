@@ -3,7 +3,7 @@ import { PanelIndex } from "../bit-components";
 import { HubsWorld } from "../app";
 import { greetingPhrases, paradigms } from "./text-paradigms";
 import { Text } from "troika-three-text";
-import { getRandomInt, handleArrows } from "./agent-system";
+import { getRandomInt, virtualAgent } from "./agent-system";
 
 let activeIndex = 0;
 let updated = false;
@@ -59,8 +59,7 @@ export function UpdateTextSystem(world: HubsWorld, newFormatedText: Array<string
   });
 
   resetIndex();
-
-  handleArrows(world, textCount !== 1);
+  virtualAgent.HandleArrows(textCount !== 1);
 
   return textCount === 1;
 }
@@ -76,7 +75,6 @@ export function PanelIndexSystem(world: HubsWorld) {
   });
 
   if (updated) {
-    console.log("New index:", activeIndex);
     updated = false;
   }
 }

@@ -27,8 +27,8 @@ export enum VL {
   GPT
 }
 export const VL_MODULES: Record<VL, string> = {
-  [VL.LXMERT]: "NULL",
-  [VL.GPT]: "cap_gpt2/"
+  [VL.LXMERT]: "https://dev.voxreality.maggioli-research.gr/lxmert/",
+  [VL.GPT]: "https://dev.gpt-voxreality.maggioli-research.gr/cap_gpt2/"
 };
 
 export enum VL_CODES {
@@ -84,7 +84,12 @@ export interface ResponseData {
     file?: Blob;
     text_init?: string;
     text_en?: string;
-    task?: { code: TASK; descript: string };
+    task_code?: TASK;
+    task_descript?: string;
+    start?: number;
+    dest?: number;
     descript?: any;
   };
 }
+
+const a = new THREE.Vector3(1, 1, 1);

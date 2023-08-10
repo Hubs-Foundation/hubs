@@ -29,6 +29,7 @@ import { moveToSpawnPoint } from "./bit-systems/waypoint";
 import { spawnFromFileList, spawnFromUrl } from "./load-media-on-paste-or-drop";
 import { isLockedDownDemoRoom } from "./utils/hub-utils";
 import { addAgentToScene } from "./prefabs/agent";
+import { virtualAgent } from "./bit-systems/agent-system";
 const useNewLoader = qsTruthy("newLoader");
 
 export default class SceneEntryManager {
@@ -103,7 +104,7 @@ export default class SceneEntryManager {
 
     this._spawnAvatar();
     this.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_ENTER_SCENE);
-    this.scene.emit("agent-toggle");
+    // this.scene.emit("agent-toggle");
 
     if (isBotMode) {
       this._runBot();
@@ -452,16 +453,8 @@ export default class SceneEntryManager {
   };
 
   _setupAgent = () => {
-    const eid = addAgentToScene(APP.world);
-    this.scene.addEventListener("agent-toggle", () => {
-      const hidden = hasComponent(APP.world, Hidden, eid);
-
-      if (hidden) {
-        removeComponent(APP.world, Hidden, eid);
-      } else {
-        addComponent(APP.world, Hidden, eid);
-      }
-    });
+    // const eid = addAgentToScene(APP.world);
+    virtualAgent.Init();
   };
 
   _setupCamera = () => {

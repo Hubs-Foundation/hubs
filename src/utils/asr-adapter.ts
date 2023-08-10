@@ -17,6 +17,8 @@ import {
   VL_TEXT
 } from "./ml-types";
 import { HubsWorld } from "../app";
+import { sceneGraph } from "../bit-systems/routing-system";
+import { virtualAgent } from "../bit-systems/agent-system";
 
 let mediaRecorder: MediaRecorder | null = null;
 let chunks: any[] = [];
@@ -90,7 +92,7 @@ function saveAudio(blob: Blob) {
 }
 
 export async function nmtModule(prevResponse: ResponseData, language: LANGUAGES, asrModel: ASR): Promise<ResponseData> {
-  const apiURL = "https://192.168.190.70:8888/" + ASR_MODULES[asrModel];
+  const apiURL = "https://dev.speech-voxreality.maggioli-research.gr/" + ASR_MODULES[asrModel];
   const formData = new FormData();
   formData.append("audio_files", prevResponse.data!.file!, "recording.wav");
 
@@ -116,18 +118,65 @@ export async function nmtModule(prevResponse: ResponseData, language: LANGUAGES,
   }
 }
 
-export async function routerModule(prevResponse: ResponseData): Promise<ResponseData> {
-  const randomNumber = Math.floor(Math.random() * 4);
+export function developingRouter() {
+  const randomNumber = 0;
 
-  if (randomNumber < 2)
+  if (randomNumber === 0) {
+    const destNodeIndex = Math.floor(Math.random() * sceneGraph.nodeCount);
+    const startNodeIndex = sceneGraph.GetClosestIndex(virtualAgent.AvatarPos());
+
+    return {
+      status: { code: 0, text: "successful" },
+      data: {
+        task_code: TASK.NAV,
+        task_descript: TASK_DESCRIPT[TASK.NAV],
+        start: startNodeIndex,
+        dest: destNodeIndex
+      }
+    };
+  } else if (randomNumber < 2) {
+    return {
+      status: { code: 0, text: "successful" },
+      data: {
+        task_code: TASK.SPATIAL,
+        task_descript: TASK_DESCRIPT[TASK.SPATIAL]
+      }
+    };
+  } else {
+    throw {
+      status: { code: 1, text: "could not find task" }
+    };
+  }
+}
+
+export async function routerModule(prevResponse: ResponseData): Promise<ResponseData> {
+  // const randomNumber = Math.floor(Math.random() * 4);
+  const randomNumber = 0;
+
+  if (randomNumber === 0) {
+    const destNodeIndex = Math.floor(Math.random() * sceneGraph.nodeCount);
+    const startNodeIndex = sceneGraph.GetClosestIndex(virtualAgent.AvatarPos());
+
     return {
       status: { code: 0, text: "successful" },
       data: {
         text_en: prevResponse.data?.text_en!,
-        task: { code: TASK.SPATIAL, descript: TASK_DESCRIPT[TASK.SPATIAL] }
+        task_code: TASK.NAV,
+        task_descript: TASK_DESCRIPT[TASK.NAV],
+        start: startNodeIndex,
+        dest: destNodeIndex
       }
     };
-  else {
+  } else if (randomNumber < 2) {
+    return {
+      status: { code: 0, text: "successful" },
+      data: {
+        text_en: prevResponse.data?.text_en!,
+        task_code: TASK.SPATIAL,
+        task_descript: TASK_DESCRIPT[TASK.SPATIAL]
+      }
+    };
+  } else {
     throw {
       status: { code: 1, text: "could not find task" }
     };
@@ -140,7 +189,7 @@ export async function vlModule(
   prevResponse?: ResponseData,
   depthPov?: Blob
 ): Promise<ResponseData> {
-  const apiURL = "https://192.168.190.70:5037/" + VL_MODULES[vlModule];
+  const apiURL = VL_MODULES[vlModule];
   const formData = new FormData();
   formData.append("file", pov, "camera_pov.png");
 

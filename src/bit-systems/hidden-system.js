@@ -25,5 +25,8 @@ export function HiddenSystem(world) {
     agentObj.updateMatrix();
     UpdateTextSystem(world, FromatNewText(greetingPhrases[getRandomInt(greetingPhrases.length)]));
     agentObj.visible = true;
+
+    // const agentObj = world.eid2obj.get(eid);
+    // agentObj.visible = true;
   });
 }
