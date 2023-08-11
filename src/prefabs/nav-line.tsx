@@ -10,6 +10,11 @@ import {
   Quaternion,
   Vector3
 } from "three";
+import rightArrowSrc from "../assets/models/arrow_left.glb";
+import { preload } from "../utils/preload";
+import { loadModel } from "../components/gltf-model-plus";
+
+preload(loadModel(rightArrowSrc, null, true));
 
 const depth = 0.1;
 const halfDepth = depth / 2;

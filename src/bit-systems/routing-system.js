@@ -129,7 +129,7 @@ class Graph {
           prevLine.copy(current.clone().sub(prev));
         }
 
-        const orientation = this.Orient(prevLine.normalize(), nextLine.normalize());
+        const orientation = this.Orient(prevLine.clone().normalize(), nextLine.clone().normalize());
         if (orientation !== "straight") {
           this.instructions.push({ turn: orientation });
         }
@@ -144,7 +144,7 @@ class Graph {
   Orient(vector1, vector2) {
     const crossVector = new THREE.Vector3();
     const zAxis = new THREE.Vector3(0, 0, 1);
-    crossVector.crossVectors(vector1, vector2);
+    crossVector.crossVectors(vector1, vector2).normalize();
     const dotProduct = crossVector.dot(zAxis);
 
     if (dotProduct > 0) return "left";
@@ -200,8 +200,3 @@ class Graph {
 }
 
 export const sceneGraph = new Graph(10, 10);
-
-// myGrid.Dijkstra(0, 13);
-// console.log(myGrid.path);
-// myGrid.GetInstructions();
-// console.log(myGrid.instructions);

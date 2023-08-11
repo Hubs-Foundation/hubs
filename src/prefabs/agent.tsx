@@ -1,8 +1,8 @@
 /** @jsx createElementEntity */
+import agentModelSrc from "../assets/models/cute_agent.glb";
 import { createElementEntity, renderAsEntity, createRef } from "../utils/jsx-entity";
 import { preload } from "../utils/preload";
-import { loadModel } from "../components/gltf-model-plus";
-import agentModelSrc from "../assets/models/cute_agent.glb";
+import { cloneModelFromCache, loadModel } from "../components/gltf-model-plus";
 import { HubsWorld } from "../app";
 import { MediaLoaderParams } from "../inflators/media-loader";
 import nametagSrc from "../assets/hud/nametag.9.png";
@@ -32,7 +32,6 @@ const agentMediaParams: MediaLoaderParams = {
 export function AgentEntity() {
   const agentRef = createRef();
   const panelRef = createRef();
-  const modelRef = createRef();
   const micRef = createRef();
   const snapRef = createRef();
   const nextRef = createRef();
@@ -40,13 +39,15 @@ export function AgentEntity() {
   const text = ["", ""];
   // FromatNewText(greetingPhrases[getRandomInt(greetingPhrases.length)]);
 
+  console.log(cloneModelFromCache(agentModelSrc));
+
   return (
     <entity
       name="Agent"
       agent={{ panelRef, micRef, snapRef, nextRef, prevRef }}
       ref={agentRef}
-      mediaLoader={agentMediaParams}
-      scale={[1, 1, 1]}
+      /*mediaLoader={agentMediaParams}*/
+      model={{ model: cloneModelFromCache(agentModelSrc).scene }}
       cursorRaycastable
       remoteHoverTarget
       handCollisionTarget

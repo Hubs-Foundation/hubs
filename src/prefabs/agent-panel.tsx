@@ -43,21 +43,22 @@ export function AgentPanel({ text, panelRef, nextRef, prevRef, micRef, snapRef, 
   }
 
   return (
-    <entity
-      name="agentPanel"
-      ref={panelRef}
-      rotation={[0, 0, 0]}
-      slice9={{ size: [0.6, 0.3], insets: [64, 66, 64, 66], texture: panelTexture }}
-      position={[0, 0.2, 0.1]}
-      scale={[1.0, 1.0, 1.0]}
-    >
-      {slidesArray}
-
+    <entity>
+      <entity
+        name="agentPanel"
+        ref={panelRef}
+        rotation={[0, 0, 0]}
+        slice9={{ size: [0.6, 0.3], insets: [64, 66, 64, 66], texture: panelTexture }}
+        position={[0, -0.35, 0.1]}
+        scale={[1.0, 1.0, 1.0]}
+      >
+        {slidesArray}
+      </entity>
       <Button3D
         ref={prevRef}
         scale={[buttonScale[0], buttonScale[1], buttonScale[2]]}
         type={BUTTON_TYPES.DEFAULT}
-        position={[-0.4, 0, 0.03]}
+        position={[-0.3, 0, 0.03]}
         width={buttonHeight}
         height={buttonHeight}
         text={"<"}
@@ -67,17 +68,16 @@ export function AgentPanel({ text, panelRef, nextRef, prevRef, micRef, snapRef, 
         ref={nextRef}
         scale={[buttonScale[0], buttonScale[1], buttonScale[2]]}
         type={BUTTON_TYPES.DEFAULT}
-        position={[0.4, 0, 0.03]}
+        position={[0.3, 0, 0.03]}
         width={buttonHeight}
         height={buttonHeight}
         text={">"}
       />
-
       <IconButton
         ref={micRef}
         scale={[buttonScale[0], buttonScale[1], buttonScale[2]]}
         type={BUTTON_TYPES.MIC}
-        position={[0.18, -0.25, 0.03]}
+        position={[0.25, 0.15, 0]}
         width={buttonHeight}
         height={buttonHeight}
       />
@@ -86,7 +86,7 @@ export function AgentPanel({ text, panelRef, nextRef, prevRef, micRef, snapRef, 
         ref={snapRef}
         scale={[buttonScale[0], buttonScale[1], buttonScale[2]]}
         type={BUTTON_TYPES.CAMERA}
-        position={[-0.18, -0.25, 0.03]}
+        position={[-0.25, 0.15, 0]}
         width={buttonHeight}
         height={buttonHeight}
       />

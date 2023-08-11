@@ -196,6 +196,8 @@ export default class VirtualAgent {
       points.push(sceneGraph.nodes[index].vector);
     });
     console.log("nodePath:", sceneGraph.path);
+    sceneGraph.GetInstructions();
+    console.log("instructions", sceneGraph.instructions);
     this.cube = renderAsEntity(APP.world, NavigationLine(points));
     this.arrowObjs = APP.world.eid2obj.get(this.cube);
     this.scene.object3D.add(this.arrowObjs);
