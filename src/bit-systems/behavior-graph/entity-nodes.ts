@@ -6,7 +6,7 @@ import {
   NodeCategory,
   ValueType
 } from "@oveddan-behave-graph/core";
-import { addComponent, hasComponent, IComponent } from "bitecs";
+import { addComponent, ComponentType, hasComponent, IComponent } from "bitecs";
 import { Color, Euler, Mesh, MeshStandardMaterial, Object3D, Quaternion, Texture, Vector3 } from "three";
 import { Text } from "troika-three-text";
 import { HubsWorld } from "../../app";
@@ -20,9 +20,18 @@ import {
   SingleActionButton
 } from "../../bit-components";
 import { inflateCustomTags } from "../../inflators/custom-tags";
-import { findAncestorWithComponent } from "../../utils/bit-utils";
+import { findAncestorWithComponent, findChildWithComponent } from "../../utils/bit-utils";
 import { ClientID } from "../../utils/networking-types";
 import { definitionListToMap } from "./utils";
+import {
+  MediaVideo,
+  TextTag,
+  NetworkedAnimation,
+  Rigidbody,
+  PhysicsShape,
+  NetworkedTransform,
+  NetworkedBehavior
+} from "../../bit-components";
 
 type SocketTypeName =
   | "string"
@@ -51,6 +60,18 @@ type EntityEventState = {
   collidingEntities: Set<EntityID>;
 };
 export const entityEvents = new Map<EntityID, EntityEventState>();
+
+type TextToComponentType = { [key: string]: ComponentType<any> };
+const TEXT_TO_COMPONENT = {
+  video: MediaVideo,
+  audio: MediaVideo,
+  text: TextTag,
+  "networked-animation": NetworkedAnimation,
+  "rigid-body": Rigidbody,
+  "physics-shape": PhysicsShape,
+  "networked-transform": NetworkedTransform,
+  "networked-behavior": NetworkedBehavior
+} as TextToComponentType;
 
 type EntityEventData = {
   target?: EntityID;
@@ -180,7 +201,15 @@ export const EntityValue = {
   color: new ValueType(
     "color",
     () => new Color(),
-    (value: Color | number[]) => (value instanceof Color ? value : new Color().fromArray(value)),
+    (value: Color | number[] | string) => {
+      if (value instanceof Color) {
+        return value;
+      } else if (typeof value === "string") {
+        return new Color().set(value);
+      } else if (Array.isArray(value)) {
+        return new Color().fromArray(value);
+      }
+    },
     (value: Color) => [value.r, value.g, value.b, 1.0],
     (start: Color, end: Color, t: number) => new Color().copy(start).lerp(end, t)
   )
@@ -583,6 +612,17 @@ function makeMaterialPropertyNodes<T extends SettableMaterialProperties, S exten
         }
         if (NEEDS_UPDATE_PROPERTIES.includes(property)) material.needsUpdate = true;
         commit("flow");
+      }
+    }),
+    makeInNOutFunctionDesc({
+      name: "entity/getEntityComponent",
+      category: "Entity" as any,
+      label: `Get Entity Component`,
+      in: [{ entity: "entity" }, { component: "string" }],
+      out: [{ entity: "entity" }],
+      exec: (entity: EntityID, component: string) => {
+        const text = findChildWithComponent(APP.world, TEXT_TO_COMPONENT[component], entity);
+        return { entity: text };
       }
     })
   ];

@@ -1,9 +1,10 @@
 import { defineQuery } from "bitecs";
 import { Text as TroikaText } from "troika-three-text";
 import { HubsWorld } from "../app";
-import { TextTag } from "../bit-components";
+import { NetworkedText, TextTag } from "../bit-components";
 
 const textQuery = defineQuery([TextTag]);
+const networkedTextQuery = defineQuery([TextTag, NetworkedText]);
 
 export function textSystem(world: HubsWorld) {
   textQuery(world).forEach(eid => {
@@ -29,5 +30,21 @@ export function textSystem(world: HubsWorld) {
     // disposed before the async processing is done
     // because TroikaText properly handles
     text.sync();
+  });
+  networkedTextQuery(world).forEach(eid => {
+    const text = world.eid2obj.get(eid)! as TroikaText;
+    const newText = APP.getString(NetworkedText.text[eid]);
+    if (text.text !== newText) {
+      text.text = newText!;
+    }
+    if (text.fontSize !== NetworkedText.fontSize[eid]) {
+      text.fontSize = NetworkedText.fontSize[eid];
+    }
+    if (text.color !== NetworkedText.color[eid]) {
+      text.color = NetworkedText.color[eid];
+    }
+    if (text.fillOpacity !== NetworkedText.fillOpacity[eid]) {
+      text.fillOpacity = NetworkedText.fillOpacity[eid];
+    }
   });
 }

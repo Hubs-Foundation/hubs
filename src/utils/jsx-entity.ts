@@ -55,7 +55,7 @@ import { inflateLink, LinkParams } from "../inflators/link";
 import { inflateLinkLoader, LinkLoaderParams } from "../inflators/link-loader";
 import { inflateLoopAnimationInitialize, LoopAnimationParams } from "../inflators/loop-animation";
 import { inflateSlice9 } from "../inflators/slice9";
-import { TextParams, inflateText } from "../inflators/text";
+import { TextParams, inflateGLTFText, inflateText } from "../inflators/text";
 import {
   BackgroundParams,
   EnvironmentSettingsParams,
@@ -261,7 +261,6 @@ export interface ComponentData {
   audioZone?: AudioZoneParams;
   audioParams?: AudioSettings;
   mediaFrame?: any;
-  text?: TextParams;
 }
 
 type OptionalParams<T> = Partial<T> | true;
@@ -363,6 +362,7 @@ export interface JSXComponentData extends ComponentData {
   waypointPreview?: boolean;
   pdf?: PDFParams;
   loopAnimation?: LoopAnimationParams;
+  text?: TextParams;
 }
 
 export interface GLTFComponentData extends ComponentData {
@@ -391,6 +391,7 @@ export interface GLTFComponentData extends ComponentData {
   networkedAnimation: true;
   networkedBehavior: true;
   networkedTransform: true;
+  text?: TextParams;
 
   // deprecated
   spawnPoint?: true;
@@ -433,8 +434,7 @@ export const commonInflators: Required<{ [K in keyof ComponentData]: InflatorFn 
   mirror: inflateMirror,
   audioZone: inflateAudioZone,
   audioParams: inflateAudioParams,
-  mediaFrame: inflateMediaFrame,
-  text: inflateText
+  mediaFrame: inflateMediaFrame
 };
 
 const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
@@ -476,13 +476,14 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   quack: createDefaultInflator(Quack),
   mixerAnimatable: createDefaultInflator(MixerAnimatableInitialize),
   loopAnimation: inflateLoopAnimationInitialize,
+  text: inflateText,
   // inflators that create Object3Ds
   object3D: addObject3DComponent,
   slice9: inflateSlice9,
   model: inflateModel,
   image: inflateImage,
   video: inflateVideo,
-  link: inflateLink,
+  link: inflateLink
 };
 
 export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorFn }> = {
@@ -524,7 +525,8 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
   customTags: inflateCustomTags,
   networkedAnimation: inflateNetworkedAnimation,
   networkedBehavior: inflateNetworkedBehavior,
-  networkedTransform: inflateNetworkedTransform
+  networkedTransform: inflateNetworkedTransform,
+  text: inflateGLTFText
 };
 
 function jsxInflatorExists(name: string): name is keyof JSXComponentData {

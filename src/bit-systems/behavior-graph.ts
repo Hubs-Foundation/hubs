@@ -27,6 +27,7 @@ import { cleanupNodespac, definitionListToMap } from "./behavior-graph/utils";
 import { Vector3Nodes, Vector3Value as vec3ValueDefs } from "./behavior-graph/vec3-nodes";
 import { NetworkingNodes } from "./behavior-graph/networking-nodes";
 import { MediaNodes, mediaSystem } from "./behavior-graph/media-nodes";
+import { TextNodes } from "./behavior-graph/text-nodes";
 
 const coreValues = getCoreValueTypes();
 const logger = new DefaultLogger();
@@ -40,6 +41,7 @@ const registry: IRegistry = {
     ...NetworkingNodes,
     ...playerNodedefs,
     ...MediaNodes,
+    ...TextNodes,
     ...definitionListToMap([
       makeFlowNodeDefinition({
         typeName: "hubs/displayMessage",

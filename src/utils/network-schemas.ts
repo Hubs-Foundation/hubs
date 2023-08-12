@@ -7,6 +7,7 @@ import {
   NetworkedFloatyObject,
   NetworkedMediaFrame,
   NetworkedPDF,
+  NetworkedText,
   NetworkedTransform,
   NetworkedVideo,
   NetworkedWaypoint
@@ -20,6 +21,7 @@ import { NetworkedWaypointSchema } from "./networked-waypoint-schema";
 import { NetworkedAnimationSchema } from "./networked-animation-schema";
 import type { CursorBuffer, EntityID } from "./networking-types";
 import { NetworkedBehaviorSchema } from "./networked-behavior-schema";
+import { NetworkedTextSchema } from "./networked-text-schema";
 
 export interface StoredComponent {
   version: number;
@@ -52,6 +54,7 @@ schemas.set(NetworkedFloatyObject, {
 schemas.set(NetworkedPDF, NetworkedPDFSchema);
 schemas.set(NetworkedAnimation, NetworkedAnimationSchema);
 schemas.set(NetworkedBehavior, NetworkedBehaviorSchema);
+schemas.set(NetworkedText, NetworkedTextSchema);
 
 export const networkableComponents = Array.from(schemas.keys());
 

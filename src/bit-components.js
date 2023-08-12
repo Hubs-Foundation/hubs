@@ -38,6 +38,13 @@ export const MediaFrame = defineComponent({
   preview: Types.eid,
   previewingNid: Types.eid
 });
+export const NetworkedText = defineComponent({
+  text: Types.ui8,
+  fontSize: Types.f32,
+  color: Types.ui32,
+  fillOpacity: Types.f32
+});
+NetworkedText.text[$isStringType] = true;
 export const TextTag = defineComponent();
 export const ReflectionProbe = defineComponent();
 export const Slice9 = defineComponent({

@@ -1,9 +1,4 @@
-import {
-  makeFlowNodeDefinition,
-  EventEmitter,
-  makeEventNodeDefinition,
-  makeInNOutFunctionDesc
-} from "@oveddan-behave-graph/core";
+import { makeFlowNodeDefinition, EventEmitter, makeEventNodeDefinition } from "@oveddan-behave-graph/core";
 import { definitionListToMap } from "./utils";
 import {
   EntityID,
@@ -12,14 +7,12 @@ import {
   MediaVideo,
   MediaVideoData,
   Networked,
-  NetworkedVideo,
-  Owned
+  NetworkedVideo
 } from "../../bit-components";
 import { HubsWorld } from "../../app";
 import { findAncestorWithComponent, findChildWithComponent } from "../../utils/bit-utils";
 import { proxiedUrlFor } from "../../utils/media-url-utils";
 import { defineQuery, enterQuery, exitQuery, hasComponent } from "bitecs";
-import { write } from "fs-extra";
 
 type MediaEventState = {
   emitters: {
@@ -186,7 +179,7 @@ export const MediaNodes = definitionListToMap([
       const world = graph.getDependency("world") as HubsWorld;
 
       const media = findChildWithComponent(world, MediaVideo, entity);
-      if (media && hasComponent(world, Owned, media)) {
+      if (media) {
         const video = MediaVideoData.get(media) as HTMLVideoElement;
         if (video) {
           if (triggeringSocketName === "play") {
@@ -200,17 +193,6 @@ export const MediaNodes = definitionListToMap([
         }
       }
       commit("flow");
-    }
-  }),
-  makeInNOutFunctionDesc({
-    name: "media/getVideoComponent",
-    category: "Media" as any,
-    label: `Get Video Component`,
-    in: [{ entity: "entity" }],
-    out: [{ entity: "entity" }],
-    exec: (entity: EntityID) => {
-      const media = findChildWithComponent(APP.world, MediaVideo, entity);
-      return { entity: media };
     }
   })
 ]);

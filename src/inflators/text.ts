@@ -2,8 +2,9 @@ import { addComponent } from "bitecs";
 import { BackSide, DoubleSide, FrontSide } from "three";
 import { Text as TroikaText } from "troika-three-text";
 import { HubsWorld } from "../app";
-import { TextTag } from "../bit-components";
+import { Networked, NetworkedText, TextTag } from "../bit-components";
 import { addObject3DComponent } from "../utils/jsx-entity";
+import { Color } from "three";
 
 export type TextParams = {
   value: string;
@@ -132,8 +133,9 @@ const cast = (params: Required<TextParams>): Required<TextParams> => {
   return params;
 };
 
-export function inflateText(world: HubsWorld, eid: number, params: TextParams) {
-  const requiredParams = cast(Object.assign({}, DEFAULTS, params) as Required<TextParams>);
+const tmpColor = new Color();
+function createText(params: TextParams) {
+  const requiredParams = Object.assign({}, DEFAULTS, params) as Required<TextParams>;
   const text = new TroikaText();
   text.material!.toneMapped = false;
 
@@ -145,7 +147,7 @@ export function inflateText(world: HubsWorld, eid: number, params: TextParams) {
   text.anchorX = requiredParams.anchorX;
   text.anchorY = requiredParams.anchorY;
   text.clipRect = requiredParams.clipRect;
-  text.color = requiredParams.color;
+  text.color = tmpColor.set(requiredParams.color).getHex();
   text.curveRadius = requiredParams.curveRadius;
   text.depthOffset = requiredParams.depthOffset;
   text.direction = requiredParams.direction;
@@ -173,6 +175,26 @@ export function inflateText(world: HubsWorld, eid: number, params: TextParams) {
 
   text.sync();
 
+  return text;
+}
+
+export function inflateText(world: HubsWorld, eid: number, params: TextParams) {
+  const text = createText(params);
+
   addComponent(world, TextTag, eid);
   addObject3DComponent(world, eid, text);
+}
+
+export function inflateGLTFText(world: HubsWorld, eid: number, params: TextParams) {
+  const text = createText(params);
+
+  addComponent(world, TextTag, eid);
+  addComponent(world, Networked, eid);
+  addComponent(world, NetworkedText, eid);
+  addObject3DComponent(world, eid, text);
+
+  NetworkedText.text[eid] = APP.getSid(text.text);
+  NetworkedText.fontSize[eid] = text.fontSize;
+  NetworkedText.color[eid] = text.color as number;
+  NetworkedText.fillOpacity[eid] = text.fillOpacity;
 }
