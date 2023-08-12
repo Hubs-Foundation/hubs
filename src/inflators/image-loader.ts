@@ -1,7 +1,7 @@
 import { HubsWorld } from "../app";
+import { MediaImageLoaderData } from "../bit-components";
 import { ProjectionMode } from "../utils/projection-mode";
 import { inflateMediaLoader } from "./media-loader";
-import { MediaImageLoaderData } from "../bit-components";
 
 export interface ImageLoaderParams {
   src: string;

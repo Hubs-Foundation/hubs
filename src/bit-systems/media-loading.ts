@@ -4,8 +4,10 @@ import { HubsWorld } from "../app";
 import {
   GLTFModel,
   MediaContentBounds,
+  MediaImageLoaderData,
   MediaLoaded,
   MediaLoader,
+  MediaVideoLoaderData,
   Networked,
   ObjectMenuTarget
 } from "../bit-components";
@@ -64,34 +66,6 @@ export function* waitForMediaLoaded(world: HubsWorld, eid: EntityID) {
     yield crNextFrame();
   }
 }
-
-// prettier-ignore
-const loaderForMediaType = {
-  [MediaType.IMAGE]: (
-    world: HubsWorld,
-    eid: EntityID,
-    { accessibleUrl, contentType }: { accessibleUrl: string, contentType: string }
-  ) => loadImage(world, eid, accessibleUrl, contentType),
-  [MediaType.VIDEO]: (
-    world: HubsWorld,
-    eid: EntityID,
-    { accessibleUrl, contentType }: { accessibleUrl: string, contentType: string }
-  ) => loadVideo(world, eid, accessibleUrl, contentType),
-  [MediaType.MODEL]: (
-    world: HubsWorld,
-    eid: EntityID,
-    { accessibleUrl, contentType }: { accessibleUrl: string, contentType: string }
-  ) => loadModel(world, accessibleUrl, contentType, true),
-  [MediaType.PDF]: (world: HubsWorld, eid: EntityID, { accessibleUrl }: { accessibleUrl: string }) =>
-    loadPDF(world, accessibleUrl),
-  [MediaType.AUDIO]: (world: HubsWorld, eid: EntityID, { accessibleUrl }: { accessibleUrl: string }) =>
-    loadAudio(world, eid, accessibleUrl),
-  [MediaType.HTML]: (
-    world: HubsWorld,
-    eid: EntityID,
-    { canonicalUrl, thumbnail }: { canonicalUrl: string, thumbnail: string }
-  ) => loadHtml(world, canonicalUrl, thumbnail)
-};
 
 export const MEDIA_LOADER_FLAGS = {
   RECENTER: 1 << 0,
@@ -189,6 +163,58 @@ type MediaInfo = {
   thumbnail: string;
 };
 
+function* loadByMediaType(
+  world: HubsWorld,
+  eid: EntityID,
+  {
+    accessibleUrl,
+    canonicalUrl,
+    contentType,
+    mediaType,
+    thumbnail
+  }: MediaInfo
+) {
+  // Note: For Image, Video, and Audio, parameters can be set via
+  //       glTF image/video/audio inflators inflateImageLoader and
+  //       inflateVideoLoader.
+  // TODO: Refactor media loading flow to simplify.
+  //       Only in loading glTF Image, Video, and Audio flows,
+  //       specified parameters assignment is needed after loading
+  //       content then using MediaImage/VideoLoaderData as like
+  //       transporting data from the inflators. This may be like
+  //       special and a bit less maintainable.
+  switch(mediaType) {
+    case MediaType.IMAGE:
+      return yield* loadImage(
+        world,
+        accessibleUrl,
+        contentType,
+        MediaImageLoaderData.has(eid) ? MediaImageLoaderData.get(eid)! : {}
+      );
+    case MediaType.VIDEO:
+      return yield* loadVideo(
+        world,
+        accessibleUrl,
+        contentType,
+        MediaVideoLoaderData.has(eid) ? MediaVideoLoaderData.get(eid)! : {}
+      );
+    case MediaType.MODEL:
+      return yield* loadModel(world, accessibleUrl, contentType, true);
+    case MediaType.PDF:
+      return yield* loadPDF(world, accessibleUrl);
+    case MediaType.AUDIO:
+      return yield* loadAudio(
+        world,
+        accessibleUrl,
+        MediaVideoLoaderData.has(eid) ? MediaVideoLoaderData.get(eid)! : {}
+      );
+    case MediaType.HTML:
+      return yield* loadHtml(world, canonicalUrl, thumbnail);
+    default:
+      throw new UnsupportedMediaTypeError(eid, mediaType);
+  }
+}
+
 function* loadMedia(world: HubsWorld, eid: EntityID) {
   let loadingObjEid = 0;
   const addLoadingObjectTimeout = crTimeout(() => {
@@ -200,11 +226,7 @@ function* loadMedia(world: HubsWorld, eid: EntityID) {
   let media: EntityID;
   try {
     const urlData = (yield resolveMediaInfo(src)) as MediaInfo;
-    const loader = urlData.mediaType && loaderForMediaType[urlData.mediaType];
-    if (!loader) {
-      throw new UnsupportedMediaTypeError(eid, urlData.mediaType);
-    }
-    media = yield* loader(world, eid, urlData);
+    media = yield* loadByMediaType(world, eid, urlData);
     addComponent(world, MediaLoaded, media);
   } catch (e) {
     console.error(e);
@@ -257,6 +279,14 @@ export function mediaLoadingSystem(world: HubsWorld) {
 
   mediaLoaderExitQuery(world).forEach(function (eid) {
     jobs.stop(eid);
+
+    if (MediaImageLoaderData.has(eid)) {
+      MediaImageLoaderData.delete(eid);
+    }
+
+    if (MediaVideoLoaderData.has(eid)) {
+      MediaVideoLoaderData.delete(eid);
+    }
   });
 
   jobs.tick();
