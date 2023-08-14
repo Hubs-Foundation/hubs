@@ -10,7 +10,7 @@ function apply(eid: EntityID, { version, data }: StoredComponent) {
 
   const { text, fontSize, color, fillOpacity }: { text: string; fontSize: number; color: number; fillOpacity: number } =
     data;
-  write(NetworkedText.text, eid, text);
+  write(NetworkedText.text, eid, APP.getSid(text));
   write(NetworkedText.fontSize, eid, fontSize);
   write(NetworkedText.color, eid, color);
   write(NetworkedText.fillOpacity, eid, fillOpacity);
@@ -29,7 +29,7 @@ export const NetworkedTextSchema: NetworkSchema = {
         text: read(NetworkedText.text, eid),
         fontSize: read(NetworkedText.fontSize, eid),
         color: read(NetworkedText.color, eid),
-        fillOpacity: read(NetworkedText.fillOpacity, eid)
+        fillOpacity: APP.getString(read(NetworkedText.fillOpacity, eid))
       }
     };
   },
