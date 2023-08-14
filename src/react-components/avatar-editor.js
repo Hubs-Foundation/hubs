@@ -17,7 +17,6 @@ import styles from "../assets/stylesheets/avatar-editor.scss";
 
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader";
 import { getCustomGLTFParserURLResolver } from "../utils/media-url-utils";
 
 import dropdownArrowUrl from "../assets/images/dropdown_arrow.png";
@@ -160,12 +159,8 @@ class AvatarEditor extends Component {
       const gltfLoader = new GLTFLoader(loadingManager).register(parser => new GLTFBinarySplitterPlugin(parser));
       const onProgress = console.log;
 
-      const ktxLoader = new KTX2Loader(loadingManager);
       const dracoLoader = new DRACOLoader(loadingManager);
 
-      if (ktxLoader) {
-        gltfLoader.setKTX2Loader(ktxLoader);
-      }
       if (dracoLoader) {
         gltfLoader.setDRACOLoader(dracoLoader);
       }
