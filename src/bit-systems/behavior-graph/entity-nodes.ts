@@ -30,7 +30,8 @@ import {
   Rigidbody,
   PhysicsShape,
   NetworkedTransform,
-  NetworkedBehavior
+  NetworkedBehavior,
+  MediaFrame
 } from "../../bit-components";
 
 type SocketTypeName =
@@ -62,10 +63,11 @@ type EntityEventState = {
 export const entityEvents = new Map<EntityID, EntityEventState>();
 
 type TextToComponentType = { [key: string]: ComponentType<any> };
-const TEXT_TO_COMPONENT = {
+const NAME_TO_COMPONENT = {
   video: MediaVideo,
   audio: MediaVideo,
   text: TextTag,
+  "media-frame": MediaFrame,
   "networked-animation": NetworkedAnimation,
   "rigid-body": Rigidbody,
   "physics-shape": PhysicsShape,

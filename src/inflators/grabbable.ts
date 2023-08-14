@@ -2,11 +2,15 @@ import { addComponent } from "bitecs";
 import { HubsWorld } from "../app";
 import {
   CursorRaycastable,
+  FloatyObject,
   HandCollisionTarget,
   Holdable,
+  Networked,
+  NetworkedFloatyObject,
   OffersHandConstraint,
   OffersRemoteConstraint,
-  RemoteHoverTarget
+  RemoteHoverTarget,
+  RestoreBodyTypeOnRelease
 } from "../bit-components";
 
 export type GrabbableParams = { cursor: boolean; hand: boolean };
@@ -23,4 +27,12 @@ export function inflateGrabbable(world: HubsWorld, eid: number, props: Grabbable
     addComponent(world, OffersRemoteConstraint, eid);
   }
   addComponent(world, Holdable, eid);
+}
+
+export function inflateGLTFGrabbable(world: HubsWorld, eid: number, props: GrabbableParams) {
+  inflateGrabbable(world, eid, props);
+  addComponent(world, FloatyObject, eid, true);
+  addComponent(world, Networked, eid, true);
+  addComponent(world, NetworkedFloatyObject, eid, true);
+  addComponent(world, RestoreBodyTypeOnRelease, eid, true);
 }

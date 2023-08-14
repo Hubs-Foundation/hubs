@@ -8,6 +8,12 @@ import { inflateRigidBody, Type } from "./rigid-body";
 import { Fit, inflatePhysicsShape, Shape } from "./physics-shape";
 import { Mesh, BoxBufferGeometry, ShaderMaterial, Color, DoubleSide } from "three";
 
+export const MEDIA_FRAME_FLAGS = {
+  ACTIVE: 1 << 0,
+  SNAP_TO_CENTER: 1 << 1,
+  LOCKED: 1 << 2
+};
+
 const DEFAULTS = {
   bounds: { x: 1, y: 1, z: 1 },
   mediaType: "all"
@@ -56,12 +62,17 @@ export function inflateMediaFrame(world, eid, componentProps) {
   addComponent(world, MediaFrame, eid, true);
   addComponent(world, NetworkedMediaFrame, eid, true);
 
+  NetworkedMediaFrame.flags[eid] |= MEDIA_FRAME_FLAGS.ACTIVE;
+  if (componentProps.snapToCenter) {
+    NetworkedMediaFrame.flags[eid] |= MEDIA_FRAME_FLAGS.SNAP_TO_CENTER;
+  }
+
   if (!hasComponent(world, Networked, eid)) addComponent(world, Networked, eid);
 
   MediaFrame.mediaType[eid] = {
     all: MediaType.ALL,
     "all-2d": MediaType.ALL_2D,
-    model: MediaType.MODEL,
+    model: MediaType.MODEL | MediaType.OBJECT,
     image: MediaType.IMAGE,
     video: MediaType.VIDEO,
     pdf: MediaType.PDF

@@ -40,6 +40,8 @@ const WEIGHT_IDX = 2;
 const FLAGS_IDX = 3;
 
 function deserialize(world: HubsWorld, eid: EntityID, data: CursorBuffer) {
+  // We skip the updatedPids item as we are not shadowing the component properties,
+  // This is a big hack, we should fine a better way.
   const updatedPids = data[data.cursor!++] as Array<any>;
   const componentData = data[data.cursor!++];
   NetworkedAnimation.timestamp[eid] = componentData[0];

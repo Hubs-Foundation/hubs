@@ -43,7 +43,7 @@ import {
 } from "../bit-components";
 import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
-import { GrabbableParams, inflateGrabbable } from "../inflators/grabbable";
+import { GrabbableParams, inflateGLTFGrabbable, inflateGrabbable } from "../inflators/grabbable";
 import { inflateImage } from "../inflators/image";
 import { inflateVideo, VideoParams } from "../inflators/video";
 import { inflateModel, ModelParams } from "../inflators/model";
@@ -102,6 +102,7 @@ import { CustomTagParams, inflateCustomTags } from "../inflators/custom-tags";
 import { inflateNetworkedAnimation } from "../inflators/networked-animation";
 import { inflateNetworkedBehavior } from "../inflators/networked-behavior";
 import { inflateNetworkedTransform } from "../inflators/networked-transform";
+import { inflateCapturable } from "../inflators/capturable";
 
 preload(
   new Promise(resolve => {
@@ -255,7 +256,6 @@ export interface ComponentData {
   hemisphereLight?: HemisphereLightParams;
   pointLight?: PointLightParams;
   spotLight?: SpotLightParams;
-  grabbable?: GrabbableParams;
   billboard?: { onlyY: boolean };
   mirror?: MirrorParams;
   audioZone?: AudioZoneParams;
@@ -303,6 +303,7 @@ export interface JSXComponentData extends ComponentData {
   makeKinematicOnRelease?: true;
   destroyAtExtremeDistance?: true;
   quack?: true;
+  grabbable?: GrabbableParams;
 
   // @TODO Define all the anys
   networked?: any;
@@ -392,6 +393,8 @@ export interface GLTFComponentData extends ComponentData {
   networkedBehavior: true;
   networkedTransform: true;
   text?: TextParams;
+  grabbable?: GrabbableParams;
+  capturable?: true;
 
   // deprecated
   spawnPoint?: true;
@@ -422,7 +425,6 @@ declare global {
 }
 
 export const commonInflators: Required<{ [K in keyof ComponentData]: InflatorFn }> = {
-  grabbable: inflateGrabbable,
   billboard: createDefaultInflator(Billboard),
 
   // inflators that create Object3Ds
@@ -439,6 +441,7 @@ export const commonInflators: Required<{ [K in keyof ComponentData]: InflatorFn 
 
 const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   ...commonInflators,
+  grabbable: inflateGrabbable,
   cursorRaycastable: createDefaultInflator(CursorRaycastable),
   remoteHoverTarget: createDefaultInflator(RemoteHoverTarget),
   isNotRemoteHoverTarget: createDefaultInflator(NotRemoteHoverTarget),
@@ -488,6 +491,7 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
 
 export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorFn }> = {
   ...commonInflators,
+  grabbable: inflateGLTFGrabbable,
   pdf: inflatePDFLoader,
   // Temporarily reuse video loader for audio because of
   // their processings are similar.
@@ -526,7 +530,8 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
   networkedAnimation: inflateNetworkedAnimation,
   networkedBehavior: inflateNetworkedBehavior,
   networkedTransform: inflateNetworkedTransform,
-  text: inflateGLTFText
+  text: inflateGLTFText,
+  capturable: inflateCapturable
 };
 
 function jsxInflatorExists(name: string): name is keyof JSXComponentData {

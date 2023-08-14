@@ -25,7 +25,8 @@ export const Owned = defineComponent();
 export const EntityStateDirty = defineComponent();
 export const NetworkedMediaFrame = defineComponent({
   capturedNid: Types.ui32,
-  scale: [Types.f32, 3]
+  scale: [Types.f32, 3],
+  flags: Types.ui8
 });
 NetworkedMediaFrame.capturedNid[$isStringType] = true;
 
@@ -36,8 +37,12 @@ export const MediaFrame = defineComponent({
   bounds: [Types.f32, 3],
   guide: Types.eid,
   preview: Types.eid,
-  previewingNid: Types.eid
+  previewingNid: Types.eid,
+  flags: Types.ui8
 });
+export const MediaRoot = defineComponent();
+export const Capturable = defineComponent();
+export const CapturableObject = defineComponent();
 export const NetworkedText = defineComponent({
   text: Types.ui8,
   fontSize: Types.f32,
@@ -118,6 +123,7 @@ export const Rigidbody = defineComponent({
   collisionFilterMask: Types.ui32,
   flags: Types.ui8
 });
+
 export const PhysicsShape = defineComponent({
   bodyId: Types.ui16,
   shapeId: Types.ui16,
@@ -140,6 +146,7 @@ export const MediaLoading = defineComponent();
 export const FloatyObject = defineComponent({ flags: Types.ui8, releaseGravity: Types.f32 });
 export const NetworkedFloatyObject = defineComponent({ flags: Types.ui8 });
 export const MakeKinematicOnRelease = defineComponent();
+export const RestoreBodyTypeOnRelease = defineComponent();
 export const CameraTool = defineComponent({
   snapTime: Types.f32,
   state: Types.ui8,

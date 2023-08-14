@@ -1,5 +1,5 @@
 import { addComponent } from "bitecs";
-import { EntityID, NetworkedRigidBody, Rigidbody } from "../bit-components";
+import { Rigidbody } from "../bit-components";
 import { HubsWorld } from "../app";
 import { CONSTANTS } from "three-ammo";
 import { COLLISION_LAYERS } from "../constants";
@@ -255,7 +255,8 @@ export enum GLTFRigidBodyCollisionGroup {
   OBJECTS = "objects",
   ENVIRONMENT = "environment",
   TRIGGERS = "triggers",
-  AVATARS = "avatars"
+  AVATARS = "avatars",
+  MEDIA_FRAMES = "media-frames"
 }
 
 const GLTF_DEFAULTS = {
@@ -269,7 +270,8 @@ const gltfGroupToLayer = {
   [GLTFRigidBodyCollisionGroup.OBJECTS]: COLLISION_LAYERS.INTERACTABLES,
   [GLTFRigidBodyCollisionGroup.ENVIRONMENT]: COLLISION_LAYERS.ENVIRONMENT,
   [GLTFRigidBodyCollisionGroup.TRIGGERS]: COLLISION_LAYERS.TRIGGERS,
-  [GLTFRigidBodyCollisionGroup.AVATARS]: COLLISION_LAYERS.AVATAR
+  [GLTFRigidBodyCollisionGroup.AVATARS]: COLLISION_LAYERS.AVATAR,
+  [GLTFRigidBodyCollisionGroup.MEDIA_FRAMES]: COLLISION_LAYERS.MEDIA_FRAMES
 } as const;
 
 export interface GLTFRigidBodyParams

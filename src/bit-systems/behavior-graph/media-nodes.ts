@@ -2,8 +2,8 @@ import { makeFlowNodeDefinition, EventEmitter, makeEventNodeDefinition } from "@
 import { definitionListToMap } from "./utils";
 import {
   EntityID,
-  MediaContentBounds,
   MediaLoaded,
+  MediaRoot,
   MediaVideo,
   MediaVideoData,
   Networked,
@@ -208,7 +208,7 @@ const mediaEnterQuery = enterQuery(mediaQuery);
 const mediaExitQuery = exitQuery(mediaQuery);
 export function mediaSystem(world: HubsWorld) {
   mediaEnterQuery(world).forEach(eid => {
-    const mediaRoot = findAncestorWithComponent(world, MediaContentBounds, eid)!;
+    const mediaRoot = findAncestorWithComponent(world, MediaRoot, eid)!;
     const video = MediaVideoData.get(eid) as HTMLVideoElement;
     const mediaState = mediaEvents.get(mediaRoot)!;
     if (video && mediaState) {
@@ -226,7 +226,7 @@ export function mediaSystem(world: HubsWorld) {
   });
 
   mediaExitQuery(world).forEach(eid => {
-    const mediaRoot = findAncestorWithComponent(world, MediaContentBounds, eid)!;
+    const mediaRoot = findAncestorWithComponent(world, MediaRoot, eid)!;
     const video = MediaVideoData.get(eid) as HTMLVideoElement;
     const mediaState = mediaEvents.get(mediaRoot)!;
     if (video && mediaState) {
