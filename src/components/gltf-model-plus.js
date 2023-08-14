@@ -412,7 +412,8 @@ const OBJECT3D_EXT = new Set([
   "skybox",
   "spot-light",
   "text",
-  "video"
+  "video",
+  "waypoint"
 ]);
 
 class GLTFHubsPlugin {
