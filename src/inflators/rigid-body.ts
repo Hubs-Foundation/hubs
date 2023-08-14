@@ -1,5 +1,5 @@
 import { addComponent } from "bitecs";
-import { Rigidbody } from "../bit-components";
+import { EntityID, NetworkedRigidBody, Rigidbody } from "../bit-components";
 import { HubsWorld } from "../app";
 import { CONSTANTS } from "three-ammo";
 import { COLLISION_LAYERS } from "../constants";
@@ -43,15 +43,15 @@ export type RigidBodyParams = {
 };
 
 export type BodyParams = {
-  type: Type;
+  type: string;
   mass: number;
-  gravity: [number, number, number];
+  gravity: { x: number; y: number; z: number };
   linearDamping: number;
   angularDamping: number;
   linearSleepingThreshold: number;
   angularSleepingThreshold: number;
-  angularFactor: [number, number, number];
-  activationState: ActivationState;
+  angularFactor: { x: number; y: number; z: number };
+  activationState: string;
   emitCollisionEvents: boolean;
   disableCollision: boolean;
   collisionFilterGroup: number;
@@ -86,8 +86,48 @@ export const getTypeString = (eid: number) => {
   return Object.values(CONSTANTS.TYPE)[Rigidbody.type[eid]];
 };
 
-export const getActivationStateString = (eid: number) => {
+export const getStringFromActivationState = (eid: number) => {
   return Object.values(CONSTANTS.ACTIVATION_STATE)[Rigidbody.activationState[eid]];
+};
+
+export const getActivationStateFromString = (activationState: string) => {
+  switch (activationState) {
+    case CONSTANTS.ACTIVATION_STATE.ACTIVE_TAG:
+      return ActivationState.ACTIVE_TAG;
+    case CONSTANTS.ACTIVATION_STATE.DISABLE_DEACTIVATION:
+      return ActivationState.DISABLE_DEACTIVATION;
+    case CONSTANTS.ACTIVATION_STATE.DISABLE_SIMULATION:
+      return ActivationState.DISABLE_SIMULATION;
+    case CONSTANTS.ACTIVATION_STATE.ISLAND_SLEEPING:
+      return ActivationState.ISLAND_SLEEPING;
+    case CONSTANTS.ACTIVATION_STATE.WANTS_DEACTIVATION:
+      return ActivationState.WANTS_DEACTIVATION;
+  }
+  return ActivationState.ACTIVE_TAG;
+};
+
+export const getTypeFromBodyType = (type: string) => {
+  switch (type) {
+    case "static":
+      return Type.STATIC;
+    case "dynamic":
+      return Type.DYNAMIC;
+    case "kinematic":
+      return Type.KINEMATIC;
+  }
+  return Type.KINEMATIC;
+};
+
+export const getBodyTypeFromType = (type: Type) => {
+  switch (type) {
+    case Type.STATIC:
+      return "static";
+    case Type.DYNAMIC:
+      return "dynamic";
+    case Type.KINEMATIC:
+      return "kinematic";
+  }
+  return "kinematic";
 };
 
 export const getBodyFromRigidBody = (eid: number) => {
@@ -103,7 +143,7 @@ export const getBodyFromRigidBody = (eid: number) => {
       y: Rigidbody.angularFactor[eid][1],
       z: Rigidbody.angularFactor[eid][2]
     },
-    activationState: getActivationStateString(eid),
+    activationState: getStringFromActivationState(eid),
     emitCollisionEvents: Rigidbody.flags[eid] & RIGID_BODY_FLAGS.EMIT_COLLISION_EVENTS,
     scaleAutoUpdate: Rigidbody.flags[eid] & RIGID_BODY_FLAGS.SCALE_AUTO_UPDATE,
     type: getTypeString(eid),
@@ -113,24 +153,73 @@ export const getBodyFromRigidBody = (eid: number) => {
   };
 };
 
-export const updateRigidBodyParams = (eid: number, params: Partial<BodyParams>) => {
+export const updateBodyParams = (eid: number, params: Partial<BodyParams>) => {
   const currentParams = getBodyFromRigidBody(eid);
   const bodyParams = Object.assign({}, currentParams, params) as BodyParams;
 
-  Rigidbody.type[eid] = bodyParams.type;
+  Rigidbody.type[eid] = getTypeFromBodyType(bodyParams.type);
   Rigidbody.mass[eid] = bodyParams.mass;
-  Rigidbody.gravity[eid].set(bodyParams.gravity);
+  Rigidbody.gravity[eid].set([bodyParams.gravity.x, bodyParams.gravity.y, bodyParams.gravity.z]);
   Rigidbody.linearDamping[eid] = bodyParams.linearDamping;
   Rigidbody.angularDamping[eid] = bodyParams.angularDamping;
   Rigidbody.linearSleepingThreshold[eid] = bodyParams.linearSleepingThreshold;
   Rigidbody.angularSleepingThreshold[eid] = bodyParams.angularSleepingThreshold;
-  Rigidbody.angularFactor[eid].set(bodyParams.angularFactor);
-  Rigidbody.activationState[eid] = bodyParams.activationState;
+  Rigidbody.angularFactor[eid].set([
+    bodyParams.angularFactor.x,
+    bodyParams.angularFactor.y,
+    bodyParams.angularFactor.z
+  ]);
+  Rigidbody.activationState[eid] = getActivationStateFromString(params.activationState!);
   bodyParams.emitCollisionEvents && (Rigidbody.flags[eid] |= RIGID_BODY_FLAGS.EMIT_COLLISION_EVENTS);
   bodyParams.disableCollision && (Rigidbody.flags[eid] |= RIGID_BODY_FLAGS.DISABLE_COLLISION);
   Rigidbody.collisionFilterGroup[eid] = bodyParams.collisionFilterGroup;
   Rigidbody.collisionFilterMask[eid] = bodyParams.collisionFilterMask;
   bodyParams.scaleAutoUpdate && (Rigidbody.flags[eid] |= RIGID_BODY_FLAGS.SCALE_AUTO_UPDATE);
+};
+
+export const updateRigidBodyParams = (eid: number, params: Partial<RigidBodyParams>) => {
+  if (params.type !== undefined) {
+    Rigidbody.type[eid] = params.type;
+  }
+  if (params.mass !== undefined) {
+    Rigidbody.mass[eid] = params.mass;
+  }
+  if (params.gravity !== undefined) {
+    Rigidbody.gravity[eid].set(params.gravity);
+  }
+  if (params.linearDamping !== undefined) {
+    Rigidbody.linearDamping[eid] = params.linearDamping;
+  }
+  if (params.angularDamping !== undefined) {
+    Rigidbody.angularDamping[eid] = params.angularDamping;
+  }
+  if (params.linearSleepingThreshold !== undefined) {
+    Rigidbody.linearSleepingThreshold[eid] = params.linearSleepingThreshold;
+  }
+  if (params.angularSleepingThreshold !== undefined) {
+    Rigidbody.angularSleepingThreshold[eid] = params.angularSleepingThreshold;
+  }
+  if (params.angularFactor !== undefined) {
+    Rigidbody.angularFactor[eid].set(params.angularFactor);
+  }
+  if (params.activationState !== undefined) {
+    Rigidbody.activationState[eid] = params.activationState;
+  }
+  if (params.emitCollisionEvents !== undefined) {
+    Rigidbody.flags[eid] |= RIGID_BODY_FLAGS.EMIT_COLLISION_EVENTS;
+  }
+  if (params.disableCollision !== undefined) {
+    Rigidbody.flags[eid] |= RIGID_BODY_FLAGS.DISABLE_COLLISION;
+  }
+  if (params.scaleAutoUpdate !== undefined) {
+    Rigidbody.flags[eid] |= RIGID_BODY_FLAGS.SCALE_AUTO_UPDATE;
+  }
+  if (params.collisionGroup !== undefined) {
+    Rigidbody.collisionFilterGroup[eid] = params.collisionGroup;
+  }
+  if (params.collisionMask !== undefined) {
+    Rigidbody.collisionFilterMask[eid] = params.collisionMask;
+  }
 };
 
 export function inflateRigidBody(world: HubsWorld, eid: number, params: Partial<RigidBodyParams>) {
