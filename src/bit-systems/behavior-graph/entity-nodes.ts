@@ -617,12 +617,12 @@ function makeMaterialPropertyNodes<T extends SettableMaterialProperties, S exten
     makeInNOutFunctionDesc({
       name: "entity/getEntityComponent",
       category: "Entity" as any,
-      label: `Get Entity Component`,
+      label: `Get Component`,
       in: [{ entity: "entity" }, { component: "string" }],
       out: [{ entity: "entity" }],
       exec: (entity: EntityID, component: string) => {
-        const text = findChildWithComponent(APP.world, TEXT_TO_COMPONENT[component], entity);
-        return { entity: text };
+        const cmp = findChildWithComponent(APP.world, NAME_TO_COMPONENT[component], entity);
+        return { entity: cmp };
       }
     })
   ];
