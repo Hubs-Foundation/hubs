@@ -1,7 +1,7 @@
 import { addComponent, addEntity, defineQuery, removeComponent } from "bitecs";
 import { PositionalAudio, Audio as StereoAudio, AudioListener as ThreeAudioListener } from "three";
 import { HubsWorld } from "../app";
-import { AudioEmitter, AudioSettingsChanged, MediaVideoData } from "../bit-components";
+import { AudioEmitter, AudioSettingsChanged, EntityID, MediaVideoData } from "../bit-components";
 import { AudioType, SourceType } from "../components/audio-params";
 import { AudioSystem } from "../systems/audio-system";
 import { applySettings, getCurrentAudioSettings, updateAudioSettings } from "../update-audio-settings";
@@ -53,6 +53,13 @@ function swapAudioType<T extends AudioObject3D>(
   audio.removeFromParent();
 
   swapObject3DComponent(world, eid, newAudio);
+}
+
+export function swapAudioSrc(world: HubsWorld, videoEid: EntityID, audioEid: EntityID) {
+  const audio = world.eid2obj.get(audioEid)! as AudioObject3D;
+  const video = MediaVideoData.get(videoEid)!;
+  audio.setMediaElementSource(video);
+  video.volume = 1;
 }
 
 export function makeAudioEntity(world: HubsWorld, source: number, sourceType: SourceType, audioSystem: AudioSystem) {

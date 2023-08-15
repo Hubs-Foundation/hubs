@@ -1,10 +1,13 @@
-import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent } from "bitecs";
+import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeEntity } from "bitecs";
 import { Mesh } from "three";
 import { HubsWorld } from "../app";
 import {
+  AudioEmitter,
   AudioParams,
   AudioSettingsChanged,
+  EntityID,
   MediaLoaded,
+  MediaRoot,
   MediaVideo,
   MediaVideoData,
   Networked,
@@ -13,17 +16,63 @@ import {
 } from "../bit-components";
 import { SourceType } from "../components/audio-params";
 import { AudioSystem } from "../systems/audio-system";
-import { findAncestorWithComponent } from "../utils/bit-utils";
-import { Emitter2Audio, Emitter2Params, makeAudioEntity } from "./audio-emitter-system";
+import { findAncestorWithComponent, findChildWithComponent } from "../utils/bit-utils";
+import { Emitter2Audio, Emitter2Params, makeAudioEntity, swapAudioSrc } from "./audio-emitter-system";
 import { takeSoftOwnership } from "../utils/take-soft-ownership";
+import { disposeNode } from "../utils/three-utils";
+import { HubsVideoTexture } from "../textures/HubsVideoTexture";
+import { createImageMesh } from "../utils/create-image-mesh";
+import { JobRunner } from "../utils/coroutine-utils";
+import { loadVideoTexture } from "../utils/load-video-texture";
+import { resolveMediaInfo } from "../utils/media-utils";
+import { swapObject3DComponent } from "../utils/jsx-entity";
+import { MediaInfo } from "./media-loading";
 
 enum Flags {
   PAUSED = 1 << 0
 }
 
+function* loadSrc(world: HubsWorld, eid: EntityID, src: string) {
+  const { accessibleUrl, contentType } = (yield resolveMediaInfo(src)) as MediaInfo;
+  const { texture, ratio, video }: { texture: HubsVideoTexture; ratio: number; video: HTMLVideoElement } =
+    yield loadVideoTexture(accessibleUrl, contentType);
+  // TODO: Check the projection mode to allow EQUIRECT
+  const videoObj = createImageMesh(texture, ratio);
+  MediaVideo.ratio[eid] = ratio;
+  const oldVideo = MediaVideoData.get(eid) as HTMLVideoElement;
+  oldVideo.pause();
+  MediaVideoData.set(eid, video);
+
+  const mediaRoot = findAncestorWithComponent(world, MediaRoot, eid)!;
+  const mediaRootObj = world.eid2obj.get(mediaRoot)!;
+  mediaRootObj.add(videoObj);
+
+  const audioEmitter = findChildWithComponent(world, AudioEmitter, eid)!;
+  swapAudioSrc(world, eid, audioEmitter);
+  const audioObj = APP.world.eid2obj.get(audioEmitter)!;
+  videoObj.add(audioObj);
+
+  const oldVideoObj = APP.world.eid2obj.get(eid)! as Mesh;
+  mediaRootObj.remove(oldVideoObj);
+  disposeNode(oldVideoObj);
+
+  swapObject3DComponent(world, eid, videoObj);
+
+  if ((NetworkedVideo.flags[eid] & Flags.PAUSED) === 0) {
+    video.play();
+  }
+}
+
+export function updateVideoSrc(world: HubsWorld, eid: EntityID, src: string) {
+  jobs.stop(eid);
+  jobs.add(eid, () => loadSrc(world, eid, src));
+}
+
+const jobs = new JobRunner();
 const OUT_OF_SYNC_SEC = 5;
 const networkedVideoQuery = defineQuery([Networked, NetworkedVideo]);
 const networkedVideoEnterQuery = enterQuery(networkedVideoQuery);
+const networkedVideoExitQuery = exitQuery(networkedVideoQuery);
 const mediaVideoQuery = defineQuery([MediaVideo]);
 const mediaVideoEnterQuery = enterQuery(mediaVideoQuery);
 const mediaVideoExitQuery = exitQuery(mediaVideoQuery);
@@ -70,6 +119,10 @@ export function videoSystem(world: HubsWorld, audioSystem: AudioSystem) {
     }
   });
 
+  networkedVideoExitQuery(world).forEach(eid => {
+    jobs.stop(eid);
+  });
+
   networkedVideoQuery(world).forEach(function (eid) {
     const video = MediaVideoData.get(eid)!;
     if (hasComponent(world, Owned, eid)) {
@@ -82,6 +135,7 @@ export function videoSystem(world: HubsWorld, audioSystem: AudioSystem) {
       const networkedSrc = APP.getString(NetworkedVideo.src[eid])!;
       if (networkedSrc !== video.src) {
         video.src = networkedSrc;
+        updateVideoSrc(world, eid, networkedSrc);
       }
       const networkedPauseState = !!(NetworkedVideo.flags[eid] & Flags.PAUSED);
       if (networkedPauseState !== video.paused) {
@@ -92,4 +146,6 @@ export function videoSystem(world: HubsWorld, audioSystem: AudioSystem) {
       }
     }
   });
+
+  jobs.tick();
 }

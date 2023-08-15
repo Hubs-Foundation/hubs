@@ -11,8 +11,8 @@ import {
 } from "../../bit-components";
 import { HubsWorld } from "../../app";
 import { findAncestorWithComponent, findChildWithComponent } from "../../utils/bit-utils";
-import { proxiedUrlFor } from "../../utils/media-url-utils";
 import { defineQuery, enterQuery, exitQuery, hasComponent } from "bitecs";
+import { updateVideoSrc } from "../video-system";
 
 type MediaEventState = {
   emitters: {
@@ -187,8 +187,8 @@ export const MediaNodes = definitionListToMap([
           } else if (triggeringSocketName === "pause") {
             video.pause();
           } else if (triggeringSocketName === "setSrc") {
-            const src = read("src") as string;
-            video.src = proxiedUrlFor(src);
+            video.currentTime = 0;
+            updateVideoSrc(APP.world, media, read("src") as string);
           }
         }
       }

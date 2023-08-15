@@ -157,7 +157,7 @@ class UnsupportedMediaTypeError extends Error {
   }
 }
 
-type MediaInfo = {
+export type MediaInfo = {
   accessibleUrl: string;
   canonicalUrl: string;
   canonicalAudioUrl: string | null;
