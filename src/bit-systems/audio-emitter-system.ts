@@ -19,7 +19,9 @@ export function isPositionalAudio(node: AudioObject3D): node is PositionalAudio 
 
 export function cleanupAudio(audio: AudioObject3D) {
   const eid = audio.eid!;
-  audio.disconnect();
+  if (audio.source !== null) {
+    audio.disconnect();
+  }
   const audioSystem = APP.scene?.systems["hubs-systems"].audioSystem;
   APP.audios.delete(eid);
   APP.supplementaryAttenuation.delete(eid);
@@ -34,7 +36,9 @@ function swapAudioType<T extends AudioObject3D>(
   NewType: AudioConstructor<T>
 ) {
   const audio = world.eid2obj.get(eid)! as AudioObject3D;
-  audio.disconnect();
+  if (audio.source !== null) {
+    audio.disconnect();
+  }
   APP.sourceType.set(eid, SourceType.MEDIA_VIDEO);
   APP.supplementaryAttenuation.delete(eid);
   APP.audios.delete(eid);
