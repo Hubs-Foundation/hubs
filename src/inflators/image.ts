@@ -26,14 +26,14 @@ export function inflateImage(world: HubsWorld, eid: EntityID, params: ImageParam
   addComponent(world, MediaImage, eid);
 
   if (projection !== undefined) {
-    MediaImage.projection[eid] = APP.getSid(projection);
+    MediaImage.projection[eid] = projection;
   } else {
-    MediaImage.projection[eid] = APP.getSid(ProjectionMode.FLAT);
+    MediaImage.projection[eid] = ProjectionMode.FLAT;
   }
   if (alphaMode !== undefined) {
-    MediaImage.alphaMode[eid] = APP.getSid(alphaMode);
+    MediaImage.alphaMode[eid] = alphaMode;
   } else {
-    MediaImage.alphaMode[eid] = APP.getSid(AlphaMode.Opaque);
+    MediaImage.alphaMode[eid] = AlphaMode.Opaque;
   }
   if (alphaCutoff !== undefined) {
     MediaImage.alphaCutoff[eid] = alphaCutoff;

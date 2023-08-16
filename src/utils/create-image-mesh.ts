@@ -4,9 +4,15 @@ import { Layers } from "../camera-layers";
 import { Texture } from "three";
 
 export enum AlphaMode {
-  Blend = "blend",
-  Mask = "mask",
-  Opaque = "opaque"
+  Opaque = 0,
+  Blend = 1,
+  Mask = 2
+}
+
+export const enum ALPHA_MODE {
+  OPAQUE = "opaque",
+  BLEND = "blend",
+  MASK = "mask"
 }
 
 export function create360ImageMesh(texture: Texture, alphaMode: AlphaMode = AlphaMode.Opaque, alphaCutoff = 0.5) {

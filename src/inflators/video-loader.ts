@@ -1,11 +1,10 @@
 import { HubsWorld } from "../app";
 import { MediaVideoLoaderData } from "../bit-components";
-import { ProjectionMode } from "../utils/projection-mode";
 import { inflateMediaLoader } from "./media-loader";
 
 export interface VideoLoaderParams {
   src: string;
-  projection?: ProjectionMode;
+  projection?: string;
   autoPlay: boolean;
   controls: boolean;
   loop: boolean;

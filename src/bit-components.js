@@ -173,8 +173,6 @@ export const MediaImage = defineComponent({
   alphaCutoff: Types.f32
 });
 MediaImage.cacheKey[$isStringType] = true;
-MediaImage.projection[$isStringType] = true;
-MediaImage.alphaMode[$isStringType] = true;
 /**
  * @type {Map<EntityId, ImageLoaderParams}>}
  */
@@ -193,7 +191,6 @@ export const MediaVideo = defineComponent({
   flags: Types.ui8,
   projection: Types.ui8
 });
-MediaVideo.projection[$isStringType] = true;
 /**
  * @type {Map<EntityId, VideoLoaderParams}>}
  */

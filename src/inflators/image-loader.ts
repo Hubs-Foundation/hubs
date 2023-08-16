@@ -5,7 +5,7 @@ import { MediaImageLoaderData } from "../bit-components";
 
 export interface ImageLoaderParams {
   src: string;
-  projection: ProjectionMode;
+  projection: string;
   alphaMode: string;
   alphaCutoff: number;
 }

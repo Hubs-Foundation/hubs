@@ -32,10 +32,10 @@ export function inflateVideo(world: HubsWorld, eid: EntityID, params: VideoParam
   if (controls !== undefined) {
     MediaVideo.flags[eid] |= VIDEO_FLAGS.CONTROLS;
   }
-  if (projection) {
-    MediaVideo.projection[eid] = APP.getSid(projection);
+  if (projection !== undefined) {
+    MediaVideo.projection[eid] = projection;
   } else {
-    MediaVideo.projection[eid] = APP.getSid(ProjectionMode.FLAT);
+    MediaVideo.projection[eid] = ProjectionMode.FLAT;
   }
 
   MediaVideo.ratio[eid] = ratio !== undefined ? ratio : 1;

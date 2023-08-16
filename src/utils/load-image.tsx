@@ -1,11 +1,11 @@
 /** @jsx createElementEntity */
 import { createElementEntity } from "../utils/jsx-entity";
-import { ProjectionMode } from "./projection-mode";
+import { PROJECTION_MODE, ProjectionMode } from "./projection-mode";
 import { loadTextureCancellable } from "../utils/load-texture";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { HubsWorld } from "../app";
 import { Texture } from "three";
-import { AlphaMode } from "./create-image-mesh";
+import { ALPHA_MODE, AlphaMode } from "./create-image-mesh";
 import { EntityID } from "./networking-types";
 import { MediaImageLoaderData } from "../bit-components";
 import { ImageParams } from "../inflators/image";
@@ -39,8 +39,18 @@ export function* loadImage(world: HubsWorld, eid: EntityID, url: string, content
 
   if (MediaImageLoaderData.has(eid)) {
     const params = MediaImageLoaderData.get(eid)!;
-    imageDef.projection = params.projection as ProjectionMode;
-    imageDef.alphaMode = params.alphaMode as AlphaMode;
+    if (params.projection === PROJECTION_MODE.FLAT) {
+      imageDef.projection = ProjectionMode.FLAT;
+    } else if (params.projection === PROJECTION_MODE.SPHERE_EQUIRECTANGULAR) {
+      imageDef.projection = ProjectionMode.SPHERE_EQUIRECTANGULAR;
+    }
+    if (params.alphaMode === ALPHA_MODE.OPAQUE) {
+      imageDef.alphaMode = AlphaMode.Opaque;
+    } else if (params.alphaMode === ALPHA_MODE.BLEND) {
+      imageDef.alphaMode = AlphaMode.Blend;
+    } else if ((params.alphaMode = ALPHA_MODE.MASK)) {
+    }
+    imageDef.alphaMode === AlphaMode.Mask;
     imageDef.alphaCutoff = params.alphaCutoff;
     MediaImageLoaderData.delete(eid);
   }
