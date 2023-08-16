@@ -8,7 +8,7 @@ import { EntityID } from "../utils/networking-types";
 import { Texture } from "three";
 
 export const VIDEO_FLAGS = {
-  CONTROLS: 1 << 2
+  CONTROLS: 1 << 0
 };
 
 export interface VideoParams {
