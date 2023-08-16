@@ -25,14 +25,20 @@ export function inflateImage(world: HubsWorld, eid: EntityID, params: ImageParam
   addObject3DComponent(world, eid, mesh);
   addComponent(world, MediaImage, eid);
 
-  if (projection) {
+  if (projection !== undefined) {
     MediaImage.projection[eid] = APP.getSid(projection);
+  } else {
+    MediaImage.projection[eid] = APP.getSid(ProjectionMode.FLAT);
   }
-  if (alphaMode) {
+  if (alphaMode !== undefined) {
     MediaImage.alphaMode[eid] = APP.getSid(alphaMode);
+  } else {
+    MediaImage.alphaMode[eid] = APP.getSid(AlphaMode.Opaque);
   }
-  if (alphaCutoff) {
+  if (alphaCutoff !== undefined) {
     MediaImage.alphaCutoff[eid] = alphaCutoff;
+  } else {
+    MediaImage.alphaCutoff[eid] = 0;
   }
 
   MediaImage.cacheKey[eid] = APP.getSid(cacheKey);

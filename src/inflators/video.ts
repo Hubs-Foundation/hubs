@@ -28,14 +28,17 @@ export function inflateVideo(world: HubsWorld, eid: EntityID, params: VideoParam
   addObject3DComponent(world, eid, mesh);
   addComponent(world, MediaVideo, eid);
 
-  if (controls) {
+  MediaVideo.flags[eid] = 0;
+  if (controls !== undefined) {
     MediaVideo.flags[eid] |= VIDEO_FLAGS.CONTROLS;
   }
   if (projection) {
     MediaVideo.projection[eid] = APP.getSid(projection);
+  } else {
+    MediaVideo.projection[eid] = APP.getSid(ProjectionMode.FLAT);
   }
 
-  MediaVideo.ratio[eid] = ratio;
+  MediaVideo.ratio[eid] = ratio !== undefined ? ratio : 1;
   MediaVideoData.set(eid, video);
   return eid;
 }
