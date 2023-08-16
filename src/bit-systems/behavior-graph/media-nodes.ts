@@ -7,12 +7,13 @@ import {
   MediaVideo,
   MediaVideoData,
   Networked,
-  NetworkedVideo
+  NetworkedVideo,
+  Owned
 } from "../../bit-components";
 import { HubsWorld } from "../../app";
 import { findAncestorWithComponent, findChildWithComponent } from "../../utils/bit-utils";
-import { defineQuery, enterQuery, exitQuery, hasComponent } from "bitecs";
-import { updateVideoSrc } from "../video-system";
+import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent } from "bitecs";
+import { MediaVideoUpdateSrcEvent, updateVideoSrc } from "../video-system";
 
 type MediaEventState = {
   emitters: {
@@ -123,8 +124,9 @@ export const MediaNodes = definitionListToMap([
           } else if (triggeringSocketName === "pause") {
             video.pause();
           } else if (triggeringSocketName === "setSrc") {
-            video.currentTime = 0;
-            updateVideoSrc(APP.world, media, read("src") as string);
+            if (!hasComponent(world, MediaVideoUpdateSrcEvent, media)) {
+              updateVideoSrc(world, media, read("src") as string, video);
+            }
           }
         }
       }
@@ -133,43 +135,65 @@ export const MediaNodes = definitionListToMap([
   })
 ]);
 
+function addVideoListeners(world: HubsWorld, eid: EntityID) {
+  const mediaRoot = findAncestorWithComponent(world, MediaRoot, eid)!;
+  const mediaState = mediaEvents.get(mediaRoot)!;
+  if (mediaState) {
+    const video = MediaVideoData.get(eid) as HTMLVideoElement;
+    const listeners = videoListeners.get(eid)!;
+    video.addEventListener("play", listeners.onPlay);
+    video.addEventListener("pause", listeners.onPause);
+    video.addEventListener("end", listeners.onEnd);
+    mediaState.emitters["onMediaEvent"].emit({ entity: mediaRoot, event: "create" });
+  }
+}
+
+function removeVideoListeners(world: HubsWorld, eid: EntityID) {
+  const mediaRoot = findAncestorWithComponent(world, MediaRoot, eid)!;
+  const mediaState = mediaEvents.get(mediaRoot)!;
+  if (mediaState) {
+    const video = MediaVideoData.get(eid) as HTMLVideoElement;
+    const listeners = videoListeners.get(eid)!;
+    video.removeEventListener("play", listeners.onPlay);
+    video.removeEventListener("pause", listeners.onPause);
+    video.removeEventListener("end", listeners.onEnd);
+    mediaState.emitters["onMediaEvent"].emit({ entity: mediaRoot, event: "destroy" });
+  }
+}
+
 type VideoListeners = {
   onPlay: EventListener;
   onPause: EventListener;
   onEnd: EventListener;
 };
+
 const videoListeners = new Map<EntityID, VideoListeners>();
 const mediaQuery = defineQuery([MediaVideo, Networked, NetworkedVideo, MediaLoaded]);
 const mediaEnterQuery = enterQuery(mediaQuery);
 const mediaExitQuery = exitQuery(mediaQuery);
+const mediaVideoSrcUpdatedQuery = defineQuery([MediaVideo, MediaVideoUpdateSrcEvent]);
+const mediaVideoSrcUpdatedEnterQuery = enterQuery(mediaVideoSrcUpdatedQuery);
+const mediaVideoSrcUpdatedExitQuery = exitQuery(mediaVideoSrcUpdatedQuery);
 export function mediaSystem(world: HubsWorld) {
+  mediaVideoSrcUpdatedEnterQuery(world).forEach(eid => removeVideoListeners(world, eid));
+  mediaVideoSrcUpdatedExitQuery(world).forEach(eid => addVideoListeners(world, eid));
+
   mediaEnterQuery(world).forEach(eid => {
     const mediaRoot = findAncestorWithComponent(world, MediaRoot, eid)!;
-    const video = MediaVideoData.get(eid) as HTMLVideoElement;
     const mediaState = mediaEvents.get(mediaRoot)!;
-    if (video && mediaState) {
+    if (mediaState) {
       const listeners = {
         onPlay: (ev: Event) => mediaState.emitters["onMediaEvent"].emit({ entity: mediaRoot, event: "play" }),
         onPause: (ev: Event) => mediaState.emitters["onMediaEvent"].emit({ entity: mediaRoot, event: "pause" }),
         onEnd: (ev: Event) => mediaState.emitters["onMediaEvent"].emit({ entity: mediaRoot, event: "end" })
       };
       videoListeners.set(eid, listeners);
-      mediaState.emitters["onMediaEvent"].emit({ entity: mediaRoot, event: "create" });
-      video.addEventListener("play", listeners.onPlay);
-      video.addEventListener("pause", listeners.onPause);
-      video.addEventListener("end", listeners.onEnd);
+      addVideoListeners(world, eid);
     }
   });
 
   mediaExitQuery(world).forEach(eid => {
-    const mediaRoot = findAncestorWithComponent(world, MediaRoot, eid)!;
-    const video = MediaVideoData.get(eid) as HTMLVideoElement;
-    const mediaState = mediaEvents.get(mediaRoot)!;
-    if (video && mediaState) {
-      const listeners = videoListeners.get(eid)!;
-      video.removeEventListener("play", listeners.onPlay);
-      mediaState.emitters["onMediaEvent"].emit({ entity: mediaRoot, event: "destroy" });
-      videoListeners.delete(eid);
-    }
+    removeVideoListeners(world, eid);
+    videoListeners.delete(eid);
   });
 }

@@ -1,4 +1,12 @@
-import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeEntity } from "bitecs";
+import {
+  addComponent,
+  defineComponent,
+  defineQuery,
+  enterQuery,
+  exitQuery,
+  hasComponent,
+  removeComponent
+} from "bitecs";
 import { Mesh } from "three";
 import { HubsWorld } from "../app";
 import {
@@ -22,25 +30,28 @@ import { takeSoftOwnership } from "../utils/take-soft-ownership";
 import { disposeNode } from "../utils/three-utils";
 import { HubsVideoTexture } from "../textures/HubsVideoTexture";
 import { createImageMesh } from "../utils/create-image-mesh";
-import { JobRunner } from "../utils/coroutine-utils";
+import { ClearFunction, JobRunner } from "../utils/coroutine-utils";
 import { loadVideoTexture } from "../utils/load-video-texture";
 import { resolveMediaInfo } from "../utils/media-utils";
 import { swapObject3DComponent } from "../utils/jsx-entity";
 import { MediaInfo } from "./media-loading";
 
+export const MediaVideoUpdateSrcEvent = defineComponent();
+
 enum Flags {
   PAUSED = 1 << 0
 }
 
-function* loadSrc(world: HubsWorld, eid: EntityID, src: string) {
+function* loadSrc(world: HubsWorld, eid: EntityID, src: string, clearRollbacks: ClearFunction) {
   const { accessibleUrl, contentType } = (yield resolveMediaInfo(src)) as MediaInfo;
   const { texture, ratio, video }: { texture: HubsVideoTexture; ratio: number; video: HTMLVideoElement } =
     yield loadVideoTexture(accessibleUrl, contentType);
+
+  clearRollbacks(); // After this point, normal entity cleanup will take care of things
+
   // TODO: Check the projection mode to allow EQUIRECT
   const videoObj = createImageMesh(texture, ratio);
   MediaVideo.ratio[eid] = ratio;
-  const oldVideo = MediaVideoData.get(eid) as HTMLVideoElement;
-  oldVideo.pause();
   MediaVideoData.set(eid, video);
 
   const mediaRoot = findAncestorWithComponent(world, MediaRoot, eid)!;
@@ -61,11 +72,17 @@ function* loadSrc(world: HubsWorld, eid: EntityID, src: string) {
   if ((NetworkedVideo.flags[eid] & Flags.PAUSED) === 0) {
     video.play();
   }
+
+  removeComponent(world, MediaVideoUpdateSrcEvent, eid);
 }
 
-export function updateVideoSrc(world: HubsWorld, eid: EntityID, src: string) {
+export function updateVideoSrc(world: HubsWorld, eid: EntityID, src: string, video: HTMLVideoElement) {
+  video.currentTime = 0;
+  video.pause();
+  addComponent(world, MediaVideoUpdateSrcEvent, eid);
+
   jobs.stop(eid);
-  jobs.add(eid, () => loadSrc(world, eid, src));
+  jobs.add(eid, clearRollbacks => loadSrc(world, eid, src, clearRollbacks));
 }
 
 const jobs = new JobRunner();
@@ -133,9 +150,8 @@ export function videoSystem(world: HubsWorld, audioSystem: AudioSystem) {
       NetworkedVideo.src[eid] = APP.getSid(video.src);
     } else {
       const networkedSrc = APP.getString(NetworkedVideo.src[eid])!;
-      if (networkedSrc !== video.src) {
-        video.src = networkedSrc;
-        updateVideoSrc(world, eid, networkedSrc);
+      if (networkedSrc !== video.src && !hasComponent(world, MediaVideoUpdateSrcEvent, eid)) {
+        updateVideoSrc(world, eid, networkedSrc, video);
       }
       const networkedPauseState = !!(NetworkedVideo.flags[eid] & Flags.PAUSED);
       if (networkedPauseState !== video.paused) {
