@@ -34,7 +34,6 @@ function* updateLinkType(world: HubsWorld, eid: EntityID) {
 const jobs = new JobRunner();
 export function linkSystem(world: HubsWorld) {
   linkInitializingEnterQuery(world).forEach(eid => {
-    jobs.stop(eid);
     jobs.add(eid, () => updateLinkType(world, eid));
   });
   linkInitializingExitQuery(world).forEach(eid => {
