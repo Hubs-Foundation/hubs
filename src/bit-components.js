@@ -255,13 +255,16 @@ export const ObjectMenu = defineComponent({
 // TODO: Store this data elsewhere, since only one or two will ever exist.
 export const LinkHoverMenu = defineComponent({
   targetObjectRef: Types.eid,
-  linkButtonRef: Types.eid
+  linkButtonRef: Types.eid,
+  clearTargetTimer: Types.f64
 });
 export const LinkHoverMenuItem = defineComponent();
 export const Link = defineComponent({
-  url: Types.ui32
+  url: Types.ui32,
+  type: Types.ui8
 });
 Link.url[$isStringType] = true;
+export const LinkInitializing = defineComponent();
 // TODO: Store this data elsewhere, since only one or two will ever exist.
 export const PDFMenu = defineComponent({
   prevButtonRef: Types.eid,

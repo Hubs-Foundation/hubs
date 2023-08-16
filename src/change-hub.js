@@ -29,7 +29,7 @@ function loadRoomObjects(hubId) {
   objectsScene.appendChild(objectsEl);
 }
 
-export async function changeHub(hubId, addToHistory = true, waypoint = null) {
+export async function changeHub(hubId, addToHistory = true, waypoint = "") {
   if (hubId === APP.hub.hub_id) {
     console.log("Change hub called with the current hub id. This is a noop.");
     return;

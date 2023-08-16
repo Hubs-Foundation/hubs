@@ -79,6 +79,7 @@ import { linearTransformSystem } from "../bit-systems/linear-transform";
 import { quackSystem } from "../bit-systems/quack";
 import { mixerAnimatableSystem } from "../bit-systems/mixer-animatable";
 import { loopAnimationSystem } from "../bit-systems/loop-animation";
+import { linkSystem } from "../bit-systems/link-system";
 
 declare global {
   interface Window {
@@ -250,7 +251,8 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   videoMenuSystem(world, aframeSystems.userinput);
   videoSystem(world, hubsSystems.audioSystem);
   pdfMenuSystem(world, sceneEl.is("frozen"));
-  linkHoverMenuSystem(world);
+  linkSystem(world);
+  linkHoverMenuSystem(world, sceneEl.is("frozen"));
   pdfSystem(world);
   mediaFramesSystem(world, hubsSystems.physicsSystem);
   hubsSystems.audioZonesSystem.tick(hubsSystems.el);
