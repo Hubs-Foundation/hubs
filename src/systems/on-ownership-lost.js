@@ -6,6 +6,7 @@ import {
   HeldHandRight,
   HeldRemoteLeft,
   HeldRemoteRight,
+  InteractableObject,
   OffersRemoteConstraint,
   Owned,
   Rigidbody
@@ -28,7 +29,15 @@ export function onOwnershipLost(world) {
     }
 
     if (hasComponent(world, Rigidbody, eid)) {
-      physicsSystem.updateRigidBody(eid, kinematicOptions);
+      // TODO: If this system should only act on FloatyObjects we should express that
+      // in the query instead of doing this.
+      if (hasComponent(world, InteractableObject, eid)) {
+        physicsSystem.updateRigidBody(eid, {
+          type: "kinematic"
+        });
+      } else {
+        physicsSystem.updateRigidBody(eid, kinematicOptions);
+      }
     }
   }
 }

@@ -16,10 +16,8 @@ import {
   Rigidbody,
   MakeKinematicOnRelease,
   Constraint,
-  NetworkedFloatyObject,
-  RestoreBodyTypeOnRelease
+  NetworkedFloatyObject
 } from "../bit-components";
-import { getBodyTypeFromType } from "../inflators/rigid-body";
 
 export const MakeStaticWhenAtRest = defineComponent();
 
@@ -56,15 +54,6 @@ function makeKinematicOnRelease(world) {
   makeKinematicOnReleaseExitQuery(world).forEach(eid => {
     if (!entityExists(world, eid) || !hasComponent(world, Owned, eid)) return;
     physicsSystem.updateRigidBody(eid, { type: "kinematic" });
-  });
-}
-
-const restoreTypeOnReleaseExitQuery = exitQuery(defineQuery([Rigidbody, Constraint, RestoreBodyTypeOnRelease]));
-function restoreTypeOnRelease(world) {
-  const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
-  restoreTypeOnReleaseExitQuery(world).forEach(eid => {
-    if (!entityExists(world, eid) || !hasComponent(world, Owned, eid)) return;
-    physicsSystem.updateRigidBody(eid, { type: getBodyTypeFromType(Rigidbody.type[eid]) });
   });
 }
 
@@ -170,5 +159,4 @@ export const floatyObjectSystem = world => {
 
   makeStaticAtRest(world);
   makeKinematicOnRelease(world);
-  restoreTypeOnRelease(world);
 };

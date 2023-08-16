@@ -146,7 +146,6 @@ export const MediaLoading = defineComponent();
 export const FloatyObject = defineComponent({ flags: Types.ui8, releaseGravity: Types.f32 });
 export const NetworkedFloatyObject = defineComponent({ flags: Types.ui8 });
 export const MakeKinematicOnRelease = defineComponent();
-export const RestoreBodyTypeOnRelease = defineComponent();
 export const CameraTool = defineComponent({
   snapTime: Types.f32,
   state: Types.ui8,
@@ -426,3 +425,6 @@ export const NetworkedBehavior = defineComponent({
  * @type {Map<EntityId, Map}>}
  */
 export const NetworkedBehaviorData = new Map();
+export const InteractableObject = defineComponent({
+  type: Types.ui8
+});

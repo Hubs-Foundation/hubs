@@ -30,13 +30,10 @@ export const PhysicsNodes = definitionListToMap([
       const cmp = findChildWithComponent(world, Rigidbody, entity);
       if (cmp && hasComponent(world, Owned, cmp)) {
         if (triggeringSocketName === "setType") {
-          const type = read("type") as string;
           const physicsSystem = APP.scene?.systems["hubs-systems"].physicsSystem;
           physicsSystem.updateRigidBody(cmp, {
-            type
+            type: read("type") as string
           });
-          const bodyId = Rigidbody.bodyId[cmp];
-          physicsSystem.activateBody(bodyId);
         } else if (triggeringSocketName === "setMass") {
           const physicsSystem = APP.scene?.systems["hubs-systems"].physicsSystem;
           physicsSystem.updateRigidBody(cmp, {
