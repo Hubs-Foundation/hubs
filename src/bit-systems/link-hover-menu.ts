@@ -78,7 +78,7 @@ async function handleLinkClick(world: HubsWorld, button: EntityID) {
     case LinkType.ROOM:
       const waypoint = url.hash && url.hash.substring(1);
       // move to new room without page load or entry flow
-      const hubId = hubIdFromUrl(url);
+      const hubId = hubIdFromUrl(src);
       changeHub(hubId, true, waypoint);
       break;
     case LinkType.ROOM_URL:
