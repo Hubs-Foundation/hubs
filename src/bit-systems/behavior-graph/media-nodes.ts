@@ -107,7 +107,9 @@ export const MediaNodes = definitionListToMap([
       { key: "setSrc", valueType: "flow" },
       { key: "src", valueType: "string" },
       { key: "setMuted", valueType: "flow" },
-      { key: "muted", valueType: "boolean" }
+      { key: "muted", valueType: "boolean" },
+      { key: "setLoop", valueType: "flow" },
+      { key: "loop", valueType: "boolean" }
     ],
     initialState: undefined,
     out: { flow: "flow" },
@@ -127,6 +129,8 @@ export const MediaNodes = definitionListToMap([
             if (!hasComponent(world, MediaVideoUpdateSrcEvent, media)) {
               updateVideoSrc(world, media, read("src") as string, video);
             }
+          } else if (triggeringSocketName === "setLoop") {
+            video.loop = read("loop") as boolean;
           }
         }
       }
