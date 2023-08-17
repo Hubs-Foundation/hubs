@@ -19,8 +19,14 @@ export interface VideoParams {
   controls: boolean;
 }
 
+const DEFAULTS: Partial<VideoParams> = {
+  projection: ProjectionMode.FLAT,
+  controls: true,
+  ratio: 1
+};
+
 export function inflateVideo(world: HubsWorld, eid: EntityID, params: VideoParams) {
-  const { texture, ratio, projection, video, controls } = params;
+  const { texture, ratio, projection, video } = params;
   const mesh =
     projection === ProjectionMode.SPHERE_EQUIRECTANGULAR
       ? create360ImageMesh(texture)
@@ -28,17 +34,13 @@ export function inflateVideo(world: HubsWorld, eid: EntityID, params: VideoParam
   addObject3DComponent(world, eid, mesh);
   addComponent(world, MediaVideo, eid);
 
+  const requiredParams = Object.assign({}, DEFAULTS, params) as Required<VideoParams>;
   MediaVideo.flags[eid] = 0;
-  if (controls !== undefined) {
+  if (!!requiredParams.controls) {
     MediaVideo.flags[eid] |= VIDEO_FLAGS.CONTROLS;
   }
-  if (projection !== undefined) {
-    MediaVideo.projection[eid] = projection;
-  } else {
-    MediaVideo.projection[eid] = ProjectionMode.FLAT;
-  }
-
-  MediaVideo.ratio[eid] = ratio !== undefined ? ratio : 1;
+  MediaVideo.projection[eid] = requiredParams.projection;
+  MediaVideo.ratio[eid] = requiredParams.ratio;
   MediaVideoData.set(eid, video);
   return eid;
 }

@@ -70,7 +70,7 @@ export function inflateWaypoint(world: HubsWorld, eid: number, props: WaypointPa
             texture,
             ratio: 1,
             projection: ProjectionMode.FLAT,
-            alphaMode: AlphaMode.Blend,
+            alphaMode: AlphaMode.BLEND,
             cacheKey
           }}
         ></entity>

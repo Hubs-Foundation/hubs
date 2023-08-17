@@ -3,19 +3,30 @@ import { errorTexture } from "../utils/error-texture";
 import { Layers } from "../camera-layers";
 import { Texture } from "three";
 
-export enum AlphaMode {
-  Opaque = 0,
-  Blend = 1,
-  Mask = 2
+export const enum AlphaMode {
+  OPAQUE = 0,
+  BLEND = 1,
+  MASK = 2
 }
 
-export const enum ALPHA_MODE {
+export const enum AlphaModeName {
   OPAQUE = "opaque",
   BLEND = "blend",
   MASK = "mask"
 }
 
-export function create360ImageMesh(texture: Texture, alphaMode: AlphaMode = AlphaMode.Opaque, alphaCutoff = 0.5) {
+export function getAlphaModeFromAlphaModeName(alphaMode: AlphaModeName) {
+  if (alphaMode === AlphaModeName.OPAQUE) {
+    return AlphaMode.OPAQUE;
+  } else if (alphaMode === AlphaModeName.BLEND) {
+    return AlphaMode.BLEND;
+  } else if (alphaMode === AlphaModeName.MASK) {
+    return AlphaMode.MASK;
+  }
+  return AlphaMode.OPAQUE;
+}
+
+export function create360ImageMesh(texture: Texture, alphaMode: AlphaMode = AlphaMode.OPAQUE, alphaCutoff = 0.5) {
   const geometry = new THREE.SphereBufferGeometry(1, 64, 32);
   // invert the geometry on the x-axis so that all of the faces point inward
   geometry.scale(-1, 1, 1);
@@ -33,14 +44,14 @@ export function create360ImageMesh(texture: Texture, alphaMode: AlphaMode = Alph
     material.transparent = true;
   } else {
     switch (alphaMode) {
-      case AlphaMode.Opaque:
+      case AlphaMode.OPAQUE:
         material.transparent = false;
         break;
-      case AlphaMode.Mask:
+      case AlphaMode.MASK:
         material.transparent = false;
         material.alphaTest = alphaCutoff;
         break;
-      case AlphaMode.Blend:
+      case AlphaMode.BLEND:
         material.transparent = true;
         material.alphaTest = 0;
         break;
@@ -60,7 +71,7 @@ export function create360ImageMesh(texture: Texture, alphaMode: AlphaMode = Alph
 export function createImageMesh(
   texture: Texture,
   ratio: number,
-  alphaMode: AlphaMode = AlphaMode.Opaque,
+  alphaMode: AlphaMode = AlphaMode.OPAQUE,
   alphaCutoff = 0.5
 ) {
   const width = Math.min(1.0, 1.0 / ratio);
@@ -71,15 +82,15 @@ export function createImageMesh(
   material.toneMapped == false;
   material.side = THREE.DoubleSide;
   switch (alphaMode) {
-    case AlphaMode.Mask:
+    case AlphaMode.MASK:
       material.transparent = false;
       material.alphaTest = alphaCutoff;
       break;
-    case AlphaMode.Blend:
+    case AlphaMode.BLEND:
       material.transparent = true;
       material.alphaTest = 0;
       break;
-    case AlphaMode.Opaque:
+    case AlphaMode.OPAQUE:
     default:
       material.transparent = false;
   }

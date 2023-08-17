@@ -1,6 +1,6 @@
 /** @jsx createElementEntity */
 import { createElementEntity } from "../utils/jsx-entity";
-import { PROJECTION_MODE, ProjectionMode } from "./projection-mode";
+import { ProjectionMode, getProjectionFromProjectionName } from "./projection-mode";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { loadVideoTexture } from "../utils/load-video-texture";
 import { HubsWorld } from "../app";
@@ -19,11 +19,7 @@ export function* loadVideo(world: HubsWorld, eid: EntityID, url: string, content
     loop = params.loop;
     autoPlay = params.autoPlay;
     controls = params.controls;
-    if (params.projection === PROJECTION_MODE.FLAT) {
-      projection = ProjectionMode.FLAT;
-    } else if (params.projection === PROJECTION_MODE.SPHERE_EQUIRECTANGULAR) {
-      projection = ProjectionMode.SPHERE_EQUIRECTANGULAR;
-    }
+    projection = getProjectionFromProjectionName(params.projection);
     MediaVideoLoaderData.delete(eid);
   }
 

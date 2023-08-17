@@ -16,6 +16,13 @@ export interface ImageParams {
   alphaCutoff: number;
 }
 
+const DEFAULTS: Partial<ImageParams> = {
+  projection: ProjectionMode.FLAT,
+  alphaMode: AlphaMode.OPAQUE,
+  alphaCutoff: 0.5,
+  ratio: 1
+};
+
 export function inflateImage(world: HubsWorld, eid: EntityID, params: ImageParams) {
   const { texture, ratio, projection, alphaMode, alphaCutoff, cacheKey } = params;
   const mesh =
@@ -25,22 +32,11 @@ export function inflateImage(world: HubsWorld, eid: EntityID, params: ImageParam
   addObject3DComponent(world, eid, mesh);
   addComponent(world, MediaImage, eid);
 
-  if (projection !== undefined) {
-    MediaImage.projection[eid] = projection;
-  } else {
-    MediaImage.projection[eid] = ProjectionMode.FLAT;
-  }
-  if (alphaMode !== undefined) {
-    MediaImage.alphaMode[eid] = alphaMode;
-  } else {
-    MediaImage.alphaMode[eid] = AlphaMode.Opaque;
-  }
-  if (alphaCutoff !== undefined) {
-    MediaImage.alphaCutoff[eid] = alphaCutoff;
-  } else {
-    MediaImage.alphaCutoff[eid] = 0;
-  }
-
+  const requiredParams = Object.assign({}, DEFAULTS, params) as Required<ImageParams>;
+  MediaImage.projection[eid] = requiredParams.projection;
+  MediaImage.alphaMode[eid] = requiredParams.alphaMode;
+  MediaImage.alphaCutoff[eid] = requiredParams.alphaCutoff;
   MediaImage.cacheKey[eid] = APP.getSid(cacheKey);
+
   return eid;
 }
