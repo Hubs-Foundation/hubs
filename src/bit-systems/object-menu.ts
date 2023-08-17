@@ -1,10 +1,12 @@
-import { defineQuery, enterQuery, entityExists, exitQuery, hasComponent } from "bitecs";
+import { addComponent, defineQuery, enterQuery, entityExists, exitQuery, hasComponent } from "bitecs";
 import { Matrix4, Quaternion, Vector3 } from "three";
 import type { HubsWorld } from "../app";
 import {
+  EntityStateDirty,
   HeldRemoteRight,
   HoveredRemoteRight,
   Interacted,
+  Networked,
   ObjectMenu,
   ObjectMenuTarget,
   RemoteRight,
@@ -14,6 +16,7 @@ import { anyEntityWith, findAncestorWithComponent } from "../utils/bit-utils";
 import { createNetworkedEntity } from "../utils/create-networked-entity";
 import HubChannel from "../utils/hub-channel";
 import type { EntityID } from "../utils/networking-types";
+import { takeOwnership } from "../utils/take-ownership";
 import { setMatrixWorld } from "../utils/three-utils";
 import { deleteTheDeletableAncestor } from "./delete-entity-system";
 import { createMessageDatas, isPinned } from "./networking";
@@ -81,6 +84,9 @@ function moveToTarget(world: HubsWorld, menu: EntityID) {
 //       temporary implementation that rely on the old systems.
 //       They should be rewritten more elegantly with bitecs.
 function startRotation(world: HubsWorld, targetEid: EntityID) {
+  if (hasComponent(world, Networked, targetEid)) {
+    takeOwnership(world, targetEid);
+  }
   const transformSystem = APP.scene!.systems["transform-selected-object"];
   const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
   physicsSystem.updateRigidBodyOptions(Rigidbody.bodyId[targetEid], { type: "kinematic" });
@@ -90,12 +96,18 @@ function startRotation(world: HubsWorld, targetEid: EntityID) {
   });
 }
 
-function stopRotation() {
+function stopRotation(world: HubsWorld, targetEid: EntityID) {
+  if (hasComponent(world, Networked, targetEid)) {
+    addComponent(world, EntityStateDirty, targetEid);
+  }
   const transformSystem = APP.scene!.systems["transform-selected-object"];
   transformSystem.stopTransform();
 }
 
 function startScaling(world: HubsWorld, targetEid: EntityID) {
+  if (hasComponent(world, Networked, targetEid)) {
+    takeOwnership(world, targetEid);
+  }
   // TODO: Don't use any
   // TODO: Remove the dependency with AFRAME
   const transformSystem = (AFRAME as any).scenes[0].systems["transform-selected-object"];
@@ -107,7 +119,10 @@ function startScaling(world: HubsWorld, targetEid: EntityID) {
   scalingHandler!.startScaling(world.eid2obj.get(rightCursorEid));
 }
 
-function stopScaling(world: HubsWorld) {
+function stopScaling(world: HubsWorld, targetEid: EntityID) {
+  if (hasComponent(world, Networked, targetEid)) {
+    addComponent(world, EntityStateDirty, targetEid);
+  }
   const rightCursorEid = anyEntityWith(world, RemoteRight)!;
   scalingHandler!.endScaling(world.eid2obj.get(rightCursorEid));
   scalingHandler = null;
@@ -188,10 +203,10 @@ function handleHeldEnter(world: HubsWorld, eid: EntityID, menuEid: EntityID) {
 function handleHeldExit(world: HubsWorld, eid: EntityID, menuEid: EntityID) {
   switch (eid) {
     case ObjectMenu.rotateButtonRef[menuEid]:
-      stopRotation();
+      stopRotation(world, ObjectMenu.targetRef[menuEid]);
       break;
     case ObjectMenu.scaleButtonRef[menuEid]:
-      stopScaling(world);
+      stopScaling(world, ObjectMenu.targetRef[menuEid]);
       break;
   }
 }
