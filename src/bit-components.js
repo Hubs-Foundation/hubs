@@ -161,6 +161,31 @@ export const MediaContentBounds = defineComponent({
   bounds: [Types.f32, 3]
 });
 
+// MediaImageLoaderData and MediaVideoLoaderData are
+// for parameters that are set at glTF inflators
+// inflateImageLoader and inflateVideoLoader and
+// are needed to be transported to util image/audio loaders.
+// They are handled as part of MediaLoader component data.
+
+/**
+ * @type {Map<EntityId, {
+ *   alphaCutoff: number,
+ *   alphaMode: AlphaMode,
+ *   projection: ProjectionMode
+ * }>}
+ */
+export const MediaImageLoaderData = new Map();
+
+/**
+ * @type {Map<EntityId, {
+ *   loop: boolean,
+ *   autoPlay: boolean,
+ *   controls: boolean,
+ *   projection: ProjectionMode
+ * }>}
+ */
+export const MediaVideoLoaderData = new Map();
+
 export const SceneRoot = defineComponent();
 export const NavMesh = defineComponent();
 export const SceneLoader = defineComponent({ src: Types.ui32 });
@@ -173,10 +198,6 @@ export const MediaImage = defineComponent({
   alphaCutoff: Types.f32
 });
 MediaImage.cacheKey[$isStringType] = true;
-/**
- * @type {Map<EntityId, ImageLoaderParams}>}
- */
-export const MediaImageLoaderData = new Map();
 
 export const NetworkedPDF = defineComponent({
   pageNumber: Types.ui8
@@ -191,10 +212,6 @@ export const MediaVideo = defineComponent({
   flags: Types.ui8,
   projection: Types.ui8
 });
-/**
- * @type {Map<EntityId, VideoLoaderParams}>}
- */
-export const MediaVideoLoaderData = new Map();
 /**
  * @type {Map<EntityId, HTMLVideoElement}>}
  */

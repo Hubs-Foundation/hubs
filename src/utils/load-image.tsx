@@ -1,13 +1,11 @@
 /** @jsx createElementEntity */
 import { createElementEntity } from "../utils/jsx-entity";
-import { ProjectionMode, getProjectionFromProjectionName } from "./projection-mode";
+import { ProjectionMode } from "./projection-mode";
 import { loadTextureCancellable } from "../utils/load-texture";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { HubsWorld } from "../app";
 import { Texture } from "three";
-import { AlphaMode, getAlphaModeFromAlphaModeName } from "./create-image-mesh";
-import { EntityID } from "./networking-types";
-import { MediaImageLoaderData } from "../bit-components";
+import { AlphaMode } from "./create-image-mesh";
 import { ImageParams } from "../inflators/image";
 
 export function* createImageDef(world: HubsWorld, url: string, contentType: string): Generator<any, ImageParams, any> {
@@ -34,15 +32,27 @@ export function* createImageDef(world: HubsWorld, url: string, contentType: stri
   };
 }
 
-export function* loadImage(world: HubsWorld, eid: EntityID, url: string, contentType: string) {
+type Params = {
+  alphaCutoff?: number;
+  alphaMode?: AlphaMode;
+  projection?: ProjectionMode;
+};
+
+export function* loadImage(world: HubsWorld, url: string, contentType: string, params: Params) {
+  const { alphaCutoff, alphaMode, projection } = params;
+
   const imageDef = yield* createImageDef(world, url, contentType);
 
-  if (MediaImageLoaderData.has(eid)) {
-    const params = MediaImageLoaderData.get(eid)!;
-    imageDef.projection = getProjectionFromProjectionName(params.projection);
-    imageDef.alphaMode = getAlphaModeFromAlphaModeName(params.alphaMode);
-    imageDef.alphaCutoff = params.alphaCutoff;
-    MediaImageLoaderData.delete(eid);
+  if (alphaCutoff !== undefined) {
+    imageDef.alphaCutoff = alphaCutoff;
+  }
+
+  if (alphaMode !== undefined) {
+    imageDef.alphaMode = alphaMode;
+  }
+
+  if (projection !== undefined) {
+    imageDef.projection = projection;
   }
 
   return renderAsEntity(world, <entity name="Image" image={imageDef} />);

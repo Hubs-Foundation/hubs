@@ -5,23 +5,23 @@ import { renderAsEntity } from "../utils/jsx-entity";
 import { loadAudioTexture } from "../utils/load-audio-texture";
 import { HubsWorld } from "../app";
 import { HubsVideoTexture } from "../textures/HubsVideoTexture";
-import { EntityID } from "./networking-types";
-import { MediaVideoLoaderData } from "../bit-components";
-import { VideoLoaderParams } from "../inflators/video-loader";
 
-export function* loadAudio(world: HubsWorld, eid: EntityID, url: string) {
-  let loop = true;
-  let autoPlay = true;
-  let controls = true;
-  let projection = ProjectionMode.FLAT;
-  if (MediaVideoLoaderData.has(eid)) {
-    const params = MediaVideoLoaderData.get(eid)! as VideoLoaderParams;
-    loop = params.loop;
-    autoPlay = params.autoPlay;
-    controls = params.controls;
-    MediaVideoLoaderData.delete(eid);
-  }
+type Params = {
+  loop?: boolean;
+  autoPlay?: boolean;
+  controls?: boolean;
+  projection?: ProjectionMode;
+};
 
+const DEFAULTS: Required<Params> = {
+  loop: true,
+  autoPlay: true,
+  controls: true,
+  projection: ProjectionMode.FLAT
+};
+
+export function* loadAudio(world: HubsWorld, url: string, params: Params) {
+  const { loop, autoPlay, controls, projection } = Object.assign({}, DEFAULTS, params);
   const { texture, ratio, video }: { texture: HubsVideoTexture; ratio: number; video: HTMLVideoElement } =
     yield loadAudioTexture(url, loop, autoPlay);
 
