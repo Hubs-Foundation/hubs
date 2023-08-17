@@ -42,7 +42,13 @@ enum Flags {
   PAUSED = 1 << 0
 }
 
-function* loadSrc(world: HubsWorld, eid: EntityID, src: string, clearRollbacks: ClearFunction) {
+function* loadSrc(
+  world: HubsWorld,
+  eid: EntityID,
+  src: string,
+  oldVideo: HTMLVideoElement,
+  clearRollbacks: ClearFunction
+) {
   const { accessibleUrl, contentType } = (yield resolveMediaInfo(src)) as MediaInfo;
   const { texture, ratio, video }: { texture: HubsVideoTexture; ratio: number; video: HTMLVideoElement } =
     yield loadVideoTexture(accessibleUrl, contentType);
@@ -53,6 +59,7 @@ function* loadSrc(world: HubsWorld, eid: EntityID, src: string, clearRollbacks: 
   const videoObj = createImageMesh(texture, ratio);
   MediaVideo.ratio[eid] = ratio;
   MediaVideoData.set(eid, video);
+  oldVideo.pause();
 
   const mediaRoot = findAncestorWithComponent(world, MediaRoot, eid)!;
   const mediaRootObj = world.eid2obj.get(mediaRoot)!;
@@ -77,12 +84,10 @@ function* loadSrc(world: HubsWorld, eid: EntityID, src: string, clearRollbacks: 
 }
 
 export function updateVideoSrc(world: HubsWorld, eid: EntityID, src: string, video: HTMLVideoElement) {
-  video.currentTime = 0;
-  video.pause();
   addComponent(world, MediaVideoUpdateSrcEvent, eid);
 
   jobs.stop(eid);
-  jobs.add(eid, clearRollbacks => loadSrc(world, eid, src, clearRollbacks));
+  jobs.add(eid, clearRollbacks => loadSrc(world, eid, src, video, clearRollbacks));
 }
 
 const jobs = new JobRunner();
