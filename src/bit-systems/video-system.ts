@@ -33,7 +33,7 @@ export function videoSystem(world: HubsWorld, audioSystem: AudioSystem) {
   mediaVideoEnterQuery(world).forEach(function (videoEid) {
     const videoObj = world.eid2obj.get(videoEid) as Mesh;
     const video = MediaVideoData.get(videoEid)!;
-    if (MediaVideo.autoPlay[videoEid]) {
+    if (video.autoplay) {
       video.play().catch(() => {
         // Need to deal with the fact play() may fail if user has not interacted with browser yet.
         console.error("Error auto-playing video.");

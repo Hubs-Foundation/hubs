@@ -13,7 +13,7 @@ export function ErrorObject() {
         texture: loadTextureFromCache("error", 1).texture,
         ratio: 1400 / 1200,
         projection: ProjectionMode.FLAT,
-        alphaMode: AlphaMode.Blend,
+        alphaMode: AlphaMode.BLEND,
         cacheKey: TextureCache.key("error", 1)
       }}
     />

@@ -4,7 +4,9 @@ import { HubsVideoTexture } from "../textures/HubsVideoTexture";
 
 // TODO: Replace async with function*?
 export async function loadAudioTexture(
-  src: string
+  src: string,
+  loop: boolean,
+  autoplay: boolean
 ): Promise<{ texture: HubsVideoTexture; ratio: number; video: HTMLVideoElement }> {
   const videoEl = createVideoOrAudioEl("video") as HTMLVideoElement;
   const imageEl = new Image();
@@ -33,6 +35,8 @@ export async function loadAudioTexture(
 
     videoEl.src = src;
     videoEl.onerror = failLoad;
+    videoEl.loop = loop;
+    videoEl.autoplay = autoplay;
 
     // NOTE: We used to use the canplay event here to yield the texture, but that fails to fire on iOS Safari
     // and also sometimes in Chrome it seems.

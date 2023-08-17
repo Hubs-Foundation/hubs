@@ -5,7 +5,7 @@ import { HLSVideoTexture } from "../textures/HLSVideoTexture";
 import { createDashPlayer, createHLSPlayer, createVideoOrAudioEl } from "./media-utils";
 import { HubsVideoTexture } from "../textures/HubsVideoTexture";
 
-export async function loadVideoTexture(src, contentType) {
+export async function loadVideoTexture(src, contentType, loop, autoplay) {
   const videoEl = createVideoOrAudioEl("video");
   let texture = null;
 
@@ -48,6 +48,8 @@ export async function loadVideoTexture(src, contentType) {
       texture = new HubsVideoTexture(videoEl);
       videoEl.src = src;
       videoEl.onerror = failLoad;
+      videoEl.loop = loop;
+      videoEl.autoplay = autoplay;
     }
 
     texture.minFilter = LinearFilter;

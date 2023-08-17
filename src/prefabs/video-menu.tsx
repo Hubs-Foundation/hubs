@@ -72,7 +72,7 @@ export function VideoMenuPrefab() {
           texture: playTexture,
           ratio: 1,
           projection: ProjectionMode.FLAT,
-          alphaMode: AlphaMode.Blend,
+          alphaMode: AlphaMode.BLEND,
           cacheKey: TextureCache.key(playImageUrl, 1)
         }}
         visible={false}
@@ -85,7 +85,7 @@ export function VideoMenuPrefab() {
           texture: pauseTexture,
           ratio: 1,
           projection: ProjectionMode.FLAT,
-          alphaMode: AlphaMode.Blend,
+          alphaMode: AlphaMode.BLEND,
           cacheKey: TextureCache.key(pauseImageUrl, 1)
         }}
         visible={false}

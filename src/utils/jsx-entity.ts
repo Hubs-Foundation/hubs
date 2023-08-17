@@ -45,7 +45,7 @@ import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
 import { GrabbableParams, inflateGrabbable } from "../inflators/grabbable";
 import { inflateImage } from "../inflators/image";
-import { inflateVideo } from "../inflators/video";
+import { inflateVideo, VideoParams } from "../inflators/video";
 import { inflateModel, ModelParams } from "../inflators/model";
 import { inflatePDFLoader, PDFLoaderParams } from "../inflators/pdf-loader";
 import { inflateVideoLoader, VideoLoaderParams } from "../inflators/video-loader";
@@ -265,23 +265,17 @@ type OptionalParams<T> = Partial<T> | true;
 export interface JSXComponentData extends ComponentData {
   slice9?: {
     size: [width: number, height: number];
-    insets: [top: number, buttom: number, left: number, right: number];
+    insets: [top: number, bottom: number, left: number, right: number];
     texture: Texture;
   };
   image?: {
     texture: Texture;
     ratio: number;
     projection: ProjectionMode;
-    alphaMode: typeof AlphaMode.Blend | typeof AlphaMode.Mask | typeof AlphaMode.Opaque;
+    alphaMode: AlphaMode;
     cacheKey: string;
   };
-  video?: {
-    texture: HubsVideoTexture;
-    ratio: number;
-    projection: ProjectionMode;
-    autoPlay: boolean;
-    video: HTMLVideoElement;
-  };
+  video?: VideoParams;
   networkedVideo?: true;
   videoMenu?: {
     sliderRef: Ref;
