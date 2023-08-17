@@ -1,18 +1,10 @@
 /** @jsx createElementEntity */
 
 import { createElementEntity } from "../utils/jsx-entity";
-import {
-  AxesHelper,
-  BoxBufferGeometry,
-  Mesh,
-  MeshBasicMaterial,
-  PlaneBufferGeometry,
-  Quaternion,
-  Vector3
-} from "three";
-import rightArrowSrc from "../assets/models/arrow_left.glb";
+import { Object3D, Quaternion, Vector3 } from "three";
+import rightArrowSrc from "../assets/models/arrow_right.glb";
 import { preload } from "../utils/preload";
-import { loadModel } from "../components/gltf-model-plus";
+import { cloneModelFromCache, loadModel } from "../components/gltf-model-plus";
 
 preload(loadModel(rightArrowSrc, null, true));
 
@@ -20,19 +12,50 @@ const depth = 0.1;
 const halfDepth = depth / 2;
 const height = 0.05;
 
-export function NavigationLine(points: Array<THREE.Vector3>) {
-  const arrows = [];
+interface navigationData {
+  path: Vector3[];
+  instructions: instruction[];
+}
+
+interface instruction {
+  action: "start" | "finish" | "move" | "turn" | "continue";
+  direction?: "right" | "left" | "forward";
+  angle?: number;
+  from?: Vector3;
+  prev?: Vector3;
+  line?: Vector3;
+  current?: Vector3;
+  next?: Vector3;
+  to?: Vector3;
+  distance?: number;
+}
+
+export function NavigationLine(navigation: navigationData) {
+  const lines = [];
+  const turns: any[] | undefined = [];
+  const points = navigation.path;
+
+  navigation.instructions.forEach(instruction => {
+    if (instruction.action === "turn") {
+      turns.push(<entity name={`turn`} model={{ model: GetArrow(instruction) }}></entity>);
+    }
+  });
 
   for (let i = 0; i < points.length - 1; i++) {
     const prev = points[i];
     const next = points[i + 1];
-
-    arrows.push(<entity name={`arrow ${i}`} object3D={GetLine(prev, next)} />);
+    lines.push(<entity name={`arrow ${i}`} object3D={GetLine(prev, next)} />);
   }
-  return <entity>{arrows}</entity>;
+
+  return (
+    <entity>
+      <entity>{turns}</entity>
+      <entity>{lines}</entity>
+    </entity>
+  );
 }
 
-export function GetLine(point1: Vector3, point2: Vector3): any {
+function GetLine(point1: Vector3, point2: Vector3): any {
   const width = point1.distanceTo(point2);
 
   const center = new THREE.Vector3().addVectors(point1, point2).multiplyScalar(0.5);
@@ -52,7 +75,24 @@ export function GetLine(point1: Vector3, point2: Vector3): any {
   boxMesh.position.copy(center.clone().addScaledVector(direction, -halfDepth));
   boxMesh.quaternion.copy(finalQuaterion);
 
-  boxMesh.add(new AxesHelper(5));
-
   return boxMesh;
+}
+
+function GetArrow(instruction: instruction) {
+  const obj = cloneModelFromCache(rightArrowSrc).scene as Object3D;
+  const line = instruction.line!;
+
+  const quaternion1 = new Quaternion().setFromUnitVectors(new Vector3(1, 0, 0), line);
+  const correctZaxis = new Vector3(0, 0, 1);
+
+  correctZaxis.applyQuaternion(quaternion1);
+
+  const desiredDirection = new Vector3().crossVectors(line, new Vector3(0, 1, 0));
+  const quaternion2 = new Quaternion().setFromUnitVectors(correctZaxis.normalize(), desiredDirection.normalize());
+
+  const finalQuaterion = quaternion2.multiply(quaternion1);
+  obj.applyQuaternion(finalQuaterion);
+  obj.position.copy(new Vector3(instruction.current!.x, instruction.current!.y + 1.5, instruction.current!.z));
+
+  return obj;
 }

@@ -20,6 +20,7 @@ import { sceneGraph } from "./routing-system";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { NavigationLine } from "../prefabs/nav-line";
 import { MeshLine, MeshLineMaterial, MeshLineRaycast } from "three.meshline";
+import { AxesHelper } from "three";
 
 const agentQuery = defineQuery([Agent]);
 const enterAgentQuery = enterQuery(agentQuery);
@@ -88,6 +89,8 @@ export default class VirtualAgent {
       this.setMicStatus();
 
       APP.scene.emit("agent-toggle");
+
+      this.scene.object3D.add(new AxesHelper());
     });
 
     if (this.eid) return true;
@@ -105,11 +108,11 @@ export default class VirtualAgent {
     const avatarPos = this.avatarPovObj.getWorldPosition(new THREE.Vector3());
     const dist = agentPos.distanceTo(avatarPos);
 
-    if (dist > 2) {
-      const dir = new THREE.Vector3().subVectors(avatarPos, agentPos).normalize();
-      const newPos = new THREE.Vector3().copy(avatarPos.sub(dir.multiplyScalar(2)));
-      this.agentObj.position.copy(newPos);
-    }
+    // if (dist > 2) {
+    const dir = new THREE.Vector3().subVectors(avatarPos, agentPos).normalize();
+    const newPos = new THREE.Vector3().copy(avatarPos.sub(dir.multiplyScalar(2)));
+    this.agentObj.position.copy(newPos);
+    /*}*/
 
     if (dist < 0.3) {
       this.agentObj.visible = false;
@@ -190,23 +193,15 @@ export default class VirtualAgent {
       removeEntity(APP.world, this.cube);
       this.scene.object3D.remove(this.arrowObjs);
     }
-    sceneGraph.Dijkstra(startIndex, endIndex);
-    const points = [];
-    sceneGraph.path.forEach(index => {
-      points.push(sceneGraph.nodes[index].vector);
-    });
-    console.log("nodePath:", sceneGraph.path);
-    sceneGraph.GetInstructions();
-    console.log("instructions", sceneGraph.instructions);
-    this.cube = renderAsEntity(APP.world, NavigationLine(points));
+    const navigation = sceneGraph.GetInstructions(startIndex, endIndex);
+
+    console.log("nodePath:", navigation.path);
+    console.log("instructions", navigation.instructions);
+
+    this.cube = renderAsEntity(APP.world, NavigationLine(navigation));
     this.arrowObjs = APP.world.eid2obj.get(this.cube);
     this.scene.object3D.add(this.arrowObjs);
   }
-
-  // Router(result) {
-  //   if (result.) {
-  //   }
-  // }
 
   AgentPos() {
     return this.agentObj.getWorldPosition(new THREE.Vector3());
@@ -214,6 +209,13 @@ export default class VirtualAgent {
 
   AvatarPos() {
     return this.avatarPovObj.getWorldPosition(new THREE.Vector3());
+  }
+
+  AvatarDirection() {
+    const playerForward = new THREE.Vector3();
+    this.avatarPovObj.getWorldDirection(playerForward);
+
+    return playerForward.multiplyScalar(-1);
   }
 }
 

@@ -1,3 +1,6 @@
+import { Vector3 } from "three";
+import { virtualAgent } from "./agent-system";
+
 const INF = Number.MAX_SAFE_INTEGER;
 class Node {
   constructor(x, y, z) {
@@ -58,6 +61,11 @@ class Graph {
 
     this.nodeCount = this.nodes.length;
     this.mapped = false;
+    this.mappedNodes = new Array(this.nodeCount).fill(false);
+    this.paths = new Array(this.nodeCount);
+    for (let j = 0; j < this.nodeCount; j++) {
+      this.paths[j] = [];
+    }
   }
 
   AreNodesAdjacent(node1, node2) {
@@ -66,13 +74,12 @@ class Graph {
     );
   }
 
-  Dijkstra(startIndex, stopIndex = -1) {
+  Dijkstra(startIndex) {
     if (this.mapped) {
       this.Reset();
     }
 
     let startingNode = this.nodes[startIndex];
-    this.start = startIndex;
     startingNode.MakeStartingPoint(this.nodeCount, startIndex);
 
     for (let i = 0; i < this.nodeCount - 1; i++) {
@@ -90,69 +97,88 @@ class Graph {
             this.nodes[j].path = [...this.nodes[minDistanceIndex].path, j];
           }
         }
-      }
-    }
-
-    if (stopIndex !== -1) {
-      this.path = this.nodes[stopIndex].path;
-      this.destination = stopIndex;
-    } else {
-      this.path = [];
-      for (let i = 0; i < this.nodeCount; i++) {
-        this.path.push({ i: this.nodes[i].path });
+        this.paths[startIndex][j] = this.nodes[j].path;
       }
     }
 
     this.mapped = true;
+    this.mappedNodes[startIndex] = true;
   }
 
-  GetInstructions() {
-    if (!this.mapped) {
-      console.log("The gaph is not mapped");
-      return;
-    } else {
-      this.instructions = [{ start: this.start }];
-      const x = 0;
-      const y = 1;
-      const playerForward = new THREE.Vector3(x, y, 0).normalize();
+  GetInstructions(startIndex, stopIndex) {
+    if (!this.mappedNodes[startIndex]) {
+      if (this.mapped) this.Reset();
+      this.Dijkstra(startIndex);
+    }
 
-      for (let i = 0; i < this.path.length - 1; i++) {
-        const current = this.nodes[this.path[i]].vector;
-        const next = this.nodes[this.path[i + 1]].vector;
+    const path = this.paths[startIndex][stopIndex];
+    const pathVectors = [];
 
-        const nextLine = next.clone().sub(current);
-        const prevLine = new THREE.Vector3();
+    path.forEach(index => {
+      pathVectors.push(this.nodes[index].vector);
+    });
 
-        if (i === 0) prevLine.copy(playerForward);
-        else {
-          const prev = this.nodes[this.path[i - 1]].vector;
-          prevLine.copy(current.clone().sub(prev));
-        }
+    const navigation = { path: pathVectors, instructions: [{ action: "start", from: startIndex }] };
+    const playerForward = virtualAgent.AvatarDirection();
 
-        const orientation = this.Orient(prevLine.clone().normalize(), nextLine.clone().normalize());
-        if (orientation !== "straight") {
-          this.instructions.push({ turn: orientation });
-        }
+    for (let i = 0; i < path.length - 1; i++) {
+      const current = this.nodes[path[i]].vector;
+      const next = this.nodes[path[i + 1]].vector;
 
-        this.instructions.push({ move: nextLine.length() });
+      const nextLine = next.clone().sub(current);
+      const prevLine = new THREE.Vector3();
+      let prev;
+
+      if (i === 0) prevLine.copy(playerForward);
+      else {
+        prev = this.nodes[path[i - 1]].vector;
+        prevLine.copy(current.clone().sub(prev));
       }
 
-      this.instructions.push({ finish: this.destination });
+      const turn = this.Orient(prevLine.clone().normalize(), nextLine.clone().normalize(), i === 0);
+      // if (prev !== undefined) turn.prev = prev;
+      turn.line = nextLine.normalize();
+      turn.current = current;
+      // turn.next = next;
+
+      navigation.instructions.push(turn);
+
+      console.log(turn);
+
+      navigation.instructions.push({
+        action: "move",
+        from: path[i],
+        to: path[i + 1],
+        distance: Math.floor(nextLine.length())
+      });
     }
+
+    navigation.instructions.push({ action: "finish", to: stopIndex });
+
+    console.log(this.paths);
+
+    return navigation;
   }
 
-  Orient(vector1, vector2) {
+  Orient(vector1, vector2, initial) {
     const crossVector = new THREE.Vector3();
-    const zAxis = new THREE.Vector3(0, 0, 1);
     crossVector.crossVectors(vector1, vector2).normalize();
-    const dotProduct = crossVector.dot(zAxis);
 
-    if (dotProduct > 0) return "left";
-    else if (dotProduct < 0) return "right";
-    else return "straight";
+    const angle = THREE.MathUtils.radToDeg(vector1.angleTo(vector2));
+    const signedAngle = angle * (crossVector.dot(new THREE.Vector3(0, 1, 0)) < 0 ? -1 : 1);
+    let action = initial ? "initial turn" : "turn";
+    let direction;
+
+    if (angle > 90) direction = "around";
+    else if (signedAngle > 10) direction = "left";
+    else if (signedAngle < -10) direction = "right";
+    else {
+      action = "continue";
+      direction = "forward";
+    }
+
+    return { action: action, direction: direction, angle: Math.floor(signedAngle) };
   }
-
-  LogDistance() {}
 
   GetMinDistanceIndex(distances, nodes) {
     let minDistance = INF;
@@ -196,6 +222,10 @@ class Graph {
     }
 
     return index;
+  }
+
+  GetNode(index) {
+    return this.nodes[i].vector;
   }
 }
 
