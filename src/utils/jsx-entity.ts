@@ -52,6 +52,7 @@ import { inflateVideoLoader, VideoLoaderParams } from "../inflators/video-loader
 import { inflateImageLoader, ImageLoaderParams } from "../inflators/image-loader";
 import { inflateModelLoader, ModelLoaderParams } from "../inflators/model-loader";
 import { inflateLink, LinkParams } from "../inflators/link";
+import { inflateLinkLoader, LinkLoaderParams } from "../inflators/link-loader";
 import { inflateLoopAnimationInitialize, LoopAnimationParams } from "../inflators/loop-animation";
 import { inflateSlice9 } from "../inflators/slice9";
 import { TextParams, inflateText } from "../inflators/text";
@@ -252,7 +253,6 @@ export interface ComponentData {
   spotLight?: SpotLightParams;
   grabbable?: GrabbableParams;
   billboard?: { onlyY: boolean };
-  link?: LinkParams;
   mirror?: MirrorParams;
   audioZone?: AudioZoneParams;
   audioParams?: AudioSettings;
@@ -276,6 +276,7 @@ export interface JSXComponentData extends ComponentData {
     cacheKey: string;
   };
   video?: VideoParams;
+  link?: LinkParams;
   networkedVideo?: true;
   videoMenu?: {
     sliderRef: Ref;
@@ -365,6 +366,7 @@ export interface GLTFComponentData extends ComponentData {
   audio?: VideoLoaderParams;
   video?: VideoLoaderParams;
   image?: ImageLoaderParams;
+  link?: LinkLoaderParams;
   model?: ModelLoaderParams;
   environmentSettings?: EnvironmentSettingsParams;
   reflectionProbe?: ReflectionProbeParams;
@@ -409,7 +411,6 @@ declare global {
 export const commonInflators: Required<{ [K in keyof ComponentData]: InflatorFn }> = {
   grabbable: inflateGrabbable,
   billboard: createDefaultInflator(Billboard),
-  link: inflateLink,
 
   // inflators that create Object3Ds
   ambientLight: inflateAmbientLight,
@@ -468,7 +469,8 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   slice9: inflateSlice9,
   model: inflateModel,
   image: inflateImage,
-  video: inflateVideo
+  video: inflateVideo,
+  link: inflateLink,
 };
 
 export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorFn }> = {
@@ -481,6 +483,7 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
   audio: inflateVideoLoader,
   video: inflateVideoLoader,
   image: inflateImageLoader,
+  link: inflateLinkLoader,
   model: inflateModelLoader,
   reflectionProbe: inflateReflectionProbe,
   navMesh: createDefaultInflator(NavMesh),
