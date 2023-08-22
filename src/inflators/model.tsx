@@ -203,6 +203,9 @@ export function inflateModel(world: HubsWorld, rootEid: number, { model }: Model
 
   if (model.userData.behaviorGraph) {
     const graph = model.userData.behaviorGraph as GraphJSON;
+    for (const variable of graph.variables!) {
+      variable.initialValue = resolveBGMHCLink(world, variable.initialValue as any, idx2eid, matIdx2eid);
+    }
     for (const node of graph.nodes!) {
       if (node.configuration) {
         for (const propName in node.configuration) {
