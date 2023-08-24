@@ -3,6 +3,7 @@ import { Box3, Euler, Vector3 } from "three";
 import { HubsWorld } from "../app";
 import {
   GLTFModel,
+  LoadedByMediaLoader,
   MediaContentBounds,
   MediaLoaded,
   MediaLoader,
@@ -210,6 +211,7 @@ function* loadMedia(world: HubsWorld, eid: EntityID) {
     console.error(e);
     media = renderAsEntity(world, ErrorObject());
   }
+  addComponent(world, LoadedByMediaLoader, media);
   crClearTimeout(addLoadingObjectTimeout);
   loadingObjEid && removeEntity(world, loadingObjEid);
   return media;
