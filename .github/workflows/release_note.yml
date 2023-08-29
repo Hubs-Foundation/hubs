@@ -5,4 +5,4 @@ on:
 
 jobs:
   release_note:
-    uses: mozilla/hubs-ops/.github/workflows/changelog.yml@master
+    uses: mozilla/hubs-ops/.github/workflows/changelog.yml@feature/changelog
