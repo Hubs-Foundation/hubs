@@ -101,7 +101,8 @@ import { NotificationsContainer } from "./room/NotificationsContainer";
 import { usePermissions } from "./room/hooks/usePermissions";
 import { ChatContextProvider } from "./room/contexts/ChatContext";
 import ChatToolbarButton from "./room/components/ChatToolbarButton/ChatToolbarButton";
-import {AgenSpawnButton} from "./room/AgentSpawnButton.js";
+import { AgenSpawnButton } from "./room/AgentSpawnButton.js";
+import { MapSpawnButton } from "./room/MapSpawnButton";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -1617,7 +1618,8 @@ class UIRoot extends Component {
                               mediaSearchStore={this.props.mediaSearchStore}
                               showNonHistoriedDialog={this.showNonHistoriedDialog}
                             />
-                            <AgenSpawnButton scene={this.props.scene}/>
+                            <AgenSpawnButton scene={this.props.scene} />
+                            <MapSpawnButton scene={this.props.scene} />
                           </>
                         )}
                         {this.props.hubChannel.can("spawn_emoji") && (

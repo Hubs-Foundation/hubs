@@ -10,6 +10,7 @@ AFRAME.registerComponent("in-world-hud", {
     this.spawn = this.el.querySelector(".spawn");
     this.pen = this.el.querySelector(".penhud");
     this.cameraBtn = this.el.querySelector(".camera-btn");
+    this.agentBtn = this.el.querySelector(".agent-btn");
     this.inviteBtn = this.el.querySelector(".invite-btn");
     this.background = this.el.querySelector(".bg");
 
@@ -43,6 +44,10 @@ AFRAME.registerComponent("in-world-hud", {
       this.el.emit("action_spawn");
     };
 
+    this.onAgentClick = () => {
+      this.el.emit("agent-toggle");
+    };
+
     this.onPenClick = e => {
       if (!window.APP.hubChannel.can("spawn_drawing")) return;
       this.el.emit("spawn_pen", { object3D: e.object3D });
@@ -74,6 +79,7 @@ AFRAME.registerComponent("in-world-hud", {
     this.spawn.object3D.addEventListener("interact", this.onSpawnClick);
     this.pen.object3D.addEventListener("interact", this.onPenClick);
     this.cameraBtn.object3D.addEventListener("interact", this.onCameraClick);
+    this.agentBtn.object3D.addEventListener("interact", this.onAgentClick);
     this.inviteBtn.object3D.addEventListener("interact", this.onInviteClick);
   },
 
@@ -87,6 +93,7 @@ AFRAME.registerComponent("in-world-hud", {
     this.spawn.object3D.removeEventListener("interact", this.onSpawnClick);
     this.pen.object3D.removeEventListener("interact", this.onPenClick);
     this.cameraBtn.object3D.removeEventListener("interact", this.onCameraClick);
+    this.agentBtn.object3D.removeEventListener("interact", this.onAgentClick);
     this.inviteBtn.object3D.removeEventListener("interact", this.onInviteClick);
   }
 });

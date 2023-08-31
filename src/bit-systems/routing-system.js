@@ -136,14 +136,10 @@ class Graph {
       }
 
       const turn = this.Orient(prevLine.clone().normalize(), nextLine.clone().normalize(), i === 0);
-      // if (prev !== undefined) turn.prev = prev;
       turn.line = nextLine.normalize();
       turn.current = current;
-      // turn.next = next;
 
       navigation.instructions.push(turn);
-
-      console.log(turn);
 
       navigation.instructions.push({
         action: "move",
@@ -152,10 +148,7 @@ class Graph {
         distance: Math.floor(nextLine.length())
       });
     }
-
     navigation.instructions.push({ action: "finish", to: stopIndex });
-
-    console.log(this.paths);
 
     return navigation;
   }
@@ -204,12 +197,6 @@ class Graph {
     return randomNumber * 2 - 1;
   }
 
-  PrintNodes() {
-    this.nodes.forEach(node => {
-      console.log(node.vector);
-    });
-  }
-
   GetClosestIndex(position) {
     let max = INF;
     let index;
@@ -222,10 +209,6 @@ class Graph {
     }
 
     return index;
-  }
-
-  GetNode(index) {
-    return this.nodes[i].vector;
   }
 }
 

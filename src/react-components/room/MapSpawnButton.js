@@ -7,19 +7,18 @@ import { Agent } from "../../bit-components";
 import { ToolTip } from "@mozilla/lilypad-ui";
 import { virtualAgent } from "../../bit-systems/agent-system";
 
-const AgentTooltipDescription = defineMessage({
-  id: "agent-tooltip.description",
-  defaultMessage: "Toggle Agent Visibility"
+const MapTooltipDescription = defineMessage({
+  id: "map-tooltip.description",
+  defaultMessage: "Toggle Map"
 });
 
-export function AgenSpawnButton({ scene }) {
-  const [flag, setFlag] = useState(true);
+export function MapSpawnButton({ scene }) {
+  const [flag, setFlag] = useState(false);
   const intl = useIntl();
-  const description = intl.formatMessage(AgentTooltipDescription);
+  const description = intl.formatMessage(MapTooltipDescription);
 
   const clickCallback = () => {
-    scene.emit("agent-toggle");
-    setFlag(!virtualAgent.hidden);
+    scene.emit("map-toggle");
   };
 
   return (
@@ -31,7 +30,7 @@ export function AgenSpawnButton({ scene }) {
         selected={flag}
         icon={<AgentIcon />}
         preset="accent5"
-        label={<FormattedMessage id="agent-toolbar-button" defaultMessage="Agent" />}
+        label={<FormattedMessage id="agent-toolbar-button" defaultMessage="Map" />}
       />
     </ToolTip>
   );

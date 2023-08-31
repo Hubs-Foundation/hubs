@@ -19,7 +19,6 @@ import { SnapDepthPOV, SnapPOV } from "../utils/vlm-adapters";
 import { sceneGraph } from "./routing-system";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { NavigationLine } from "../prefabs/nav-line";
-import { MeshLine, MeshLineMaterial, MeshLineRaycast } from "three.meshline";
 import { AxesHelper } from "three";
 
 const agentQuery = defineQuery([Agent]);
@@ -108,11 +107,11 @@ export default class VirtualAgent {
     const avatarPos = this.avatarPovObj.getWorldPosition(new THREE.Vector3());
     const dist = agentPos.distanceTo(avatarPos);
 
-    // if (dist > 2) {
-    const dir = new THREE.Vector3().subVectors(avatarPos, agentPos).normalize();
-    const newPos = new THREE.Vector3().copy(avatarPos.sub(dir.multiplyScalar(2)));
-    this.agentObj.position.copy(newPos);
-    /*}*/
+    if (dist > 2) {
+      const dir = new THREE.Vector3().subVectors(avatarPos, agentPos).normalize();
+      const newPos = new THREE.Vector3().copy(avatarPos.sub(dir.multiplyScalar(2)));
+      this.agentObj.position.copy(newPos);
+    }
 
     if (dist < 0.3) {
       this.agentObj.visible = false;
