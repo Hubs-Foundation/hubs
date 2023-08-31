@@ -222,18 +222,21 @@ function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
   world.eid2obj.get(ObjectMenu.pinButtonRef[menu])!.visible =
     visible && !isPinned(target) && canPin(APP.hubChannel!, target);
 
+  // Hide unimplemented features for now.
+  // TODO: Implement and show the buttons.
+  world.eid2obj.get(ObjectMenu.cameraFocusButtonRef[menu])!.visible = false;
+  world.eid2obj.get(ObjectMenu.cameraTrackButtonRef[menu])!.visible = false;
+  world.eid2obj.get(ObjectMenu.deserializeDrawingButtonRef[menu])!.visible = false;
+  world.eid2obj.get(ObjectMenu.mirrorButtonRef[menu])!.visible = false;
+  world.eid2obj.get(ObjectMenu.inspectButtonRef[menu])!.visible = false;
+  world.eid2obj.get(ObjectMenu.dropButtonRef[menu])!.visible = false;
+  world.eid2obj.get(ObjectMenu.refreshButtonRef[menu])!.visible = false;
+
   [
-    ObjectMenu.cameraFocusButtonRef[menu],
-    ObjectMenu.cameraTrackButtonRef[menu],
     ObjectMenu.removeButtonRef[menu],
-    ObjectMenu.dropButtonRef[menu],
-    ObjectMenu.inspectButtonRef[menu],
-    ObjectMenu.deserializeDrawingButtonRef[menu],
     ObjectMenu.openLinkButtonRef[menu],
-    ObjectMenu.refreshButtonRef[menu],
     ObjectMenu.cloneButtonRef[menu],
     ObjectMenu.rotateButtonRef[menu],
-    ObjectMenu.mirrorButtonRef[menu],
     ObjectMenu.scaleButtonRef[menu]
   ].forEach(buttonRef => {
     const buttonObj = world.eid2obj.get(buttonRef)!;
