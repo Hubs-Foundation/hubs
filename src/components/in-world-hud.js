@@ -1,3 +1,4 @@
+import { virtualAgent } from "../bit-systems/agent-system";
 import { SOUND_SPAWN_PEN } from "../systems/sound-effects-system";
 /**
  * HUD panel for muting, freezing, and other controls that don't necessarily have hardware buttons.
@@ -23,6 +24,7 @@ AFRAME.registerComponent("in-world-hud", {
       this.mic.setAttribute("mic-button", "active", APP.dialog.isMicEnabled);
       this.pen.setAttribute("icon-button", "active", this.el.sceneEl.is("pen"));
       this.cameraBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("camera"));
+      this.agentBtn.setAttribute("icon-button", "active", !virtualAgent.hidden);
       if (window.APP.hubChannel) {
         this.spawn.setAttribute("icon-button", "disabled", !window.APP.hubChannel.can("spawn_and_move_media"));
         this.pen.setAttribute("icon-button", "disabled", !window.APP.hubChannel.can("spawn_drawing"));
@@ -31,7 +33,8 @@ AFRAME.registerComponent("in-world-hud", {
     };
 
     this.onStateChange = evt => {
-      if (!(evt.detail === "frozen" || evt.detail === "pen" || evt.detail === "camera")) return;
+      if (!(evt.detail === "frozen" || evt.detail === "pen" || evt.detail === "camera" || evt.detail === "agent"))
+        return;
       this.updateButtonStates();
     };
 
