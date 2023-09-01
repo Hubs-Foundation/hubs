@@ -32,6 +32,13 @@ const _mat4 = new Matrix4();
 
 let scalingHandler: ScalingHandler | null = null;
 
+// Needs to remember rotating/scaling entity id because
+// rotation/scaling are operated by dragging so that
+// rotation/scaling operation can continue even if the cursor
+// hover off the target entity.
+// TODO: Should this data stored in Component?
+let handlingTargetEid: EntityID = 0;
+
 function clicked(world: HubsWorld, eid: EntityID) {
   return hasComponent(world, Interacted, eid);
 }
@@ -94,14 +101,21 @@ function startRotation(world: HubsWorld, targetEid: EntityID) {
   transformSystem.startTransform(world.eid2obj.get(targetEid)!, world.eid2obj.get(rightCursorEid)!, {
     mode: TRANSFORM_MODE.CURSOR
   });
+  handlingTargetEid = targetEid;
 }
 
-function stopRotation(world: HubsWorld, targetEid: EntityID) {
-  if (hasComponent(world, Networked, targetEid)) {
-    addComponent(world, EntityStateDirty, targetEid);
+function stopRotation(world: HubsWorld) {
+  // TODO: More proper handling in case the target entity is already removed.
+  //       In the worst scenario the entity has been already recycled at this moment
+  //       and this code doesn't handled such a case correctly.
+  //       We may refactor when we will reimplement the object menu system
+  //       by removing A-Frame dependency.
+  if (entityExists(world, handlingTargetEid) && hasComponent(world, Networked, handlingTargetEid)) {
+    addComponent(world, EntityStateDirty, handlingTargetEid);
   }
   const transformSystem = APP.scene!.systems["transform-selected-object"];
   transformSystem.stopTransform();
+  handlingTargetEid = 0;
 }
 
 function startScaling(world: HubsWorld, targetEid: EntityID) {
@@ -117,15 +131,17 @@ function startScaling(world: HubsWorld, targetEid: EntityID) {
   scalingHandler = new ScalingHandler(world.eid2obj.get(targetEid), transformSystem);
   scalingHandler!.objectToScale = world.eid2obj.get(targetEid);
   scalingHandler!.startScaling(world.eid2obj.get(rightCursorEid));
+  handlingTargetEid = targetEid;
 }
 
-function stopScaling(world: HubsWorld, targetEid: EntityID) {
-  if (hasComponent(world, Networked, targetEid)) {
-    addComponent(world, EntityStateDirty, targetEid);
+function stopScaling(world: HubsWorld) {
+  if (entityExists(world, handlingTargetEid) && hasComponent(world, Networked, handlingTargetEid)) {
+    addComponent(world, EntityStateDirty, handlingTargetEid);
   }
   const rightCursorEid = anyEntityWith(world, RemoteRight)!;
   scalingHandler!.endScaling(world.eid2obj.get(rightCursorEid));
   scalingHandler = null;
+  handlingTargetEid = 0;
 }
 
 function openLink(world: HubsWorld, eid: EntityID) {
@@ -203,10 +219,10 @@ function handleHeldEnter(world: HubsWorld, eid: EntityID, menuEid: EntityID) {
 function handleHeldExit(world: HubsWorld, eid: EntityID, menuEid: EntityID) {
   switch (eid) {
     case ObjectMenu.rotateButtonRef[menuEid]:
-      stopRotation(world, ObjectMenu.targetRef[menuEid]);
+      stopRotation(world);
       break;
     case ObjectMenu.scaleButtonRef[menuEid]:
-      stopScaling(world, ObjectMenu.targetRef[menuEid]);
+      stopScaling(world);
       break;
   }
 }
@@ -253,13 +269,14 @@ const heldExitQuery = exitQuery(heldQuery);
 export function objectMenuSystem(world: HubsWorld, sceneIsFrozen: boolean, hubChannel: HubChannel) {
   const menu = anyEntityWith(world, ObjectMenu)!;
 
+  heldExitQuery(world).forEach(eid => {
+    handleHeldExit(world, eid, menu);
+  });
+
   ObjectMenu.targetRef[menu] = objectMenuTarget(world, menu, sceneIsFrozen);
+
   if (ObjectMenu.targetRef[menu]) {
     handleClicks(world, menu, hubChannel);
-
-    heldExitQuery(world).forEach(eid => {
-      handleHeldExit(world, eid, menu);
-    });
 
     heldEnterQuery(world).forEach(eid => {
       handleHeldEnter(world, eid, menu);
