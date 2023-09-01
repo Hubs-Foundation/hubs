@@ -525,7 +525,7 @@
 			"spriteSourceSize": {"x":0,"y":0,"w":68,"h":68},
 			"sourceSize": {"w":68,"h":68}
 		},
-		"user_on-hover.png":
+		"user_off-hover.png":
 		{
 			"frame": {"x":764,"y":1264,"w":68,"h":68},
 			"rotated": false,
@@ -533,9 +533,25 @@
 			"spriteSourceSize": {"x":0,"y":0,"w":68,"h":68},
 			"sourceSize": {"w":68,"h":68}
 		},
-		"user_on.png":
+		"user_off.png":
 		{
 			"frame": {"x":848,"y":1264,"w":68,"h":68},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {"x":0,"y":0,"w":68,"h":68},
+			"sourceSize": {"w":68,"h":68}
+		},
+		"user_on-hover.png":
+		{
+			"frame": {"x":932,"y":1264,"w":68,"h":68},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {"x":0,"y":0,"w":68,"h":68},
+			"sourceSize": {"w":68,"h":68}
+		},
+		"user_on.png":
+		{
+			"frame": {"x":1016,"y":1264,"w":68,"h":68},
 			"rotated": false,
 			"trimmed": false,
 			"spriteSourceSize": {"x":0,"y":0,"w":68,"h":68},
@@ -576,22 +592,6 @@
 		"snap_camera.png":
 		{
 			"frame": {"x":1032,"y":1100,"w":64,"h":64},
-			"rotated": false,
-			"trimmed": false,
-			"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
-			"sourceSize": {"w":64,"h":64}
-		},
-		"user_off-hover.png":
-		{
-			"frame": {"x":1112,"y":1100,"w":64,"h":64},
-			"rotated": false,
-			"trimmed": false,
-			"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
-			"sourceSize": {"w":64,"h":64}
-		},
-		"user_off.png":
-		{
-			"frame": {"x":932,"y":1264,"w":64,"h":64},
 			"rotated": false,
 			"trimmed": false,
 			"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
