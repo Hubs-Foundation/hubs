@@ -30,6 +30,7 @@ import { spawnFromFileList, spawnFromUrl } from "./load-media-on-paste-or-drop";
 import { isLockedDownDemoRoom } from "./utils/hub-utils";
 import { addAgentToScene } from "./prefabs/agent";
 import { virtualAgent } from "./bit-systems/agent-system";
+import { floorMap } from "./bit-systems/map-system";
 const useNewLoader = qsTruthy("newLoader");
 
 export default class SceneEntryManager {
@@ -99,6 +100,7 @@ export default class SceneEntryManager {
     this._setupMedia();
     this._setupCamera();
     this._setupAgent();
+    this._setupMap();
 
     if (qsTruthy("offline")) return;
 
@@ -455,6 +457,10 @@ export default class SceneEntryManager {
   _setupAgent = () => {
     // const eid = addAgentToScene(APP.world);
     virtualAgent.Init();
+  };
+
+  _setupMap = () => {
+    floorMap.Init();
   };
 
   _setupCamera = () => {

@@ -83,6 +83,7 @@ import { AgentSystem } from "../bit-systems/agent-system";
 import { lookAtUserSystem } from "../bit-systems/look-at-user";
 import { PanelIndexSystem } from "../bit-systems/agent-slideshow-system";
 import { HiddenSystem } from "../bit-systems/hidden-system";
+import { FloorMapSystem } from "../bit-systems/map-system";
 
 declare global {
   interface Window {
@@ -273,6 +274,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   lookAtUserSystem(world);
 
   AgentSystem(world);
+  FloorMapSystem(world);
 
   HiddenSystem(world);
 

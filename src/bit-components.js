@@ -6,6 +6,11 @@ setRemovedRecycleThreshold(0.2);
 
 export const $isStringType = Symbol("isStringType");
 
+export const FloorMap = defineComponent({
+  planeRef: Types.eid,
+  pointRef: Types.eid
+});
+
 export const Agent = defineComponent({
   language: Types.ui8,
   modelRef: Types.eid,

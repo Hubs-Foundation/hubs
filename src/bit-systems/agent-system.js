@@ -60,11 +60,11 @@ export default class VirtualAgent {
     APP.scene.addEventListener("agent-toggle", () => {
       if (this.hidden) {
         removeComponent(APP.world, Hidden, this.eid);
-        APP.scene.removeState("agent");
+        APP.scene.addState("agent");
         this.hidden = false;
       } else {
         addComponent(APP.world, Hidden, this.eid);
-        APP.scene.addState("agent");
+        APP.scene.removeState("agent");
         this.hidden = true;
       }
     });

@@ -45,7 +45,8 @@ import {
   LookAtUser,
   AgentTextPanel,
   PanelIndex,
-  MicButtonTag
+  MicButtonTag,
+  FloorMap
 } from "../bit-components";
 
 import { inflateMediaLoader } from "../inflators/media-loader";
@@ -370,6 +371,10 @@ export interface JSXComponentData extends ComponentData {
     prevRef: Ref;
   };
   agentTextPanel?: any;
+  floorMap?: {
+    planeRef: Ref;
+    pointRef: Ref;
+  };
   panelIndex?: { index: number };
   mediaLoader?: MediaLoaderParams;
   mixerAnimatable?: boolean;
@@ -499,6 +504,7 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
 
   // agent: inflateAgent
   agent: createDefaultInflator(Agent),
+  floorMap: createDefaultInflator(FloorMap),
   lookatuser: createDefaultInflator(LookAtUser),
   agentTextPanel: createDefaultInflator(AgentTextPanel),
   panelIndex: createDefaultInflator(PanelIndex),
