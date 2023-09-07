@@ -576,6 +576,7 @@
   "support.supported": "compatible",
   "support.unsupported": "non compatible",
   "support.update-browser": "Merci de changer de navigateur ou de le mettre à jour vers une version plus récente",
+  "take-screencapture.label": "Capture d'écran",
   "tips.desktop.invite": "Il n'y a personne pour le moment. Pour qu'on vous rejoigne, partagez cette salle à l'aide du bouton Inviter en bas à gauche.",
   "tips.desktop.locomotion": "Utilisez les touches W A S D pour vous déplacer. Maintenez SHIFT pour accélérer.",
   "tips.desktop.look": "Bienvenue dans {appName} ! C'est parti pour une petite visite 👋 Cliquez et faites glisser pour regarder autour de vous.",

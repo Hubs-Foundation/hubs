@@ -629,6 +629,7 @@
   "sign-in-modal.title": "サインイン",
   "sign-in-modal.wait-for-verification": "<p>メールは{email}に送信されました！</p><p>続行するには、モバイル、タブレット、またはPCを使用してメール内のリンクをクリックしてください。</p><p>メールアドレスをお持ちでない方は、アカウントを作成できません。</p>",
   "spectating-label.label": "ウォッチング",
+  "take-screencapture.label": "画面キャプチャ",
   "tips.buttons.done": "完了",
   "tips.buttons.get-started": "始める",
   "tips.buttons.skip-tour": "ツアーをスキップ",

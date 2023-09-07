@@ -162,6 +162,7 @@
   "sign-in-modal.signin-message.unpin": "只有登陆才可以在房间移除物品。",
   "sign-in-modal.wait-for-verification": "<p>邮件已发送!</p><p>下一步, 用你的手机，平板电脑或是个人电脑进入邮箱点击链接。</p><p>未收到邮件? 你可能无法创建账户。</p>",
   "spectating-label.label": "看",
+  "take-screencapture.label": "屏幕截图",
   "tips.desktop.invite": "没人在这里。 使用顶部的按钮分享此房间",
   "tips.desktop.locomotion": "使用 {moveKeys} 键来移动。 按shift键快速移动",
   "tips.desktop.look": "欢迎来到 {appName}! 我们开始一个快速的介绍。 👋 点击拖拽四处查看",

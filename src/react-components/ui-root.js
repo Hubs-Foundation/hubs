@@ -102,6 +102,7 @@ import { NotificationsContainer } from "./room/NotificationsContainer";
 import { usePermissions } from "./room/hooks/usePermissions";
 import { ChatContextProvider } from "./room/contexts/ChatContext";
 import ChatToolbarButton from "./room/components/ChatToolbarButton/ChatToolbarButton";
+import { TakeScreenCapture } from "./room/TakeScreenCapture";
 import SeePlansCTA from "./room/components/SeePlansCTA/SeePlansCTA";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
@@ -1648,6 +1649,13 @@ class UIRoot extends Component {
                       <ChatToolbarButton
                         onClick={() => this.toggleSidebar("chat", { chatPrefix: "", chatAutofocus: false })}
                         selected={this.state.sidebarId === "chat"}
+                      />
+                    )}
+                    {entered && (
+                      <TakeScreenCapture
+                        onClick={() => {
+                          console.log("first");
+                        }}
                       />
                     )}
                     {entered && isMobileVR && (

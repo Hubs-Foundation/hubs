@@ -582,6 +582,7 @@
   "support.supported": "com suporte",
   "support.unsupported": "sem suporte",
   "support.update-browser": "Tente trocar ou atualizar para um navegador mais recente",
+  "take-screencapture.label": "Captura de tela",
   "tips.desktop.invite": "Ninguém mais está aqui ainda. Use o botão Convidar no canto inferior esquerdo para compartilhar essa sala!",
   "tips.desktop.locomotion": "Use as teclas {moveKeys} para se mover. Segure a tecla shift para impulsionar.",
   "tips.desktop.look": "Boas-vindas ao {appName}! Vamos fazer um tour rápido. Clique e arraste para olhar ao redor.",

@@ -635,6 +635,7 @@
   "sign-in-modal.title": "Inicia la sessió",
   "sign-in-modal.wait-for-verification": "<p>S'ha enviat un correu electrònic a {email}!</p><p>Per continuar, feu clic a l'enllaç del correu electrònic utilitzant el telèfon, la tauleta o el PC.</p><p>No hi ha correu electrònic? És possible que no pugueu crear un compte.</p>",
   "spectating-label.label": "Estàs en mode espectador",
+  "take-screencapture.label": "Captura de pantalla",
   "tips.buttons.done": "Fet",
   "tips.buttons.get-started": "Comenceu",
   "tips.buttons.skip-tour": "Omet la visita guiada",

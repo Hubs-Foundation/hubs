@@ -537,6 +537,7 @@
   "support.supported": "unterstützt",
   "support.unsupported": "nicht unterstützt",
   "support.update-browser": "Bitte wechsele oder aktualisiere deinen Browser",
+  "take-screencapture.label": "Bildschirmaufnahme",
   "tips.desktop.invite": "Niemand sonst ist hier. Verwende die Schaltfläche 'Einladen' unten links, um diesen Raum zu teilen.",
   "tips.desktop.locomotion": "Verwende die Tasten {moveKeys} zum Bewegen. Halte die Umschalttaste gedrückt, um zu rennen.",
   "tips.desktop.look": "Willkommen bei {appName}! Lass uns eine kurze Tour machen. 👋 Klicke und ziehe, um dich umzusehen.",

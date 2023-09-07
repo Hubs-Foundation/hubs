@@ -585,6 +585,7 @@
   "support.supported": "supported",
   "support.unsupported": "unsupported",
   "support.update-browser": "Please try switching or updating to a newer browser",
+  "take-screencapture.label": "屏幕截圖",
   "tips.desktop.invite": "Nobody else is here. Use the invite button in the bottom left to share this room.",
   "tips.desktop.locomotion": "Use the {moveKeys} keys to move. Hold shift to boost.",
   "tips.desktop.look": "Welcome to {appName}! Let's take a quick tour. 👋 Click and drag to look around.",

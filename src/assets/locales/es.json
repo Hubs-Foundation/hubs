@@ -184,6 +184,7 @@
   "support.supported": "soportado",
   "support.unsupported": "no soportado",
   "support.update-browser": "Por favor, trata de cambiar a otro navegador web o actualizar éste",
+  "take-screencapture.label": "La captura de pantalla",
   "tips.desktop.invite": "No hay nadie aquí. Usa el botón Compartir de arriba para compartir esta sala.",
   "tips.desktop.locomotion": "Usa las teclas {moveKeys} para moverte. Mantén presionado Mayúsculas para acelerar.",
   "tips.desktop.look": "¡Bienvenido(a) a {appName}! Hagamos un recorrido rápido. 👋 Haz clic y arrastra para mirar alrededor.",
