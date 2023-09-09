@@ -8,7 +8,8 @@ import { qsGet } from "../utils/qs_truthy";
 const customFOV = qsGet("fov");
 const enableThirdPersonMode = qsTruthy("thirdPerson");
 import { Layers } from "../camera-layers";
-import { Inspectable } from "../bit-components";
+import { defineQuery } from "bitecs";
+import { Inspectable, HoveredRemoteRight } from "../bit-components";
 import { findAncestorWithComponent, shouldUseNewLoader } from "../utils/bit-utils";
 
 function getInspectableInHierarchy(eid) {
@@ -201,6 +202,7 @@ function getAudio(o) {
   return audio;
 }
 
+const hoveredQuery = defineQuery([HoveredRemoteRight]);
 const FALLOFF = 0.9;
 export class CameraSystem {
   constructor(camera, renderer) {
@@ -448,6 +450,18 @@ export class CameraSystem {
       this.interaction = this.interaction || scene.systems.interaction;
 
       if (this.userinput.get(paths.actions.startInspecting) && this.mode !== CAMERA_MODE_INSPECT) {
+        if (shouldUseNewLoader()) {
+          const hoveredEids = hoveredQuery(APP.world);
+          if (hoveredEids.length > 0) {
+            this.inspect(APP.world.eid2obj.get(hoveredEids[0]), 1.5);
+          }
+        } else {
+          const hoverEl = this.interaction.state.rightRemote.hovered || this.interaction.state.leftRemote.hovered;
+
+          if (hoverEl) {
+            this.inspect(hoverEl.object3D, 1.5);
+          }
+        }
         const hoverEl = this.interaction.state.rightRemote.hovered || this.interaction.state.leftRemote.hovered;
 
         if (hoverEl) {
