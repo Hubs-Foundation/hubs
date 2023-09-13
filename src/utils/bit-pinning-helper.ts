@@ -49,10 +49,5 @@ export const canPin = (hubChannel: HubChannel, eid: EntityID): boolean => {
   const hasFile = !!fileId;
   const hasPromotableFile =
     hasFile && APP.store.state.uploadPromotionTokens.some((upload: any) => upload.fileId === fileId);
-  return (
-    isNetworkInstantiated(eid) &&
-    !isPinned(eid) &&
-    hubChannel.can("pin_objects") && // TODO: Remove once conditional sign in is implemented
-    (!hasFile || hasPromotableFile)
-  );
+  return isNetworkInstantiated(eid) && !isPinned(eid) && (!hasFile || hasPromotableFile);
 };
