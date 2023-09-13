@@ -1,4 +1,5 @@
 import { Not, defineQuery, entityExists } from "bitecs";
+import { Matrix4, Vector3 } from "three";
 import type { HubsWorld } from "../app";
 import {
   Link,
@@ -88,12 +89,41 @@ async function handleLinkClick(world: HubsWorld, button: EntityID) {
   }
 }
 
+const _moveTargetPos = new Vector3();
+const _lookAtTargetPos = new Vector3();
+const _objectPos = new Vector3();
+const _mat4 = new Matrix4();
+
+// Move the menu object to target object position but a little bit closer
+// to the camera and make the menu object look at the camera.
+// TODO: Similar code in object-menu system. Expose as util and reuse?
 function moveToTarget(world: HubsWorld, menu: EntityID) {
-  const linkEid = LinkHoverMenu.targetObjectRef[menu];
-  const targetObject = world.eid2obj.get(linkEid)!;
-  targetObject.updateMatrices();
-  const menuObject = world.eid2obj.get(menu)!;
-  setMatrixWorld(menuObject, targetObject.matrixWorld);
+  const menuObj = world.eid2obj.get(menu)!;
+
+  const targetObj = world.eid2obj.get(LinkHoverMenu.targetObjectRef[menu])!;
+  targetObj.updateMatrices();
+
+  // TODO: Remove the dependency with AFRAME
+  const camera = AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.viewingCamera;
+  camera.updateMatrices();
+
+  _moveTargetPos.setFromMatrixPosition(targetObj.matrixWorld);
+  _lookAtTargetPos.setFromMatrixPosition(camera.matrixWorld);
+
+  // Place the menu object a little bit closer to the camera in the scene
+  _objectPos
+    .copy(_lookAtTargetPos)
+    .sub(_moveTargetPos)
+    .normalize()
+    // TODO: 0.5 is an arbitrary number. 0.5 might be too small for
+    //       huge target object. Using bounding box may be safer?
+    // TODO: What if camera is between the menu and the target object?
+    .multiplyScalar(0.5)
+    .add(_moveTargetPos);
+
+  _mat4.copy(camera.matrixWorld).setPosition(_objectPos);
+  setMatrixWorld(menuObj, _mat4);
+  menuObj.lookAt(_lookAtTargetPos);
 }
 
 function updateButtonText(world: HubsWorld, menu: EntityID, button: EntityID) {
