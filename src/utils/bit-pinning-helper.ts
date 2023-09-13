@@ -4,6 +4,7 @@ import HubChannel from "./hub-channel";
 import { EntityID } from "./networking-types";
 import { takeOwnership } from "./take-ownership";
 import { createMessageDatas, isNetworkInstantiated, isPinned } from "../bit-systems/networking";
+import { SignInMessages } from "../react-components/auth/SignInModal";
 
 export const setPinned = async (hubChannel: HubChannel, world: HubsWorld, eid: EntityID, shouldPin: boolean) => {
   _signInAndPinOrUnpinElement(hubChannel, world, eid, shouldPin);
@@ -29,8 +30,14 @@ const unpinElement = (hubChannel: HubChannel, world: HubsWorld, eid: EntityID) =
 
 const _signInAndPinOrUnpinElement = (hubChannel: HubChannel, world: HubsWorld, eid: EntityID, shouldPin: boolean) => {
   const action = shouldPin ? () => _pinElement(hubChannel, world, eid) : () => unpinElement(hubChannel, world, eid);
-  // TODO: Perform conditional sign in
-  action();
+  APP.entryManager!.performConditionalSignIn(
+    () => hubChannel.signedIn,
+    action,
+    shouldPin ? SignInMessages.pin : SignInMessages.unpin,
+    (e: Error) => {
+      console.warn(`PinningHelper: Conditional sign-in failed. ${e}`);
+    }
+  );
 };
 
 export const canPin = (hubChannel: HubChannel, eid: EntityID): boolean => {
