@@ -1,8 +1,8 @@
 import { HubsWorld } from "../app";
-import { ProjectionModeName } from "../utils/projection-mode";
-import { inflateMediaLoader } from "./media-loader";
 import { MediaImageLoaderData } from "../bit-components";
-import { AlphaModeName } from "../utils/create-image-mesh";
+import { AlphaModeName, getAlphaModeFromAlphaModeName } from "../utils/create-image-mesh";
+import { ProjectionModeName, getProjectionFromProjectionName } from "../utils/projection-mode";
+import { inflateMediaLoader } from "./media-loader";
 
 export interface ImageLoaderParams {
   src: string;
@@ -27,5 +27,12 @@ export function inflateImageLoader(world: HubsWorld, eid: number, params: ImageL
   });
 
   const requiredParams = Object.assign({}, DEFAULTS, params) as Required<ImageLoaderParams>;
-  MediaImageLoaderData.set(eid, requiredParams);
+  MediaImageLoaderData.set(eid, {
+    alphaCutoff: requiredParams.alphaCutoff,
+    // This inflator is glTF inflator. alphaMode and projection are
+    // passed as strings from glTF. They are different typed, just regular enum,
+    // in Hubs Client internal. So needs to convert here.
+    alphaMode: getAlphaModeFromAlphaModeName(requiredParams.alphaMode),
+    projection: getProjectionFromProjectionName(requiredParams.projection)
+  });
 }

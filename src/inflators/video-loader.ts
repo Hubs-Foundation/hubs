@@ -1,6 +1,6 @@
 import { HubsWorld } from "../app";
 import { MediaVideoLoaderData } from "../bit-components";
-import { ProjectionModeName } from "../utils/projection-mode";
+import { ProjectionModeName, getProjectionFromProjectionName } from "../utils/projection-mode";
 import { inflateMediaLoader } from "./media-loader";
 
 export interface VideoLoaderParams {
@@ -28,5 +28,13 @@ export function inflateVideoLoader(world: HubsWorld, eid: number, params: VideoL
   });
 
   const requiredParams = Object.assign({}, DEFAULTS, params) as Required<VideoLoaderParams>;
-  MediaVideoLoaderData.set(eid, requiredParams);
+  MediaVideoLoaderData.set(eid, {
+    autoPlay: requiredParams.autoPlay,
+    controls: requiredParams.controls,
+    // This inflator is glTF inflator. projection is passed as strings
+    // from glTF. It is different typed, just regular enum, in Hubs Client
+    // internal. So needs to convert here.
+    projection: getProjectionFromProjectionName(requiredParams.projection),
+    loop: requiredParams.loop
+  });
 }
