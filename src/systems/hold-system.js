@@ -27,8 +27,7 @@ const GRAB_HAND_LEFT = paths.actions.leftHand.grab;
 const DROP_HAND_LEFT = paths.actions.leftHand.drop;
 
 function hasPermissionToGrab(world, eid) {
-  if (!hasComponent(world, AEntity, eid)) return true;
-  return canMove(world.eid2obj.get(eid).el);
+  return canMove(hasComponent(world, AEntity, eid) ? world.eid2obj.get(eid).el : eid);
 }
 
 function isAEntityPinned(world, eid) {
