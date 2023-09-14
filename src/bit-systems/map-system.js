@@ -13,39 +13,46 @@ class FloorMapClass {
   constructor() {
     this.obj = null;
     this.eid = null;
-    this.wasAgent = null;
   }
 
   Init() {
+    this.avatarPovObj = document.querySelector("#avatar-pov-node").object3D;
     APP.scene.addEventListener("map-toggle", () => {
-      this.eid = anyEntityWith(APP.world, FloorMap);
-      this.avatarPovObj = document.querySelector("#avatar-pov-node").object3D;
-
-      if (this.eid) {
-        const mapObj = APP.world.eid2obj.get(this.eid);
-        APP.scene.remove(mapObj);
+      if (this.Active()) {
+        APP.scene.remove(this.obj);
         removeEntity(APP.world, this.eid);
         APP.scene.removeState("map");
-        this.obj = null;
-        this.eid = null;
-
-        // if (this.wasAgent) APP.scene.emit("agent-toggle");
       } else {
-        this.avatarDirection = this.avatarPovObj.getWorldDirection(new Vector3());
+        const avatarDirection = this.avatarPovObj.getWorldDirection(new Vector3());
         const userPosition = this.avatarPovObj.getWorldPosition(new THREE.Vector3());
-        const MapPos = new Vector3().addVectors(userPosition, this.avatarDirection.normalize().multiplyScalar(-2));
-        APP.scene.addState("map");
-        this.eid = addFloorMap(APP.world, MapPos);
-        this.obj = APP.world.eid2obj.get(this.eid);
+        const MapPos = new Vector3().addVectors(userPosition, avatarDirection.normalize().multiplyScalar(-2));
 
-        if (APP.scene.is("agent")) {
-          this.wasAgent = true;
-          // APP.scene.emit("agent-toggle");
-        } else {
-          this.wasAgent = false;
-        }
+        APP.scene.addState("map");
+        addFloorMap(APP.world, MapPos, userPosition);
       }
     });
+  }
+
+  Active() {
+    enterMapQuery(APP.world).forEach(mapEID => {
+      if (APP.scene.is("agent")) {
+        APP.scene.emit("agent-toggle");
+        console.log("Agent toggled before Map spawn");
+      }
+      this.eid = mapEID;
+      this.obj = APP.world.eid2obj.get(mapEID);
+      this.pointEID = FloorMap.pointRef[mapEID];
+      this.pointObj = APP.world.eid2obj.get(this.pointEID);
+      console.log("Map spawn");
+    });
+    exitMapQuery(APP.world).forEach(exitEID => {
+      console.log("Map removing");
+      this.eid = null;
+      this.pointEID = null;
+      this.obj = null;
+    });
+
+    return this.eid;
   }
 
   Movement() {
@@ -64,14 +71,19 @@ class FloorMapClass {
     } else {
       this.obj.visible = true;
     }
+
+    const scalarPos = userPosition.multiplyScalar(0.02);
+    this.pointObj.position.copy(new Vector3(scalarPos.x, scalarPos.z, 0.01));
+
+    this.pointObj.updateMatrix();
+    this.obj.updateMatrix();
   }
 }
 
 export const floorMap = new FloorMapClass();
 
 export function FloorMapSystem(world) {
-  if (!APP.scene.is("map")) return;
+  if (!floorMap.Active()) return;
 
   floorMap.Movement();
-  floorMap.obj.updateMatrix();
 }

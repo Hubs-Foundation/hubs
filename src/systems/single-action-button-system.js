@@ -160,5 +160,4 @@ function changeShape(obj) {
   }
   updateMicButton = false;
   shouldChange = false;
-  console.log("shape changed");
 }

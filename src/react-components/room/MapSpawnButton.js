@@ -19,35 +19,17 @@ export function MapSpawnButton({ scene }) {
 
   const clickCallback = () => {
     scene.emit("map-toggle");
+  };
+
+  const activateButton = () => {
     setActive(scene.is("map"));
   };
 
-  useEffect(() => {
-    const agentToggled = event => {
-      if (!virtualAgent.hidden) {
-        clickCallback();
-      }
-    };
-
-    if (active) {
-      window.addEventListener("agent-toggle", agentToggled);
-    } else {
-      console.log("remove event listener");
-      window.removeEventListener("agent-toggle", agentToggled);
-    }
-
-    // Cleanup function to remove the event listener when the component unmounts
-    return () => {
-      console.log("component unmounted, removing event listener");
-      window.removeEventListener("agent-toggle", agentToggled);
-    };
-  }, [active]);
+  window.addEventListener("map-toggle", activateButton);
 
   return (
     <ToolTip description={description}>
       <ToolbarButton
-        // Ignore type lint error as we will be redoing ToolbarButton in the future
-        // @ts-ignore
         onClick={clickCallback}
         selected={active}
         icon={<AgentIcon />}
@@ -57,3 +39,6 @@ export function MapSpawnButton({ scene }) {
     </ToolTip>
   );
 }
+
+// Ignore type lint error as we will be redoing ToolbarButton in the future
+// @ts-ignore

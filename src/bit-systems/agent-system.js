@@ -59,13 +59,19 @@ export default class VirtualAgent {
     this.exists = false;
     APP.scene.addEventListener("agent-toggle", () => {
       if (this.hidden) {
+        if (APP.scene.is("map")) {
+          APP.scene.emit("map-toggle");
+          console.log("Map toggled before Agent spawn");
+        }
         removeComponent(APP.world, Hidden, this.eid);
         APP.scene.addState("agent");
         this.hidden = false;
+        console.log("Agent spawn");
       } else {
-        addComponent(APP.world, Hidden, this.eid);
+        console.log("Agent removing");
         APP.scene.removeState("agent");
         this.hidden = true;
+        addComponent(APP.world, Hidden, this.eid);
       }
     });
   }
@@ -127,10 +133,10 @@ export default class VirtualAgent {
     if (clicked(this.arrowPrev)) lowerIndex();
     if (clicked(this.buttonMic)) this.MicrophoneActions();
     if (clicked(this.buttonSnap)) {
-      /*this.SnapActions();*/
-      const dev = developingRouter();
-      console.log(dev);
-      this.Navigation(dev.data.start, dev.data.dest);
+      this.SnapActions();
+      // const dev = developingRouter();
+      // console.log(dev);
+      // this.Navigation(dev.data.start, dev.data.dest);
     }
   }
 
