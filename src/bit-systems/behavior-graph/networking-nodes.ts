@@ -131,9 +131,6 @@ export const NetworkingNodes = definitionListToMap([
     category: "Components" as any,
     label: "Networked Variable Set",
     configuration: {
-      target: {
-        valueType: "entity"
-      },
       prop_name: {
         valueType: "string"
       },
@@ -151,6 +148,10 @@ export const NetworkingNodes = definitionListToMap([
           valueType: "flow"
         },
         {
+          key: "entity",
+          valueType: "entity"
+        },
+        {
           key: type,
           valueType: type,
           label: name
@@ -162,12 +163,12 @@ export const NetworkingNodes = definitionListToMap([
     initialState: undefined,
     out: { flow: "flow" },
     triggered: ({ read, commit, configuration }) => {
-      const entity = configuration.target as EntityID;
       const name = configuration.prop_name as string;
       const type = configuration.prop_type as string;
 
-      const data = NetworkedBehaviorData.get(entity) || new Map();
+      const entity = read("entity") as EntityID;
       const value = read(type);
+      const data = NetworkedBehaviorData.get(entity) || new Map();
       data.set(name, value);
       NetworkedBehaviorData.set(entity, data);
       NetworkedBehavior.timestamp[entity] = performance.now();
@@ -180,9 +181,6 @@ export const NetworkingNodes = definitionListToMap([
     category: "Components" as any,
     label: "Get",
     configuration: {
-      target: {
-        valueType: "entity"
-      },
       prop_name: {
         valueType: "string"
       },
@@ -190,7 +188,16 @@ export const NetworkingNodes = definitionListToMap([
         valueType: "string"
       }
     },
-    in: {},
+    in: () => {
+      const sockets: SocketsList = [
+        {
+          key: "entity",
+          valueType: "entity"
+        }
+      ];
+
+      return sockets;
+    },
     out: configuration => {
       const type = configuration.prop_type || "string";
       const name = configuration.prop_name || "prop";
@@ -205,11 +212,11 @@ export const NetworkingNodes = definitionListToMap([
 
       return result;
     },
-    exec: ({ write, configuration }) => {
-      const entity = configuration.target as EntityID;
+    exec: ({ read, write, configuration }) => {
       const name = configuration.prop_name as string;
       const type = configuration.prop_type || "string";
 
+      const entity = read("entity") as EntityID;
       if (NetworkedBehaviorData.has(entity)) {
         const data = NetworkedBehaviorData.get(entity)!;
         if (data.has(name)) {
