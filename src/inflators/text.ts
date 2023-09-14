@@ -81,8 +81,59 @@ const DEFAULTS: Required<TextParams> = {
   whiteSpace: "normal"
 };
 
+// Parameters from glTF are not type checked then needs to
+// cast to ensure the data types. Otherwise text can look weird
+// because of mismatched typed data.
+// This type problem shouldn't be Text component specific.
+// Ideally type check and cast should be done for all parameters
+// in all (glTF) inflators. Also validation should be done.
+// For now, we cast only number typed text parameters because we
+// nooticed that they are sometimes passed as string types from
+// glTF. If we notice problems with other parameters, we may add
+// casting of other parameters.
+// TODO: Add a generic mechanism to cast and validate inflator params.
+const cast = (params: Required<TextParams>): Required<TextParams> => {
+  const keys: Array<keyof TextParams> = [
+    "curveRadius",
+    "depthOffset",
+    "fillOpacity",
+    "fontSize",
+    "glyphGeometryDetail",
+    "letterSpacing",
+    "lineHeight",
+    "maxWidth",
+    "opacity",
+    "outlineBlur",
+    "outlineOffsetX",
+    "outlineOffsetY",
+    "outlineOpacity",
+    "outlineWidth",
+    "sdfGlyphSize",
+    "strokeOpacity",
+    "strokeWidth",
+    "textIndent"
+  ];
+
+  for (const key of keys) {
+    let value = params[key];
+    if (value === null || value === undefined) {
+      continue;
+    }
+    value = Number(value);
+    if (isNaN(value)) {
+      continue;
+    }
+    // Compile error if remove any.
+    //   TS2322: Type 'number' is not assignable to type 'never'.
+    // Any proper and reasonable solution?
+    (params as any)[key] = value;
+  }
+
+  return params;
+};
+
 export function inflateText(world: HubsWorld, eid: number, params: TextParams) {
-  const requiredParams = Object.assign({}, DEFAULTS, params) as Required<TextParams>;
+  const requiredParams = cast(Object.assign({}, DEFAULTS, params) as Required<TextParams>);
   const text = new TroikaText();
   text.material!.toneMapped = false;
 
