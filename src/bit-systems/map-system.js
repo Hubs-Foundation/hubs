@@ -16,19 +16,21 @@ class FloorMapClass {
   }
 
   Init() {
-    this.avatarPovObj = document.querySelector("#avatar-pov-node").object3D;
+    this.userPov = document.querySelector("#avatar-pov-node").object3D;
+    this.userObj = document.querySelector("#avatar-rig").object3D;
     APP.scene.addEventListener("map-toggle", () => {
       if (this.Active()) {
         APP.scene.remove(this.obj);
         removeEntity(APP.world, this.eid);
         APP.scene.removeState("map");
       } else {
-        const avatarDirection = this.avatarPovObj.getWorldDirection(new Vector3());
-        const userPosition = this.avatarPovObj.getWorldPosition(new THREE.Vector3());
-        const MapPos = new Vector3().addVectors(userPosition, avatarDirection.normalize().multiplyScalar(-2));
+        const avatarDirection = this.userPov.getWorldDirection(new Vector3());
+        const povPosition = this.userPov.getWorldPosition(new THREE.Vector3());
+        const correctedAvatarDirection = new Vector3(avatarDirection.x, 0, avatarDirection.z);
+        const MapPos = new Vector3().addVectors(povPosition, correctedAvatarDirection.normalize().multiplyScalar(-1));
 
         APP.scene.addState("map");
-        addFloorMap(APP.world, MapPos, userPosition);
+        addFloorMap(APP.world, MapPos, povPosition);
       }
     });
   }
@@ -37,16 +39,13 @@ class FloorMapClass {
     enterMapQuery(APP.world).forEach(mapEID => {
       if (APP.scene.is("agent")) {
         APP.scene.emit("agent-toggle");
-        console.log("Agent toggled before Map spawn");
       }
       this.eid = mapEID;
       this.obj = APP.world.eid2obj.get(mapEID);
       this.pointEID = FloorMap.pointRef[mapEID];
       this.pointObj = APP.world.eid2obj.get(this.pointEID);
-      console.log("Map spawn");
     });
     exitMapQuery(APP.world).forEach(exitEID => {
-      console.log("Map removing");
       this.eid = null;
       this.pointEID = null;
       this.obj = null;
@@ -57,12 +56,13 @@ class FloorMapClass {
 
   Movement() {
     const mapPosition = this.obj.getWorldPosition(new THREE.Vector3());
-    const userPosition = this.avatarPovObj.getWorldPosition(new THREE.Vector3());
-    const dist = mapPosition.distanceTo(userPosition);
+    const povPosition = this.userPov.getWorldPosition(new THREE.Vector3());
+    const userPosition = this.userObj.getWorldPosition(new THREE.Vector3());
+    const dist = mapPosition.distanceTo(povPosition);
 
-    if (dist > 2) {
-      const dir = new THREE.Vector3().subVectors(userPosition, mapPosition).normalize();
-      const newPos = new THREE.Vector3().copy(userPosition.sub(dir.multiplyScalar(2)));
+    if (dist > 1) {
+      const dir = new THREE.Vector3().subVectors(povPosition, mapPosition).normalize();
+      const newPos = new THREE.Vector3().copy(povPosition.sub(dir.multiplyScalar(1)));
       this.obj.position.copy(newPos);
     }
 

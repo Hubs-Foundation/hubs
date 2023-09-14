@@ -61,14 +61,11 @@ export default class VirtualAgent {
       if (this.hidden) {
         if (APP.scene.is("map")) {
           APP.scene.emit("map-toggle");
-          console.log("Map toggled before Agent spawn");
         }
         removeComponent(APP.world, Hidden, this.eid);
         APP.scene.addState("agent");
         this.hidden = false;
-        console.log("Agent spawn");
       } else {
-        console.log("Agent removing");
         APP.scene.removeState("agent");
         this.hidden = true;
         addComponent(APP.world, Hidden, this.eid);
