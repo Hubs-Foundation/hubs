@@ -604,7 +604,7 @@ export function parseURL(text) {
 }
 
 export async function resolveMediaInfo(urlString) {
-  //check if url is an anchor hash e.g. #Spawn_Point_1
+  // check if url is an anchor hash e.g. #Spawn_Point_1
   if (urlString.charAt(0) === "#") {
     urlString = `${window.location.origin}${window.location.pathname}${window.location.search}${urlString}`;
   }
