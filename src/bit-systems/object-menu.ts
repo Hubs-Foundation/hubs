@@ -237,6 +237,7 @@ function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
   world.eid2obj.get(ObjectMenu.unpinButtonRef[menu])!.visible = visible && isPinned(target);
   world.eid2obj.get(ObjectMenu.pinButtonRef[menu])!.visible =
     visible && !isPinned(target) && canPin(APP.hubChannel!, target);
+  world.eid2obj.get(ObjectMenu.removeButtonRef[menu])!.visible = visible && !isPinned(target);
 
   // Hide unimplemented features for now.
   // TODO: Implement and show the buttons.
@@ -249,7 +250,6 @@ function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
   world.eid2obj.get(ObjectMenu.refreshButtonRef[menu])!.visible = false;
 
   [
-    ObjectMenu.removeButtonRef[menu],
     ObjectMenu.openLinkButtonRef[menu],
     ObjectMenu.cloneButtonRef[menu],
     ObjectMenu.rotateButtonRef[menu],
