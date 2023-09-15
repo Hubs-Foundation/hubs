@@ -2,7 +2,6 @@
 
 import { hasComponent } from "bitecs";
 import { HoldableButton } from "../bit-components";
-import { isPinned } from "../bit-systems/networking";
 
 // https://github.com/mozilla/hubs/wiki/Hubs-authorization
 export function showHoverEffect(el) {
@@ -19,31 +18,22 @@ export function showHoverEffect(el) {
   return (isSpawner || !isPinned || isFrozen) && canMove;
 }
 
-export function canMove(elOrEid) {
-  if (!elOrEid.isEntity) {
-    return (
-      hasComponent(APP.world, HoldableButton, elOrEid) ||
-      (window.APP.hubChannel.can("spawn_and_move_media") &&
-        (!isPinned(elOrEid) || window.APP.hubChannel.can("pin_objects")))
-    );
-  } else {
-    const isPinned = elOrEid.components.pinnable && elOrEid.components.pinnable.data.pinned;
-    // TODO Move pen/emojis to bitECS when it's migrated
-    const networkedTemplate = elOrEid && elOrEid.components.networked && elOrEid.components.networked.data.template;
-    const isPen = networkedTemplate === "#interactable-pen";
-    const spawnerTemplate =
-      elOrEid && elOrEid.components["super-spawner"] && elOrEid.components["super-spawner"].data.template;
-    const isEmojiSpawner = spawnerTemplate === "#interactable-emoji";
-    const isEmoji = !!elOrEid.components.emoji;
-    return (
-      hasComponent(APP.world, HoldableButton, elOrEid.eid) ||
-      ((isEmoji || isEmojiSpawner
-        ? window.APP.hubChannel.can("spawn_emoji")
-        : window.APP.hubChannel.can("spawn_and_move_media")) &&
-        (!isPinned || window.APP.hubChannel.can("pin_objects")) &&
-        (!isPen || window.APP.hubChannel.can("spawn_drawing")))
-    );
-  }
+export function canMove(entity) {
+  const isPinned = entity.components.pinnable && entity.components.pinnable.data.pinned;
+  const networkedTemplate = entity && entity.components.networked && entity.components.networked.data.template;
+  const isPen = networkedTemplate === "#interactable-pen";
+  const spawnerTemplate =
+    entity && entity.components["super-spawner"] && entity.components["super-spawner"].data.template;
+  const isEmojiSpawner = spawnerTemplate === "#interactable-emoji";
+  const isEmoji = !!entity.components.emoji;
+  return (
+    hasComponent(APP.world, HoldableButton, entity.eid) ||
+    ((isEmoji || isEmojiSpawner
+      ? window.APP.hubChannel.can("spawn_emoji")
+      : window.APP.hubChannel.can("spawn_and_move_media")) &&
+      (!isPinned || window.APP.hubChannel.can("pin_objects")) &&
+      (!isPen || window.APP.hubChannel.can("spawn_drawing")))
+  );
 }
 
 function indexForComponent(component, schema) {

@@ -15,6 +15,7 @@ import {
   AEntity
 } from "../bit-components";
 import { canMove } from "../utils/permissions-utils";
+import { canMove as canMoveEntity } from "../utils/bit-permissions-utils";
 import { isPinned } from "../bit-systems/networking";
 
 const GRAB_REMOTE_RIGHT = paths.actions.cursor.right.grab;
@@ -27,7 +28,11 @@ const GRAB_HAND_LEFT = paths.actions.leftHand.grab;
 const DROP_HAND_LEFT = paths.actions.leftHand.drop;
 
 function hasPermissionToGrab(world, eid) {
-  return canMove(hasComponent(world, AEntity, eid) ? world.eid2obj.get(eid).el : eid);
+  if (hasComponent(world, AEntity, eid)) {
+    return canMove(world.eid2obj.get(eid).el);
+  } else {
+    return canMoveEntity(eid);
+  }
 }
 
 function isAEntityPinned(world, eid) {
