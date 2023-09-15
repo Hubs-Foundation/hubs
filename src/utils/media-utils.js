@@ -604,10 +604,16 @@ export function parseURL(text) {
 }
 
 export async function resolveMediaInfo(urlString) {
+  // check if url is an anchor hash e.g. #Spawn_Point_1
+  if (urlString.charAt(0) === "#") {
+    urlString = `${window.location.origin}${window.location.pathname}${window.location.search}${urlString}`;
+  }
+
   const url = parseURL(urlString);
   if (!url) {
     throw new Error(`Cannot fetch data for URL: ${urlString}`);
   }
+
   let canonicalUrl = url.href;
   let canonicalAudioUrl = null; // set non-null only if audio track is separated from video track (eg. 360 video)
   let contentType;
