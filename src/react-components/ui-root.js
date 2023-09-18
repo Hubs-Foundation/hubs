@@ -103,6 +103,7 @@ import { ChatContextProvider } from "./room/contexts/ChatContext";
 import ChatToolbarButton from "./room/components/ChatToolbarButton/ChatToolbarButton";
 import { AgenSpawnButton } from "./room/AgentSpawnButton.js";
 import { MapSpawnButton } from "./room/MapSpawnButton";
+import { TranslatePopoverContainer } from "./room/TranslatePopoverContainer";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -1618,7 +1619,7 @@ class UIRoot extends Component {
                               mediaSearchStore={this.props.mediaSearchStore}
                               showNonHistoriedDialog={this.showNonHistoriedDialog}
                             />
-                            <AgenSpawnButton scene={this.props.scene} />
+                            <TranslatePopoverContainer scene={this.props.scene} />
                             <MapSpawnButton scene={this.props.scene} />
                           </>
                         )}

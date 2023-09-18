@@ -2,11 +2,8 @@ import React, { useCallback, useEffect, useState } from "react";
 import { ToolbarButton } from "../input/ToolbarButton";
 import { ReactComponent as AgentIcon } from "../icons/User.svg";
 import { FormattedMessage, defineMessage, useIntl } from "react-intl";
-import { anyEntityWith } from "../../utils/bit-utils";
-import { Agent } from "../../bit-components";
 import { ToolTip } from "@mozilla/lilypad-ui";
 import { virtualAgent } from "../../bit-systems/agent-system";
-import { floorMap } from "../../bit-systems/map-system";
 
 const AgentTooltipDescription = defineMessage({
   id: "agent-tooltip.description",
