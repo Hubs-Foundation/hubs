@@ -9,6 +9,7 @@ export interface VideoLoaderParams {
   autoPlay: boolean;
   controls: boolean;
   loop: boolean;
+  linkSrc?: string;
 }
 
 const DEFAULTS: Partial<VideoLoaderParams> = {
@@ -24,7 +25,8 @@ export function inflateVideoLoader(world: HubsWorld, eid: number, params: VideoL
     recenter: false,
     resize: false,
     animateLoad: false,
-    isObjectMenuTarget: false
+    isObjectMenuTarget: params.linkSrc && params.controls ? true : false,
+    linkSrc: params.controls ? params.linkSrc : undefined
   });
 
   const requiredParams = Object.assign({}, DEFAULTS, params) as Required<VideoLoaderParams>;

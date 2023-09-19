@@ -3,6 +3,7 @@ import { inflateMediaLoader } from "./media-loader";
 
 export type ModelLoaderParams = {
   src: string;
+  linkSrc?: string;
 };
 
 export function inflateModelLoader(world: HubsWorld, eid: number, params: ModelLoaderParams) {
@@ -11,6 +12,7 @@ export function inflateModelLoader(world: HubsWorld, eid: number, params: ModelL
     recenter: true,
     resize: false,
     animateLoad: false,
-    isObjectMenuTarget: false
+    isObjectMenuTarget: params.linkSrc ? true : false,
+    linkSrc: params.linkSrc
   });
 }
