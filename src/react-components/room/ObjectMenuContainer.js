@@ -46,7 +46,7 @@ function PlayerMenuItems({ hubChannel, activeObject, deselectObject }) {
     >
       <HideIcon />
       <span>
-        <FormattedMessage id="object-menu.hide-avatar-button" defaultMessage="Hide" />
+        <FormattedMessage id="object-menu.hide-avatar-button" defaultMessage="Hide!!" />
       </span>
     </ObjectMenuButton>
   );

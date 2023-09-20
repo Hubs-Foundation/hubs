@@ -304,6 +304,8 @@ export class CameraSystem {
     if (fireChangeEvent) {
       scene.emit("inspect-target-changed");
     }
+
+    console.log("inpecting");
   }
 
   uninspect(fireChangeEvent = true) {
@@ -428,6 +430,8 @@ export class CameraSystem {
 
         if (hoverEl) {
           this.inspect(hoverEl, 1.5);
+          console.log("inspect began");
+          // this is where inspect begins
         }
       } else if (this.mode === CAMERA_MODE_INSPECT && this.userinput.get(paths.actions.stopInspecting)) {
         scene.emit("uninspect");

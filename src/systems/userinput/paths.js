@@ -18,6 +18,7 @@ paths.actions.boost = "/actions/boost";
 paths.actions.startGazeTeleport = "/actions/startTeleport";
 paths.actions.stopGazeTeleport = "/actions/stopTeleport";
 paths.actions.spawnPen = "/actions/spawnPen";
+paths.actions.selectUser = "actions/selectUser"; //custom action to select user audio
 paths.actions.ensureFrozen = "/actions/ensureFrozen";
 paths.actions.toggleFreeze = "/actions/toggleFreeze";
 paths.actions.thaw = "/actions/thaw";

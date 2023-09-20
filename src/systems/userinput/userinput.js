@@ -543,7 +543,7 @@ AFRAME.registerSystem("userinput", {
 
       const newState = xform(this.frame, src, dest, this.xformStates.get(binding));
 
-      if (debug) {
+      if (src.value === "/device/keyboard/y" /*debug*/) {
         // Note for now this only works with bindings that have { value: } sources and dests
         console.log(
           `${JSON.stringify(src.value)} (${src.value && JSON.stringify(this.frame.get(src.value))}) to ${JSON.stringify(

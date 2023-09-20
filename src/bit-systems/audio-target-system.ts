@@ -152,6 +152,7 @@ export function audioTargetSystem(world: HubsWorld, audioSystem: AudioSystem) {
       source2Debug.delete(audioSourceEid);
     }
   });
+  //this is the loop where it gets decided who gets in the final audio output. source2emitter decides that. where there are the audio streams
   audioSourceEids.forEach(audioSourceEid => {
     const playerInfos = APP.componentRegistry["player-info"];
     if (source2Emitter.has(audioSourceEid)) {

@@ -143,5 +143,13 @@ AFRAME.registerSystem("interaction", {
     this.state.leftRemote.held = anyAframeEntityWith(world, HeldRemoteLeft);
     this.state.rightHand.held = anyAframeEntityWith(world, HeldHandRight);
     this.state.leftHand.held = anyAframeEntityWith(world, HeldHandLeft);
+
+    // console.log(
+    //   this.state.rightRemote.held,
+    //   this.state.leftRemote.held
+    //   // this.state.leftRemote.hovered,
+    //   // this.state.rightHand.hovered,
+    //   // this.state.leftHand.hovered
+    // );
   }
 });

@@ -1619,6 +1619,7 @@ class UIRoot extends Component {
                               mediaSearchStore={this.props.mediaSearchStore}
                               showNonHistoriedDialog={this.showNonHistoriedDialog}
                             />
+                            <AgenSpawnButton scene={this.props.scene} />
                             <TranslatePopoverContainer scene={this.props.scene} />
                             <MapSpawnButton scene={this.props.scene} />
                           </>

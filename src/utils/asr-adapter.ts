@@ -25,6 +25,9 @@ let chunks: any[] = [];
 export let isRecording = false;
 let recordingPromise: Promise<any>;
 
+//TODO: automate the query parameters
+export function queryPreprocess() {}
+
 export async function toggleRecording(savefile: boolean): Promise<ResponseData> {
   if (!isRecording) {
     recordingPromise = startRecording(savefile);
@@ -90,6 +93,9 @@ function saveAudio(blob: Blob) {
   downloadLink.click();
   URL.revokeObjectURL(blobUrl);
 }
+
+// TODO: make this function inference in a vague way
+export async function AudioModules(data: Blob, ModelParameters: Object) /*: Promise<ResponseData>*/ {}
 
 export async function nmtModule(prevResponse: ResponseData, language: LANGUAGES, asrModel: ASR): Promise<ResponseData> {
   const apiURL = "https://dev.speech-voxreality.maggioli-research.gr/" + ASR_MODULES[asrModel];

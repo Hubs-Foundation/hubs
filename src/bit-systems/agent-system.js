@@ -35,6 +35,17 @@ export function getRandomInt(max) {
 export function AgentSystem(world) {
   if (!virtualAgent.IsEntered() || virtualAgent.hidden) return;
 
+  // console.log(APP.hubChannel);
+  // console.log(NAF);
+
+  const state = window.APP.hubChannel.presence.state;
+  const streamers = Object.keys(state);
+  const ar = [];
+
+  streamers.forEach(streamer => {
+    ar.push(state[streamer]);
+  });
+  // console.log(window.APP.componentRegistry["player-info"]);
   virtualAgent.MovementActions();
 
   virtualAgent.ButtonInteractions();

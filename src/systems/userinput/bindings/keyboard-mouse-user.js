@@ -19,6 +19,9 @@ const startInspectingViaKeyboard = "/vars/mouse-and-keyboard/startInspectingViaK
 const stopInspectingViaKeyboard = "/vars/mouse-and-keyboard/stopInspectingViaKeyboard";
 const stopInspectingViaKeyboardFocus = "/vars/mouse-and-keyboard/stopInspectingViaKeyboardFocus";
 const stopInspectingSelf = "/vars/mouse-and-keyboard/stopInspectingSelf";
+const toggleUserWithKeyboard = "/vars/mouse-and-keyboard/toggle_user_with_keyboard";
+const toggleUserWithHud = "/vars/mouse-and-keyboard/toggle_user_with_hud";
+const toggleUser = "/vars/mouse-and-keyboard/toggleUser";
 
 const qs = new URLSearchParams(location.search);
 const inspectZoomSpeed = parseFloat(qs.get("izs")) || -10.0;
@@ -764,6 +767,18 @@ export const keyboardMouseUserBindings = addSetsToBindings({
       xform: xforms.any,
       priority: 201
     },
+    // {
+    //   src: { value: paths.device.keyboard.key("y") },
+    //   dest: { value: toggleUserWithKeyboard },
+    //   xform: xforms.rising,
+    //   priority: 200
+    // },
+    // {
+    //   src: [toggleUserWithKeyboard, toggleUserWithHud],
+    //   dest: { value: paths.actions.selectUser },
+    //   xform: xforms.any,
+    //   priority: 201
+    // },
     {
       src: { value: paths.device.keyboard.key("x") },
       dest: { value: paths.actions.cursor.right.deleteEntity },
