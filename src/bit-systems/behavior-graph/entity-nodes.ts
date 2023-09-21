@@ -33,6 +33,7 @@ import {
   NetworkedBehavior,
   MediaFrame
 } from "../../bit-components";
+import { GLTFComponentData } from "../../utils/jsx-entity";
 
 type SocketTypeName =
   | "string"
@@ -62,17 +63,18 @@ type EntityEventState = {
 };
 export const entityEvents = new Map<EntityID, EntityEventState>();
 
-type TextToComponentType = { [key: string]: ComponentType<any> };
+type ComponentKeyType = keyof GLTFComponentData;
+type TextToComponentType = { [K in ComponentKeyType]: ComponentType<any> };
 const NAME_TO_COMPONENT = {
   video: MediaVideo,
   audio: MediaVideo,
   text: TextTag,
-  "media-frame": MediaFrame,
-  "networked-animation": NetworkedAnimation,
-  "rigid-body": Rigidbody,
-  "physics-shape": PhysicsShape,
-  "networked-transform": NetworkedTransform,
-  "networked-behavior": NetworkedBehavior
+  mediaFrame: MediaFrame,
+  networkedAnimation: NetworkedAnimation,
+  rigidbody: Rigidbody,
+  physicsShape: PhysicsShape,
+  networkedTransform: NetworkedTransform,
+  networkedBehavior: NetworkedBehavior
 } as TextToComponentType;
 
 type EntityEventData = {
@@ -623,7 +625,7 @@ function makeMaterialPropertyNodes<T extends SettableMaterialProperties, S exten
       in: [{ entity: "entity" }, { component: "string" }],
       out: [{ entity: "entity" }],
       exec: (entity: EntityID, component: string) => {
-        const cmp = findChildWithComponent(APP.world, NAME_TO_COMPONENT[component], entity);
+        const cmp = findChildWithComponent(APP.world, NAME_TO_COMPONENT[component as ComponentKeyType], entity);
         return { entity: cmp };
       }
     })
