@@ -109,13 +109,8 @@ function* loadScene(
     if (findChildWithComponent(world, TrimeshTag, scene) || findChildWithComponent(world, HeightFieldTag, scene)) {
       console.log("heightfield or trimesh found on scene");
     } else {
-      let navMeshEid;
-      if (isHighDensity) {
-        navMeshEid = findChildWithComponent(world, NavMesh, scene);
-      }
-
+      let navMeshEid = findChildWithComponent(world, NavMesh, scene);
       if (navMeshEid) {
-        console.log(`Mesh density exceeded, using floor plan only`);
         inflatePhysicsShape(world, navMeshEid, {
           type: Shape.MESH,
           margin: 0.01,
