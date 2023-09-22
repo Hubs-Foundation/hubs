@@ -254,6 +254,7 @@ AFRAME.registerComponent("zone-audio-source", {
   },
 
   tick() {
+    console.log("hie", this.el);
     this.el.object3D.getWorldPosition(tmpWorldPos);
     if (this.trackingEl) {
       const distanceSquared = this.trackingEl.object3D.position.distanceToSquared(tmpWorldPos);

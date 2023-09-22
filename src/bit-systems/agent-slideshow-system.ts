@@ -42,7 +42,8 @@ export function FromatNewText(newText: string) {
   return segments;
 }
 
-export function UpdateTextSystem(world: HubsWorld, newFormatedText: Array<string>) {
+export function UpdateTextSystem(world: HubsWorld, newText: string) {
+  const newFormatedText = FromatNewText(newText);
   const textCount = newFormatedText.length;
 
   SlideQuery(world).forEach(eid => {
@@ -65,7 +66,7 @@ export function UpdateTextSystem(world: HubsWorld, newFormatedText: Array<string
 
 export function PanelIndexSystem(world: HubsWorld) {
   if (slideEnterQuery(world).length || slideExitQuery(world).length) {
-    UpdateTextSystem(world, FromatNewText(greetingPhrases[getRandomInt(greetingPhrases.length)]));
+    UpdateTextSystem(world, greetingPhrases[getRandomInt(greetingPhrases.length)]);
   }
 
   SlideQuery(world).forEach(eid => {

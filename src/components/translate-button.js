@@ -1,3 +1,5 @@
+import { subtitleSystem } from "../bit-systems/subtitling-system";
+
 /**
  * Registers a click handler and invokes the block method on the NAF adapter for the owner associated with its entity.
  * @namespace network
@@ -6,7 +8,9 @@
 AFRAME.registerComponent("translate-button", {
   init() {
     this.onClick = () => {
-      this.translate(this.owner);
+      // this.translate(this.owner);
+      subtitleSystem.SelectTarget(this.owner);
+      // this.translate(this.el);
     };
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.owner = networkedEl.components.networked.data.owner;

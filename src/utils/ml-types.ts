@@ -1,14 +1,14 @@
-export enum ASR {
-  TRANSLATE_AUDIO,
-  TRANSLATE_TEXT,
-  TRANSCRIBE_AUDIO_FILES,
-  TRANSLATE_AUDIO_FILE
+export enum AUDIO_ENDPOINTS {
+  TRANSLATE_AUDIO = "https://dev.speech-voxreality.maggioli-research.gr/translate_audio",
+  TRANSLATE_TEXT = "https://dev.speech-voxreality.maggioli-research.gr/translate_text",
+  TRANSCRIBE_AUDIO_FILES = "https://dev.speech-voxreality.maggioli-research.gr/transcribe_audio_files",
+  TRANSLATE_AUDIO_FILES = "https://dev.speech-voxreality.maggioli-research.gr/translate_audio_files"
 }
-export const ASR_MODULES: Record<ASR, string> = {
-  [ASR.TRANSLATE_AUDIO]: "translate_audio",
-  [ASR.TRANSLATE_TEXT]: "translate_text",
-  [ASR.TRANSCRIBE_AUDIO_FILES]: "transcribe_audio_files",
-  [ASR.TRANSLATE_AUDIO_FILE]: "translate_audio_file"
+export const ASR_MODULES: Record<AUDIO_ENDPOINTS, string> = {
+  [AUDIO_ENDPOINTS.TRANSLATE_AUDIO]: "translate_audio",
+  [AUDIO_ENDPOINTS.TRANSLATE_TEXT]: "translate_text",
+  [AUDIO_ENDPOINTS.TRANSCRIBE_AUDIO_FILES]: "transcribe_audio_files",
+  [AUDIO_ENDPOINTS.TRANSLATE_AUDIO_FILES]: "translate_audio_file"
 };
 
 export enum ASR_CODES {
@@ -91,5 +91,3 @@ export interface ResponseData {
     descript?: any;
   };
 }
-
-const a = new THREE.Vector3(1, 1, 1);

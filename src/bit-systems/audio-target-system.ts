@@ -87,6 +87,7 @@ const audioSourceExitQuery = exitQuery(audioSourceQuery);
 export function audioTargetSystem(world: HubsWorld, audioSystem: AudioSystem) {
   const audioTargetEids = audioTargetQuery(world);
   const audioSourceEids = audioSourceQuery(world);
+
   audioTargetEnterQuery(world).forEach(audioTargetEid => {
     const ctx = APP.audioListener.context;
     const audioEid = makeAudioEntity(world, audioTargetEid, SourceType.AUDIO_TARGET, audioSystem);
@@ -113,12 +114,14 @@ export function audioTargetSystem(world: HubsWorld, audioSystem: AudioSystem) {
     APP.audioOverrides.set(audioEid, audioSettings);
     addComponent(world, AudioSettingsChanged, audioEid);
   });
+
   audioTargetExitQuery(world).forEach(audioTargetEid => {
     Emitter2Audio.delete(audioTargetEid);
     const audioSourceEid = AudioTarget.source[audioTargetEid];
     source2Target.delete(audioSourceEid);
     APP.audioOverrides.delete(audioTargetEid);
   });
+
   audioSourceEnterQuery(world).forEach(audioSourceEid => {
     const audioTargetEid = audioTargetEids.find(
       audioTargetEid => AudioTarget.source[audioTargetEid] === audioSourceEid
@@ -138,6 +141,7 @@ export function audioTargetSystem(world: HubsWorld, audioSystem: AudioSystem) {
       obj.add(debugObj);
     }
   });
+
   audioSourceExitQuery(world).forEach(audioSourceEid => {
     removeSourceFromAudioTarget(audioSourceEid);
     source2Target.delete(audioSourceEid);
@@ -152,6 +156,7 @@ export function audioTargetSystem(world: HubsWorld, audioSystem: AudioSystem) {
       source2Debug.delete(audioSourceEid);
     }
   });
+
   //this is the loop where it gets decided who gets in the final audio output. source2emitter decides that. where there are the audio streams
   audioSourceEids.forEach(audioSourceEid => {
     const playerInfos = APP.componentRegistry["player-info"];

@@ -31,6 +31,7 @@ import { isLockedDownDemoRoom } from "./utils/hub-utils";
 import { addAgentToScene } from "./prefabs/agent";
 import { virtualAgent } from "./bit-systems/agent-system";
 import { floorMap } from "./bit-systems/map-system";
+import { subtitleSystem } from "./bit-systems/subtitling-system";
 const useNewLoader = qsTruthy("newLoader");
 
 export default class SceneEntryManager {
@@ -101,6 +102,7 @@ export default class SceneEntryManager {
     this._setupCamera();
     this._setupAgent();
     this._setupMap();
+    this._setupSubtitles();
 
     if (qsTruthy("offline")) return;
 
@@ -461,6 +463,10 @@ export default class SceneEntryManager {
 
   _setupMap = () => {
     floorMap.Init();
+  };
+
+  _setupSubtitles = () => {
+    subtitleSystem.Init();
   };
 
   _setupCamera = () => {

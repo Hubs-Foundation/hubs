@@ -6,7 +6,6 @@ import {
   RECORDER_CODES,
   RECORDER_TEXT,
   ASR_MODULES,
-  ASR,
   ASR_CODES,
   ASR_TEXT,
   TASK,
@@ -14,7 +13,8 @@ import {
   VL_MODULES,
   VL,
   VL_CODES,
-  VL_TEXT
+  VL_TEXT,
+  AUDIO_ENDPOINTS
 } from "./ml-types";
 import { HubsWorld } from "../app";
 import { sceneGraph } from "../bit-systems/routing-system";
@@ -25,7 +25,7 @@ let chunks: any[] = [];
 export let isRecording = false;
 let recordingPromise: Promise<any>;
 
-//TODO: automate the query parameters
+//TODO:: automate the query parameters
 export function queryPreprocess() {}
 
 export async function toggleRecording(savefile: boolean): Promise<ResponseData> {
@@ -95,15 +95,20 @@ function saveAudio(blob: Blob) {
 }
 
 // TODO: make this function inference in a vague way
-export async function AudioModules(data: Blob, ModelParameters: Object) /*: Promise<ResponseData>*/ {}
-
-export async function nmtModule(prevResponse: ResponseData, language: LANGUAGES, asrModel: ASR): Promise<ResponseData> {
-  const apiURL = "https://dev.speech-voxreality.maggioli-research.gr/" + ASR_MODULES[asrModel];
+export async function AudioModules(
+  endPoint: AUDIO_ENDPOINTS,
+  data: Blob,
+  parameters: Record<string, any>
+): Promise<ResponseData> {
   const formData = new FormData();
-  formData.append("audio_files", prevResponse.data!.file!, "recording.wav");
+  formData.append("audio_files", data, "recording.wav");
+  const queryString = Object.keys(parameters)
+    .map(key => `${key}=${parameters[key]}`)
+    .join("&");
+  console.log(endPoint + `?${queryString}`);
 
   try {
-    const response = await fetch(apiURL + "?source_language=" + language, {
+    const response = await fetch(endPoint + `?${queryString}`, {
       method: "POST",
       body: formData
     });
@@ -113,16 +118,42 @@ export async function nmtModule(prevResponse: ResponseData, language: LANGUAGES,
     }
 
     const data = await response.json();
-    const responseText: string = data.transcriptions[0];
 
     return {
       status: { code: ASR_CODES.SUCCESSFUL, text: ASR_TEXT[ASR_CODES.SUCCESSFUL] },
-      data: { text_en: responseText }
+      data: data
     };
   } catch (error) {
     throw { status: { code: ASR_CODES.ERROR_FETCH, text: ASR_TEXT[ASR_CODES.ERROR_FETCH] } };
   }
 }
+
+// export async function nmtModule(prevResponse: ResponseData, language: LANGUAGES, asrModel: ASR): Promise<ResponseData> {
+//   const apiURL = "https://dev.speech-voxreality.maggioli-research.gr/" + ASR_MODULES[asrModel];
+//   const formData = new FormData();
+//   formData.append("audio_files", prevResponse.data!.file!, "recording.wav");
+
+//   try {
+//     const response = await fetch(apiURL + "?source_language=" + language, {
+//       method: "POST",
+//       body: formData
+//     });
+
+//     if (!response.ok) {
+//       throw { status: { code: ASR_CODES.ERROR_RESPONSE, text: ASR_TEXT[ASR_CODES.ERROR_RESPONSE] } };
+//     }
+
+//     const data = await response.json();
+//     const responseText: string = data.transcriptions[0];
+
+//     return {
+//       status: { code: ASR_CODES.SUCCESSFUL, text: ASR_TEXT[ASR_CODES.SUCCESSFUL] },
+//       data: { text_en: responseText }
+//     };
+//   } catch (error) {
+//     throw { status: { code: ASR_CODES.ERROR_FETCH, text: ASR_TEXT[ASR_CODES.ERROR_FETCH] } };
+//   }
+// }
 
 export function developingRouter() {
   const randomNumber = 0;

@@ -23,7 +23,8 @@ export function HiddenSystem(world) {
     const agentObj = world.eid2obj.get(eid);
     agentObj.position.copy(POVPos.add(forward));
     agentObj.updateMatrix();
-    UpdateTextSystem(world, FromatNewText(greetingPhrases[getRandomInt(greetingPhrases.length)]));
+    // UpdateTextSystem(world, FromatNewText(greetingPhrases[getRandomInt(greetingPhrases.length)]));
+    UpdateTextSystem(world, greetingPhrases[getRandomInt(greetingPhrases.length)]);
     agentObj.visible = true;
 
     // const agentObj = world.eid2obj.get(eid);

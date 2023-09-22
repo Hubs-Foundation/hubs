@@ -14,3 +14,5 @@ AFRAME.registerComponent("visible-if-permitted", {
     window.APP.hubChannel.removeEventListener("permissions_updated", this.updateVisibility);
   }
 });
+
+//TODO:: create a component that shows that gives extra functionality to the translate button and doesn't render it if the user hasn't select language
