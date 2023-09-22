@@ -933,7 +933,7 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
     .register(parser => new GLTFMozTextureRGBE(parser, new RGBELoader().setDataType(THREE.HalfFloatType)))
     .register(parser => new GLTFHubsLoopAnimationComponent(parser))
     // TODO remove and use MOZ_behavior until spec is finalized
-    // .register(() => new GLTFMozBehaviorExtension("KHR_behavior"))
+    .register(() => new GLTFMozBehaviorExtension("KHR_behavior"))
     .register(() => new GLTFMozBehaviorExtension())
     .register(
       parser =>
