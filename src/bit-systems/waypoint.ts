@@ -107,7 +107,6 @@ function* moveToSpawnPointJob(world: HubsWorld, characterController: CharacterCo
   if (spawnPoints.length) {
     const waypoint = spawnPoints[Math.floor(Math.random() * spawnPoints.length)];
     moveToWaypoint(world, waypoint, characterController, true);
-    initialSpawnHappened = true;
   } else {
     console.warn("Could not find any available spawn points, spawning at the origin.");
     characterController.enqueueWaypointTravelTo(new Matrix4().identity(), true, {
@@ -116,8 +115,8 @@ function* moveToSpawnPointJob(world: HubsWorld, characterController: CharacterCo
       snapToNavMesh: true,
       willMaintainInitialOrientation: false
     });
-    initialSpawnHappened = true;
   }
+  initialSpawnHappened = true;
 }
 
 let spawnJob: Coroutine | null = null;
