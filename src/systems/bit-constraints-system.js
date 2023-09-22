@@ -19,7 +19,8 @@ import {
   ConstraintHandLeft,
   ConstraintHandRight,
   ConstraintRemoteLeft,
-  ConstraintRemoteRight
+  ConstraintRemoteRight,
+  Networked
 } from "../bit-components";
 import { takeOwnership } from "../utils/take-ownership";
 
@@ -45,7 +46,9 @@ const releaseBodyOptions = { activationState: ACTIVE_TAG };
 function add(world, physicsSystem, interactor, constraintComponent, entities) {
   for (let i = 0; i < entities.length; i++) {
     const eid = findAncestorEntity(world, entities[i], ancestor => hasComponent(world, Rigidbody, ancestor));
-    takeOwnership(world, eid);
+    if (hasComponent(world, Networked, eid)) {
+      takeOwnership(world, eid);
+    }
     physicsSystem.updateRigidBodyOptions(eid, grabBodyOptions);
     physicsSystem.addConstraint(interactor, Rigidbody.bodyId[eid], Rigidbody.bodyId[interactor], {});
     addComponent(world, Constraint, eid);
