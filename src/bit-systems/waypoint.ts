@@ -172,11 +172,8 @@ export function waypointSystem(
 
     const hashUpdated = window.location.hash !== "" && previousWaypointHash !== window.location.hash;
     if (hashUpdated && initialSpawnHappened) {
-      const waypointName = window.location.hash.replace("#", "");
-      if (eid) {
-        moveToWaypoint(world, eid, characterController, previousWaypointHash === null);
-        window.history.replaceState(null, "", window.location.href.split("#")[0]); // Reset so you can re-activate the same waypoint
-      }
+      moveToWaypoint(world, eid, characterController, previousWaypointHash === null);
+      window.history.replaceState(null, "", window.location.href.split("#")[0]); // Reset so you can re-activate the same waypoint
       previousWaypointHash = window.location.hash;
     }
 
