@@ -29,18 +29,16 @@ import { Emitter2Audio, Emitter2Params, makeAudioEntity, swapAudioSrc } from "./
 import { takeSoftOwnership } from "../utils/take-soft-ownership";
 import { disposeNode } from "../utils/three-utils";
 import { HubsVideoTexture } from "../textures/HubsVideoTexture";
-import { createImageMesh } from "../utils/create-image-mesh";
+import { create360ImageMesh, createImageMesh } from "../utils/create-image-mesh";
 import { ClearFunction, JobRunner } from "../utils/coroutine-utils";
 import { loadVideoTexture } from "../utils/load-video-texture";
 import { resolveMediaInfo } from "../utils/media-utils";
 import { swapObject3DComponent } from "../utils/jsx-entity";
 import { MediaInfo } from "./media-loading";
+import { VIDEO_FLAGS } from "../inflators/video";
+import { ProjectionModeName, getProjectionNameFromProjection } from "../utils/projection-mode";
 
 export const MediaVideoUpdateSrcEvent = defineComponent();
-
-enum Flags {
-  PAUSED = 1 << 0
-}
 
 function* loadSrc(
   world: HubsWorld,
@@ -49,14 +47,21 @@ function* loadSrc(
   oldVideo: HTMLVideoElement,
   clearRollbacks: ClearFunction
 ) {
+  const projection = getProjectionNameFromProjection(NetworkedVideo.projection[eid]);
+  const autoPlay = NetworkedVideo.flags[eid] && VIDEO_FLAGS.AUTO_PLAY ? true : false;
+  const loop = NetworkedVideo.flags[eid] && VIDEO_FLAGS.LOOP ? true : false;
   const { accessibleUrl, contentType } = (yield resolveMediaInfo(src)) as MediaInfo;
   const { texture, ratio, video }: { texture: HubsVideoTexture; ratio: number; video: HTMLVideoElement } =
-    yield loadVideoTexture(accessibleUrl, contentType);
+    yield loadVideoTexture(accessibleUrl, contentType, loop, autoPlay);
 
   clearRollbacks(); // After this point, normal entity cleanup will take care of things
 
-  // TODO: Check the projection mode to allow EQUIRECT
-  const videoObj = createImageMesh(texture, ratio);
+  let videoObj;
+  if (projection === ProjectionModeName.SPHERE_EQUIRECTANGULAR) {
+    videoObj = create360ImageMesh(texture, ratio);
+  } else {
+    videoObj = createImageMesh(texture, ratio);
+  }
   MediaVideo.ratio[eid] = ratio;
   MediaVideoData.set(eid, video);
   oldVideo.pause();
@@ -76,7 +81,7 @@ function* loadSrc(
 
   swapObject3DComponent(world, eid, videoObj);
 
-  if ((NetworkedVideo.flags[eid] & Flags.PAUSED) === 0) {
+  if ((NetworkedVideo.flags[eid] & VIDEO_FLAGS.PAUSED) === 0) {
     video.play();
   }
 
@@ -150,15 +155,26 @@ export function videoSystem(world: HubsWorld, audioSystem: AudioSystem) {
     if (hasComponent(world, Owned, eid)) {
       NetworkedVideo.time[eid] = video.currentTime;
       let flags = 0;
-      flags |= video.paused ? Flags.PAUSED : 0;
+      flags |= video.paused ? VIDEO_FLAGS.PAUSED : 0;
       NetworkedVideo.flags[eid] = flags;
       NetworkedVideo.src[eid] = APP.getSid(video.src);
     } else {
-      const networkedSrc = APP.getString(NetworkedVideo.src[eid])!;
-      if (networkedSrc !== video.src && !hasComponent(world, MediaVideoUpdateSrcEvent, eid)) {
-        updateVideoSrc(world, eid, networkedSrc, video);
+      let shouldUpdateVideo = false;
+      const autoPlay = NetworkedVideo.flags[eid] & VIDEO_FLAGS.AUTO_PLAY ? true : false;
+      const loop = NetworkedVideo.flags[eid] & VIDEO_FLAGS.AUTO_PLAY ? true : false;
+      if (MediaVideo.flags[eid] !== NetworkedVideo.flags[eid]) {
+        MediaVideo.flags[eid] = NetworkedVideo.flags[eid];
       }
-      const networkedPauseState = !!(NetworkedVideo.flags[eid] & Flags.PAUSED);
+      if (MediaVideo.projection[eid] !== NetworkedVideo.projection[eid]) {
+        MediaVideo.projection[eid] = NetworkedVideo.projection[eid];
+        shouldUpdateVideo ||= true;
+      }
+      const src = APP.getString(NetworkedVideo.src[eid])!;
+      shouldUpdateVideo ||= src !== video.src || autoPlay !== video.autoplay || loop !== video.loop;
+      if (shouldUpdateVideo && !hasComponent(world, MediaVideoUpdateSrcEvent, eid)) {
+        updateVideoSrc(world, eid, src, video);
+      }
+      const networkedPauseState = !!(NetworkedVideo.flags[eid] & VIDEO_FLAGS.PAUSED);
       if (networkedPauseState !== video.paused) {
         video.paused ? video.play() : video.pause();
       }

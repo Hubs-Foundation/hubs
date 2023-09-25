@@ -1,14 +1,22 @@
 import { create360ImageMesh, createImageMesh } from "../utils/create-image-mesh";
 import { addComponent } from "bitecs";
 import { addObject3DComponent } from "../utils/jsx-entity";
-import { ProjectionMode } from "../utils/projection-mode";
-import { MediaVideo, MediaVideoData } from "../bit-components";
+import {
+  ProjectionMode,
+  ProjectionModeName,
+  getProjectionFromProjectionName,
+  getProjectionNameFromProjection
+} from "../utils/projection-mode";
+import { MediaVideo, MediaVideoData, NetworkedVideo } from "../bit-components";
 import { HubsWorld } from "../app";
 import { EntityID } from "../utils/networking-types";
 import { Texture } from "three";
 
 export const VIDEO_FLAGS = {
-  CONTROLS: 1 << 0
+  CONTROLS: 1 << 0,
+  AUTO_PLAY: 1 << 1,
+  LOOP: 1 << 2,
+  PAUSED: 1 << 3
 };
 
 export interface VideoParams {

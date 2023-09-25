@@ -375,6 +375,10 @@ export function mediaFramesSystem(world, physicsSystem) {
       MediaFrame.flags[frame] = NetworkedMediaFrame.flags[frame];
     }
 
+    if (MediaFrame.mediaType[frame] !== NetworkedMediaFrame.mediaType[frame]) {
+      MediaFrame.mediaType[frame] = NetworkedMediaFrame.mediaType[frame];
+    }
+
     // This currently only works for Capturables (not spawned media). Do we want to support that?
     if (capturedEid) {
       if (MediaFrame.flags[frame] & MEDIA_FRAME_FLAGS.LOCKED) {

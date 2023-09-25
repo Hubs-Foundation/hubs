@@ -5,8 +5,6 @@ import { findAncestorWithComponent } from "../utils/bit-utils";
 import { getBodyFromRigidBody } from "../inflators/rigid-body";
 import { HubsWorld } from "../app";
 import { PhysicsSystem } from "./physics-system";
-import { Quaternion, Vector3 } from "three";
-import { CONSTANTS } from "three-ammo";
 
 const rigidbodyQuery = defineQuery([Rigidbody, Object3DTag, Not(AEntity)]);
 const rigidbodyEnteredQuery = enterQuery(rigidbodyQuery);

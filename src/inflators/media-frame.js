@@ -4,7 +4,7 @@ import { addComponent, addEntity, hasComponent } from "bitecs";
 import { MediaType } from "../utils/media-utils";
 import { COLLISION_LAYERS } from "../constants";
 import { Layers } from "../camera-layers";
-import { inflateRigidBody, Type } from "./rigid-body";
+import { Type } from "./rigid-body";
 import { Fit, inflatePhysicsShape, Shape } from "./physics-shape";
 import { Mesh, BoxBufferGeometry, ShaderMaterial, Color, DoubleSide } from "three";
 
@@ -14,9 +14,20 @@ export const MEDIA_FRAME_FLAGS = {
   LOCKED: 1 << 2
 };
 
+export const MediaTypes = {
+  all: MediaType.ALL,
+  "all-2d": MediaType.ALL_2D,
+  model: MediaType.MODEL | MediaType.OBJECT,
+  image: MediaType.IMAGE,
+  video: MediaType.VIDEO,
+  pdf: MediaType.PDF
+};
+
 const DEFAULTS = {
   bounds: { x: 1, y: 1, z: 1 },
-  mediaType: "all"
+  mediaType: "all",
+  active: true,
+  locked: false
 };
 export function inflateMediaFrame(world, eid, componentProps) {
   componentProps = Object.assign({}, DEFAULTS, componentProps);
@@ -69,18 +80,16 @@ export function inflateMediaFrame(world, eid, componentProps) {
 
   if (!hasComponent(world, Networked, eid)) addComponent(world, Networked, eid);
 
-  MediaFrame.mediaType[eid] = {
-    all: MediaType.ALL,
-    "all-2d": MediaType.ALL_2D,
-    model: MediaType.MODEL | MediaType.OBJECT,
-    image: MediaType.IMAGE,
-    video: MediaType.VIDEO,
-    pdf: MediaType.PDF
-  }[componentProps.mediaType];
+  MediaFrame.mediaType[eid] = MediaTypes[componentProps.mediaType];
   MediaFrame.bounds[eid].set([componentProps.bounds.x, componentProps.bounds.y, componentProps.bounds.z]);
   MediaFrame.guide[eid] = guideEid;
-
-  inflateRigidBody(world, eid, {
+  if (componentProps.active) {
+    NetworkedMediaFrame.flags[eid] |= MEDIA_FRAME_FLAGS.ACTIVE;
+  }
+  if (componentProps.locked) {
+    NetworkedMediaFrame.flags[eid] |= MEDIA_FRAME_FLAGS.LOCKED;
+  }
+  MediaFrame.inflateRigidBody(world, eid, {
     type: Type.KINEMATIC,
     collisionGroup: COLLISION_LAYERS.MEDIA_FRAMES,
     collisionMask: COLLISION_LAYERS.INTERACTABLES,

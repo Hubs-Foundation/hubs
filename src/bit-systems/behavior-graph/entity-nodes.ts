@@ -2,12 +2,14 @@ import {
   EventEmitter,
   makeEventNodeDefinition,
   makeFlowNodeDefinition,
+  makeFunctionNodeDefinition,
   makeInNOutFunctionDesc,
   NodeCategory,
+  SocketsList,
   ValueType
 } from "@oveddan-behave-graph/core";
-import { addComponent, ComponentType, hasComponent, IComponent } from "bitecs";
-import { Color, Euler, Mesh, MeshStandardMaterial, Object3D, Quaternion, Texture, Vector3 } from "three";
+import { addComponent, hasComponent, IComponent } from "bitecs";
+import { Color, Euler, Material, Mesh, MeshStandardMaterial, Object3D, Quaternion, Texture, Vector3 } from "three";
 import { Text } from "troika-three-text";
 import { HubsWorld } from "../../app";
 import * as bitComponents from "../../bit-components";
@@ -23,17 +25,7 @@ import { inflateCustomTags } from "../../inflators/custom-tags";
 import { findAncestorWithComponent, findChildWithComponent } from "../../utils/bit-utils";
 import { ClientID } from "../../utils/networking-types";
 import { definitionListToMap } from "./utils";
-import {
-  MediaVideo,
-  TextTag,
-  NetworkedAnimation,
-  Rigidbody,
-  PhysicsShape,
-  NetworkedTransform,
-  NetworkedBehavior,
-  MediaFrame
-} from "../../bit-components";
-import { GLTFComponentData } from "../../utils/jsx-entity";
+import { ComponentBindings, ComponentKeyType } from "./bindings/bindings";
 
 type SocketTypeName =
   | "string"
@@ -62,20 +54,6 @@ type EntityEventState = {
   collidingEntities: Set<EntityID>;
 };
 export const entityEvents = new Map<EntityID, EntityEventState>();
-
-type ComponentKeyType = keyof GLTFComponentData;
-type TextToComponentType = { [K in ComponentKeyType]: ComponentType<any> };
-const NAME_TO_COMPONENT = {
-  video: MediaVideo,
-  audio: MediaVideo,
-  text: TextTag,
-  mediaFrame: MediaFrame,
-  networkedAnimation: NetworkedAnimation,
-  rigidbody: Rigidbody,
-  physicsShape: PhysicsShape,
-  networkedTransform: NetworkedTransform,
-  networkedBehavior: NetworkedBehavior
-} as TextToComponentType;
 
 type EntityEventData = {
   target?: EntityID;
@@ -625,8 +603,120 @@ function makeMaterialPropertyNodes<T extends SettableMaterialProperties, S exten
       in: [{ entity: "entity" }, { component: "string" }],
       out: [{ entity: "entity" }],
       exec: (entity: EntityID, component: string) => {
-        const cmp = findChildWithComponent(APP.world, NAME_TO_COMPONENT[component as ComponentKeyType], entity);
+        const { component: componentDef } = ComponentBindings[component as ComponentKeyType]!;
+        const cmp = findChildWithComponent(APP.world, componentDef, entity);
         return { entity: cmp };
+      }
+    }),
+    makeFlowNodeDefinition({
+      typeName: "components/setComponentProperty",
+      category: "Components" as any,
+      label: "Set Components Property",
+      configuration: {
+        component: {
+          valueType: "string"
+        },
+        property: {
+          valueType: "string"
+        }
+      },
+      in: configuration => {
+        const propertyName = configuration.property || "string";
+        const type = configuration.type || "string";
+
+        const sockets: SocketsList = [
+          {
+            key: "flow",
+            valueType: "flow"
+          },
+          {
+            key: "entity",
+            valueType: "entity"
+          },
+          {
+            key: type,
+            valueType: type,
+            label: propertyName
+          }
+        ];
+
+        return sockets;
+      },
+      initialState: undefined,
+      out: { flow: "flow" },
+      triggered: ({ read, commit, configuration, graph }) => {
+        const world = graph.getDependency("world") as HubsWorld;
+
+        const componentName = configuration.component as string;
+        const propertyName = configuration.property as string;
+        const type = configuration.type as string;
+
+        const entity = read("entity") as EntityID;
+
+        const { set } = ComponentBindings[componentName as ComponentKeyType]!;
+        if (set) {
+          set(world, entity, {
+            [propertyName]: read(type)
+          });
+        } else {
+          console.error(`Set not supported for ${componentName}.${propertyName}`);
+        }
+
+        commit("flow");
+      }
+    }),
+    makeFunctionNodeDefinition({
+      typeName: "components/getComponentProperty",
+      category: "Components" as any,
+      label: "Get Components Property",
+      configuration: {
+        prop_name: {
+          valueType: "string"
+        },
+        prop_type: {
+          valueType: "string"
+        }
+      },
+      in: configuration => {
+        const sockets: SocketsList = [
+          {
+            key: "entity",
+            valueType: "entity"
+          }
+        ];
+
+        return sockets;
+      },
+      out: configuration => {
+        const propertyName = configuration.property || "string";
+        const type = configuration.type || "string";
+
+        const result: SocketsList = [
+          {
+            key: type,
+            valueType: type,
+            label: propertyName
+          }
+        ];
+
+        return result;
+      },
+      exec: ({ read, write, configuration, graph }) => {
+        const world = graph.getDependency("world") as HubsWorld;
+
+        const componentName = configuration.component as string;
+        const propertyName = configuration.property as string;
+        const type = configuration.type as string;
+
+        const entity = read("entity") as EntityID;
+
+        const { get } = ComponentBindings[componentName as ComponentKeyType]!;
+        if (get) {
+          const props = get(world, entity);
+          write(type, props[propertyName]);
+        } else {
+          console.error(`Get not supported for ${componentName}.${propertyName}`);
+        }
       }
     })
   ];

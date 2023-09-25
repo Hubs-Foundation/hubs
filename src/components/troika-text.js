@@ -7,7 +7,7 @@ import { Text } from "troika-three-text";
 // Mark this type of object so we can filter in from our shader patching
 Text.prototype.isTroikaText = true;
 
-const THREE_SIDES = {
+const SIDE_TO_THREE = {
   front: THREE.FrontSide,
   back: THREE.BackSide,
   double: THREE.DoubleSide
@@ -106,7 +106,7 @@ AFRAME.registerComponent("text", {
     mesh.anchorX = data.anchorX;
     mesh.anchorY = data.anchorY;
     mesh.color = data.color;
-    mesh.material.side = THREE_SIDES[data.side];
+    mesh.material.side = SIDE_TO_THREE[data.side];
     mesh.material.opacity = data.opacity;
     mesh.curveRadius = data.curveRadius;
     mesh.depthOffset = data.depthOffset || 0;

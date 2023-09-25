@@ -19,10 +19,16 @@ function apply(eid: EntityID, { version, data }: StoredComponent) {
     write(NetworkedMediaFrame.flags, eid, 0);
     return true;
   } else if (version === 2) {
-    const { capturedNid, scale, flags }: { capturedNid: string; scale: ArrayVec3; flags: number } = data;
+    const {
+      capturedNid,
+      scale,
+      flags,
+      mediaType
+    }: { capturedNid: string; scale: ArrayVec3; flags: number; mediaType: number } = data;
     write(NetworkedMediaFrame.capturedNid, eid, capturedNid);
     write(NetworkedMediaFrame.scale, eid, scale);
     write(NetworkedMediaFrame.flags, eid, flags);
+    write(NetworkedMediaFrame.mediaType, eid, mediaType);
     return true;
   }
 
@@ -39,7 +45,8 @@ export const NetworkedMediaFrameSchema: NetworkSchema = {
       data: {
         capturedNid: read(NetworkedMediaFrame.capturedNid, eid),
         scale: read(NetworkedMediaFrame.scale, eid),
-        flags: read(NetworkedMediaFrame.flags, eid)
+        flags: read(NetworkedMediaFrame.flags, eid),
+        mediaType: read(NetworkedMediaFrame.mediaType, eid)
       }
     };
   },
