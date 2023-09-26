@@ -8,9 +8,8 @@ import {
   NetworkedTransform,
   PhysicsShape,
   Rigidbody,
-  TextTag,
+  TextTag
 } from "../../../bit-components";
-import { getText, setText } from "../../../inflators/text";
 import { GLTFComponentData } from "../../../utils/jsx-entity";
 import { HubsWorld } from "../../../app";
 import { getVideo, setVideo } from "./video";
