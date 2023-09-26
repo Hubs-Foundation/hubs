@@ -4,7 +4,7 @@ import { addComponent, addEntity, hasComponent } from "bitecs";
 import { MediaType } from "../utils/media-utils";
 import { COLLISION_LAYERS } from "../constants";
 import { Layers } from "../camera-layers";
-import { Type } from "./rigid-body";
+import { Type, inflateRigidBody } from "./rigid-body";
 import { Fit, inflatePhysicsShape, Shape } from "./physics-shape";
 import { Mesh, BoxBufferGeometry, ShaderMaterial, Color, DoubleSide } from "three";
 
@@ -89,7 +89,7 @@ export function inflateMediaFrame(world, eid, componentProps) {
   if (componentProps.locked) {
     NetworkedMediaFrame.flags[eid] |= MEDIA_FRAME_FLAGS.LOCKED;
   }
-  MediaFrame.inflateRigidBody(world, eid, {
+  inflateRigidBody(world, eid, {
     type: Type.KINEMATIC,
     collisionGroup: COLLISION_LAYERS.MEDIA_FRAMES,
     collisionMask: COLLISION_LAYERS.INTERACTABLES,
