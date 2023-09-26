@@ -170,6 +170,9 @@ export function waypointSystem(
       }
     }
 
+    // When a scene is opened with a named waypoint we have to make sure that the scene default waypoint
+    // doesn't override it and that we correctly spawn in the named waypoint from the url.
+    // https://github.com/mozilla/hubs/issues/2833
     const hashUpdated = window.location.hash !== "" && previousWaypointHash !== window.location.hash;
     if (hashUpdated && initialSpawnHappened) {
       const waypointName = window.location.hash.replace("#", "");
