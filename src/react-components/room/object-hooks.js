@@ -58,6 +58,13 @@ function isObjectPinned(world, eid) {
   if (hasComponent(world, AEntity, eid)) {
     return isAEntityPinned(APP.world, eid);
   } else {
+    // This hooks is making decisions based on components attached to the root MediaLoader entity
+    // and the child media entity. ie. The MediaInfo component lives in the child media but the
+    // networked state lives in the root. This is not great, there is a lot of places where we need to
+    // do component searches to find either the media root or the actual media. It's not even reasonable
+    // to look for a component name MediaContentBounds just to get the MediaLoader (as we remove that
+    // after loading the media).
+    // We should probably find a better way of dealing with spawned media entity hierarchies.
     const mediaRootEid = findAncestorWithComponent(APP.world, MediaContentBounds, eid);
     return getPinnedState(mediaRootEid);
   }
