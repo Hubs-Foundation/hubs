@@ -162,25 +162,27 @@ export function waypointSystem(
     myOccupiedWaypoint = 0;
   }
 
+  // When a scene is opened with a named waypoint we have to make sure that the scene default waypoint
+  // doesn't override it and that we correctly spawn in the named waypoint from the url.
+  // https://github.com/mozilla/hubs/issues/2833
+  const hashUpdated = window.location.hash !== "" && previousWaypointHash !== window.location.hash;
+  const waypointName = window.location.hash.replace("#", "");
+  if (hashUpdated && initialSpawnHappened) {
+    waypointQuery(world).forEach(eid => {
+      const waypointObj = world.eid2obj.get(eid)!;
+      if (waypointObj.name === waypointName) {
+        moveToWaypoint(world, eid, characterController, previousWaypointHash === null);
+        window.history.replaceState(null, "", window.location.href.split("#")[0]); // Reset so you can re-activate the same waypoint
+        previousWaypointHash = window.location.hash;
+      }
+    });
+  }
+
   waypointQuery(world).forEach(eid => {
     if (hasComponent(world, NetworkedWaypoint, eid) && hasComponent(world, Owned, eid) && eid !== myOccupiedWaypoint) {
       // Inherited this waypoint, clear its occupied state
       if (NetworkedWaypoint.occupied[eid]) {
         NetworkedWaypoint.occupied[eid] = 0;
-      }
-    }
-
-    // When a scene is opened with a named waypoint we have to make sure that the scene default waypoint
-    // doesn't override it and that we correctly spawn in the named waypoint from the url.
-    // https://github.com/mozilla/hubs/issues/2833
-    const hashUpdated = window.location.hash !== "" && previousWaypointHash !== window.location.hash;
-    if (hashUpdated && initialSpawnHappened) {
-      const waypointName = window.location.hash.replace("#", "");
-      const waypointObj = world.eid2obj.get(eid);
-      if (waypointObj && waypointObj.name === waypointName) {
-        moveToWaypoint(world, eid, characterController, previousWaypointHash === null);
-        window.history.replaceState(null, "", window.location.href.split("#")[0]); // Reset so you can re-activate the same waypoint
-        previousWaypointHash = window.location.hash;
       }
     }
 
