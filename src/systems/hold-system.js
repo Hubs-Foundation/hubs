@@ -31,7 +31,7 @@ function hasPermissionToGrab(world, eid) {
   return canMove(world.eid2obj.get(eid).el);
 }
 
-function isAEntityPinned(world, eid) {
+export function isAEntityPinned(world, eid) {
   if (hasComponent(world, AEntity, eid)) {
     const el = world.eid2obj.get(eid).el;
     return !!el.components?.pinnable?.data?.pinned;
