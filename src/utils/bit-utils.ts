@@ -34,6 +34,12 @@ export function findAncestorWithComponent(world: HubsWorld, component: Component
   return findAncestorEntity(world, eid, otherId => hasComponent(world, component, otherId));
 }
 
+export function findAncestorWithComponents(world: HubsWorld, components: Array<Component>, eid: number) {
+  return findAncestorEntity(world, eid, otherId =>
+    components.every(component => hasComponent(world, component, otherId))
+  );
+}
+
 export function findAncestorWithAnyComponent(world: HubsWorld, components: Array<Component>, eid: number) {
   return findAncestorEntity(world, eid, otherId => hasAnyComponent(world, components, otherId));
 }

@@ -5,6 +5,9 @@ import { renderAsEntity } from "../utils/jsx-entity";
 import { loadAudioTexture } from "../utils/load-audio-texture";
 import { HubsWorld } from "../app";
 import { HubsVideoTexture } from "../textures/HubsVideoTexture";
+import { ObjectMenuTarget } from "../bit-components";
+import { ObjectMenuTargetFlags } from "../inflators/object-menu-target";
+import { EntityID } from "./networking-types";
 
 type Params = {
   loop?: boolean;
@@ -20,10 +23,12 @@ const DEFAULTS: Required<Params> = {
   projection: ProjectionMode.FLAT
 };
 
-export function* loadAudio(world: HubsWorld, url: string, params: Params) {
+export function* loadAudio(world: HubsWorld, eid: EntityID, url: string, params: Params) {
   const { loop, autoPlay, controls, projection } = Object.assign({}, DEFAULTS, params);
   const { texture, ratio, video }: { texture: HubsVideoTexture; ratio: number; video: HTMLVideoElement } =
     yield loadAudioTexture(url, loop, autoPlay);
+
+  ObjectMenuTarget.flags[eid] |= ObjectMenuTargetFlags.Flat;
 
   return renderAsEntity(
     world,
@@ -34,6 +39,7 @@ export function* loadAudio(world: HubsWorld, url: string, params: Params) {
       grabbable={{ cursor: true, hand: false }}
       // Audio and Video are handled very similarly in 3D scene
       // so create as video
+      objectMenuTarget={{ isFlat: true }}
       video={{
         texture,
         ratio,

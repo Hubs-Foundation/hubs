@@ -257,7 +257,8 @@ export const VideoMenu = defineComponent({
   trackRef: Types.eid,
   headRef: Types.eid,
   playIndicatorRef: Types.eid,
-  pauseIndicatorRef: Types.eid
+  pauseIndicatorRef: Types.eid,
+  clearTargetTimer: Types.f64
 });
 export const AudioEmitter = defineComponent({
   flags: Types.ui8
@@ -286,7 +287,9 @@ export const ObjectMenu = defineComponent({
   rotateButtonRef: Types.eid,
   mirrorButtonRef: Types.eid,
   scaleButtonRef: Types.eid,
-  targetRef: Types.eid
+  targetRef: Types.eid,
+  handlingTargetRef: Types.eid,
+  flags: Types.ui8
 });
 // TODO: Store this data elsewhere, since only one or two will ever exist.
 export const LinkHoverMenu = defineComponent({
@@ -309,7 +312,9 @@ export const PDFMenu = defineComponent({
   targetRef: Types.eid,
   clearTargetTimer: Types.f64
 });
-export const ObjectMenuTarget = defineComponent();
+export const ObjectMenuTarget = defineComponent({
+  flags: Types.ui8
+});
 export const NetworkDebug = defineComponent();
 export const NetworkDebugRef = defineComponent({
   ref: Types.eid
@@ -393,3 +398,8 @@ export const MediaLink = defineComponent({
   src: Types.ui32
 });
 MediaLink.src[$isStringType] = true;
+export const ObjectMenuTransform = defineComponent({
+  targetObjectRef: Types.eid,
+  prevObjectRef: Types.eid,
+  flags: Types.ui8
+});

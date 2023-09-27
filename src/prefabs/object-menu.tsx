@@ -16,7 +16,7 @@ export async function loadObjectMenuButtonIcons() {
 
 const buttonHeight = 0.2;
 const buttonScale: ArrayVec3 = [0.6, 0.6, 0.6];
-const uiZ = 0.25;
+const uiZ = 0.001;
 
 function PinButton(props: Attrs) {
   return (
@@ -258,6 +258,7 @@ export function ObjectMenuPrefab() {
   return (
     <entity
       name="Interactable Object Menu"
+      objectMenuTransform={{ center: true }}
       objectMenu={{
         pinButtonRef: refs.pin,
         unpinButtonRef: refs.unpin,
