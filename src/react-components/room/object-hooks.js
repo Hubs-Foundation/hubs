@@ -5,8 +5,9 @@ import { rotateInPlaceAroundWorldUp, affixToWorldUp } from "../../utils/three-ut
 import { getPromotionTokenForFile } from "../../utils/media-utils";
 import { hasComponent } from "bitecs";
 import { isPinned as getPinnedState } from "../../bit-systems/networking";
-import { MediaInfo, Static } from "../../bit-components";
+import { AEntity, MediaInfo, Static } from "../../bit-components";
 import { deleteTheDeletableAncestor } from "../../bit-systems/delete-entity-system";
+import { isAEntityPinned } from "../../systems/hold-system";
 
 export function isMe(object) {
   return object.id === "avatar-rig";
@@ -39,8 +40,16 @@ export function getObjectUrl(object) {
   return null;
 }
 
+function isObjectPinned(world, eid) {
+  if (hasComponent(world, AEntity, eid)) {
+    return isAEntityPinned(APP.world, eid);
+  } else {
+    return getPinnedState(eid);
+  }
+}
+
 export function usePinObject(hubChannel, scene, object) {
-  const [isPinned, setIsPinned] = useState(getPinnedState(object.eid));
+  const [isPinned, setIsPinned] = useState(isObjectPinned(APP.world, object.eid));
 
   const pinObject = useCallback(() => {
     const el = object.el;
@@ -71,11 +80,11 @@ export function usePinObject(hubChannel, scene, object) {
     const el = object.el;
 
     function onPinStateChanged() {
-      setIsPinned(getPinnedState(el.eid));
+      setIsPinned(isObjectPinned(APP.world, object.eid));
     }
     el.addEventListener("pinned", onPinStateChanged);
     el.addEventListener("unpinned", onPinStateChanged);
-    setIsPinned(getPinnedState(el.eid));
+    setIsPinned(isObjectPinned(APP.world, object.eid));
     return () => {
       el.removeEventListener("pinned", onPinStateChanged);
       el.removeEventListener("unpinned", onPinStateChanged);
@@ -148,7 +157,7 @@ export function useRemoveObject(hubChannel, scene, object) {
   const canRemoveObject = !!(
     scene.is("entered") &&
     !isPlayer(object) &&
-    !getPinnedState(eid) &&
+    !isObjectPinned(APP.world, object.eid) &&
     !hasComponent(APP.world, Static, eid) &&
     hubChannel.can("spawn_and_move_media")
   );
