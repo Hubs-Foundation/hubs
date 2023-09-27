@@ -66,6 +66,7 @@ function* loadScene(
     add(world, scene, loaderEid);
     setNetworkedDataWithoutRoot(world, APP.getString(Networked.id[loaderEid])!, scene);
 
+    let hasMesh = false;
     let sceneEl = APP.scene!;
     let isHighDensity = false;
     let skybox: Sky | undefined;
@@ -73,6 +74,7 @@ function* loadScene(
       if ((o as Mesh).isMesh) {
         // TODO animated objects should not be static
         (o as Mesh).reflectionProbeMode = "static";
+        hasMesh ||= true;
       }
       if ((o as any).isReflectionProbe) {
         o.updateMatrices();
@@ -117,7 +119,7 @@ function* loadScene(
           fit: Fit.ALL,
           includeInvisible: true
         });
-      } else if (!isHighDensity) {
+      } else if (!isHighDensity && hasMesh) {
         inflatePhysicsShape(world, scene, {
           type: Shape.MESH,
           margin: 0.01,
