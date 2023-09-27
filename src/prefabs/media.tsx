@@ -28,6 +28,7 @@ export function MediaPrefab(params: MediaLoaderParams): EntityDef {
         collisionMask: COLLISION_LAYERS.HANDS
       }}
       scale={[1, 1, 1]}
+      inspectable
     />
   );
 }

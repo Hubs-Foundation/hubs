@@ -38,8 +38,8 @@ import {
   MaterialTag,
   VideoTextureSource,
   Quack,
-  Mirror,
-  MixerAnimatableInitialize
+  MixerAnimatableInitialize,
+  Inspectable
 } from "../bit-components";
 import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
@@ -359,6 +359,7 @@ export interface JSXComponentData extends ComponentData {
   waypointPreview?: boolean;
   pdf?: PDFParams;
   loopAnimation?: LoopAnimationParams;
+  inspectable?: boolean;
 }
 
 export interface GLTFComponentData extends ComponentData {
@@ -464,6 +465,7 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   quack: createDefaultInflator(Quack),
   mixerAnimatable: createDefaultInflator(MixerAnimatableInitialize),
   loopAnimation: inflateLoopAnimationInitialize,
+  inspectable: createDefaultInflator(Inspectable),
   // inflators that create Object3Ds
   object3D: addObject3DComponent,
   slice9: inflateSlice9,
