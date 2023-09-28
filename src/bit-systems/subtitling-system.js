@@ -44,7 +44,11 @@ export class SubtitleSystem {
     if (this.hasTarget()) this.StopTranslating();
     if (this.target === _target) this.target = null;
     else this.target = _target;
-    if (this.hasTarget()) this.DemoTranslating(); //this.StartTranslating();
+    if (this.hasTarget()) {
+      APP.scene.emit("translation-available", { text: "The audio translation will be displayed here!" });
+      // this.DemoTranslating();
+      this.StartTranslating();
+    }
     APP.scene.emit("translation-target-updated", { owner: this.target });
   }
 

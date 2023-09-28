@@ -119,11 +119,14 @@
                             <a-entity class="pronouns-text"
                                 text="side: double; textAlign: center; color: #ddd; fontSize: 0.06;" text-raycast-hack
                                 position="0 -0.06 0.001"></a-entity>
+
                         </a-entity>
                         <a-entity is-not-remote-hover-target class="recordingBadge" sprite="name: recording-badge.png"
                             scale="0.10 0.10 0.10" position="0 0.25 0.001" visible="false"></a-entity>
                         <a-entity is-not-remote-hover-target class="modBadge" sprite="name: mod-badge.png"
                             scale="0.10 0.10 0.10" position="0 0.25 0.001" visible="false"></a-entity>
+                        <a-entity is-not-remote-hover-target class="translateBadge" sprite="name: translate-badge.png"
+                            scale="0.10 0.10 0.10" position="-0.25 -0.35 0.001" visible="false"></a-entity>
                         <a-entity class="identityName"
                             text="side: double; textAlign: center; color: #ddd; fontSize: 0.1; outlineWidth: 1%;"
                             visibility-while-frozen="withinDistance: 100; requireHoverOnNonMobile: false;"
@@ -156,6 +159,7 @@
                                         text-raycast-hack text-raycast-hack class="translate-text"
                                         position="0 0 0.01"></a-entity>
                                 </a-entity>
+
                                 <!-- end   -->
 
                                 <a-entity tags="ignoreSpaceBubble: true;" class="interactable ui interactable-ui"
@@ -190,7 +194,8 @@
                                         <a-entity is-remote-hover-target tags="singleActionButton:true;"
                                             mixin="rounded-text-button" translate-button position=".5 0 .35"
                                             scale="0.8 0.8 0.8">
-                                            <a-entity text="value:Translate; textAlign:center;" text-raycast-hack
+                                            <a-entity text="value:Translate; textAlign:center;"
+                                                class="translate-button-text" text-raycast-hack
                                                 position="0 0 0.001"></a-entity>
                                         </a-entity>
                                         <!-- end -->

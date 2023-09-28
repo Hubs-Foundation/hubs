@@ -8,25 +8,26 @@ import { subtitleSystem } from "../bit-systems/subtitling-system";
 AFRAME.registerComponent("translate-button", {
   init() {
     this.onClick = () => {
-      // this.translate(this.owner);
       subtitleSystem.SelectTarget(this.owner);
-      // this.translate(this.el);
+      const text = this.el.querySelector(".translate-button-text").object3D;
+      if (subtitleSystem.hasTarget()) {
+        text.el.setAttribute("text", {
+          value: "Stop"
+        });
+      } else {
+        text.el.setAttribute("text", {
+          value: "Translate"
+        });
+      }
     };
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.owner = networkedEl.components.networked.data.owner;
     });
   },
-
   play() {
     this.el.object3D.addEventListener("interact", this.onClick);
   },
-
   pause() {
     this.el.object3D.removeEventListener("interact", this.onClick);
-  },
-
-  translate(clientId) {
-    console.log("translating: ", clientId);
-    // window.APP.hubChannel.hide(clientId);
   }
 });

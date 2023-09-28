@@ -19,9 +19,9 @@ AFRAME.registerComponent("translate-panel", {
     this.size = new Vector3();
     this.preformatText;
     this.formattedText;
+  },
 
-    console.log(this.translateText, this.translateBackground);
-    console.log("i exist");
+  play() {
     APP.scene.addEventListener("translation-available", this.onAvailableTranslation);
     APP.scene.addEventListener("translation-target-updated", this.onTargetUpdate);
     this.translateText.el.setAttribute("text", {
@@ -30,6 +30,10 @@ AFRAME.registerComponent("translate-panel", {
     this.onTargetUpdate({ detail: { owner: null } });
   },
 
+  pause() {
+    APP.scene.removeEventListener("translation-available", this.onAvailableTranslation);
+    APP.scene.removeEventListener("translation-target-updated", this.onTargetUpdate);
+  },
   onAvailableTranslation(event) {
     this.preformatText = event.detail.text;
     this.fortmatLines();
