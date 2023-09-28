@@ -6,6 +6,7 @@
 
 import { Vector3 } from "three";
 import { FromatNewText } from "../bit-systems/agent-slideshow-system";
+import { subtitleSystem } from "../bit-systems/subtitling-system";
 const PANEL_PADDING = 0.05;
 
 AFRAME.registerComponent("translate-panel", {
@@ -16,18 +17,24 @@ AFRAME.registerComponent("translate-panel", {
     this.updateTextSize = this.updateTextSize.bind(this);
     this.fortmatLines = this.fortmatLines.bind(this);
     this.onTargetUpdate = this.onTargetUpdate.bind(this);
+    this.onLanguageUpdate = this.onLanguageUpdate.bind(this);
+    this.checkAndRender = this.checkAndRender.bind(this);
     this.size = new Vector3();
     this.preformatText;
     this.formattedText;
+    this.languageCheck = false;
+    this.userCheck = false;
   },
 
   play() {
     APP.scene.addEventListener("translation-available", this.onAvailableTranslation);
     APP.scene.addEventListener("translation-target-updated", this.onTargetUpdate);
+    APP.scene.addEventListener("language_updated", this.onLanguageUpdate);
     this.translateText.el.setAttribute("text", {
       value: this.formattedText
     });
-    this.onTargetUpdate({ detail: { owner: null } });
+    // this.onTargetUpdate({ detail: { owner: null } });
+    this.checkAndRender();
   },
 
   pause() {
@@ -67,10 +74,23 @@ AFRAME.registerComponent("translate-panel", {
       .getNetworkedEntity(this.el)
       .then(networkedEl => {
         const owner = networkedEl.components.networked.data.owner;
-        this.el.object3D.visible = owner === event.detail.owner;
+        this.userCheck = owner === event.detail.owner;
+        console.log("this user check", this.userCheck);
       })
       .catch(error => {
         console.error(error);
+        this.userCheck = false;
       });
+    this.checkAndRender();
+  },
+
+  onLanguageUpdate(event) {
+    this.languageCheck = !!event.detail.language;
+    console.log("this language check", this.languageCheck);
+    this.checkAndRender();
+  },
+
+  checkAndRender() {
+    this.el.object3D.visible = this.userCheck && this.languageCheck;
   }
 });

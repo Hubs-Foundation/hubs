@@ -42,7 +42,7 @@ function useTranslate(scene) {
     }
   });
   const toggleGreek = useCallback(() => {
-    if (language === "gr") {
+    if (language === "el") {
       scene.emit("language_updated", { language: null });
     } else {
       scene.emit("language_updated", { language: "el" });
@@ -94,12 +94,12 @@ export function TranslatePopoverContainer({ scene }) {
       active: language === "de"
     },
     {
-      id: "gr",
+      id: "el",
       icon: Greek,
       color: "accent5",
       label: <FormattedMessage id="translate-popover.lang.gr" defaultMessage="Greek" />,
       onSelect: toggleGreek,
-      active: language === "gr"
+      active: language === "el"
     },
     {
       id: "it",

@@ -36,7 +36,6 @@ export class SubtitleSystem {
 
   onLanguageUpdate(event) {
     this.targetLanguage = event.detail.language;
-    console.log(this.targetLanguage);
   }
 
   SelectTarget(_target) {

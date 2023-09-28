@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { ButtonGridPopover } from "../popover/ButtonGridPopover";
 import { Popover } from "../popover/Popover";
 import { ToolbarButton } from "../input/ToolbarButton";
-import { ReactComponent as TranslateIcon } from "../icons/translate.svg";
+import { ReactComponent as TranslateIcon } from "../icons/Translate.svg";
 import { defineMessage, useIntl } from "react-intl";
 import { ToolTip } from "@mozilla/lilypad-ui";
 

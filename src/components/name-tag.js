@@ -8,6 +8,7 @@ import { createPlaneBufferGeometry, setMatrixWorld } from "../utils/three-utils"
 import { textureLoader } from "../utils/media-utils";
 
 import handRaisedIconSrc from "../assets/hud/hand-raised.png";
+import { subtitleSystem } from "../bit-systems/subtitling-system";
 
 const DEBUG = qsTruthy("debug");
 const NAMETAG_BACKGROUND_PADDING = 0.05;
