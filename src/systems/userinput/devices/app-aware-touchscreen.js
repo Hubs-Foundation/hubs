@@ -2,12 +2,12 @@ import { paths } from "../paths";
 import { Pose } from "../pose";
 import { touchIsAssigned, jobIsAssigned, assign, unassign, findByJob, findByTouch } from "./touchscreen/assignments";
 import { findRemoteHoverTarget } from "../../../components/cursor-controller";
-// import { canMove } from "../../../utils/permissions-utils";
 import ResizeObserver from "resize-observer-polyfill";
 import { hasComponent } from "bitecs";
 import { AEntity, HeldRemoteRight, OffersRemoteConstraint, SingleActionButton, Static } from "../../../bit-components";
 import { anyEntityWith } from "../../../utils/bit-utils";
 import { isPinned } from "../../../bit-systems/networking";
+import { canMove } from "../../../utils/bit-permissions-utils";
 
 const MOVE_CURSOR_JOB = "MOVE CURSOR";
 const MOVE_CAMERA_JOB = "MOVE CAMERA";
@@ -68,9 +68,12 @@ function shouldMoveCursor(touch, rect, raycaster) {
   // TODO isStatic is likely a superfluous check for things matched via OffersRemoteConstraint
   const isStatic = hasComponent(APP.world, Static, remoteHoverTarget);
   return (
-    isSingleActionButton || (isInteractable && (isSceneFrozen || !isPinned(remoteHoverTarget)) && !isStatic)
-    // TODO check canMove
-    //&& (remoteHoverTarget && canMove(remoteHoverTarget))
+    isSingleActionButton ||
+    (isInteractable &&
+      (isSceneFrozen || !isPinned(remoteHoverTarget)) &&
+      !isStatic &&
+      remoteHoverTarget &&
+      canMove(remoteHoverTarget))
   );
 }
 
