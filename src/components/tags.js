@@ -12,7 +12,8 @@ import {
   Static,
   Inspectable,
   PreventAudioBoost,
-  IgnoreSpaceBubble
+  IgnoreSpaceBubble,
+  LookAtUser
 } from "../bit-components";
 
 const tag2ecs = {
@@ -28,7 +29,8 @@ const tag2ecs = {
   isStatic: Static,
   inspectable: Inspectable,
   preventAudioBoost: PreventAudioBoost,
-  ignoreSpaceBubble: IgnoreSpaceBubble
+  ignoreSpaceBubble: IgnoreSpaceBubble,
+  lookAtUser: LookAtUser
 };
 
 // TODO usages of this should be replaced with direct hasComponent calls
@@ -51,7 +53,8 @@ AFRAME.registerComponent("tags", {
     isStatic: { default: false },
     inspectable: { default: false },
     preventAudioBoost: { default: false },
-    ignoreSpaceBubble: { default: false }
+    ignoreSpaceBubble: { default: false },
+    lookAtUser: { default: false }
   },
   update() {
     if (this.didUpdateOnce) {

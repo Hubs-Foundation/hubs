@@ -132,6 +132,7 @@ AFRAME.registerComponent("text", {
     mesh.maxWidth = data.maxWidth;
     mesh.sync(() => {
       this.el.emit("text-updated", this);
+      console.log("text updated");
     });
   },
 

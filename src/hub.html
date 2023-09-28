@@ -106,6 +106,7 @@
 
                     <a-entity class="right-controller"></a-entity>
 
+
                     <a-entity name-tag tags="ignoreSpaceBubble: true;" position="0 0 0"
                         layers="mask: 768; recursive: true;" billboard="onlyY: true;">
                         <a-entity class="nametag-background"
@@ -143,6 +144,20 @@
                                     is-remote-hover-target inspect-button></a-entity>
                                 <a-entity class="chest-image" scale="0.18 0.18 0.18"
                                     position="0 -0.025 0.13"></a-entity>
+
+                                <!-- this is the translate panel -->
+                                <a-entity billboard="onlyY: true;" translate-panel position="-0.7 0 .1">
+                                    <a-entity
+                                        slice9="width: 0.7; height: 0.5; left: 64; top: 64; right: 66; bottom: 66; transparent: true, opacity: 0.5; alphaTest: 0.1; src: nametag;"
+                                        mixin="rounded-text-button" tags="lookAtUser: true;"
+                                        class="translate-background"></a-entity>
+                                    <a-entity
+                                        text="value: This is my translation panel and i love it so fucking much ; side: double; textAlign: center; color: #000; fontSize: 0.05;"
+                                        text-raycast-hack text-raycast-hack class="translate-text"
+                                        position="0 0 0.01"></a-entity>
+                                </a-entity>
+                                <!-- end   -->
+
                                 <a-entity tags="ignoreSpaceBubble: true;" class="interactable ui interactable-ui"
                                     layers="mask: 768; recursive: true;">
                                     <a-entity billboard="onlyY: true;" class="freeze-menu"

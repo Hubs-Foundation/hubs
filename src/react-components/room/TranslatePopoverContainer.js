@@ -45,7 +45,7 @@ function useTranslate(scene) {
     if (language === "gr") {
       scene.emit("language_updated", { language: null });
     } else {
-      scene.emit("language_updated", { language: "gr" });
+      scene.emit("language_updated", { language: "el" });
     }
   });
   const toggleItalian = useCallback(() => {

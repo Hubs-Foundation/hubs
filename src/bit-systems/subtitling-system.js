@@ -30,12 +30,11 @@ export class SubtitleSystem {
     this.VRmode = this.scene.is("vr-mode");
     this.initialized = true;
     this.cleanup = false;
-
+    this.counter = 0;
     this.scene.addEventListener("language_updated", this.onLanguageUpdate);
   }
 
   onLanguageUpdate(event) {
-    console.log("emittt", event.detail.language);
     this.targetLanguage = event.detail.language;
     console.log(this.targetLanguage);
   }
@@ -45,7 +44,8 @@ export class SubtitleSystem {
     if (this.hasTarget()) this.StopTranslating();
     if (this.target === _target) this.target = null;
     else this.target = _target;
-    if (this.hasTarget()) this.StartTranslating();
+    if (this.hasTarget()) this.DemoTranslating(); //this.StartTranslating();
+    APP.scene.emit("translation-target-updated", { owner: this.target });
   }
 
   StopTranslating() {
@@ -60,6 +60,27 @@ export class SubtitleSystem {
     this.audioContext = null;
     this.analyser = null;
     this.animationFrameID = null;
+  }
+
+  DemoTranslating() {
+    let text;
+    switch (this.counter % 4) {
+      case 0:
+        text = "Here is new text for my translation panel";
+        break;
+      case 1:
+        text = "My name is Amalia Antonopoulou and I represent the beautiful island of Greece";
+        break;
+      case 2:
+        text = "Lucky that my breasts are small and humble so you don't confuse them with mountains";
+        break;
+      case 3:
+        text = "Hello everybody";
+        break;
+    }
+
+    this.counter++;
+    APP.scene.emit("translation-available", { text: text });
   }
 
   StartTranslating() {
@@ -141,14 +162,16 @@ export class SubtitleSystem {
           chunks.length = 0;
 
           if (inference) {
-            // this.saveAudio(recordingBlob);
+            this.saveAudio(recordingBlob);
             AudioModules(AUDIO_ENDPOINTS.TRANSLATE_AUDIO_FILES, recordingBlob, {
               source_language: this.myLanguage,
               target_language: this.targetLanguage,
               return_transcription: "true"
             })
               .then(translateRespone => {
-                console.log(translateRespone);
+                // console.log(translateRespone);
+                APP.scene.emit("translation-available", { text: translateRespone.data.translations[0] });
+                console.log("i emit translation available");
                 UpdateTextSystem(APP.world, translateRespone.data.translations[0]);
               })
               .catch(error => {
