@@ -134,14 +134,8 @@ export function usePinObject(hubChannel, scene, object) {
     };
   }, [object]);
 
-  let userOwnsFile = false;
-
-  if (shouldUseNewLoader()) {
-    const fileId = MediaLoader.fileId[object.eid];
-    const mediaRootEid = findAncestorWithComponent(APP.world, MediaContentBounds, object.eid);
-    const fileIsOwned = hasComponent(APP.world, Owned, mediaRootEid);
-    userOwnsFile = fileIsOwned || (fileId && getPromotionTokenForFile(fileId));
-  } else {
+  let userOwnsFile = true;
+  if (!shouldUseNewLoader()) {
     const el = object.el;
     if (el.components["media-loader"]) {
       const { fileIsOwned, fileId } = el.components["media-loader"].data;

@@ -45,9 +45,5 @@ export const canPin = (hubChannel: HubChannel, eid: EntityID): boolean => {
   if (createMessageData.prefabName !== "media") {
     return false;
   }
-  const fileId = createMessageData.initialData.fileId;
-  const hasFile = !!fileId;
-  const hasPromotableFile =
-    hasFile && APP.store.state.uploadPromotionTokens.some((upload: any) => upload.fileId === fileId);
-  return isNetworkInstantiated(eid) && !isPinned(eid) && (!hasFile || hasPromotableFile);
+  return isNetworkInstantiated(eid) && !isPinned(eid);
 };

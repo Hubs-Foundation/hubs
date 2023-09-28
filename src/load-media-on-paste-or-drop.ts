@@ -44,15 +44,11 @@ export async function spawnFromFileList(files: FileList) {
       .then(function (response: UploadResponse) {
         const srcUrl = new URL(response.origin);
         srcUrl.searchParams.set("token", response.meta.access_token);
-        window.APP.store.update({
-          uploadPromotionTokens: [{ fileId: response.file_id, promotionToken: response.meta.promotion_token }]
-        });
         return {
           src: srcUrl.href,
           recenter: true,
           resize: !qsTruthy("noResize"),
           animateLoad: true,
-          fileId: response.file_id,
           isObjectMenuTarget: true
         };
       })
