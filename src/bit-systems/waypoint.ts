@@ -91,7 +91,10 @@ function* trySpawnIntoOccupiable(world: HubsWorld, characterController: Characte
     if (!spawnPoints.length) return false;
 
     const waypoint = spawnPoints[Math.floor(Math.random() * spawnPoints.length)];
-    if (yield* tryOccupyAndSpawn(world, characterController, waypoint)) return true;
+    if (yield* tryOccupyAndSpawn(world, characterController, waypoint)) {
+      initialSpawnHappened = true;
+      return true;
+    }
   }
 
   return false;
@@ -113,6 +116,7 @@ function* moveToSpawnPointJob(world: HubsWorld, characterController: CharacterCo
       willMaintainInitialOrientation: false
     });
   }
+  initialSpawnHappened = true;
 }
 
 let spawnJob: Coroutine | null = null;
@@ -146,7 +150,10 @@ const hoveredRightWaypointQuery = defineQuery([Waypoint, HoveredRemoteRight]);
 
 const exitedOwnedQuery = exitQuery(defineQuery([Owned]));
 
+// Todo: Find a better place for this system state variables, maybe in a scene component?
 let preview: Object3D | null;
+let initialSpawnHappened: boolean = false;
+let previousWaypointHash: string | null = null;
 export function waypointSystem(
   world: HubsWorld,
   characterController: CharacterControllerSystem,
@@ -154,6 +161,26 @@ export function waypointSystem(
 ) {
   if (exitedOwnedQuery(world).includes(myOccupiedWaypoint)) {
     myOccupiedWaypoint = 0;
+  }
+
+  // When a scene is opened with a named waypoint we have to make sure that the scene default waypoint
+  // doesn't override it and that we correctly spawn in the named waypoint from the url.
+  // We use initialSpawnHappened to check if the player has already spawned in the default spawn point.
+  // In that case initialSpawnHappened will be set to true and then we can get the hash named point and move to that one,
+  // this way we don't override the player position with the default spawn point position.
+  // We use previousWaypointHash to make sure that if we have already moved to a named waypoint we don't move again.
+  // See https://github.com/mozilla/hubs/issues/2833 and https://github.com/mozilla/hubs/pull/2837/files#r468103137
+  const hashUpdated = window.location.hash !== "" && previousWaypointHash !== window.location.hash;
+  const waypointName = window.location.hash.replace("#", "");
+  if (hashUpdated && initialSpawnHappened) {
+    waypointQuery(world).forEach(eid => {
+      const waypointObj = world.eid2obj.get(eid)!;
+      if (waypointObj.name === waypointName) {
+        moveToWaypoint(world, eid, characterController, previousWaypointHash === null);
+        window.history.replaceState(null, "", window.location.href.split("#")[0]); // Reset so you can re-activate the same waypoint
+        previousWaypointHash = window.location.hash;
+      }
+    });
   }
 
   waypointQuery(world).forEach(eid => {
