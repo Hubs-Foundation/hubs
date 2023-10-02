@@ -7,6 +7,7 @@ import {
   MediaContentBounds,
   MediaImageLoaderData,
   MediaInfo,
+  MediaLink,
   MediaLoaded,
   MediaLoader,
   MediaVideoLoaderData,
@@ -219,9 +220,8 @@ function* loadByMediaType(
       throw new UnsupportedMediaTypeError(eid, mediaType);
   }
 
-  const linkSrc = APP.getString(MediaLoader.linkSrc[eid]);
-  if (linkSrc) {
-    inflateLink(world, mediaEid, { href: linkSrc, type: LinkType.LINK });
+  if (hasComponent(world, MediaLink, eid)) {
+    inflateLink(world, mediaEid, { href: APP.getString(MediaLink.src[eid])!, type: LinkType.LINK });
     inflateGrabbable(world, mediaEid, { cursor: true, hand: false });
   }
 

@@ -9,8 +9,6 @@ export interface ImageLoaderParams {
   projection: ProjectionModeName;
   alphaMode: AlphaModeName;
   alphaCutoff: number;
-  linkSrc?: string;
-  controls: true;
 }
 
 const DEFAULTS: Partial<ImageLoaderParams> = {
@@ -25,8 +23,7 @@ export function inflateImageLoader(world: HubsWorld, eid: number, params: ImageL
     recenter: false,
     resize: false,
     animateLoad: false,
-    isObjectMenuTarget: params.linkSrc && params.controls ? true : false,
-    linkSrc: params.controls ? params.linkSrc : undefined
+    isObjectMenuTarget: false
   });
 
   const requiredParams = Object.assign({}, DEFAULTS, params) as Required<ImageLoaderParams>;

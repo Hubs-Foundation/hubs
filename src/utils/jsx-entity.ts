@@ -98,6 +98,7 @@ import { inflateTrimesh } from "../inflators/trimesh";
 import { HeightFieldParams, inflateHeightField } from "../inflators/heightfield";
 import { inflateAudioSettings } from "../inflators/audio-settings";
 import { HubsVideoTexture } from "../textures/HubsVideoTexture";
+import { inflateMediaLink, MediaLinkParams } from "../inflators/media-link";
 
 preload(
   new Promise(resolve => {
@@ -380,6 +381,7 @@ export interface GLTFComponentData extends ComponentData {
   zoneAudioSource: AudioSourceParams;
   audioTarget: AudioTargetParams;
   audioSettings: SceneAudioSettings;
+  mediaLink: MediaLinkParams;
 
   // deprecated
   spawnPoint?: true;
@@ -472,7 +474,7 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   model: inflateModel,
   image: inflateImage,
   video: inflateVideo,
-  link: inflateLink,
+  link: inflateLink
 };
 
 export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorFn }> = {
@@ -507,7 +509,8 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
   boxCollider: inflateBoxCollider,
   trimesh: inflateTrimesh,
   heightfield: inflateHeightField,
-  audioSettings: inflateAudioSettings
+  audioSettings: inflateAudioSettings,
+  mediaLink: inflateMediaLink
 };
 
 function jsxInflatorExists(name: string): name is keyof JSXComponentData {

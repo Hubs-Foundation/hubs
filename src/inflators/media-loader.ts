@@ -10,13 +10,12 @@ export type MediaLoaderParams = {
   animateLoad: boolean;
   fileId?: string;
   isObjectMenuTarget: boolean;
-  linkSrc?: string;
 };
 
 export function inflateMediaLoader(
   world: HubsWorld,
   eid: number,
-  { src, recenter, resize, animateLoad, fileId, isObjectMenuTarget, linkSrc }: MediaLoaderParams
+  { src, recenter, resize, animateLoad, fileId, isObjectMenuTarget }: MediaLoaderParams
 ) {
   addComponent(world, MediaLoader, eid);
   let flags = 0;
@@ -29,7 +28,4 @@ export function inflateMediaLoader(
     MediaLoader.fileId[eid] = APP.getSid(fileId)!;
   }
   MediaLoader.src[eid] = APP.getSid(src)!;
-  if (linkSrc) {
-    MediaLoader.linkSrc[eid] = APP.getSid(linkSrc)!;
-  }
 }

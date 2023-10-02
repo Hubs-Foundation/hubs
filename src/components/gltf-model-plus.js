@@ -584,7 +584,9 @@ class GLTFHubsComponentsExtension {
           if (shouldUseNewLoader()) {
             if (Object.prototype.hasOwnProperty.call(ext, "link")) {
               if (["image", "video", "model"].includes(componentName)) {
-                props["linkSrc"] = ext.link.href;
+                ext["media-link"] = {
+                  src: ext.link.href
+                };
                 delete ext.link;
               }
             }

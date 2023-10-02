@@ -152,8 +152,7 @@ export const MyCameraTool = defineComponent();
 export const MediaLoader = defineComponent({
   src: Types.ui32,
   flags: Types.ui8,
-  fileId: Types.ui32,
-  linkSrc: Types.ui32
+  fileId: Types.ui32
 });
 MediaLoader.src[$isStringType] = true;
 MediaLoader.fileId[$isStringType] = true;
@@ -390,3 +389,7 @@ export const TrimeshTag = defineComponent();
 export const HeightFieldTag = defineComponent();
 export const LocalAvatar = defineComponent();
 export const RemoteAvatar = defineComponent();
+export const MediaLink = defineComponent({
+  src: Types.ui32
+});
+MediaLink.src[$isStringType] = true;
