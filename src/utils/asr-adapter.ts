@@ -159,7 +159,7 @@ export function developingRouter() {
   const randomNumber = 0;
 
   if (randomNumber === 0) {
-    const destNodeIndex = Math.floor(Math.random() * sceneGraph.nodeCount);
+    const destNodeIndex = Math.floor(Math.random() * sceneGraph.nodeCount!);
     const startNodeIndex = sceneGraph.GetClosestIndex(virtualAgent.AvatarPos());
 
     return {
@@ -191,7 +191,7 @@ export async function routerModule(prevResponse: ResponseData): Promise<Response
   const randomNumber = 0;
 
   if (randomNumber === 0) {
-    const destNodeIndex = Math.floor(Math.random() * sceneGraph.nodeCount);
+    const destNodeIndex = Math.floor(Math.random() * sceneGraph.nodeCount!);
     const startNodeIndex = sceneGraph.GetClosestIndex(virtualAgent.AvatarPos());
 
     return {

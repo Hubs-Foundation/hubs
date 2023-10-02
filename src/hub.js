@@ -268,6 +268,7 @@ import { listenForNetworkMessages } from "./utils/listen-for-network-messages";
 import { exposeBitECSDebugHelpers } from "./bitecs-debug-helpers";
 import { loadLegacyRoomObjects } from "./utils/load-legacy-room-objects";
 import { loadSavedEntityStates } from "./utils/entity-state-utils";
+import { sceneGraph } from "./bit-systems/routing-system";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -750,8 +751,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  console.log("here");
-
   const hubId = getCurrentHubId();
   console.log(`Hub ID: ${hubId}`);
 
@@ -775,6 +774,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const onSceneLoaded = () => {
     const physicsSystem = scene.systems["hubs-systems"].physicsSystem;
     physicsSystem.setDebug(isDebug || physicsSystem.debug);
+    sceneGraph.Init(hubId);
   };
   if (scene.hasLoaded) {
     onSceneLoaded();

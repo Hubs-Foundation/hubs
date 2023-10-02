@@ -1,5 +1,6 @@
 import { Vector3 } from "three";
 import { virtualAgent } from "./agent-system";
+import { GetRoomProperties } from "../utils/rooms-properties";
 
 const INF = Number.MAX_SAFE_INTEGER;
 class Node {
@@ -8,6 +9,9 @@ class Node {
     this.visited = false;
     this.path = [];
     this.distances = null;
+    this.x = this.vector.x;
+    this.y = this.vector.y;
+    this.z = this.vector.z;
   }
 
   MakeStartingPoint(nodeCount, index) {
@@ -25,6 +29,10 @@ class Node {
     this.path = [];
     this.distances = null;
   }
+
+  IsIdentical(node) {
+    return node.x === this.x && node.y === this.x && node.z === this.z;
+  }
 }
 
 class Edge {
@@ -37,41 +45,87 @@ class Edge {
   }
 }
 
-class Graph {
-  constructor(PlaneX, PlaneY) {
-    this.nodes = [];
-    this.edges = [];
+export class Graph {
+  constructor() {}
 
-    for (let y = -PlaneY / 2; y < PlaneY / 2; y++) {
-      for (let x = -PlaneX / 2; x < PlaneX / 2; x++) {
-        this.nodes.push(new Node(x, y > 0 ? 1 : 0, y));
-      }
-    }
+  Init(hubID) {
+    const roomProperties = GetRoomProperties(hubID);
+    if (!roomProperties) {
+      console.error("Cannot read room properties, navigation is not enabled for this room");
+      this.enabled = false;
+    } else {
+      this.enabled = true;
+      this.nodes = [];
+      this.edges = [];
+      this.saliencyNodes = [];
+      this.saliencyIndex = {};
+      this.dimensions = roomProperties.dimensions;
+      this.exceptions = roomProperties.exceptions;
+      this.saliency = roomProperties.saliency;
 
-    for (let i = 0; i < this.nodes.length; i++) {
-      this.edges.push([]);
-      for (let j = 0; j < this.nodes.length; j++) {
-        if (i === j || !this.AreNodesAdjacent(this.nodes[i], this.nodes[j])) {
-          this.edges[i][j] = null;
-        } else {
-          this.edges[i][j] = new Edge(this.nodes[i], this.nodes[j]);
+      Object.keys(this.saliency).forEach((key, index) => {
+        const value = this.saliency[key];
+        const salientNode = new Node(value[0], value[1], value[2]);
+        this.nodes.push(salientNode);
+        this.saliencyNodes.push(salientNode);
+        this.saliencyIndex[key] = index;
+      });
+
+      for (let z = this.dimensions[2]; z < this.dimensions[3]; z++) {
+        for (let x = this.dimensions[0]; x < this.dimensions[1]; x++) {
+          let discard = false;
+          this.exceptions.forEach(exception => {
+            discard = x >= exception[0] && x <= exception[1] && z >= exception[2] && z <= exception[3];
+          });
+          const node = new Node(x, 0, z);
+          if (!discard) {
+            Object.values(this.saliencyNodes).forEach(salient => {
+              if (salient.IsIdentical(node)) {
+                discard = true;
+              }
+            });
+          }
+          if (!discard) this.nodes.push(new Node(x, 0, z));
         }
       }
-    }
 
-    this.nodeCount = this.nodes.length;
-    this.mapped = false;
-    this.mappedNodes = new Array(this.nodeCount).fill(false);
-    this.paths = new Array(this.nodeCount);
-    for (let j = 0; j < this.nodeCount; j++) {
-      this.paths[j] = [];
+      for (let i = 0; i < this.nodes.length; i++) {
+        this.edges.push([]);
+        for (let j = 0; j < this.nodes.length; j++) {
+          if (i === j || !this.AreNodesAdjacent(this.nodes[i], this.nodes[j])) {
+            this.edges[i][j] = null;
+          } else {
+            this.edges[i][j] = new Edge(this.nodes[i], this.nodes[j]);
+          }
+        }
+      }
+      console.log("nodes", this.nodes);
+      console.log("edges", this.edges);
+
+      this.nodeCount = this.nodes.length;
+      this.mapped = false;
+      this.mappedNodes = new Array(this.nodeCount).fill(false);
+      this.paths = new Array(this.nodeCount);
+      for (let j = 0; j < this.nodeCount; j++) {
+        this.paths[j] = [];
+      }
     }
   }
 
   AreNodesAdjacent(node1, node2) {
     return (
-      node1.vector.x === node2.vector.x || node1.vector.z === node2.vector.z /*&& node1.vector.y === node2.vector.y*/
+      (node1.vector.x === node2.vector.x || node1.vector.z === node2.vector.z) &&
+      node1.vector.distanceTo(node2.vector) <= 1.0
+      /*&& node1.vector.y === node2.vector.y*/
     );
+  }
+
+  GetDestIndex(salientName) {
+    if (Object.keys(this.saliencyIndex).includes(salientName)) {
+      return this.saliencyIndex[salientName];
+    } else {
+      console.error("This point is not a registered salient point");
+    }
   }
 
   Dijkstra(startIndex) {
@@ -84,6 +138,7 @@ class Graph {
 
     for (let i = 0; i < this.nodeCount - 1; i++) {
       const minDistanceIndex = this.GetMinDistanceIndex(startingNode.distances, this.nodes, this.edges);
+      console.log("minDistance index:", minDistanceIndex);
 
       this.nodes[minDistanceIndex].Visit();
 
@@ -105,11 +160,15 @@ class Graph {
     this.mappedNodes[startIndex] = true;
   }
 
-  GetInstructions(startIndex, stopIndex) {
+  GetInstructions(startIndex, stopName) {
     if (!this.mappedNodes[startIndex]) {
       if (this.mapped) this.Reset();
       this.Dijkstra(startIndex);
     }
+
+    const stopIndex = this.GetDestIndex(stopName);
+    console.log("stopName:", stopName);
+    console.log("stopIndex:", stopIndex);
 
     const path = this.paths[startIndex][stopIndex];
     const pathVectors = [];

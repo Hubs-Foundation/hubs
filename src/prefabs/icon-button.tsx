@@ -4,7 +4,7 @@ import { Layers } from "../camera-layers";
 import backgroundSrc from "../assets/hud/button.9.png";
 import recIconSrc from "../assets/hud/button.9.png";
 import stopIconSrc from "../assets/hud/nametag.9.png";
-import cameraIconSrc from "../assets/images/camera.png";
+import cameraIconSrc from "../assets/images/location.png";
 import { textureLoader } from "../utils/media-utils";
 import { Texture } from "three";
 import { BUTTON_TYPES } from "./button3D";
@@ -60,6 +60,7 @@ export function IconButton({ width, height, name = "Button", type, ...props }: I
         slice9={{ size: [width, height], insets: [64, 66, 64, 66], texture: iconTexture }}
         scale={iconSize}
         position={[0, 0, 0.01]}
+        rotation={[0, 0, 3.1415926536]}
         name={`${name} Label`}
       />
     </entity>

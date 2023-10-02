@@ -141,7 +141,8 @@ export default class VirtualAgent {
     if (clicked(this.arrowPrev)) lowerIndex();
     if (clicked(this.buttonMic)) this.MicrophoneActions();
     if (clicked(this.buttonSnap)) {
-      this.SnapActions();
+      this.NavigationActions();
+      // this.SnapActions();
       // const dev = developingRouter();
       // console.log(dev);
       // this.Navigation(dev.data.start, dev.data.dest);
@@ -191,6 +192,16 @@ export default class VirtualAgent {
       .catch(error => {
         console.log(error);
       });
+  }
+
+  NavigationActions() {
+    const salientPoints = Object.keys(sceneGraph.saliency);
+    const randomKeyIndex = Math.floor(Math.random() * salientPoints.length);
+    const destName = salientPoints[randomKeyIndex];
+    const startNodeIndex = sceneGraph.GetClosestIndex(virtualAgent.AvatarPos());
+    console.log("closest index to me:", startNodeIndex);
+    console.log("destination Name: ", destName);
+    this.Navigation(startNodeIndex, destName);
   }
 
   HandleArrows(renderArrows) {
