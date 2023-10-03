@@ -16,6 +16,7 @@ import { getVideo, setVideo } from "./video";
 import { getRigidBody, setRigidBody } from "./rigid-body";
 import { getMediaFrame, setMediaFrame } from "./media-frame";
 import { getText, setText } from "./text";
+import { camelCase } from "../../../inflators/model";
 
 type ComponentProps = {
   [key: string]: any;
@@ -29,7 +30,7 @@ type ComponentBindingType = {
 
 // This is a temporary place for all the component to get/set props methods to avoid polluting jsx-entity until we find a better home for it
 // Ideally we should have a good API to add components in a self contained way. An add-ons API would be the ideal way.
-export const ComponentBindings = {
+const ComponentBindings = {
   video: {
     component: MediaVideo,
     get: getVideo,
@@ -68,3 +69,7 @@ export const ComponentBindings = {
     component: NetworkedBehavior
   }
 } as ComponentBindingType;
+
+export function getComponentBindings(componentName: string) {
+  return ComponentBindings[camelCase(componentName) as ComponentKeyType]!;
+}

@@ -25,7 +25,8 @@ import { inflateCustomTags } from "../../inflators/custom-tags";
 import { findAncestorWithComponent, findChildWithComponent } from "../../utils/bit-utils";
 import { ClientID } from "../../utils/networking-types";
 import { definitionListToMap } from "./utils";
-import { ComponentBindings, ComponentKeyType } from "./bindings/bindings";
+import { getComponentBindings } from "./bindings/bindings";
+import { camelCase } from "../../inflators/model";
 
 type SocketTypeName =
   | "string"
@@ -603,7 +604,7 @@ function makeMaterialPropertyNodes<T extends SettableMaterialProperties, S exten
       in: [{ entity: "entity" }, { component: "string" }],
       out: [{ entity: "entity" }],
       exec: (entity: EntityID, component: string) => {
-        const { component: componentDef } = ComponentBindings[component as ComponentKeyType]!;
+        const { component: componentDef } = getComponentBindings(component);
         const cmp = findChildWithComponent(APP.world, componentDef, entity);
         return { entity: cmp };
       }
@@ -647,13 +648,13 @@ function makeMaterialPropertyNodes<T extends SettableMaterialProperties, S exten
       triggered: ({ read, commit, configuration, graph }) => {
         const world = graph.getDependency("world") as HubsWorld;
 
-        const componentName = configuration.component as string;
+        const componentName = camelCase(configuration.component as string);
         const propertyName = configuration.property as string;
         const type = configuration.type as string;
 
         const entity = read("entity") as EntityID;
 
-        const { set } = ComponentBindings[componentName as ComponentKeyType]!;
+        const { set } = getComponentBindings(componentName);
         if (set) {
           set(world, entity, {
             [propertyName]: read(type)
@@ -704,13 +705,13 @@ function makeMaterialPropertyNodes<T extends SettableMaterialProperties, S exten
       exec: ({ read, write, configuration, graph }) => {
         const world = graph.getDependency("world") as HubsWorld;
 
-        const componentName = configuration.component as string;
+        const componentName = camelCase(configuration.component as string);
         const propertyName = configuration.property as string;
         const type = configuration.type as string;
 
         const entity = read("entity") as EntityID;
 
-        const { get } = ComponentBindings[componentName as ComponentKeyType]!;
+        const { get } = getComponentBindings(componentName);
         if (get) {
           const props = get(world, entity);
           write(type, props[propertyName]);

@@ -8,7 +8,7 @@ import { mapMaterials } from "../utils/material-utils";
 import { EntityID } from "../utils/networking-types";
 import { inflateLoopAnimationInitialize, LoopAnimationParams } from "./loop-animation";
 
-function camelCase(s: string) {
+export function camelCase(s: string) {
   return s.replace(/-(\w)/g, (_, m) => m.toUpperCase());
 }
 
