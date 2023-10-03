@@ -142,10 +142,11 @@ const createAnimationActionDef = makeFlowNodeDefinition({
     const rootEid = graph.getDependency<EntityID>("rootEntity")!;
     const world = graph.getDependency<HubsWorld>("world")!;
     const obj = world.eid2obj.get(rootEid)!;
+    const targetObj = world.eid2obj.get(targetEid)!;
     const mixer = MixerAnimatableData.get(rootEid)!;
 
-    const action = mixer.clipAction(AnimationClip.findByName(obj.animations, clipName));
-    action.blendMode = additiveBlending ? AdditiveAnimationBlendMode : NormalAnimationBlendMode;
+    const blendMode = additiveBlending ? AdditiveAnimationBlendMode : NormalAnimationBlendMode;
+    const action = mixer.clipAction(AnimationClip.findByName(obj.animations, clipName), targetObj, blendMode);
     action.setLoop(loop ? LoopRepeat : LoopOnce, Infinity);
     action.clampWhenFinished = clampWhenFinished;
     action.weight = weight;
