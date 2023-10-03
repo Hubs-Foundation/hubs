@@ -8,8 +8,9 @@ import { qsGet } from "../utils/qs_truthy";
 const customFOV = qsGet("fov");
 const enableThirdPersonMode = qsTruthy("thirdPerson");
 import { Layers } from "../camera-layers";
-import { Inspectable } from "../bit-components";
+import { HoveredRemoteRight, Inspectable } from "../bit-components";
 import { findAncestorWithComponent, shouldUseNewLoader } from "../utils/bit-utils";
+import { defineQuery } from "bitecs";
 
 function getInspectableInHierarchy(eid) {
   let inspectable = findAncestorWithComponent(APP.world, Inspectable, eid);
@@ -413,6 +414,7 @@ export class CameraSystem {
   tick = (function () {
     const translation = new THREE.Matrix4();
     let uiRoot;
+    const hoveredQuery = defineQuery([HoveredRemoteRight]);
     return function tick(scene, dt) {
       this.viewingCamera.matrixNeedsUpdate = true;
       this.viewingCamera.updateMatrix();
@@ -448,10 +450,18 @@ export class CameraSystem {
       this.interaction = this.interaction || scene.systems.interaction;
 
       if (this.userinput.get(paths.actions.startInspecting) && this.mode !== CAMERA_MODE_INSPECT) {
-        const hoverEl = this.interaction.state.rightRemote.hovered || this.interaction.state.leftRemote.hovered;
+        if (shouldUseNewLoader()) {
+          if (hoveredQuery(APP.world).length) {
+            const hovered = hoveredQuery(APP.world)[0];
+            const obj = APP.world.eid2obj.get(hovered);
+            this.inspect(obj, 1.5);
+          }
+        } else {
+          const hoverEl = this.interaction.state.rightRemote.hovered || this.interaction.state.leftRemote.hovered;
 
-        if (hoverEl) {
-          this.inspect(hoverEl.object3D, 1.5);
+          if (hoverEl) {
+            this.inspect(hoverEl.object3D, 1.5);
+          }
         }
       } else if (this.mode === CAMERA_MODE_INSPECT && this.userinput.get(paths.actions.stopInspecting)) {
         scene.emit("uninspect");
