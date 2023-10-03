@@ -5,7 +5,7 @@ export class InspectYourselfSystem {
     if (!scene.is("entered")) return;
     if (userinput.get(paths.actions.startInspectingSelf) && !isLockedDownDemoRoom()) {
       const rig = document.getElementById("avatar-rig");
-      cameraSystem.inspect(rig, 1.5);
+      cameraSystem.inspect(rig.object3D, 1.5);
     }
   }
 }
