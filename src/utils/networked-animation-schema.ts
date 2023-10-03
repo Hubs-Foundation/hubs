@@ -1,6 +1,6 @@
 import { HubsWorld } from "../app";
 import { NetworkedAnimationActionsData, NetworkedAnimation } from "../bit-components";
-import { AnimationActionDataT, AnimationActionsMap } from "../bit-systems/behavior-graph/animation-nodes";
+import { AnimationActionDataT, AnimationActionsDataMap } from "../bit-systems/behavior-graph/animation-nodes";
 import { defineNetworkSchema } from "./define-network-schema";
 import { deserializerWithMigrations, Migration, NetworkSchema, StoredComponent } from "./network-schemas";
 import type { CursorBuffer, EntityID } from "./networking-types";
@@ -14,7 +14,7 @@ function serialize(world: HubsWorld, eid: EntityID, data: CursorBuffer, isFullSy
     if (NetworkedAnimationActionsData.has(eid)) {
       const actionDatas = NetworkedAnimationActionsData.get(eid)!;
       datas.length = 0;
-      actionDatas.forEach((actionData: AnimationActionDataT, actionId: number) => {
+      actionDatas.forEach((actionData: AnimationActionDataT, actionId: string) => {
         datas.push([actionId, [actionData.time, actionData.timeScale, actionData.weight, actionData.flags]]);
       });
       if (datas.length > 0) {
@@ -24,7 +24,7 @@ function serialize(world: HubsWorld, eid: EntityID, data: CursorBuffer, isFullSy
       }
       result = datas.length > 0;
     } else {
-      data.pop();
+      data.splice(-2);
       result = false;
     }
   }
@@ -48,7 +48,7 @@ function deserialize(world: HubsWorld, eid: EntityID, data: CursorBuffer) {
   if (NetworkedAnimationActionsData.has(eid)) {
     const rawActionData = componentData[1];
     if (!NetworkedAnimationActionsData.has(eid)) {
-      NetworkedAnimationActionsData.set(eid, new AnimationActionsMap());
+      NetworkedAnimationActionsData.set(eid, new AnimationActionsDataMap());
     }
     const actionDatas = NetworkedAnimationActionsData.get(eid)!;
     for (let i = 0; i < rawActionData.length; i++) {

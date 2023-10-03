@@ -42,7 +42,7 @@ function serialize(world: HubsWorld, eid: EntityID, data: CursorBuffer, isFullSy
       data[data.length - 1] = [data[data.length - 1], JSON.stringify(NetworkedBehaviorData.get(eid), serMap)];
       result = true;
     } else {
-      data.pop();
+      data.splice(-2);
       result = false;
     }
   }
