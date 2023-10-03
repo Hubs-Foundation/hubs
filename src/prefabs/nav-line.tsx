@@ -3,10 +3,13 @@
 import { createElementEntity } from "../utils/jsx-entity";
 import { Object3D, Quaternion, Vector3 } from "three";
 import rightArrowSrc from "../assets/models/arrow_right.glb";
+import pointSrc from "../assets/models/point.glb";
 import { preload } from "../utils/preload";
 import { cloneModelFromCache, loadModel } from "../components/gltf-model-plus";
+import { Node } from "../bit-systems/routing-system";
 
 preload(loadModel(rightArrowSrc, null, true));
+preload(loadModel(pointSrc, null, true));
 
 const depth = 0.1;
 const halfDepth = depth / 2;
@@ -95,4 +98,15 @@ function GetArrow(instruction: instruction) {
   obj.position.copy(new Vector3(instruction.current!.x, instruction.current!.y + 1.5, instruction.current!.z));
 
   return obj;
+}
+
+export function pivotPoint(nodeArray: Node[]) {
+  const points: any[] = [];
+
+  nodeArray.forEach(node => {
+    const obj = cloneModelFromCache(pointSrc).scene as Object3D;
+    points.push(<entity name="point" object3D={obj} position={[node.x, node.y, node.z]}></entity>);
+  });
+
+  return <entity>{points}</entity>;
 }

@@ -18,7 +18,7 @@ import { addAgentToScene } from "../prefabs/agent";
 import { SnapDepthPOV, SnapPOV } from "../utils/vlm-adapters";
 import { sceneGraph } from "./routing-system";
 import { renderAsEntity } from "../utils/jsx-entity";
-import { NavigationLine } from "../prefabs/nav-line";
+import { NavigationLine, pivotPoint } from "../prefabs/nav-line";
 import { AxesHelper } from "three";
 
 const agentQuery = defineQuery([Agent]);
@@ -106,6 +106,14 @@ export default class VirtualAgent {
       APP.scene.emit("agent-toggle");
 
       this.scene.object3D.add(new AxesHelper());
+
+      const showPivots = false; //Change this to see points
+
+      if (showPivots) {
+        const pointEid = renderAsEntity(APP.world, pivotPoint(sceneGraph.nodes));
+        const pivotObjs = APP.world.eid2obj.get(pointEid);
+        this.scene.object3D.add(pivotObjs);
+      }
     });
 
     if (this.eid) return true;
@@ -121,6 +129,7 @@ export default class VirtualAgent {
   MovementActions() {
     const agentPos = this.agentObj.getWorldPosition(new THREE.Vector3());
     const avatarPos = this.avatarPovObj.getWorldPosition(new THREE.Vector3());
+    // console.log("pos", avatarPos.x, avatarPos.z);
     const dist = agentPos.distanceTo(avatarPos);
 
     if (dist > 2) {
@@ -195,7 +204,10 @@ export default class VirtualAgent {
   }
 
   NavigationActions() {
-    const salientPoints = Object.keys(sceneGraph.saliency);
+    const salientPoints = sceneGraph.saliency.map(element => {
+      return element.name;
+    });
+
     const randomKeyIndex = Math.floor(Math.random() * salientPoints.length);
     const destName = salientPoints[randomKeyIndex];
     const startNodeIndex = sceneGraph.GetClosestIndex(virtualAgent.AvatarPos());
@@ -215,7 +227,7 @@ export default class VirtualAgent {
 
   Navigation(startIndex, endIndex) {
     if (this.cube !== undefined) {
-      console.log("deleting previous arrows");
+      //console.log("deleting previous arrows");
       removeEntity(APP.world, this.cube);
       this.scene.object3D.remove(this.arrowObjs);
     }

@@ -1,9 +1,9 @@
-import { Vector3 } from "three";
+import { DiscreteInterpolant, Vector3 } from "three";
 import { virtualAgent } from "./agent-system";
 import { GetRoomProperties } from "../utils/rooms-properties";
 
 const INF = Number.MAX_SAFE_INTEGER;
-class Node {
+export class Node {
   constructor(x, y, z) {
     this.vector = new THREE.Vector3(x, y, z);
     this.visited = false;
@@ -60,24 +60,25 @@ export class Graph {
       this.saliencyNodes = [];
       this.saliencyIndex = {};
       this.dimensions = roomProperties.dimensions;
-      this.exceptions = roomProperties.exceptions;
       this.saliency = roomProperties.saliency;
 
-      Object.keys(this.saliency).forEach((key, index) => {
-        const value = this.saliency[key];
-        const salientNode = new Node(value[0], value[1], value[2]);
+      this.saliency.forEach((element, index) => {
+        const value = element.pivot;
+        const salientNode = new Node(value[0], value[1], -value[2]);
         this.nodes.push(salientNode);
         this.saliencyNodes.push(salientNode);
-        this.saliencyIndex[key] = index;
+        this.saliencyIndex[element.name] = index;
       });
 
-      for (let z = this.dimensions[2]; z < this.dimensions[3]; z++) {
-        for (let x = this.dimensions[0]; x < this.dimensions[1]; x++) {
+      for (let z = this.dimensions[2] + 1; z < this.dimensions[3]; z++) {
+        for (let x = this.dimensions[0] + 1; x < this.dimensions[1]; x++) {
           let discard = false;
-          this.exceptions.forEach(exception => {
+          for (let i = 0; i < this.saliency.length; i++) {
+            const exception = this.saliency[i].box;
             discard = x >= exception[0] && x <= exception[1] && z >= exception[2] && z <= exception[3];
-          });
-          const node = new Node(x, 0, z);
+            if (discard) break;
+          }
+          const node = new Node(x, 0, -z);
           if (!discard) {
             Object.values(this.saliencyNodes).forEach(salient => {
               if (salient.IsIdentical(node)) {
@@ -85,9 +86,11 @@ export class Graph {
               }
             });
           }
-          if (!discard) this.nodes.push(new Node(x, 0, z));
+          if (!discard) this.nodes.push(new Node(x, 0, -z));
         }
       }
+
+      console.log("nodes", this.nodes);
 
       for (let i = 0; i < this.nodes.length; i++) {
         this.edges.push([]);
@@ -99,7 +102,7 @@ export class Graph {
           }
         }
       }
-      console.log("nodes", this.nodes);
+
       console.log("edges", this.edges);
 
       this.nodeCount = this.nodes.length;
@@ -138,7 +141,6 @@ export class Graph {
 
     for (let i = 0; i < this.nodeCount - 1; i++) {
       const minDistanceIndex = this.GetMinDistanceIndex(startingNode.distances, this.nodes, this.edges);
-      console.log("minDistance index:", minDistanceIndex);
 
       this.nodes[minDistanceIndex].Visit();
 
