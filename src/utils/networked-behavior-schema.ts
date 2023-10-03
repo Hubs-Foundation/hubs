@@ -6,13 +6,18 @@ import type { CursorBuffer, EntityID } from "./networking-types";
 
 const migrations = new Map<number, Migration>();
 
-type MapValueT = number | string | Map<string, MapValueT>;
+type MapValueT = number | string | bigint | Map<string, MapValueT>;
 
 function serMap(key: string, value: MapValueT) {
   if (value instanceof Map) {
     return {
       dataType: "Map",
       value: Array.from(value.entries())
+    };
+  } else if (typeof value === "bigint") {
+    return {
+      dataType: "bigint",
+      value: value.toString()
     };
   } else {
     return value;
@@ -23,6 +28,8 @@ function desMap(key: any, value: any) {
   if (typeof value === "object" && value !== null) {
     if (value.dataType === "Map") {
       return new Map(value.value);
+    } else if (value.dataType === "bigint") {
+      return BigInt(value.value);
     }
   }
   return value;
