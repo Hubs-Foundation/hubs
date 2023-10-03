@@ -54,12 +54,12 @@ export type AnimationActionDataT = {
   weight: number;
   flags: number;
 };
-export type AnimationActionDataMapT = Map<number, AnimationActionDataT>;
-export class AnimationActionsDataMap extends Map<number, AnimationActionDataT> {}
+export type AnimationActionDataMapT = Map<string, AnimationActionDataT>;
+export class AnimationActionsDataMap extends Map<string, AnimationActionDataT> {}
 export class AnimationActionsMap extends Map<EntityID, AnimationActionsDataMap> {}
 
-const id2action = new Map<number, AnimationAction>();
-const id2time = new Map<number, number>();
+const id2action = new Map<string, AnimationAction>();
+const id2time = new Map<string, number>();
 
 function actionData2Action(actionData: AnimationActionDataT, action: AnimationAction) {
   const clampWhenFinished = actionData.flags & ANIMATION_FLAGS.CLAMP_WHEN_FINISHED ? true : false;
@@ -78,12 +78,10 @@ function actionData2Action(actionData: AnimationActionDataT, action: AnimationAc
   action.timeScale = actionData.timeScale;
   action.weight = actionData.weight;
   action.time = actionData.time;
-  if (running != action.isRunning()) {
-    if (running) {
-      action.play();
-    } else {
-      action.stop();
-    }
+  if (running) {
+    action.play();
+  } else {
+    action.stop();
   }
 }
 
@@ -153,7 +151,7 @@ const createAnimationActionDef = makeFlowNodeDefinition({
     action.timeScale = timeScale;
 
     if (hasComponent(world, NetworkedAnimation, targetEid)) {
-      action.id = id2action.size;
+      action.id = `${targetEid}_${clipName}`;
       action.eid = targetEid;
       if (!NetworkedAnimationActionsData.has(targetEid)) {
         NetworkedAnimationActionsData.set(targetEid, new AnimationActionsDataMap());
@@ -170,7 +168,7 @@ const createAnimationActionDef = makeFlowNodeDefinition({
       id2action.set(action.id, action);
     }
 
-    write("action", action);
+    write("action", action.id);
     commit("flow");
   }
 });
@@ -225,9 +223,10 @@ export class PlayAnimationNode extends AsyncNode {
       this.clearState();
     }
 
-    const action = this.readInput("action") as AnimationAction;
+    const actionId = this.readInput("action") as string;
     const reset = this.readInput("reset") as boolean;
 
+    const action = id2action.get(actionId)!;
     this.state.action = action;
     this.state.onFinished = (e: { action: AnimationAction }) => {
       if (e.action != this.state.action) return;
@@ -284,7 +283,9 @@ export const AnimationNodes = definitionListToMap([
     initialState: undefined,
     out: { flow: "flow" },
     triggered: ({ read, commit, graph }) => {
-      const action = read("action") as AnimationAction;
+      const actionId = read("action") as string;
+
+      const action = id2action.get(actionId)!;
       action.stop();
 
       const world = graph.getDependency("world") as HubsWorld;
@@ -309,10 +310,13 @@ export const AnimationNodes = definitionListToMap([
     initialState: undefined,
     out: { flow: "flow" },
     triggered: ({ read, commit }) => {
-      const action = read("action") as AnimationAction;
-      const toAction = read("toAction") as AnimationAction;
+      const actionId = read("action") as string;
+      const toActionId = read("toAction") as string;
       const duration = read("duration") as number;
       const warp = read("warp") as boolean;
+
+      const action = id2action.get(actionId)!;
+      const toAction = id2action.get(toActionId)!;
       action.crossFadeTo(toAction, duration, warp);
       commit("flow");
     }
@@ -329,8 +333,10 @@ export const AnimationNodes = definitionListToMap([
     initialState: undefined,
     out: { flow: "flow" },
     triggered: ({ read, commit, graph }) => {
-      const action = read("action") as AnimationAction;
+      const actionId = read("action") as string;
       const timeScale = read("timeScale") as number;
+
+      const action = id2action.get(actionId)!;
       action.timeScale = timeScale;
 
       const world = graph.getDependency("world") as HubsWorld;
@@ -345,8 +351,9 @@ export const AnimationNodes = definitionListToMap([
     category: "Animation" as any,
     in: [{ action: "animationAction" }],
     out: "boolean",
-    exec: (action: AnimationAction) => {
-      return action.isRunning();
+    exec: (action: string) => {
+      const _action = id2action.get(action)!;
+      return _action.isRunning();
     }
   })
 ]);
@@ -369,7 +376,7 @@ export function animationSystem(world: HubsWorld) {
   animationQuery(world).forEach(eid => {
     if (NetworkedAnimationActionsData.has(eid) && !hasComponent(world, Owned, eid)) {
       const actionDatas = NetworkedAnimationActionsData.get(eid)!;
-      actionDatas.forEach((actionData: AnimationActionDataT, actionId: number) => {
+      actionDatas.forEach((actionData: AnimationActionDataT, actionId: string) => {
         const action = id2action.get(actionId);
         // TODO: We should check per animation action timestamps to know if we should update an animation
         if (action && id2time.get(action.id!) !== NetworkedAnimation.timestamp[action.eid!]) {
