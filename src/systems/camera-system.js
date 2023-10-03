@@ -8,8 +8,8 @@ import { qsGet } from "../utils/qs_truthy";
 const customFOV = qsGet("fov");
 const enableThirdPersonMode = qsTruthy("thirdPerson");
 import { Layers } from "../camera-layers";
-import { Inspectable } from "../bit-components";
-import { findAncestorWithComponent, shouldUseNewLoader } from "../utils/bit-utils";
+import { Inspectable, LocalAvatar, RemoteAvatar } from "../bit-components";
+import { findAncestorWithAnyComponent, findAncestorWithComponent, shouldUseNewLoader } from "../utils/bit-utils";
 
 function getInspectableInHierarchy(eid) {
   let inspectable = findAncestorWithComponent(APP.world, Inspectable, eid);
@@ -49,8 +49,14 @@ function pivotFor(el) {
 
 function getInspectableAndPivot(eid) {
   const inspectable = getInspectableInHierarchy(eid);
-  // TODO Add support for pivotFor (avatars only)
-  return { inspectable, pivot: inspectable };
+  let pivot;
+  if (findAncestorWithAnyComponent(APP.world, [RemoteAvatar, LocalAvatar], eid)) {
+    // TODO Until avatars are migrated we still handle pivot using the AFrame element
+    pivot = pivotFor(inspectable.el);
+  } else {
+    pivot = inspectable;
+  }
+  return { inspectable, pivot };
 }
 
 function getInspectableAndPivotAframe(el) {
