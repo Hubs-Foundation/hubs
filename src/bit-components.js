@@ -442,13 +442,7 @@ const _CustomTags = defineComponent();
  */
 export const CustomTags = _CustomTags;
 CustomTags.tags = new Map();
-export const NetworkedAnimation = defineComponent({
-  timestamp: Types.ui32
-});
-/**
- * @type {Map<EntityId, AnimationActionsDataMap}>}
- */
-export const NetworkedAnimationActionsData = new Map();
+export const NetworkedAnimation = defineComponent();
 export const NetworkedBehavior = defineComponent({
   timestamp: Types.ui32
 });
@@ -459,3 +453,19 @@ export const NetworkedBehaviorData = new Map();
 export const InteractableObject = defineComponent({
   type: Types.ui8
 });
+export const BitAnimationAction = defineComponent({
+  time: Types.ui32,
+  timeScale: Types.ui8,
+  weight: Types.ui8,
+  flags: Types.ui8
+});
+export const NetworkedAnimationAction = defineComponent({
+  time: Types.ui32,
+  timeScale: Types.ui8,
+  weight: Types.ui8,
+  flags: Types.ui8
+});
+/**
+ * @type {Map<EntityId, Set<EntityID>}>}
+ */
+export const ObjectAnimationActionData = new Map();

@@ -23,8 +23,7 @@ import {
   LocalAvatar,
   RemoteAvatar,
   Rigidbody,
-  SceneLoader,
-  SceneRoot
+  SceneLoader
 } from "../bit-components";
 import { anyEntityWith, findAncestorEntity } from "../utils/bit-utils";
 import { ClientID, EntityID } from "../utils/networking-types";

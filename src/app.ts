@@ -11,6 +11,7 @@ import MediaDevicesManager from "./utils/media-devices-manager";
 
 import { EffectComposer, EffectPass } from "postprocessing";
 import {
+  AnimationAction,
   Audio,
   AudioListener,
   Material,
@@ -52,6 +53,7 @@ export interface HubsWorld extends IWorld {
   nid2eid: Map<number, number>;
   eid2obj: Map<number, Object3D>;
   eid2mat: Map<number, Material>;
+  eid2action: Map<number, AnimationAction>;
   time: { delta: number; elapsed: number; tick: number };
 }
 
@@ -120,6 +122,7 @@ export class App {
     // TODO: Create accessor / update methods for these maps / set
     this.world.eid2obj = new Map();
     this.world.eid2mat = new Map();
+    this.world.eid2action = new Map();
 
     this.world.nid2eid = new Map();
     this.world.deletedNids = new Set();

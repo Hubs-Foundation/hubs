@@ -2,7 +2,7 @@ import { Component } from "bitecs";
 import { HubsWorld } from "../app";
 import {
   $isStringType,
-  NetworkedAnimation,
+  NetworkedAnimationAction,
   NetworkedBehavior,
   NetworkedFloatyObject,
   NetworkedMediaFrame,
@@ -18,7 +18,7 @@ import { NetworkedPDFSchema } from "./networked-pdf-schema";
 import { NetworkedTransformSchema } from "./networked-transform-schema";
 import { NetworkedVideoSchema } from "./networked-video-schema";
 import { NetworkedWaypointSchema } from "./networked-waypoint-schema";
-import { NetworkedAnimationSchema } from "./networked-animation-schema";
+import { NetworkedAnimationActionSchema } from "./networked-animation-action-schema";
 import type { CursorBuffer, EntityID } from "./networking-types";
 import { NetworkedBehaviorSchema } from "./networked-behavior-schema";
 import { NetworkedTextSchema } from "./networked-text-schema";
@@ -52,7 +52,7 @@ schemas.set(NetworkedFloatyObject, {
   ...defineNetworkSchema(NetworkedFloatyObject)
 });
 schemas.set(NetworkedPDF, NetworkedPDFSchema);
-schemas.set(NetworkedAnimation, NetworkedAnimationSchema);
+schemas.set(NetworkedAnimationAction, NetworkedAnimationActionSchema);
 schemas.set(NetworkedBehavior, NetworkedBehaviorSchema);
 schemas.set(NetworkedText, NetworkedTextSchema);
 

@@ -19,16 +19,21 @@ import {
 } from "three";
 import { HubsWorld } from "../../app";
 import {
-  NetworkedAnimationActionsData,
   BehaviorGraph,
   MixerAnimatableData,
-  Networked,
   NetworkedAnimation,
-  Owned
+  NetworkedAnimationAction,
+  ObjectAnimationActionData,
+  Networked,
+  Owned,
+  BitAnimationAction
 } from "../../bit-components";
 import { EntityID } from "../../utils/networking-types";
 import { definitionListToMap } from "./utils";
-import { defineQuery, enterQuery, exitQuery, hasComponent } from "bitecs";
+import { addComponent, addEntity, defineQuery, exitQuery, hasComponent, removeEntity } from "bitecs";
+import { takeOwnership } from "../../utils/take-ownership";
+import { takeSoftOwnership } from "../../utils/take-soft-ownership";
+import { setInitialNetworkedData } from "../../utils/assign-network-ids";
 
 export const ANIMATION_FLAGS = {
   RUNNING: 1 << 0,
@@ -48,46 +53,7 @@ export const animationValueDefs = {
   )
 };
 
-export type AnimationActionDataT = {
-  time: number;
-  timeScale: number;
-  weight: number;
-  flags: number;
-};
-export type AnimationActionDataMapT = Map<string, AnimationActionDataT>;
-export class AnimationActionsDataMap extends Map<string, AnimationActionDataT> {}
-export class AnimationActionsMap extends Map<EntityID, AnimationActionsDataMap> {}
-
-const id2action = new Map<string, AnimationAction>();
-const id2time = new Map<string, number>();
-
-function actionData2Action(actionData: AnimationActionDataT, action: AnimationAction) {
-  const clampWhenFinished = actionData.flags & ANIMATION_FLAGS.CLAMP_WHEN_FINISHED ? true : false;
-  const loop = actionData.flags & ANIMATION_FLAGS.LOOP ? LoopRepeat : LoopOnce;
-  const blendMode =
-    actionData.flags & ANIMATION_FLAGS.ADDITIVE_BLENDING ? AdditiveAnimationBlendMode : NormalAnimationBlendMode;
-  const running = actionData.flags & ANIMATION_FLAGS.RUNNING ? true : false;
-  const paused = actionData.flags & ANIMATION_FLAGS.PAUSED ? true : false;
-
-  action.paused = paused;
-  action.blendMode = blendMode;
-  if (action.loop != loop) {
-    action.setLoop(loop, Infinity);
-  }
-  action.clampWhenFinished = clampWhenFinished;
-  action.timeScale = actionData.timeScale;
-  action.weight = actionData.weight;
-  action.time = actionData.time;
-  if (running != action.isRunning()) {
-    if (running) {
-      action.play();
-    } else {
-      action.stop();
-    }
-  }
-}
-
-function action2ActionData(action: AnimationAction): AnimationActionDataT {
+function action2Component(world: HubsWorld, eid: EntityID, action: AnimationAction) {
   let flags = 0;
   if (action.clampWhenFinished) flags |= ANIMATION_FLAGS.CLAMP_WHEN_FINISHED;
   if (action.blendMode === AdditiveAnimationBlendMode) flags |= ANIMATION_FLAGS.ADDITIVE_BLENDING;
@@ -95,22 +61,78 @@ function action2ActionData(action: AnimationAction): AnimationActionDataT {
   if (action.isRunning()) flags |= ANIMATION_FLAGS.RUNNING;
   if (action.paused) flags |= ANIMATION_FLAGS.PAUSED;
 
-  return { time: action.time, timeScale: action.timeScale, weight: action.weight, flags };
+  BitAnimationAction.flags[eid] = flags;
+  BitAnimationAction.time[eid] = action.time;
+  BitAnimationAction.timeScale[eid] = action.timeScale;
+  BitAnimationAction.weight[eid] = action.weight;
+
+  NetworkedAnimationAction.flags[eid] = flags;
+  NetworkedAnimationAction.time[eid] = action.time;
+  NetworkedAnimationAction.timeScale[eid] = action.timeScale;
+  NetworkedAnimationAction.weight[eid] = action.weight;
 }
 
-function syncAnimationAction(world: HubsWorld, action: AnimationAction) {
-  if (
-    action.eid !== undefined &&
-    hasComponent(world, NetworkedAnimation, action.eid) &&
-    hasComponent(world, Owned, action.eid)
-  ) {
-    const actionDatas = NetworkedAnimationActionsData.get(action.eid);
-    if (actionDatas) {
-      actionDatas.set(action.id!, action2ActionData(action));
+function component2Action(world: HubsWorld, eid: EntityID, action: AnimationAction) {
+  if (BitAnimationAction.flags[eid] !== NetworkedAnimationAction.flags[eid]) {
+    if (
+      (BitAnimationAction.flags[eid] & ANIMATION_FLAGS.CLAMP_WHEN_FINISHED) !==
+      (NetworkedAnimationAction.flags[eid] & ANIMATION_FLAGS.CLAMP_WHEN_FINISHED)
+    ) {
+      const clampWhenFinished =
+        NetworkedAnimationAction.flags[eid] & ANIMATION_FLAGS.CLAMP_WHEN_FINISHED ? true : false;
+      action.clampWhenFinished = clampWhenFinished;
     }
-    const timestamp = performance.now();
-    NetworkedAnimation.timestamp[action.eid] = timestamp;
-    id2time.set(action.id!, timestamp);
+    if (
+      (BitAnimationAction.flags[eid] & ANIMATION_FLAGS.LOOP) !==
+      (NetworkedAnimationAction.flags[eid] & ANIMATION_FLAGS.LOOP)
+    ) {
+      const loop = NetworkedAnimationAction.flags[eid] & ANIMATION_FLAGS.LOOP ? LoopRepeat : LoopOnce;
+      action.setLoop(loop, Infinity);
+    }
+    if (
+      (BitAnimationAction.flags[eid] & ANIMATION_FLAGS.ADDITIVE_BLENDING) !==
+      (NetworkedAnimationAction.flags[eid] & ANIMATION_FLAGS.ADDITIVE_BLENDING)
+    ) {
+      const blendMode =
+        NetworkedAnimationAction.flags[eid] & ANIMATION_FLAGS.ADDITIVE_BLENDING
+          ? AdditiveAnimationBlendMode
+          : NormalAnimationBlendMode;
+      action.blendMode = blendMode;
+    }
+    if (
+      (BitAnimationAction.flags[eid] & ANIMATION_FLAGS.PAUSED) !==
+      (NetworkedAnimationAction.flags[eid] & ANIMATION_FLAGS.PAUSED)
+    ) {
+      const paused = NetworkedAnimationAction.flags[eid] & ANIMATION_FLAGS.PAUSED ? true : false;
+      action.paused = paused;
+    }
+    if (
+      (BitAnimationAction.flags[eid] & ANIMATION_FLAGS.RUNNING) !==
+      (NetworkedAnimationAction.flags[eid] & ANIMATION_FLAGS.RUNNING)
+    ) {
+      const running = NetworkedAnimationAction.flags[eid] & ANIMATION_FLAGS.RUNNING ? true : false;
+      if (running) {
+        action.play();
+      } else {
+        action.stop();
+      }
+    }
+    BitAnimationAction.flags[eid] = NetworkedAnimationAction.flags[eid];
+  }
+
+  if (BitAnimationAction.timeScale[eid] !== NetworkedAnimationAction.timeScale[eid]) {
+    BitAnimationAction.timeScale[eid] = NetworkedAnimationAction.timeScale[eid];
+    action.timeScale = NetworkedAnimationAction.timeScale[eid];
+  }
+
+  if (BitAnimationAction.weight[eid] !== NetworkedAnimationAction.weight[eid]) {
+    BitAnimationAction.weight[eid] = NetworkedAnimationAction.weight[eid];
+    action.weight = NetworkedAnimationAction.weight[eid];
+  }
+
+  if (BitAnimationAction.time[eid] !== NetworkedAnimationAction.time[eid]) {
+    BitAnimationAction.time[eid] = NetworkedAnimationAction.time[eid];
+    action.time = NetworkedAnimationAction.time[eid];
   }
 }
 
@@ -152,25 +174,27 @@ const createAnimationActionDef = makeFlowNodeDefinition({
     action.weight = weight;
     action.timeScale = timeScale;
 
+    const actionEid = addEntity(world);
+
+    APP.world.eid2action.set(actionEid, action);
+    if (!ObjectAnimationActionData.has(targetEid)) {
+      ObjectAnimationActionData.set(targetEid, new Set());
+    }
+    const actionEids = ObjectAnimationActionData.get(targetEid);
+    const index = actionEids?.size;
+    actionEids?.add(actionEid);
+
+    action.eid = actionEid;
+    addComponent(world, BitAnimationAction, actionEid);
     if (hasComponent(world, NetworkedAnimation, targetEid)) {
-      action.id = `${APP.getString(Networked.id[targetEid])}_${clipName}`;
-      action.eid = targetEid;
-      if (!NetworkedAnimationActionsData.has(targetEid)) {
-        NetworkedAnimationActionsData.set(targetEid, new AnimationActionsDataMap());
-      }
-      const actionsData = NetworkedAnimationActionsData.get(targetEid)!;
-      if (Networked.owner[targetEid] !== APP.str2sid.get("reticulum")) {
-        const actionData = actionsData.get(action.id);
-        if (actionData) {
-          actionData2Action(actionData, action);
-        }
-      } else {
-        actionsData.set(action.id, action2ActionData(action));
-      }
-      id2action.set(action.id, action);
+      addComponent(world, Networked, actionEid);
+      const rootNid = APP.getString(Networked.id[targetEid])!;
+      setInitialNetworkedData(actionEid, `${rootNid}.${index}`, rootNid);
+      addComponent(world, NetworkedAnimationAction, actionEid);
+      takeSoftOwnership(world, actionEid);
     }
 
-    write("action", action.id);
+    write("action", actionEid);
     commit("flow");
   }
 });
@@ -225,10 +249,11 @@ export class PlayAnimationNode extends AsyncNode {
       this.clearState();
     }
 
-    const actionId = this.readInput("action") as string;
+    const actionEid = this.readInput("action") as number;
     const reset = this.readInput("reset") as boolean;
 
-    const action = id2action.get(actionId)!;
+    const action = APP.world.eid2action.get(actionEid)!;
+
     this.state.action = action;
     this.state.onFinished = (e: { action: AnimationAction }) => {
       if (e.action != this.state.action) return;
@@ -259,7 +284,13 @@ export class PlayAnimationNode extends AsyncNode {
     console.log("PLAY", action.getClip().name, APP.world.time.tick);
 
     const world = this.graph.getDependency("world") as HubsWorld;
-    syncAnimationAction(world, action);
+
+    if (hasComponent(world, NetworkedAnimationAction, actionEid)) {
+      const targetObj = action.getRoot();
+      if (hasComponent(world, Owned, targetObj.eid!)) {
+        takeOwnership(world, actionEid);
+      }
+    }
 
     engine.commitToNewFiber(this, "flow");
     finished();
@@ -285,13 +316,18 @@ export const AnimationNodes = definitionListToMap([
     initialState: undefined,
     out: { flow: "flow" },
     triggered: ({ read, commit, graph }) => {
-      const actionId = read("action") as string;
+      const actionEid = read("action") as number;
 
-      const action = id2action.get(actionId)!;
+      const action = APP.world.eid2action.get(actionEid)!;
       action.stop();
 
       const world = graph.getDependency("world") as HubsWorld;
-      syncAnimationAction(world, action);
+      if (hasComponent(world, NetworkedAnimationAction, actionEid)) {
+        const targetObj = action.getRoot();
+        if (hasComponent(world, Owned, targetObj.eid!)) {
+          takeOwnership(world, actionEid);
+        }
+      }
 
       console.log("STOP", action.getClip().name, APP.world.time.tick);
       action.getMixer().dispatchEvent({ type: "hubs_stopped", action });
@@ -312,14 +348,16 @@ export const AnimationNodes = definitionListToMap([
     initialState: undefined,
     out: { flow: "flow" },
     triggered: ({ read, commit }) => {
-      const actionId = read("action") as string;
-      const toActionId = read("toAction") as string;
+      const actionEid = read("action") as number;
+      const toActionId = read("toAction") as number;
       const duration = read("duration") as number;
       const warp = read("warp") as boolean;
 
-      const action = id2action.get(actionId)!;
-      const toAction = id2action.get(toActionId)!;
+      const action = APP.world.eid2action.get(actionEid)!;
+      const toAction = APP.world.eid2action.get(toActionId)!;
+
       action.crossFadeTo(toAction, duration, warp);
+
       commit("flow");
     }
   }),
@@ -335,14 +373,19 @@ export const AnimationNodes = definitionListToMap([
     initialState: undefined,
     out: { flow: "flow" },
     triggered: ({ read, commit, graph }) => {
-      const actionId = read("action") as string;
+      const actionEid = read("action") as number;
       const timeScale = read("timeScale") as number;
 
-      const action = id2action.get(actionId)!;
+      const action = APP.world.eid2action.get(actionEid)!;
       action.timeScale = timeScale;
 
       const world = graph.getDependency("world") as HubsWorld;
-      syncAnimationAction(world, action);
+      if (hasComponent(world, NetworkedAnimationAction, actionEid)) {
+        const targetObj = action.getRoot();
+        if (hasComponent(world, Owned, targetObj.eid!)) {
+          takeOwnership(world, actionEid);
+        }
+      }
 
       commit("flow");
     }
@@ -353,8 +396,8 @@ export const AnimationNodes = definitionListToMap([
     category: "Animation" as any,
     in: [{ action: "animationAction" }],
     out: "boolean",
-    exec: (action: string) => {
-      const _action = id2action.get(action)!;
+    exec: (action: number) => {
+      const _action = APP.world.eid2action.get(action)!;
       return _action.isRunning();
     }
   })
@@ -362,30 +405,27 @@ export const AnimationNodes = definitionListToMap([
 
 const behaviorGraphsQuery = defineQuery([BehaviorGraph]);
 const behaviorGraphExitQuery = exitQuery(behaviorGraphsQuery);
-const animationQuery = defineQuery([Networked, NetworkedAnimation]);
-const animationEnterQuery = enterQuery(animationQuery);
-const animationExitQuery = exitQuery(animationQuery);
+const networkedAnimationQuery = defineQuery([NetworkedAnimation]);
+const networkedAnimationExitQuery = exitQuery(networkedAnimationQuery);
+const networkedAnimationActionQuery = defineQuery([Networked, NetworkedAnimationAction]);
+const networkedAnimationActionExitQuery = exitQuery(networkedAnimationActionQuery);
 export function animationSystem(world: HubsWorld) {
   behaviorGraphExitQuery(world).forEach(eid => {
-    id2action.clear();
-    id2time.clear();
-    NetworkedAnimationActionsData.clear();
+    APP.world.eid2action.clear();
   });
-  animationEnterQuery(world).forEach(eid => {});
-  animationExitQuery(world).forEach(eid => {
-    NetworkedAnimationActionsData.delete(eid);
+  networkedAnimationExitQuery(world).forEach(eid => {
+    const actionEids = ObjectAnimationActionData.get(eid);
+    actionEids?.forEach(actionEid => removeEntity(world, actionEid));
   });
-  animationQuery(world).forEach(eid => {
-    if (NetworkedAnimationActionsData.has(eid) && !hasComponent(world, Owned, eid)) {
-      const actionDatas = NetworkedAnimationActionsData.get(eid)!;
-      actionDatas.forEach((actionData: AnimationActionDataT, actionId: string) => {
-        const action = id2action.get(actionId);
-        // TODO: We should check per animation action timestamps to know if we should update an animation
-        if (action && id2time.get(action.id!) !== NetworkedAnimation.timestamp[action.eid!]) {
-          actionData2Action(actionData, action);
-          id2time.set(action.id!, NetworkedAnimation.timestamp[action.eid!]);
-        }
-      });
+  networkedAnimationActionExitQuery(world).forEach(eid => {
+    APP.world.eid2action.delete(eid);
+  });
+  networkedAnimationActionQuery(world).forEach(eid => {
+    const action = APP.world.eid2action.get(eid)!;
+    if (hasComponent(world, Owned, eid)) {
+      action2Component(world, eid, action);
+    } else {
+      component2Action(world, eid, action);
     }
   });
 }

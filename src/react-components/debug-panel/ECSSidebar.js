@@ -70,6 +70,25 @@ function MaterialItem(props) {
   );
 }
 
+function ActionItem(props) {
+  const { action, setSelectedObj } = props;
+  const displayName = `${action.getClip().name} (AnimationAction)`;
+  return (
+    <div className="obj-item">
+      <div
+        className="obj-label"
+        onContextMenu={e => {
+          e.preventDefault();
+          setSelectedObj(action);
+        }}
+      >
+        {displayName}
+        {` [${action.eid}]`}
+      </div>
+    </div>
+  );
+}
+
 export function formatComponentProps(eid, component) {
   const formatted = Object.keys(component).reduce((str, k, i, arr) => {
     const val = component[k] instanceof Map ? component[k].get(eid) : component[k][eid];
@@ -146,6 +165,7 @@ function RefreshButton({ onClick }) {
 
 const object3dQuery = defineQuery([bitComponents.Object3DTag]);
 const materialQuery = defineQuery([bitComponents.MaterialTag]);
+const animationActionsQuery = defineQuery([bitComponents.BitAnimationAction]);
 function ECSDebugSidebar({
   onClose,
   toggleObjExpand,
@@ -160,6 +180,7 @@ function ECSDebugSidebar({
     .filter(o => !o.parent);
   const materials = materialQuery(APP.world).map(eid => APP.world.eid2mat.get(eid));
   const envRoot = document.getElementById("environment-root").object3D;
+  const actions = animationActionsQuery(APP.world).map(eid => APP.world.eid2action.get(eid));
   return (
     <Sidebar
       title="ECS Debug"
@@ -202,6 +223,9 @@ function ECSDebugSidebar({
           <section>
             {materials.map(m => (
               <MaterialItem mat={m} key={m.eid} setSelectedObj={setSelectedObj} />
+            ))}
+            {actions.map(a => (
+              <ActionItem action={a} key={a.eid} setSelectedObj={setSelectedObj} />
             ))}
           </section>
         </div>

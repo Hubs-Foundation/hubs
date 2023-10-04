@@ -25,7 +25,6 @@ declare module "three" {
     reflectionProbeMode: "static" | "dynamic" | false;
   }
   interface AnimationAction {
-    id?: string;
     eid?: number;
   }
 }
