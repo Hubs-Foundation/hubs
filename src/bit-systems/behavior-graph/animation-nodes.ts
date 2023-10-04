@@ -78,10 +78,12 @@ function actionData2Action(actionData: AnimationActionDataT, action: AnimationAc
   action.timeScale = actionData.timeScale;
   action.weight = actionData.weight;
   action.time = actionData.time;
-  if (running) {
-    action.play();
-  } else {
-    action.stop();
+  if (running != action.isRunning()) {
+    if (running) {
+      action.play();
+    } else {
+      action.stop();
+    }
   }
 }
 
@@ -151,7 +153,7 @@ const createAnimationActionDef = makeFlowNodeDefinition({
     action.timeScale = timeScale;
 
     if (hasComponent(world, NetworkedAnimation, targetEid)) {
-      action.id = `${targetEid}_${clipName}`;
+      action.id = `${APP.getString(Networked.id[targetEid])}_${clipName}`;
       action.eid = targetEid;
       if (!NetworkedAnimationActionsData.has(targetEid)) {
         NetworkedAnimationActionsData.set(targetEid, new AnimationActionsDataMap());
