@@ -44,6 +44,7 @@ export function DuckPrefab(): EntityDef {
         halfExtents: [0.25, 0.5, 0.45]
       }}
       scale={[1, 1, 1]}
+      inspectable
     />
   );
 }
