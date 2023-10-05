@@ -112,7 +112,7 @@ export const NetworkingNodes = definitionListToMap([
     in: [{ entity: "entity" }],
     out: [{ result: "boolean" }],
     exec: (entity: EntityID) => {
-      return Networked.owner[entity] !== APP.getSid("reticulum") && !hasComponent(APP.world, Owned, entity);
+      return Networked.owner[entity] !== APP.getSid("reticulum");
     }
   }),
   makeInNOutFunctionDesc({
