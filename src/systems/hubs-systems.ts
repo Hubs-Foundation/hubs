@@ -82,6 +82,7 @@ import { loopAnimationSystem } from "../bit-systems/loop-animation";
 import { linkSystem } from "../bit-systems/link-system";
 import { behaviorGraphSystem } from "../bit-systems/behavior-graph";
 import { interactableObjectSystem } from "./interactable-system";
+import { visibilitySystem } from "../bit-systems/visibility-system";
 
 declare global {
   interface Window {
@@ -195,6 +196,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   mediaLoadingSystem(world);
 
   networkedTransformSystem(world);
+  visibilitySystem(world);
 
   aframeSystems.userinput.tick2(xrFrame);
 

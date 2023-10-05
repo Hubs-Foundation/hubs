@@ -10,6 +10,7 @@ import {
   NetworkedText,
   NetworkedTransform,
   NetworkedVideo,
+  NetworkedVisible,
   NetworkedWaypoint
 } from "../bit-components";
 import { defineNetworkSchema } from "./define-network-schema";
@@ -22,6 +23,7 @@ import { NetworkedAnimationActionSchema } from "./networked-animation-action-sch
 import type { CursorBuffer, EntityID } from "./networking-types";
 import { NetworkedBehaviorSchema } from "./networked-behavior-schema";
 import { NetworkedTextSchema } from "./networked-text-schema";
+import { NetworkedVisibleSchema } from "./networked-visible-schema";
 
 export interface StoredComponent {
   version: number;
@@ -55,6 +57,7 @@ schemas.set(NetworkedPDF, NetworkedPDFSchema);
 schemas.set(NetworkedAnimationAction, NetworkedAnimationActionSchema);
 schemas.set(NetworkedBehavior, NetworkedBehaviorSchema);
 schemas.set(NetworkedText, NetworkedTextSchema);
+schemas.set(NetworkedVisible, NetworkedVisibleSchema);
 
 export const networkableComponents = Array.from(schemas.keys());
 

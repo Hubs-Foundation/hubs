@@ -8,7 +8,8 @@ import {
   NetworkedTransform,
   PhysicsShape,
   Rigidbody,
-  TextTag
+  TextTag,
+  Visible
 } from "../../../bit-components";
 import { GLTFComponentData } from "../../../utils/jsx-entity";
 import { HubsWorld } from "../../../app";
@@ -17,6 +18,7 @@ import { getRigidBody, setRigidBody } from "./rigid-body";
 import { getMediaFrame, setMediaFrame } from "./media-frame";
 import { getText, setText } from "./text";
 import { camelCase } from "../../../inflators/model";
+import { getVisible, setVisible } from "./visible";
 
 type ComponentProps = {
   [key: string]: any;
@@ -67,6 +69,11 @@ const ComponentBindings = {
   },
   networkedBehavior: {
     component: NetworkedBehavior
+  },
+  visible: {
+    component: Visible,
+    get: getVisible,
+    set: setVisible
   }
 } as ComponentBindingType;
 

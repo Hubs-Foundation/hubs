@@ -469,3 +469,9 @@ export const NetworkedAnimationAction = defineComponent({
  * @type {Map<EntityId, Set<EntityID>}>}
  */
 export const ObjectAnimationActionData = new Map();
+export const Visible = defineComponent({
+  visible: Types.ui8
+});
+export const NetworkedVisible = defineComponent({
+  visible: Types.ui8
+});

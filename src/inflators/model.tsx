@@ -15,15 +15,7 @@ export function camelCase(s: string) {
 export type ModelParams = { model: Object3D };
 
 // These components are all handled in some special way, not through inflators
-const ignoredComponents = [
-  "visible",
-  "frustum",
-  "frustrum",
-  "shadow",
-  "networked",
-  "animation-mixer",
-  "loop-animation"
-];
+const ignoredComponents = ["frustum", "frustrum", "shadow", "networked", "animation-mixer", "loop-animation"];
 
 function inflateComponents(
   world: HubsWorld,
@@ -160,10 +152,6 @@ export function inflateModel(world: HubsWorld, rootEid: number, { model }: Model
   const loopAnimationParams: LoopAnimationParams = [];
   model.traverse(obj => {
     const components = obj.userData.gltfExtensions?.MOZ_hubs_components || {};
-    if (components.visible) {
-      const { visible } = components.visible;
-      obj.visible = visible;
-    }
 
     if (components.shadow) {
       const { cast, receive } = components.shadow;

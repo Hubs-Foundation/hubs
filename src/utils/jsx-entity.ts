@@ -103,6 +103,7 @@ import { inflateNetworkedAnimation } from "../inflators/networked-animation";
 import { inflateNetworkedBehavior } from "../inflators/networked-behavior";
 import { inflateNetworkedTransform } from "../inflators/networked-transform";
 import { inflateCapturable } from "../inflators/capturable";
+import { inflateVisible, VisibleParams } from "../inflators/visible";
 
 preload(
   new Promise(resolve => {
@@ -395,6 +396,7 @@ export interface GLTFComponentData extends ComponentData {
   text?: TextParams;
   grabbable?: GrabbableParams;
   capturable?: true;
+  visible?: VisibleParams;
 
   // deprecated
   spawnPoint?: true;
@@ -531,7 +533,8 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
   networkedBehavior: inflateNetworkedBehavior,
   networkedTransform: inflateNetworkedTransform,
   text: inflateGLTFText,
-  capturable: inflateCapturable
+  capturable: inflateCapturable,
+  visible: inflateVisible
 };
 
 function jsxInflatorExists(name: string): name is keyof JSXComponentData {
