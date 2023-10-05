@@ -16,16 +16,8 @@ import {
 } from "@oveddan-behave-graph/core";
 import { defineQuery, enterQuery, entityExists, exitQuery, hasComponent } from "bitecs";
 import { HubsWorld } from "../app";
-import {
-  BehaviorGraph,
-  CustomTags,
-  Interacted,
-  LocalAvatar,
-  RemoteAvatar,
-  Rigidbody,
-  SceneLoader
-} from "../bit-components";
-import { anyEntityWith, findAncestorEntity } from "../utils/bit-utils";
+import { BehaviorGraph, CustomTags, Interacted, LocalAvatar, RemoteAvatar, Rigidbody } from "../bit-components";
+import { findAncestorEntity } from "../utils/bit-utils";
 import { ClientID, EntityID } from "../utils/networking-types";
 import { AnimationNodes, animationSystem, animationValueDefs } from "./behavior-graph/animation-nodes";
 import { entityEvents, EntityNodes, EntityValue as entityValueDefs } from "./behavior-graph/entity-nodes";
@@ -103,11 +95,6 @@ const interactedQuery = defineQuery([Interacted]);
 const customTagsExitQuery = exitQuery(defineQuery([CustomTags]));
 
 export function behaviorGraphSystem(world: HubsWorld) {
-  const isSceneLoading = anyEntityWith(APP.world, SceneLoader);
-  if (isSceneLoading) {
-    return;
-  }
-
   behaviorGraphEnterQuery(world).forEach(function (eid) {
     const obj = world.eid2obj.get(eid)!;
     const graphJson = obj.userData.behaviorGraph as GraphJSON;
