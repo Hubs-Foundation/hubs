@@ -16,8 +16,16 @@ import {
 } from "@oveddan-behave-graph/core";
 import { defineQuery, enterQuery, entityExists, exitQuery, hasComponent } from "bitecs";
 import { HubsWorld } from "../app";
-import { BehaviorGraph, CustomTags, Interacted, LocalAvatar, RemoteAvatar, Rigidbody } from "../bit-components";
-import { findAncestorEntity } from "../utils/bit-utils";
+import {
+  BehaviorGraph,
+  CustomTags,
+  Interacted,
+  LocalAvatar,
+  RemoteAvatar,
+  Rigidbody,
+  SceneLoader
+} from "../bit-components";
+import { anyEntityWith, findAncestorEntity } from "../utils/bit-utils";
 import { ClientID, EntityID } from "../utils/networking-types";
 import { AnimationNodes, animationSystem, animationValueDefs } from "./behavior-graph/animation-nodes";
 import { entityEvents, EntityNodes, EntityValue as entityValueDefs } from "./behavior-graph/entity-nodes";
@@ -218,9 +226,13 @@ export function behaviorGraphSystem(world: HubsWorld) {
   }
 
   behaviorGraphsQuery(world).forEach(function (eid) {
-    const { engine, lifecycleEmitter } = engines.get(eid)!;
-    lifecycleEmitter.tickEvent.emit();
-    engine.executeAllSync(0.1, 100);
+    // Wait for the scene to be completely loaded before start ticking
+    const isSceneLoading = anyEntityWith(APP.world, SceneLoader);
+    if (!isSceneLoading) {
+      const { engine, lifecycleEmitter } = engines.get(eid)!;
+      lifecycleEmitter.tickEvent.emit();
+      engine.executeAllSync(0.1, 100);
+    }
   });
 
   playersSystem(world);
