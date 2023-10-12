@@ -236,10 +236,17 @@ function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
   const obj = world.eid2obj.get(menu)!;
   obj.visible = visible;
 
+  // Parent visibility doesn't block raycasting, so we must set each button to be invisible
+  // TODO: Ensure that children of invisible entities aren't raycastable
   world.eid2obj.get(ObjectMenu.unpinButtonRef[menu])!.visible = visible && isPinned(target);
   world.eid2obj.get(ObjectMenu.pinButtonRef[menu])!.visible =
     visible && !isPinned(target) && canPin(APP.hubChannel!, target);
-  world.eid2obj.get(ObjectMenu.removeButtonRef[menu])!.visible = visible && !isPinned(target);
+  world.eid2obj.get(ObjectMenu.removeButtonRef[menu])!.visible =
+    visible && !isPinned(target) && APP.hubChannel!.can("spawn_and_move_media");
+  world.eid2obj.get(ObjectMenu.cloneButtonRef[menu])!.visible = visible && APP.hubChannel!.can("spawn_and_move_media");
+  world.eid2obj.get(ObjectMenu.rotateButtonRef[menu])!.visible = visible && APP.hubChannel!.can("spawn_and_move_media");
+  world.eid2obj.get(ObjectMenu.scaleButtonRef[menu])!.visible = visible && APP.hubChannel!.can("spawn_and_move_media");
+  world.eid2obj.get(ObjectMenu.openLinkButtonRef[menu])!.visible = visible;
 
   // Hide unimplemented features for now.
   // TODO: Implement and show the buttons.
@@ -250,18 +257,6 @@ function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
   world.eid2obj.get(ObjectMenu.inspectButtonRef[menu])!.visible = false;
   world.eid2obj.get(ObjectMenu.dropButtonRef[menu])!.visible = false;
   world.eid2obj.get(ObjectMenu.refreshButtonRef[menu])!.visible = false;
-
-  [
-    ObjectMenu.openLinkButtonRef[menu],
-    ObjectMenu.cloneButtonRef[menu],
-    ObjectMenu.rotateButtonRef[menu],
-    ObjectMenu.scaleButtonRef[menu]
-  ].forEach(buttonRef => {
-    const buttonObj = world.eid2obj.get(buttonRef)!;
-    // Parent visibility doesn't block raycasting, so we must set each button to be invisible
-    // TODO: Ensure that children of invisible entities aren't raycastable
-    buttonObj.visible = visible;
-  });
 }
 
 const hoveredQuery = defineQuery([HoveredRemoteRight]);
