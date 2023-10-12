@@ -7,6 +7,7 @@ import {
   MediaContentBounds,
   MediaImageLoaderData,
   MediaInfo,
+  MediaLink,
   MediaLoaded,
   MediaLoader,
   MediaVideoLoaderData,
@@ -31,6 +32,8 @@ import { loadAudio } from "../utils/load-audio";
 import { loadHtml } from "../utils/load-html";
 import { MediaType, mediaTypeName, resolveMediaInfo } from "../utils/media-utils";
 import { EntityID } from "../utils/networking-types";
+import { LinkType, inflateLink } from "../inflators/link";
+import { inflateGrabbable } from "../inflators/grabbable";
 
 const getBox = (() => {
   const rotation = new Euler();
@@ -179,36 +182,50 @@ function* loadByMediaType(
   //       content then using MediaImage/VideoLoaderData as like
   //       transporting data from the inflators. This may be like
   //       special and a bit less maintainable.
+  let mediaEid;
   switch (mediaType) {
     case MediaType.IMAGE:
-      return yield* loadImage(
+      mediaEid = yield* loadImage(
         world,
         accessibleUrl,
         contentType,
         MediaImageLoaderData.has(eid) ? MediaImageLoaderData.get(eid)! : {}
       );
+      break;
     case MediaType.VIDEO:
-      return yield* loadVideo(
+      mediaEid = yield* loadVideo(
         world,
         accessibleUrl,
         contentType,
         MediaVideoLoaderData.has(eid) ? MediaVideoLoaderData.get(eid)! : {}
       );
+      break;
     case MediaType.MODEL:
-      return yield* loadModel(world, accessibleUrl, contentType, true);
+      mediaEid = yield* loadModel(world, accessibleUrl, contentType, true);
+      break;
     case MediaType.PDF:
-      return yield* loadPDF(world, accessibleUrl);
+      mediaEid = yield* loadPDF(world, accessibleUrl);
+      break;
     case MediaType.AUDIO:
-      return yield* loadAudio(
+      mediaEid = yield* loadAudio(
         world,
         accessibleUrl,
         MediaVideoLoaderData.has(eid) ? MediaVideoLoaderData.get(eid)! : {}
       );
+      break;
     case MediaType.HTML:
-      return yield* loadHtml(world, canonicalUrl, thumbnail);
+      mediaEid = yield* loadHtml(world, canonicalUrl, thumbnail);
+      break;
     default:
       throw new UnsupportedMediaTypeError(eid, mediaType);
   }
+
+  if (hasComponent(world, MediaLink, eid)) {
+    inflateLink(world, mediaEid, { href: APP.getString(MediaLink.src[eid])!, type: LinkType.LINK });
+    inflateGrabbable(world, mediaEid, { cursor: true, hand: false });
+  }
+
+  return mediaEid;
 }
 
 function* loadMedia(world: HubsWorld, eid: EntityID) {

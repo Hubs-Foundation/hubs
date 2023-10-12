@@ -577,13 +577,28 @@ class GLTFHubsComponentsExtension {
             };
           }
 
+          // It seems to be a pretty common use case to add a link to a media to show a link when hovering.
+          // That was supported in the previous loader but in the new loader it loads as two different entities.
+          // This hack adds support for linked media using the new loader.
+          // Note: For some reason this was not supported for PDFs. Not sure if it's random or if there is a reason.
+          if (shouldUseNewLoader()) {
+            if (Object.prototype.hasOwnProperty.call(ext, "link")) {
+              if (["image", "video", "model"].includes(componentName)) {
+                ext["media-link"] = {
+                  src: ext.link.href
+                };
+                delete ext.link;
+              }
+            }
+          }
+
           const value = props[propName];
           const type = value?.__mhc_link_type;
           if (type && value.index !== undefined) {
             deps.push(
               parser.getDependency(type, value.index).then(loadedDep => {
                 // TODO similar to above, this logic being spread out in multiple places is not great...
-                // Node refences are assumed to always be in the scene graph. These referneces are late-resolved in inflateComponents
+                // Node references are assumed to always be in the scene graph. These references are late-resolved in inflateComponents
                 // otherwise they will need to be updated when cloning (which happens as part of caching).
                 if (type === "node") return;
 

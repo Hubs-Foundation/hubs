@@ -389,3 +389,7 @@ export const TrimeshTag = defineComponent();
 export const HeightFieldTag = defineComponent();
 export const LocalAvatar = defineComponent();
 export const RemoteAvatar = defineComponent();
+export const MediaLink = defineComponent({
+  src: Types.ui32
+});
+MediaLink.src[$isStringType] = true;
