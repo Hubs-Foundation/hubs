@@ -32,7 +32,7 @@ function inflateComponents(
 ) {
   Object.keys(components).forEach(name => {
     const inflatorName = camelCase(name);
-    if (ignoredComponents.includes(inflatorName)) return;
+    if (ignoredComponents.includes(name)) return;
     if (!gltfInflatorExists(inflatorName)) {
       console.warn(`Failed to inflate unknown component called ${inflatorName}`, components[name]);
       return;
