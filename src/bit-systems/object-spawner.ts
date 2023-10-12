@@ -13,6 +13,8 @@ export enum OBJECT_SPAWNER_FLAGS {
 }
 
 function* spawnObjectJob(world: HubsWorld, spawner: EntityID) {
+  if (!APP.hubChannel!.can("spawn_and_move_media")) return;
+
   const spawned = createNetworkedMedia(world, {
     src: APP.getString(ObjectSpawner.src[spawner])!,
     recenter: true,
