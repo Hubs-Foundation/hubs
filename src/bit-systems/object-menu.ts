@@ -15,7 +15,7 @@ import {
   MediaContentBounds,
   Deleting
 } from "../bit-components";
-import { anyEntityWith, findAncestorWithAnyComponent, findAncestorWithComponents } from "../utils/bit-utils";
+import { anyEntityWith, findAncestorWithComponents } from "../utils/bit-utils";
 import { createNetworkedEntity } from "../utils/create-networked-entity";
 import HubChannel from "../utils/hub-channel";
 import type { EntityID } from "../utils/networking-types";
