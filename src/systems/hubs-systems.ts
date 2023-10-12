@@ -80,6 +80,7 @@ import { quackSystem } from "../bit-systems/quack";
 import { mixerAnimatableSystem } from "../bit-systems/mixer-animatable";
 import { loopAnimationSystem } from "../bit-systems/loop-animation";
 import { linkSystem } from "../bit-systems/link-system";
+import { objectMenuTransformSystem } from "../bit-systems/object-menu-transform-system";
 
 declare global {
   interface Window {
@@ -248,7 +249,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   uvScrollSystem(world);
   hubsSystems.shadowSystem.tick();
   objectMenuSystem(world, sceneEl.is("frozen"), APP.hubChannel!);
-  videoMenuSystem(world, aframeSystems.userinput);
+  videoMenuSystem(world, aframeSystems.userinput, sceneEl.is("frozen"));
   videoSystem(world, hubsSystems.audioSystem);
   pdfMenuSystem(world, sceneEl.is("frozen"));
   linkSystem(world);
@@ -264,6 +265,8 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   simpleWaterSystem(world);
   linearTransformSystem(world);
   quackSystem(world);
+
+  objectMenuTransformSystem(world);
 
   mixerAnimatableSystem(world);
   loopAnimationSystem(world);

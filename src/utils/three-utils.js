@@ -365,6 +365,7 @@ export function createPlaneBufferGeometry(width, height, widthSegments, heightSe
 }
 
 import { Layers } from "../camera-layers";
+import { Box3, Vector3 } from "three";
 
 // This code is from three-vrm. We will likely be using that in the future and this inlined code can go away
 function excludeTriangles(triangles, bws, skinIndex, exclude) {
@@ -496,4 +497,62 @@ export function traverseSome(obj, fn) {
       traverseSome(obj.children[i], fn);
     }
   }
+}
+
+const expandByObject = (function () {
+  const _box = new Box3();
+  const _vector = new Vector3();
+  return function expandByObject(box, object, onlyVisible = true, precise = false) {
+    // Computes the world-axis-aligned bounding box of an object (including its children),
+    // accounting for both the object's, and children's, world transforms
+
+    object.updateWorldMatrix(false, false);
+
+    if (object.boundingBox !== undefined) {
+      if (object.boundingBox === null) {
+        object.computeBoundingBox();
+      }
+
+      _box.copy(object.boundingBox);
+      _box.applyMatrix4(object.matrixWorld);
+
+      box.union(_box);
+    } else {
+      const geometry = object.geometry;
+
+      if (geometry !== undefined) {
+        if (precise && geometry.attributes !== undefined && geometry.attributes.position !== undefined) {
+          const position = geometry.attributes.position;
+          for (let i = 0, l = position.count; i < l; i++) {
+            _vector.fromBufferAttribute(position, i).applyMatrix4(object.matrixWorld);
+            box.expandByPoint(_vector);
+          }
+        } else {
+          if (geometry.boundingBox === null) {
+            geometry.computeBoundingBox();
+          }
+
+          _box.copy(geometry.boundingBox);
+          _box.applyMatrix4(object.matrixWorld);
+
+          box.union(_box);
+        }
+      }
+    }
+
+    const children = object.children;
+
+    for (let i = 0, l = children.length; i < l; i++) {
+      if (onlyVisible && !children[i].visible) {
+        continue;
+      } else {
+        expandByObject(box, children[i], onlyVisible, precise);
+      }
+    }
+  };
+})();
+
+export function setFromObject(box, object, onlyVisible = true, precise = false) {
+  box.makeEmpty();
+  expandByObject(box, object, onlyVisible, precise);
 }

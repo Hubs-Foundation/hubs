@@ -3,7 +3,6 @@ import { preloadFont } from "troika-three-text";
 import {
   $isStringType,
   CameraTool,
-  ObjectMenu,
   LinkHoverMenu,
   LinkHoverMenuItem,
   PDFMenu,
@@ -39,7 +38,8 @@ import {
   VideoTextureSource,
   Quack,
   MixerAnimatableInitialize,
-  Inspectable
+  Inspectable,
+  ObjectMenu
 } from "../bit-components";
 import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
@@ -99,6 +99,8 @@ import { HeightFieldParams, inflateHeightField } from "../inflators/heightfield"
 import { inflateAudioSettings } from "../inflators/audio-settings";
 import { HubsVideoTexture } from "../textures/HubsVideoTexture";
 import { inflateMediaLink, MediaLinkParams } from "../inflators/media-link";
+import { inflateObjectMenuTarget, ObjectMenuTargetParams } from "../inflators/object-menu-target";
+import { inflateObjectMenuTransform, ObjectMenuTransformParams } from "../inflators/object-menu-transform";
 
 preload(
   new Promise(resolve => {
@@ -361,6 +363,8 @@ export interface JSXComponentData extends ComponentData {
   pdf?: PDFParams;
   loopAnimation?: LoopAnimationParams;
   inspectable?: boolean;
+  objectMenuTransform?: OptionalParams<ObjectMenuTransformParams>;
+  objectMenuTarget?: OptionalParams<ObjectMenuTargetParams>;
 }
 
 export interface GLTFComponentData extends ComponentData {
@@ -474,7 +478,9 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   model: inflateModel,
   image: inflateImage,
   video: inflateVideo,
-  link: inflateLink
+  link: inflateLink,
+  objectMenuTransform: inflateObjectMenuTransform,
+  objectMenuTarget: inflateObjectMenuTarget
 };
 
 export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorFn }> = {

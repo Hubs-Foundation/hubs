@@ -37,8 +37,7 @@ import { inflateGrabbable } from "../inflators/grabbable";
 
 const getBox = (() => {
   const rotation = new Euler();
-  return (world: HubsWorld, eid: EntityID, rootEid: EntityID, worldSpace?: boolean) => {
-    const box = new Box3();
+  return (world: HubsWorld, eid: EntityID, rootEid: EntityID, box: Box3, worldSpace?: boolean) => {
     const obj = world.eid2obj.get(eid)!;
     const rootObj = world.eid2obj.get(rootEid)!;
 
@@ -61,8 +60,6 @@ const getBox = (() => {
 
     rootObj.matrixWorldNeedsUpdate = true;
     rootObj.updateMatrices();
-
-    return box;
   };
 })();
 
@@ -187,6 +184,7 @@ function* loadByMediaType(
     case MediaType.IMAGE:
       mediaEid = yield* loadImage(
         world,
+        eid,
         accessibleUrl,
         contentType,
         MediaImageLoaderData.has(eid) ? MediaImageLoaderData.get(eid)! : {}
@@ -195,6 +193,7 @@ function* loadByMediaType(
     case MediaType.VIDEO:
       mediaEid = yield* loadVideo(
         world,
+        eid,
         accessibleUrl,
         contentType,
         MediaVideoLoaderData.has(eid) ? MediaVideoLoaderData.get(eid)! : {}
@@ -204,18 +203,17 @@ function* loadByMediaType(
       mediaEid = yield* loadModel(world, accessibleUrl, contentType, true);
       break;
     case MediaType.PDF:
-      mediaEid = yield* loadPDF(world, accessibleUrl);
-      break;
+      return yield* loadPDF(world, eid, accessibleUrl);
     case MediaType.AUDIO:
       mediaEid = yield* loadAudio(
         world,
+        eid,
         accessibleUrl,
         MediaVideoLoaderData.has(eid) ? MediaVideoLoaderData.get(eid)! : {}
       );
       break;
     case MediaType.HTML:
-      mediaEid = yield* loadHtml(world, canonicalUrl, thumbnail);
-      break;
+      return yield* loadHtml(world, eid, canonicalUrl, thumbnail);
     default:
       throw new UnsupportedMediaTypeError(eid, mediaType);
   }
@@ -255,6 +253,7 @@ function* loadMedia(world: HubsWorld, eid: EntityID) {
 }
 
 const tmpVector = new Vector3();
+const box = new Box3();
 function* loadAndAnimateMedia(world: HubsWorld, eid: EntityID, clearRollbacks: ClearFunction) {
   if (MediaLoader.flags[eid] & MEDIA_LOADER_FLAGS.IS_OBJECT_MENU_TARGET) {
     addComponent(world, ObjectMenuTarget, eid);
@@ -272,7 +271,7 @@ function* loadAndAnimateMedia(world: HubsWorld, eid: EntityID, clearRollbacks: C
 
   if (media) {
     if (hasComponent(world, MediaLoaded, media)) {
-      const box = getBox(world, eid, media);
+      getBox(world, eid, media, box);
       addComponent(world, MediaContentBounds, eid);
       box.getSize(tmpVector);
       MediaContentBounds.bounds[eid].set(tmpVector.toArray());

@@ -12,8 +12,8 @@ import {
   MediaVideo,
   MediaVideoData,
   NetworkedVideo,
-  VideoMenu,
-  VideoMenuItem
+  ObjectMenuTransform,
+  VideoMenu
 } from "../bit-components";
 import { timeFmt } from "../components/media-video";
 import { takeOwnership } from "../utils/take-ownership";
@@ -23,12 +23,12 @@ import { coroutine } from "../utils/coroutine";
 import { easeOutQuadratic } from "../utils/easing";
 import { isFacingCamera } from "../utils/three-utils";
 import { Emitter2Audio } from "./audio-emitter-system";
-import { VIDEO_FLAGS } from "../inflators/video";
+import { EntityID } from "../utils/networking-types";
+import { findAncestorWithComponent, hasAnyComponent } from "../utils/bit-utils";
+import { ObjectMenuTransformFlags } from "../inflators/object-menu-transform";
 
 const videoMenuQuery = defineQuery([VideoMenu]);
-const hoverRightVideoQuery = defineQuery([HoveredRemoteRight, MediaVideo]);
-const hoverRightVideoEnterQuery = enterQuery(hoverRightVideoQuery);
-const hoverRightMenuItemQuery = defineQuery([HoveredRemoteRight, VideoMenuItem]);
+const hoveredQuery = defineQuery([HoveredRemoteRight]);
 const sliderHalfWidth = 0.475;
 
 function setCursorRaycastable(world: HubsWorld, menu: number, enable: boolean) {
@@ -45,7 +45,6 @@ const intersectInThePlaneOf = (() => {
     ray.set(position, direction);
     plane.normal.set(0, 0, 1);
     plane.constant = 0;
-    obj.updateMatrices();
     plane.applyMatrix4(obj.matrixWorld);
     ray.intersectPlane(plane, intersection);
   };
@@ -54,33 +53,68 @@ const intersectInThePlaneOf = (() => {
 type Job<T> = () => IteratorResult<undefined, T>;
 let rightMenuIndicatorCoroutine: Job<void> | null = null;
 
-let intersectionPoint = new Vector3();
-export function videoMenuSystem(world: HubsWorld, userinput: any) {
-  const rightVideoMenu = videoMenuQuery(world)[0];
-  const shouldHideVideoMenu =
-    VideoMenu.videoRef[rightVideoMenu] &&
-    (!entityExists(world, VideoMenu.videoRef[rightVideoMenu]) ||
-      (!hoverRightVideoQuery(world).length &&
-        !hoverRightMenuItemQuery(world).length &&
-        !hasComponent(world, Held, VideoMenu.trackRef[rightVideoMenu])));
-  if (shouldHideVideoMenu) {
-    const menu = rightVideoMenu;
-    const menuObj = world.eid2obj.get(menu)!;
-    menuObj.removeFromParent();
-    setCursorRaycastable(world, menu, false);
+function findVideoMenuTarget(world: HubsWorld, menu: EntityID, sceneIsFrozen: boolean) {
+  if (VideoMenu.videoRef[menu] && !entityExists(world, VideoMenu.videoRef[menu])) {
+    // Clear the invalid entity reference. (The pdf entity was removed).
     VideoMenu.videoRef[menu] = 0;
   }
 
-  hoverRightVideoEnterQuery(world).forEach(function (eid) {
-    if (MediaVideo.flags[eid] & VIDEO_FLAGS.CONTROLS) {
-      const menu = rightVideoMenu;
-      VideoMenu.videoRef[menu] = eid;
-      const menuObj = world.eid2obj.get(menu)!;
-      const videoObj = world.eid2obj.get(eid)!;
-      videoObj.add(menuObj);
-      setCursorRaycastable(world, menu, true);
-    }
-  });
+  if (sceneIsFrozen) {
+    VideoMenu.videoRef[menu] = 0;
+    return;
+  }
+
+  const isTrackHoveredOrHeld = hasAnyComponent(world, [Held, HoveredRemoteRight], VideoMenu.trackRef[menu]);
+  if (isTrackHoveredOrHeld) {
+    VideoMenu.clearTargetTimer[menu] = world.time.elapsed + 1000;
+    return;
+  }
+
+  const hovered = hoveredQuery(world);
+  const target = hovered.map(eid => findAncestorWithComponent(world, MediaVideo, eid))[0] || 0;
+  if (target) {
+    VideoMenu.videoRef[menu] = target;
+    VideoMenu.clearTargetTimer[menu] = world.time.elapsed + 1000;
+    return;
+  }
+
+  if (hovered.some(eid => findAncestorWithComponent(world, VideoMenu, eid))) {
+    VideoMenu.clearTargetTimer[menu] = world.time.elapsed + 1000;
+    return;
+  }
+
+  if (world.time.elapsed > VideoMenu.clearTargetTimer[menu]) {
+    VideoMenu.videoRef[menu] = 0;
+    return;
+  }
+}
+
+function flushToObject3Ds(world: HubsWorld, menu: EntityID, frozen: boolean) {
+  const target = VideoMenu.videoRef[menu];
+  const visible = !!(target && !frozen);
+
+  const obj = world.eid2obj.get(menu)!;
+  obj.visible = visible;
+
+  // TODO We are handling menus visibility in a similar way for all the object menus, we
+  // should probably refactor this to a common object-menu-visibility-system
+  if (visible) {
+    setCursorRaycastable(world, menu, true);
+    APP.world.scene.add(obj);
+    ObjectMenuTransform.targetObjectRef[menu] = target;
+    ObjectMenuTransform.flags[menu] |= ObjectMenuTransformFlags.Enabled;
+  } else {
+    obj.removeFromParent();
+    setCursorRaycastable(world, menu, false);
+
+    ObjectMenuTransform.flags[menu] &= ~ObjectMenuTransformFlags.Enabled;
+  }
+}
+
+let intersectionPoint = new Vector3();
+export function videoMenuSystem(world: HubsWorld, userinput: any, sceneIsFrozen: boolean) {
+  const rightVideoMenu = videoMenuQuery(world)[0];
+  findVideoMenuTarget(world, rightVideoMenu, sceneIsFrozen);
 
   videoMenuQuery(world).forEach(function (eid) {
     const videoEid = VideoMenu.videoRef[eid];
@@ -153,6 +187,8 @@ export function videoMenuSystem(world: HubsWorld, userinput: any) {
       rightMenuIndicatorCoroutine = null;
     }
   });
+
+  flushToObject3Ds(world, rightVideoMenu, sceneIsFrozen);
 }
 
 const START_SCALE = new Vector3().setScalar(0.05);

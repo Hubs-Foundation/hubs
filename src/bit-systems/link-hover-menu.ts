@@ -1,5 +1,4 @@
-import { Not, defineQuery, entityExists } from "bitecs";
-import { Matrix4, Vector3 } from "three";
+import { Not, addComponent, defineQuery, entityExists, removeComponent } from "bitecs";
 import type { HubsWorld } from "../app";
 import {
   Link,
@@ -8,7 +7,8 @@ import {
   TextTag,
   Interacted,
   LinkHoverMenuItem,
-  LinkInitializing
+  LinkInitializing,
+  ObjectMenuTransform
 } from "../bit-components";
 import { findAncestorWithComponent, findChildWithComponent } from "../utils/bit-utils";
 import { hubIdFromUrl } from "../utils/media-url-utils";
@@ -16,8 +16,8 @@ import { Text as TroikaText } from "troika-three-text";
 import { handleExitTo2DInterstitial } from "../utils/vr-interstitial";
 import { changeHub } from "../change-hub";
 import { EntityID } from "../utils/networking-types";
-import { setMatrixWorld } from "../utils/three-utils";
 import { LinkType } from "../inflators/link";
+import { ObjectMenuTransformFlags } from "../inflators/object-menu-transform";
 
 const menuQuery = defineQuery([LinkHoverMenu]);
 const hoveredLinksQuery = defineQuery([HoveredRemoteRight, Link, Not(LinkInitializing)]);
@@ -89,43 +89,6 @@ async function handleLinkClick(world: HubsWorld, button: EntityID) {
   }
 }
 
-const _moveTargetPos = new Vector3();
-const _lookAtTargetPos = new Vector3();
-const _objectPos = new Vector3();
-const _mat4 = new Matrix4();
-
-// Move the menu object to target object position but a little bit closer
-// to the camera and make the menu object look at the camera.
-// TODO: Similar code in object-menu system. Expose as util and reuse?
-function moveToTarget(world: HubsWorld, menu: EntityID) {
-  const menuObj = world.eid2obj.get(menu)!;
-
-  const targetObj = world.eid2obj.get(LinkHoverMenu.targetObjectRef[menu])!;
-  targetObj.updateMatrices();
-
-  // TODO: Remove the dependency with AFRAME
-  const camera = AFRAME.scenes[0].systems["hubs-systems"].cameraSystem.viewingCamera;
-  camera.updateMatrices();
-
-  _moveTargetPos.setFromMatrixPosition(targetObj.matrixWorld);
-  _lookAtTargetPos.setFromMatrixPosition(camera.matrixWorld);
-
-  // Place the menu object a little bit closer to the camera in the scene
-  _objectPos
-    .copy(_lookAtTargetPos)
-    .sub(_moveTargetPos)
-    .normalize()
-    // TODO: 0.5 is an arbitrary number. 0.5 might be too small for
-    //       huge target object. Using bounding box may be safer?
-    // TODO: What if camera is between the menu and the target object?
-    .multiplyScalar(0.5)
-    .add(_moveTargetPos);
-
-  _mat4.copy(camera.matrixWorld).setPosition(_objectPos);
-  setMatrixWorld(menuObj, _mat4);
-  menuObj.lookAt(_lookAtTargetPos);
-}
-
 function updateButtonText(world: HubsWorld, menu: EntityID, button: EntityID) {
   const text = findChildWithComponent(world, TextTag, button)!;
   const textObj = world.eid2obj.get(text)! as TroikaText;
@@ -157,6 +120,15 @@ function flushToObject3Ds(world: HubsWorld, menu: EntityID, frozen: boolean, for
   const target = LinkHoverMenu.targetObjectRef[menu];
   const visible = !!target && !frozen;
 
+  // TODO We are handling menus visibility in a similar way for all the object menus, we
+  // should probably refactor this to a common object-menu-visibility-system
+  if (visible) {
+    ObjectMenuTransform.targetObjectRef[menu] = target;
+    ObjectMenuTransform.flags[menu] |= ObjectMenuTransformFlags.Enabled;
+  } else {
+    ObjectMenuTransform.flags[menu] &= ~ObjectMenuTransformFlags.Enabled;
+  }
+
   const obj = world.eid2obj.get(menu)!;
   obj.visible = visible;
 
@@ -182,7 +154,6 @@ export function linkHoverMenuSystem(world: HubsWorld, sceneIsFrozen: boolean) {
     updateLinkMenuTarget(world, menu, sceneIsFrozen);
     const currTarget = LinkHoverMenu.targetObjectRef[menu];
     if (currTarget) {
-      moveToTarget(world, menu);
       clickedMenuItemQuery(world).forEach(eid => handleLinkClick(world, eid));
     }
     flushToObject3Ds(world, menu, sceneIsFrozen, prevTarget !== currTarget);

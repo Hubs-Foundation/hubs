@@ -1,12 +1,20 @@
 import { addComponent, defineQuery, entityExists, hasComponent } from "bitecs";
 import { Text } from "troika-three-text";
 import type { HubsWorld } from "../app";
-import { EntityStateDirty, HoveredRemoteRight, Interacted, MediaPDF, NetworkedPDF, PDFMenu } from "../bit-components";
+import {
+  EntityStateDirty,
+  HoveredRemoteRight,
+  Interacted,
+  MediaPDF,
+  NetworkedPDF,
+  ObjectMenuTransform,
+  PDFMenu
+} from "../bit-components";
 import { anyEntityWith, findAncestorWithComponent } from "../utils/bit-utils";
 import type { EntityID } from "../utils/networking-types";
 import { takeOwnership } from "../utils/take-ownership";
-import { setMatrixWorld } from "../utils/three-utils";
 import { PDFResourcesMap } from "./pdf-system";
+import { ObjectMenuTransformFlags } from "../inflators/object-menu-transform";
 
 function clicked(world: HubsWorld, eid: EntityID) {
   return hasComponent(world, Interacted, eid);
@@ -42,13 +50,6 @@ function findPDFMenuTarget(world: HubsWorld, menu: EntityID, sceneIsFrozen: bool
   }
 }
 
-function moveToTarget(world: HubsWorld, menu: EntityID) {
-  const targetObj = world.eid2obj.get(PDFMenu.targetRef[menu])!;
-  targetObj.updateMatrices();
-  const menuObj = world.eid2obj.get(menu)!;
-  setMatrixWorld(menuObj, targetObj.matrixWorld);
-}
-
 function wrapAround(n: number, min: number, max: number) {
   // Wrap around [min, max] inclusively
   // Assumes that n is only 1 more than max or 1 less than min
@@ -78,6 +79,15 @@ function flushToObject3Ds(world: HubsWorld, menu: EntityID, frozen: boolean) {
   const obj = world.eid2obj.get(menu)!;
   obj.visible = visible;
 
+  // TODO We are handling menus visibility in a similar way for all the object menus, we
+  // should probably refactor this to a common object-menu-visibility-system
+  if (visible) {
+    ObjectMenuTransform.targetObjectRef[menu] = target;
+    ObjectMenuTransform.flags[menu] |= ObjectMenuTransformFlags.Enabled;
+  } else {
+    ObjectMenuTransform.flags[menu] &= ~ObjectMenuTransformFlags.Enabled;
+  }
+
   [PDFMenu.prevButtonRef[menu], PDFMenu.nextButtonRef[menu]].forEach(buttonRef => {
     const buttonObj = world.eid2obj.get(buttonRef)!;
     // Parent visibility doesn't block raycasting, so we must set each button to be invisible
@@ -96,7 +106,6 @@ export function pdfMenuSystem(world: HubsWorld, sceneIsFrozen: boolean) {
   const menu = anyEntityWith(world, PDFMenu)!;
   findPDFMenuTarget(world, menu, sceneIsFrozen);
   if (PDFMenu.targetRef[menu]) {
-    moveToTarget(world, menu);
     handleClicks(world, menu);
   }
   flushToObject3Ds(world, menu, sceneIsFrozen);
