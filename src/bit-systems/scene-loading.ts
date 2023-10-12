@@ -66,6 +66,7 @@ function* loadScene(
     add(world, scene, loaderEid);
     setNetworkedDataWithoutRoot(world, APP.getString(Networked.id[loaderEid])!, scene);
 
+    let hasMesh = false;
     let sceneEl = APP.scene!;
     let isHighDensity = false;
     let skybox: Sky | undefined;
@@ -73,6 +74,7 @@ function* loadScene(
       if ((o as Mesh).isMesh) {
         // TODO animated objects should not be static
         (o as Mesh).reflectionProbeMode = "static";
+        hasMesh ||= true;
       }
       if ((o as any).isReflectionProbe) {
         o.updateMatrices();
@@ -109,20 +111,15 @@ function* loadScene(
     if (findChildWithComponent(world, TrimeshTag, scene) || findChildWithComponent(world, HeightFieldTag, scene)) {
       console.log("heightfield or trimesh found on scene");
     } else {
-      let navMeshEid;
-      if (isHighDensity) {
-        navMeshEid = findChildWithComponent(world, NavMesh, scene);
-      }
-
+      let navMeshEid = findChildWithComponent(world, NavMesh, scene);
       if (navMeshEid) {
-        console.log(`Mesh density exceeded, using floor plan only`);
         inflatePhysicsShape(world, navMeshEid, {
           type: Shape.MESH,
           margin: 0.01,
           fit: Fit.ALL,
           includeInvisible: true
         });
-      } else if (!isHighDensity) {
+      } else if (!isHighDensity && hasMesh) {
         inflatePhysicsShape(world, scene, {
           type: Shape.MESH,
           margin: 0.01,
