@@ -22,13 +22,17 @@ function* setTexture(world: HubsWorld, eid: number) {
   // todo: we don't need to proxy for many things if the canonical URL has permissive CORS headers
   src = proxiedUrlFor(canonicalUrl);
 
-  const texture: Texture = yield textureLoader.loadAsync(src);
+  try {
+    const texture: Texture = yield textureLoader.loadAsync(src);
 
-  const particleEmitter: ParticleEmitter = world.eid2obj.get(eid)! as ParticleEmitter;
-  particleEmitter.material.uniforms.map.value = texture;
-  particleEmitter.visible = true;
+    const particleEmitter: ParticleEmitter = world.eid2obj.get(eid)! as ParticleEmitter;
+    particleEmitter.material.uniforms.map.value = texture;
+    particleEmitter.visible = true;
 
-  particleEmitter.updateParticles();
+    particleEmitter.updateParticles();
+  } catch (e) {
+    console.error(`Error loading particle image: ${src}`);
+  }
 }
 
 const particleEmitterQuery = defineQuery([ParticleEmitterTag]);
