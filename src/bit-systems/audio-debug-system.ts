@@ -117,11 +117,13 @@ getScene().then(() => {
 });
 
 const addDebugMaterial = (world: HubsWorld, navEid: number) => {
-  if (nav2mat.has(navEid)) return;
   const obj = world.eid2obj.get(navEid);
   if (obj) {
-    const navMesh = obj as Mesh;
+    // Some older scenes have the nav-mesh component as an ancestor of the mesh itself
+    // TODO the "as any" here is because of incorrect type definition for getObjectByProperty. It was fixed in r145
+    const navMesh = obj.getObjectByProperty("isMesh", true as any) as Mesh;
     navMesh.visible = isEnabled;
+    if (nav2mat.has(navEid)) return;
     nav2mat.set(navEid, navMesh.material);
     navMesh.material = debugMaterial!;
     navMesh.material.needsUpdate = true;
@@ -130,11 +132,13 @@ const addDebugMaterial = (world: HubsWorld, navEid: number) => {
 };
 
 const removeDebugMaterial = (world: HubsWorld, navEid: number) => {
-  if (!nav2mat.has(navEid)) return;
   const obj = world.eid2obj.get(navEid);
   if (obj) {
-    const navMesh = obj as Mesh;
+    // Some older scenes have the nav-mesh component as an ancestor of the mesh itself
+    // TODO the "as any" here is because of incorrect type definition for getObjectByProperty. It was fixed in r145
+    const navMesh = obj.getObjectByProperty("isMesh", true as any) as Mesh;
     navMesh.visible = false;
+    if (!nav2mat.has(navEid)) return;
     navMesh.material = nav2mat.get(navEid)!;
     nav2mat.delete(navEid);
     (navMesh.material as Material).needsUpdate = true;
@@ -154,10 +158,12 @@ export function audioDebugSystem(world: HubsWorld) {
   navMeshExitQuery(world).forEach(navEid => {
     removeDebugMaterial(world, navEid);
   });
+  navMeshEnterQuery(world).forEach(navEid => {
+    if (isEnabled) {
+      addDebugMaterial(world, navEid);
+    }
+  });
   if (isEnabled && uniforms) {
-    navMeshEnterQuery(world).forEach(navEid => {
-      isEnabled && addDebugMaterial(world, navEid);
-    });
     let idx = 0;
     APP.audios.forEach((audio: AudioObject3D, audioEmitterId: ElOrEid) => {
       if (APP.isAudioPaused.has(audioEmitterId) || APP.mutedState.has(audioEmitterId)) {
