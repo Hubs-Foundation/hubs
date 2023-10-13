@@ -268,6 +268,7 @@ function* loadAndAnimateMedia(world: HubsWorld, eid: EntityID, clearRollbacks: C
     yield* animateScale(world, media);
   }
   removeComponent(world, MediaLoader, eid);
+  removeComponent(world, MediaLink, eid);
 
   if (media) {
     if (hasComponent(world, MediaLoaded, media)) {
