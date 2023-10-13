@@ -1,4 +1,4 @@
-import { defineQuery, enterQuery, exitQuery } from "bitecs";
+import { defineQuery, enterQuery, exitQuery, removeComponent } from "bitecs";
 import { ParticleEmitter } from "lib-hubs/packages/three-particle-emitter/lib/esm/index";
 import { Texture } from "three";
 
@@ -32,6 +32,7 @@ function* setTexture(world: HubsWorld, eid: number) {
     particleEmitter.updateParticles();
   } catch (e) {
     console.error(`Error loading particle image: ${src}`);
+    removeComponent(world, ParticleEmitterTag, eid);
   }
 }
 
