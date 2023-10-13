@@ -157,14 +157,9 @@ export function audioDebugSystem(world: HubsWorld) {
   navMeshEnterQuery(world).forEach(navEid => {
     if (isEnabled) {
       addDebugMaterial(world, navEid);
-    } else {
-      removeDebugMaterial(world, navEid);
     }
   });
   if (isEnabled && uniforms) {
-    navMeshEnterQuery(world).forEach(navEid => {
-      isEnabled && addDebugMaterial(world, navEid);
-    });
     let idx = 0;
     APP.audios.forEach((audio: AudioObject3D, audioEmitterId: ElOrEid) => {
       if (APP.isAudioPaused.has(audioEmitterId) || APP.mutedState.has(audioEmitterId)) {
