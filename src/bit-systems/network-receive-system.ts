@@ -43,6 +43,7 @@ const enteredNetworkedQuery = enterQuery(defineQuery([Networked]));
 
 export function networkReceiveSystem(world: HubsWorld) {
   if (!localClientID) return; // Not connected yet.
+  if (APP.scene!.is("frozen")) return; // Eventually we will need to handle this as a scene level component
 
   {
     // When a user leaves, remove the entities created by that user

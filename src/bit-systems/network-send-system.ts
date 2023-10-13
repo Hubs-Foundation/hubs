@@ -23,6 +23,7 @@ const exitedNetworkedQuery = exitQuery(networkedQuery);
 
 export function networkSendSystem(world: HubsWorld) {
   if (!localClientID) return; // Not connected yet
+  if (APP.scene!.is("frozen")) return; // Eventually we will need to handle this as a scene level component
 
   const now = performance.now();
   if (now < nextTick) return;
