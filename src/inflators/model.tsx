@@ -31,8 +31,8 @@ function inflateComponents(
   idx2eid: Map<number, EntityID>
 ) {
   Object.keys(components).forEach(name => {
+    if (ignoredComponents.includes(name)) return;
     const inflatorName = camelCase(name);
-    if (ignoredComponents.includes(inflatorName)) return;
     if (!gltfInflatorExists(inflatorName)) {
       console.warn(`Failed to inflate unknown component called ${inflatorName}`, components[name]);
       return;
