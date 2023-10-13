@@ -1,4 +1,4 @@
-import { defineQuery, enterQuery, exitQuery } from "bitecs";
+import { defineQuery, enterQuery, exitQuery, removeComponent } from "bitecs";
 import { ParticleEmitter } from "lib-hubs/packages/three-particle-emitter/lib/esm/index";
 import { Texture } from "three";
 
@@ -22,13 +22,18 @@ function* setTexture(world: HubsWorld, eid: number) {
   // todo: we don't need to proxy for many things if the canonical URL has permissive CORS headers
   src = proxiedUrlFor(canonicalUrl);
 
-  const texture: Texture = yield textureLoader.loadAsync(src);
+  try {
+    const texture: Texture = yield textureLoader.loadAsync(src);
 
-  const particleEmitter: ParticleEmitter = world.eid2obj.get(eid)! as ParticleEmitter;
-  particleEmitter.material.uniforms.map.value = texture;
-  particleEmitter.visible = true;
+    const particleEmitter: ParticleEmitter = world.eid2obj.get(eid)! as ParticleEmitter;
+    particleEmitter.material.uniforms.map.value = texture;
+    particleEmitter.visible = true;
 
-  particleEmitter.updateParticles();
+    particleEmitter.updateParticles();
+  } catch (e) {
+    console.error(`Error loading particle image: ${src}`);
+    removeComponent(world, ParticleEmitterTag, eid);
+  }
 }
 
 const particleEmitterQuery = defineQuery([ParticleEmitterTag]);
