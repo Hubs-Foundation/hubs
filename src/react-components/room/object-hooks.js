@@ -13,7 +13,7 @@ export function isMe(object) {
   if (shouldUseNewLoader()) {
     return hasComponent(APP.world, LocalAvatar, object.eid);
   } else {
-  return object.id === "avatar-rig";
+    return object.id === "avatar-rig";
   }
 }
 
@@ -168,16 +168,24 @@ export function useRemoveObject(hubChannel, scene, object) {
   return { removeObject, canRemoveObject };
 }
 
-export function useHideAvatar(hubChannel, avatarEl) {
+export function useHideAvatar(hubChannel, avatarObj) {
   const hideAvatar = useCallback(() => {
-    if (avatarEl.components.networked) {
+    let avatarEl;
+    if (shouldUseNewLoader()) {
+      // TODO This should be updated when we migrate avatars to bitECS
+      const avatarEid = avatarObj.eid;
+      avatarEl = APP.world.eid2obj.get(avatarEid).el;
+    } else {
+      avatarEl = avatarObj.el;
+    }
+    if (avatarEl && avatarEl.components.networked) {
       const clientId = avatarEl.components.networked.data.owner;
 
       if (clientId && clientId !== NAF.clientId) {
         hubChannel.hide(clientId);
       }
     }
-  }, [hubChannel, avatarEl]);
+  }, [hubChannel, avatarObj]);
 
   return hideAvatar;
 }

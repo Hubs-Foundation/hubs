@@ -35,7 +35,7 @@ MyMenuItems.propTypes = {
 };
 
 function PlayerMenuItems({ hubChannel, activeObject, deselectObject }) {
-  const hideAvatar = useHideAvatar(hubChannel, activeObject.el);
+  const hideAvatar = useHideAvatar(hubChannel, activeObject);
 
   return (
     <ObjectMenuButton
