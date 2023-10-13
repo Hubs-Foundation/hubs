@@ -81,15 +81,6 @@ function* loadScene(
         // TODO: In three.js, update reflection probes so that boxes are defined in local space.
         (o as any).box.applyMatrix4(o.matrixWorld);
       }
-      if (hasComponent(world, NavMesh, o.eid!)) {
-        // TODO the "as any" here is because of incorrect type definition for getObjectByProperty. It was fixed in r145
-        const navMesh = o.getObjectByProperty("isMesh", true as any) as Mesh;
-        // Some older scenes have the nav-mesh component as an ancestor of the mesh itself
-        if (navMesh !== o) {
-          console.warn("The `nav-mesh` component should be placed directly on a mesh.");
-        }
-        sceneEl.systems.nav.loadMesh(navMesh, "character");
-      }
 
       if (!skybox && hasComponent(world, Skybox, o.eid!)) {
         skybox = o as Sky;
@@ -108,12 +99,26 @@ function* loadScene(
       }
     });
 
+    // Find and load a nav-mesh
+    let navMesh;
+    const navMeshEid = findChildWithComponent(world, NavMesh, scene);
+    if (navMeshEid) {
+      const navMeshObj = world.eid2obj.get(navMeshEid);
+      // TODO the "as any" here is because of incorrect type definition for getObjectByProperty. It was fixed in r145
+      navMesh = navMeshObj?.getObjectByProperty("isMesh", true as any) as Mesh;
+      // Some older scenes have the nav-mesh component as an ancestor of the mesh itself
+      if (navMesh !== navMeshObj) {
+        console.warn("The `nav-mesh` component should be placed directly on a mesh.");
+      }
+      sceneEl.systems.nav.loadMesh(navMesh, "character");
+    }
+
+    // Create scene physics
     if (findChildWithComponent(world, TrimeshTag, scene) || findChildWithComponent(world, HeightFieldTag, scene)) {
       console.log("heightfield or trimesh found on scene");
     } else {
-      let navMeshEid = findChildWithComponent(world, NavMesh, scene);
-      if (navMeshEid) {
-        inflatePhysicsShape(world, navMeshEid, {
+      if (isHighDensity && navMesh) {
+        inflatePhysicsShape(world, navMesh.eid!, {
           type: Shape.MESH,
           margin: 0.01,
           fit: Fit.ALL,
