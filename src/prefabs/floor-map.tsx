@@ -1,11 +1,12 @@
 /** @jsx createElementEntity */
 import { COLLISION_LAYERS } from "../constants";
 import { createElementEntity, renderAsEntity, Ref, createRef, EntityDef } from "../utils/jsx-entity";
-import nametagSrc from "../assets/images/floorPlan_prototype.png";
+// import nametagSrc from "../assets/images/floorPlan_prototype.png";
+import nametagSrc from "../assets/images/demo_map.png";
 import spotSrc from "../assets/images/red_spot.png";
 import { textureLoader } from "../utils/media-utils";
 import { HubsWorld } from "../app";
-import { Vector3 } from "three";
+import { Object3D, Vector3 } from "three";
 import { ProjectionMode } from "../utils/projection-mode";
 import { AlphaMode } from "../utils/create-image-mesh";
 
@@ -20,6 +21,7 @@ interface FloorMapPanelParamaters {
 export function FloorMapPanel(position: Vector3, pointPos: Vector3) {
   const panelRef = createRef();
   const pointRef = createRef();
+  const scalar = 1 / 50;
   return (
     <entity
       name={"floor-map"}
@@ -39,16 +41,16 @@ export function FloorMapPanel(position: Vector3, pointPos: Vector3) {
       offersRemoteConstraint
       offersHandConstraint
       makeKinematicOnRelease
-      holdable
+      // holdable
       floatyObject
       rigidbody={{ collisionGroup: COLLISION_LAYERS.INTERACTABLES, collisionMask: COLLISION_LAYERS.HANDS }}
       physicsShape={{ halfExtents: [0.22, 0.14, 0.1] }}
-      lookatuser
+      // lookatuser
     >
       <entity
         name="point"
-        position={[pointPos.x / 50, pointPos.z / 50, 0.02]}
-        scale={[0.05, 0.05, 0.05]}
+        position={[pointPos.x * scalar, pointPos.z * scalar, 0.02]}
+        scale={[0.02, 0.02, 0.02]}
         ref={pointRef}
         image={{
           texture: spotTexture,
@@ -62,9 +64,9 @@ export function FloorMapPanel(position: Vector3, pointPos: Vector3) {
   );
 }
 
-export function addFloorMap(world: HubsWorld, position: Vector3, pointPos: Vector3) {
+export function addFloorMap(world: HubsWorld, position: Vector3, pointPos: Vector3, userPOV: Object3D) {
   const eid = renderAsEntity(world, FloorMapPanel(position, pointPos));
   const obj = world.eid2obj.get(eid)!;
-  window.APP.scene!.object3D.add(obj);
+  userPOV.add(obj);
   return eid;
 }

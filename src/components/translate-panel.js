@@ -19,11 +19,21 @@ AFRAME.registerComponent("translate-panel", {
     this.onTargetUpdate = this.onTargetUpdate.bind(this);
     this.onLanguageUpdate = this.onLanguageUpdate.bind(this);
     this.checkAndRender = this.checkAndRender.bind(this);
+
     this.size = new Vector3();
     this.preformatText;
     this.formattedText;
     this.languageCheck = false;
     this.userCheck = false;
+
+    NAF.utils
+      .getNetworkedEntity(this.el)
+      .then(networkedEl => {
+        this.owner = networkedEl.components.networked.data.owner;
+      })
+      .catch(error => {
+        console.error(error);
+      });
   },
 
   play() {
@@ -70,17 +80,7 @@ AFRAME.registerComponent("translate-panel", {
   },
 
   onTargetUpdate(event) {
-    NAF.utils
-      .getNetworkedEntity(this.el)
-      .then(networkedEl => {
-        const owner = networkedEl.components.networked.data.owner;
-        this.userCheck = owner === event.detail.owner;
-        console.log("this user check", this.userCheck);
-      })
-      .catch(error => {
-        console.error(error);
-        this.userCheck = false;
-      });
+    this.userCheck = this.owner === event.detail.owner;
     this.checkAndRender();
   },
 

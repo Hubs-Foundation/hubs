@@ -43,12 +43,12 @@ export class SubtitleSystem {
     if (this.hasTarget()) this.StopTranslating();
     if (this.target === _target) this.target = null;
     else this.target = _target;
+    APP.scene.emit("translation-target-updated", { owner: this.target });
     if (this.hasTarget()) {
       APP.scene.emit("translation-available", { text: "The audio translation will be displayed here!" });
       // this.DemoTranslating();
       this.StartTranslating();
     }
-    APP.scene.emit("translation-target-updated", { owner: this.target });
   }
 
   StopTranslating() {
@@ -165,7 +165,7 @@ export class SubtitleSystem {
           chunks.length = 0;
 
           if (inference) {
-            this.saveAudio(recordingBlob);
+            // this.saveAudio(recordingBlob);
             AudioModules(AUDIO_ENDPOINTS.TRANSLATE_AUDIO_FILES, recordingBlob, {
               source_language: this.myLanguage,
               target_language: this.targetLanguage,

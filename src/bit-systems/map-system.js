@@ -24,13 +24,11 @@ class FloorMapClass {
         removeEntity(APP.world, this.eid);
         APP.scene.removeState("map");
       } else {
-        const avatarDirection = this.userPov.getWorldDirection(new Vector3());
         const povPosition = this.userPov.getWorldPosition(new THREE.Vector3());
-        const correctedAvatarDirection = new Vector3(avatarDirection.x, 0, avatarDirection.z);
-        const MapPos = new Vector3().addVectors(povPosition, correctedAvatarDirection.normalize().multiplyScalar(-1));
-
+        const POVDirection = this.userPov.getWorldDirection(new THREE.Vector3());
+        const MapPos = new Vector3(0, 0, -1);
         APP.scene.addState("map");
-        addFloorMap(APP.world, MapPos, povPosition);
+        addFloorMap(APP.world, MapPos, povPosition, this.userPov);
       }
     });
   }
@@ -55,25 +53,9 @@ class FloorMapClass {
   }
 
   Movement() {
-    const mapPosition = this.obj.getWorldPosition(new THREE.Vector3());
-    const povPosition = this.userPov.getWorldPosition(new THREE.Vector3());
     const userPosition = this.userObj.getWorldPosition(new THREE.Vector3());
-    const dist = mapPosition.distanceTo(povPosition);
-
-    if (dist > 1) {
-      const dir = new THREE.Vector3().subVectors(povPosition, mapPosition).normalize();
-      const newPos = new THREE.Vector3().copy(povPosition.sub(dir.multiplyScalar(1)));
-      this.obj.position.copy(newPos);
-    }
-
-    if (dist < 0.3) {
-      this.obj.visible = false;
-    } else {
-      this.obj.visible = true;
-    }
-
-    const scalarPos = userPosition.multiplyScalar(0.02);
-    this.pointObj.position.copy(new Vector3(scalarPos.x, scalarPos.z, 0.01));
+    const scalarPos = userPosition.multiplyScalar(0.04);
+    this.pointObj.position.copy(new Vector3(scalarPos.x - 0.5, -scalarPos.z - 0.5, 0.01));
 
     this.pointObj.updateMatrix();
     this.obj.updateMatrix();

@@ -9,8 +9,13 @@ AFRAME.registerComponent("translate-button", {
   init() {
     this.onClick = () => {
       subtitleSystem.SelectTarget(this.owner);
+    };
+    NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
+      this.owner = networkedEl.components.networked.data.owner;
+    });
+    this.onTargetUpdate = event => {
       const text = this.el.querySelector(".translate-button-text").object3D;
-      if (subtitleSystem.hasTarget()) {
+      if (event.detail.owner === this.owner) {
         text.el.setAttribute("text", {
           value: "Stop"
         });
@@ -20,12 +25,10 @@ AFRAME.registerComponent("translate-button", {
         });
       }
     };
-    NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
-      this.owner = networkedEl.components.networked.data.owner;
-    });
   },
   play() {
     this.el.object3D.addEventListener("interact", this.onClick);
+    APP.scene.addEventListener("translation-target-updated", this.onTargetUpdate);
   },
   pause() {
     this.el.object3D.removeEventListener("interact", this.onClick);

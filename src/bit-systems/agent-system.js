@@ -9,7 +9,7 @@ import {
   removeEntity
 } from "bitecs";
 import { Agent, Hidden, Interacted, Object3DTag } from "../bit-components";
-import { lowerIndex, raiseIndex } from "./agent-slideshow-system";
+import { UpdateTextSystem, lowerIndex, raiseIndex } from "./agent-slideshow-system";
 import { PermissionStatus } from "../utils/media-devices-utils";
 import { stageUpdate } from "../systems/single-action-button-system";
 import { developingRouter, routerModule, toggleRecording, vlModule } from "../utils/asr-adapter";
@@ -211,6 +211,7 @@ export default class VirtualAgent {
     const randomKeyIndex = Math.floor(Math.random() * salientPoints.length);
     const destName = salientPoints[randomKeyIndex];
     const startNodeIndex = sceneGraph.GetClosestIndex(virtualAgent.AvatarPos());
+    UpdateTextSystem(APP.world, `Follow the lines to reach ${destName}`);
     console.log("closest index to me:", startNodeIndex);
     console.log("destination Name: ", destName);
     this.Navigation(startNodeIndex, destName);
