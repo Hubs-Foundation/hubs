@@ -3,7 +3,10 @@ import { Networked, NetworkedBehavior, NetworkedBehaviorData } from "../bit-comp
 import { HubsWorld } from "../app";
 
 type NetworkedBehaviorType = {
-  [key: string]: any;
+  [key: string]: {
+    type: string;
+    value: any;
+  };
 };
 
 export function inflateNetworkedBehavior(world: HubsWorld, eid: number, params: NetworkedBehaviorType): number {
@@ -12,9 +15,15 @@ export function inflateNetworkedBehavior(world: HubsWorld, eid: number, params: 
   if (params) {
     const data = NetworkedBehaviorData.get(eid) || new Map();
     for (let key in params) {
-      data.set(key, params[key]);
-      NetworkedBehaviorData.set(eid, data);
+      const type = params[key].type;
+      const value = params[key].value;
+      if (type === "integer") {
+        data.set(key, BigInt(value));
+      } else {
+        data.set(key, value);
+      }
     }
+    NetworkedBehaviorData.set(eid, data);
   }
   return eid;
 }
