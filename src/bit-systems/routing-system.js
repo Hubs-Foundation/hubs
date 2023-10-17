@@ -1,6 +1,7 @@
 import { DiscreteInterpolant, Vector3 } from "three";
 import { virtualAgent } from "./agent-system";
 import { GetRoomProperties } from "../utils/rooms-properties";
+import { node } from "prop-types";
 
 const INF = Number.MAX_SAFE_INTEGER;
 export class Node {
@@ -41,7 +42,7 @@ class Edge {
   }
 
   FindDistance(v1, v2) {
-    return Math.abs(v2.vector.x - v1.vector.x) + Math.abs(v2.vector.z - v1.vector.z);
+    return Math.abs(v2.x - v1.x) + Math.abs(v2.z - v1.z);
   }
 }
 
@@ -57,40 +58,71 @@ export class Graph {
       this.enabled = true;
       this.nodes = [];
       this.edges = [];
-      this.saliencyNodes = [];
-      this.saliencyIndex = {};
-      this.dimensions = roomProperties.dimensions;
-      this.saliency = roomProperties.saliency;
 
-      this.saliency.forEach((element, index) => {
-        const value = element.pivot;
-        const salientNode = new Node(value[0], value[1], -value[2]);
-        this.nodes.push(salientNode);
-        this.saliencyNodes.push(salientNode);
-        this.saliencyIndex[element.name] = index;
+      const connectorPairs = [];
+      const manualIndices = [];
+      this.targetInfo = {};
+
+      roomProperties.connectors.forEach(object => {
+        const end1 = object.end1;
+        const end2 = object.end2;
+        const node1 = new Node(end1[0], end1[1], end1[2]);
+        const node2 = new Node(end2[0], end2[1], end2[2]);
+
+        let index1 = this.FindInArray(this.nodes, node1);
+        if (index1 === -1) {
+          index1 = this.nodes.push(node1) - 1;
+          manualIndices.push(index1);
+        }
+
+        let index2 = this.FindInArray(this.nodes, node2);
+        if (index2 === -1) {
+          index2 = this.nodes.push(node2) - 1;
+          manualIndices.push(index2);
+        }
+        connectorPairs.push([index1, index2]);
       });
 
-      for (let z = this.dimensions[2] + 1; z < this.dimensions[3]; z++) {
-        for (let x = this.dimensions[0] + 1; x < this.dimensions[1]; x++) {
-          let discard = false;
-          for (let i = 0; i < this.saliency.length; i++) {
-            const exception = this.saliency[i].box;
-            discard = x >= exception[0] && x <= exception[1] && z >= exception[2] && z <= exception[3];
-            if (discard) break;
-          }
-          const node = new Node(x, 0, -z);
-          if (!discard) {
-            Object.values(this.saliencyNodes).forEach(salient => {
-              if (salient.IsIdentical(node)) {
-                discard = true;
-              }
-            });
-          }
-          if (!discard) this.nodes.push(new Node(x, 0, -z));
-        }
-      }
+      roomProperties.targets.forEach(target => {
+        const value = target.pivot;
+        const targetNode = new Node(value[0], value[1], -value[2]);
+        const index = this.nodes.push(targetNode) - 1;
 
-      console.log("nodes", this.nodes);
+        manualIndices.push(index);
+        this.targetInfo[target.name] = index;
+      });
+
+      roomProperties.dimensions.forEach(dimensionElement => {
+        const dimension = dimensionElement.box;
+        const height = dimensionElement.height;
+
+        for (let z = dimension[2]; z <= dimension[3]; z++) {
+          for (let x = dimension[0]; x <= dimension[1]; x++) {
+            let discard = false;
+            for (let i = 0; i < roomProperties.targets.length; i++) {
+              const exception = roomProperties.targets[i].box;
+              const exceptionHeight = roomProperties.targets[i].pivot[1];
+              discard =
+                x >= exception[0] &&
+                x <= exception[1] &&
+                z >= exception[2] &&
+                z <= exception[3] &&
+                height === exceptionHeight;
+              if (discard) break;
+            }
+            const node = new Node(x, height, -z);
+            if (!discard) {
+              manualIndices.forEach(manualIndex => {
+                const manualNode = this.nodes[manualIndex];
+                if (manualNode.IsIdentical(node)) {
+                  discard = true;
+                }
+              });
+            }
+            if (!discard) this.nodes.push(node);
+          }
+        }
+      });
 
       for (let i = 0; i < this.nodes.length; i++) {
         this.edges.push([]);
@@ -103,7 +135,12 @@ export class Graph {
         }
       }
 
-      console.log("edges", this.edges);
+      connectorPairs.forEach(pair => {
+        const index1 = pair[0];
+        const index2 = pair[1];
+        this.edges[index1][index2] = new Edge(this.nodes[index1], this.nodes[index2]);
+        this.edges[index2][index1] = new Edge(this.nodes[index2], this.nodes[index1]);
+      });
 
       this.nodeCount = this.nodes.length;
       this.mapped = false;
@@ -117,15 +154,15 @@ export class Graph {
 
   AreNodesAdjacent(node1, node2) {
     return (
-      (node1.vector.x === node2.vector.x || node1.vector.z === node2.vector.z) &&
+      node1.y === node2.y &&
+      (node1.x === node2.x || node1.z === node2.z) &&
       node1.vector.distanceTo(node2.vector) <= 1.0
-      /*&& node1.vector.y === node2.vector.y*/
     );
   }
 
   GetDestIndex(salientName) {
-    if (Object.keys(this.saliencyIndex).includes(salientName)) {
-      return this.saliencyIndex[salientName];
+    if (Object.keys(this.targetInfo).includes(salientName)) {
+      return this.targetInfo[salientName];
     } else {
       console.error("This point is not a registered salient point");
     }
@@ -270,6 +307,15 @@ export class Graph {
     }
 
     return index;
+  }
+
+  FindInArray(myArray, myElement) {
+    for (let i = 0; i < myArray.length; i++) {
+      if (myArray[i] === myElement) {
+        return i; // Element found, return its index
+      }
+    }
+    return -1; // Element not found in the array
   }
 }
 

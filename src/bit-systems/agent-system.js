@@ -107,12 +107,14 @@ export default class VirtualAgent {
 
       this.scene.object3D.add(new AxesHelper());
 
-      const showPivots = false; //Change this to see points
+      const showPivots = true; //Change this to see points
 
       if (showPivots) {
         const pointEid = renderAsEntity(APP.world, pivotPoint(sceneGraph.nodes));
         const pivotObjs = APP.world.eid2obj.get(pointEid);
         this.scene.object3D.add(pivotObjs);
+        console.log(sceneGraph.nodes);
+        console.log(sceneGraph.edges);
       }
     });
 
@@ -204,12 +206,9 @@ export default class VirtualAgent {
   }
 
   NavigationActions() {
-    const salientPoints = sceneGraph.saliency.map(element => {
-      return element.name;
-    });
-
-    const randomKeyIndex = Math.floor(Math.random() * salientPoints.length);
-    const destName = salientPoints[randomKeyIndex];
+    const targetNames = Object.keys(sceneGraph.targetInfo);
+    const randomKeyIndex = Math.floor(Math.random() * targetNames.length);
+    const destName = targetNames[randomKeyIndex];
     const startNodeIndex = sceneGraph.GetClosestIndex(virtualAgent.AvatarPos());
     UpdateTextSystem(APP.world, `Follow the lines to reach ${destName}`);
     console.log("closest index to me:", startNodeIndex);
