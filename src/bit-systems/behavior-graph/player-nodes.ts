@@ -12,10 +12,6 @@ import { getPlayerInfo } from "../../utils/component-utils";
 import { ClientID } from "../../utils/networking-types";
 import { definitionListToMap } from "./utils";
 import { AElement } from "aframe";
-import { HubsWorld } from "../../app";
-import { defineQuery, enterQuery, exitQuery } from "bitecs";
-import { BehaviorGraph, EntityID, RemoteAvatar } from "../../bit-components";
-import { clientIdForEntity } from "../behavior-graph";
 
 export const playerValueDefs = {
   player: new ValueType(
@@ -282,35 +278,3 @@ export const playerNodedefs = definitionListToMap([
     }
   })
 ]);
-
-const entityIdToClientId = new Map<EntityID, ClientID>();
-
-const behaviorGraphsQuery = defineQuery([BehaviorGraph]);
-const behaviorGraphEnterQuery = enterQuery(behaviorGraphsQuery);
-const playerQuery = defineQuery([RemoteAvatar]);
-const playerJoinedQuery = enterQuery(playerQuery);
-const playerLeftQuery = exitQuery(playerQuery);
-export function playersSystem(world: HubsWorld) {
-  behaviorGraphEnterQuery(world).forEach(eid => {
-    const playerInfos = APP.componentRegistry["player-info"];
-    playerInfos.forEach(playerInfo => {
-      const clientId = clientIdForEntity(world, playerInfo.el.eid);
-      entityIdToClientId.set(eid, clientId);
-      playerEmitters.onPlayerJoined.emit(clientId);
-    });
-  });
-
-  playerJoinedQuery(world).forEach(eid => {
-    const clientId = clientIdForEntity(world, eid);
-    entityIdToClientId.set(eid, clientId);
-    playerEmitters.onPlayerJoined.emit(clientId);
-  });
-
-  playerLeftQuery(world).forEach(eid => {
-    const clientId = entityIdToClientId.get(eid);
-    if (clientId) {
-      playerEmitters.onPlayerLeft.emit(clientId);
-      entityIdToClientId.delete(eid);
-    }
-  });
-}

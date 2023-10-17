@@ -102,7 +102,7 @@ export const NetworkedTextSchema: NetworkSchema = {
     return {
       version: 1,
       data: {
-        text: read(NetworkedText.text, eid),
+        text: APP.getString(read(NetworkedText.text, eid)),
         fontSize: read(NetworkedText.fontSize, eid),
         color: read(NetworkedText.color, eid),
         fillOpacity: APP.getString(read(NetworkedText.fillOpacity, eid)),

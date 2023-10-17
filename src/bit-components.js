@@ -375,6 +375,7 @@ export const Billboard = defineComponent({
   onlyY: Types.ui8
 });
 export const MaterialTag = defineComponent();
+export const TextureTag = defineComponent();
 export const UVScroll = defineComponent({
   speed: [Types.f32, 2],
   increment: [Types.f32, 2],
@@ -475,3 +476,35 @@ export const Visible = defineComponent({
 export const NetworkedVisible = defineComponent({
   visible: Types.ui8
 });
+export const NetworkedObjectMaterial = defineComponent({
+  matNid: Types.ui8
+});
+NetworkedObjectMaterial.matNid[$isStringType] = true;
+export const NetworkedMaterial = defineComponent({
+  color: Types.ui32,
+  mapNid: Types.ui8,
+  flags: Types.ui8,
+  opacity: Types.f32,
+  alphaMapNid: Types.ui8,
+  emissive: Types.f32,
+  emissiveMapNid: Types.ui8,
+  emissiveIntensity: Types.f32,
+  roughnessMapNid: Types.ui8,
+  roughness: Types.f32,
+  metalnessMapNid: Types.ui8,
+  metalness: Types.f32,
+  lightMapNid: Types.ui8,
+  lightMapIntensity: Types.f32,
+  aoMapNid: Types.ui8,
+  aoMapIntensity: Types.f32,
+  normalMapNid: Types.ui8,
+  alphaTest: Types.f32
+});
+NetworkedMaterial.mapNid[$isStringType] = true;
+NetworkedMaterial.alphaMapNid[$isStringType] = true;
+NetworkedMaterial.emissiveMapNid[$isStringType] = true;
+NetworkedMaterial.roughnessMapNid[$isStringType] = true;
+NetworkedMaterial.metalnessMapNid[$isStringType] = true;
+NetworkedMaterial.lightMapNid[$isStringType] = true;
+NetworkedMaterial.aoMapNid[$isStringType] = true;
+NetworkedMaterial.normalMapNid[$isStringType] = true;

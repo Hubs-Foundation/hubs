@@ -21,6 +21,10 @@ declare module "three" {
       group: GeometryGroup
     ) => void;
   }
+
+  interface Texture {
+    eid?: number;
+  }
   interface Mesh {
     reflectionProbeMode: "static" | "dynamic" | false;
   }

@@ -70,6 +70,25 @@ function MaterialItem(props) {
   );
 }
 
+function TextureItem(props) {
+  const { tex, setSelectedObj } = props;
+  const displayName = formatObjectName(tex);
+  return (
+    <div className="obj-item">
+      <div
+        className="obj-label"
+        onContextMenu={e => {
+          e.preventDefault();
+          setSelectedObj(tex);
+        }}
+      >
+        {displayName}
+        {` [${tex.eid}]`}
+      </div>
+    </div>
+  );
+}
+
 function ActionItem(props) {
   const { action, setSelectedObj } = props;
   const displayName = `${action.getClip().name} (AnimationAction)`;
@@ -165,6 +184,7 @@ function RefreshButton({ onClick }) {
 
 const object3dQuery = defineQuery([bitComponents.Object3DTag]);
 const materialQuery = defineQuery([bitComponents.MaterialTag]);
+const textureQuery = defineQuery([bitComponents.TextureTag]);
 const animationActionsQuery = defineQuery([bitComponents.BitAnimationAction]);
 function ECSDebugSidebar({
   onClose,
@@ -179,6 +199,7 @@ function ECSDebugSidebar({
     .map(eid => APP.world.eid2obj.get(eid))
     .filter(o => !o.parent);
   const materials = materialQuery(APP.world).map(eid => APP.world.eid2mat.get(eid));
+  const textures = textureQuery(APP.world).map(eid => APP.world.eid2tex.get(eid));
   const envRoot = document.getElementById("environment-root").object3D;
   const actions = animationActionsQuery(APP.world).map(eid => APP.world.eid2action.get(eid));
   return (
@@ -221,9 +242,8 @@ function ECSDebugSidebar({
             ))}
           </section>
           <section>
-            {materials.map(m => (
-              <MaterialItem mat={m} key={m.eid} setSelectedObj={setSelectedObj} />
-            ))}
+            {materials.map(m => m && <MaterialItem mat={m} key={m.eid} setSelectedObj={setSelectedObj} />)}
+            {textures.map(t => t && <TextureItem tex={t} key={t.eid} setSelectedObj={setSelectedObj} />)}
             {actions.map(a => (
               <ActionItem action={a} key={a.eid} setSelectedObj={setSelectedObj} />
             ))}

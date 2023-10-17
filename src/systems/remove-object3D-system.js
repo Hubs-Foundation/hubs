@@ -16,7 +16,8 @@ import {
   TextTag,
   VideoMenu,
   ParticleEmitterTag,
-  NavMesh
+  NavMesh,
+  TextureTag
 } from "../bit-components";
 import { gltfCache } from "../components/gltf-model-plus";
 import { releaseTextureByKey } from "../utils/load-texture";
@@ -93,6 +94,7 @@ const cleanupAudioDebugSystem = cleanupOnExit(NavMesh, eid => cleanupAudioDebugN
 //      which means we will remove each descendent from its parent.
 const exitedObject3DQuery = exitQuery(defineQuery([Object3DTag]));
 const exitedMaterialQuery = exitQuery(defineQuery([MaterialTag]));
+const exitedTextureQuery = exitQuery(defineQuery([TextureTag]));
 export function removeObject3DSystem(world) {
   function removeObjFromMap(eid) {
     const o = world.eid2obj.get(eid);
@@ -102,6 +104,11 @@ export function removeObject3DSystem(world) {
   function removeFromMatMap(eid) {
     const m = world.eid2mat.get(eid);
     world.eid2mat.delete(eid);
+    m.eid = 0;
+  }
+  function removeFromTexMap(eid) {
+    const m = world.eid2tex.get(eid);
+    world.eid2tex.delete(eid);
     m.eid = 0;
   }
 
@@ -145,4 +152,5 @@ export function removeObject3DSystem(world) {
   entities.forEach(removeObjFromMap);
   exitedObject3DQuery(world).forEach(removeObjFromMap);
   exitedMaterialQuery(world).forEach(removeFromMatMap);
+  exitedTextureQuery(world).forEach(removeFromTexMap);
 }

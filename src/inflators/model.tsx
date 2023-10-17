@@ -1,9 +1,15 @@
 import { GraphJSON, ValueJSON } from "@oveddan-behave-graph/core";
 import { addComponent, addEntity, hasComponent } from "bitecs";
-import { Material, Mesh, Object3D } from "three";
+import { Material, Mesh, Object3D, Texture } from "three";
 import { HubsWorld } from "../app";
-import { GLTFModel, MaterialTag, MixerAnimatableInitialize, BehaviorGraph, MixerAnimatable } from "../bit-components";
-import { addMaterialComponent, addObject3DComponent, gltfInflatorExists, gltfInflators } from "../utils/jsx-entity";
+import { GLTFModel, MaterialTag, MixerAnimatableInitialize, BehaviorGraph } from "../bit-components";
+import {
+  addMaterialComponent,
+  addObject3DComponent,
+  addTextureComponent,
+  gltfInflatorExists,
+  gltfInflators
+} from "../utils/jsx-entity";
 import { mapMaterials } from "../utils/material-utils";
 import { EntityID } from "../utils/networking-types";
 import { inflateLoopAnimationInitialize, LoopAnimationParams } from "./loop-animation";
@@ -70,6 +76,14 @@ function resolveBGMHCLink(
         if (!mat.eid) {
           mat.eid = addEntity(world);
           addMaterialComponent(world, mat.eid, mat);
+
+          for (const [_, value] of Object.entries(mat)) {
+            if (value && value instanceof Texture) {
+              const texEid = value.eid || addEntity(world);
+              addTextureComponent(world, texEid, value);
+            }
+          }
+
           const components = mat.userData.gltfExtensions?.MOZ_hubs_components;
           if (components) inflateComponents(world, mat.eid, components, idx2eid);
         }
@@ -77,7 +91,7 @@ function resolveBGMHCLink(
       }
       return matIdx2eid.get(value.index)!;
     } else {
-      throw new Error(`${linkType} links not suppoerted`);
+      throw new Error(`${linkType} links not supported`);
     }
   } else {
     return value as any;
@@ -109,6 +123,14 @@ export function inflateModel(world: HubsWorld, rootEid: number, { model }: Model
       const eid = mat.eid || addEntity(world);
       matIdx2eid.set(mat.userData.gltfIndex, eid);
       if (!hasComponent(world, MaterialTag, eid)) addMaterialComponent(world, eid, mat);
+
+      for (const [_, value] of Object.entries(mat)) {
+        if (value && value instanceof Texture) {
+          const texEid = value.eid || addEntity(world);
+          addTextureComponent(world, texEid, value);
+        }
+      }
+
       const components = mat.userData.gltfExtensions?.MOZ_hubs_components;
       if (components) inflateComponents(world, eid, components, idx2eid);
     });

@@ -39,7 +39,8 @@ import {
   VideoTextureSource,
   Quack,
   Mirror,
-  MixerAnimatableInitialize
+  MixerAnimatableInitialize,
+  TextureTag
 } from "../bit-components";
 import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
@@ -104,6 +105,12 @@ import { inflateNetworkedBehavior } from "../inflators/networked-behavior";
 import { inflateNetworkedTransform } from "../inflators/networked-transform";
 import { inflateCapturable } from "../inflators/capturable";
 import { inflateVisible, VisibleParams } from "../inflators/visible";
+import { inflateNetworkedMaterial } from "../inflators/networked-material";
+import { inflateNetworkedObjectMaterial } from "../inflators/networked-object-material";
+import {
+  inflateNetworkedObjectProperties,
+  NetworkedObjectPropertiesParams
+} from "../inflators/networked-object-properties";
 
 preload(
   new Promise(resolve => {
@@ -220,6 +227,16 @@ export function addMaterialComponent(world: HubsWorld, eid: number, mat: Materia
   addComponent(world, MaterialTag, eid);
   world.eid2mat.set(eid, mat);
   mat.eid = eid;
+  return eid;
+}
+
+export function addTextureComponent(world: HubsWorld, eid: number, tex: Texture) {
+  if (hasComponent(world, TextureTag, eid)) {
+    return eid;
+  }
+  addComponent(world, TextureTag, eid);
+  world.eid2tex.set(eid, tex);
+  tex.eid = eid;
   return eid;
 }
 
@@ -393,10 +410,13 @@ export interface GLTFComponentData extends ComponentData {
   networkedAnimation: true;
   networkedBehavior: true;
   networkedTransform: true;
+  networkedMaterial: true;
+  networkedObjectMaterial: true;
   text?: TextParams;
   grabbable?: GrabbableParams;
   capturable?: true;
   visible?: VisibleParams;
+  networkedObjectProperties?: NetworkedObjectPropertiesParams;
 
   // deprecated
   spawnPoint?: true;
@@ -532,9 +552,12 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
   networkedAnimation: inflateNetworkedAnimation,
   networkedBehavior: inflateNetworkedBehavior,
   networkedTransform: inflateNetworkedTransform,
+  networkedMaterial: inflateNetworkedMaterial,
+  networkedObjectMaterial: inflateNetworkedObjectMaterial,
   text: inflateGLTFText,
   capturable: inflateCapturable,
-  visible: inflateVisible
+  visible: inflateVisible,
+  networkedObjectProperties: inflateNetworkedObjectProperties
 };
 
 function jsxInflatorExists(name: string): name is keyof JSXComponentData {

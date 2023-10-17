@@ -5,6 +5,8 @@ import {
   MediaVideo,
   NetworkedAnimation,
   NetworkedBehavior,
+  NetworkedMaterial,
+  NetworkedObjectMaterial,
   NetworkedTransform,
   PhysicsShape,
   Rigidbody,
@@ -19,12 +21,11 @@ import { getMediaFrame, setMediaFrame } from "./media-frame";
 import { getText, setText } from "./text";
 import { camelCase } from "../../../inflators/model";
 import { getVisible, setVisible } from "./visible";
+import { getMaterial, setMaterial } from "./material";
+import { getObjectMaterial, setObjectMaterial } from "./object-material";
 
-type ComponentProps = {
-  [key: string]: any;
-};
-type GetFunctionT = (world: HubsWorld, eid: EntityID) => ComponentProps;
-type SetFunctionT = (world: HubsWorld, eid: EntityID, params: ComponentProps) => void;
+type GetFunctionT = (world: HubsWorld, eid: EntityID) => any;
+type SetFunctionT = (world: HubsWorld, eid: EntityID, params: any) => void;
 export type ComponentKeyType = keyof GLTFComponentData;
 type ComponentBindingType = {
   [K in ComponentKeyType]?: { component: ComponentType<any>; get?: GetFunctionT; set?: SetFunctionT };
@@ -74,6 +75,16 @@ const ComponentBindings = {
     component: Visible,
     get: getVisible,
     set: setVisible
+  },
+  material: {
+    component: NetworkedMaterial,
+    get: getMaterial,
+    set: setMaterial
+  },
+  objectMaterial: {
+    component: NetworkedObjectMaterial,
+    get: getObjectMaterial,
+    set: setObjectMaterial
   }
 } as ComponentBindingType;
 

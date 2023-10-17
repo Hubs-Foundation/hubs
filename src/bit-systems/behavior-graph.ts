@@ -27,16 +27,22 @@ import {
 } from "../bit-components";
 import { anyEntityWith, findAncestorEntity } from "../utils/bit-utils";
 import { ClientID, EntityID } from "../utils/networking-types";
-import { AnimationNodes, animationSystem, animationValueDefs } from "./behavior-graph/animation-nodes";
+import { AnimationNodes, animationValueDefs } from "./behavior-graph/animation-nodes";
 import { entityEvents, EntityNodes, EntityValue as entityValueDefs } from "./behavior-graph/entity-nodes";
 import { EulerNodes, eulerValueDefs } from "./behavior-graph/euler-nodes";
-import { playerNodedefs, playersSystem, playerValueDefs } from "./behavior-graph/player-nodes";
+import { playerNodedefs, playerValueDefs } from "./behavior-graph/player-nodes";
 import { cleanupNodespac, definitionListToMap } from "./behavior-graph/utils";
 import { Vector3Nodes, Vector3Value as vec3ValueDefs } from "./behavior-graph/vec3-nodes";
 import { NetworkingNodes } from "./behavior-graph/networking-nodes";
-import { MediaNodes, mediaSystem } from "./behavior-graph/media-nodes";
+import { MediaNodes } from "./behavior-graph/media-nodes";
 import { ElementNodes } from "./behavior-graph/elements-nodes";
 import { PhysicsNodes } from "./behavior-graph/physics-nodes";
+import { materialSystem } from "./behavior-graph/systems/material-system";
+import { objectMaterialSystem } from "./behavior-graph/systems/object-material-system";
+import { visibilitySystem } from "./behavior-graph/systems/visibility-system";
+import { playersSystem } from "./behavior-graph/systems/player-system";
+import { animationSystem } from "./behavior-graph/systems/animation-system";
+import { mediaSystem } from "./behavior-graph/systems/media-system";
 
 const coreValues = getCoreValueTypes();
 const logger = new DefaultLogger();
@@ -153,6 +159,29 @@ export function behaviorGraphSystem(world: HubsWorld) {
     lifecycleEmitter.startEvent.clear();
     lifecycleEmitter.tickEvent.clear();
     lifecycleEmitter.endEvent.clear();
+
+    // When referencing materials from nodes they are exported as another
+    // material instance so when need to release them
+    for (const [_, node] of Object.entries(engine.nodes)) {
+      node.inputs.forEach(input => {
+        if (input.valueTypeName === "material") {
+          const matEid = input.value;
+          const m = world.eid2mat.get(matEid);
+          if (m) {
+            world.eid2mat.delete(matEid);
+            m.eid = 0;
+          }
+        } else if (input.valueTypeName === "texture") {
+          const texEid = input.value;
+          const t = world.eid2tex.get(texEid);
+          if (t) {
+            world.eid2tex.delete(texEid);
+            t.eid = 0;
+          }
+        }
+      });
+    }
+
     engines.delete(eid);
     console.log("cleaned up engine", engine);
   });
@@ -235,6 +264,9 @@ export function behaviorGraphSystem(world: HubsWorld) {
     }
   });
 
+  visibilitySystem(world);
+  materialSystem(world);
+  objectMaterialSystem(world);
   playersSystem(world);
   animationSystem(world);
   mediaSystem(world);

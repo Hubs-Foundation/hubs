@@ -27,6 +27,7 @@ import { ClientID } from "../../utils/networking-types";
 import { definitionListToMap } from "./utils";
 import { getComponentBindings } from "./bindings/bindings";
 import { camelCase } from "../../inflators/model";
+import { takeOwnership } from "../../utils/take-ownership";
 
 type SocketTypeName =
   | "string"
@@ -138,7 +139,7 @@ function makeObjectPropertyFlowNode<T extends keyof Object3D>(property: T, value
     ],
     initialState: undefined,
     out: { flow: "flow" },
-    triggered: ({ read, commit }) => {
+    triggered: ({ read, commit, graph }) => {
       const eid = read("entity") as EntityID;
       const obj = APP.world.eid2obj.get(eid);
       if (!obj) {
@@ -153,12 +154,19 @@ function makeObjectPropertyFlowNode<T extends keyof Object3D>(property: T, value
       } else {
         obj[property] = value;
       }
+
+      if (property === "visible") {
+        const world = graph.getDependency<HubsWorld>("world")!;
+        const { set } = getComponentBindings("visible")!;
+        set!(world, eid, { [property]: value });
+      }
+
       commit("flow");
     }
   });
 }
 
-type GLTFMaterial = MeshStandardMaterial;
+export type GLTFMaterial = MeshStandardMaterial;
 export const EntityValue = {
   entity: new ValueType(
     "entity",
@@ -432,17 +440,9 @@ export const EntityNodes = definitionListToMap([
     out: "material",
     exec: (entity: EntityID) => {
       const world = APP.world;
-      const obj = world.eid2obj.get(entity);
-      if (!obj) {
-        console.error(`get material: could not find entity`, entity);
-        return;
-      }
-      const mesh = obj as Mesh;
-      if (!mesh.isMesh) {
-        console.error(`get material: called on a non meh`, entity);
-        return;
-      }
-      return Array.isArray(mesh.material) ? mesh.material[0].eid : mesh.material.eid;
+
+      const { get } = getComponentBindings("object-material")!;
+      return get!(world, entity);
     }
   }),
   makeFlowNodeDefinition({
@@ -459,23 +459,11 @@ export const EntityNodes = definitionListToMap([
     triggered: ({ read, commit, graph }) => {
       const world = graph.getDependency<HubsWorld>("world")!;
       const entity = read<EntityID>("entity");
-      const material = world.eid2mat.get(read<EntityID>("material"));
-      const obj = world.eid2obj.get(entity);
+      const matEid = read<EntityID>("material");
 
-      if (!obj) {
-        console.error(`set material: could not find entity`, entity);
-        return;
-      }
-      if (!material) {
-        console.error(`set material: could not find material`, entity);
-        return;
-      }
-      const mesh = obj as Mesh;
-      if (!mesh.isMesh) {
-        console.error(`set material: called on a non meh`, entity);
-        return;
-      }
-      mesh.material = material;
+      const { set } = getComponentBindings("object-material")!;
+      set!(world, entity, matEid);
+
       commit("flow");
     }
   }),
@@ -539,18 +527,6 @@ type SettableMaterialProperties =
   | "depthWrite"
   | "alphaTest";
 
-const NEEDS_UPDATE_PROPERTIES: (keyof GLTFMaterial)[] = [
-  "flatShading",
-  "map",
-  "lightMap",
-  "aoMap",
-  "emissiveMap",
-  "normalMap",
-  "roughnessMap",
-  "metalnessMap",
-  "alphaMap"
-];
-
 function makeMaterialPropertyNodes<T extends SettableMaterialProperties, S extends SocketTypeName>(
   property: T,
   nodeName: string,
@@ -566,8 +542,9 @@ function makeMaterialPropertyNodes<T extends SettableMaterialProperties, S exten
       in: [{ material: "material" }],
       out: socketType,
       exec: (matEid: EntityID) => {
-        const material = APP.world.eid2mat.get(matEid) as GLTFMaterial;
-        return material.color.clone();
+        const { get } = getComponentBindings("material")!;
+        const material = get!(APP.world, matEid);
+        return (material as any)[property];
       }
     }),
     makeFlowNodeDefinition({
@@ -584,16 +561,11 @@ function makeMaterialPropertyNodes<T extends SettableMaterialProperties, S exten
       triggered: ({ read, commit, graph }) => {
         const world = graph.getDependency<HubsWorld>("world")!;
         const matEid = read<EntityID>("material");
-        const material = world.eid2mat.get(matEid) as GLTFMaterial;
         const value = read(socketName) as any;
-        const prop = material[property];
-        console.log(`setting material ${property}`, material, value);
-        if (socketType === "color" || socketType === "euler" || socketType === "vec3") {
-          (prop as any).copy(value);
-        } else {
-          material[property] = value;
-        }
-        if (NEEDS_UPDATE_PROPERTIES.includes(property)) material.needsUpdate = true;
+        // TODO Replace this by a take ownership checkbox in the set nodes
+        takeOwnership(world, matEid);
+        const { set } = getComponentBindings("material")!;
+        set!(world, matEid, { [property]: value });
         commit("flow");
       }
     }),

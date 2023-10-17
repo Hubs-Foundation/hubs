@@ -880,6 +880,13 @@ class GLTFMozBehaviorExtension {
                   if (type === "texture" && !parser.json.textures[value.index].extensions?.MOZ_texture_rgbe) {
                     loadedDep.encoding = THREE.sRGBEncoding;
                   }
+                  // Not associated materials don't get their components resolved in GLTFHubsComponentsExtension as they are not referenced by any object
+                  if (type === "material" && !loadedDep.userData.gltfExtensions) {
+                    loadedDep.userData.gltfExtensions = Object.assign(
+                      {},
+                      parser.json.materials[value.index].extensions
+                    );
+                  }
                   value.dep = loadedDep;
                   return loadedDep;
                 })
@@ -896,6 +903,13 @@ class GLTFMozBehaviorExtension {
                 parser.getDependency(type, value.index).then(loadedDep => {
                   if (type === "texture" && !parser.json.textures[value.index].extensions?.MOZ_texture_rgbe) {
                     loadedDep.encoding = THREE.sRGBEncoding;
+                  }
+                  // Not associated materials don't get their components resolved in GLTFHubsComponentsExtension as they are not referenced by any object
+                  if (type === "material" && !loadedDep.userData.gltfExtensions) {
+                    loadedDep.userData.gltfExtensions = Object.assign(
+                      {},
+                      parser.json.materials[value.index].extensions
+                    );
                   }
                   value.dep = loadedDep;
                   return loadedDep;
