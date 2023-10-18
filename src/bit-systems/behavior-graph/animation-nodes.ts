@@ -173,6 +173,15 @@ export class PlayAnimationNode extends AsyncNode {
     this.state.action = action;
     this.state.onFinished = (e: { action: AnimationAction }) => {
       if (e.action != this.state.action) return;
+
+      if (hasComponent(world, NetworkedAnimationAction, action.eid!)) {
+        const targetObj = action.getRoot();
+        if (hasComponent(world, Owned, targetObj.eid!)) {
+          takeOwnership(world, action.eid!);
+          action2Component(world, action.eid!, action);
+        }
+      }
+
       console.log("FINISH", e.action.getClip().name, APP.world.time.tick);
       // TODO HACK when transitioning to another animation in this event, even on the same frame, the object seems to reset to its base position momentarily without this
       e.action.enabled = true;
@@ -182,10 +191,28 @@ export class PlayAnimationNode extends AsyncNode {
     };
     this.state.onLoop = (e: { action: AnimationAction }) => {
       if (e.action != this.state.action) return;
+
+      if (hasComponent(world, NetworkedAnimationAction, action.eid!)) {
+        const targetObj = action.getRoot();
+        if (hasComponent(world, Owned, targetObj.eid!)) {
+          takeOwnership(world, action.eid!);
+          action2Component(world, action.eid!, action);
+        }
+      }
+
       engine.commitToNewFiber(this, "loop");
     };
     this.state.onStop = (e: { action: AnimationAction }) => {
       if (e.action != this.state.action) return;
+
+      if (hasComponent(world, NetworkedAnimationAction, action.eid!)) {
+        const targetObj = action.getRoot();
+        if (hasComponent(world, Owned, targetObj.eid!)) {
+          takeOwnership(world, action.eid!);
+          action2Component(world, action.eid!, action);
+        }
+      }
+
       this.clearState();
       engine.commitToNewFiber(this, "stopped");
     };
