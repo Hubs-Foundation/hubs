@@ -60,7 +60,7 @@ export function findChildWithComponent(world: HubsWorld, component: Component, e
   }
 }
 
-const forceNewLoader = qsTruthy("newLoader");
+const forceOldLoader = qsTruthy("oldLoader");
 export function shouldUseNewLoader() {
-  return forceNewLoader || APP.hub?.user_data?.hubsUseNewLoader;
+  return !forceOldLoader && !APP.hub?.user_data?.hubsUseOldLoader;
 }
