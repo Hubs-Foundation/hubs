@@ -5,18 +5,21 @@ import { rotateInPlaceAroundWorldUp, affixToWorldUp } from "../../utils/three-ut
 import { getPromotionTokenForFile } from "../../utils/media-utils";
 import { hasComponent } from "bitecs";
 import { isPinned as getPinnedState } from "../../bit-systems/networking";
-import { AEntity, MediaInfo, Static } from "../../bit-components";
+import { AEntity, LocalAvatar, MediaInfo, RemoteAvatar, Static } from "../../bit-components";
 import { deleteTheDeletableAncestor } from "../../bit-systems/delete-entity-system";
 import { isAEntityPinned } from "../../systems/hold-system";
 
 export function isMe(object) {
-  return object.id === "avatar-rig";
+  if (shouldUseNewLoader()) {
+    return hasComponent(APP.world, LocalAvatar, object.eid);
+  } else {
+    return object.id === "avatar-rig";
+  }
 }
 
 export function isPlayer(object) {
   if (shouldUseNewLoader()) {
-    // TODO Add when networked avatar is migrated
-    return false;
+    return hasComponent(APP.world, RemoteAvatar, object.eid);
   } else {
     return !!object.el.components["networked-avatar"];
   }
@@ -165,16 +168,24 @@ export function useRemoveObject(hubChannel, scene, object) {
   return { removeObject, canRemoveObject };
 }
 
-export function useHideAvatar(hubChannel, avatarEl) {
+export function useHideAvatar(hubChannel, avatarObj) {
   const hideAvatar = useCallback(() => {
-    if (avatarEl.components.networked) {
+    let avatarEl;
+    if (shouldUseNewLoader()) {
+      // TODO This should be updated when we migrate avatars to bitECS
+      const avatarEid = avatarObj.eid;
+      avatarEl = APP.world.eid2obj.get(avatarEid).el;
+    } else {
+      avatarEl = avatarObj.el;
+    }
+    if (avatarEl && avatarEl.components.networked) {
       const clientId = avatarEl.components.networked.data.owner;
 
       if (clientId && clientId !== NAF.clientId) {
         hubChannel.hide(clientId);
       }
     }
-  }, [hubChannel, avatarEl]);
+  }, [hubChannel, avatarObj]);
 
   return hideAvatar;
 }
