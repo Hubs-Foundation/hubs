@@ -11,18 +11,18 @@ import { resolveUrl, textureLoader } from "../utils/media-utils";
 function* setTexture(world: HubsWorld, eid: number) {
   let src = APP.sid2str.get(ParticleEmitterTag.src[eid]);
 
-  const result: URL = yield resolveUrl(src);
-  let canonicalUrl = result.origin;
-
-  // handle protocol relative urls
-  if (canonicalUrl.startsWith("//")) {
-    canonicalUrl = location.protocol + canonicalUrl;
-  }
-
-  // todo: we don't need to proxy for many things if the canonical URL has permissive CORS headers
-  src = proxiedUrlFor(canonicalUrl);
-
   try {
+    const result: URL = yield resolveUrl(src);
+    let canonicalUrl = result.origin;
+
+    // handle protocol relative urls
+    if (canonicalUrl.startsWith("//")) {
+      canonicalUrl = location.protocol + canonicalUrl;
+    }
+
+    // todo: we don't need to proxy for many things if the canonical URL has permissive CORS headers
+    src = proxiedUrlFor(canonicalUrl);
+
     const texture: Texture = yield textureLoader.loadAsync(src);
 
     const particleEmitter: ParticleEmitter = world.eid2obj.get(eid)! as ParticleEmitter;
