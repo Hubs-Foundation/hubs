@@ -85,6 +85,7 @@ const createMaterial = () => {
   }
 };
 
+const navMeshesQuery = defineQuery([NavMesh]);
 getScene().then(() => {
   const webGLVersion = getWebGLVersion(APP.scene!.renderer);
   if (webGLVersion < "2.0") {
@@ -99,14 +100,17 @@ getScene().then(() => {
   (APP.store as any).addEventListener("statechanged", () => {
     isEnabled = APP.store.state.preferences.showAudioDebugPanel;
     isEnabled && createMaterial();
-    defineQuery([NavMesh])(APP.world).forEach(navEid => {
-      if (unsupported) return;
+
+    if (unsupported) return;
+    const navMeshes = navMeshesQuery(APP.world);
+    if (navMeshes.length > 0) {
       if (isEnabled) {
-        addDebugMaterial(APP.world, navEid);
+        addDebugMaterial(APP.world, navMeshes[0]);
       } else {
-        removeDebugMaterial(APP.world, navEid);
+        removeDebugMaterial(APP.world, navMeshes[0]);
       }
-    });
+    }
+
     if (!isEnabled && debugMaterial) {
       disposeMaterial(debugMaterial);
       debugMaterial = null;
@@ -155,14 +159,18 @@ const navMeshEnterQuery = enterQuery(navMeshQuery);
 const navMeshExitQuery = exitQuery(navMeshQuery);
 export function audioDebugSystem(world: HubsWorld) {
   if (unsupported) return;
-  navMeshExitQuery(world).forEach(navEid => {
-    removeDebugMaterial(world, navEid);
-  });
-  navMeshEnterQuery(world).forEach(navEid => {
+
+  const exitedNavMeshes = navMeshExitQuery(world);
+  if (exitedNavMeshes.length > 0) {
+    removeDebugMaterial(APP.world, exitedNavMeshes[0]);
+  }
+
+  const enteredNavMeshes = navMeshEnterQuery(world);
+  if (enteredNavMeshes.length > 0) {
     if (isEnabled) {
-      addDebugMaterial(world, navEid);
+      addDebugMaterial(APP.world, enteredNavMeshes[0]);
     }
-  });
+  }
   if (isEnabled && uniforms) {
     let idx = 0;
     APP.audios.forEach((audio: AudioObject3D, audioEmitterId: ElOrEid) => {

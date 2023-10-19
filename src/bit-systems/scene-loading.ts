@@ -41,6 +41,8 @@ export function swapActiveScene(world: HubsWorld, src: string) {
   (document.querySelector("#environment-scene") as AElement).object3D.add(world.eid2obj.get(newScene)!);
 }
 
+const navMeshesQuery = defineQuery([NavMesh]);
+
 function* loadScene(
   world: HubsWorld,
   loaderEid: EntityID,
@@ -101,7 +103,11 @@ function* loadScene(
 
     // Find and load a nav-mesh
     let navMesh;
-    const navMeshEid = findChildWithComponent(world, NavMesh, scene);
+    let navMeshEid;
+    const navMeshes = navMeshesQuery(APP.world);
+    if (navMeshes.length > 0) {
+      navMeshEid = navMeshes[0];
+    }
     if (navMeshEid) {
       const navMeshObj = world.eid2obj.get(navMeshEid);
       // TODO the "as any" here is because of incorrect type definition for getObjectByProperty. It was fixed in r145
