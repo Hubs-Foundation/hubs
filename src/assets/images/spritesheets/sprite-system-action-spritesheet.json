@@ -271,11 +271,11 @@
 		},
 		"drop-action.png":
 		{
-			"frame": {"x":168,"y":738,"w":64,"h":64},
+			"frame": {"x":200,"y":800,"w":100,"h":100},
 			"rotated": false,
 			"trimmed": false,
 			"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
-			"sourceSize": {"w":64,"h":64}
+			"sourceSize": {"w":100,"h":100}
 		},
 		"focus-action.png":
 		{
