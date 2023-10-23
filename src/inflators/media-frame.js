@@ -81,6 +81,7 @@ export function inflateMediaFrame(world, eid, componentProps) {
   if (!hasComponent(world, Networked, eid)) addComponent(world, Networked, eid);
 
   MediaFrame.mediaType[eid] = MediaTypes[componentProps.mediaType];
+  NetworkedMediaFrame.mediaType[eid] = MediaFrame.mediaType[eid];
   MediaFrame.bounds[eid].set([componentProps.bounds.x, componentProps.bounds.y, componentProps.bounds.z]);
   MediaFrame.guide[eid] = guideEid;
   if (componentProps.active) {
