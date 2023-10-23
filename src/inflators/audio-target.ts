@@ -25,8 +25,11 @@ export function inflateAudioTarget(world: HubsWorld, eid: number, params: AudioT
 
   addComponent(world, AudioTarget, eid);
 
-  AudioTarget.maxDelay[eid] = params.maxDelay;
-  AudioTarget.maxDelay[eid] = params.maxDelay;
+  // https://developer.mozilla.org/en-US/docs/Web/API/BaseAudioContext/createDelay#maxdelaytime
+  params.maxDelay = params.maxDelay < 180 ? params.maxDelay : 179;
+  AudioTarget.maxDelay[eid] = params.maxDelay < 0 ? 0 : params.maxDelay;
+  params.minDelay = params.minDelay > AudioTarget.maxDelay[eid] ? AudioTarget.maxDelay[eid] : params.minDelay;
+  AudioTarget.minDelay[eid] = params.minDelay < 0 ? 0 : params.minDelay;
   AudioTarget.source[eid] = params.srcNode;
   if (params.debug) AudioTarget.flags[eid] |= AUDIO_TARGET_FLAGS.DEBUG;
 }
