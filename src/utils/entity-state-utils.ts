@@ -76,7 +76,13 @@ export async function deleteEntityState(hubChannel: HubChannel, world: HubsWorld
   const payload: DeleteEntityStatePayload = {
     nid: APP.getString(Networked.id[eid])! as NetworkID
   };
-
+  const {
+    initialData: { fileId }
+  } = createMessageDatas.get(eid)!;
+  if (fileId) {
+    payload.file_id = fileId;
+  }
+  // console.log("delete_entity_state",  payload);
   return push(hubChannel, "delete_entity_state", payload);
 }
 
@@ -156,6 +162,22 @@ function createEntityStatePayload(world: HubsWorld, rootEid: EntityID): CreateEn
     updates
   } as CreateEntityStatePayload;
 
+  const {
+    prefabName,
+    initialData: { fileId, src }
+  } = createMessageDatas.get(rootEid)!;
+
+  if (prefabName == "media" && fileId && src) {
+    const fileAccessToken = new URL(src).searchParams.get("token") as string;
+    const { promotionToken } = APP.store.state.uploadPromotionTokens.find(
+      (upload: { fileId: string }) => upload.fileId === fileId
+    );
+    if (promotionToken) {
+      payload.file_id = fileId;
+      payload.file_access_token = fileAccessToken;
+      payload.promotion_token = promotionToken;
+    }
+  }
   return payload;
 }
 
