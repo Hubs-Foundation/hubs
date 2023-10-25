@@ -196,6 +196,18 @@ export function RoomSettingsSidebar({
             />
           </div>
         </InputField>
+        <InputField
+          label={<FormattedMessage id="room-settings-sidebar.new-loader" defaultMessage="New loader activation" />}
+          fullWidth
+        >
+          {/* TODO: Refresh the page in all the clients in the room when toggled */}
+          <ToggleInput
+            label={
+              <FormattedMessage id="room-settings-sidebar.new-loader-activation" defaultMessage="Enable new loader" />
+            }
+            {...register("user_data.hubs_use_new_loader")}
+          />
+        </InputField>
         <ApplyButton type="submit" />
       </Column>
     </Sidebar>
