@@ -197,15 +197,23 @@ export function RoomSettingsSidebar({
           </div>
         </InputField>
         <InputField
-          label={<FormattedMessage id="room-settings-sidebar.new-loader" defaultMessage="New loader activation" />}
+          label={<FormattedMessage id="room-settings-sidebar.bitecs-client" defaultMessage="bitECS based Client" />}
           fullWidth
         >
-          {/* TODO: Refresh the page in all the clients in the room when toggled */}
           <ToggleInput
             label={
-              <FormattedMessage id="room-settings-sidebar.new-loader-activation" defaultMessage="Enable new loader" />
+              <FormattedMessage
+                id="room-settings-sidebar.bitecs-client-activation"
+                defaultMessage="Enable bitECS based Client"
+              />
             }
-            {...register("user_data.hubs_use_new_loader")}
+            description={
+              <FormattedMessage
+                id="room-settings-sidebar.bitecs-client-activation-description"
+                defaultMessage="Enable or disable the new Client, which is implemented with bitECS for simplicity and extensibility."
+              />
+            }
+            {...register("user_data.hubs_use_bitecs_based_client")}
           />
         </InputField>
         <ApplyButton type="submit" />

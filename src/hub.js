@@ -531,8 +531,8 @@ export async function updateEnvironmentForHub(hub, entryManager) {
   }
 }
 
-export async function updateUIForHub(hub, hubChannel, showNewLoaderRefreshPrompt = false) {
-  remountUI({ hub, entryDisallowed: !hubChannel.canEnterRoom(hub), showNewLoaderRefreshPrompt });
+export async function updateUIForHub(hub, hubChannel, showBitECSBasedClientRefreshPrompt = false) {
+  remountUI({ hub, entryDisallowed: !hubChannel.canEnterRoom(hub), showBitECSBasedClientRefreshPrompt });
 }
 
 function onConnectionError(entryManager, connectError) {
@@ -1375,17 +1375,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     const userInfo = hubChannel.presence.state[session_id];
     const displayName = (userInfo && userInfo.metas[0].profile.displayName) || "API";
 
-    let showNewLoaderRefreshPrompt = false;
+    let showBitECSBasedClientRefreshPrompt = false;
 
-    if (!!hub.user_data?.hubs_use_new_loader !== !!window.APP.hub.user_data?.hubs_use_new_loader) {
-      showNewLoaderRefreshPrompt = true;
+    if (!!hub.user_data?.hubs_use_bitecs_based_client !== !!window.APP.hub.user_data?.hubs_use_bitecs_based_client) {
+      showBitECSBasedClientRefreshPrompt = true;
       setTimeout(() => {
         document.location.reload();
       }, 5000);
     }
 
     window.APP.hub = hub;
-    updateUIForHub(hub, hubChannel, showNewLoaderRefreshPrompt);
+    updateUIForHub(hub, hubChannel, showBitECSBasedClientRefreshPrompt);
 
     if (
       stale_fields.includes("scene") ||

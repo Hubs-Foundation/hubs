@@ -152,7 +152,7 @@ class UIRoot extends Component {
     subscriptions: PropTypes.object,
     initialIsFavorited: PropTypes.bool,
     showSignInDialog: PropTypes.bool,
-    showNewLoaderRefreshPrompt: PropTypes.bool,
+    showBitECSBasedClientRefreshPrompt: PropTypes.bool,
     signInMessage: PropTypes.object,
     onContinueAfterSignIn: PropTypes.func,
     showSafariMicDialog: PropTypes.bool,
@@ -1697,11 +1697,11 @@ class UIRoot extends Component {
               />
             )}
           </div>
-          {this.props.showNewLoaderRefreshPrompt && (
-            <div className={styles.newLoaderRefreshPrompt}>
+          {this.props.showBitECSBasedClientRefreshPrompt && (
+            <div className={styles.bitecsBasedClientRefreshPrompt}>
               <FormattedMessage
-                id="ui-root.new-loader-refresh-prompt"
-                defaultMessage="This page will be reloaded in five seconds because the room owner toggled the new loader activation flag."
+                id="ui-root.bitecs-based-client-refresh-prompt"
+                defaultMessage="This page will be reloaded in five seconds because the room owner toggled the bitECS based client activation flag."
               />
             </div>
           )}

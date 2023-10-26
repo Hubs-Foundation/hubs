@@ -52,7 +52,7 @@ body.vr-mode {
   pointer-events: auto;
 }
 
-:local(.new-loader-refresh-prompt) {
+:local(.bitecs-based-client-refresh-prompt) {
   @extend %default-font;
   background: theme.$background1-color;
   border: 3px solid theme.$border1-color;
