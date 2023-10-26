@@ -152,6 +152,7 @@ class UIRoot extends Component {
     subscriptions: PropTypes.object,
     initialIsFavorited: PropTypes.bool,
     showSignInDialog: PropTypes.bool,
+    showNewLoaderRefreshPrompt: PropTypes.bool,
     signInMessage: PropTypes.object,
     onContinueAfterSignIn: PropTypes.func,
     showSafariMicDialog: PropTypes.bool,
@@ -1696,6 +1697,14 @@ class UIRoot extends Component {
               />
             )}
           </div>
+          {this.props.showNewLoaderRefreshPrompt && (
+            <div className={styles.newLoaderRefreshPrompt}>
+              <FormattedMessage
+                id="ui-root.new-loader-refresh-prompt"
+                defaultMessage="This page will be reloaded in five seconds because the room owner toggled the new loader activation flag."
+              />
+            </div>
+          )}
         </ReactAudioContext.Provider>
       </MoreMenuContextProvider>
     );
