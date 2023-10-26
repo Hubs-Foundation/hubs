@@ -39,9 +39,10 @@ const tradeshows: RoomProperties = {
     { name: "booth_3", pivot: [-7.5, 0, 8], box: [-12, -8, 6, 10] },
     { name: "booth_4", pivot: [-7.5, 0, 21], box: [-12, -8, 19, 23] },
     { name: "social_area", pivot: [0, 0, 13.5], box: [-5, 5, 3, 13] },
-    { name: "statue", pivot: [0, 0, 25.5], box: [-5, 5, 16, 26] },
-    { name: "exit", pivot: [-11.5, 0, 14], box: [-12, -11, 12, 17] },
-    { name: "business_room", pivot: [0, 4.59, 38.5], box: [-2, 2, 39, 41] }
+    { name: "statue", pivot: [0, 0, 26], box: [-5, 5, 16, 26] },
+    { name: "exit", pivot: [-10.5, 0, 14], box: [-12, -11, 12, 17] },
+    { name: "business_room", pivot: [0, 0, 33], box: [-2, 2, 33, 34] },
+    { name: "conference_room", pivot: [0, 4.59, 39], box: [-2, 2, 39, 41] }
   ],
   dimensions: [
     { height: 0, box: [-12, 12, 1, 27] },
@@ -53,10 +54,10 @@ const tradeshows: RoomProperties = {
     { height: 4.59, box: [-12, 12, 34, 39] }
   ],
   connectors: [
-    { end1: [2, 0, 30], end2: [11, 4.59, 30] },
-    { end1: [-2, 0, 30], end2: [-11, 4.59, 30] },
-    { end1: [2, 0, 31], end2: [11, 4.59, 31] },
-    { end1: [-2, 0, 31], end2: [-11, 4.59, 31] }
+    { end1: [2, 0, 30], end2: [10, 4.59, 30] },
+    { end1: [-2, 0, 30], end2: [-10, 4.59, 30] },
+    { end1: [2, 0, 31], end2: [10, 4.59, 31] },
+    { end1: [-2, 0, 31], end2: [-10, 4.59, 31] }
   ]
 };
 

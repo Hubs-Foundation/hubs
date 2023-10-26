@@ -1,7 +1,7 @@
 /** @jsx createElementEntity */
 
 import { createElementEntity } from "../utils/jsx-entity";
-import { Object3D, Quaternion, Vector3 } from "three";
+import { AxesHelper, Object3D, Quaternion, Vector3 } from "three";
 import rightArrowSrc from "../assets/models/arrow_right.glb";
 import pointSrc from "../assets/models/point.glb";
 import { preload } from "../utils/preload";
@@ -96,6 +96,8 @@ function GetArrow(instruction: instruction) {
   const finalQuaterion = quaternion2.multiply(quaternion1);
   obj.applyQuaternion(finalQuaterion);
   obj.position.copy(new Vector3(instruction.current!.x, instruction.current!.y + 1.5, instruction.current!.z));
+
+  obj.add(new AxesHelper());
 
   return obj;
 }

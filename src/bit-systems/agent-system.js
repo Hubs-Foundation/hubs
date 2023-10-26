@@ -107,7 +107,7 @@ export default class VirtualAgent {
 
       this.scene.object3D.add(new AxesHelper());
 
-      const showPivots = true; //Change this to see points
+      const showPivots = false; //Change this to see points
 
       if (showPivots) {
         const pointEid = renderAsEntity(APP.world, pivotPoint(sceneGraph.nodes));
@@ -115,6 +115,10 @@ export default class VirtualAgent {
         this.scene.object3D.add(pivotObjs);
         console.log(sceneGraph.nodes);
         console.log(sceneGraph.edges);
+
+        sceneGraph.nodes.forEach(node => {
+          if (node.x === 2 && node.z > 29) console.log(node);
+        });
       }
     });
 

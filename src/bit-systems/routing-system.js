@@ -10,6 +10,7 @@ export class Node {
     this.visited = false;
     this.path = [];
     this.distances = null;
+    this.neighboors = {};
     this.x = this.vector.x;
     this.y = this.vector.y;
     this.z = this.vector.z;
@@ -36,15 +37,15 @@ export class Node {
   }
 }
 
-class Edge {
-  constructor(start, stop) {
-    this.distance = this.FindDistance(start, stop);
-  }
+// class Edge {
+//   constructor(start, stop) {
+//     this.distance = this.FindDistance(start, stop);
+//   }
 
-  FindDistance(v1, v2) {
-    return Math.abs(v2.x - v1.x) + Math.abs(v2.z - v1.z);
-  }
-}
+//   FindDistance(v1, v2) {
+//     return Math.abs(v2.x - v1.x) + Math.abs(v2.z - v1.z);
+//   }
+// }
 
 export class Graph {
   constructor() {}
@@ -66,8 +67,8 @@ export class Graph {
       roomProperties.connectors.forEach(object => {
         const end1 = object.end1;
         const end2 = object.end2;
-        const node1 = new Node(end1[0], end1[1], end1[2]);
-        const node2 = new Node(end2[0], end2[1], end2[2]);
+        const node1 = new Node(end1[0], end1[1], -end1[2]);
+        const node2 = new Node(end2[0], end2[1], -end2[2]);
 
         let index1 = this.FindInArray(this.nodes, node1);
         if (index1 === -1) {
@@ -92,7 +93,9 @@ export class Graph {
         this.targetInfo[target.name] = index;
       });
 
+      let count = -1;
       roomProperties.dimensions.forEach(dimensionElement => {
+        count++;
         const dimension = dimensionElement.box;
         const height = dimensionElement.height;
 
@@ -119,27 +122,49 @@ export class Graph {
                 }
               });
             }
-            if (!discard) this.nodes.push(node);
+            if (!discard) {
+              this.nodes.push(node);
+              if (count === 1) console.log(node);
+            }
           }
         }
       });
 
+      // console.log(this.nodes[0].neighboors);
+
       for (let i = 0; i < this.nodes.length; i++) {
-        this.edges.push([]);
-        for (let j = 0; j < this.nodes.length; j++) {
-          if (i === j || !this.AreNodesAdjacent(this.nodes[i], this.nodes[j])) {
-            this.edges[i][j] = null;
-          } else {
-            this.edges[i][j] = new Edge(this.nodes[i], this.nodes[j]);
+        for (let j = i + 1; j < this.nodes.length; j++) {
+          if (this.AreNodesAdjacent(this.nodes[i], this.nodes[j])) {
+            const distance = this.nodes[i].vector.manhattanDistanceTo(this.nodes[j]);
+            if (distance > 0) {
+              this.nodes[i].neighboors[j] = distance;
+              this.nodes[j].neighboors[i] = distance;
+            }
           }
         }
       }
 
+      console.log(this.nodes[0].neighboors);
+
+      // for (let i = 0; i < this.nodes.length; i++) {
+      //   this.edges.push([]);
+      //   for (let j = 0; j < this.nodes.length; j++) {
+      //     if (i === j || !this.AreNodesAdjacent(this.nodes[i], this.nodes[j])) {
+      //       this.edges[i][j] = null;
+      //     } else {
+      //       this.edges[i][j] = new Edge(this.nodes[i], this.nodes[j]);
+      //     }
+      //   }
+      // }
+
       connectorPairs.forEach(pair => {
         const index1 = pair[0];
         const index2 = pair[1];
-        this.edges[index1][index2] = new Edge(this.nodes[index1], this.nodes[index2]);
-        this.edges[index2][index1] = new Edge(this.nodes[index2], this.nodes[index1]);
+        const distance = this.nodes[index1].vector.manhattanDistanceTo(this.nodes[index2]);
+        if (!Object.keys(this.nodes[index1].neighboors).includes(index2)) {
+          this.nodes[index1].neighboors[index2] = distance;
+          this.nodes[index2].neighboors[index1] = distance;
+        }
       });
 
       this.nodeCount = this.nodes.length;
@@ -153,6 +178,7 @@ export class Graph {
   }
 
   AreNodesAdjacent(node1, node2) {
+    if (node1.IsIdentical(node2)) return false;
     return (
       node1.y === node2.y &&
       (node1.x === node2.x || node1.z === node2.z) &&
@@ -175,15 +201,17 @@ export class Graph {
 
     let startingNode = this.nodes[startIndex];
     startingNode.MakeStartingPoint(this.nodeCount, startIndex);
-
+    let a;
     for (let i = 0; i < this.nodeCount - 1; i++) {
-      const minDistanceIndex = this.GetMinDistanceIndex(startingNode.distances, this.nodes, this.edges);
+      // console.log(a);
+      const minDistanceIndex = this.GetMinDistanceIndex(startingNode.distances, this.nodes);
 
       this.nodes[minDistanceIndex].Visit();
 
       for (let j = 0; j < this.nodeCount; j++) {
-        if (!this.nodes[j].visited && this.edges[minDistanceIndex][j]) {
-          const totalDistance = startingNode.distances[minDistanceIndex] + this.edges[minDistanceIndex][j].distance;
+        if (!this.nodes[j].visited && this.nodes[j].neighboors[minDistanceIndex]) {
+          const totalDistance = startingNode.distances[minDistanceIndex] + this.nodes[j].neighboors[minDistanceIndex];
+          console.log(j);
 
           if (totalDistance < startingNode.distances[j]) {
             startingNode.distances[j] = totalDistance;
