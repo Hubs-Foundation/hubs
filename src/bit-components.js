@@ -400,6 +400,5 @@ export const MediaLink = defineComponent({
 MediaLink.src[$isStringType] = true;
 export const ObjectMenuTransform = defineComponent({
   targetObjectRef: Types.eid,
-  prevObjectRef: Types.eid,
   flags: Types.ui8
 });
