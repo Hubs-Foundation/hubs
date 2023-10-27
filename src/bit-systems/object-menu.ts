@@ -15,7 +15,7 @@ import {
   MediaContentBounds,
   Deleting
 } from "../bit-components";
-import { anyEntityWith, findAncestorWithComponents } from "../utils/bit-utils";
+import { anyEntityWith, findAncestorWithComponent, findAncestorWithComponents } from "../utils/bit-utils";
 import { createNetworkedEntity } from "../utils/create-networked-entity";
 import HubChannel from "../utils/hub-channel";
 import type { EntityID } from "../utils/networking-types";
@@ -221,7 +221,7 @@ function handleHeldExit(world: HubsWorld, eid: EntityID, menuEid: EntityID) {
 }
 
 function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
-  const target = ObjectMenu.targetRef[menu];
+  let target = ObjectMenu.targetRef[menu];
   const visible = !!(target && frozen) && (ObjectMenu.flags[menu] & ObjectMenuFlags.Visible) !== 0;
 
   // TODO We are handling menus visibility in a similar way for all the object menus, we
@@ -236,16 +236,27 @@ function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
   const obj = world.eid2obj.get(menu)!;
   obj.visible = visible;
 
+  // We need the media loader entity as that's the entity that's actually pinned and we
+  // need to check its state to show/hide certain buttons
+  // TODO At this moment all objects that have an object menu have been loaded by a media loader
+  // but this might not be true in the future if we allow adding object menus to arbitrary objects.
+  const mediaLoader = findAncestorWithComponent(world, MediaContentBounds, target);
+  target = mediaLoader ? mediaLoader : target;
+
+  const canISpawnMove = APP.hubChannel!.can("spawn_and_move_media");
+  const canIPin = !!(target && canPin(APP.hubChannel!, target));
+  const isEntityPinned = isPinned(target);
+
   // Parent visibility doesn't block raycasting, so we must set each button to be invisible
   // TODO: Ensure that children of invisible entities aren't raycastable
-  world.eid2obj.get(ObjectMenu.unpinButtonRef[menu])!.visible = visible && isPinned(target);
-  world.eid2obj.get(ObjectMenu.pinButtonRef[menu])!.visible =
-    visible && !isPinned(target) && canPin(APP.hubChannel!, target);
-  world.eid2obj.get(ObjectMenu.removeButtonRef[menu])!.visible =
-    visible && !isPinned(target) && APP.hubChannel!.can("spawn_and_move_media");
-  world.eid2obj.get(ObjectMenu.cloneButtonRef[menu])!.visible = visible && APP.hubChannel!.can("spawn_and_move_media");
-  world.eid2obj.get(ObjectMenu.rotateButtonRef[menu])!.visible = visible && APP.hubChannel!.can("spawn_and_move_media");
-  world.eid2obj.get(ObjectMenu.scaleButtonRef[menu])!.visible = visible && APP.hubChannel!.can("spawn_and_move_media");
+  world.eid2obj.get(ObjectMenu.unpinButtonRef[menu])!.visible = visible && isEntityPinned && canIPin;
+  world.eid2obj.get(ObjectMenu.pinButtonRef[menu])!.visible = visible && !isEntityPinned && canIPin;
+  world.eid2obj.get(ObjectMenu.removeButtonRef[menu])!.visible = visible && !isEntityPinned && canISpawnMove;
+  world.eid2obj.get(ObjectMenu.cloneButtonRef[menu])!.visible = visible && canISpawnMove;
+  world.eid2obj.get(ObjectMenu.rotateButtonRef[menu])!.visible =
+    visible && (!isEntityPinned || canIPin) && canISpawnMove;
+  world.eid2obj.get(ObjectMenu.scaleButtonRef[menu])!.visible =
+    visible && (!isEntityPinned || canIPin) && canISpawnMove;
   world.eid2obj.get(ObjectMenu.openLinkButtonRef[menu])!.visible = visible;
 
   // Hide unimplemented features for now.
