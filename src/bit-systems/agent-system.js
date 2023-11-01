@@ -12,7 +12,7 @@ import { Agent, Hidden, Interacted, Object3DTag } from "../bit-components";
 import { UpdateTextSystem, lowerIndex, raiseIndex } from "./agent-slideshow-system";
 import { PermissionStatus } from "../utils/media-devices-utils";
 import { stageUpdate } from "../systems/single-action-button-system";
-import { developingRouter, routerModule, toggleRecording, vlModule } from "../utils/asr-adapter";
+import { AudioModules, developingRouter, routerModule, toggleRecording, vlModule } from "../utils/asr-adapter";
 import { LANGUAGES, RECORDER_CODES, VL_TEXT, VL } from "../utils/ml-types";
 import { addAgentToScene } from "../prefabs/agent";
 import { SnapDepthPOV, SnapPOV } from "../utils/vlm-adapters";
@@ -171,7 +171,12 @@ export default class VirtualAgent {
     toggleRecording(savefile)
       .then(result => {
         if (result.status.code === RECORDER_CODES.SUCCESSFUL) {
-          nmtModule(result, LANGUAGES.SPANISH, ASR.TRANSCRIBE_AUDIO_FILES)
+          // nmtModule(result, LANGUAGES.SPANISH, ASR.TRANSCRIBE_AUDIO_FILES)
+          AudioModules(AUDIO_ENDPOINTS.TRANSLATE_AUDIO_FILES, recordingBlob, {
+            source_language: this.myLanguage,
+            target_language: "en",
+            return_transcription: "true"
+          })
             .then(asrResult => {
               routerModule(asrResult)
                 .then(routerResults => {
@@ -235,10 +240,13 @@ export default class VirtualAgent {
       removeEntity(APP.world, this.cube);
       this.scene.object3D.remove(this.arrowObjs);
     }
+
+    const verbose = false;
     const navigation = sceneGraph.GetInstructions(startIndex, endIndex);
 
     console.log("nodePath:", navigation.path);
     console.log("instructions", navigation.instructions);
+    console.log("knowledge", navigation.knowledge);
 
     this.cube = renderAsEntity(APP.world, NavigationLine(navigation));
     this.arrowObjs = APP.world.eid2obj.get(this.cube);

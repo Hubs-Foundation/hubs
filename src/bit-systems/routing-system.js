@@ -211,7 +211,7 @@ export class Graph {
       for (let j = 0; j < this.nodeCount; j++) {
         if (!this.nodes[j].visited && this.nodes[j].neighboors[minDistanceIndex]) {
           const totalDistance = startingNode.distances[minDistanceIndex] + this.nodes[j].neighboors[minDistanceIndex];
-          console.log(j);
+          // console.log(j);
 
           if (totalDistance < startingNode.distances[j]) {
             startingNode.distances[j] = totalDistance;
@@ -234,9 +234,6 @@ export class Graph {
     }
 
     const stopIndex = this.GetDestIndex(stopName);
-    console.log("stopName:", stopName);
-    console.log("stopIndex:", stopIndex);
-
     const path = this.paths[startIndex][stopIndex];
     const pathVectors = [];
 
@@ -244,8 +241,14 @@ export class Graph {
       pathVectors.push(this.nodes[index].vector);
     });
 
-    const navigation = { path: pathVectors, instructions: [{ action: "start", from: startIndex }] };
+    const navigation = {
+      path: pathVectors,
+      instructions: [{ action: "start", from: startIndex }],
+      knowledge: [{ action: "start" }]
+    };
     const playerForward = virtualAgent.AvatarDirection();
+
+    let distanceSum = 0;
 
     for (let i = 0; i < path.length - 1; i++) {
       const current = this.nodes[path[i]].vector;
@@ -261,8 +264,8 @@ export class Graph {
         prevLine.copy(current.clone().sub(prev));
       }
 
-      const turn = this.Orient(prevLine.clone().normalize(), nextLine.clone().normalize(), i === 0);
-      turn.line = nextLine.normalize();
+      const turn = this.Orient(prevLine.clone().normalize(), nextLine.clone().normalize());
+      turn.line = nextLine.clone().normalize();
       turn.current = current;
 
       navigation.instructions.push(turn);
@@ -273,27 +276,50 @@ export class Graph {
         to: path[i + 1],
         distance: Math.floor(nextLine.length())
       });
+
+      if (turn.action === "turn" || turn.action === "stairs") {
+        if (distanceSum !== 0) navigation.knowledge.push({ action: "move", distance: distanceSum });
+        navigation.knowledge.push({ action: turn.action, direction: turn.direction });
+        distanceSum = 0;
+      }
+
+      distanceSum += Math.floor(nextLine.length());
+      console.log(`action continue, new distance ${distanceSum}`);
     }
     navigation.instructions.push({ action: "finish", to: stopIndex });
+    navigation.knowledge.push({ action: "move", distance: distanceSum }, { action: "finish" });
 
     return navigation;
   }
 
-  Orient(vector1, vector2, initial) {
+  Orient(vector1, vector2) {
+    let stairs = false;
+    let action = "turn";
+    let direction;
+
     const crossVector = new THREE.Vector3();
     crossVector.crossVectors(vector1, vector2).normalize();
 
+    if (vector1.y !== 0) vector1.y = 0;
+    if (vector2.y !== 0) {
+      action = "stairs";
+      if (vector2.y > 0) direction = "up";
+      else direction = "down";
+      vector2.y = 0;
+      stairs = true;
+    }
+
     const angle = THREE.MathUtils.radToDeg(vector1.angleTo(vector2));
     const signedAngle = angle * (crossVector.dot(new THREE.Vector3(0, 1, 0)) < 0 ? -1 : 1);
-    let action = initial ? "initial turn" : "turn";
-    let direction;
 
-    if (angle > 90) direction = "around";
-    else if (signedAngle > 10) direction = "left";
-    else if (signedAngle < -10) direction = "right";
-    else {
-      action = "continue";
-      direction = "forward";
+    if (!stairs) {
+      if (angle > 90) direction = "around";
+      else if (signedAngle > 10) direction = "left";
+      else if (signedAngle < -10) direction = "right";
+      else {
+        action = "continue";
+        direction = "forward";
+      }
     }
 
     return { action: action, direction: direction, angle: Math.floor(signedAngle) };
