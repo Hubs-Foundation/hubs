@@ -34,15 +34,15 @@ const demo: RoomProperties = {
 
 const tradeshows: RoomProperties = {
   targets: [
-    { name: "booth_1", pivot: [7.5, 0, 8], box: [8, 12, 6, 10] },
-    { name: "booth_2", pivot: [7.5, 0, 21], box: [8, 12, 19, 23] },
-    { name: "booth_3", pivot: [-7.5, 0, 8], box: [-12, -8, 6, 10] },
-    { name: "booth_4", pivot: [-7.5, 0, 21], box: [-12, -8, 19, 23] },
-    { name: "social_area", pivot: [0, 0, 13.5], box: [-5, 5, 3, 13] },
+    { name: "booth 1", pivot: [7.5, 0, 8], box: [8, 12, 6, 10] },
+    { name: "booth 2", pivot: [7.5, 0, 21], box: [8, 12, 19, 23] },
+    { name: "booth 3", pivot: [-7.5, 0, 8], box: [-12, -8, 6, 10] },
+    { name: "booth 4", pivot: [-7.5, 0, 21], box: [-12, -8, 19, 23] },
+    { name: "social area", pivot: [0, 0, 13.5], box: [-5, 5, 3, 13] },
     { name: "statue", pivot: [0, 0, 26], box: [-5, 5, 16, 26] },
     { name: "exit", pivot: [-10.5, 0, 14], box: [-12, -11, 12, 17] },
-    { name: "business_room", pivot: [0, 0, 33], box: [-2, 2, 33, 34] },
-    { name: "conference_room", pivot: [0, 4.59, 39], box: [-2, 2, 39, 41] }
+    { name: "business room", pivot: [0, 0, 33], box: [-2, 2, 33, 34] },
+    { name: "conference room", pivot: [0, 4.59, 39], box: [-2, 2, 39, 41] }
   ],
   dimensions: [
     { height: 0, box: [-12, 12, 1, 27] },

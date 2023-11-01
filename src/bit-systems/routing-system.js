@@ -37,16 +37,6 @@ export class Node {
   }
 }
 
-// class Edge {
-//   constructor(start, stop) {
-//     this.distance = this.FindDistance(start, stop);
-//   }
-
-//   FindDistance(v1, v2) {
-//     return Math.abs(v2.x - v1.x) + Math.abs(v2.z - v1.z);
-//   }
-// }
-
 export class Graph {
   constructor() {}
 
@@ -130,8 +120,6 @@ export class Graph {
         }
       });
 
-      // console.log(this.nodes[0].neighboors);
-
       for (let i = 0; i < this.nodes.length; i++) {
         for (let j = i + 1; j < this.nodes.length; j++) {
           if (this.AreNodesAdjacent(this.nodes[i], this.nodes[j])) {
@@ -143,19 +131,6 @@ export class Graph {
           }
         }
       }
-
-      console.log(this.nodes[0].neighboors);
-
-      // for (let i = 0; i < this.nodes.length; i++) {
-      //   this.edges.push([]);
-      //   for (let j = 0; j < this.nodes.length; j++) {
-      //     if (i === j || !this.AreNodesAdjacent(this.nodes[i], this.nodes[j])) {
-      //       this.edges[i][j] = null;
-      //     } else {
-      //       this.edges[i][j] = new Edge(this.nodes[i], this.nodes[j]);
-      //     }
-      //   }
-      // }
 
       connectorPairs.forEach(pair => {
         const index1 = pair[0];
@@ -203,7 +178,6 @@ export class Graph {
     startingNode.MakeStartingPoint(this.nodeCount, startIndex);
     let a;
     for (let i = 0; i < this.nodeCount - 1; i++) {
-      // console.log(a);
       const minDistanceIndex = this.GetMinDistanceIndex(startingNode.distances, this.nodes);
 
       this.nodes[minDistanceIndex].Visit();
@@ -211,7 +185,6 @@ export class Graph {
       for (let j = 0; j < this.nodeCount; j++) {
         if (!this.nodes[j].visited && this.nodes[j].neighboors[minDistanceIndex]) {
           const totalDistance = startingNode.distances[minDistanceIndex] + this.nodes[j].neighboors[minDistanceIndex];
-          // console.log(j);
 
           if (totalDistance < startingNode.distances[j]) {
             startingNode.distances[j] = totalDistance;
@@ -284,10 +257,22 @@ export class Graph {
       }
 
       distanceSum += Math.floor(nextLine.length());
-      console.log(`action continue, new distance ${distanceSum}`);
     }
     navigation.instructions.push({ action: "finish", to: stopIndex });
     navigation.knowledge.push({ action: "move", distance: distanceSum }, { action: "finish" });
+    const navigationString = navigation.knowledge
+      .map(actionObj => {
+        const { action, direction, distance } = actionObj;
+        if (distance) {
+          return `${action} ${distance}`;
+        } else if (direction) {
+          return `${action} ${direction}`;
+        } else {
+          return `${action}`;
+        }
+      })
+      .join(", ");
+    navigation.knowledge = navigationString;
 
     return navigation;
   }
@@ -321,7 +306,6 @@ export class Graph {
         direction = "forward";
       }
     }
-
     return { action: action, direction: direction, angle: Math.floor(signedAngle) };
   }
 
@@ -359,7 +343,6 @@ export class Graph {
         index = i;
       }
     }
-
     return index;
   }
 

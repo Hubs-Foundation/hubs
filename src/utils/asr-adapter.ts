@@ -14,8 +14,9 @@ import {
   VL,
   VL_CODES,
   VL_TEXT,
-  AUDIO_ENDPOINTS
-} from "./ml-types";
+  AUDIO_ENDPOINTS,
+  COMPONENT_ENDPOINTS
+} from "./component-types";
 import { HubsWorld } from "../app";
 import { sceneGraph } from "../bit-systems/routing-system";
 import { virtualAgent } from "../bit-systems/agent-system";
@@ -96,7 +97,7 @@ function saveAudio(blob: Blob) {
 
 // TODO: make this function inference in a vague way
 export async function AudioModules(
-  endPoint: AUDIO_ENDPOINTS,
+  endPoint: COMPONENT_ENDPOINTS,
   data: Blob,
   parameters: Record<string, any>
 ): Promise<ResponseData> {
@@ -105,7 +106,6 @@ export async function AudioModules(
   const queryString = Object.keys(parameters)
     .map(key => `${key}=${parameters[key]}`)
     .join("&");
-  console.log(endPoint + `?${queryString}`);
 
   try {
     const response = await fetch(endPoint + `?${queryString}`, {
@@ -127,33 +127,6 @@ export async function AudioModules(
     throw { status: { code: ASR_CODES.ERROR_FETCH, text: ASR_TEXT[ASR_CODES.ERROR_FETCH] } };
   }
 }
-
-// export async function nmtModule(prevResponse: ResponseData, language: LANGUAGES, asrModel: ASR): Promise<ResponseData> {
-//   const apiURL = "https://dev.speech-voxreality.maggioli-research.gr/" + ASR_MODULES[asrModel];
-//   const formData = new FormData();
-//   formData.append("audio_files", prevResponse.data!.file!, "recording.wav");
-
-//   try {
-//     const response = await fetch(apiURL + "?source_language=" + language, {
-//       method: "POST",
-//       body: formData
-//     });
-
-//     if (!response.ok) {
-//       throw { status: { code: ASR_CODES.ERROR_RESPONSE, text: ASR_TEXT[ASR_CODES.ERROR_RESPONSE] } };
-//     }
-
-//     const data = await response.json();
-//     const responseText: string = data.transcriptions[0];
-
-//     return {
-//       status: { code: ASR_CODES.SUCCESSFUL, text: ASR_TEXT[ASR_CODES.SUCCESSFUL] },
-//       data: { text_en: responseText }
-//     };
-//   } catch (error) {
-//     throw { status: { code: ASR_CODES.ERROR_FETCH, text: ASR_TEXT[ASR_CODES.ERROR_FETCH] } };
-//   }
-// }
 
 export function developingRouter() {
   const randomNumber = 0;
@@ -186,37 +159,63 @@ export function developingRouter() {
   }
 }
 
-export async function routerModule(prevResponse: ResponseData): Promise<ResponseData> {
-  // const randomNumber = Math.floor(Math.random() * 4);
-  const randomNumber = 0;
+export async function intentionModule(prevResponse: ResponseData): Promise<ResponseData> {
+  const headers = {
+    Accept: "application/json",
+    "Content-Type": "application/json"
+  };
 
-  if (randomNumber === 0) {
-    const destNodeIndex = Math.floor(Math.random() * sceneGraph.nodeCount!);
-    const startNodeIndex = sceneGraph.GetClosestIndex(virtualAgent.AvatarPos());
+  const data = { user_query: prevResponse.data?.transcriptions![0] };
+
+  try {
+    const response = await fetch(COMPONENT_ENDPOINTS.INTENTION, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+      throw { status: { code: ASR_CODES.ERROR_RESPONSE, text: ASR_TEXT[ASR_CODES.ERROR_RESPONSE] } };
+    }
+
+    const responseData = await response.json();
 
     return {
-      status: { code: 0, text: "successful" },
-      data: {
-        text_en: prevResponse.data?.text_en!,
-        task_code: TASK.NAV,
-        task_descript: TASK_DESCRIPT[TASK.NAV],
-        start: startNodeIndex,
-        dest: destNodeIndex
-      }
+      status: { code: ASR_CODES.SUCCESSFUL, text: ASR_TEXT[ASR_CODES.SUCCESSFUL] },
+      data: responseData
     };
-  } else if (randomNumber < 2) {
+  } catch (error) {
+    throw { status: { code: ASR_CODES.ERROR_FETCH, text: ASR_TEXT[ASR_CODES.ERROR_FETCH] } };
+  }
+}
+
+export async function knowledgeModule(userQuery: string, mozillaInput: string): Promise<ResponseData> {
+  const headers = {
+    Accept: "application/json",
+    "Content-Type": "application/json"
+  };
+
+  const data = { user_query: { user_query: userQuery }, mozilla_input: { mozilla_input: mozillaInput } };
+
+  try {
+    const response = await fetch(COMPONENT_ENDPOINTS.TASK_RESPONSE, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+      throw { status: { code: ASR_CODES.ERROR_RESPONSE, text: ASR_TEXT[ASR_CODES.ERROR_RESPONSE] } };
+    }
+
+    const responseData = await response.json();
+
     return {
-      status: { code: 0, text: "successful" },
-      data: {
-        text_en: prevResponse.data?.text_en!,
-        task_code: TASK.SPATIAL,
-        task_descript: TASK_DESCRIPT[TASK.SPATIAL]
-      }
+      status: { code: ASR_CODES.SUCCESSFUL, text: ASR_TEXT[ASR_CODES.SUCCESSFUL] },
+      data: responseData
     };
-  } else {
-    throw {
-      status: { code: 1, text: "could not find task" }
-    };
+  } catch (error) {
+    throw { status: { code: ASR_CODES.ERROR_FETCH, text: ASR_TEXT[ASR_CODES.ERROR_FETCH] } };
   }
 }
 

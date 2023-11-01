@@ -1,7 +1,7 @@
 import { getMediaStream } from "../components/avatar-audio-source";
 import { paths } from "../systems/userinput/paths";
 import { AudioModules } from "../utils/asr-adapter";
-import { AUDIO_ENDPOINTS } from "../utils/ml-types";
+import { AUDIO_ENDPOINTS } from "../utils/component-types";
 import { UpdateTextSystem } from "./agent-slideshow-system";
 
 export class SubtitleSystem {

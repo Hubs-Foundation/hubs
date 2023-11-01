@@ -12,8 +12,17 @@ import { Agent, Hidden, Interacted, Object3DTag } from "../bit-components";
 import { UpdateTextSystem, lowerIndex, raiseIndex } from "./agent-slideshow-system";
 import { PermissionStatus } from "../utils/media-devices-utils";
 import { stageUpdate } from "../systems/single-action-button-system";
-import { AudioModules, developingRouter, routerModule, toggleRecording, vlModule } from "../utils/asr-adapter";
-import { LANGUAGES, RECORDER_CODES, VL_TEXT, VL } from "../utils/ml-types";
+import {
+  AudioModules,
+  developingRouter,
+  intentModule,
+  intentionModule,
+  knowledgeModule,
+  routerModule,
+  toggleRecording,
+  vlModule
+} from "../utils/asr-adapter";
+import { LANGUAGES, RECORDER_CODES, VL_TEXT, VL, AUDIO_ENDPOINTS, COMPONENT_ENDPOINTS } from "../utils/component-types";
 import { addAgentToScene } from "../prefabs/agent";
 import { SnapDepthPOV, SnapPOV } from "../utils/vlm-adapters";
 import { sceneGraph } from "./routing-system";
@@ -156,7 +165,7 @@ export default class VirtualAgent {
     if (clicked(this.arrowPrev)) lowerIndex();
     if (clicked(this.buttonMic)) this.MicrophoneActions();
     if (clicked(this.buttonSnap)) {
-      this.NavigationActions();
+      this.StartNavigation("conference_room");
       // this.SnapActions();
       // const dev = developingRouter();
       // console.log(dev);
@@ -166,26 +175,36 @@ export default class VirtualAgent {
 
   MicrophoneActions() {
     const savefile = false;
-
     stageUpdate();
     toggleRecording(savefile)
       .then(result => {
         if (result.status.code === RECORDER_CODES.SUCCESSFUL) {
-          // nmtModule(result, LANGUAGES.SPANISH, ASR.TRANSCRIBE_AUDIO_FILES)
-          AudioModules(AUDIO_ENDPOINTS.TRANSLATE_AUDIO_FILES, recordingBlob, {
-            source_language: this.myLanguage,
+          AudioModules(COMPONENT_ENDPOINTS.TRANSLATE_AUDIO_FILES, result.data.file, {
+            source_language: "en",
             target_language: "en",
             return_transcription: "true"
           })
             .then(asrResult => {
-              routerModule(asrResult)
-                .then(routerResults => {
-                  this.Navigation(routerResults.data.start, routerResults.data.dest);
-                  // sceneGraph.Dijkstra(routerResults.data.start, routerResults.data.dest);
-                  // console.log(sceneGraph.path);
+              console.log(asrResult);
+              intentionModule(asrResult)
+                .then(intentResults => {
+                  console.log(intentResults);
+                  if (intentResults.data.intent === "navigation") {
+                    console.log(asrResult);
+                    const instructions = this.StartNavigation(intentResults.data.destination);
+                    console.log("instructions", instructions);
+                    knowledgeModule(asrResult.data.translations[0], instructions)
+                      .then(knowledge => {
+                        console.log("knowledge", knowledge);
+                        UpdateTextSystem(APP.world, knowledge.data.response);
+                      })
+                      .catch(knowledgeError => {
+                        console.log(knowledgeError);
+                      });
+                  }
                 })
-                .catch(routerError => {
-                  console.log(routerError);
+                .catch(intentError => {
+                  console.log(intentError);
                 });
             })
             .catch(asrError => {
@@ -214,15 +233,19 @@ export default class VirtualAgent {
       });
   }
 
-  NavigationActions() {
+  StartNavigation(destName) {
+    const startNodeIndex = sceneGraph.GetClosestIndex(virtualAgent.AvatarPos());
+    // UpdateTextSystem(APP.world, `Follow the lines to reach ${destName}`);
+    console.log("closest index to me:", startNodeIndex);
+    console.log("destination Name: ", destName);
+    return this.Navigation(startNodeIndex, destName);
+  }
+
+  GetRandomDest() {
     const targetNames = Object.keys(sceneGraph.targetInfo);
     const randomKeyIndex = Math.floor(Math.random() * targetNames.length);
     const destName = targetNames[randomKeyIndex];
-    const startNodeIndex = sceneGraph.GetClosestIndex(virtualAgent.AvatarPos());
-    UpdateTextSystem(APP.world, `Follow the lines to reach ${destName}`);
-    console.log("closest index to me:", startNodeIndex);
-    console.log("destination Name: ", destName);
-    this.Navigation(startNodeIndex, destName);
+    return destName;
   }
 
   HandleArrows(renderArrows) {
@@ -244,13 +267,10 @@ export default class VirtualAgent {
     const verbose = false;
     const navigation = sceneGraph.GetInstructions(startIndex, endIndex);
 
-    console.log("nodePath:", navigation.path);
-    console.log("instructions", navigation.instructions);
-    console.log("knowledge", navigation.knowledge);
-
     this.cube = renderAsEntity(APP.world, NavigationLine(navigation));
     this.arrowObjs = APP.world.eid2obj.get(this.cube);
     this.scene.object3D.add(this.arrowObjs);
+    return navigation.knowledge;
   }
 
   AgentPos() {

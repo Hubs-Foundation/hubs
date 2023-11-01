@@ -4,6 +4,18 @@ export enum AUDIO_ENDPOINTS {
   TRANSCRIBE_AUDIO_FILES = "https://dev.speech-voxreality.maggioli-research.gr/transcribe_audio_files",
   TRANSLATE_AUDIO_FILES = "https://dev.speech-voxreality.maggioli-research.gr/translate_audio_files"
 }
+
+export enum COMPONENT_ENDPOINTS {
+  TRANSLATE_AUDIO = "https://dev.speech-voxreality.maggioli-research.gr/translate_audio",
+  TRANSLATE_TEXT = "https://dev.speech-voxreality.maggioli-research.gr/translate_text",
+  TRANSCRIBE_AUDIO_FILES = "https://dev.speech-voxreality.maggioli-research.gr/transcribe_audio_files",
+  TRANSLATE_AUDIO_FILES = "https://dev.speech-voxreality.maggioli-research.gr/translate_audio_files",
+  LXMERT = "https://dev.voxreality.maggioli-research.gr/lxmert/",
+  GPT = "https://dev.gpt-voxreality.maggioli-research.gr/cap_gpt2/",
+  INTENTION = "https://192.168.169.219:443/intent_dest/",
+  TASK_RESPONSE = "https://192.168.169.219:443/response/"
+}
+
 export const ASR_MODULES: Record<AUDIO_ENDPOINTS, string> = {
   [AUDIO_ENDPOINTS.TRANSLATE_AUDIO]: "translate_audio",
   [AUDIO_ENDPOINTS.TRANSLATE_TEXT]: "translate_text",
@@ -89,5 +101,44 @@ export interface ResponseData {
     start?: number;
     dest?: number;
     descript?: any;
+    transcriptions?: string[];
+    translations?: string[];
   };
 }
+
+export interface AudioModulesResponse {
+  status: {
+    code: number;
+    text: string;
+  };
+  data?: {
+    file?: Blob;
+    text_init?: string;
+    text_en?: string;
+    task_code?: TASK;
+    task_descript?: string;
+    start?: number;
+    dest?: number;
+    descript?: any;
+  };
+}
+
+export enum PROCESS_CODES {
+  Successful,
+  FetchError,
+  MediaRecorderError,
+  RecordingStopped,
+  NmtResponseError,
+  UknownTask,
+  UnknownDest
+}
+
+export const CODE_DESCRIPTION: Record<PROCESS_CODES, string> = {
+  [PROCESS_CODES.Successful]: "Successfull",
+  [PROCESS_CODES.FetchError]: "Fetch fail",
+  [PROCESS_CODES.MediaRecorderError]: "Media Recorder Error",
+  [PROCESS_CODES.RecordingStopped]: "Recording Stopped",
+  [PROCESS_CODES.NmtResponseError]: "Error with the response of the NMT module",
+  [PROCESS_CODES.UknownTask]: "Uknown Task",
+  [PROCESS_CODES.UnknownDest]: "Uknown Destination"
+};
