@@ -1,7 +1,7 @@
 import { getMediaStream } from "../components/avatar-audio-source";
 import { paths } from "../systems/userinput/paths";
-import { AudioModules } from "../utils/asr-adapter";
-import { AUDIO_ENDPOINTS } from "../utils/component-types";
+import { audioModules } from "../utils/asr-adapter";
+import { COMPONENT_ENDPOINTS } from "../utils/component-types";
 import { UpdateTextSystem } from "./agent-slideshow-system";
 
 export class SubtitleSystem {
@@ -166,7 +166,7 @@ export class SubtitleSystem {
 
           if (inference) {
             // this.saveAudio(recordingBlob);
-            AudioModules(AUDIO_ENDPOINTS.TRANSLATE_AUDIO_FILES, recordingBlob, {
+            audioModules(COMPONENT_ENDPOINTS.TRANSLATE_AUDIO_FILES, recordingBlob, {
               source_language: this.myLanguage,
               target_language: this.targetLanguage,
               return_transcription: "true"

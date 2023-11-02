@@ -4,7 +4,6 @@ import { createElementEntity, renderAsEntity, createRef } from "../utils/jsx-ent
 import { preload } from "../utils/preload";
 import { cloneModelFromCache, loadModel } from "../components/gltf-model-plus";
 import { HubsWorld } from "../app";
-import { MediaLoaderParams } from "../inflators/media-loader";
 import nametagSrc from "../assets/hud/nametag.9.png";
 import { textureLoader } from "../utils/media-utils";
 import { AgentPanel } from "./agent-panel";
@@ -14,20 +13,6 @@ import { COLLISION_LAYERS } from "../constants";
 
 preload(loadModel(agentModelSrc, null, true));
 const panelTexture = textureLoader.load(nametagSrc);
-const slideRefs = [];
-
-// for (let i = 0; i < 25; i++) {
-//   const ref = createRef();
-//   slideRefs.push(ref);
-// }
-
-const agentMediaParams: MediaLoaderParams = {
-  src: agentModelSrc,
-  recenter: true,
-  resize: true,
-  animateLoad: true,
-  isObjectMenuTarget: true
-};
 
 export function AgentEntity() {
   const agentRef = createRef();
@@ -37,16 +22,12 @@ export function AgentEntity() {
   const nextRef = createRef();
   const prevRef = createRef();
   const text = ["", ""];
-  // FromatNewText(greetingPhrases[getRandomInt(greetingPhrases.length)]);
-
-  console.log(cloneModelFromCache(agentModelSrc));
 
   return (
     <entity
       name="Agent"
       agent={{ panelRef, micRef, snapRef, nextRef, prevRef }}
       ref={agentRef}
-      /*mediaLoader={agentMediaParams}*/
       model={{ model: cloneModelFromCache(agentModelSrc).scene }}
       cursorRaycastable
       remoteHoverTarget

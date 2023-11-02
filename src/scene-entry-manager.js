@@ -28,7 +28,6 @@ import { anyEntityWith } from "./utils/bit-utils";
 import { moveToSpawnPoint } from "./bit-systems/waypoint";
 import { spawnFromFileList, spawnFromUrl } from "./load-media-on-paste-or-drop";
 import { isLockedDownDemoRoom } from "./utils/hub-utils";
-import { addAgentToScene } from "./prefabs/agent";
 import { virtualAgent } from "./bit-systems/agent-system";
 import { floorMap } from "./bit-systems/map-system";
 import { subtitleSystem } from "./bit-systems/subtitling-system";
@@ -457,7 +456,6 @@ export default class SceneEntryManager {
   };
 
   _setupAgent = () => {
-    // const eid = addAgentToScene(APP.world);
     virtualAgent.Init();
   };
 

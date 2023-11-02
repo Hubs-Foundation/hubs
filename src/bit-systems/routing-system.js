@@ -114,7 +114,6 @@ export class Graph {
             }
             if (!discard) {
               this.nodes.push(node);
-              if (count === 1) console.log(node);
             }
           }
         }

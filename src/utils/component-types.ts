@@ -1,10 +1,3 @@
-export enum AUDIO_ENDPOINTS {
-  TRANSLATE_AUDIO = "https://dev.speech-voxreality.maggioli-research.gr/translate_audio",
-  TRANSLATE_TEXT = "https://dev.speech-voxreality.maggioli-research.gr/translate_text",
-  TRANSCRIBE_AUDIO_FILES = "https://dev.speech-voxreality.maggioli-research.gr/transcribe_audio_files",
-  TRANSLATE_AUDIO_FILES = "https://dev.speech-voxreality.maggioli-research.gr/translate_audio_files"
-}
-
 export enum COMPONENT_ENDPOINTS {
   TRANSLATE_AUDIO = "https://dev.speech-voxreality.maggioli-research.gr/translate_audio",
   TRANSLATE_TEXT = "https://dev.speech-voxreality.maggioli-research.gr/translate_text",
@@ -15,44 +8,6 @@ export enum COMPONENT_ENDPOINTS {
   INTENTION = "https://192.168.169.219:443/intent_dest/",
   TASK_RESPONSE = "https://192.168.169.219:443/response/"
 }
-
-export const ASR_MODULES: Record<AUDIO_ENDPOINTS, string> = {
-  [AUDIO_ENDPOINTS.TRANSLATE_AUDIO]: "translate_audio",
-  [AUDIO_ENDPOINTS.TRANSLATE_TEXT]: "translate_text",
-  [AUDIO_ENDPOINTS.TRANSCRIBE_AUDIO_FILES]: "transcribe_audio_files",
-  [AUDIO_ENDPOINTS.TRANSLATE_AUDIO_FILES]: "translate_audio_file"
-};
-
-export enum ASR_CODES {
-  SUCCESSFUL,
-  ERROR_RESPONSE,
-  ERROR_FETCH
-}
-export const ASR_TEXT: Record<ASR_CODES, string> = {
-  [ASR_CODES.SUCCESSFUL]: "successful",
-  [ASR_CODES.ERROR_RESPONSE]: "response not ok",
-  [ASR_CODES.ERROR_FETCH]: "fetch failed"
-};
-
-export enum VL {
-  LXMERT,
-  GPT
-}
-export const VL_MODULES: Record<VL, string> = {
-  [VL.LXMERT]: "https://dev.voxreality.maggioli-research.gr/lxmert/",
-  [VL.GPT]: "https://dev.gpt-voxreality.maggioli-research.gr/cap_gpt2/"
-};
-
-export enum VL_CODES {
-  SUCCESSFUL,
-  ERROR_RESPONSE,
-  ERROR_FETCH
-}
-export const VL_TEXT: Record<VL_CODES, string> = {
-  [VL_CODES.SUCCESSFUL]: "successful",
-  [VL_CODES.ERROR_RESPONSE]: "response not ok",
-  [VL_CODES.ERROR_FETCH]: "fetch failed"
-};
 
 export enum RECORDER_CODES {
   SUCCESSFUL,
@@ -74,19 +29,6 @@ export enum LANGUAGES {
   GERMAN = "de"
 }
 
-export enum TASK {
-  QA,
-  NAV,
-  PROGRAM,
-  SPATIAL
-}
-export const TASK_DESCRIPT: Record<TASK, string> = {
-  [TASK.QA]: "Question Answering",
-  [TASK.NAV]: "Navigation",
-  [TASK.PROGRAM]: "Event Program",
-  [TASK.SPATIAL]: "Spatial Info"
-};
-
 export interface ResponseData {
   status: {
     code: number;
@@ -96,7 +38,6 @@ export interface ResponseData {
     file?: Blob;
     text_init?: string;
     text_en?: string;
-    task_code?: TASK;
     task_descript?: string;
     start?: number;
     dest?: number;
@@ -106,24 +47,7 @@ export interface ResponseData {
   };
 }
 
-export interface AudioModulesResponse {
-  status: {
-    code: number;
-    text: string;
-  };
-  data?: {
-    file?: Blob;
-    text_init?: string;
-    text_en?: string;
-    task_code?: TASK;
-    task_descript?: string;
-    start?: number;
-    dest?: number;
-    descript?: any;
-  };
-}
-
-export enum PROCESS_CODES {
+export enum COMPONENT_CODES {
   Successful,
   FetchError,
   MediaRecorderError,
@@ -133,12 +57,12 @@ export enum PROCESS_CODES {
   UnknownDest
 }
 
-export const CODE_DESCRIPTION: Record<PROCESS_CODES, string> = {
-  [PROCESS_CODES.Successful]: "Successfull",
-  [PROCESS_CODES.FetchError]: "Fetch fail",
-  [PROCESS_CODES.MediaRecorderError]: "Media Recorder Error",
-  [PROCESS_CODES.RecordingStopped]: "Recording Stopped",
-  [PROCESS_CODES.NmtResponseError]: "Error with the response of the NMT module",
-  [PROCESS_CODES.UknownTask]: "Uknown Task",
-  [PROCESS_CODES.UnknownDest]: "Uknown Destination"
+export const CODE_DESCRIPTIONS: Record<COMPONENT_CODES, string> = {
+  [COMPONENT_CODES.Successful]: "Successfull",
+  [COMPONENT_CODES.FetchError]: "Fetch fail",
+  [COMPONENT_CODES.MediaRecorderError]: "Media Recorder Error",
+  [COMPONENT_CODES.RecordingStopped]: "Recording Stopped",
+  [COMPONENT_CODES.NmtResponseError]: "Error with the response of the NMT module",
+  [COMPONENT_CODES.UknownTask]: "Uknown Task",
+  [COMPONENT_CODES.UnknownDest]: "Uknown Destination"
 };

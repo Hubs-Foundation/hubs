@@ -1,25 +1,6 @@
 import { string } from "prop-types";
 import { Object3D, PerspectiveCamera, WebGLRenderer } from "three";
-import {
-  LANGUAGES,
-  ResponseData,
-  RECORDER_CODES,
-  RECORDER_TEXT,
-  ASR_MODULES,
-  ASR_CODES,
-  ASR_TEXT,
-  TASK,
-  TASK_DESCRIPT,
-  VL_MODULES,
-  VL,
-  VL_CODES,
-  VL_TEXT,
-  AUDIO_ENDPOINTS,
-  COMPONENT_ENDPOINTS
-} from "./component-types";
-import { HubsWorld } from "../app";
-import { sceneGraph } from "../bit-systems/routing-system";
-import { virtualAgent } from "../bit-systems/agent-system";
+import { ResponseData, COMPONENT_ENDPOINTS, COMPONENT_CODES, CODE_DESCRIPTIONS } from "./component-types";
 
 let mediaRecorder: MediaRecorder | null = null;
 let chunks: any[] = [];
@@ -36,7 +17,7 @@ export async function toggleRecording(savefile: boolean): Promise<ResponseData> 
   } else {
     stopRecording();
     return Promise.resolve({
-      status: { code: RECORDER_CODES.STOP, text: RECORDER_TEXT[RECORDER_CODES.STOP] }
+      status: { code: COMPONENT_CODES.RecordingStopped, text: CODE_DESCRIPTIONS[COMPONENT_CODES.RecordingStopped] }
     });
   }
 }
@@ -64,14 +45,17 @@ async function startRecording(savefile: boolean): Promise<ResponseData> {
       }
 
       resolve({
-        status: { code: RECORDER_CODES.SUCCESSFUL, text: RECORDER_TEXT[RECORDER_CODES.SUCCESSFUL] },
+        status: { code: COMPONENT_CODES.Successful, text: CODE_DESCRIPTIONS[COMPONENT_CODES.Successful] },
         data: { file: recordingBlob }
       });
     };
 
     mediaRecorder.onerror = event => {
       reject({
-        status: { code: RECORDER_CODES.ERROR, text: RECORDER_TEXT[RECORDER_CODES.ERROR] }
+        status: {
+          code: COMPONENT_CODES.MediaRecorderError,
+          text: CODE_DESCRIPTIONS[COMPONENT_CODES.MediaRecorderError]
+        }
       });
       console.log(event);
     };
@@ -96,7 +80,7 @@ function saveAudio(blob: Blob) {
 }
 
 // TODO: make this function inference in a vague way
-export async function AudioModules(
+export async function audioModules(
   endPoint: COMPONENT_ENDPOINTS,
   data: Blob,
   parameters: Record<string, any>
@@ -113,59 +97,20 @@ export async function AudioModules(
       body: formData
     });
 
-    if (!response.ok) {
-      throw { status: { code: ASR_CODES.ERROR_RESPONSE, text: ASR_TEXT[ASR_CODES.ERROR_RESPONSE] } };
-    }
-
     const data = await response.json();
 
     return {
-      status: { code: ASR_CODES.SUCCESSFUL, text: ASR_TEXT[ASR_CODES.SUCCESSFUL] },
+      status: { code: COMPONENT_CODES.Successful, text: CODE_DESCRIPTIONS[COMPONENT_CODES.Successful] },
       data: data
     };
   } catch (error) {
-    throw { status: { code: ASR_CODES.ERROR_FETCH, text: ASR_TEXT[ASR_CODES.ERROR_FETCH] } };
+    throw { status: { code: COMPONENT_CODES.FetchError, text: CODE_DESCRIPTIONS[COMPONENT_CODES.FetchError] } };
   }
 }
 
-export function developingRouter() {
-  const randomNumber = 0;
-
-  if (randomNumber === 0) {
-    const destNodeIndex = Math.floor(Math.random() * sceneGraph.nodeCount!);
-    const startNodeIndex = sceneGraph.GetClosestIndex(virtualAgent.AvatarPos());
-
-    return {
-      status: { code: 0, text: "successful" },
-      data: {
-        task_code: TASK.NAV,
-        task_descript: TASK_DESCRIPT[TASK.NAV],
-        start: startNodeIndex,
-        dest: destNodeIndex
-      }
-    };
-  } else if (randomNumber < 2) {
-    return {
-      status: { code: 0, text: "successful" },
-      data: {
-        task_code: TASK.SPATIAL,
-        task_descript: TASK_DESCRIPT[TASK.SPATIAL]
-      }
-    };
-  } else {
-    throw {
-      status: { code: 1, text: "could not find task" }
-    };
-  }
-}
-
-export async function intentionModule(prevResponse: ResponseData): Promise<ResponseData> {
-  const headers = {
-    Accept: "application/json",
-    "Content-Type": "application/json"
-  };
-
-  const data = { user_query: prevResponse.data?.transcriptions![0] };
+export async function intentionModule(englishTranscription: string): Promise<ResponseData> {
+  const headers = { Accept: "application/json", "Content-Type": "application/json" };
+  const data = { user_query: englishTranscription };
 
   try {
     const response = await fetch(COMPONENT_ENDPOINTS.INTENTION, {
@@ -174,28 +119,24 @@ export async function intentionModule(prevResponse: ResponseData): Promise<Respo
       body: JSON.stringify(data)
     });
 
-    if (!response.ok) {
-      throw { status: { code: ASR_CODES.ERROR_RESPONSE, text: ASR_TEXT[ASR_CODES.ERROR_RESPONSE] } };
-    }
-
     const responseData = await response.json();
 
     return {
-      status: { code: ASR_CODES.SUCCESSFUL, text: ASR_TEXT[ASR_CODES.SUCCESSFUL] },
+      status: { code: COMPONENT_CODES.Successful, text: CODE_DESCRIPTIONS[COMPONENT_CODES.Successful] },
       data: responseData
     };
   } catch (error) {
-    throw { status: { code: ASR_CODES.ERROR_FETCH, text: ASR_TEXT[ASR_CODES.ERROR_FETCH] } };
+    throw { status: { code: COMPONENT_CODES.FetchError, text: CODE_DESCRIPTIONS[COMPONENT_CODES.FetchError] } };
   }
 }
 
-export async function knowledgeModule(userQuery: string, mozillaInput: string): Promise<ResponseData> {
+export async function knowledgeModule(userQuery: string, intent: string, mozillaInput: string): Promise<ResponseData> {
   const headers = {
     Accept: "application/json",
     "Content-Type": "application/json"
   };
 
-  const data = { user_query: { user_query: userQuery }, mozilla_input: { mozilla_input: mozillaInput } };
+  const data = { user_query: userQuery, intent: intent, mozilla_input: mozillaInput };
 
   try {
     const response = await fetch(COMPONENT_ENDPOINTS.TASK_RESPONSE, {
@@ -204,48 +145,34 @@ export async function knowledgeModule(userQuery: string, mozillaInput: string): 
       body: JSON.stringify(data)
     });
 
-    if (!response.ok) {
-      throw { status: { code: ASR_CODES.ERROR_RESPONSE, text: ASR_TEXT[ASR_CODES.ERROR_RESPONSE] } };
-    }
-
     const responseData = await response.json();
 
     return {
-      status: { code: ASR_CODES.SUCCESSFUL, text: ASR_TEXT[ASR_CODES.SUCCESSFUL] },
+      status: { code: COMPONENT_CODES.Successful, text: CODE_DESCRIPTIONS[COMPONENT_CODES.Successful] },
       data: responseData
     };
   } catch (error) {
-    throw { status: { code: ASR_CODES.ERROR_FETCH, text: ASR_TEXT[ASR_CODES.ERROR_FETCH] } };
+    throw { status: { code: COMPONENT_CODES.FetchError, text: CODE_DESCRIPTIONS[COMPONENT_CODES.FetchError] } };
   }
 }
 
-export async function vlModule(
-  pov: Blob,
-  vlModule: VL,
-  prevResponse?: ResponseData,
-  depthPov?: Blob
-): Promise<ResponseData> {
-  const apiURL = VL_MODULES[vlModule];
+export async function vlModule(pov: Blob, vlModule: COMPONENT_ENDPOINTS): Promise<ResponseData> {
   const formData = new FormData();
   formData.append("file", pov, "camera_pov.png");
 
   try {
-    const response = await fetch(apiURL, {
+    const response = await fetch(vlModule, {
       method: "POST",
       body: formData
     });
 
-    if (!response.ok) {
-      throw { status: { code: VL_CODES.ERROR_RESPONSE, text: VL_TEXT[VL_CODES.ERROR_RESPONSE] } };
-    }
-
     const data = await response.json();
 
     return {
-      status: { code: VL_CODES.SUCCESSFUL, text: VL_TEXT[VL_CODES.SUCCESSFUL] },
+      status: { code: COMPONENT_CODES.Successful, text: CODE_DESCRIPTIONS[COMPONENT_CODES.Successful] },
       data: { descript: data }
     };
   } catch (error) {
-    throw { status: { code: VL_CODES.ERROR_FETCH, text: VL_TEXT[VL_CODES.ERROR_FETCH] } };
+    throw { status: { code: COMPONENT_CODES.FetchError, text: CODE_DESCRIPTIONS[COMPONENT_CODES.FetchError] } };
   }
 }

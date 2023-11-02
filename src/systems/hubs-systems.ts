@@ -273,7 +273,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   loopAnimationSystem(world);
   lookAtUserSystem(world);
 
-  AgentSystem(world);
+  AgentSystem();
   FloorMapSystem(world);
 
   HiddenSystem(world);

@@ -1,28 +1,10 @@
-import {
-  addComponent,
-  defineQuery,
-  enterQuery,
-  entityExists,
-  exitQuery,
-  hasComponent,
-  removeComponent,
-  removeEntity
-} from "bitecs";
-import { Agent, Hidden, Interacted, Object3DTag } from "../bit-components";
+import { addComponent, defineQuery, enterQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
+import { Agent, Hidden, Interacted } from "../bit-components";
 import { UpdateTextSystem, lowerIndex, raiseIndex } from "./agent-slideshow-system";
 import { PermissionStatus } from "../utils/media-devices-utils";
 import { stageUpdate } from "../systems/single-action-button-system";
-import {
-  AudioModules,
-  developingRouter,
-  intentModule,
-  intentionModule,
-  knowledgeModule,
-  routerModule,
-  toggleRecording,
-  vlModule
-} from "../utils/asr-adapter";
-import { LANGUAGES, RECORDER_CODES, VL_TEXT, VL, AUDIO_ENDPOINTS, COMPONENT_ENDPOINTS } from "../utils/component-types";
+import { audioModules, intentionModule, knowledgeModule, toggleRecording, vlModule } from "../utils/asr-adapter";
+import { COMPONENT_ENDPOINTS, COMPONENT_CODES } from "../utils/component-types";
 import { addAgentToScene } from "../prefabs/agent";
 import { SnapDepthPOV, SnapPOV } from "../utils/vlm-adapters";
 import { sceneGraph } from "./routing-system";
@@ -41,33 +23,13 @@ export function getRandomInt(max) {
   return Math.floor(Math.random() * max);
 }
 
-export function AgentSystem(world) {
+export function AgentSystem() {
   if (!virtualAgent.IsEntered() || virtualAgent.hidden) return;
 
-  // console.log(APP.hubChannel);
-  // console.log(NAF);
-
-  const state = window.APP.hubChannel.presence.state;
-  const streamers = Object.keys(state);
-  const ar = [];
-
-  streamers.forEach(streamer => {
-    ar.push(state[streamer]);
-  });
-  // console.log(window.APP.componentRegistry["player-info"]);
   virtualAgent.MovementActions();
-
   virtualAgent.ButtonInteractions();
-
   virtualAgent.agentObj.updateMatrix();
 }
-
-const mode = {
-  greeting: 0,
-  idle: 1,
-  listening: 2,
-  navigation: 3
-};
 
 export default class VirtualAgent {
   constructor() {}
@@ -75,7 +37,6 @@ export default class VirtualAgent {
   Init() {
     addAgentToScene(APP.world);
     this.hidden = true;
-    this.mode = mode.greeting;
     this.exists = false;
     APP.scene.addEventListener("agent-toggle", () => {
       if (this.hidden) {
@@ -107,7 +68,6 @@ export default class VirtualAgent {
       this.camera = this.scene.camera;
       this.renderer = this.scene.renderer;
       this.avatarPovObj = document.querySelector("#avatar-pov-node").object3D;
-      this.mode = mode.greeting;
 
       APP.dialog.on("mic-state-changed", () => this.setMicStatus());
       this.setMicStatus();
@@ -144,7 +104,6 @@ export default class VirtualAgent {
   MovementActions() {
     const agentPos = this.agentObj.getWorldPosition(new THREE.Vector3());
     const avatarPos = this.avatarPovObj.getWorldPosition(new THREE.Vector3());
-    // console.log("pos", avatarPos.x, avatarPos.z);
     const dist = agentPos.distanceTo(avatarPos);
 
     if (dist > 2) {
@@ -160,85 +119,68 @@ export default class VirtualAgent {
     }
   }
 
-  ButtonInteractions() {
+  async ButtonInteractions() {
     if (clicked(this.arrowNext)) raiseIndex();
     if (clicked(this.arrowPrev)) lowerIndex();
     if (clicked(this.buttonMic)) this.MicrophoneActions();
-    if (clicked(this.buttonSnap)) {
-      this.StartNavigation("conference_room");
-      // this.SnapActions();
-      // const dev = developingRouter();
-      // console.log(dev);
-      // this.Navigation(dev.data.start, dev.data.dest);
+    if (clicked(this.buttonSnap))
+      await this.Navigate("conference room", "how can i go to the conference room?", "navigation");
+  }
+
+  async MicrophoneActions(savefile) {
+    stageUpdate();
+    try {
+      const toggleResponse = await toggleRecording(savefile);
+
+      if (toggleResponse.status.code === COMPONENT_CODES.Successful) {
+        const nmtParameters = { source_language: "en", target_language: "en", return_transcription: "true" };
+        const nmtResponse = await audioModules(
+          COMPONENT_ENDPOINTS.TRANSLATE_AUDIO_FILES,
+          toggleResponse.data.file,
+          nmtParameters
+        );
+        console.log("nmtResponse", nmtResponse);
+
+        const intentResponse = await intentionModule(nmtResponse.data.translations[0]);
+        console.log("intentResponse", intentResponse);
+
+        if (intentResponse.data.intent === "navigation") {
+          const destName = intentResponse.data.destination;
+          await this.Navigate(destName, nmtResponse.data.translations[0], intentResponse.data.intent);
+        }
+      }
+    } catch (error) {
+      console.log("error", error);
     }
   }
 
-  MicrophoneActions() {
-    const savefile = false;
-    stageUpdate();
-    toggleRecording(savefile)
-      .then(result => {
-        if (result.status.code === RECORDER_CODES.SUCCESSFUL) {
-          AudioModules(COMPONENT_ENDPOINTS.TRANSLATE_AUDIO_FILES, result.data.file, {
-            source_language: "en",
-            target_language: "en",
-            return_transcription: "true"
-          })
-            .then(asrResult => {
-              console.log(asrResult);
-              intentionModule(asrResult)
-                .then(intentResults => {
-                  console.log(intentResults);
-                  if (intentResults.data.intent === "navigation") {
-                    console.log(asrResult);
-                    const instructions = this.StartNavigation(intentResults.data.destination);
-                    console.log("instructions", instructions);
-                    knowledgeModule(asrResult.data.translations[0], instructions)
-                      .then(knowledge => {
-                        console.log("knowledge", knowledge);
-                        UpdateTextSystem(APP.world, knowledge.data.response);
-                      })
-                      .catch(knowledgeError => {
-                        console.log(knowledgeError);
-                      });
-                  }
-                })
-                .catch(intentError => {
-                  console.log(intentError);
-                });
-            })
-            .catch(asrError => {
-              console.log(asrError);
-            });
-        }
-      })
-      .catch(error => {
-        console.log(error);
-      });
+  async Navigate(destName, userQuery, userIntent) {
+    const startIndex = sceneGraph.GetClosestIndex(virtualAgent.AvatarPos());
+    const navigation = sceneGraph.GetInstructions(startIndex, destName);
+    try {
+      const knowledge = await knowledgeModule(userQuery, userIntent, navigation.instructions);
+      UpdateTextSystem(APP.world, knowledge.data.response);
+    } catch (error) {
+      console.log(error);
+    }
+
+    if (this.cube !== undefined) {
+      removeEntity(APP.world, this.cube);
+      this.scene.object3D.remove(this.arrowObjs);
+    }
+    this.cube = renderAsEntity(APP.world, NavigationLine(navigation));
+    this.arrowObjs = APP.world.eid2obj.get(this.cube);
+    this.scene.object3D.add(this.arrowObjs);
   }
 
-  SnapActions() {
-    Promise.all([SnapPOV(this.agentObj, false), SnapDepthPOV(false)])
-      .then(values => {
-        vlModule(values[0], VL.LXMERT)
-          .then(snapResponse => {
-            console.log(snapResponse);
-          })
-          .catch(snapError => {
-            console.log(snapError);
-          });
-      })
-      .catch(error => {
-        console.log(error);
-      });
-  }
-
-  StartNavigation(destName) {
-    const startNodeIndex = sceneGraph.GetClosestIndex(virtualAgent.AvatarPos());
-    // UpdateTextSystem(APP.world, `Follow the lines to reach ${destName}`);
-    console.log("closest index to me:", startNodeIndex);
-    console.log("destination Name: ", destName);
-    return this.Navigation(startNodeIndex, destName);
+  async SnapActions() {
+    try {
+      const responses = await Promise.all([SnapPOV(this.agentObj, false), SnapDepthPOV(false)]);
+      const vlResponse = await vlModule(responses[0], COMPONENT_ENDPOINTS.LXMERT);
+      console.log(vlResponse);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   GetRandomDest() {
@@ -251,30 +193,6 @@ export default class VirtualAgent {
   HandleArrows(renderArrows) {
     APP.world.eid2obj.get(this.arrowNext).visible = renderArrows;
     APP.world.eid2obj.get(this.arrowPrev).visible = renderArrows;
-  }
-
-  ChangeMode(mode) {
-    this.mode = mode;
-  }
-
-  Navigation(startIndex, endIndex) {
-    if (this.cube !== undefined) {
-      //console.log("deleting previous arrows");
-      removeEntity(APP.world, this.cube);
-      this.scene.object3D.remove(this.arrowObjs);
-    }
-
-    const verbose = false;
-    const navigation = sceneGraph.GetInstructions(startIndex, endIndex);
-
-    this.cube = renderAsEntity(APP.world, NavigationLine(navigation));
-    this.arrowObjs = APP.world.eid2obj.get(this.cube);
-    this.scene.object3D.add(this.arrowObjs);
-    return navigation.knowledge;
-  }
-
-  AgentPos() {
-    return this.agentObj.getWorldPosition(new THREE.Vector3());
   }
 
   AvatarPos() {
