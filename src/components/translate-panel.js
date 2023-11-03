@@ -54,7 +54,6 @@ AFRAME.registerComponent("translate-panel", {
   onAvailableTranslation(event) {
     this.preformatText = event.detail.text;
     this.fortmatLines();
-    console.log(this.formattedText);
     this.translateText.el.addEventListener("text-updated", this.updateTextSize);
     this.translateText.el.setAttribute("text", {
       value: this.formattedText
@@ -63,8 +62,6 @@ AFRAME.registerComponent("translate-panel", {
 
   updateTextSize() {
     this.translateText.el.components["text"].getSize(this.size);
-    console.log(`text size is`);
-    console.log(this.size);
     this.translateBackground.el.setAttribute("slice9", {
       width: this.size.x + PANEL_PADDING * 2,
       height: this.size.y + PANEL_PADDING * 2
