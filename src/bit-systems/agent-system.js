@@ -11,6 +11,7 @@ import { sceneGraph } from "./routing-system";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { NavigationLine, pivotPoint } from "../prefabs/nav-line";
 import { AxesHelper } from "three";
+import { subtitleSystem } from "./subtitling-system";
 
 const agentQuery = defineQuery([Agent]);
 const enterAgentQuery = enterQuery(agentQuery);
@@ -133,21 +134,41 @@ export default class VirtualAgent {
       const toggleResponse = await toggleRecording(savefile);
 
       if (toggleResponse.status.code === COMPONENT_CODES.Successful) {
-        const nmtParameters = { source_language: "en", target_language: "en", return_transcription: "true" };
+        const sourceLang = subtitleSystem.targetLanguage ? subtitleSystem.targetLanguage : "en";
+        const nmtParameters = { source_language: sourceLang, target_language: "en", return_transcription: "true" };
+        let t11, t12, t21, t22, t31, t32, elapsedTime1, elapsedTime2, elapsedTime3, knowledgeRespone;
+        t11 = performance.now();
         const nmtResponse = await audioModules(
           COMPONENT_ENDPOINTS.TRANSLATE_AUDIO_FILES,
           toggleResponse.data.file,
           nmtParameters
         );
-        console.log("nmtResponse", nmtResponse);
+        t12 = performance.now();
+        elapsedTime1 = t12 - t11;
 
+        t21 = performance.now();
         const intentResponse = await intentionModule(nmtResponse.data.translations[0]);
-        console.log("intentResponse", intentResponse);
+        t22 = performance.now();
+        elapsedTime2 = t22 - t21;
 
         if (intentResponse.data.intent === "navigation") {
           const destName = intentResponse.data.destination;
-          await this.Navigate(destName, nmtResponse.data.translations[0], intentResponse.data.intent);
+
+          t31 = performance.now();
+          knowledgeRespone = await this.Navigate(
+            destName,
+            nmtResponse.data.translations[0],
+            intentResponse.data.intent
+          );
+          t32 = performance.now();
+          elapsedTime3 = t32 - t31;
         }
+
+        const log = `NMT: {Query: "${nmtResponse.data.translations[0]}", Time: ${elapsedTime1}ms}\n
+        Intent: {Intent: ${intentResponse.data.intent}, Destination: ${intentResponse.data.destination}, Time: ${elapsedTime2}ms}\n
+        Response: {Knowledege: "${knowledgeRespone.data.response}", Time: ${elapsedTime3}ms}`;
+
+        console.log(log);
       }
     } catch (error) {
       console.log("error", error);
@@ -155,11 +176,12 @@ export default class VirtualAgent {
   }
 
   async Navigate(destName, userQuery, userIntent) {
-    const startIndex = sceneGraph.GetClosestIndex(virtualAgent.AvatarPos());
-    const navigation = sceneGraph.GetInstructions(startIndex, destName);
     try {
-      const knowledge = await knowledgeModule(userQuery, userIntent, navigation.instructions);
+      const startIndex = sceneGraph.GetClosestIndex(virtualAgent.AvatarPos());
+      const navigation = sceneGraph.GetInstructions(startIndex, destName);
+      const knowledge = await knowledgeModule(userQuery, userIntent, navigation.knowledge);
       UpdateTextSystem(APP.world, knowledge.data.response);
+      return knowledge;
     } catch (error) {
       console.log(error);
     }

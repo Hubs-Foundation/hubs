@@ -163,19 +163,18 @@ export class Graph {
   GetDestIndex(salientName) {
     if (Object.keys(this.targetInfo).includes(salientName)) {
       return this.targetInfo[salientName];
-    } else {
-      console.error("This point is not a registered salient point");
     }
+    console.error(`Invalid Salient Name: ${salientName}`);
   }
 
   Dijkstra(startIndex) {
+    if (startIndex < 0 || startIndex > this.nodeCount - 1) throw new Error("Invalid starting index");
     if (this.mapped) {
       this.Reset();
     }
 
     let startingNode = this.nodes[startIndex];
     startingNode.MakeStartingPoint(this.nodeCount, startIndex);
-    let a;
     for (let i = 0; i < this.nodeCount - 1; i++) {
       const minDistanceIndex = this.GetMinDistanceIndex(startingNode.distances, this.nodes);
 
@@ -200,12 +199,15 @@ export class Graph {
   }
 
   GetInstructions(startIndex, stopName) {
+    const stopIndex = this.GetDestIndex(stopName);
+
+    if (!stopIndex) return { knowledge: "" };
+
     if (!this.mappedNodes[startIndex]) {
       if (this.mapped) this.Reset();
       this.Dijkstra(startIndex);
     }
 
-    const stopIndex = this.GetDestIndex(stopName);
     const path = this.paths[startIndex][stopIndex];
     const pathVectors = [];
 
@@ -272,7 +274,6 @@ export class Graph {
       })
       .join(", ");
     navigation.knowledge = navigationString;
-
     return navigation;
   }
 
