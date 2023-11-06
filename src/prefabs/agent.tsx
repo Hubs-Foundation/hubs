@@ -6,7 +6,7 @@ import { cloneModelFromCache, loadModel } from "../components/gltf-model-plus";
 import { HubsWorld } from "../app";
 import nametagSrc from "../assets/hud/nametag.9.png";
 import { textureLoader } from "../utils/media-utils";
-import { AgentPanel } from "./agent-panel";
+import { AgentPanel, SimplePanel } from "./agent-panel";
 import { addComponent } from "bitecs";
 import { Hidden } from "../bit-components";
 import { COLLISION_LAYERS } from "../constants";
@@ -21,12 +21,13 @@ export function AgentEntity() {
   const snapRef = createRef();
   const nextRef = createRef();
   const prevRef = createRef();
+  const textRef = createRef();
   const text = ["", ""];
 
   return (
     <entity
       name="Agent"
-      agent={{ panelRef, micRef, snapRef, nextRef, prevRef }}
+      agent={{ panelRef, textRef, micRef, snapRef, nextRef, prevRef }}
       ref={agentRef}
       model={{ model: cloneModelFromCache(agentModelSrc).scene }}
       cursorRaycastable
@@ -41,9 +42,10 @@ export function AgentEntity() {
       physicsShape={{ halfExtents: [0.22, 0.14, 0.1] }}
       lookatuser
     >
-      <AgentPanel
+      <SimplePanel
         micRef={micRef}
         snapRef={snapRef}
+        textRef={textRef}
         text={text}
         panelRef={panelRef}
         nextRef={nextRef}

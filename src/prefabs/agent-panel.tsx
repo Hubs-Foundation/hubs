@@ -12,10 +12,11 @@ export interface PanelParams {
   text: Array<string>;
   panelRef: Ref;
   micRef: Ref;
-  nextRef: Ref;
-  prevRef: Ref;
-  snapRef: Ref;
-  maxSlideCount: number;
+  nextRef?: Ref;
+  prevRef?: Ref;
+  snapRef?: Ref;
+  maxSlideCount?: number;
+  textRef?: Ref;
 }
 
 export function AgentPanel({ text, panelRef, nextRef, prevRef, micRef, snapRef, maxSlideCount }: PanelParams) {
@@ -23,7 +24,7 @@ export function AgentPanel({ text, panelRef, nextRef, prevRef, micRef, snapRef, 
   const buttonHeight = 0.2;
   let slidesArray = [];
 
-  for (let i = 0; i < maxSlideCount; i++) {
+  for (let i = 0; i < maxSlideCount!; i++) {
     slidesArray.push(
       <entity
         name={`slide ${i}`}
@@ -94,7 +95,16 @@ export function AgentPanel({ text, panelRef, nextRef, prevRef, micRef, snapRef, 
   );
 }
 
-export function SimplePanel(panelRef: Ref, panelTextRef: Ref) {
+export function SimplePanel({
+  text,
+  panelRef,
+  textRef,
+  nextRef,
+  prevRef,
+  micRef,
+  snapRef,
+  maxSlideCount
+}: PanelParams) {
   <entity>
     <entity
       name="agentPanel"
@@ -107,7 +117,7 @@ export function SimplePanel(panelRef: Ref, panelTextRef: Ref) {
       <entity
         name={`text`}
         position={[0, 0, 0.01]}
-        ref={panelTextRef}
+        ref={textRef}
         text={{
           value: "This is a test",
           color: "#000000",

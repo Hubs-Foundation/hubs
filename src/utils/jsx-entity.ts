@@ -365,6 +365,7 @@ export interface JSXComponentData extends ComponentData {
   };
   agent?: {
     panelRef: Ref;
+    textRef: Ref;
     micRef: Ref;
     snapRef: Ref;
     nextRef: Ref;
