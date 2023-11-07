@@ -181,18 +181,21 @@ export default class VirtualAgent {
       const navigation = sceneGraph.GetInstructions(startIndex, destName);
       const knowledge = await knowledgeModule(userQuery, userIntent, navigation.knowledge);
       UpdateTextSystem(APP.world, knowledge.data.response);
+      // return knowledge;
+
+      if (this.cube !== undefined) {
+        removeEntity(APP.world, this.cube);
+        this.scene.object3D.remove(this.arrowObjs);
+      }
+      console.log(navigation);
+      this.cube = renderAsEntity(APP.world, NavigationLine(navigation));
+      this.arrowObjs = APP.world.eid2obj.get(this.cube);
+      this.scene.object3D.add(this.arrowObjs);
+
       return knowledge;
     } catch (error) {
       console.log(error);
     }
-
-    if (this.cube !== undefined) {
-      removeEntity(APP.world, this.cube);
-      this.scene.object3D.remove(this.arrowObjs);
-    }
-    this.cube = renderAsEntity(APP.world, NavigationLine(navigation));
-    this.arrowObjs = APP.world.eid2obj.get(this.cube);
-    this.scene.object3D.add(this.arrowObjs);
   }
 
   async SnapActions() {
