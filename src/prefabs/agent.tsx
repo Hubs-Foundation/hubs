@@ -40,7 +40,7 @@ export function AgentEntity(position: Vector3) {
       floatyObject
       rigidbody={{ collisionGroup: COLLISION_LAYERS.INTERACTABLES, collisionMask: COLLISION_LAYERS.HANDS }}
       physicsShape={{ halfExtents: [0.22, 0.14, 0.1] }}
-      // lookatuser
+      lookatuser
     >
       <SimplePanel panelRef={panelRef} textRef={textRef} micRef={micRef} />
     </entity>

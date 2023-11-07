@@ -13,12 +13,7 @@ import { AlphaMode } from "../utils/create-image-mesh";
 const panelTexture = textureLoader.load(nametagSrc);
 const spotTexture = textureLoader.load(spotSrc);
 
-interface FloorMapPanelParamaters {
-  panelRef: Ref;
-  pointRef: Ref;
-}
-
-export function FloorMapPanel(position: Vector3, pointPos: Vector3) {
+export function LangPicker(position: Vector3) {
   const panelRef = createRef();
   const pointRef = createRef();
   const scalar = 1 / 50;
