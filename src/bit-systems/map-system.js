@@ -25,7 +25,6 @@ class FloorMapClass {
         APP.scene.removeState("map");
       } else {
         const povPosition = this.userPov.getWorldPosition(new THREE.Vector3());
-        const POVDirection = this.userPov.getWorldDirection(new THREE.Vector3());
         const MapPos = new Vector3(0, 0, -1);
         APP.scene.addState("map");
         addFloorMap(APP.world, MapPos, povPosition, this.userPov);
@@ -43,7 +42,7 @@ class FloorMapClass {
       this.pointEID = FloorMap.pointRef[mapEID];
       this.pointObj = APP.world.eid2obj.get(this.pointEID);
     });
-    exitMapQuery(APP.world).forEach(exitEID => {
+    exitMapQuery(APP.world).forEach(() => {
       this.eid = null;
       this.pointEID = null;
       this.obj = null;

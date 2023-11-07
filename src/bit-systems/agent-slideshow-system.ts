@@ -56,12 +56,11 @@ export function UpdateTextSystem(world: HubsWorld, newText: string) {
       panelObj.visible = true;
     }
     maxValue = newFormatedText.length - 1;
+    resetIndex();
+    virtualAgent.HandleArrows(textCount !== 1);
+
+    return textCount === 1;
   });
-
-  resetIndex();
-  virtualAgent.HandleArrows(textCount !== 1);
-
-  return textCount === 1;
 }
 
 export function PanelIndexSystem(world: HubsWorld) {

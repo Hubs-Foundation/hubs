@@ -11,7 +11,7 @@ const AgentTooltipDescription = defineMessage({
 });
 
 export function AgenSpawnButton({ scene }) {
-  const [active, setActive] = useState(true);
+  const [active, setActive] = useState(false);
   const intl = useIntl();
   const description = intl.formatMessage(AgentTooltipDescription);
 
@@ -20,7 +20,7 @@ export function AgenSpawnButton({ scene }) {
   };
 
   const activateButton = () => {
-    setActive(!virtualAgent.hidden);
+    setActive(scene.is("agent"));
   };
 
   window.addEventListener("agent-toggle", activateButton);

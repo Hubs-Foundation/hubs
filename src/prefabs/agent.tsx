@@ -10,11 +10,11 @@ import { AgentPanel, SimplePanel } from "./agent-panel";
 import { addComponent } from "bitecs";
 import { Hidden } from "../bit-components";
 import { COLLISION_LAYERS } from "../constants";
+import { Object3D, Vector3 } from "three";
 
 preload(loadModel(agentModelSrc, null, true));
-const panelTexture = textureLoader.load(nametagSrc);
 
-export function AgentEntity() {
+export function AgentEntity(position: Vector3) {
   const agentRef = createRef();
   const panelRef = createRef();
   const micRef = createRef();
@@ -22,7 +22,6 @@ export function AgentEntity() {
   const nextRef = createRef();
   const prevRef = createRef();
   const textRef = createRef();
-  const text = ["", ""];
 
   return (
     <entity
@@ -30,6 +29,7 @@ export function AgentEntity() {
       agent={{ panelRef, textRef, micRef, snapRef, nextRef, prevRef }}
       ref={agentRef}
       model={{ model: cloneModelFromCache(agentModelSrc).scene }}
+      position={position.toArray()}
       cursorRaycastable
       remoteHoverTarget
       handCollisionTarget
@@ -40,26 +40,16 @@ export function AgentEntity() {
       floatyObject
       rigidbody={{ collisionGroup: COLLISION_LAYERS.INTERACTABLES, collisionMask: COLLISION_LAYERS.HANDS }}
       physicsShape={{ halfExtents: [0.22, 0.14, 0.1] }}
-      lookatuser
+      // lookatuser
     >
-      <SimplePanel
-        micRef={micRef}
-        snapRef={snapRef}
-        textRef={textRef}
-        text={text}
-        panelRef={panelRef}
-        nextRef={nextRef}
-        prevRef={prevRef}
-        maxSlideCount={25}
-      />
+      <SimplePanel panelRef={panelRef} textRef={textRef} micRef={micRef} />
     </entity>
   );
 }
 
-export function addAgentToScene(world: HubsWorld) {
-  const eid = renderAsEntity(world, AgentEntity());
-  addComponent(world, Hidden, eid);
+export function addAgentToScene(world: HubsWorld, userPOV: Object3D) {
+  const eid = renderAsEntity(world, AgentEntity(new Vector3(0.2, 0, -1)));
   const obj = world.eid2obj.get(eid)!;
-  window.APP.scene!.object3D.add(obj);
+  userPOV.add(obj);
   return eid;
 }

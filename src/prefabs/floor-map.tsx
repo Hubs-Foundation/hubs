@@ -25,7 +25,6 @@ export function FloorMapPanel(position: Vector3, pointPos: Vector3) {
   return (
     <entity
       name={"floor-map"}
-      // slice9={{ size: [2, 1.125], insets: [64, 66, 64, 66], texture: panelTexture }}
       image={{
         texture: panelTexture,
         ratio: 1,
@@ -45,7 +44,6 @@ export function FloorMapPanel(position: Vector3, pointPos: Vector3) {
       floatyObject
       rigidbody={{ collisionGroup: COLLISION_LAYERS.INTERACTABLES, collisionMask: COLLISION_LAYERS.HANDS }}
       physicsShape={{ halfExtents: [0.22, 0.14, 0.1] }}
-      // lookatuser
     >
       <entity
         name="point"

@@ -7,10 +7,26 @@ export default UpdateTextPanel;
 
 const PANEL_PADDING = 0.05;
 
-function UpdateTextPanel(newNext: string, textObj: TroikaText, panelEid: number) {
-  const formattedText = fortmatLines(newNext);
+function UpdateTextPanel(
+  newText: string,
+  textObj: TroikaText,
+  panelEid: number,
+  formatLines: boolean,
+  changePos: boolean
+) {
+  let formattedText;
+  if (formatLines) formattedText = fortmatLines(newText);
+  else formattedText = newText;
+
   textObj.addEventListener("synccomplete", () => {
-    updateTextSize(textObj, panelEid);
+    let [x, y] = updateTextSize(textObj, panelEid);
+    if (changePos) {
+      const panelObj = APP.world.eid2obj.get(panelEid);
+      console.log("panelObj:", panelObj, "position:", panelObj?.position);
+      const newPos = new Vector3(-x / 2 - 0.3, 0, 0);
+      panelObj?.position.copy(newPos);
+      panelObj?.updateMatrix();
+    }
   });
   textObj.text = formattedText;
 }
@@ -29,4 +45,5 @@ function updateTextSize(newTextObj: TroikaText, panelEid: number) {
   const size = [rawSize!.x + PANEL_PADDING * 2, rawSize!.y + PANEL_PADDING * 2];
   Slice9.size[panelEid].set(size);
   updateSlice9Geometry(APP.world, panelEid);
+  return [rawSize!.x + PANEL_PADDING * 2, rawSize!.y + PANEL_PADDING * 2];
 }

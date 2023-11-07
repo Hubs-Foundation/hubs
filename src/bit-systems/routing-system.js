@@ -220,7 +220,7 @@ export class Graph {
       instructions: [{ action: "start", from: startIndex }],
       knowledge: [{ action: "start" }]
     };
-    const playerForward = virtualAgent.AvatarDirection();
+    const playerForward = virtualAgent.avatarDirection;
 
     let distanceSum = 0;
 

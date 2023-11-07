@@ -12,9 +12,8 @@ export const FloorMap = defineComponent({
 });
 
 export const Agent = defineComponent({
-  language: Types.ui8,
-  modelRef: Types.eid,
   panelRef: Types.eid,
+  textRef: Types.eid,
   micRef: Types.eid,
   snapRef: Types.eid,
   nextRef: Types.eid,
