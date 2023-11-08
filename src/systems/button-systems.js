@@ -45,6 +45,7 @@ export class HoldableButtonSystem {
 const hasButtonComponent = (function () {
   const BUTTON_COMPONENT_NAMES = [
     "icon-button",
+    "flag-button",
     "text-button",
     "pin-networked-object-button",
     "mic-button",

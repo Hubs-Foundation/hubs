@@ -46,11 +46,11 @@ AFRAME.registerComponent("flag-button", {
   },
 
   update() {
-    this.updateLangState();
     this.updateButtonState();
   },
 
   updateButtonState() {
+    this.updateLangState();
     const hovering = this.hovering;
     const active = this.data.active;
     const disabled = this.data.disabled;
@@ -65,8 +65,10 @@ AFRAME.registerComponent("flag-button", {
     }
 
     if (this.el.components.sprite) {
-      if (this.data[image]) {
-        this.el.setAttribute("sprite", "name", this.lang ? `${this.lang}_lang_${image}.png` : `translate_${image}.png`);
+      if (image) {
+        const icon_name = this.lang ? `${this.lang}_lang${image}.png` : `translate${image}.png`;
+        this.el.setAttribute("sprite", "name", icon_name);
+        console.log("icon name", icon_name);
       } else {
         console.warn(`No ${image} image on me.`, this);
       }
@@ -82,5 +84,6 @@ AFRAME.registerComponent("flag-button", {
   },
   updateLangState() {
     this.lang = subtitleSystem.targetLanguage;
+    console.log("this lang:", this.lang);
   }
 });
