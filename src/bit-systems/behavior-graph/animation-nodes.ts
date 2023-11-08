@@ -7,7 +7,8 @@ import {
   NodeDescription,
   NodeDescription2,
   Socket,
-  ValueType
+  ValueType,
+  NodeConfiguration
 } from "@oveddan-behave-graph/core";
 import {
   AdditiveAnimationBlendMode,
@@ -24,7 +25,6 @@ import {
   NetworkedAnimationAction,
   ObjectAnimationActionData,
   Networked,
-  Owned,
   BitAnimationAction
 } from "../../bit-components";
 import { EntityID } from "../../utils/networking-types";
@@ -39,7 +39,9 @@ export const ANIMATION_FLAGS = {
   PAUSED: 1 << 1,
   LOOP: 1 << 2,
   CLAMP_WHEN_FINISHED: 1 << 3,
-  ADDITIVE_BLENDING: 1 << 4
+  ADDITIVE_BLENDING: 1 << 4,
+  RESET: 1 << 5,
+  FINISHED: 1 << 6
 };
 
 export const animationValueDefs = {
@@ -68,7 +70,10 @@ const createAnimationActionDef = makeFlowNodeDefinition({
   ],
   initialState: undefined,
   out: { flow: "flow", action: "animationAction" },
-  triggered: ({ read, write, commit, graph }) => {
+  configuration: {
+    networked: { valueType: "boolean" }
+  },
+  triggered: ({ read, write, commit, graph, configuration }) => {
     const clipName = read("clipName") as string;
     const loop = read("loop") as boolean;
     const clampWhenFinished = read("clampWhenFinished") as boolean;
@@ -102,7 +107,7 @@ const createAnimationActionDef = makeFlowNodeDefinition({
 
     action.eid = actionEid;
     addComponent(world, BitAnimationAction, actionEid);
-    if (hasComponent(world, NetworkedAnimation, targetEid)) {
+    if (configuration.networked) {
       addComponent(world, Networked, actionEid);
       const rootNid = APP.getString(Networked.id[targetEid])!;
       setInitialNetworkedData(actionEid, `${rootNid}.action.${index}`, rootNid);
@@ -122,10 +127,13 @@ export class PlayAnimationNode extends AsyncNode {
     otherTypeNames: ["flow/delay"],
     category: "Animation",
     label: "Play Animation",
-    factory: (description, graph) => new PlayAnimationNode(description, graph)
+    configuration: {
+      networked: { valueType: "boolean" }
+    },
+    factory: (description, graph, config) => new PlayAnimationNode(description, graph, config)
   });
 
-  constructor(description: NodeDescription, graph: IGraphApi) {
+  constructor(description: NodeDescription, graph: IGraphApi, config: NodeConfiguration) {
     super(
       description,
       graph,
@@ -139,7 +147,8 @@ export class PlayAnimationNode extends AsyncNode {
         new Socket("flow", "finished"),
         new Socket("flow", "loop"),
         new Socket("flow", "stopped")
-      ]
+      ],
+      config
     );
   }
 
@@ -174,12 +183,9 @@ export class PlayAnimationNode extends AsyncNode {
     this.state.onFinished = (e: { action: AnimationAction }) => {
       if (e.action != this.state.action) return;
 
-      if (hasComponent(world, NetworkedAnimationAction, action.eid!)) {
-        const targetObj = action.getRoot();
-        if (hasComponent(world, Owned, targetObj.eid!)) {
-          takeOwnership(world, action.eid!);
-          action2Component(world, action.eid!, action);
-        }
+      if (this.configuration.networked) {
+        BitAnimationAction.flags[actionEid] |= ANIMATION_FLAGS.FINISHED;
+        NetworkedAnimationAction.flags[actionEid] |= ANIMATION_FLAGS.FINISHED;
       }
 
       console.log("FINISH", e.action.getClip().name, APP.world.time.tick);
@@ -191,26 +197,15 @@ export class PlayAnimationNode extends AsyncNode {
     };
     this.state.onLoop = (e: { action: AnimationAction }) => {
       if (e.action != this.state.action) return;
-
-      if (hasComponent(world, NetworkedAnimationAction, action.eid!)) {
-        const targetObj = action.getRoot();
-        if (hasComponent(world, Owned, targetObj.eid!)) {
-          takeOwnership(world, action.eid!);
-          action2Component(world, action.eid!, action);
-        }
-      }
-
       engine.commitToNewFiber(this, "loop");
     };
     this.state.onStop = (e: { action: AnimationAction }) => {
       if (e.action != this.state.action) return;
 
-      if (hasComponent(world, NetworkedAnimationAction, action.eid!)) {
-        const targetObj = action.getRoot();
-        if (hasComponent(world, Owned, targetObj.eid!)) {
-          takeOwnership(world, action.eid!);
-          action2Component(world, action.eid!, action);
-        }
+      if (this.configuration.networked) {
+        action2Component(world, this.state.action.eid!, this.state.action);
+        BitAnimationAction.flags[actionEid] |= ANIMATION_FLAGS.FINISHED;
+        NetworkedAnimationAction.flags[actionEid] |= ANIMATION_FLAGS.FINISHED;
       }
 
       this.clearState();
@@ -227,13 +222,18 @@ export class PlayAnimationNode extends AsyncNode {
     console.log("PLAY", action.getClip().name, APP.world.time.tick);
 
     const world = this.graph.getDependency("world") as HubsWorld;
-
-    if (hasComponent(world, NetworkedAnimationAction, actionEid)) {
-      const targetObj = action.getRoot();
-      if (hasComponent(world, Owned, targetObj.eid!)) {
-        takeOwnership(world, actionEid);
-        action2Component(world, actionEid, action);
+    if (this.configuration.networked) {
+      action2Component(world, actionEid, action);
+      if (reset) {
+        BitAnimationAction.flags[actionEid] |= ANIMATION_FLAGS.RESET;
+        NetworkedAnimationAction.flags[actionEid] |= ANIMATION_FLAGS.RESET;
+      } else {
+        BitAnimationAction.flags[actionEid] &= ~ANIMATION_FLAGS.RESET;
+        NetworkedAnimationAction.flags[actionEid] &= ~ANIMATION_FLAGS.RESET;
       }
+      BitAnimationAction.flags[actionEid] &= ~ANIMATION_FLAGS.FINISHED;
+      NetworkedAnimationAction.flags[actionEid] &= ~ANIMATION_FLAGS.FINISHED;
+      takeOwnership(world, actionEid);
     }
 
     engine.commitToNewFiber(this, "flow");
@@ -259,19 +259,19 @@ export const AnimationNodes = definitionListToMap([
     ],
     initialState: undefined,
     out: { flow: "flow" },
-    triggered: ({ read, commit, graph }) => {
+    configuration: {
+      networked: { valueType: "boolean" }
+    },
+    triggered: ({ read, commit, graph, configuration }) => {
       const actionEid = read("action") as number;
 
       const action = APP.world.eid2action.get(actionEid)!;
       action.stop();
 
       const world = graph.getDependency("world") as HubsWorld;
-      if (hasComponent(world, NetworkedAnimationAction, actionEid)) {
-        const targetObj = action.getRoot();
-        if (hasComponent(world, Owned, targetObj.eid!)) {
-          takeOwnership(world, actionEid);
-          action2Component(world, actionEid, action);
-        }
+      if (configuration.networked) {
+        action2Component(world, actionEid, action);
+        takeOwnership(world, actionEid);
       }
 
       console.log("STOP", action.getClip().name, APP.world.time.tick);
@@ -292,6 +292,9 @@ export const AnimationNodes = definitionListToMap([
     ],
     initialState: undefined,
     out: { flow: "flow" },
+    configuration: {
+      networked: { valueType: "boolean" }
+    },
     triggered: ({ read, commit }) => {
       const actionEid = read("action") as number;
       const toActionId = read("toAction") as number;
@@ -302,6 +305,8 @@ export const AnimationNodes = definitionListToMap([
       const toAction = APP.world.eid2action.get(toActionId)!;
 
       action.crossFadeTo(toAction, duration, warp);
+
+      // TODO Network this node
 
       commit("flow");
     }
@@ -317,7 +322,10 @@ export const AnimationNodes = definitionListToMap([
     ],
     initialState: undefined,
     out: { flow: "flow" },
-    triggered: ({ read, commit, graph }) => {
+    configuration: {
+      networked: { valueType: "boolean" }
+    },
+    triggered: ({ read, commit, graph, configuration }) => {
       const actionEid = read("action") as number;
       const timeScale = read("timeScale") as number;
 
@@ -325,12 +333,10 @@ export const AnimationNodes = definitionListToMap([
       action.timeScale = timeScale;
 
       const world = graph.getDependency("world") as HubsWorld;
-      if (hasComponent(world, NetworkedAnimationAction, actionEid)) {
-        const targetObj = action.getRoot();
-        if (hasComponent(world, Owned, targetObj.eid!)) {
-          takeOwnership(world, actionEid);
-          action2Component(world, actionEid, action);
-        }
+      BitAnimationAction.timeScale[actionEid] = timeScale;
+      if (configuration.networked) {
+        NetworkedAnimationAction.timeScale[actionEid] = timeScale;
+        takeOwnership(world, actionEid);
       }
 
       commit("flow");

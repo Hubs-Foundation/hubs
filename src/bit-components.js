@@ -455,15 +455,15 @@ export const InteractableObject = defineComponent({
   type: Types.ui8
 });
 export const BitAnimationAction = defineComponent({
-  time: Types.ui32,
-  timeScale: Types.ui8,
-  weight: Types.ui8,
+  time: Types.f32,
+  timeScale: Types.f32,
+  weight: Types.f32,
   flags: Types.ui8
 });
 export const NetworkedAnimationAction = defineComponent({
-  time: Types.ui32,
-  timeScale: Types.ui8,
-  weight: Types.ui8,
+  time: Types.f32,
+  timeScale: Types.f32,
+  weight: Types.f32,
   flags: Types.ui8
 });
 /**

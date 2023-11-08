@@ -43,6 +43,7 @@ import { visibilitySystem } from "./behavior-graph/systems/visibility-system";
 import { playersSystem } from "./behavior-graph/systems/player-system";
 import { animationSystem } from "./behavior-graph/systems/animation-system";
 import { mediaSystem } from "./behavior-graph/systems/media-system";
+import { MaterialNodes } from "./behavior-graph/material-nodes";
 
 const coreValues = getCoreValueTypes();
 const logger = new DefaultLogger();
@@ -58,6 +59,7 @@ const registry: IRegistry = {
     ...MediaNodes,
     ...ElementNodes,
     ...PhysicsNodes,
+    ...MaterialNodes,
     ...definitionListToMap([
       makeFlowNodeDefinition({
         typeName: "hubs/displayMessage",

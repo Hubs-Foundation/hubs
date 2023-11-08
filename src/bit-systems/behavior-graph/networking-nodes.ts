@@ -18,6 +18,7 @@ import { entityExists, hasComponent } from "bitecs";
 import { ClientID } from "../../utils/networking-types";
 import { takeOwnership } from "../../utils/take-ownership";
 import { takeSoftOwnership } from "../../utils/take-soft-ownership";
+import { findChildWithComponent } from "../../utils/bit-utils";
 
 export class TakeSoftOwnership extends AsyncNode {
   public static Description = new NodeDescription2({
@@ -131,16 +132,20 @@ export const NetworkingNodes = definitionListToMap([
     category: "Components" as any,
     label: "Networked Variable Set",
     configuration: {
-      prop_name: {
+      variableId: {
+        valueType: "number"
+      },
+      name: {
         valueType: "string"
       },
-      prop_type: {
+      valueTypeName: {
         valueType: "string"
-      }
+      },
+      networked: { valueType: "boolean" }
     },
     in: configuration => {
-      const type = configuration.prop_type || "string";
-      const name = configuration.prop_name || "prop";
+      const type = configuration.valueTypeName || "string";
+      const name = configuration.name || "prop";
 
       const sockets: SocketsList = [
         {
@@ -152,7 +157,7 @@ export const NetworkingNodes = definitionListToMap([
           valueType: "entity"
         },
         {
-          key: type,
+          key: "value",
           valueType: type,
           label: name
         }
@@ -162,16 +167,28 @@ export const NetworkingNodes = definitionListToMap([
     },
     initialState: undefined,
     out: { flow: "flow" },
-    triggered: ({ read, commit, configuration }) => {
-      const name = configuration.prop_name as string;
-      const type = configuration.prop_type as string;
+    triggered: ({ read, commit, configuration, graph }) => {
+      const name = configuration.name as string;
+      const type = configuration.valueTypeName as string;
 
-      const entity = read("entity") as EntityID;
-      const value = read(type);
-      const data = NetworkedBehaviorData.get(entity) || new Map();
-      data.set(name, value);
-      NetworkedBehaviorData.set(entity, data);
-      NetworkedBehavior.timestamp[entity] = performance.now();
+      if (configuration.networked) {
+        const entity = read("entity") as EntityID;
+        const value = read("value");
+        const data = NetworkedBehaviorData.get(entity) || new Map();
+        data.set(name, value);
+        NetworkedBehaviorData.set(entity, data);
+        NetworkedBehavior.timestamp[entity] = performance.now();
+
+        const world = graph.getDependency<HubsWorld>("world")!;
+        const cmpEid = findChildWithComponent(world, NetworkedBehavior, entity);
+        if (cmpEid) {
+          takeOwnership(world, cmpEid);
+        }
+      } else {
+        const variable = graph.variables[configuration.variableId];
+        if (!variable) return;
+        variable.set(read("value"));
+      }
 
       commit("flow");
     }
@@ -181,12 +198,16 @@ export const NetworkingNodes = definitionListToMap([
     category: "Components" as any,
     label: "Get",
     configuration: {
-      prop_name: {
+      variableId: {
+        valueType: "number"
+      },
+      name: {
         valueType: "string"
       },
-      prop_type: {
+      valueTypeName: {
         valueType: "string"
-      }
+      },
+      networked: { valueType: "boolean" }
     },
     in: () => {
       const sockets: SocketsList = [
@@ -199,12 +220,12 @@ export const NetworkingNodes = definitionListToMap([
       return sockets;
     },
     out: configuration => {
-      const type = configuration.prop_type || "string";
-      const name = configuration.prop_name || "prop";
+      const type = configuration.valueTypeName || "string";
+      const name = configuration.name || "prop";
 
       const result: SocketsList = [
         {
-          key: type,
+          key: "value",
           valueType: type,
           label: name
         }
@@ -212,16 +233,22 @@ export const NetworkingNodes = definitionListToMap([
 
       return result;
     },
-    exec: ({ read, write, configuration }) => {
-      const name = configuration.prop_name as string;
-      const type = configuration.prop_type || "string";
+    exec: ({ read, write, configuration, graph }) => {
+      const name = configuration.name as string;
+      const type = configuration.valueTypeName || "string";
 
-      const entity = read("entity") as EntityID;
-      if (NetworkedBehaviorData.has(entity)) {
-        const data = NetworkedBehaviorData.get(entity)!;
-        if (data.has(name)) {
-          write(type, data.get(name));
+      if (configuration.networked) {
+        const entity = read("entity") as EntityID;
+        if (NetworkedBehaviorData.has(entity)) {
+          const data = NetworkedBehaviorData.get(entity)!;
+          if (data.has(name)) {
+            write("value", data.get(name));
+          }
         }
+      } else {
+        const variable = graph.variables[configuration.variableId];
+        if (!variable) return;
+        write("value", variable.get());
       }
     }
   })
