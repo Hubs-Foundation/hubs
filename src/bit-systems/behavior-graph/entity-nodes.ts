@@ -126,45 +126,6 @@ function makeEntityEventNode(
   });
 }
 
-function makeIframeOpenFlowNode<T extends keyof Object3D>(property: T, valueType: SocketTypeName) {
-  const typeName = `hubs/entity/set/${property}`;
-  return makeFlowNodeDefinition({
-    typeName,
-    category: "Entity" as any,
-    label: `Set ${property}`,
-    in: () => [
-      { key: "flow", valueType: "flow" },
-      { key: "entity", valueType: "entity" },
-      { key: property, valueType }
-    ],
-    initialState: undefined,
-    out: { flow: "flow" },
-    triggered: ({ read, commit, graph }) => {
-      const eid = read("entity") as EntityID;
-      const obj = APP.world.eid2obj.get(eid);
-      if (!obj) {
-        console.error(`${typeName} could not find entity`, eid);
-        return;
-      }
-      const value = read(property) as Object3D[T];
-      const prop = obj[property]!;
-      if (typeof prop === "object" && "copy" in prop) {
-        prop.copy(value);
-        if (["position", "rotation", "scale"].includes(property)) obj.matrixNeedsUpdate = true;
-      } else {
-        obj[property] = value;
-      }
-
-      if (property === "visible") {
-        const world = graph.getDependency<HubsWorld>("world")!;
-        const { set } = getComponentBindings("visible")!;
-        set!(world, eid, { [property]: value });
-      }
-
-      commit("flow");
-    }
-  });
-}
 
 function makeObjectPropertyFlowNode<T extends keyof Object3D>(property: T, valueType: SocketTypeName) {
   const typeName = `hubs/entity/set/${property}`;
