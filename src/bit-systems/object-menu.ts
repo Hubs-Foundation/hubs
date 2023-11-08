@@ -12,8 +12,8 @@ import {
   ObjectMenuTarget,
   RemoteRight,
   Rigidbody,
-  MediaContentBounds,
-  Deleting
+  Deleting,
+  Deletable
 } from "../bit-components";
 import { anyEntityWith, findAncestorWithComponents } from "../utils/bit-utils";
 import { createNetworkedEntity } from "../utils/create-networked-entity";
@@ -49,12 +49,11 @@ function objectMenuTarget(world: HubsWorld, menu: EntityID, sceneIsFrozen: boole
   }
 
   // We can have more than one object menu target in the object hierarchy so we need to explicity look
-  // for the media loader entity here. ie. The object menu target in the media loader entity and the
-  // video menu in the video entity
-  // TODO We should use something more meaningful than MediaContentBounds for the media loader root entity
-  // or rename that to something like MediaRoot
+  // for the root media loader entity.
+  // We should probably use something more meaningful to refer to that spawned media root than Deletable.
+  // Maybe something like MediaRoot or SpawnedMediaRoot.
   const target = hoveredQuery(world).map(eid =>
-    findAncestorWithComponents(world, [MediaContentBounds, ObjectMenuTarget], eid)
+    findAncestorWithComponents(world, [Deletable, ObjectMenuTarget], eid)
   )[0];
   if (target) {
     if (hasComponent(world, Deleting, target)) {
