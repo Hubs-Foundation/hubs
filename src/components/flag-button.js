@@ -8,12 +8,6 @@ import { subtitleSystem } from "../bit-systems/subtitling-system";
  */
 AFRAME.registerComponent("flag-button", {
   schema: {
-    image: { type: "string" },
-    hoverImage: { type: "string" },
-    activeImage: { type: "string" },
-    activeHoverImage: { type: "string" },
-    language: { type: "string" },
-    disabledImage: { type: "string" },
     active: { type: "boolean" },
     disabled: { type: "boolean" },
     tooltip: { type: "selector" },
@@ -65,14 +59,14 @@ AFRAME.registerComponent("flag-button", {
     if (disabled) {
       image = "disabledImage";
     } else if (active) {
-      image = hovering ? "activeHoverImage" : "activeImage";
+      image = hovering ? "_on-hover" : "_on";
     } else {
-      image = hovering ? "hoverImage" : "image";
+      image = hovering ? "_off-hover" : "_off";
     }
 
     if (this.el.components.sprite) {
       if (this.data[image]) {
-        this.el.setAttribute("sprite", "name", this.lang ? `${this.lang}-${this.data[image]}` : this.data[image]);
+        this.el.setAttribute("sprite", "name", this.lang ? `${this.lang}_lang_${image}.png` : `translate_${image}.png`);
       } else {
         console.warn(`No ${image} image on me.`, this);
       }
