@@ -126,6 +126,46 @@ function makeEntityEventNode(
   });
 }
 
+function makeIframeOpenFlowNode<T extends keyof Object3D>(property: T, valueType: SocketTypeName) {
+  const typeName = `hubs/entity/set/${property}`;
+  return makeFlowNodeDefinition({
+    typeName,
+    category: "Entity" as any,
+    label: `Set ${property}`,
+    in: () => [
+      { key: "flow", valueType: "flow" },
+      { key: "entity", valueType: "entity" },
+      { key: property, valueType }
+    ],
+    initialState: undefined,
+    out: { flow: "flow" },
+    triggered: ({ read, commit, graph }) => {
+      const eid = read("entity") as EntityID;
+      const obj = APP.world.eid2obj.get(eid);
+      if (!obj) {
+        console.error(`${typeName} could not find entity`, eid);
+        return;
+      }
+      const value = read(property) as Object3D[T];
+      const prop = obj[property]!;
+      if (typeof prop === "object" && "copy" in prop) {
+        prop.copy(value);
+        if (["position", "rotation", "scale"].includes(property)) obj.matrixNeedsUpdate = true;
+      } else {
+        obj[property] = value;
+      }
+
+      if (property === "visible") {
+        const world = graph.getDependency<HubsWorld>("world")!;
+        const { set } = getComponentBindings("visible")!;
+        set!(world, eid, { [property]: value });
+      }
+
+      commit("flow");
+    }
+  });
+}
+
 function makeObjectPropertyFlowNode<T extends keyof Object3D>(property: T, valueType: SocketTypeName) {
   const typeName = `hubs/entity/set/${property}`;
   return makeFlowNodeDefinition({
@@ -214,6 +254,7 @@ export const EntityNodes = definitionListToMap([
     addComponent(APP.world, RemoteHoverTarget, target);
   }),
   makeEntityEventNode("onCollisionEnter", "entity", "On Collision Enter"),
+  //   makeEntityEventNode("onButtonClicked", "entity", "On Button Clicked"),
   makeEntityEventNode("onCollisionStay", "entity", "On Collision Stay"),
   makeEntityEventNode("onCollisionExit", "entity", "On Collision Exit"),
   makeEntityEventNode("onPlayerCollisionEnter", "player", "On Player Collision Enter"),
@@ -306,6 +347,30 @@ export const EntityNodes = definitionListToMap([
       }
       const text = obj as Text;
       text.text = read("text");
+      commit("flow");
+    }
+  }),
+  makeFlowNodeDefinition({
+    typeName: "hubs/misc/iframeopen",
+    category: "Components" as any,
+    label: "Open Iframe",
+    in: {
+      flow: "flow",
+      //   entity: "entity",
+      text: "string"
+    },
+    out: { flow: "flow" },
+    initialState: undefined,
+    triggered: ({ read, commit, graph }) => {
+      //   const world = graph.getDependency<HubsWorld>("world")!;
+      // //   const eid = read<EntityID>("entity");
+      // //   const obj = world.eid2obj.get(eid);
+      //   if (!obj || !(obj as Text).isTroikaText) {
+      //     console.error(`Text: Set Text, could not find entity with text`, eid);
+      //     return;
+      //   }
+      //   const text = obj as Text;
+      alert("cliced" + read("text"));
       commit("flow");
     }
   }),
