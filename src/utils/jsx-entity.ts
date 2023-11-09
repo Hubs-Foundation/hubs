@@ -46,7 +46,8 @@ import {
   AgentTextPanel,
   PanelIndex,
   MicButtonTag,
-  FloorMap
+  FloorMap,
+  FlagPanelManager
 } from "../bit-components";
 
 import { inflateMediaLoader } from "../inflators/media-loader";
@@ -317,6 +318,7 @@ export interface JSXComponentData extends ComponentData {
   // @TODO Define all the anys
   networked?: any;
   textButton?: any;
+  flagPanelManager?: any;
   iconButton?: any;
   hoverButton?: any;
   rigidbody?: OptionalParams<RigidBodyParams>;
@@ -467,6 +469,7 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   holdableButton: createDefaultInflator(HoldableButton),
   textButton: createDefaultInflator(TextButton),
   iconButton: createDefaultInflator(IconButton),
+  flagPanelManager: createDefaultInflator(FlagPanelManager),
   hoverButton: createDefaultInflator(HoverButton),
   holdable: createDefaultInflator(Holdable),
   deletable: createDefaultInflator(Deletable),

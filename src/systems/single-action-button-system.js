@@ -134,7 +134,7 @@ function hoverButtonSystem(world) {
     if (hasComponent(world, IconButton, eid)) {
       const lbl = world.eid2obj.get(IconButton.labelRef[eid]);
       if (shouldChange) changeShape(lbl);
-      lbl.material.color.copy(isHovered ? style.iconHoverColor : style.iconColor);
+      // lbl.material.color.copy(isHovered ? style.iconHoverColor : style.iconColor);
     }
   });
 }

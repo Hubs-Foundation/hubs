@@ -11,6 +11,7 @@ import { addComponent } from "bitecs";
 import { Hidden } from "../bit-components";
 import { COLLISION_LAYERS } from "../constants";
 import { Object3D, Vector3 } from "three";
+import { HUDLangPanel } from "./hud-lang-panel";
 
 preload(loadModel(agentModelSrc, null, true));
 
@@ -51,5 +52,12 @@ export function addAgentToScene(world: HubsWorld, userPOV: Object3D) {
   const eid = renderAsEntity(world, AgentEntity(new Vector3(0.2, 0, -1)));
   const obj = world.eid2obj.get(eid)!;
   userPOV.add(obj);
+  return eid;
+}
+
+export function addLangPanelToScene(world: HubsWorld) {
+  const eid = renderAsEntity(world, HUDLangPanel());
+  const obj = world.eid2obj.get(eid)!;
+  world.scene.add(obj);
   return eid;
 }

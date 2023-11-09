@@ -5,7 +5,7 @@ import { PermissionStatus } from "../utils/media-devices-utils";
 import { stageUpdate } from "../systems/single-action-button-system";
 import { audioModules, intentionModule, knowledgeModule, toggleRecording, vlModule } from "../utils/asr-adapter";
 import { COMPONENT_ENDPOINTS, COMPONENT_CODES } from "../utils/component-types";
-import { addAgentToScene } from "../prefabs/agent";
+import { addAgentToScene, addLangPanelToScene } from "../prefabs/agent";
 import { SnapDepthPOV, SnapPOV } from "../utils/vlm-adapters";
 import { sceneGraph } from "./routing-system";
 import { renderAsEntity } from "../utils/jsx-entity";
@@ -58,6 +58,19 @@ export default class VirtualAgent {
         this.agent.obj.visible = false;
       }
       this.active = APP.scene.is("agent");
+    });
+    APP.scene.addEventListener("lang-toggle", () => {
+      if (!APP.scene.is("lang-panel")) {
+        this.LangPanelEid = addLangPanelToScene(APP.world);
+        APP.scene.addState("lang-panel");
+      } else {
+        if (this.LangPanelEid) {
+          APP.scene.remove(APP.world.eid2obj.get(this.LangPanelEid));
+          removeEntity(APP.world, this.LangPanelEid);
+        }
+        APP.scene.removeState("lang-panel");
+      }
+      this.active = APP.scene.is("lang-panel");
     });
   }
 
@@ -207,6 +220,10 @@ export default class VirtualAgent {
 
   get avatarPos() {
     return this.avatarPovObj.getWorldPosition(new THREE.Vector3());
+  }
+
+  get flatAvatarDirection() {
+    return virtualAgent.avatarDirection.setY(0).normalize();
   }
 }
 

@@ -1,8 +1,11 @@
+import { FlagPanelManager } from "../bit-components";
 import { getMediaStream } from "../components/avatar-audio-source";
 import { paths } from "../systems/userinput/paths";
 import { audioModules } from "../utils/asr-adapter";
 import { COMPONENT_ENDPOINTS } from "../utils/component-types";
 import { UpdateTextSystem } from "./agent-slideshow-system";
+import { addComponent, defineQuery, enterQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
+import { virtualAgent } from "./agent-system";
 
 export class SubtitleSystem {
   constructor() {
@@ -19,7 +22,9 @@ export class SubtitleSystem {
     this.dataArray;
     this.mediaRecorder;
     this.animationFrameID;
+    this.FlagManagerID;
     this.onLanguageUpdate = this.onLanguageUpdate.bind(this);
+    this.flagObjs = { it: null, es: null, du: null, de: null, el: null };
   }
 
   Init() {
@@ -36,6 +41,11 @@ export class SubtitleSystem {
 
   onLanguageUpdate(event) {
     this.targetLanguage = event.detail.language;
+    if (this.FlagManagerID) {
+      Object.keys(this.flagObjs).forEach(key => {
+        console.log(key);
+      });
+    }
   }
 
   SelectTarget(_target) {
@@ -233,6 +243,24 @@ export class SubtitleSystem {
   SetLanguage(_language) {
     this.myLanguage = _language;
   }
+}
+
+const panelManagerQuery = defineQuery([FlagPanelManager]);
+const enterpanelManagerQuery = enterQuery(panelManagerQuery);
+const exitpanelManagerQuery = exitQuery(panelManagerQuery);
+
+export function FlagPanelSystem(world) {
+  enterpanelManagerQuery(world).forEach(managerEid => {
+    subtitleSystem.FlagManagerID = managerEid;
+    subtitleSystem.flagObjs.de = world.eid2obj.get(FlagPanelManager.deRef[managerEid]);
+    subtitleSystem.flagObjs.du = world.eid2obj.get(FlagPanelManager.duRef[managerEid]);
+    subtitleSystem.flagObjs.es = world.eid2obj.get(FlagPanelManager.esRef[managerEid]);
+    subtitleSystem.flagObjs.it = world.eid2obj.get(FlagPanelManager.itRef[managerEid]);
+    subtitleSystem.flagObjs.el = world.eid2obj.get(FlagPanelManager.elRef[managerEid]);
+  });
+  exitpanelManagerQuery(world).forEach(managerEid => {
+    if (subtitleSystem.FlagManagerID === managerEid) subtitleSystem.FlagManagerID = null;
+  });
 }
 
 export const subtitleSystem = new SubtitleSystem();
