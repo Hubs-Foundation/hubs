@@ -16,6 +16,7 @@ import { Vector3 } from "three";
 
 const agentQuery = defineQuery([Agent]);
 const enterAgentQuery = enterQuery(agentQuery);
+const skipModule = true;
 
 function clicked(eid) {
   return hasComponent(APP.world, Interacted, eid);
@@ -36,7 +37,7 @@ export function AgentSystem() {
   virtualAgent.agent.obj.updateMatrix();
 }
 
-class AgentElement {
+export class objElement {
   constructor(eid) {
     this.eid = eid;
     this.obj = APP.world.eid2obj.get(eid);
@@ -75,13 +76,13 @@ export default class VirtualAgent {
   }
 
   Enter(agentEid, showPivots) {
-    this.agent = new AgentElement(agentEid);
-    this.nextArrow = new AgentElement(Agent.nextRef[agentEid]);
-    this.prevArrow = new AgentElement(Agent.prevRef[agentEid]);
-    this.micButton = new AgentElement(Agent.micRef[agentEid]);
-    this.snapButton = new AgentElement(Agent.snapRef[agentEid]);
-    this.panel = new AgentElement(Agent.panelRef[agentEid]);
-    this.text = new AgentElement(Agent.textRef[agentEid]);
+    this.agent = new objElement(agentEid);
+    this.nextArrow = new objElement(Agent.nextRef[agentEid]);
+    this.prevArrow = new objElement(Agent.prevRef[agentEid]);
+    this.micButton = new objElement(Agent.micRef[agentEid]);
+    this.snapButton = new objElement(Agent.snapRef[agentEid]);
+    this.panel = new objElement(Agent.panelRef[agentEid]);
+    this.text = new objElement(Agent.textRef[agentEid]);
 
     this.scene = AFRAME.scenes[0];
     this.camera = this.scene.camera;
@@ -128,50 +129,40 @@ export default class VirtualAgent {
       if (toggleResponse.status.code === COMPONENT_CODES.Successful) {
         const sourceLang = subtitleSystem.targetLanguage ? subtitleSystem.targetLanguage : "en";
         const nmtParameters = { source_language: sourceLang, target_language: "en", return_transcription: "true" };
-        let t11, t12, t21, t22, t31, t32, elapsedTime1, elapsedTime2, elapsedTime3, knowledgeRespone;
-        t11 = performance.now();
+        let knowledgeRespone;
+
         const nmtResponse = await audioModules(
           COMPONENT_ENDPOINTS.TRANSLATE_AUDIO_FILES,
           toggleResponse.data.file,
           nmtParameters
         );
-        t12 = performance.now();
-        elapsedTime1 = t12 - t11;
-
-        t21 = performance.now();
-        const intentResponse = await intentionModule(nmtResponse.data.translations[0]);
-        t22 = performance.now();
-        elapsedTime2 = t22 - t21;
+        let intentResponse;
+        if (skipModule) intentResponse = { data: { intent: "navigation", destination: "exit" } };
+        else intentResponse = await intentionModule(nmtResponse.data.translations[0]);
 
         if (intentResponse.data.intent === "navigation") {
           const destName = intentResponse.data.destination;
 
-          t31 = performance.now();
           knowledgeRespone = await this.Navigate(
             destName,
             nmtResponse.data.translations[0],
-            intentResponse.data.intent
+            intentResponse.data.intent,
+            skipModule
           );
-          t32 = performance.now();
-          elapsedTime3 = t32 - t31;
         }
-
-        const log = `NMT: {Query: "${nmtResponse.data.translations[0]}", Time: ${elapsedTime1}ms}\n
-        Intent: {Intent: ${intentResponse.data.intent}, Destination: ${intentResponse.data.destination}, Time: ${elapsedTime2}ms}\n
-        Response: {Knowledege: "${knowledgeRespone.data.response}", Time: ${elapsedTime3}ms}`;
-
-        console.log(log);
       }
     } catch (error) {
       console.log("error", error);
     }
   }
 
-  async Navigate(destName, userQuery, userIntent) {
+  async Navigate(destName, userQuery, userIntent, skipModule = false) {
     try {
       const startIndex = sceneGraph.GetClosestIndex(virtualAgent.avatarPos);
       const navigation = sceneGraph.GetInstructions(startIndex, destName);
-      const knowledge = await knowledgeModule(userQuery, userIntent, navigation.knowledge);
+      let knowledge;
+      if (skipModule) knowledge = { data: { response: "this is a demo try to go to the conference room" } };
+      else knowledge = await knowledgeModule(userQuery, userIntent, navigation.knowledge);
       this.updateText(knowledge.data.response);
       if (this.cube !== undefined) {
         removeEntity(APP.world, this.cube);
@@ -202,7 +193,7 @@ export default class VirtualAgent {
   }
 
   Reset() {
-    const initialPosition = new THREE.Vector3(0.2, 0, -1);
+    const initialPosition = new THREE.Vector3(0.2, 0, -2);
     const initialRotation = new THREE.Euler(0, 0, 0, "XYZ");
     this.agent.obj.position.copy(initialPosition);
     this.agent.obj.rotation.copy(initialRotation);

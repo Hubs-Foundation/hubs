@@ -1,5 +1,5 @@
 /** @jsx createElementEntity */
-import agentModelSrc from "../assets/models/cute_agent.glb";
+import agentModelSrc from "../assets/models/voxy.glb";
 import { createElementEntity, renderAsEntity, createRef } from "../utils/jsx-entity";
 import { preload } from "../utils/preload";
 import { cloneModelFromCache, loadModel } from "../components/gltf-model-plus";
@@ -12,10 +12,11 @@ import { Hidden } from "../bit-components";
 import { COLLISION_LAYERS } from "../constants";
 import { Object3D, Vector3 } from "three";
 import { HUDLangPanel } from "./hud-lang-panel";
+import { virtualAgent } from "../bit-systems/agent-system";
 
 preload(loadModel(agentModelSrc, null, true));
 
-export function AgentEntity(position: Vector3) {
+export function AgentEntity() {
   const agentRef = createRef();
   const panelRef = createRef();
   const micRef = createRef();
@@ -30,7 +31,6 @@ export function AgentEntity(position: Vector3) {
       agent={{ panelRef, textRef, micRef, snapRef, nextRef, prevRef }}
       ref={agentRef}
       model={{ model: cloneModelFromCache(agentModelSrc).scene }}
-      position={position.toArray()}
       cursorRaycastable
       remoteHoverTarget
       handCollisionTarget
@@ -49,9 +49,11 @@ export function AgentEntity(position: Vector3) {
 }
 
 export function addAgentToScene(world: HubsWorld, userPOV: Object3D) {
-  const eid = renderAsEntity(world, AgentEntity(new Vector3(0.2, 0, -1)));
+  const eid = renderAsEntity(world, AgentEntity());
   const obj = world.eid2obj.get(eid)!;
   userPOV.add(obj);
+  let a = virtualAgent.avatarDirection;
+  obj.position.copy(obj.position.clone().add(a.multiplyScalar(2)));
   return eid;
 }
 

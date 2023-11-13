@@ -79,7 +79,6 @@ export function FlagButton({ width, name = "FlagButton", type, flag, ...props }:
       cursorRaycastable
       remoteHoverTarget
       hoverButton={{ type }}
-      iconButton={{ labelRef }}
       singleActionButton
       layers={1 << Layers.CAMERA_LAYER_UI}
       {...props}
@@ -88,7 +87,6 @@ export function FlagButton({ width, name = "FlagButton", type, flag, ...props }:
         image={{
           texture: flags[flag],
           ratio: 0.74,
-
           projection: ProjectionMode.FLAT,
           alphaMode: AlphaMode.Mask,
           cacheKey: ""

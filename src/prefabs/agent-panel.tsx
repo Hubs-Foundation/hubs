@@ -135,7 +135,7 @@ export function SimplePanel({ panelRef, textRef, micRef }: SimplePanelParams) {
         ref={micRef}
         scale={[buttonScale[0], buttonScale[1], buttonScale[2]]}
         type={BUTTON_TYPES.MIC}
-        position={[0.25, 0.15, 0]}
+        position={[0.3, 0.15, 0]}
         width={buttonHeight}
         height={buttonHeight}
       />

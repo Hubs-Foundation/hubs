@@ -21,7 +21,7 @@ interface navigationData {
 }
 
 interface instruction {
-  action: "start" | "finish" | "move" | "turn" | "continue";
+  action: "start" | "finish" | "move" | "turn" | "continue" | "stairs";
   direction?: "right" | "left" | "forward";
   angle?: number;
   from?: Vector3;
@@ -39,7 +39,7 @@ export function NavigationLine(navigation: navigationData) {
   const points = navigation.path;
 
   navigation.instructions.forEach(instruction => {
-    if (instruction.action === "turn") {
+    if (instruction.action === "turn" || instruction.action === "stairs") {
       turns.push(<entity name={`turn`} model={{ model: GetArrow(instruction) }}></entity>);
     }
   });
@@ -85,19 +85,11 @@ function GetArrow(instruction: instruction) {
   const obj = cloneModelFromCache(rightArrowSrc).scene as Object3D;
   const line = instruction.line!;
 
-  const quaternion1 = new Quaternion().setFromUnitVectors(new Vector3(1, 0, 0), line);
-  const correctZaxis = new Vector3(0, 0, 1);
-
-  correctZaxis.applyQuaternion(quaternion1);
-
-  const desiredDirection = new Vector3().crossVectors(line, new Vector3(0, 1, 0));
-  const quaternion2 = new Quaternion().setFromUnitVectors(correctZaxis.normalize(), desiredDirection.normalize());
-
+  const quaternion1 = new Quaternion().setFromUnitVectors(new Vector3(1, 0, 0), line.clone().setY(0).normalize());
+  const quaternion2 = new Quaternion().setFromUnitVectors(line.clone().setY(0).normalize(), line);
   const finalQuaterion = quaternion2.multiply(quaternion1);
   obj.applyQuaternion(finalQuaterion);
   obj.position.copy(new Vector3(instruction.current!.x, instruction.current!.y + 1.5, instruction.current!.z));
-
-  obj.add(new AxesHelper());
 
   return obj;
 }

@@ -28,7 +28,7 @@ function useTranslate(scene) {
   }, [scene, language]);
 
   const toggleDutch = useCallback(() => {
-    if (language === "nl") {
+    if (language === "du") {
       scene.emit("language_updated", { language: null });
     } else {
       scene.emit("language_updated", { language: "nl" });
