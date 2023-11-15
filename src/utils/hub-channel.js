@@ -88,7 +88,7 @@ export default class HubChannel extends EventTarget {
 
     // This now exists in room settings but a default is left here to support old reticulum servers
     const DEFAULT_ROOM_SIZE = 24;
-    return roomEntrySlotCount < (hub.room_size !== undefined ? hub.room_size : DEFAULT_ROOM_SIZE);
+    return roomEntrySlotCount <= (hub.room_size ?? DEFAULT_ROOM_SIZE);
   }
 
   // Migrates this hub channel to a new phoenix channel and presence
