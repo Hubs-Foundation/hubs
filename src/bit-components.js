@@ -152,7 +152,9 @@ export const MyCameraTool = defineComponent();
 export const MediaLoader = defineComponent({
   src: Types.ui32,
   flags: Types.ui8,
-  fileId: Types.ui32
+  fileId: Types.ui32,
+  count: Types.ui8,
+  mediaRef: Types.eid
 });
 MediaLoader.src[$isStringType] = true;
 MediaLoader.fileId[$isStringType] = true;

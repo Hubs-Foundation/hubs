@@ -490,6 +490,16 @@ export function findAncestor(obj, predicate) {
   return null;
 }
 
+export function findAncestors(obj, predicate) {
+  const ancestors = [];
+  let ancestor = obj;
+  while (ancestor) {
+    if (predicate(ancestor)) ancestors.push(ancestor);
+    ancestor = ancestor.parent;
+  }
+  return ancestors;
+}
+
 export function traverseSome(obj, fn) {
   const shouldContinue = fn(obj);
   if (shouldContinue) {

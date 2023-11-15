@@ -1,6 +1,6 @@
 import { addComponent } from "bitecs";
 import { HubsWorld } from "../app";
-import { MediaLoader } from "../bit-components";
+import { MediaLoader, MediaLoading } from "../bit-components";
 import { MEDIA_LOADER_FLAGS } from "../bit-systems/media-loading";
 
 export type MediaLoaderParams = {
@@ -18,6 +18,7 @@ export function inflateMediaLoader(
   { src, recenter, resize, animateLoad, fileId, isObjectMenuTarget }: MediaLoaderParams
 ) {
   addComponent(world, MediaLoader, eid);
+  addComponent(world, MediaLoading, eid);
   let flags = 0;
   if (recenter) flags |= MEDIA_LOADER_FLAGS.RECENTER;
   if (resize) flags |= MEDIA_LOADER_FLAGS.RESIZE;
@@ -28,4 +29,5 @@ export function inflateMediaLoader(
     MediaLoader.fileId[eid] = APP.getSid(fileId)!;
   }
   MediaLoader.src[eid] = APP.getSid(src)!;
+  MediaLoader.count[eid] = 0;
 }
