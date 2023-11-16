@@ -137,15 +137,24 @@ function makeObjectPropertyFlowNode<T extends keyof Object3D>(property: T, value
       { key: "entity", valueType: "entity" },
       { key: property, valueType }
     ],
+    configuration: {
+      networked: { valueType: "boolean" }
+    },
     initialState: undefined,
     out: { flow: "flow" },
-    triggered: ({ read, commit, graph }) => {
+    triggered: ({ read, commit, graph, configuration }) => {
       const eid = read("entity") as EntityID;
       const obj = APP.world.eid2obj.get(eid);
       if (!obj) {
         console.error(`${typeName} could not find entity`, eid);
         return;
       }
+
+      if (configuration.networked) {
+        const world = graph.getDependency("world") as HubsWorld;
+        takeOwnership(world, eid);
+      }
+
       const value = read(property) as Object3D[T];
       const prop = obj[property]!;
       if (typeof prop === "object" && "copy" in prop) {
@@ -455,11 +464,18 @@ export const EntityNodes = definitionListToMap([
       material: "material"
     },
     out: { flow: "flow" },
+    configuration: {
+      networked: { valueType: "boolean" }
+    },
     initialState: undefined,
-    triggered: ({ read, commit, graph }) => {
+    triggered: ({ read, commit, graph, configuration }) => {
       const world = graph.getDependency<HubsWorld>("world")!;
       const entity = read<EntityID>("entity");
       const matEid = read<EntityID>("material");
+
+      if (configuration.networked) {
+        takeOwnership(world, matEid);
+      }
 
       const { set } = getComponentBindings("object-material")!;
       set!(world, entity, matEid);
@@ -556,16 +572,23 @@ function makeMaterialPropertyNodes<T extends SettableMaterialProperties, S exten
         material: "material",
         [socketName]: socketType
       },
+      configuration: {
+        networked: { valueType: "boolean" }
+      },
       out: { flow: "flow" },
       initialState: undefined,
-      triggered: ({ read, commit, graph }) => {
+      triggered: ({ read, commit, graph, configuration }) => {
         const world = graph.getDependency<HubsWorld>("world")!;
         const matEid = read<EntityID>("material");
         const value = read(socketName) as any;
-        // TODO Replace this by a take ownership checkbox in the set nodes
-        takeOwnership(world, matEid);
+
+        if (configuration.networked) {
+          takeOwnership(world, matEid);
+        }
+
         const { set } = getComponentBindings("material")!;
         set!(world, matEid, { [property]: value });
+
         commit("flow");
       }
     }),
@@ -591,6 +614,9 @@ function makeMaterialPropertyNodes<T extends SettableMaterialProperties, S exten
         },
         property: {
           valueType: "string"
+        },
+        networked: {
+          valueType: "boolean"
         }
       },
       in: configuration => {
@@ -626,8 +652,14 @@ function makeMaterialPropertyNodes<T extends SettableMaterialProperties, S exten
 
         const entity = read("entity") as EntityID;
 
-        const { set } = getComponentBindings(componentName);
+        const { component, set } = getComponentBindings(componentName);
         if (set) {
+          if (configuration.networked) {
+            const cmpEid = findChildWithComponent(world, component, entity);
+            if (cmpEid) {
+              takeOwnership(world, cmpEid);
+            }
+          }
           set(world, entity, {
             [propertyName]: read(type)
           });

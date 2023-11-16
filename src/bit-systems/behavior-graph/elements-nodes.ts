@@ -4,8 +4,8 @@ import { EntityID, MediaFrame, NetworkedMediaFrame, NetworkedText, Owned, TextTa
 import { HubsWorld } from "../../app";
 import { findChildWithComponent } from "../../utils/bit-utils";
 import { MEDIA_FRAME_FLAGS } from "../../inflators/media-frame";
-import { hasComponent } from "bitecs";
 import { Color } from "three";
+import { takeOwnership } from "../../utils/take-ownership";
 
 const tmpColor = new Color();
 export const ElementNodes = definitionListToMap([
@@ -58,34 +58,58 @@ export const ElementNodes = definitionListToMap([
       { key: "setSnapToCenter", valueType: "flow" },
       { key: "snapToCenter", valueType: "boolean" }
     ],
+    configuration: {
+      networked: { valueType: "boolean" }
+    },
     initialState: undefined,
     out: { flow: "flow" },
-    triggered: ({ read, commit, triggeringSocketName, graph }) => {
+    triggered: ({ read, commit, triggeringSocketName, graph, configuration }) => {
       const entity = read("entity") as EntityID;
       const world = graph.getDependency("world") as HubsWorld;
 
       const cmp = findChildWithComponent(world, MediaFrame, entity);
-      if (cmp && hasComponent(world, Owned, cmp)) {
+      if (cmp) {
+        if (configuration.networked) {
+          takeOwnership(world, cmp);
+        }
         if (triggeringSocketName === "setActive") {
           const active = read("active");
           if (active) {
-            NetworkedMediaFrame.flags[cmp] |= MEDIA_FRAME_FLAGS.ACTIVE;
+            MediaFrame.flags[cmp] |= MEDIA_FRAME_FLAGS.ACTIVE;
+            if (configuration.networked) {
+              NetworkedMediaFrame.flags[cmp] |= MEDIA_FRAME_FLAGS.ACTIVE;
+            }
           } else {
-            NetworkedMediaFrame.flags[cmp] &= ~MEDIA_FRAME_FLAGS.ACTIVE;
+            MediaFrame.flags[cmp] &= ~MEDIA_FRAME_FLAGS.ACTIVE;
+            if (configuration.networked) {
+              NetworkedMediaFrame.flags[cmp] &= ~MEDIA_FRAME_FLAGS.ACTIVE;
+            }
           }
         } else if (triggeringSocketName === "setLocked") {
           const locked = read("locked");
           if (locked) {
-            NetworkedMediaFrame.flags[cmp] |= MEDIA_FRAME_FLAGS.LOCKED;
+            MediaFrame.flags[cmp] |= MEDIA_FRAME_FLAGS.LOCKED;
+            if (configuration.networked) {
+              NetworkedMediaFrame.flags[cmp] |= MEDIA_FRAME_FLAGS.LOCKED;
+            }
           } else {
-            NetworkedMediaFrame.flags[cmp] &= ~MEDIA_FRAME_FLAGS.LOCKED;
+            MediaFrame.flags[cmp] &= ~MEDIA_FRAME_FLAGS.LOCKED;
+            if (configuration.networked) {
+              NetworkedMediaFrame.flags[cmp] &= ~MEDIA_FRAME_FLAGS.LOCKED;
+            }
           }
         } else if (triggeringSocketName === "setSnapToCenter") {
           const snapToCenter = read("snapToCenter");
           if (snapToCenter) {
-            NetworkedMediaFrame.flags[cmp] |= MEDIA_FRAME_FLAGS.SNAP_TO_CENTER;
+            MediaFrame.flags[cmp] |= MEDIA_FRAME_FLAGS.SNAP_TO_CENTER;
+            if (configuration.networked) {
+              NetworkedMediaFrame.flags[cmp] |= MEDIA_FRAME_FLAGS.SNAP_TO_CENTER;
+            }
           } else {
-            NetworkedMediaFrame.flags[cmp] &= ~MEDIA_FRAME_FLAGS.SNAP_TO_CENTER;
+            MediaFrame.flags[cmp] &= ~MEDIA_FRAME_FLAGS.SNAP_TO_CENTER;
+            if (configuration.networked) {
+              NetworkedMediaFrame.flags[cmp] &= ~MEDIA_FRAME_FLAGS.SNAP_TO_CENTER;
+            }
           }
         }
       }
