@@ -32,7 +32,14 @@ export const normalMaterial = new THREE.MeshBasicMaterial({
 });
 
 export function HUDLangPanel() {
-  const [deRef, duRef, itRef, elRef, esRef] = [createRef(), createRef(), createRef(), createRef(), createRef()];
+  const [deRef, duRef, itRef, elRef, esRef, enRef] = [
+    createRef(),
+    createRef(),
+    createRef(),
+    createRef(),
+    createRef(),
+    createRef()
+  ];
   const agentPos = virtualAgent.avatarPos;
   const agentdir = virtualAgent.flatAvatarDirection;
   const pos = new Vector3().addVectors(agentPos, agentdir.multiplyScalar(2));
@@ -49,7 +56,7 @@ export function HUDLangPanel() {
           alphaMode: AlphaMode.Blend,
           cacheKey: ""
         }}
-        flagPanelManager={{ deRef: deRef, duRef: duRef, itRef: itRef, elRef: elRef, esRef: esRef }}
+        flagPanelManager={{ deRef: deRef, duRef: duRef, itRef: itRef, elRef: elRef, esRef: esRef, enRef: enRef }}
       ></entity>
       <FlagButton
         name="de_flag"
@@ -79,7 +86,7 @@ export function HUDLangPanel() {
         name="es_flag"
         width={0.5}
         ref={esRef}
-        position={[-0.31, -0.31, 0.1]}
+        position={[-0.62, -0.31, 0.1]}
         flag={FLAGS.ES}
         type={BUTTON_TYPES.MIC}
       ></FlagButton>
@@ -87,8 +94,16 @@ export function HUDLangPanel() {
         name="el_flag"
         width={0.5}
         ref={elRef}
-        position={[0.31, -0.31, 0.1]}
+        position={[0, -0.31, 0.1]}
         flag={FLAGS.EL}
+        type={BUTTON_TYPES.MIC}
+      ></FlagButton>
+      <FlagButton
+        name="en_flag"
+        width={0.5}
+        ref={enRef}
+        position={[0.62, -0.31, 0.1]}
+        flag={FLAGS.EN}
         type={BUTTON_TYPES.MIC}
       ></FlagButton>
     </entity>

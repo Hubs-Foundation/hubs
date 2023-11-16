@@ -9,6 +9,7 @@ import flagItSrc from "../assets/images/flags/it_flag.png";
 import flagDeSrc from "../assets/images/flags/de_flag.png";
 import flagDuSrc from "../assets/images/flags/du_flag.png";
 import flagElSrc from "../assets/images/flags/el_flag.png";
+import flagEnSrc from "../assets/images/flags/en_flag.png";
 import { textureLoader } from "../utils/media-utils";
 import { Texture } from "three";
 import { BUTTON_TYPES } from "./button3D";
@@ -21,16 +22,18 @@ export const itFlagTexture = textureLoader.load(flagItSrc);
 export const deFlagTexture = textureLoader.load(flagDeSrc);
 export const duFlagTexture = textureLoader.load(flagDuSrc);
 export const elFlagTexture = textureLoader.load(flagElSrc);
+export const enFlagTexture = textureLoader.load(flagEnSrc);
 
 export enum FLAGS {
   EL,
   DU,
   DE,
   ES,
-  IT
+  IT,
+  EN
 }
 
-type FlagType = FLAGS.DE | FLAGS.DU | FLAGS.IT | FLAGS.ES | FLAGS.EL;
+type FlagType = FLAGS.DE | FLAGS.DU | FLAGS.IT | FLAGS.ES | FLAGS.EL | FLAGS.EN;
 
 type ButtonType =
   | BUTTON_TYPES.DEFAULT
@@ -44,7 +47,8 @@ const flags = {
   [FLAGS.ES]: esFlagTexture,
   [FLAGS.IT]: itFlagTexture,
   [FLAGS.DU]: duFlagTexture,
-  [FLAGS.EL]: elFlagTexture
+  [FLAGS.EL]: elFlagTexture,
+  [FLAGS.EN]: enFlagTexture
 };
 
 export interface Refable {

@@ -27,7 +27,7 @@ export class SubtitleSystem {
     this.animationFrameID;
     this.FlagManagerID;
     this.onLanguageUpdate = this.onLanguageUpdate.bind(this);
-    this.flagObjs = { it: null, es: null, nl: null, de: null, el: null };
+    this.flagObjs = { it: null, es: null, nl: null, de: null, el: null, en: null };
   }
 
   Init() {
@@ -299,6 +299,14 @@ export class SubtitleSystem {
         APP.scene.emit("language_updated", { language: "el" });
       }
     }
+    if (hasComponent(world, Interacted, this.flagObjs.en.eid)) {
+      console.log("en interacted");
+      if (this.targetLanguage === "en") {
+        APP.scene.emit("language_updated", { language: null });
+      } else {
+        APP.scene.emit("language_updated", { language: "en" });
+      }
+    }
   }
 }
 
@@ -314,6 +322,7 @@ export function FlagPanelSystem(world) {
     subtitleSystem.flagObjs.es = new objElement(FlagPanelManager.esRef[managerEid]);
     subtitleSystem.flagObjs.it = new objElement(FlagPanelManager.itRef[managerEid]);
     subtitleSystem.flagObjs.el = new objElement(FlagPanelManager.elRef[managerEid]);
+    subtitleSystem.flagObjs.en = new objElement(FlagPanelManager.enRef[managerEid]);
 
     console.log("registered flagManager with eid", managerEid);
     subtitleSystem.ResetPanel();

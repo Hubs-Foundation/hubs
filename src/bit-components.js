@@ -114,7 +114,8 @@ export const FlagPanelManager = defineComponent({
   duRef: Types.eid,
   itRef: Types.eid,
   elRef: Types.eid,
-  esRef: Types.eid
+  esRef: Types.eid,
+  enRef: Types.eid
 });
 export const HoldableButton = defineComponent();
 export const SingleActionButton = defineComponent();

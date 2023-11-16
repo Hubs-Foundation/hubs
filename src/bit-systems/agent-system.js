@@ -99,9 +99,6 @@ export default class VirtualAgent {
       const pointEid = renderAsEntity(APP.world, pivotPoint(sceneGraph.nodes));
       const pivotObjs = APP.world.eid2obj.get(pointEid);
       this.scene.object3D.add(pivotObjs);
-      console.log(sceneGraph.nodes);
-      console.log(sceneGraph.edges);
-
       sceneGraph.nodes.forEach(node => {
         if (node.x === 2 && node.z > 29) console.log(node);
       });
@@ -137,7 +134,7 @@ export default class VirtualAgent {
           nmtParameters
         );
         let intentResponse;
-        if (skipModule) intentResponse = { data: { intent: "navigation", destination: "exit" } };
+        if (skipModule) intentResponse = { data: { intent: "navigation", destination: "conference room" } };
         else intentResponse = await intentionModule(nmtResponse.data.translations[0]);
 
         if (intentResponse.data.intent === "navigation") {
@@ -161,16 +158,20 @@ export default class VirtualAgent {
       const startIndex = sceneGraph.GetClosestIndex(virtualAgent.avatarPos);
       const navigation = sceneGraph.GetInstructions(startIndex, destName);
       let knowledge;
-      if (skipModule) knowledge = { data: { response: "this is a demo try to go to the conference room" } };
-      else knowledge = await knowledgeModule(userQuery, userIntent, navigation.knowledge);
-      this.updateText(knowledge.data.response);
-      if (this.cube !== undefined) {
+      if (!skipModule) knowledge = await knowledgeModule(userQuery, userIntent, navigation.knowledge);
+      if (!!this.cube) {
         removeEntity(APP.world, this.cube);
         this.scene.object3D.remove(this.arrowObjs);
+        this.cube = null;
+        knowledge = { data: { response: "Instructions cleared. How else could I help you?" } };
+      } else {
+        this.cube = renderAsEntity(APP.world, NavigationLine(navigation));
+        this.arrowObjs = APP.world.eid2obj.get(this.cube);
+        this.scene.object3D.add(this.arrowObjs);
+        knowledge = { data: { response: "This is a demo showing you instructions to go to the conference room" } };
       }
-      this.cube = renderAsEntity(APP.world, NavigationLine(navigation));
-      this.arrowObjs = APP.world.eid2obj.get(this.cube);
-      this.scene.object3D.add(this.arrowObjs);
+      this.updateText(knowledge.data.response);
+
       return knowledge;
     } catch (error) {
       console.log(error);
