@@ -36,6 +36,7 @@ import { findAncestorWithComponent, findChildWithComponent } from "../utils/bit-
 import { TEXTURES_FLIP_Y } from "../loaders/HubsTextureLoader";
 import { addObject3DComponent } from "../utils/jsx-entity";
 import { updateMaterials } from "../utils/material-utils";
+import { MEDIA_FRAME_FLAGS, AxisAlignType } from "../inflators/media-frame";
 import {
   Box3,
   DoubleSide,
@@ -136,7 +137,7 @@ function isEntityColliding(physicsSystem, eidA, eidB) {
 }
 
 function scaleForAspectFit(containerSize, itemSize) {
-  return Math.min(containerSize[0] / itemSize.x, containerSize[1] / itemSize.y, containerSize[2] / itemSize.z);
+  return Math.min(containerSize[0] / itemSize[0], containerSize[1] / itemSize[1], containerSize[2] / itemSize[2]);
 }
 
 const snapToFrame = (() => {
@@ -144,24 +145,44 @@ const snapToFrame = (() => {
   const frameQuat = new Quaternion();
   const frameScale = new Vector3();
   const m4 = new Matrix4();
-  const contentBounds = new Vector3();
-
+  // Lookup for adjusting axis alignment
+  const AxisAlignMultipliers = new Array();
+  AxisAlignMultipliers[AxisAlignType.MIN] = -1;
+  AxisAlignMultipliers[AxisAlignType.CENTER] = 0;
+  AxisAlignMultipliers[AxisAlignType.MAX] = +1;
+  
   return (world, frame, target) => {
     const frameObj = world.eid2obj.get(frame);
     const targetObj = world.eid2obj.get(target);
 
+    // Copy frame transform
     frameObj.updateMatrices();
     frameObj.matrixWorld.decompose(framePos, frameQuat, frameScale);
 
-    contentBounds.fromArray(MediaContentBounds.bounds[target]);
-    setMatrixWorld(
-      targetObj,
-      m4.compose(
-        framePos,
-        frameQuat,
-        frameScale.multiplyScalar(scaleForAspectFit(MediaFrame.bounds[frame], contentBounds))
-      )
-    );
+    const frameBounds = MediaFrame.bounds[frame];
+    const contentBounds = MediaContentBounds.bounds[target];
+
+    // Apply scale settings
+    const scaleToBounds = MediaFrame.flags[frame] & MEDIA_FRAME_FLAGS.SCALE_TO_BOUNDS;
+    if(scaleToBounds) {
+      // Adjust content scale to fit inside the frame
+      const scaleFactor = scaleForAspectFit(frameBounds, contentBounds)
+      frameScale.multiplyScalar(scaleFactor)
+    } else {
+      // Preserve the current scale
+      frameScale.setFromMatrixScale(targetObj.matrixWorld);
+    }
+
+    // Apply boundary alignment on all three axes
+    for(let i = 0; i < 3; ++i) {
+      // Calculate the delta required to shift the content from the center to the desired axis alignment
+      const axisAlignment = MediaFrame.align[frame][i];
+      const alignmentMultiplier = AxisAlignMultipliers[axisAlignment];
+      const positionDelta = alignmentMultiplier * (frameBounds[i] - frameScale.getComponent(i) * contentBounds[i]) / 2;
+      framePos.setComponent(i, framePos.getComponent(i) + positionDelta);
+    }
+
+    setMatrixWorld(targetObj, m4.compose(framePos, frameQuat, frameScale));
   };
 })();
 
@@ -183,41 +204,47 @@ const previewMaterial = new MeshBasicMaterial();
 previewMaterial.side = DoubleSide;
 previewMaterial.transparent = true;
 previewMaterial.opacity = 0.5;
-function createPreviewMesh(world, capturable) {
-  let srcMesh;
-  let el;
-  let previewMesh;
+function createPreview(world, capturableEid) {
+  // Source object to copy
+  let srcObj;
+  // Copied object to use as preview
+  let previewObj;
   let isVideo = false;
   let ratio = 1;
-  if (hasComponent(world, AEntity, capturable)) {
-    el = world.eid2obj.get(capturable).el;
-    const video = el.components["media-video"];
+  const capturableObj = world.eid2obj.get(capturableEid);
+  if (hasComponent(world, AEntity, capturableEid)) {
+    const video = capturableObj.el.components["media-video"];
     isVideo = !!video;
     if (isVideo) {
       ratio =
         (video.videoTexture.image.videoHeight || video.videoTexture.image.height) /
         (video.videoTexture.image.videoWidth || video.videoTexture.image.width);
     }
-    srcMesh = el.getObject3D("mesh");
+    srcObj = capturableObj;
   } else {
-    const mediaEid = findChildWithComponent(world, MediaLoaded, capturable);
+    const mediaEid = findChildWithComponent(world, MediaLoaded, capturableEid);
     isVideo = hasComponent(world, MediaVideo, mediaEid);
     if (isVideo) {
       ratio = MediaVideo.ratio[mediaEid];
     }
-    srcMesh = world.eid2obj.get(mediaEid);
+    srcObj = world.eid2obj.get(mediaEid);
   }
 
   // Audios can't be cloned so we take a different path for them
   if (isVideo) {
-    previewMesh = new Mesh(videoGeometry, previewMaterial);
-    previewMesh.material.map = srcMesh.material.map;
-    previewMesh.material.needsUpdate = true;
+    // Video mesh will be scaled to the aspect ratio and vertical orientation of the video
+    // this is then placed inside a Group to keep the downstream snap logic simpler
+    const videoMesh = new Mesh(videoGeometry, previewMaterial);
+    videoMesh.material.map = srcObj.el.getObject3D("mesh").material.map;
+    videoMesh.material.needsUpdate = true;
     // Preview mesh UVs are set to accommodate textureLoader default, but video textures don't match this
-    previewMesh.scale.y *= TEXTURES_FLIP_Y !== previewMesh.material.map.flipY ? -ratio : ratio;
+    videoMesh.scale.setY(TEXTURES_FLIP_Y !== videoMesh.material.map.flipY ? -ratio : ratio);
+    videoMesh.matrixNeedsUpdate = true;
+    previewObj = new Group();
+    previewObj.add(videoMesh);
   } else {
-    previewMesh = cloneObject3D(srcMesh, false);
-    previewMesh.traverse(node => {
+    previewObj = cloneObject3D(srcObj, false);
+    previewObj.traverse(node => {
       updateMaterials(node, function (srcMat) {
         const mat = srcMat.clone();
         mat.transparent = true;
@@ -228,47 +255,41 @@ function createPreviewMesh(world, capturable) {
         return mat;
       });
     });
+    // Copy the target's transform to preserve scale, 
+    // but position and orientation will be overriden later by the snap
+    setMatrixWorld(previewObj, srcObj.matrixWorld);
   }
 
-  // TODO HACK We add this mesh to a group whose position is centered
-  //      so that putting this in the middle of a media frame is easy,
-  //      but we should just do this math when putting an object into a frame
-  //      and not assume an object's root is in the center of its geometry.
-  previewMesh.position.setScalar(0);
-  previewMesh.quaternion.identity();
-  previewMesh.matrixNeedsUpdate = true;
-  const aabb = new Box3().setFromObject(previewMesh);
-  aabb.getCenter(previewMesh.position).multiplyScalar(-1);
-  previewMesh.matrixNeedsUpdate = true;
+  world.scene.add(previewObj);
+  return previewObj;
 
-  const cloneObj = new Group();
-  cloneObj.add(previewMesh);
-  world.scene.add(cloneObj);
+  //AVN: NOT SURE WHAT THIS DOES BUT IT MAY NEED REINSTATING (PROBABLY VIDEO)
+  // if(hasComponent(world, AEntity, capturable)) {
+  //   cloneObj.el = capturableObj.el;
+  // }
 
-  hasComponent(world, AEntity, capturable) && (cloneObj.el = el);
-
-  return cloneObj;
+  // return cloneObj;
 }
 
-function showPreview(world, frame, capturable) {
-  const previewObj = createPreviewMesh(world, capturable);
-  const eid = addEntity(world);
-  addObject3DComponent(world, eid, previewObj);
-  addComponent(world, MediaContentBounds, eid);
-  MediaContentBounds.bounds[eid].set(MediaContentBounds.bounds[capturable]);
+function showPreview(world, frameEid, capturableEid) {
+  const previewObj = createPreview(world, capturableEid);
+  const previewEid = addEntity(world);
+  addObject3DComponent(world, previewEid, previewObj);
+  addComponent(world, MediaContentBounds, previewEid);
+  MediaContentBounds.bounds[previewEid].set(MediaContentBounds.bounds[capturableEid]);
 
-  MediaFrame.preview[frame] = eid;
-  MediaFrame.previewingNid[frame] = Networked.id[capturable];
-  snapToFrame(world, frame, eid);
+  MediaFrame.preview[frameEid] = previewEid;
+  MediaFrame.previewingNid[frameEid] = Networked.id[capturableEid];
+  snapToFrame(world, frameEid, previewEid);
 }
 
-function hidePreview(world, frame) {
+function hidePreview(world, frameEid) {
   // NOTE we intentionally do not dispose of geometries or textures since they are all shared with the original object
-  const eid = MediaFrame.preview[frame];
+  const eid = MediaFrame.preview[frameEid];
   removeEntity(world, eid);
 
-  MediaFrame.preview[frame] = 0;
-  MediaFrame.previewingNid[frame] = 0;
+  MediaFrame.preview[frameEid] = 0;
+  MediaFrame.previewingNid[frameEid] = 0;
 }
 
 const zero = [0, 0, 0];
