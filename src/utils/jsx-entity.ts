@@ -44,7 +44,7 @@ import {
 import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
 import { GrabbableParams, inflateGrabbable } from "../inflators/grabbable";
-import { inflateImage } from "../inflators/image";
+import { ImageParams, inflateImage } from "../inflators/image";
 import { inflateVideo, VideoParams } from "../inflators/video";
 import { inflateModel, ModelParams } from "../inflators/model";
 import { inflatePDFLoader, PDFLoaderParams } from "../inflators/pdf-loader";
@@ -101,6 +101,7 @@ import { HubsVideoTexture } from "../textures/HubsVideoTexture";
 import { inflateMediaLink, MediaLinkParams } from "../inflators/media-link";
 import { inflateObjectMenuTarget, ObjectMenuTargetParams } from "../inflators/object-menu-target";
 import { inflateObjectMenuTransform, ObjectMenuTransformParams } from "../inflators/object-menu-transform";
+import { inflatePlane, PlaneParams } from "../inflators/plane";
 
 preload(
   new Promise(resolve => {
@@ -270,14 +271,11 @@ export interface JSXComponentData extends ComponentData {
     size: [width: number, height: number];
     insets: [top: number, bottom: number, left: number, right: number];
     texture: Texture;
+    toneMapped?: boolean;
+    transparent?: boolean;
+    alphaTest?: number;
   };
-  image?: {
-    texture: Texture;
-    ratio: number;
-    projection: ProjectionMode;
-    alphaMode: AlphaMode;
-    cacheKey: string;
-  };
+  image?: ImageParams;
   video?: VideoParams;
   link?: LinkParams;
   networkedVideo?: true;
@@ -314,6 +312,7 @@ export interface JSXComponentData extends ComponentData {
   networkedFloatyObject?: any;
   networkedTransform?: any;
   objectMenu?: {
+    backgroundRef: Ref;
     pinButtonRef: Ref;
     unpinButtonRef: Ref;
     cameraFocusButtonRef: Ref;
@@ -365,6 +364,7 @@ export interface JSXComponentData extends ComponentData {
   inspectable?: boolean;
   objectMenuTransform?: OptionalParams<ObjectMenuTransformParams>;
   objectMenuTarget?: OptionalParams<ObjectMenuTargetParams>;
+  plane?: PlaneParams;
 }
 
 export interface GLTFComponentData extends ComponentData {
@@ -480,7 +480,8 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   video: inflateVideo,
   link: inflateLink,
   objectMenuTransform: inflateObjectMenuTransform,
-  objectMenuTarget: inflateObjectMenuTarget
+  objectMenuTarget: inflateObjectMenuTarget,
+  plane: inflatePlane
 };
 
 export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorFn }> = {
