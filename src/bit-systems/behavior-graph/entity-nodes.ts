@@ -653,16 +653,16 @@ function makeMaterialPropertyNodes<T extends SettableMaterialProperties, S exten
         const entity = read("entity") as EntityID;
 
         const { component, set } = getComponentBindings(componentName);
-        if (set) {
-          if (configuration.networked) {
-            const cmpEid = findChildWithComponent(world, component, entity);
-            if (cmpEid) {
+        if (set && component) {
+          const cmpEid = findChildWithComponent(world, component, entity);
+          if (cmpEid) {
+            if (configuration.networked) {
               takeOwnership(world, cmpEid);
             }
+            set(world, cmpEid, {
+              [propertyName]: read(type)
+            });
           }
-          set(world, entity, {
-            [propertyName]: read(type)
-          });
         } else {
           console.error(`Set not supported for ${componentName}.${propertyName}`);
         }
@@ -715,12 +715,15 @@ function makeMaterialPropertyNodes<T extends SettableMaterialProperties, S exten
 
         const entity = read("entity") as EntityID;
 
-        const { get } = getComponentBindings(componentName);
-        if (get) {
-          const props = get(world, entity);
-          write(type, props[propertyName]);
-        } else {
-          console.error(`Get not supported for ${componentName}.${propertyName}`);
+        const { get, component } = getComponentBindings(componentName);
+        const cmpEid = findChildWithComponent(world, component, entity);
+        if (cmpEid) {
+          if (get) {
+            const props = get(world, cmpEid);
+            write(type, props[propertyName]);
+          } else {
+            console.error(`Get not supported for ${componentName}.${propertyName}`);
+          }
         }
       }
     })
