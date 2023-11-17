@@ -326,7 +326,7 @@ export const EntityNodes = definitionListToMap([
     out: "vec3",
     exec: (position: Vector3, entity: EntityID) => {
       const obj = APP.world.eid2obj.get(entity);
-      if (!obj || !(obj as Text).isTroikaText) {
+      if (!obj) {
         console.error(`vec3 localToWorld, could not find entity`, entity);
         return position.clone();
       }
@@ -342,7 +342,7 @@ export const EntityNodes = definitionListToMap([
     out: "euler",
     exec: (rotation: Euler, entity: EntityID) => {
       const obj = APP.world.eid2obj.get(entity);
-      if (!obj || !(obj as Text).isTroikaText) {
+      if (!obj) {
         console.error(`euler localToWorld, could not find entity`, entity);
         return rotation.clone();
       }
