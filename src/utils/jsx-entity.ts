@@ -44,7 +44,7 @@ import {
 import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
 import { GrabbableParams, inflateGrabbable } from "../inflators/grabbable";
-import { inflateImage } from "../inflators/image";
+import { ImageParams, inflateImage } from "../inflators/image";
 import { inflateVideo, VideoParams } from "../inflators/video";
 import { inflateModel, ModelParams } from "../inflators/model";
 import { inflatePDFLoader, PDFLoaderParams } from "../inflators/pdf-loader";
@@ -271,14 +271,11 @@ export interface JSXComponentData extends ComponentData {
     size: [width: number, height: number];
     insets: [top: number, bottom: number, left: number, right: number];
     texture: Texture;
+    toneMapped?: boolean;
+    transparent?: boolean;
+    alphaTest?: number;
   };
-  image?: {
-    texture: Texture;
-    ratio: number;
-    projection: ProjectionMode;
-    alphaMode: AlphaMode;
-    cacheKey: string;
-  };
+  image?: ImageParams;
   video?: VideoParams;
   link?: LinkParams;
   networkedVideo?: true;

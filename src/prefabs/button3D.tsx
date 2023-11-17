@@ -53,7 +53,8 @@ export function Button3D({
       ratio: 1,
       projection: ProjectionMode.FLAT,
       alphaMode: AlphaMode.BLEND,
-      cacheKey: icon.cacheKey
+      cacheKey: icon.cacheKey,
+      renderOrder: APP.RENDER_ORDER.HUD_ICONS
     };
     iconOrText.scale = icon.scale;
   } else {
@@ -69,7 +70,7 @@ export function Button3D({
   return (
     <entity
       name={name}
-      slice9={{ size: [width, height], insets: [64, 66, 64, 66], texture }}
+      slice9={{ size: [width, height], insets: [64, 66, 64, 66], texture, transparent: false, alphaTest: 0.1 }}
       cursorRaycastable
       remoteHoverTarget
       hoverButton={{ type }}
