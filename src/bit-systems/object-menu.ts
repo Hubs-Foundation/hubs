@@ -247,6 +247,11 @@ function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
   world.eid2obj.get(ObjectMenu.scaleButtonRef[menu])!.visible = visible && APP.hubChannel!.can("spawn_and_move_media");
   world.eid2obj.get(ObjectMenu.openLinkButtonRef[menu])!.visible = visible;
 
+  // This is a hacky way of giving a chance to the object-menu-transform system to center the menu based on the
+  // visible buttons without accounting for the background plane.
+  const same = ObjectMenuTransform.prevObjectRef[menu] === ObjectMenuTransform.targetObjectRef[menu];
+  world.eid2obj.get(ObjectMenu.backgroundRef[menu])!.visible = visible && same;
+
   // Hide unimplemented features for now.
   // TODO: Implement and show the buttons.
   world.eid2obj.get(ObjectMenu.cameraFocusButtonRef[menu])!.visible = false;
