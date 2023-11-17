@@ -474,7 +474,7 @@ export const EntityNodes = definitionListToMap([
       const matEid = read<EntityID>("material");
 
       if (configuration.networked) {
-        takeOwnership(world, matEid);
+        takeOwnership(world, entity);
       }
 
       const { set } = getComponentBindings("object-material")!;
