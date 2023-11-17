@@ -6,6 +6,8 @@ import rotateIconSrc from "../assets/rotate-action.png";
 import scaleIconSrc from "../assets/scale-action.png";
 import removeIconSrc from "../assets/remove-action.png";
 import { Plane } from "./plane";
+import { FrontSide } from "three";
+import { Layers } from "../camera-layers";
 
 export async function loadObjectMenuButtonIcons() {
   return Promise.all([
@@ -286,7 +288,9 @@ export function ObjectMenuPrefab() {
         position={position.background}
         width={0.8}
         height={0.8}
-        material={{ transparent: true, opacity: 0 }}
+        material={{ transparent: true, opacity: 0, side: FrontSide }}
+        renderOrder={APP.RENDER_ORDER.HUD_BACKGROUND}
+        layers={1 << Layers.CAMERA_LAYER_UI}
       />
       <PinButton ref={refs.pin} position={position.pin} />
       <UnpinButton ref={refs.unpin} position={position.unpin} />
