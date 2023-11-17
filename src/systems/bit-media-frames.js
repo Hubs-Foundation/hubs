@@ -144,45 +144,50 @@ const snapToFrame = (() => {
   const framePos = new Vector3();
   const frameQuat = new Quaternion();
   const frameScale = new Vector3();
+  const newScale = new Vector3();
   const m4 = new Matrix4();
   // Lookup for adjusting axis alignment
   const AxisAlignMultipliers = new Array();
   AxisAlignMultipliers[AxisAlignType.MIN] = -1;
-  AxisAlignMultipliers[AxisAlignType.CENTER] = 0;
   AxisAlignMultipliers[AxisAlignType.MAX] = +1;
   
-  return (world, frame, target) => {
-    const frameObj = world.eid2obj.get(frame);
-    const targetObj = world.eid2obj.get(target);
+  return (world, frameEid, targetEid) => {
+    const frameObj = world.eid2obj.get(frameEid);
+    const targetObj = world.eid2obj.get(targetEid);
 
     // Copy frame transform
     frameObj.updateMatrices();
     frameObj.matrixWorld.decompose(framePos, frameQuat, frameScale);
 
-    const frameBounds = MediaFrame.bounds[frame];
-    const contentBounds = MediaContentBounds.bounds[target];
+    // Note that bounds are independent of scale
+    const frameBounds = MediaFrame.bounds[frameEid];
+    const contentBounds = MediaContentBounds.bounds[targetEid];
 
     // Apply scale settings
-    const scaleToBounds = MediaFrame.flags[frame] & MEDIA_FRAME_FLAGS.SCALE_TO_BOUNDS;
-    if(scaleToBounds) {
+    newScale.copy(frameScale)
+    if(MediaFrame.flags[frameEid] & MEDIA_FRAME_FLAGS.SCALE_TO_BOUNDS) {
       // Adjust content scale to fit inside the frame
-      const scaleFactor = scaleForAspectFit(frameBounds, contentBounds)
-      frameScale.multiplyScalar(scaleFactor)
+      newScale.multiplyScalar(scaleForAspectFit(frameBounds, contentBounds));
     } else {
-      // Preserve the current scale
-      frameScale.setFromMatrixScale(targetObj.matrixWorld);
+      // Preserve the current object scale
+      newScale.setFromMatrixScale(targetObj.matrixWorld);
     }
 
     // Apply boundary alignment on all three axes
+    const frameAxisAlignments = MediaFrame.align[frameEid];
     for(let i = 0; i < 3; ++i) {
-      // Offset the content from the center to the desired axis alignment
-      const axisAlignment = MediaFrame.align[frame][i];
-      const alignmentMultiplier = AxisAlignMultipliers[axisAlignment];
-      const positionDelta = alignmentMultiplier * (frameBounds[i] - frameScale.getComponent(i) * contentBounds[i]) / 2;
-      framePos.setComponent(i, framePos.getComponent(i) + positionDelta);
+      const axisAlignment = frameAxisAlignments[i];
+      if(axisAlignment != AxisAlignType.CENTER) {
+        // Offset the content from the center to the desired axis alignment
+        const alignmentMultiplier = AxisAlignMultipliers[axisAlignment];
+        const frameBoundsWorldSpace = frameBounds[i] * frameScale.getComponent(i);
+        const contentBoundsWorldSpace = contentBounds[i] * newScale.getComponent(i);
+        const positionDelta = alignmentMultiplier * (frameBoundsWorldSpace - contentBoundsWorldSpace) / 2;
+        framePos.setComponent(i, framePos.getComponent(i) + positionDelta);
+      }
     }
-
-    setMatrixWorld(targetObj, m4.compose(framePos, frameQuat, frameScale));
+    // Transform content to match frame specification
+    setMatrixWorld(targetObj, m4.compose(framePos, frameQuat, newScale));
   };
 })();
 
@@ -206,12 +211,11 @@ previewMaterial.transparent = true;
 previewMaterial.opacity = 0.5;
 function createPreview(world, capturableEid) {
   // Source object to copy
-  let srcObj;
+  const capturableObj = world.eid2obj.get(capturableEid);
   // Copied object to use as preview
   let previewObj;
   let videoObj;
   let aspectRatio;
-  const capturableObj = world.eid2obj.get(capturableEid);
   if (hasComponent(world, AEntity, capturableEid)) {
     const video = capturableObj.el.components["media-video"];
     if (video) {
@@ -220,17 +224,15 @@ function createPreview(world, capturableEid) {
         (video.videoTexture.image.videoWidth || video.videoTexture.image.width);
       videoObj = capturableObj.el.getObject3D("mesh");
     }
-    srcObj = capturableObj;
   } else {
     const mediaEid = findChildWithComponent(world, MediaLoaded, capturableEid);
     if (hasComponent(world, MediaVideo, mediaEid)) {
       aspectRatio = MediaVideo.ratio[mediaEid];
       videoObj = world.eid2obj.get(mediaEid);
     }
-    srcObj = capturableObj;
   }
 
-  // Audios can't be cloned so we take a different path for them
+  // Videos can't be cloned so we take a different path for them
   if (videoObj) {
     // Video mesh will be scaled to the aspect ratio and vertical orientation of the video
     // this is then placed inside a Group to keep the downstream snap logic simpler
@@ -243,7 +245,7 @@ function createPreview(world, capturableEid) {
     previewObj = new Group();
     previewObj.add(videoMesh);
   } else {
-    previewObj = cloneObject3D(srcObj, false);
+    previewObj = cloneObject3D(capturableObj, false);
     previewObj.traverse(node => {
       updateMaterials(node, function (srcMat) {
         const mat = srcMat.clone();
@@ -255,20 +257,11 @@ function createPreview(world, capturableEid) {
         return mat;
       });
     });
-    // Copy the target's transform to preserve scale, 
-    // but position and orientation will be overriden later by the snap
-    setMatrixWorld(previewObj, srcObj.matrixWorld);
+    // Copy the target's transform to preserve scale for some of the media frame options
+    setMatrixWorld(previewObj, capturableObj.matrixWorld);
   }
-
   world.scene.add(previewObj);
   return previewObj;
-
-  //AVN: NOT SURE WHAT THIS DOES BUT IT MAY NEED REINSTATING (PROBABLY VIDEO)
-  // if(hasComponent(world, AEntity, capturable)) {
-  //   cloneObj.el = capturableObj.el;
-  // }
-
-  // return cloneObj;
 }
 
 function showPreview(world, frameEid, capturableEid) {
