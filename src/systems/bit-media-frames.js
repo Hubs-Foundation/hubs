@@ -175,7 +175,7 @@ const snapToFrame = (() => {
 
     // Apply boundary alignment on all three axes
     for(let i = 0; i < 3; ++i) {
-      // Calculate the delta required to shift the content from the center to the desired axis alignment
+      // Offset the content from the center to the desired axis alignment
       const axisAlignment = MediaFrame.align[frame][i];
       const alignmentMultiplier = AxisAlignMultipliers[axisAlignment];
       const positionDelta = alignmentMultiplier * (frameBounds[i] - frameScale.getComponent(i) * contentBounds[i]) / 2;
@@ -209,36 +209,36 @@ function createPreview(world, capturableEid) {
   let srcObj;
   // Copied object to use as preview
   let previewObj;
-  let isVideo = false;
-  let ratio = 1;
+  let videoObj;
+  let aspectRatio;
   const capturableObj = world.eid2obj.get(capturableEid);
   if (hasComponent(world, AEntity, capturableEid)) {
     const video = capturableObj.el.components["media-video"];
-    isVideo = !!video;
-    if (isVideo) {
-      ratio =
+    if (video) {
+      aspectRatio =
         (video.videoTexture.image.videoHeight || video.videoTexture.image.height) /
         (video.videoTexture.image.videoWidth || video.videoTexture.image.width);
+      videoObj = capturableObj.el.getObject3D("mesh");
     }
     srcObj = capturableObj;
   } else {
     const mediaEid = findChildWithComponent(world, MediaLoaded, capturableEid);
-    isVideo = hasComponent(world, MediaVideo, mediaEid);
-    if (isVideo) {
-      ratio = MediaVideo.ratio[mediaEid];
+    if (hasComponent(world, MediaVideo, mediaEid)) {
+      aspectRatio = MediaVideo.ratio[mediaEid];
+      videoObj = world.eid2obj.get(mediaEid);
     }
-    srcObj = world.eid2obj.get(mediaEid);
+    srcObj = capturableObj;
   }
 
   // Audios can't be cloned so we take a different path for them
-  if (isVideo) {
+  if (videoObj) {
     // Video mesh will be scaled to the aspect ratio and vertical orientation of the video
     // this is then placed inside a Group to keep the downstream snap logic simpler
     const videoMesh = new Mesh(videoGeometry, previewMaterial);
-    videoMesh.material.map = srcObj.el.getObject3D("mesh").material.map;
+    videoMesh.material.map = videoObj.material.map;
     videoMesh.material.needsUpdate = true;
     // Preview mesh UVs are set to accommodate textureLoader default, but video textures don't match this
-    videoMesh.scale.setY(TEXTURES_FLIP_Y !== videoMesh.material.map.flipY ? -ratio : ratio);
+    videoMesh.scale.setY(TEXTURES_FLIP_Y !== videoMesh.material.map.flipY ? -aspectRatio : aspectRatio);
     videoMesh.matrixNeedsUpdate = true;
     previewObj = new Group();
     previewObj.add(videoMesh);
