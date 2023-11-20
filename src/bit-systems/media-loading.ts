@@ -115,28 +115,32 @@ function resizeAndRecenter(world: HubsWorld, mediaLoaderEid: EntityID, box: Box3
   }
 }
 
-function* animateScale(world: HubsWorld, mediaLoaderEid: EntityID) {
+export function* animateScale(world: HubsWorld, mediaLoaderEid: EntityID) {
+  const mediaLoaderRootObj = world.eid2obj.get(mediaLoaderEid)!;
+  const onAnimate = ([scale]: [Vector3]) => {
+    mediaLoaderRootObj.scale.copy(scale);
+    mediaLoaderRootObj.matrixNeedsUpdate = true;
+  };
+  const scalar = 0.001;
+  const startScale = new Vector3().copy(mediaLoaderRootObj.scale).multiplyScalar(scalar);
+  const endScale = new Vector3().copy(mediaLoaderRootObj.scale);
+  // Animate once to set the initial state, then yield one frame
+  // because the first render of the new object may be slow
+  // TODO: We could move uploading textures to the GPU to the loader,
+  //       so that we don't hitch here
+  onAnimate([startScale]);
+  yield crNextFrame();
+  yield* animate({
+    properties: [[startScale, endScale]],
+    durationMS: 400,
+    easing: easeOutQuadratic,
+    fn: onAnimate
+  });
+}
+
+function* finish(world: HubsWorld, mediaLoaderEid: EntityID) {
   if (MediaLoader.flags[mediaLoaderEid] & MEDIA_LOADER_FLAGS.ANIMATE_LOAD) {
-    const mediaLoaderRootObj = world.eid2obj.get(mediaLoaderEid)!;
-    const onAnimate = ([scale]: [Vector3]) => {
-      mediaLoaderRootObj.scale.copy(scale);
-      mediaLoaderRootObj.matrixNeedsUpdate = true;
-    };
-    const scalar = 0.001;
-    const startScale = new Vector3().copy(mediaLoaderRootObj.scale).multiplyScalar(scalar);
-    const endScale = new Vector3().copy(mediaLoaderRootObj.scale);
-    // Animate once to set the initial state, then yield one frame
-    // because the first render of the new object may be slow
-    // TODO: We could move uploading textures to the GPU to the loader,
-    //       so that we don't hitch here
-    onAnimate([startScale]);
-    yield crNextFrame();
-    yield* animate({
-      properties: [[startScale, endScale]],
-      durationMS: 400,
-      easing: easeOutQuadratic,
-      fn: onAnimate
-    });
+    yield* animateScale(world, mediaLoaderEid);
   }
   if (entityExists(world, mediaLoaderEid)) {
     inflatePhysicsShape(world, mediaLoaderEid, {
@@ -359,7 +363,7 @@ export function mediaLoadingSystem(world: HubsWorld) {
         // We only animate/scale and add physics to the root media loader in the hierarchy to
         // avoid creating unnecessary nested physics shapes.
         if (i === mediaLoaderEids.length - 1) {
-          jobs.add(mediaLoaderEid, () => animateScale(world, mediaLoaderEid));
+          jobs.add(mediaLoaderEid, () => finish(world, mediaLoaderEid));
         }
       }
     }
