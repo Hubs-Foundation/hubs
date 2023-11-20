@@ -25,7 +25,7 @@ export function inflateSpawner(world: HubsWorld, eid: number, props: SpawnerPara
     src: props.src,
     recenter: true,
     resize: false,
-    animateLoad: false,
+    animateLoad: true,
     isObjectMenuTarget: false
   });
 
