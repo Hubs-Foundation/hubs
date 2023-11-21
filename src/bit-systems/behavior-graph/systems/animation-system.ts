@@ -80,6 +80,7 @@ function component2Action(world: HubsWorld, eid: EntityID, action: AnimationActi
     ) {
       const paused = NetworkedAnimationAction.flags[eid] & ANIMATION_FLAGS.PAUSED ? true : false;
       action.paused = paused;
+      action.play();
     }
     if (
       (BitAnimationAction.flags[eid] & ANIMATION_FLAGS.RUNNING) !==
