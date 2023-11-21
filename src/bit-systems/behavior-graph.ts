@@ -44,6 +44,7 @@ import { playersSystem } from "./behavior-graph/systems/player-system";
 import { animationSystem } from "./behavior-graph/systems/animation-system";
 import { mediaSystem } from "./behavior-graph/systems/media-system";
 import { MaterialNodes } from "./behavior-graph/material-nodes";
+import { TimerNodes } from "./behavior-graph/time-nodes";
 
 const coreValues = getCoreValueTypes();
 const logger = new DefaultLogger();
@@ -60,6 +61,7 @@ const registry: IRegistry = {
     ...ElementNodes,
     ...PhysicsNodes,
     ...MaterialNodes,
+    ...TimerNodes,
     ...definitionListToMap([
       makeFlowNodeDefinition({
         typeName: "hubs/displayMessage",
