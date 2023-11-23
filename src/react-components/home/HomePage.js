@@ -46,7 +46,7 @@ export function HomePage() {
     }
 
     if (qs.has("new")) {
-      createAndRedirectToNewHub(null, null, true);
+      createAndRedirectToNewHub(null, null, true, qs);
     }
   }, []);
 
