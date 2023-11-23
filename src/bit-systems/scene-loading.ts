@@ -116,8 +116,10 @@ function* loadScene(
       if (navMesh !== navMeshObj) {
         console.warn("The `nav-mesh` component should be placed directly on a mesh.");
       }
-      navMesh.visible = false;
-      sceneEl.systems.nav.loadMesh(navMesh, "character");
+      if (navMesh) {
+        navMesh.visible = false;
+        sceneEl.systems.nav.loadMesh(navMesh, "character");
+      }
     }
 
     // Create scene physics
