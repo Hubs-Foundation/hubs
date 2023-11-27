@@ -34,7 +34,7 @@ export const MediaFrame = defineComponent({
   guide: Types.eid,
   preview: Types.eid,
   previewingNid: Types.eid,
-  flags: Types.ui8,
+  flags: Types.ui8
 });
 export const TextTag = defineComponent();
 export const ReflectionProbe = defineComponent();

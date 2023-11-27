@@ -20,9 +20,9 @@ export const MEDIA_FRAME_FLAGS = {
 
 const DEFAULTS = {
   bounds: { x: 1, y: 1, z: 1 },
-  mediaType: "all",  
+  mediaType: "all",
   scaleToBounds: true,
-  align: { x: "center", y: "center", z: "center" },
+  align: { x: "center", y: "center", z: "center" }
 };
 export function inflateMediaFrame(world, eid, componentProps) {
   componentProps = Object.assign({}, DEFAULTS, componentProps);
@@ -82,14 +82,18 @@ export function inflateMediaFrame(world, eid, componentProps) {
   // Bounds
   MediaFrame.bounds[eid].set([componentProps.bounds.x, componentProps.bounds.y, componentProps.bounds.z]);
   // Axis alignment
-  const mapAlignProp = (alignPropValue) => {
-    return { 
-      "min": AxisAlignType.MIN,
-      "center": AxisAlignType.CENTER,
-      "max": AxisAlignType.MAX, 
-    }[alignPropValue]
-  }
-  MediaFrame.align[eid].set([mapAlignProp(componentProps.align.x), mapAlignProp(componentProps.align.y), mapAlignProp(componentProps.align.z)]);
+  const mapAlignProp = alignPropValue => {
+    return {
+      min: AxisAlignType.MIN,
+      center: AxisAlignType.CENTER,
+      max: AxisAlignType.MAX
+    }[alignPropValue];
+  };
+  MediaFrame.align[eid].set([
+    mapAlignProp(componentProps.align.x),
+    mapAlignProp(componentProps.align.y),
+    mapAlignProp(componentProps.align.z)
+  ]);
   // Preview guide
   MediaFrame.guide[eid] = guideEid;
   // Flags: scaleToBounds

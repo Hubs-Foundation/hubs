@@ -38,7 +38,6 @@ import { addObject3DComponent } from "../utils/jsx-entity";
 import { updateMaterials } from "../utils/material-utils";
 import { MEDIA_FRAME_FLAGS, AxisAlignType } from "../inflators/media-frame";
 import {
-  Box3,
   DoubleSide,
   Group,
   Matrix4,
@@ -150,7 +149,7 @@ const snapToFrame = (() => {
   const AxisAlignMultipliers = new Array();
   AxisAlignMultipliers[AxisAlignType.MIN] = -1;
   AxisAlignMultipliers[AxisAlignType.MAX] = +1;
-  
+
   return (world, frameEid, targetEid) => {
     const frameObj = world.eid2obj.get(frameEid);
     const targetObj = world.eid2obj.get(targetEid);
@@ -164,8 +163,8 @@ const snapToFrame = (() => {
     const contentBounds = MediaContentBounds.bounds[targetEid];
 
     // Apply scale settings
-    newScale.copy(frameScale)
-    if(MediaFrame.flags[frameEid] & MEDIA_FRAME_FLAGS.SCALE_TO_BOUNDS) {
+    newScale.copy(frameScale);
+    if (MediaFrame.flags[frameEid] & MEDIA_FRAME_FLAGS.SCALE_TO_BOUNDS) {
       // Adjust content scale to fit inside the frame
       newScale.multiplyScalar(scaleForAspectFit(frameBounds, contentBounds));
     } else {
@@ -175,14 +174,14 @@ const snapToFrame = (() => {
 
     // Apply boundary alignment on all three axes
     const frameAxisAlignments = MediaFrame.align[frameEid];
-    for(let i = 0; i < 3; ++i) {
+    for (let i = 0; i < 3; ++i) {
       const axisAlignment = frameAxisAlignments[i];
-      if(axisAlignment != AxisAlignType.CENTER) {
+      if (axisAlignment != AxisAlignType.CENTER) {
         // Offset the content from the center to the desired axis alignment
         const alignmentMultiplier = AxisAlignMultipliers[axisAlignment];
         const frameBoundsWorldSpace = frameBounds[i] * frameScale.getComponent(i);
         const contentBoundsWorldSpace = contentBounds[i] * newScale.getComponent(i);
-        const positionDelta = alignmentMultiplier * (frameBoundsWorldSpace - contentBoundsWorldSpace) / 2;
+        const positionDelta = (alignmentMultiplier * (frameBoundsWorldSpace - contentBoundsWorldSpace)) / 2;
         framePos.setComponent(i, framePos.getComponent(i) + positionDelta);
       }
     }
