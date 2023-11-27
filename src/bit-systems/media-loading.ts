@@ -1,8 +1,18 @@
-import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
-import { Box3, Euler, Vector3 } from "three";
+import {
+  addComponent,
+  addEntity,
+  defineQuery,
+  enterQuery,
+  entityExists,
+  exitQuery,
+  hasComponent,
+  removeComponent,
+  removeEntity
+} from "bitecs";
+import { Box3, Group, Matrix4, Quaternion, Vector3 } from "three";
 import { HubsWorld } from "../app";
 import {
-  GLTFModel,
+  Deletable,
   LoadedByMediaLoader,
   MediaContentBounds,
   MediaImageLoaderData,
@@ -10,6 +20,7 @@ import {
   MediaLink,
   MediaLoaded,
   MediaLoader,
+  MediaLoading,
   MediaVideoLoaderData,
   Networked,
   ObjectMenuTarget
@@ -19,11 +30,10 @@ import { ErrorObject } from "../prefabs/error-object";
 import { LoadingObject } from "../prefabs/loading-object";
 import { animate } from "../utils/animate";
 import { setNetworkedDataWithoutRoot } from "../utils/assign-network-ids";
-import { computeObjectAABB } from "../utils/auto-box-collider";
-import { crClearTimeout, crNextFrame, crTimeout } from "../utils/coroutine";
+import { crNextFrame } from "../utils/coroutine";
 import { ClearFunction, JobRunner, withRollback } from "../utils/coroutine-utils";
 import { easeOutQuadratic } from "../utils/easing";
-import { renderAsEntity } from "../utils/jsx-entity";
+import { addObject3DComponent, renderAsEntity } from "../utils/jsx-entity";
 import { loadImage } from "../utils/load-image";
 import { loadModel } from "../utils/load-model";
 import { loadPDF } from "../utils/load-pdf";
@@ -34,34 +44,10 @@ import { MediaType, mediaTypeName, resolveMediaInfo } from "../utils/media-utils
 import { EntityID } from "../utils/networking-types";
 import { LinkType, inflateLink } from "../inflators/link";
 import { inflateGrabbable } from "../inflators/grabbable";
-
-const getBox = (() => {
-  const rotation = new Euler();
-  return (world: HubsWorld, eid: EntityID, rootEid: EntityID, box: Box3, worldSpace?: boolean) => {
-    const obj = world.eid2obj.get(eid)!;
-    const rootObj = world.eid2obj.get(rootEid)!;
-
-    rotation.copy(obj.rotation);
-    obj.rotation.set(0, 0, 0);
-    obj.updateMatrices(true, true);
-    rootObj.updateMatrices(true, true);
-    rootObj.updateMatrixWorld(true);
-
-    computeObjectAABB(rootObj, box, false);
-
-    if (!box.isEmpty()) {
-      if (!worldSpace) {
-        obj.worldToLocal(box.min);
-        obj.worldToLocal(box.max);
-      }
-      obj.rotation.copy(rotation);
-      obj.matrixNeedsUpdate = true;
-    }
-
-    rootObj.matrixWorldNeedsUpdate = true;
-    rootObj.updateMatrices();
-  };
-})();
+import { findAncestorWithComponents, findAncestorsWithComponent } from "../utils/bit-utils";
+import { setMatrixWorld } from "../utils/three-utils";
+import { Type, inflateRigidBody } from "../inflators/rigid-body";
+import { COLLISION_LAYERS } from "../constants";
 
 export function* waitForMediaLoaded(world: HubsWorld, eid: EntityID) {
   while (hasComponent(world, MediaLoader, eid)) {
@@ -76,67 +62,92 @@ export const MEDIA_LOADER_FLAGS = {
   IS_OBJECT_MENU_TARGET: 1 << 3
 };
 
-function resizeAndRecenter(world: HubsWorld, media: EntityID, eid: EntityID) {
-  const resize = MediaLoader.flags[eid] & MEDIA_LOADER_FLAGS.RESIZE;
-  const recenter = MediaLoader.flags[eid] & MEDIA_LOADER_FLAGS.RECENTER;
-  if (!resize && !recenter) return;
+const origMat = new Matrix4();
+const invMat = new Matrix4();
+const tmpMat = new Matrix4();
+const diff = new Vector3();
+const rootPosition = new Vector3();
+const transformPosition = new Vector3();
+const rootRotation = new Quaternion();
+const rootScale = new Vector3();
+function resizeAndRecenter(world: HubsWorld, mediaLoaderEid: EntityID, box: Box3) {
+  const resize = MediaLoader.flags[mediaLoaderEid] & MEDIA_LOADER_FLAGS.RESIZE;
+  const recenter = MediaLoader.flags[mediaLoaderEid] & MEDIA_LOADER_FLAGS.RECENTER;
 
-  const mediaObj = world.eid2obj.get(media)!;
-  const box = new Box3();
-  box.setFromObject(mediaObj);
+  if (resize || recenter) {
+    const mediaLoaderObj = world.eid2obj.get(mediaLoaderEid)!;
+    const mediaObj = mediaLoaderObj.children.at(0)!;
 
-  // The AABB can be empty here for interactables that fetch  media (ie. gltf with an empty that has a video component).
-  // If we don't return the interactable would be wrongly positioned at the (0,0,0).
-  if (box.isEmpty()) return;
+    mediaLoaderObj.updateMatrixWorld();
+    origMat.copy(mediaLoaderObj.matrixWorld);
+    tmpMat.copy(origMat);
+    invMat.copy(tmpMat).invert();
+    tmpMat.multiply(invMat);
+    setMatrixWorld(mediaLoaderObj, tmpMat);
+    mediaLoaderObj.updateMatrixWorld();
+    tmpMat.decompose(rootPosition, rootRotation, rootScale);
 
-  let scalar = 1;
-  if (resize) {
-    const size = new Vector3();
-    box.getSize(size);
-    scalar = 1 / Math.max(size.x, size.y, size.z);
-    if (hasComponent(world, GLTFModel, media)) scalar = scalar * 0.5;
-    mediaObj.scale.multiplyScalar(scalar);
-    mediaObj.matrixNeedsUpdate = true;
-  }
+    box.setFromObject(mediaObj);
 
-  if (recenter) {
-    const center = new Vector3();
-    box.getCenter(center);
-    mediaObj.position.copy(center).multiplyScalar(-1 * scalar);
-    mediaObj.matrixNeedsUpdate = true;
+    // The AABB can be empty here for interactables that fetch media (ie. gltf with an empty that has a video component).
+    // If we don't return the interactable would be wrongly positioned at the (0,0,0).
+    if (box.isEmpty()) return;
+
+    let scalar = 1;
+    if (resize) {
+      const size = new Vector3();
+      box.getSize(size);
+      scalar = 1 / Math.max(size.x, size.y, size.z);
+    }
+
+    if (recenter) {
+      const center = new Vector3();
+      center.addVectors(box.min, box.max).multiplyScalar(0.5);
+      diff.subVectors(rootPosition, center);
+      diff.multiplyScalar(scalar);
+      transformPosition.addVectors(rootPosition, diff);
+    }
+
+    rootScale.set(scalar, scalar, scalar);
+    tmpMat.compose(transformPosition, rootRotation, rootScale);
+    setMatrixWorld(mediaObj, tmpMat);
+    setMatrixWorld(mediaLoaderObj, origMat);
   }
 }
 
-export function* animateScale(world: HubsWorld, media: EntityID) {
-  const mediaObj = world.eid2obj.get(media)!;
-  const onAnimate = ([position, scale]: [Vector3, Vector3]) => {
-    mediaObj.position.copy(position);
-    mediaObj.scale.copy(scale);
-    mediaObj.matrixNeedsUpdate = true;
+export function* animateScale(world: HubsWorld, mediaLoaderEid: EntityID) {
+  const mediaLoaderRootObj = world.eid2obj.get(mediaLoaderEid)!;
+  const onAnimate = ([scale]: [Vector3]) => {
+    mediaLoaderRootObj.scale.copy(scale);
+    mediaLoaderRootObj.matrixNeedsUpdate = true;
   };
   const scalar = 0.001;
-  const startScale = new Vector3().copy(mediaObj.scale).multiplyScalar(scalar);
-  const endScale = new Vector3().copy(mediaObj.scale);
-  // The animation should affect the mediaObj as if its parent were being scaled:
-  // If mediaObj is offset from its parent (e.g. because it was recentered),
-  // then its position relative to its parent also needs to be scaled.
-  const startPosition = new Vector3().copy(mediaObj.position).multiplyScalar(scalar);
-  const endPosition = new Vector3().copy(mediaObj.position);
+  const startScale = new Vector3().copy(mediaLoaderRootObj.scale).multiplyScalar(scalar);
+  const endScale = new Vector3().copy(mediaLoaderRootObj.scale);
   // Animate once to set the initial state, then yield one frame
   // because the first render of the new object may be slow
   // TODO: We could move uploading textures to the GPU to the loader,
   //       so that we don't hitch here
-  onAnimate([startPosition, startScale]);
+  onAnimate([startScale]);
   yield crNextFrame();
   yield* animate({
-    properties: [
-      [startPosition, endPosition],
-      [startScale, endScale]
-    ],
+    properties: [[startScale, endScale]],
     durationMS: 400,
     easing: easeOutQuadratic,
     fn: onAnimate
   });
+}
+
+function* finish(world: HubsWorld, mediaLoaderEid: EntityID) {
+  if (MediaLoader.flags[mediaLoaderEid] & MEDIA_LOADER_FLAGS.ANIMATE_LOAD) {
+    yield* animateScale(world, mediaLoaderEid);
+  }
+  if (entityExists(world, mediaLoaderEid)) {
+    inflatePhysicsShape(world, mediaLoaderEid, {
+      type: Shape.HULL,
+      minHalfExtent: 0.04
+    });
+  }
 }
 
 // TODO: Move to bit utils and rename
@@ -227,12 +238,6 @@ function* loadByMediaType(
 }
 
 function* loadMedia(world: HubsWorld, eid: EntityID) {
-  let loadingObjEid = 0;
-  const addLoadingObjectTimeout = crTimeout(() => {
-    loadingObjEid = renderAsEntity(world, LoadingObject());
-    add(world, loadingObjEid, eid);
-  }, 400);
-  yield withRollback(Promise.resolve(), () => loadingObjEid && removeEntity(world, loadingObjEid));
   const src = APP.getString(MediaLoader.src[eid]);
   let media: EntityID;
   try {
@@ -247,57 +252,84 @@ function* loadMedia(world: HubsWorld, eid: EntityID) {
     media = renderAsEntity(world, ErrorObject());
   }
   addComponent(world, LoadedByMediaLoader, media);
-  crClearTimeout(addLoadingObjectTimeout);
-  loadingObjEid && removeEntity(world, loadingObjEid);
+  MediaLoader.mediaRef[eid] = media;
+  const mediaObj = world.eid2obj.get(media)!;
+  mediaObj.visible = false;
   return media;
 }
 
 const tmpVector = new Vector3();
 const box = new Box3();
-function* loadAndAnimateMedia(world: HubsWorld, eid: EntityID, clearRollbacks: ClearFunction) {
-  if (MediaLoader.flags[eid] & MEDIA_LOADER_FLAGS.IS_OBJECT_MENU_TARGET) {
-    addComponent(world, ObjectMenuTarget, eid);
+function* loadAndAnimateMedia(world: HubsWorld, mediaLoaderEid: EntityID, clearRollbacks: ClearFunction) {
+  if (MediaLoader.flags[mediaLoaderEid] & MEDIA_LOADER_FLAGS.IS_OBJECT_MENU_TARGET) {
+    addComponent(world, ObjectMenuTarget, mediaLoaderEid);
   }
-  const media = yield* loadMedia(world, eid);
+
+  const mediaEid = yield* loadMedia(world, mediaLoaderEid);
   clearRollbacks(); // After this point, normal entity cleanup will takes care of things
 
-  resizeAndRecenter(world, media, eid);
-  add(world, media, eid);
-  setNetworkedDataWithoutRoot(world, APP.getString(Networked.id[eid])!, media);
-  if (MediaLoader.flags[eid] & MEDIA_LOADER_FLAGS.ANIMATE_LOAD) {
-    yield* animateScale(world, media);
+  // Media loaders that require resize/rotate need and intermediate object to apply the transform to
+  // otherwise we will be updating the transform of the media.
+  const resize = MediaLoader.flags[mediaLoaderEid] & MEDIA_LOADER_FLAGS.RESIZE;
+  const recenter = MediaLoader.flags[mediaLoaderEid] & MEDIA_LOADER_FLAGS.RECENTER;
+  if (resize || recenter) {
+    const mediaTransformEid = addEntity(world);
+    const mediaTransformObj = new Group();
+    mediaTransformObj.name = "Media Loader Transform";
+    addObject3DComponent(world, mediaTransformEid, mediaTransformObj);
+    add(world, mediaTransformEid, mediaLoaderEid);
+    add(world, mediaEid, mediaTransformEid);
+  } else {
+    add(world, mediaEid, mediaLoaderEid);
   }
-  removeComponent(world, MediaLoader, eid);
-  removeComponent(world, MediaLink, eid);
 
-  if (media) {
-    if (hasComponent(world, MediaLoaded, media)) {
-      getBox(world, eid, media, box);
-      addComponent(world, MediaContentBounds, eid);
-      box.getSize(tmpVector);
-      MediaContentBounds.bounds[eid].set(tmpVector.toArray());
-    }
-    // TODO update scale?
-    inflatePhysicsShape(world, eid, {
-      type: hasComponent(world, GLTFModel, media) ? Shape.HULL : Shape.BOX,
-      minHalfExtent: 0.04
-    });
-  }
+  setNetworkedDataWithoutRoot(world, APP.getString(Networked.id[mediaLoaderEid])!, mediaEid);
+
+  addComponent(world, MediaContentBounds, mediaLoaderEid);
+  const mediaObj = world.eid2obj.get(mediaEid)!;
+  box.setFromObject(mediaObj);
+  box.getSize(tmpVector);
+  MediaContentBounds.bounds[mediaLoaderEid].set(tmpVector.toArray());
+
+  removeComponent(world, MediaLoading, mediaLoaderEid);
+  removeComponent(world, MediaLink, mediaLoaderEid);
 }
 
+const loadingCubes = new Map();
 const jobs = new JobRunner();
-const mediaLoaderQuery = defineQuery([MediaLoader]);
-const mediaLoaderEnterQuery = enterQuery(mediaLoaderQuery);
-const mediaLoaderExitQuery = exitQuery(mediaLoaderQuery);
+const mediaLoadingQuery = defineQuery([MediaLoading]);
+const mediaLoadingEnterQuery = enterQuery(mediaLoadingQuery);
+const mediaLoadingExitQuery = exitQuery(mediaLoadingQuery);
 const mediaLoadedQuery = defineQuery([MediaLoaded]);
 const mediaLoadedEnterQuery = enterQuery(mediaLoadedQuery);
 const mediaLoadedExitQuery = exitQuery(mediaLoadedQuery);
 export function mediaLoadingSystem(world: HubsWorld) {
-  mediaLoaderEnterQuery(world).forEach(function (eid) {
+  mediaLoadingEnterQuery(world).forEach(function (eid) {
+    const mediaLoaderEids = findAncestorsWithComponent(world, MediaLoader, eid);
+    mediaLoaderEids.forEach(mediaLoaderEid => {
+      MediaLoader.count[mediaLoaderEid]++;
+    });
+
+    if (MediaLoader.flags[eid] & MEDIA_LOADER_FLAGS.ANIMATE_LOAD) {
+      const loadingObjEid = renderAsEntity(world, LoadingObject());
+      add(world, loadingObjEid, eid);
+      loadingCubes.set(eid, loadingObjEid);
+    }
+
+    // If it's not deletable media, we need to add a rigid body to correctly position the physics shape
+    const deletableEid = findAncestorWithComponents(world, [MediaLoader, Deletable], eid);
+    if (!deletableEid) {
+      inflateRigidBody(world, eid, {
+        type: Type.STATIC,
+        collisionGroup: COLLISION_LAYERS.INTERACTABLES,
+        collisionMask: COLLISION_LAYERS.INTERACTABLES
+      });
+    }
+
     jobs.add(eid, clearRollbacks => loadAndAnimateMedia(world, eid, clearRollbacks));
   });
 
-  mediaLoaderExitQuery(world).forEach(function (eid) {
+  mediaLoadingExitQuery(world).forEach(function (eid) {
     jobs.stop(eid);
 
     if (MediaImageLoaderData.has(eid)) {
@@ -306,6 +338,34 @@ export function mediaLoadingSystem(world: HubsWorld) {
 
     if (MediaVideoLoaderData.has(eid)) {
       MediaVideoLoaderData.delete(eid);
+    }
+
+    const mediaLoaderEids = findAncestorsWithComponent(world, MediaLoader, eid);
+    for (let i = 0; i < mediaLoaderEids.length; i++) {
+      const mediaLoaderEid = mediaLoaderEids[i];
+      MediaLoader.count[mediaLoaderEid]--;
+      // Hide loading cube and resize/recenter when the media loader has finished
+      // loading all it's nested entities.
+      if (MediaLoader.count[mediaLoaderEid] === 0) {
+        if (MediaLoader.flags[mediaLoaderEid] & MEDIA_LOADER_FLAGS.ANIMATE_LOAD) {
+          const loadingCubeEid = loadingCubes.get(mediaLoaderEid);
+          const loadingCube = world.eid2obj.get(loadingCubeEid);
+          loadingCube?.removeFromParent();
+          removeEntity(world, loadingCubeEid);
+        }
+
+        const mediaEid = MediaLoader.mediaRef[mediaLoaderEid];
+        const mediaObj = world.eid2obj.get(mediaEid)!;
+        mediaObj.visible = true;
+
+        resizeAndRecenter(world, mediaLoaderEid, box);
+
+        // We only animate/scale and add physics to the root media loader in the hierarchy to
+        // avoid creating unnecessary nested physics shapes.
+        if (i === mediaLoaderEids.length - 1) {
+          jobs.add(mediaLoaderEid, () => finish(world, mediaLoaderEid));
+        }
+      }
     }
   });
 

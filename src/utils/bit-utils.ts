@@ -2,7 +2,7 @@ import { AElement } from "aframe";
 import { Component, defineQuery, hasComponent, Query } from "bitecs";
 import { Object3D } from "three";
 import { HubsWorld } from "../app";
-import { findAncestor, traverseSome } from "./three-utils";
+import { findAncestor, findAncestors, traverseSome } from "./three-utils";
 import { EntityID } from "./networking-types";
 import qsTruthy from "./qs_truthy";
 
@@ -30,8 +30,17 @@ export function findAncestorEntity(world: HubsWorld, eid: number, predicate: (ei
   return obj && obj.eid!;
 }
 
+export function findAncestorEntities(world: HubsWorld, eid: number, predicate: (eid: number) => boolean): EntityID[] {
+  const objs = findAncestors(world.eid2obj.get(eid)!, (o: Object3D) => !!(o.eid && predicate(o.eid))) as Object3D[];
+  return objs.filter(obj => obj.eid!).map(obj => obj.eid) as EntityID[];
+}
+
 export function findAncestorWithComponent(world: HubsWorld, component: Component, eid: number) {
   return findAncestorEntity(world, eid, otherId => hasComponent(world, component, otherId));
+}
+
+export function findAncestorsWithComponent(world: HubsWorld, component: Component, eid: number): EntityID[] {
+  return findAncestorEntities(world, eid, otherId => hasComponent(world, component, otherId));
 }
 
 export function findAncestorWithComponents(world: HubsWorld, components: Array<Component>, eid: number) {
