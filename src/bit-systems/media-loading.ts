@@ -48,6 +48,7 @@ import { findAncestorWithComponents, findAncestorsWithComponent } from "../utils
 import { setMatrixWorld } from "../utils/three-utils";
 import { Type, inflateRigidBody } from "../inflators/rigid-body";
 import { COLLISION_LAYERS } from "../constants";
+import { getScaleCoefficient } from "../utils/auto-box-collider";
 
 export function* waitForMediaLoaded(world: HubsWorld, eid: EntityID) {
   while (hasComponent(world, MediaLoader, eid)) {
@@ -97,7 +98,7 @@ function resizeAndRecenter(world: HubsWorld, mediaLoaderEid: EntityID, box: Box3
     if (resize) {
       const size = new Vector3();
       box.getSize(size);
-      scalar = 1 / Math.max(size.x, size.y, size.z);
+      scalar = getScaleCoefficient(0.5, box);
     }
 
     if (recenter) {
