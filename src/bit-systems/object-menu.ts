@@ -221,6 +221,7 @@ function handleHeldExit(world: HubsWorld, eid: EntityID, menuEid: EntityID) {
 }
 
 function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
+  if (!APP.hubChannel) return;
   let target = ObjectMenu.targetRef[menu];
   const visible = !!(target && frozen) && (ObjectMenu.flags[menu] & ObjectMenuFlags.Visible) !== 0;
 
@@ -243,8 +244,8 @@ function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
   const mediaLoader = findAncestorWithComponent(world, MediaContentBounds, target);
   target = mediaLoader ? mediaLoader : target;
 
-  const canISpawnMove = APP.hubChannel!.can("spawn_and_move_media");
-  const canIPin = !!(target && canPin(APP.hubChannel!, target));
+  const canISpawnMove = APP.hubChannel.can("spawn_and_move_media");
+  const canIPin = !!(target && canPin(APP.hubChannel, target));
   const isEntityPinned = isPinned(target);
 
   // Parent visibility doesn't block raycasting, so we must set each button to be invisible
