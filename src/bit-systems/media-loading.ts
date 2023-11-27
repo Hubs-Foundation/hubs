@@ -140,14 +140,20 @@ export function* animateScale(world: HubsWorld, mediaLoaderEid: EntityID) {
 }
 
 function* finish(world: HubsWorld, mediaLoaderEid: EntityID) {
-  if (MediaLoader.flags[mediaLoaderEid] & MEDIA_LOADER_FLAGS.ANIMATE_LOAD) {
-    yield* animateScale(world, mediaLoaderEid);
-  }
   if (entityExists(world, mediaLoaderEid)) {
+    if (MediaLoader.flags[mediaLoaderEid] & MEDIA_LOADER_FLAGS.ANIMATE_LOAD) {
+      yield* animateScale(world, mediaLoaderEid);
+    }
     inflatePhysicsShape(world, mediaLoaderEid, {
       type: Shape.HULL,
       minHalfExtent: 0.04
     });
+
+    addComponent(world, MediaContentBounds, mediaLoaderEid);
+    const mediaLoaderObj = world.eid2obj.get(mediaLoaderEid)!;
+    box.setFromObject(mediaLoaderObj);
+    box.getSize(tmpVector);
+    MediaContentBounds.bounds[mediaLoaderEid].set(tmpVector.toArray());
   }
 }
 
@@ -285,12 +291,6 @@ function* loadAndAnimateMedia(world: HubsWorld, mediaLoaderEid: EntityID, clearR
   }
 
   setNetworkedDataWithoutRoot(world, APP.getString(Networked.id[mediaLoaderEid])!, mediaEid);
-
-  addComponent(world, MediaContentBounds, mediaLoaderEid);
-  const mediaObj = world.eid2obj.get(mediaEid)!;
-  box.setFromObject(mediaObj);
-  box.getSize(tmpVector);
-  MediaContentBounds.bounds[mediaLoaderEid].set(tmpVector.toArray());
 
   removeComponent(world, MediaLoading, mediaLoaderEid);
   removeComponent(world, MediaLink, mediaLoaderEid);
