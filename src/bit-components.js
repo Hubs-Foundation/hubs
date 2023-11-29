@@ -30,9 +30,11 @@ export const MediaFrame = defineComponent({
   scale: [Types.f32, 3],
   mediaType: Types.ui8,
   bounds: [Types.f32, 3],
+  align: [Types.ui8, 3],
   guide: Types.eid,
   preview: Types.eid,
-  previewingNid: Types.eid
+  previewingNid: Types.eid,
+  flags: Types.ui8
 });
 export const TextTag = defineComponent();
 export const ReflectionProbe = defineComponent();

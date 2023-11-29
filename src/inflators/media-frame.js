@@ -8,9 +8,21 @@ import { inflateRigidBody, Type } from "./rigid-body";
 import { Fit, inflatePhysicsShape, Shape } from "./physics-shape";
 import { Mesh, BoxBufferGeometry, ShaderMaterial, Color, DoubleSide } from "three";
 
+export const AxisAlignType = {
+  MIN: 1 << 0,
+  CENTER: 1 << 1,
+  MAX: 1 << 2
+};
+
+export const MEDIA_FRAME_FLAGS = {
+  SCALE_TO_BOUNDS: 1 << 0
+};
+
 const DEFAULTS = {
   bounds: { x: 1, y: 1, z: 1 },
-  mediaType: "all"
+  mediaType: "all",
+  scaleToBounds: true,
+  align: { x: "center", y: "center", z: "center" }
 };
 export function inflateMediaFrame(world, eid, componentProps) {
   componentProps = Object.assign({}, DEFAULTS, componentProps);
@@ -58,6 +70,7 @@ export function inflateMediaFrame(world, eid, componentProps) {
 
   if (!hasComponent(world, Networked, eid)) addComponent(world, Networked, eid);
 
+  // Media types accepted
   MediaFrame.mediaType[eid] = {
     all: MediaType.ALL,
     "all-2d": MediaType.ALL_2D,
@@ -66,8 +79,27 @@ export function inflateMediaFrame(world, eid, componentProps) {
     video: MediaType.VIDEO,
     pdf: MediaType.PDF
   }[componentProps.mediaType];
+  // Bounds
   MediaFrame.bounds[eid].set([componentProps.bounds.x, componentProps.bounds.y, componentProps.bounds.z]);
+  // Axis alignment
+  const mapAlignProp = alignPropValue => {
+    return {
+      min: AxisAlignType.MIN,
+      center: AxisAlignType.CENTER,
+      max: AxisAlignType.MAX
+    }[alignPropValue];
+  };
+  MediaFrame.align[eid].set([
+    mapAlignProp(componentProps.align.x),
+    mapAlignProp(componentProps.align.y),
+    mapAlignProp(componentProps.align.z)
+  ]);
+  // Preview guide
   MediaFrame.guide[eid] = guideEid;
+  // Flags: scaleToBounds
+  let flags = 0;
+  if (componentProps.scaleToBounds) flags |= MEDIA_FRAME_FLAGS.SCALE_TO_BOUNDS;
+  MediaFrame.flags[eid] = flags;
 
   inflateRigidBody(world, eid, {
     type: Type.KINEMATIC,
