@@ -64,7 +64,7 @@ const tradeshows: RoomProperties = {
 enum Rooms {
   Demo = "iotAJFL",
   Tradeshows = "E5FoNKq",
-  ConferenceRoom = "null1",
+  ConferenceRoom = "g4Antqh",
   Lobby = "null2",
   BusinessArea = "null3"
 }
