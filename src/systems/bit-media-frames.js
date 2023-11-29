@@ -29,25 +29,14 @@ import {
   Rigidbody
 } from "../bit-components";
 import { MediaType } from "../utils/media-utils";
-import { cloneObject3D, createPlaneBufferGeometry, disposeNode, setMatrixWorld } from "../utils/three-utils";
+import { cloneObject3D, disposeNode, setMatrixWorld } from "../utils/three-utils";
 import { takeOwnership } from "../utils/take-ownership";
 import { takeSoftOwnership } from "../utils/take-soft-ownership";
 import { findAncestorWithComponent, findChildWithComponent } from "../utils/bit-utils";
-import { TEXTURES_FLIP_Y } from "../loaders/HubsTextureLoader";
 import { addObject3DComponent } from "../utils/jsx-entity";
 import { updateMaterials } from "../utils/material-utils";
 import { MEDIA_FRAME_FLAGS, AxisAlignType } from "../inflators/media-frame";
-import {
-  DoubleSide,
-  Group,
-  Matrix4,
-  Mesh,
-  MeshBasicMaterial,
-  NormalBlending,
-  Quaternion,
-  RGBAFormat,
-  Vector3
-} from "three";
+import { Matrix4, NormalBlending, Quaternion, RGBAFormat, Vector3 } from "three";
 
 const EMPTY_COLOR = 0x6fc0fd;
 const HOVER_COLOR = 0x2f80ed;
@@ -203,62 +192,23 @@ const setMatrixScale = (() => {
   };
 })();
 
-const videoGeometry = createPlaneBufferGeometry(1, 1, 1, 1, TEXTURES_FLIP_Y);
-const previewMaterial = new MeshBasicMaterial();
-previewMaterial.side = DoubleSide;
-previewMaterial.transparent = true;
-previewMaterial.opacity = 0.5;
 function createPreview(world, capturableEid) {
   // Source object to copy
   const capturableObj = world.eid2obj.get(capturableEid);
-  // Copied object to use as preview
-  let previewObj;
-  let videoObj;
-  let aspectRatio;
-  if (hasComponent(world, AEntity, capturableEid)) {
-    const video = capturableObj.el.components["media-video"];
-    if (video) {
-      aspectRatio =
-        (video.videoTexture.image.videoHeight || video.videoTexture.image.height) /
-        (video.videoTexture.image.videoWidth || video.videoTexture.image.width);
-      videoObj = capturableObj.el.getObject3D("mesh");
-    }
-  } else {
-    const mediaEid = findChildWithComponent(world, MediaLoaded, capturableEid);
-    if (hasComponent(world, MediaVideo, mediaEid)) {
-      aspectRatio = MediaVideo.ratio[mediaEid];
-      videoObj = world.eid2obj.get(mediaEid);
-    }
-  }
-
-  // Videos can't be cloned so we take a different path for them
-  if (videoObj) {
-    // Video mesh will be scaled to the aspect ratio and vertical orientation of the video
-    // this is then placed inside a Group to keep the downstream snap logic simpler
-    const videoMesh = new Mesh(videoGeometry, previewMaterial);
-    videoMesh.material.map = videoObj.material.map;
-    videoMesh.material.needsUpdate = true;
-    // Preview mesh UVs are set to accommodate textureLoader default, but video textures don't match this
-    videoMesh.scale.setY(TEXTURES_FLIP_Y !== videoMesh.material.map.flipY ? -aspectRatio : aspectRatio);
-    videoMesh.matrixNeedsUpdate = true;
-    previewObj = new Group();
-    previewObj.add(videoMesh);
-  } else {
-    previewObj = cloneObject3D(capturableObj, false);
-    previewObj.traverse(node => {
-      updateMaterials(node, function (srcMat) {
-        const mat = srcMat.clone();
-        mat.transparent = true;
-        mat.opacity = 0.5;
-        mat.format = RGBAFormat;
-        mat.blending = NormalBlending;
-        node.material = mat;
-        return mat;
-      });
+  const previewObj = cloneObject3D(capturableObj, false);
+  previewObj.traverse(node => {
+    updateMaterials(node, function (srcMat) {
+      const mat = srcMat.clone();
+      mat.transparent = true;
+      mat.opacity = 0.5;
+      mat.format = RGBAFormat;
+      mat.blending = NormalBlending;
+      node.material = mat;
+      return mat;
     });
-    // Copy the target's transform to preserve scale for some of the media frame options
-    setMatrixWorld(previewObj, capturableObj.matrixWorld);
-  }
+  });
+  // }
+  setMatrixWorld(previewObj, capturableObj.matrixWorld);
   world.scene.add(previewObj);
   return previewObj;
 }
