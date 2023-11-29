@@ -2,10 +2,10 @@ import { addComponent, defineQuery, entityExists, hasComponent } from "bitecs";
 import { Text } from "troika-three-text";
 import type { HubsWorld } from "../app";
 import {
+  Deleting,
   EntityStateDirty,
   HoveredRemoteRight,
   Interacted,
-  MediaContentBounds,
   MediaPDF,
   NetworkedPDF,
   ObjectMenuTransform,
@@ -16,7 +16,6 @@ import type { EntityID } from "../utils/networking-types";
 import { takeOwnership } from "../utils/take-ownership";
 import { PDFResourcesMap } from "./pdf-system";
 import { ObjectMenuTransformFlags } from "../inflators/object-menu-transform";
-import { canPin } from "../utils/bit-pinning-helper";
 
 function clicked(world: HubsWorld, eid: EntityID) {
   return hasComponent(world, Interacted, eid);
@@ -90,23 +89,11 @@ function flushToObject3Ds(world: HubsWorld, menu: EntityID, frozen: boolean) {
     ObjectMenuTransform.flags[menu] &= ~ObjectMenuTransformFlags.Enabled;
   }
 
-  // The media loader entity is the entity that's is actually pinned and decides
-  // the pinnable state of the pdf component so we need to check the media loader entity pin
-  // state to show/hide certain buttons. The media loader component is not present anymore after
-  // the media has been loaded but it will always have a MediaContentBounds.
-  // TODO We should use something more meaningful than MediaContentBounds for the media loader root entity
-  // or rename it to something like MediaRoot.
-  let canIPin = false;
-  const mediaLoader = findAncestorWithComponent(world, MediaContentBounds, target);
-  if (mediaLoader && canPin(APP.hubChannel!, mediaLoader)) {
-    canIPin = true;
-  }
-
   [PDFMenu.prevButtonRef[menu], PDFMenu.nextButtonRef[menu]].forEach(buttonRef => {
     const buttonObj = world.eid2obj.get(buttonRef)!;
     // Parent visibility doesn't block raycasting, so we must set each button to be invisible
     // TODO: Ensure that children of invisible entities aren't raycastable
-    buttonObj.visible = visible && canIPin;
+    buttonObj.visible = visible;
   });
 
   if (target) {

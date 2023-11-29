@@ -207,7 +207,6 @@ function createPreview(world, capturableEid) {
       return mat;
     });
   });
-  // }
   setMatrixWorld(previewObj, capturableObj.matrixWorld);
   world.scene.add(previewObj);
   return previewObj;

@@ -43,7 +43,7 @@ import { MediaType, mediaTypeName, resolveMediaInfo } from "../utils/media-utils
 import { EntityID } from "../utils/networking-types";
 import { LinkType, inflateLink } from "../inflators/link";
 import { inflateGrabbable } from "../inflators/grabbable";
-import { findAncestorsWithComponent } from "../utils/bit-utils";
+import { findAncestorsWithComponent, findChildWithComponent } from "../utils/bit-utils";
 import { setMatrixWorld } from "../utils/three-utils";
 import { computeObjectAABB, getScaleCoefficient } from "../utils/auto-box-collider";
 
@@ -129,14 +129,15 @@ function resizeAndRecenter(world: HubsWorld, mediaLoaderEid: EntityID, box: Box3
 }
 
 export function* animateScale(world: HubsWorld, mediaLoaderEid: EntityID) {
-  const mediaLoaderRootObj = world.eid2obj.get(mediaLoaderEid)!;
+  const mediaLoadedEid = findChildWithComponent(world, LoadedByMediaLoader, mediaLoaderEid)!;
+  const mediaLoadedObj = world.eid2obj.get(mediaLoadedEid)!;
   const onAnimate = ([scale]: [Vector3]) => {
-    mediaLoaderRootObj.scale.copy(scale);
-    mediaLoaderRootObj.matrixNeedsUpdate = true;
+    mediaLoadedObj.scale.copy(scale);
+    mediaLoadedObj.matrixNeedsUpdate = true;
   };
   const scalar = 0.001;
-  const startScale = new Vector3().copy(mediaLoaderRootObj.scale).multiplyScalar(scalar);
-  const endScale = new Vector3().copy(mediaLoaderRootObj.scale);
+  const startScale = new Vector3().copy(mediaLoadedObj.scale).multiplyScalar(scalar);
+  const endScale = new Vector3().copy(mediaLoadedObj.scale);
   // Animate once to set the initial state, then yield one frame
   // because the first render of the new object may be slow
   // TODO: We could move uploading textures to the GPU to the loader,

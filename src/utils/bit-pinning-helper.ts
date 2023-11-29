@@ -42,7 +42,7 @@ const _signInAndPinOrUnpinElement = (hubChannel: HubChannel, world: HubsWorld, e
 
 export const canPin = (hubChannel: HubChannel, eid: EntityID): boolean => {
   const createMessageData = createMessageDatas.get(eid)!;
-  if (createMessageData.prefabName !== "media") {
+  if (createMessageData && createMessageData.prefabName !== "media") {
     return false;
   }
   return isNetworkInstantiated(eid) && hubChannel.can("pin_objects");
