@@ -12,7 +12,6 @@ import {
 import { Box3, Group, Matrix4, Quaternion, Vector3 } from "three";
 import { HubsWorld } from "../app";
 import {
-  Deletable,
   LoadedByMediaLoader,
   MediaContentBounds,
   MediaImageLoaderData,
@@ -31,7 +30,7 @@ import { LoadingObject } from "../prefabs/loading-object";
 import { animate } from "../utils/animate";
 import { setNetworkedDataWithoutRoot } from "../utils/assign-network-ids";
 import { crNextFrame } from "../utils/coroutine";
-import { ClearFunction, JobRunner, withRollback } from "../utils/coroutine-utils";
+import { ClearFunction, JobRunner } from "../utils/coroutine-utils";
 import { easeOutQuadratic } from "../utils/easing";
 import { addObject3DComponent, renderAsEntity } from "../utils/jsx-entity";
 import { loadImage } from "../utils/load-image";
@@ -44,11 +43,9 @@ import { MediaType, mediaTypeName, resolveMediaInfo } from "../utils/media-utils
 import { EntityID } from "../utils/networking-types";
 import { LinkType, inflateLink } from "../inflators/link";
 import { inflateGrabbable } from "../inflators/grabbable";
-import { findAncestorWithComponents, findAncestorsWithComponent } from "../utils/bit-utils";
+import { findAncestorsWithComponent } from "../utils/bit-utils";
 import { setMatrixWorld } from "../utils/three-utils";
-import { Type, inflateRigidBody } from "../inflators/rigid-body";
-import { COLLISION_LAYERS } from "../constants";
-import { getScaleCoefficient } from "../utils/auto-box-collider";
+import { computeObjectAABB, getScaleCoefficient } from "../utils/auto-box-collider";
 
 export function* waitForMediaLoaded(world: HubsWorld, eid: EntityID) {
   while (hasComponent(world, MediaLoader, eid)) {
@@ -60,7 +57,8 @@ export const MEDIA_LOADER_FLAGS = {
   RECENTER: 1 << 0,
   RESIZE: 1 << 1,
   ANIMATE_LOAD: 1 << 2,
-  IS_OBJECT_MENU_TARGET: 1 << 3
+  IS_OBJECT_MENU_TARGET: 1 << 3,
+  MOVE_PARENT_NOT_OBJECT: 1 << 4
 };
 
 const origMat = new Matrix4();
@@ -74,13 +72,16 @@ const rootScale = new Vector3();
 function resizeAndRecenter(world: HubsWorld, mediaLoaderEid: EntityID, box: Box3) {
   const resize = MediaLoader.flags[mediaLoaderEid] & MEDIA_LOADER_FLAGS.RESIZE;
   const recenter = MediaLoader.flags[mediaLoaderEid] & MEDIA_LOADER_FLAGS.RECENTER;
+  const moveParentNotObject = MediaLoader.flags[mediaLoaderEid] & MEDIA_LOADER_FLAGS.MOVE_PARENT_NOT_OBJECT;
 
-  if (resize || recenter) {
-    const mediaLoaderObj = world.eid2obj.get(mediaLoaderEid)!;
-    const mediaObj = mediaLoaderObj.children.at(0)!;
+  const mediaLoaderObj = world.eid2obj.get(mediaLoaderEid)!;
+  const mediaObj = mediaLoaderObj.children.at(0)!;
 
-    mediaLoaderObj.updateMatrixWorld();
-    origMat.copy(mediaLoaderObj.matrixWorld);
+  mediaLoaderObj.updateMatrices();
+  origMat.copy(mediaLoaderObj.matrixWorld);
+
+  let scalar = 1;
+  if (recenter) {
     tmpMat.copy(origMat);
     invMat.copy(tmpMat).invert();
     tmpMat.multiply(invMat);
@@ -88,32 +89,43 @@ function resizeAndRecenter(world: HubsWorld, mediaLoaderEid: EntityID, box: Box3
     mediaLoaderObj.updateMatrixWorld();
     tmpMat.decompose(rootPosition, rootRotation, rootScale);
 
-    box.setFromObject(mediaObj);
-
-    // The AABB can be empty here for interactables that fetch media (ie. gltf with an empty that has a video component).
-    // If we don't return the interactable would be wrongly positioned at the (0,0,0).
+    computeObjectAABB(mediaObj, box, true);
     if (box.isEmpty()) return;
 
-    let scalar = 1;
     if (resize) {
-      const size = new Vector3();
-      box.getSize(size);
       scalar = getScaleCoefficient(0.5, box);
     }
 
-    if (recenter) {
-      const center = new Vector3();
-      center.addVectors(box.min, box.max).multiplyScalar(0.5);
-      diff.subVectors(rootPosition, center);
-      diff.multiplyScalar(scalar);
-      transformPosition.addVectors(rootPosition, diff);
-    }
+    const center = new Vector3();
+    center.addVectors(box.min, box.max).multiplyScalar(0.5);
+    diff.subVectors(rootPosition, center);
+    diff.multiplyScalar(scalar);
+    transformPosition.addVectors(rootPosition, diff);
 
     rootScale.set(scalar, scalar, scalar);
     tmpMat.compose(transformPosition, rootRotation, rootScale);
     setMatrixWorld(mediaObj, tmpMat);
     setMatrixWorld(mediaLoaderObj, origMat);
+  } else if (moveParentNotObject) {
+    origMat.decompose(rootPosition, rootRotation, rootScale);
+
+    computeObjectAABB(mediaObj, box, true);
+    if (box.isEmpty()) return;
+
+    const center = new Vector3();
+    center.addVectors(box.min, box.max).multiplyScalar(0.5);
+    diff.subVectors(rootPosition, center);
+    transformPosition.subVectors(rootPosition, diff);
+
+    tmpMat.compose(transformPosition, rootRotation, rootScale);
+    setMatrixWorld(mediaLoaderObj, tmpMat);
+    setMatrixWorld(mediaObj, origMat);
   }
+
+  addComponent(world, MediaContentBounds, mediaLoaderEid);
+  box.getSize(tmpVector);
+  tmpVector.multiplyScalar(scalar);
+  MediaContentBounds.bounds[mediaLoaderEid].set(tmpVector.toArray());
 }
 
 export function* animateScale(world: HubsWorld, mediaLoaderEid: EntityID) {
@@ -148,12 +160,6 @@ function* finish(world: HubsWorld, mediaLoaderEid: EntityID) {
       type: Shape.HULL,
       minHalfExtent: 0.04
     });
-
-    addComponent(world, MediaContentBounds, mediaLoaderEid);
-    const mediaLoaderObj = world.eid2obj.get(mediaLoaderEid)!;
-    box.setFromObject(mediaLoaderObj);
-    box.getSize(tmpVector);
-    MediaContentBounds.bounds[mediaLoaderEid].set(tmpVector.toArray());
   }
 }
 
@@ -315,16 +321,6 @@ export function mediaLoadingSystem(world: HubsWorld) {
       const loadingObjEid = renderAsEntity(world, LoadingObject());
       add(world, loadingObjEid, eid);
       loadingCubes.set(eid, loadingObjEid);
-    }
-
-    // If it's not deletable media, we need to add a rigid body to correctly position the physics shape
-    const deletableEid = findAncestorWithComponents(world, [MediaLoader, Deletable], eid);
-    if (!deletableEid) {
-      inflateRigidBody(world, eid, {
-        type: Type.STATIC,
-        collisionGroup: COLLISION_LAYERS.INTERACTABLES,
-        collisionMask: COLLISION_LAYERS.INTERACTABLES
-      });
     }
 
     jobs.add(eid, clearRollbacks => loadAndAnimateMedia(world, eid, clearRollbacks));
