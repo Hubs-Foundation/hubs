@@ -12,6 +12,7 @@ import {
 import { Box3, Group, Matrix4, Quaternion, Vector3 } from "three";
 import { HubsWorld } from "../app";
 import {
+  GLTFModel,
   LoadedByMediaLoader,
   MediaContentBounds,
   MediaImageLoaderData,
@@ -62,7 +63,6 @@ export const MEDIA_LOADER_FLAGS = {
 };
 
 const origMat = new Matrix4();
-const invMat = new Matrix4();
 const tmpMat = new Matrix4();
 const diff = new Vector3();
 const rootPosition = new Vector3();
@@ -75,41 +75,50 @@ function resizeAndRecenter(world: HubsWorld, mediaLoaderEid: EntityID, box: Box3
   const moveParentNotObject = MediaLoader.flags[mediaLoaderEid] & MEDIA_LOADER_FLAGS.MOVE_PARENT_NOT_OBJECT;
 
   const mediaLoaderObj = world.eid2obj.get(mediaLoaderEid)!;
-  const mediaObj = mediaLoaderObj.children.at(0)!;
-
-  mediaLoaderObj.updateMatrices();
-  origMat.copy(mediaLoaderObj.matrixWorld);
+  const mediaEid = findChildWithComponent(world, LoadedByMediaLoader, mediaLoaderEid)!;
+  const mediaObj = world.eid2obj.get(mediaEid)!;
 
   let scalar = 1;
   if (recenter) {
+    mediaLoaderObj.updateMatrices();
+    origMat.copy(mediaLoaderObj.matrixWorld);
     tmpMat.copy(origMat);
-    invMat.copy(tmpMat).invert();
-    tmpMat.multiply(invMat);
-    setMatrixWorld(mediaLoaderObj, tmpMat);
-    mediaLoaderObj.updateMatrixWorld();
+    // Reset rotation to correctly calculate AABB
     tmpMat.decompose(rootPosition, rootRotation, rootScale);
+    tmpMat.compose(rootPosition, rootRotation.identity(), new Vector3(1, 1, 1));
+    setMatrixWorld(mediaLoaderObj, tmpMat);
 
-    computeObjectAABB(mediaObj, box, true);
+    computeObjectAABB(mediaLoaderObj, box, true);
     if (box.isEmpty()) return;
 
     if (resize) {
-      scalar = getScaleCoefficient(0.5, box);
+      const mediaEid = findChildWithComponent(world, LoadedByMediaLoader, mediaLoaderEid)!;
+      scalar = getScaleCoefficient(hasComponent(world, GLTFModel, mediaEid) ? 0.5 : 1, box);
+      rootScale.set(scalar, scalar, scalar);
     }
 
+    // Calculate translate vector to move the AABB center of the object to the media loader center
     const center = new Vector3();
     center.addVectors(box.min, box.max).multiplyScalar(0.5);
     diff.subVectors(rootPosition, center);
     diff.multiplyScalar(scalar);
     transformPosition.addVectors(rootPosition, diff);
 
-    rootScale.set(scalar, scalar, scalar);
-    tmpMat.compose(transformPosition, rootRotation, rootScale);
+    // Set the new media world matrix and restore the media loader original matrix
+    tmpMat.compose(transformPosition, rootRotation.identity(), rootScale);
     setMatrixWorld(mediaObj, tmpMat);
     setMatrixWorld(mediaLoaderObj, origMat);
   } else if (moveParentNotObject) {
+    mediaLoaderObj.updateMatrices();
+    origMat.copy(mediaLoaderObj.matrixWorld);
+    tmpMat.copy(origMat);
+    tmpMat.decompose(rootPosition, rootRotation, rootScale);
+    tmpMat.compose(rootPosition, rootRotation.identity(), new Vector3(1, 1, 1));
+    setMatrixWorld(mediaLoaderObj, tmpMat);
+
     origMat.decompose(rootPosition, rootRotation, rootScale);
 
-    computeObjectAABB(mediaObj, box, true);
+    computeObjectAABB(mediaLoaderObj, box, true);
     if (box.isEmpty()) return;
 
     const center = new Vector3();
@@ -129,15 +138,15 @@ function resizeAndRecenter(world: HubsWorld, mediaLoaderEid: EntityID, box: Box3
 }
 
 export function* animateScale(world: HubsWorld, mediaLoaderEid: EntityID) {
-  const mediaLoadedEid = findChildWithComponent(world, LoadedByMediaLoader, mediaLoaderEid)!;
-  const mediaLoadedObj = world.eid2obj.get(mediaLoadedEid)!;
+  const mediaLoaderObj = world.eid2obj.get(mediaLoaderEid)!;
+  const transformObj = mediaLoaderObj.children.at(0)!;
   const onAnimate = ([scale]: [Vector3]) => {
-    mediaLoadedObj.scale.copy(scale);
-    mediaLoadedObj.matrixNeedsUpdate = true;
+    transformObj.scale.copy(scale);
+    transformObj.matrixNeedsUpdate = true;
   };
   const scalar = 0.001;
-  const startScale = new Vector3().copy(mediaLoadedObj.scale).multiplyScalar(scalar);
-  const endScale = new Vector3().copy(mediaLoadedObj.scale);
+  const startScale = new Vector3().copy(transformObj.scale).multiplyScalar(scalar);
+  const endScale = new Vector3().copy(transformObj.scale);
   // Animate once to set the initial state, then yield one frame
   // because the first render of the new object may be slow
   // TODO: We could move uploading textures to the GPU to the loader,
@@ -282,20 +291,12 @@ function* loadAndAnimateMedia(world: HubsWorld, mediaLoaderEid: EntityID, clearR
   const mediaEid = yield* loadMedia(world, mediaLoaderEid);
   clearRollbacks(); // After this point, normal entity cleanup will takes care of things
 
-  // Media loaders that require resize/rotate need and intermediate object to apply the transform to
-  // otherwise we will be updating the transform of the media.
-  const resize = MediaLoader.flags[mediaLoaderEid] & MEDIA_LOADER_FLAGS.RESIZE;
-  const recenter = MediaLoader.flags[mediaLoaderEid] & MEDIA_LOADER_FLAGS.RECENTER;
-  if (resize || recenter) {
-    const mediaTransformEid = addEntity(world);
-    const mediaTransformObj = new Group();
-    mediaTransformObj.name = "Media Loader Transform";
-    addObject3DComponent(world, mediaTransformEid, mediaTransformObj);
-    add(world, mediaTransformEid, mediaLoaderEid);
-    add(world, mediaEid, mediaTransformEid);
-  } else {
-    add(world, mediaEid, mediaLoaderEid);
-  }
+  const mediaTransformEid = addEntity(world);
+  const mediaTransformObj = new Group();
+  mediaTransformObj.name = "Media Loader Offset";
+  addObject3DComponent(world, mediaTransformEid, mediaTransformObj);
+  add(world, mediaTransformEid, mediaLoaderEid);
+  add(world, mediaEid, mediaTransformEid);
 
   setNetworkedDataWithoutRoot(world, APP.getString(Networked.id[mediaLoaderEid])!, mediaEid);
 
