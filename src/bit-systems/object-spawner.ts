@@ -19,10 +19,11 @@ function* spawnObjectJob(world: HubsWorld, spawner: EntityID) {
 
   const spawned = createNetworkedMedia(world, {
     src: APP.getString(ObjectSpawner.src[spawner])!,
-    recenter: true,
+    recenter: false,
     resize: false,
     animateLoad: false,
-    isObjectMenuTarget: true
+    isObjectMenuTarget: true,
+    moveParentNotObject: true
   });
 
   if (ObjectSpawner.flags[spawner] & OBJECT_SPAWNER_FLAGS.APPLY_GRAVITY) {
