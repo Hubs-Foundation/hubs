@@ -47,7 +47,7 @@ function transformMenu(world: HubsWorld, menu: EntityID) {
 
   // Calculate the menu offset based on visible elements
   const center = (ObjectMenuTransform.flags[menu] & ObjectMenuTransformFlags.Center) !== 0 ? true : false;
-  if (center && ObjectMenuTransform.targetObjectRef[menu] !== ObjectMenuTransform.prevObjectRef[menu]) {
+  if (center) {
     getAABB(menuObj, aabb);
     aabb.getCenter(tmpVec1);
     getAABB(menuObj, aabb, true);
@@ -100,8 +100,6 @@ function transformMenu(world: HubsWorld, menu: EntityID) {
 
     setMatrixWorld(menuObj, tmpMat4);
   }
-
-  ObjectMenuTransform.prevObjectRef[menu] = ObjectMenuTransform.targetObjectRef[menu];
 }
 
 const menuQuery = defineQuery([ObjectMenuTransform]);

@@ -40,6 +40,9 @@ export default class SceneEntryManager {
     this.leftCursorController = document.getElementById("left-cursor-controller");
     this.avatarRig = document.getElementById("avatar-rig");
     this._entered = false;
+    /**
+     * @type {Function}
+     */
     this.performConditionalSignIn = () => {};
     this.history = history;
   }
