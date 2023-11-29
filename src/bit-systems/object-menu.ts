@@ -13,7 +13,8 @@ import {
   RemoteRight,
   Rigidbody,
   Deleting,
-  Deletable
+  Deletable,
+  MediaContentBounds
 } from "../bit-components";
 import { anyEntityWith, findAncestorWithComponent, findAncestorWithComponents } from "../utils/bit-utils";
 import { createNetworkedEntity } from "../utils/create-networked-entity";

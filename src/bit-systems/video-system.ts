@@ -80,7 +80,12 @@ export function videoSystem(world: HubsWorld, audioSystem: AudioSystem) {
     } else {
       const networkedPauseState = !!(NetworkedVideo.flags[eid] & Flags.PAUSED);
       if (networkedPauseState !== video.paused) {
-        video.paused ? video.play() : video.pause();
+        video.paused
+          ? video.play().catch(() => {
+              // Need to deal with the fact play() may fail if user has not interacted with browser yet.
+              console.error("Error playing video.");
+            })
+          : video.pause();
       }
       if (networkedPauseState || Math.abs(NetworkedVideo.time[eid] - video.currentTime) > OUT_OF_SYNC_SEC) {
         video.currentTime = NetworkedVideo.time[eid];
