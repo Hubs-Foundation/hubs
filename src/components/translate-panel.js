@@ -43,7 +43,7 @@ AFRAME.registerComponent("translate-panel", {
     this.translateText.el.setAttribute("text", {
       value: this.formattedText
     });
-    // this.onTargetUpdate({ detail: { owner: null } });
+
     this.checkAndRender();
   },
 
@@ -83,7 +83,6 @@ AFRAME.registerComponent("translate-panel", {
 
   onLanguageUpdate(event) {
     this.languageCheck = !!event.detail.language;
-    console.log("this language check", this.languageCheck);
     this.checkAndRender();
   },
 

@@ -30,45 +30,45 @@ function useTranslate(scene) {
 
   const toggleDutch = useCallback(() => {
     if (language === "du") {
-      scene.emit("language_updated", { language: null });
+      scene.emit("language_available", { language: null });
     } else {
-      scene.emit("language_updated", { language: "nl" });
+      scene.emit("language_available", { language: "nl" });
     }
   });
   const toggleGerman = useCallback(() => {
     if (language === "de") {
-      scene.emit("language_updated", { language: null });
+      scene.emit("language_available", { language: null });
     } else {
-      scene.emit("language_updated", { language: "de" });
+      scene.emit("language_available", { language: "de" });
     }
   });
   const toggleGreek = useCallback(() => {
     if (language === "el") {
-      scene.emit("language_updated", { language: null });
+      scene.emit("language_available", { language: null });
     } else {
-      scene.emit("language_updated", { language: "el" });
+      scene.emit("language_available", { language: "el" });
     }
   });
   const toggleItalian = useCallback(() => {
     if (language === "it") {
-      scene.emit("language_updated", { language: null });
+      scene.emit("language_available", { language: null });
     } else {
-      scene.emit("language_updated", { language: "it" });
+      scene.emit("language_available", { language: "it" });
     }
   });
   const toggleSpanish = useCallback(() => {
     if (language === "es") {
-      scene.emit("language_updated", { language: null });
+      scene.emit("language_available", { language: null });
     } else {
-      scene.emit("language_updated", { language: "es" });
+      scene.emit("language_available", { language: "es" });
     }
   });
 
   const toggleEnglish = useCallback(() => {
     if (language === "en") {
-      scene.emit("language_updated", { language: null });
+      scene.emit("language_available", { language: null });
     } else {
-      scene.emit("language_updated", { language: "en" });
+      scene.emit("language_available", { language: "en" });
     }
   });
 

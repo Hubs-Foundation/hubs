@@ -28,7 +28,7 @@ AFRAME.registerComponent("in-world-hud", {
       this.cameraBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("camera"));
       this.agentBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("agent"));
       this.mapBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("map"));
-      this.langBtn.setAttribute("flag-button", "active", this.el.sceneEl.is("lang"));
+      this.langBtn.setAttribute("flag-button", "active", this.el.sceneEl.is("lang-panel"));
       if (window.APP.hubChannel) {
         this.spawn.setAttribute("icon-button", "disabled", !window.APP.hubChannel.can("spawn_and_move_media"));
         this.pen.setAttribute("icon-button", "disabled", !window.APP.hubChannel.can("spawn_drawing"));

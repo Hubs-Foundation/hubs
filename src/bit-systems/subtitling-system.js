@@ -26,7 +26,7 @@ export class SubtitleSystem {
     this.mediaRecorder;
     this.animationFrameID;
     this.FlagManagerID;
-    this.onLanguageUpdate = this.onLanguageUpdate.bind(this);
+    this.onLanguageAvailable = this.onLanguageAvailable.bind(this);
     this.flagObjs = { it: null, es: null, nl: null, de: null, el: null, en: null };
   }
 
@@ -39,12 +39,12 @@ export class SubtitleSystem {
     this.initialized = true;
     this.cleanup = false;
     this.counter = 0;
-    this.scene.addEventListener("language_updated", this.onLanguageUpdate);
+    this.scene.addEventListener("language_available", this.onLanguageAvailable);
   }
 
   ResetPanel() {
     if (!this.FlagManagerID) return;
-    console.log("this is working");
+
     try {
       Object.keys(this.flagObjs).forEach(key => {
         this.flagObjs[key].obj.material = normalMaterial.clone();
@@ -57,9 +57,14 @@ export class SubtitleSystem {
     }
   }
 
-  onLanguageUpdate(event) {
-    this.targetLanguage = event.detail.language;
+  onLanguageAvailable(event) {
+    this.updateLanguage(event.detail.language);
+  }
+
+  updateLanguage(lang) {
+    this.targetLanguage = lang;
     this.ResetPanel();
+    APP.scene.emit("language_updated", { language: this.targetLanguage });
   }
 
   SelectTarget(_target) {
@@ -261,51 +266,28 @@ export class SubtitleSystem {
   checkPanel(world) {
     if (hasComponent(world, Interacted, this.flagObjs.de.eid)) {
       console.log("de interacted");
-      if (this.targetLanguage === "de") {
-        APP.scene.emit("language_updated", { language: null });
-      } else {
-        APP.scene.emit("language_updated", { language: "de" });
-      }
+      if (this.targetLanguage === "de") this.updateLanguage(null);
+      else this.updateLanguage("de");
     }
     if (hasComponent(world, Interacted, this.flagObjs.nl.eid)) {
-      console.log("du interacted");
-      if (this.targetLanguage === "nl") {
-        APP.scene.emit("language_updated", { language: null });
-      } else {
-        APP.scene.emit("language_updated", { language: "nl" });
-      }
+      if (this.targetLanguage === "nl") this.updateLanguage(null);
+      else this.updateLanguage("nl");
     }
     if (hasComponent(world, Interacted, this.flagObjs.it.eid)) {
-      console.log("it interacted");
-      if (this.targetLanguage === "it") {
-        APP.scene.emit("language_updated", { language: null });
-      } else {
-        APP.scene.emit("language_updated", { language: "it" });
-      }
+      if (this.targetLanguage === "it") this.updateLanguage(null);
+      else this.updateLanguage("it");
     }
     if (hasComponent(world, Interacted, this.flagObjs.es.eid)) {
-      console.log("es interacted");
-      if (this.targetLanguage === "es") {
-        APP.scene.emit("language_updated", { language: null });
-      } else {
-        APP.scene.emit("language_updated", { language: "es" });
-      }
+      if (this.targetLanguage === "es") this.updateLanguage(null);
+      else this.updateLanguage("es");
     }
     if (hasComponent(world, Interacted, this.flagObjs.el.eid)) {
-      console.log("el interacted");
-      if (this.targetLanguage === "el") {
-        APP.scene.emit("language_updated", { language: null });
-      } else {
-        APP.scene.emit("language_updated", { language: "el" });
-      }
+      if (this.targetLanguage === "el") this.updateLanguage(null);
+      else this.updateLanguage("el");
     }
     if (hasComponent(world, Interacted, this.flagObjs.en.eid)) {
-      console.log("en interacted");
-      if (this.targetLanguage === "en") {
-        APP.scene.emit("language_updated", { language: null });
-      } else {
-        APP.scene.emit("language_updated", { language: "en" });
-      }
+      if (this.targetLanguage === "en") this.updateLanguage(null);
+      else this.updateLanguage("en");
     }
   }
 }

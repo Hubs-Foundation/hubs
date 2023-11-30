@@ -1,5 +1,5 @@
 /** @jsx createElementEntity */
-import agentModelSrc from "../assets/models/voxy.glb";
+import agentModelSrc from "../assets/models/voxy_emitted.glb";
 import { createElementEntity, renderAsEntity, createRef } from "../utils/jsx-entity";
 import { preload } from "../utils/preload";
 import { cloneModelFromCache, loadModel } from "../components/gltf-model-plus";

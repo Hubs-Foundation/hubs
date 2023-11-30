@@ -17,6 +17,7 @@ AFRAME.registerComponent("flag-button", {
 
   init() {
     this.el.object3D.matrixNeedsUpdate = true;
+    this.debugingUpdate = this.debugingUpdate.bind(this);
     this.lang = null;
     this.onHover = () => {
       this.hovering = true;
@@ -38,14 +39,21 @@ AFRAME.registerComponent("flag-button", {
     this.updateButtonState();
     this.el.object3D.addEventListener("hovered", this.onHover);
     this.el.object3D.addEventListener("unhovered", this.onHoverOut);
+    this.el.sceneEl.addEventListener("language_updated", this.debugingUpdate);
   },
 
   pause() {
     this.el.object3D.removeEventListener("hovered", this.onHover);
     this.el.object3D.removeEventListener("unhovered", this.onHoverOut);
+    this.el.sceneEl.removeEventListener("language_updated", this.debugingUpdate);
   },
 
   update() {
+    this.updateButtonState();
+  },
+
+  debugingUpdate() {
+    console.log("flag buton heard that language_updated");
     this.updateButtonState();
   },
 
