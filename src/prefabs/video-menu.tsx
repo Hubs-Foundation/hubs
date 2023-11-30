@@ -1,17 +1,17 @@
 /** @jsx createElementEntity */
 import { BoxBufferGeometry, Mesh, MeshBasicMaterial, PlaneBufferGeometry } from "three";
 import { Label } from "../prefabs/camera-tool";
-import { AlphaMode } from "../utils/create-image-mesh";
-import { createElementEntity, createRef } from "../utils/jsx-entity";
-import { ProjectionMode } from "../utils/projection-mode";
-
-import { textureLoader } from "../utils/media-utils";
+import { Attrs, createElementEntity, createRef } from "../utils/jsx-entity";
 import playImageUrl from "../assets/images/sprites/notice/play.png";
 import pauseImageUrl from "../assets/images/sprites/notice/pause.png";
-import { TextureCache } from "../utils/texture-cache";
+import { BUTTON_TYPES, Button3D } from "./button3D";
+import { loadTexture, loadTextureFromCache } from "../utils/load-texture";
 
-const playTexture = textureLoader.load(playImageUrl);
-const pauseTexture = textureLoader.load(pauseImageUrl);
+export async function loadVideoMenuButtonIcons() {
+  return Promise.all([loadTexture(playImageUrl, 1, "image/png"), loadTexture(pauseImageUrl, 1, "image/png")]);
+}
+
+const uiZ = 0.001;
 
 function Slider({ trackRef, headRef, ...props }: any) {
   return (
@@ -19,12 +19,7 @@ function Slider({ trackRef, headRef, ...props }: any) {
       <entity
         name="Slider:Track"
         videoMenuItem
-        object3D={
-          new Mesh(
-            new PlaneBufferGeometry(1.0, 0.05),
-            new MeshBasicMaterial({ opacity: 0.5, color: 0x000000, transparent: true })
-          )
-        }
+        object3D={new Mesh(new PlaneBufferGeometry(1.0, 0.05), new MeshBasicMaterial({ color: 0x000000 }))}
         cursorRaycastable
         remoteHoverTarget
         holdable
@@ -33,7 +28,7 @@ function Slider({ trackRef, headRef, ...props }: any) {
       >
         <entity
           name="Slider:Head"
-          object3D={new Mesh(new BoxBufferGeometry(0.05, 0.05, 0.05), new MeshBasicMaterial())}
+          object3D={new Mesh(new BoxBufferGeometry(0.05, 0.05, 0.05), new MeshBasicMaterial({ color: 0xffffff }))}
           ref={headRef}
         />
       </entity>
@@ -41,8 +36,26 @@ function Slider({ trackRef, headRef, ...props }: any) {
   );
 }
 
+interface VideoButtonProps extends Attrs {
+  buttonIcon: string;
+}
+
+function VideoActionButton({ buttonIcon, ...props }: VideoButtonProps) {
+  const { texture, cacheKey } = loadTextureFromCache(buttonIcon, 1);
+  return (
+    <Button3D
+      position={[0, 0, uiZ]}
+      scale={[1, 1, 1]}
+      width={0.2}
+      height={0.2}
+      type={BUTTON_TYPES.DEFAULT}
+      icon={{ texture, cacheKey, scale: [0.165, 0.165, 0.165] }}
+      {...props}
+    />
+  );
+}
+
 export function VideoMenuPrefab() {
-  const uiZ = 0.001;
   const timeLabelRef = createRef();
   const sliderRef = createRef();
   const headRef = createRef();
@@ -65,32 +78,8 @@ export function VideoMenuPrefab() {
         position={[0.5 - 0.02, halfHeight - 0.02, uiZ]}
       />
       <Slider ref={sliderRef} trackRef={trackRef} headRef={headRef} position={[0, -halfHeight + 0.025, uiZ]} />
-      <entity
-        ref={playIndicatorRef}
-        position={[0, 0, uiZ]}
-        scale={[0.25, 0.25, 0.25]}
-        image={{
-          texture: playTexture,
-          ratio: 1,
-          projection: ProjectionMode.FLAT,
-          alphaMode: AlphaMode.BLEND,
-          cacheKey: TextureCache.key(playImageUrl, 1)
-        }}
-        visible={false}
-      />
-      <entity
-        ref={pauseIndicatorRef}
-        position={[0, 0, uiZ]}
-        scale={[0.25, 0.25, 0.25]}
-        image={{
-          texture: pauseTexture,
-          ratio: 1,
-          projection: ProjectionMode.FLAT,
-          alphaMode: AlphaMode.BLEND,
-          cacheKey: TextureCache.key(pauseImageUrl, 1)
-        }}
-        visible={false}
-      />
+      <VideoActionButton ref={playIndicatorRef} name={"Play Button"} buttonIcon={playImageUrl} />
+      <VideoActionButton ref={pauseIndicatorRef} name={"Pause Button"} buttonIcon={pauseImageUrl} />
     </entity>
   );
 }
