@@ -8,7 +8,7 @@ import { isPinned as getPinnedState } from "../../bit-systems/networking";
 import { deleteTheDeletableAncestor } from "../../bit-systems/delete-entity-system";
 import { isAEntityPinned } from "../../systems/hold-system";
 import { AEntity, LocalAvatar, MediaInfo, RemoteAvatar, Static, MediaLoader } from "../../bit-components";
-import { setPinned } from "../../utils/bit-pinning-helper";
+import { setPinned, canPin as canPinObject } from "../../utils/bit-pinning-helper";
 import { debounce } from "lodash";
 
 export function isMe(object) {
@@ -118,12 +118,15 @@ export function usePinObject(hubChannel, scene, object) {
     };
   }, [object]);
 
-  let userOwnsFile = true;
-  if (!shouldUseNewLoader()) {
+  let canBePinned = false;
+  if (shouldUseNewLoader()) {
+    const mediaRootEid = findAncestorWithComponent(APP.world, MediaLoader, object.eid);
+    canBePinned = canPinObject(APP.hubChannel, mediaRootEid);
+  } else {
     const el = object.el;
     if (el.components["media-loader"]) {
       const { fileIsOwned, fileId } = el.components["media-loader"].data;
-      userOwnsFile = fileIsOwned || (fileId && getPromotionTokenForFile(fileId));
+      canBePinned = fileIsOwned || (fileId && getPromotionTokenForFile(fileId));
     }
   }
 
@@ -140,7 +143,7 @@ export function usePinObject(hubChannel, scene, object) {
     !isPlayer(object) &&
     !isStatic &&
     hubChannel.can("pin_objects") &&
-    userOwnsFile
+    canBePinned
   );
 
   return { canPin, isPinned, togglePinned, pinObject, unpinObject };
