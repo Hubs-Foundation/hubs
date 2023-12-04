@@ -1,5 +1,5 @@
-import { addComponent, defineQuery, enterQuery, entityExists, hasComponent, removeComponent } from "bitecs";
-import { Mesh, MeshBasicMaterial, Object3D, Plane, Ray, Vector3 } from "three";
+import { addComponent, defineQuery, entityExists, hasComponent, removeComponent } from "bitecs";
+import { Object3D, Plane, Ray, Vector3 } from "three";
 import { clamp, mapLinear } from "three/src/math/MathUtils";
 import { Text as TroikaText } from "troika-three-text";
 import { HubsWorld } from "../app";
@@ -9,6 +9,7 @@ import {
   Held,
   HeldRemoteRight,
   HoveredRemoteRight,
+  Interacted,
   MediaVideo,
   MediaVideoData,
   NetworkedVideo,
@@ -18,9 +19,6 @@ import {
 import { timeFmt } from "../components/media-video";
 import { takeOwnership } from "../utils/take-ownership";
 import { paths } from "../systems/userinput/paths";
-import { animate } from "../utils/animate";
-import { coroutine } from "../utils/coroutine";
-import { easeOutQuadratic } from "../utils/easing";
 import { isFacingCamera } from "../utils/three-utils";
 import { Emitter2Audio } from "./audio-emitter-system";
 import { EntityID } from "../utils/networking-types";
@@ -51,7 +49,6 @@ const intersectInThePlaneOf = (() => {
 })();
 
 type Job<T> = () => IteratorResult<undefined, T>;
-let rightMenuIndicatorCoroutine: Job<void> | null = null;
 
 function findVideoMenuTarget(world: HubsWorld, menu: EntityID, sceneIsFrozen: boolean) {
   if (VideoMenu.videoRef[menu] && !entityExists(world, VideoMenu.videoRef[menu])) {
@@ -111,6 +108,31 @@ function flushToObject3Ds(world: HubsWorld, menu: EntityID, frozen: boolean) {
   }
 }
 
+function clicked(world: HubsWorld, eid: EntityID) {
+  return hasComponent(world, Interacted, eid);
+}
+
+function handleClicks(world: HubsWorld, menu: EntityID) {
+  const videoEid = VideoMenu.videoRef[menu];
+  const video = MediaVideoData.get(videoEid)!;
+  const audioEid = Emitter2Audio.get(videoEid)!;
+  if (clicked(world, VideoMenu.playIndicatorRef[menu])) {
+    video.play();
+    APP.isAudioPaused.delete(audioEid);
+    if (hasComponent(world, NetworkedVideo, videoEid)) {
+      takeOwnership(world, videoEid);
+      addComponent(world, EntityStateDirty, videoEid);
+    }
+  } else if (clicked(world, VideoMenu.pauseIndicatorRef[menu])) {
+    video.pause();
+    APP.isAudioPaused.add(audioEid);
+    if (hasComponent(world, NetworkedVideo, videoEid)) {
+      takeOwnership(world, videoEid);
+      addComponent(world, EntityStateDirty, videoEid);
+    }
+  }
+}
+
 let intersectionPoint = new Vector3();
 export function videoMenuSystem(world: HubsWorld, userinput: any, sceneIsFrozen: boolean) {
   const rightVideoMenu = videoMenuQuery(world)[0];
@@ -121,31 +143,18 @@ export function videoMenuSystem(world: HubsWorld, userinput: any, sceneIsFrozen:
     if (!videoEid) return;
     const menuObj = world.eid2obj.get(eid)!;
     const video = MediaVideoData.get(videoEid)!;
-    const togglePlayVideo = userinput.get(paths.actions.cursor.right.togglePlayVideo);
-    if (togglePlayVideo) {
-      if (hasComponent(world, NetworkedVideo, videoEid)) {
-        takeOwnership(world, videoEid);
-        addComponent(world, EntityStateDirty, videoEid);
-      }
 
-      const playIndicatorObj = world.eid2obj.get(VideoMenu.playIndicatorRef[eid])!;
-      const pauseIndicatorObj = world.eid2obj.get(VideoMenu.pauseIndicatorRef[eid])!;
-
-      const audioEid = Emitter2Audio.get(videoEid)!;
-      if (video.paused) {
-        video.play();
-        APP.isAudioPaused.delete(audioEid);
-        playIndicatorObj.visible = true;
-        pauseIndicatorObj.visible = false;
-        rightMenuIndicatorCoroutine = coroutine(animateIndicator(world, VideoMenu.playIndicatorRef[eid]));
-      } else {
-        video.pause();
-        APP.isAudioPaused.add(audioEid);
-        playIndicatorObj.visible = false;
-        pauseIndicatorObj.visible = true;
-        rightMenuIndicatorCoroutine = coroutine(animateIndicator(world, VideoMenu.pauseIndicatorRef[eid]));
-      }
+    const playIndicatorObj = world.eid2obj.get(VideoMenu.playIndicatorRef[eid])!;
+    const pauseIndicatorObj = world.eid2obj.get(VideoMenu.pauseIndicatorRef[eid])!;
+    if (video.paused) {
+      playIndicatorObj.visible = true;
+      pauseIndicatorObj.visible = false;
+    } else {
+      playIndicatorObj.visible = false;
+      pauseIndicatorObj.visible = true;
     }
+
+    handleClicks(world, eid);
 
     const videoIsFacingCamera = isFacingCamera(world.eid2obj.get(videoEid)!);
     const yRot = videoIsFacingCamera ? 0 : Math.PI;
@@ -182,30 +191,7 @@ export function videoMenuSystem(world: HubsWorld, userinput: any, sceneIsFrozen:
     const slider = world.eid2obj.get(VideoMenu.sliderRef[eid])!;
     slider.position.setY(-(ratio / 2) + 0.025);
     slider.matrixNeedsUpdate = true;
-
-    if (rightMenuIndicatorCoroutine && rightMenuIndicatorCoroutine().done) {
-      rightMenuIndicatorCoroutine = null;
-    }
   });
 
   flushToObject3Ds(world, rightVideoMenu, sceneIsFrozen);
-}
-
-const START_SCALE = new Vector3().setScalar(0.05);
-const END_SCALE = new Vector3().setScalar(0.25);
-function* animateIndicator(world: HubsWorld, eid: number) {
-  const obj = world.eid2obj.get(eid)!;
-  yield* animate({
-    properties: [
-      [START_SCALE, END_SCALE],
-      [0.75, 0]
-    ],
-    durationMS: 700,
-    easing: easeOutQuadratic,
-    fn: ([scale, opacity]: [Vector3, number]) => {
-      obj.scale.copy(scale);
-      obj.matrixNeedsUpdate = true;
-      ((obj as Mesh).material as MeshBasicMaterial).opacity = opacity;
-    }
-  });
 }

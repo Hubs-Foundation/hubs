@@ -189,7 +189,7 @@ import PinningHelper from "./utils/pinning-helper";
 import { sleep } from "./utils/async-utils";
 import { platformUnsupported } from "./support";
 import { renderAsEntity } from "./utils/jsx-entity";
-import { VideoMenuPrefab } from "./prefabs/video-menu";
+import { VideoMenuPrefab, loadVideoMenuButtonIcons } from "./prefabs/video-menu";
 import { loadObjectMenuButtonIcons, ObjectMenuPrefab } from "./prefabs/object-menu";
 import { LinkHoverMenuPrefab } from "./prefabs/link-hover-menu";
 import { PDFMenuPrefab } from "./prefabs/pdf-menu";
@@ -197,8 +197,6 @@ import { loadWaypointPreviewModel, WaypointPreview } from "./prefabs/waypoint-pr
 import { preload } from "./utils/preload";
 
 window.APP = new App();
-renderAsEntity(APP.world, VideoMenuPrefab());
-renderAsEntity(APP.world, VideoMenuPrefab());
 function addToScene(entityDef, visible) {
   return getScene().then(scene => {
     const eid = renderAsEntity(APP.world, entityDef);
@@ -211,6 +209,12 @@ preload(addToScene(PDFMenuPrefab(), false));
 preload(loadObjectMenuButtonIcons().then(() => addToScene(ObjectMenuPrefab(), false)));
 preload(addToScene(LinkHoverMenuPrefab(), false));
 preload(loadWaypointPreviewModel().then(() => addToScene(WaypointPreview(), false)));
+preload(
+  loadVideoMenuButtonIcons().then(() => {
+    addToScene(VideoMenuPrefab(), false);
+    addToScene(VideoMenuPrefab(), false);
+  })
+);
 
 const store = window.APP.store;
 store.update({ preferences: { shouldPromptForRefresh: false } }); // Clear flag that prompts for refresh from preference screen
