@@ -187,12 +187,25 @@ export function useRemoveObject(hubChannel, scene, object) {
 
   const eid = object.eid;
 
+  let canBePinned = false;
+  if (shouldUseNewLoader()) {
+    const mediaRootEid = findAncestorWithComponent(APP.world, MediaLoader, object.eid);
+    canBePinned = canPinObject(APP.hubChannel, mediaRootEid);
+  } else {
+    const el = object.el;
+    if (el.components["media-loader"]) {
+      const { fileIsOwned, fileId } = el.components["media-loader"].data;
+      canBePinned = fileIsOwned || (fileId && getPromotionTokenForFile(fileId));
+    }
+  }
+
   const canRemoveObject = !!(
     scene.is("entered") &&
     !isPlayer(object) &&
     !isObjectPinned(APP.world, eid) &&
     !hasComponent(APP.world, Static, eid) &&
-    hubChannel.can("spawn_and_move_media")
+    hubChannel.can("spawn_and_move_media") &&
+    canBePinned
   );
 
   return { removeObject, canRemoveObject };
