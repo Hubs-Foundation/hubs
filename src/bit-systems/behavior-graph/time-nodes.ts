@@ -103,9 +103,11 @@ export const TimerNodes = definitionListToMap([
     out: { flow: "flow" },
     triggered: ({ read, commit, graph, configuration }) => {
       const timerId = read("timerId") as number;
-      clearInterval(timerId);
-      const emitter = timers.get(timerId as any);
-      emitter?.emit(timerId);
+      if (timerId) {
+        clearInterval(timerId);
+        const emitter = timers.get(timerId as any);
+        emitter?.emit(timerId);
+      }
       commit("flow");
     }
   })
