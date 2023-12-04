@@ -1,5 +1,6 @@
+import { addComponent } from "bitecs";
 import { HubsWorld } from "../app";
-import { MediaImageLoaderData } from "../bit-components";
+import { MediaImageLoaderData, MediaLink } from "../bit-components";
 import { AlphaModeName, getAlphaModeFromAlphaModeName } from "../utils/create-image-mesh";
 import { ProjectionModeName, getProjectionFromProjectionName } from "../utils/projection-mode";
 import { inflateMediaLoader } from "./media-loader";
@@ -9,12 +10,14 @@ export interface ImageLoaderParams {
   projection: ProjectionModeName;
   alphaMode: AlphaModeName;
   alphaCutoff: number;
+  controls: boolean;
 }
 
 const DEFAULTS: Partial<ImageLoaderParams> = {
   projection: ProjectionModeName.FLAT,
   alphaMode: AlphaModeName.OPAQUE,
-  alphaCutoff: 0.5
+  alphaCutoff: 0.5,
+  controls: false
 };
 
 export function inflateImageLoader(world: HubsWorld, eid: number, params: ImageLoaderParams) {
@@ -35,4 +38,8 @@ export function inflateImageLoader(world: HubsWorld, eid: number, params: ImageL
     alphaMode: getAlphaModeFromAlphaModeName(requiredParams.alphaMode),
     projection: getProjectionFromProjectionName(requiredParams.projection)
   });
+
+  if (params.controls) {
+    addComponent(world, MediaLink, eid);
+  }
 }
