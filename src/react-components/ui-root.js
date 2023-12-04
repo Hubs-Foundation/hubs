@@ -523,7 +523,7 @@ class UIRoot extends Component {
   handleForceEntry = () => {
     console.log("Forced entry type: " + this.props.forcedVREntryType);
 
-    if (!this.props.forcedVREntryType) return;
+    if (!this.props.forcedVREntryType || !this.props.hubChannel.canEnterRoom(this.props.hub)) return;
 
     if (this.props.forcedVREntryType.startsWith("daydream")) {
       this.enterDaydream();

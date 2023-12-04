@@ -4,6 +4,7 @@ import HubChannel from "./hub-channel";
 import { EntityID } from "./networking-types";
 import { takeOwnership } from "./take-ownership";
 import { createMessageDatas, isNetworkInstantiated, isPinned } from "../bit-systems/networking";
+import { SignInMessages } from "../react-components/auth/SignInModal";
 
 export const setPinned = async (hubChannel: HubChannel, world: HubsWorld, eid: EntityID, shouldPin: boolean) => {
   _signInAndPinOrUnpinElement(hubChannel, world, eid, shouldPin);
@@ -29,23 +30,20 @@ const unpinElement = (hubChannel: HubChannel, world: HubsWorld, eid: EntityID) =
 
 const _signInAndPinOrUnpinElement = (hubChannel: HubChannel, world: HubsWorld, eid: EntityID, shouldPin: boolean) => {
   const action = shouldPin ? () => _pinElement(hubChannel, world, eid) : () => unpinElement(hubChannel, world, eid);
-  // TODO: Perform conditional sign in
-  action();
+  APP.entryManager!.performConditionalSignIn(
+    () => hubChannel.signedIn,
+    action,
+    shouldPin ? SignInMessages.pin : SignInMessages.unpin,
+    (e: Error) => {
+      console.warn(`PinningHelper: Conditional sign-in failed. ${e}`);
+    }
+  );
 };
 
 export const canPin = (hubChannel: HubChannel, eid: EntityID): boolean => {
   const createMessageData = createMessageDatas.get(eid)!;
-  if (createMessageData.prefabName !== "media") {
+  if (createMessageData && createMessageData.prefabName !== "media") {
     return false;
   }
-  const fileId = createMessageData.initialData.fileId;
-  const hasFile = !!fileId;
-  const hasPromotableFile =
-    hasFile && APP.store.state.uploadPromotionTokens.some((upload: any) => upload.fileId === fileId);
-  return (
-    isNetworkInstantiated(eid) &&
-    !isPinned(eid) &&
-    hubChannel.can("pin_objects") && // TODO: Remove once conditional sign in is implemented
-    (!hasFile || hasPromotableFile)
-  );
+  return isNetworkInstantiated(eid) && hubChannel.can("pin_objects");
 };

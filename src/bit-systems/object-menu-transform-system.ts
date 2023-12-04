@@ -100,7 +100,6 @@ function transformMenu(world: HubsWorld, menu: EntityID) {
 
     setMatrixWorld(menuObj, tmpMat4);
   }
-
   ObjectMenuTransform.prevObjectRef[menu] = ObjectMenuTransform.targetObjectRef[menu];
 }
 

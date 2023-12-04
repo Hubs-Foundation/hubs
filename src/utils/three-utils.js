@@ -1,4 +1,4 @@
-import { removeEntity } from "bitecs";
+import { hasComponent, removeEntity } from "bitecs";
 import { forEachMaterial } from "./material-utils";
 
 const tempVector3 = new THREE.Vector3();
@@ -365,7 +365,9 @@ export function createPlaneBufferGeometry(width, height, widthSegments, heightSe
 }
 
 import { Layers } from "../camera-layers";
-import { Box3, Vector3 } from "three";
+import { Box3, DoubleSide, Mesh, MeshBasicMaterial, Object3D, Vector3 } from "three";
+import { TEXTURES_FLIP_Y } from "../loaders/HubsTextureLoader";
+import { MediaVideo } from "../bit-components";
 
 // This code is from three-vrm. We will likely be using that in the future and this inlined code can go away
 function excludeTriangles(triangles, bws, skinIndex, exclude) {
@@ -490,6 +492,16 @@ export function findAncestor(obj, predicate) {
   return null;
 }
 
+export function findAncestors(obj, predicate) {
+  const ancestors = [];
+  let ancestor = obj;
+  while (ancestor) {
+    if (predicate(ancestor)) ancestors.push(ancestor);
+    ancestor = ancestor.parent;
+  }
+  return ancestors;
+}
+
 export function traverseSome(obj, fn) {
   const shouldContinue = fn(obj);
   if (shouldContinue) {
@@ -556,3 +568,35 @@ export function setFromObject(box, object, onlyVisible = true, precise = false) 
   box.makeEmpty();
   expandByObject(box, object, onlyVisible, precise);
 }
+
+const videoGeometry = createPlaneBufferGeometry(1, 1, 1, 1, TEXTURES_FLIP_Y);
+const previewMaterial = new MeshBasicMaterial();
+previewMaterial.side = DoubleSide;
+previewMaterial.transparent = true;
+previewMaterial.opacity = 0.5;
+THREE.Object3D.prototype._clone = THREE.Object3D.prototype.clone;
+THREE.Object3D.prototype.clone = (function () {
+  return function clone() {
+    if (this.type === "Audio") {
+      console.log("Audio clone not supported");
+      return new Object3D();
+    } else if (hasComponent(APP.world, MediaVideo, this.eid)) {
+      const videoMesh = new Mesh(videoGeometry, previewMaterial);
+      videoMesh.material.map = this.material.map;
+      videoMesh.material.needsUpdate = true;
+      // Preview mesh UVs are set to accommodate textureLoader default, but video textures don't match this
+      const aspectRatio = MediaVideo.ratio[this.eid];
+      videoMesh.scale.setY(TEXTURES_FLIP_Y !== videoMesh.material.map.flipY ? -aspectRatio : aspectRatio);
+      videoMesh.matrixNeedsUpdate = true;
+
+      for (let i = 0; i < this.children.length; i++) {
+        const child = this.children[i];
+        videoMesh.add(child.clone());
+      }
+
+      return videoMesh;
+    } else {
+      return this._clone();
+    }
+  };
+})();

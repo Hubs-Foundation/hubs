@@ -2,6 +2,7 @@ import { addComponent, defineQuery, entityExists, hasComponent } from "bitecs";
 import { Text } from "troika-three-text";
 import type { HubsWorld } from "../app";
 import {
+  Deleting,
   EntityStateDirty,
   HoveredRemoteRight,
   Interacted,

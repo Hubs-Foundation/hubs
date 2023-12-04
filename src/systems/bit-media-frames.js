@@ -29,25 +29,14 @@ import {
   Rigidbody
 } from "../bit-components";
 import { MediaType } from "../utils/media-utils";
-import { cloneObject3D, createPlaneBufferGeometry, disposeNode, setMatrixWorld } from "../utils/three-utils";
+import { cloneObject3D, disposeNode, setMatrixWorld } from "../utils/three-utils";
 import { takeOwnership } from "../utils/take-ownership";
 import { takeSoftOwnership } from "../utils/take-soft-ownership";
 import { findAncestorWithComponent, findChildWithComponent } from "../utils/bit-utils";
-import { TEXTURES_FLIP_Y } from "../loaders/HubsTextureLoader";
 import { addObject3DComponent } from "../utils/jsx-entity";
 import { updateMaterials } from "../utils/material-utils";
-import {
-  Box3,
-  DoubleSide,
-  Group,
-  Matrix4,
-  Mesh,
-  MeshBasicMaterial,
-  NormalBlending,
-  Quaternion,
-  RGBAFormat,
-  Vector3
-} from "three";
+import { MEDIA_FRAME_FLAGS, AxisAlignType } from "../inflators/media-frame";
+import { Matrix4, NormalBlending, Quaternion, RGBAFormat, Vector3 } from "three";
 
 const EMPTY_COLOR = 0x6fc0fd;
 const HOVER_COLOR = 0x2f80ed;
@@ -136,32 +125,57 @@ function isEntityColliding(physicsSystem, eidA, eidB) {
 }
 
 function scaleForAspectFit(containerSize, itemSize) {
-  return Math.min(containerSize[0] / itemSize.x, containerSize[1] / itemSize.y, containerSize[2] / itemSize.z);
+  return Math.min(containerSize[0] / itemSize[0], containerSize[1] / itemSize[1], containerSize[2] / itemSize[2]);
 }
 
 const snapToFrame = (() => {
   const framePos = new Vector3();
   const frameQuat = new Quaternion();
   const frameScale = new Vector3();
+  const newScale = new Vector3();
   const m4 = new Matrix4();
-  const contentBounds = new Vector3();
+  // Lookup for adjusting axis alignment
+  const AxisAlignMultipliers = new Array();
+  AxisAlignMultipliers[AxisAlignType.MIN] = -1;
+  AxisAlignMultipliers[AxisAlignType.MAX] = +1;
 
-  return (world, frame, target) => {
-    const frameObj = world.eid2obj.get(frame);
-    const targetObj = world.eid2obj.get(target);
+  return (world, frameEid, targetEid) => {
+    const frameObj = world.eid2obj.get(frameEid);
+    const targetObj = world.eid2obj.get(targetEid);
 
+    // Copy frame transform
     frameObj.updateMatrices();
     frameObj.matrixWorld.decompose(framePos, frameQuat, frameScale);
 
-    contentBounds.fromArray(MediaContentBounds.bounds[target]);
-    setMatrixWorld(
-      targetObj,
-      m4.compose(
-        framePos,
-        frameQuat,
-        frameScale.multiplyScalar(scaleForAspectFit(MediaFrame.bounds[frame], contentBounds))
-      )
-    );
+    // Note that bounds are independent of scale
+    const frameBounds = MediaFrame.bounds[frameEid];
+    const contentBounds = MediaContentBounds.bounds[targetEid];
+
+    // Apply scale settings
+    newScale.copy(frameScale);
+    if (MediaFrame.flags[frameEid] & MEDIA_FRAME_FLAGS.SCALE_TO_BOUNDS) {
+      // Adjust content scale to fit inside the frame
+      newScale.multiplyScalar(scaleForAspectFit(frameBounds, contentBounds));
+    } else {
+      // Preserve the current object scale
+      newScale.setFromMatrixScale(targetObj.matrixWorld);
+    }
+
+    // Apply boundary alignment on all three axes
+    const frameAxisAlignments = MediaFrame.align[frameEid];
+    for (let i = 0; i < 3; ++i) {
+      const axisAlignment = frameAxisAlignments[i];
+      if (axisAlignment != AxisAlignType.CENTER) {
+        // Offset the content from the center to the desired axis alignment
+        const alignmentMultiplier = AxisAlignMultipliers[axisAlignment];
+        const frameBoundsWorldSpace = frameBounds[i] * frameScale.getComponent(i);
+        const contentBoundsWorldSpace = contentBounds[i] * newScale.getComponent(i);
+        const positionDelta = (alignmentMultiplier * (frameBoundsWorldSpace - contentBoundsWorldSpace)) / 2;
+        framePos.setComponent(i, framePos.getComponent(i) + positionDelta);
+      }
+    }
+    // Transform content to match frame specification
+    setMatrixWorld(targetObj, m4.compose(framePos, frameQuat, newScale));
   };
 })();
 
@@ -178,97 +192,45 @@ const setMatrixScale = (() => {
   };
 })();
 
-const videoGeometry = createPlaneBufferGeometry(1, 1, 1, 1, TEXTURES_FLIP_Y);
-const previewMaterial = new MeshBasicMaterial();
-previewMaterial.side = DoubleSide;
-previewMaterial.transparent = true;
-previewMaterial.opacity = 0.5;
-function createPreviewMesh(world, capturable) {
-  let srcMesh;
-  let el;
-  let previewMesh;
-  let isVideo = false;
-  let ratio = 1;
-  if (hasComponent(world, AEntity, capturable)) {
-    el = world.eid2obj.get(capturable).el;
-    const video = el.components["media-video"];
-    isVideo = !!video;
-    if (isVideo) {
-      ratio =
-        (video.videoTexture.image.videoHeight || video.videoTexture.image.height) /
-        (video.videoTexture.image.videoWidth || video.videoTexture.image.width);
-    }
-    srcMesh = el.getObject3D("mesh");
-  } else {
-    const mediaEid = findChildWithComponent(world, MediaLoaded, capturable);
-    isVideo = hasComponent(world, MediaVideo, mediaEid);
-    if (isVideo) {
-      ratio = MediaVideo.ratio[mediaEid];
-    }
-    srcMesh = world.eid2obj.get(mediaEid);
-  }
-
-  // Audios can't be cloned so we take a different path for them
-  if (isVideo) {
-    previewMesh = new Mesh(videoGeometry, previewMaterial);
-    previewMesh.material.map = srcMesh.material.map;
-    previewMesh.material.needsUpdate = true;
-    // Preview mesh UVs are set to accommodate textureLoader default, but video textures don't match this
-    previewMesh.scale.y *= TEXTURES_FLIP_Y !== previewMesh.material.map.flipY ? -ratio : ratio;
-  } else {
-    previewMesh = cloneObject3D(srcMesh, false);
-    previewMesh.traverse(node => {
-      updateMaterials(node, function (srcMat) {
-        const mat = srcMat.clone();
-        mat.transparent = true;
-        mat.opacity = 0.5;
-        mat.format = RGBAFormat;
-        mat.blending = NormalBlending;
-        node.material = mat;
-        return mat;
-      });
+function createPreview(world, capturableEid) {
+  // Source object to copy
+  const capturableObj = world.eid2obj.get(capturableEid);
+  const previewObj = cloneObject3D(capturableObj, false);
+  previewObj.traverse(node => {
+    updateMaterials(node, function (srcMat) {
+      const mat = srcMat.clone();
+      mat.transparent = true;
+      mat.opacity = 0.5;
+      mat.format = RGBAFormat;
+      mat.blending = NormalBlending;
+      node.material = mat;
+      return mat;
     });
-  }
-
-  // TODO HACK We add this mesh to a group whose position is centered
-  //      so that putting this in the middle of a media frame is easy,
-  //      but we should just do this math when putting an object into a frame
-  //      and not assume an object's root is in the center of its geometry.
-  previewMesh.position.setScalar(0);
-  previewMesh.quaternion.identity();
-  previewMesh.matrixNeedsUpdate = true;
-  const aabb = new Box3().setFromObject(previewMesh);
-  aabb.getCenter(previewMesh.position).multiplyScalar(-1);
-  previewMesh.matrixNeedsUpdate = true;
-
-  const cloneObj = new Group();
-  cloneObj.add(previewMesh);
-  world.scene.add(cloneObj);
-
-  hasComponent(world, AEntity, capturable) && (cloneObj.el = el);
-
-  return cloneObj;
+  });
+  setMatrixWorld(previewObj, capturableObj.matrixWorld);
+  world.scene.add(previewObj);
+  return previewObj;
 }
 
-function showPreview(world, frame, capturable) {
-  const previewObj = createPreviewMesh(world, capturable);
-  const eid = addEntity(world);
-  addObject3DComponent(world, eid, previewObj);
-  addComponent(world, MediaContentBounds, eid);
-  MediaContentBounds.bounds[eid].set(MediaContentBounds.bounds[capturable]);
+function showPreview(world, frameEid, capturableEid) {
+  const previewObj = createPreview(world, capturableEid);
+  const previewEid = addEntity(world);
+  addObject3DComponent(world, previewEid, previewObj);
+  addComponent(world, MediaContentBounds, previewEid);
+  MediaContentBounds.bounds[previewEid].set(MediaContentBounds.bounds[capturableEid]);
 
-  MediaFrame.preview[frame] = eid;
-  MediaFrame.previewingNid[frame] = Networked.id[capturable];
-  snapToFrame(world, frame, eid);
+  MediaFrame.preview[frameEid] = previewEid;
+  MediaFrame.previewingNid[frameEid] = Networked.id[capturableEid];
+  snapToFrame(world, frameEid, previewEid);
 }
 
-function hidePreview(world, frame) {
+function hidePreview(world, frameEid) {
   // NOTE we intentionally do not dispose of geometries or textures since they are all shared with the original object
-  const eid = MediaFrame.preview[frame];
+  const eid = MediaFrame.preview[frameEid];
   removeEntity(world, eid);
 
-  MediaFrame.preview[frame] = 0;
-  MediaFrame.previewingNid[frame] = 0;
+  MediaFrame.preview[frameEid] = 0;
+  MediaFrame.previewingNid[frameEid] = 0;
 }
 
 const zero = [0, 0, 0];

@@ -13,14 +13,16 @@ export interface ImageParams {
   ratio: number;
   projection: ProjectionMode;
   alphaMode: AlphaMode;
-  alphaCutoff: number;
+  alphaCutoff?: number;
+  renderOrder?: number;
 }
 
 const DEFAULTS: Partial<ImageParams> = {
   projection: ProjectionMode.FLAT,
   alphaMode: AlphaMode.OPAQUE,
   alphaCutoff: 0.5,
-  ratio: 1
+  ratio: 1,
+  renderOrder: 0
 };
 
 export function inflateImage(world: HubsWorld, eid: EntityID, params: ImageParams) {
@@ -37,6 +39,8 @@ export function inflateImage(world: HubsWorld, eid: EntityID, params: ImageParam
   MediaImage.alphaMode[eid] = requiredParams.alphaMode;
   MediaImage.alphaCutoff[eid] = requiredParams.alphaCutoff;
   MediaImage.cacheKey[eid] = APP.getSid(cacheKey);
+
+  mesh.renderOrder = requiredParams.renderOrder;
 
   return eid;
 }

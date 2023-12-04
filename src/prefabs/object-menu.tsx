@@ -5,6 +5,9 @@ import { Button3D, BUTTON_TYPES } from "./button3D";
 import rotateIconSrc from "../assets/rotate-action.png";
 import scaleIconSrc from "../assets/scale-action.png";
 import removeIconSrc from "../assets/remove-action.png";
+import { Plane } from "./plane";
+import { FrontSide } from "three";
+import { Layers } from "../camera-layers";
 
 export async function loadObjectMenuButtonIcons() {
   return Promise.all([
@@ -221,6 +224,7 @@ function ScaleButton(props: Attrs) {
 
 // prettier-ignore
 const position = {
+  background:         [    0,  0,     uiZ - 0.0005] as ArrayVec3,
   pin:                [    0,  0.125, uiZ] as ArrayVec3,
   unpin:              [    0,  0.125, uiZ] as ArrayVec3,
   focus:              [-0.25,  0.375, uiZ] as ArrayVec3,
@@ -239,6 +243,7 @@ const position = {
 
 export function ObjectMenuPrefab() {
   const refs = {
+    background: createRef(),
     pin: createRef(),
     unpin: createRef(),
     focus: createRef(),
@@ -260,6 +265,7 @@ export function ObjectMenuPrefab() {
       name="Interactable Object Menu"
       objectMenuTransform={{ center: true }}
       objectMenu={{
+        backgroundRef: refs.background,
         pinButtonRef: refs.pin,
         unpinButtonRef: refs.unpin,
         cameraFocusButtonRef: refs.focus,
@@ -276,6 +282,16 @@ export function ObjectMenuPrefab() {
         scaleButtonRef: refs.scale
       }}
     >
+      <Plane
+        name={"Background"}
+        ref={refs.background}
+        position={position.background}
+        width={0.8}
+        height={0.8}
+        material={{ transparent: true, opacity: 0, side: FrontSide }}
+        renderOrder={APP.RENDER_ORDER.HUD_BACKGROUND}
+        layers={1 << Layers.CAMERA_LAYER_UI}
+      />
       <PinButton ref={refs.pin} position={position.pin} />
       <UnpinButton ref={refs.unpin} position={position.unpin} />
       <CameraFocusButton ref={refs.focus} position={position.focus} />
