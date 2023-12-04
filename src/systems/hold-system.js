@@ -13,13 +13,14 @@ import {
   HeldHandLeft,
   AEntity,
   Networked,
-  MediaContentBounds
+  MediaLoader,
+  Deletable
 } from "../bit-components";
 import { canMove } from "../utils/permissions-utils";
 import { canMove as canMoveEntity } from "../utils/bit-permissions-utils";
 import { isPinned } from "../bit-systems/networking";
 import { takeOwnership } from "../utils/take-ownership";
-import { findAncestorWithComponent } from "../utils/bit-utils";
+import { findAncestorWithComponents } from "../utils/bit-utils";
 
 const GRAB_REMOTE_RIGHT = paths.actions.cursor.right.grab;
 const DROP_REMOTE_RIGHT = paths.actions.cursor.right.drop;
@@ -78,7 +79,7 @@ function grab(world, userinput, queryHovered, held, grabPath) {
   const hovered = queryHovered(world)[0];
 
   // Special path for Dropped/Pasted Media with new loader enabled. Check the comment above.
-  const mediaRoot = findAncestorWithComponent(world, MediaContentBounds, hovered);
+  const mediaRoot = findAncestorWithComponents(world, [Deletable, MediaLoader, Holdable], hovered);
   const target = mediaRoot ? mediaRoot : hovered;
   const isEntityPinned = isPinned(target) || isAEntityPinned(world, target);
 

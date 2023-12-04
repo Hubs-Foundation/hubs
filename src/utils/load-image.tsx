@@ -60,5 +60,13 @@ export function* loadImage(world: HubsWorld, eid: EntityID, url: string, content
 
   ObjectMenuTarget.flags[eid] |= ObjectMenuTargetFlags.Flat;
 
-  return renderAsEntity(world, <entity name="Image" image={imageDef} objectMenuTarget={{ isFlat: true }} />);
+  return renderAsEntity(
+    world,
+    <entity
+      name="Image"
+      image={imageDef}
+      objectMenuTarget={{ isFlat: true }}
+      grabbable={{ cursor: true, hand: false }}
+    />
+  );
 }
