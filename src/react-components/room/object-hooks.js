@@ -7,7 +7,7 @@ import { hasComponent } from "bitecs";
 import { isPinned as getPinnedState } from "../../bit-systems/networking";
 import { deleteTheDeletableAncestor } from "../../bit-systems/delete-entity-system";
 import { isAEntityPinned } from "../../systems/hold-system";
-import { AEntity, LocalAvatar, MediaInfo, RemoteAvatar, Static, MediaContentBounds } from "../../bit-components";
+import { AEntity, LocalAvatar, MediaInfo, RemoteAvatar, Static, MediaLoader } from "../../bit-components";
 import { setPinned } from "../../utils/bit-pinning-helper";
 import { debounce } from "lodash";
 
@@ -49,14 +49,7 @@ function isObjectPinned(world, eid) {
   if (hasComponent(world, AEntity, eid)) {
     return isAEntityPinned(APP.world, eid);
   } else {
-    // This hook is making decisions based on components attached to the root MediaLoader entity
-    // and the child media entity. ie. The MediaInfo component lives in the child media but the
-    // networked state lives in the root. This is not great, there is a lot of places where we need to
-    // do component searches to find either the media root or the actual media. It's not even reasonable
-    // to look for a component name MediaContentBounds just to get the MediaLoader (as we remove that
-    // after loading the media).
-    // We should probably find a better way of dealing with spawned media entity hierarchies.
-    const mediaRootEid = findAncestorWithComponent(APP.world, MediaContentBounds, eid);
+    const mediaRootEid = findAncestorWithComponent(APP.world, MediaLoader, eid);
     return getPinnedState(mediaRootEid);
   }
 }
@@ -66,7 +59,7 @@ export function usePinObject(hubChannel, scene, object) {
 
   const pinObject = useCallback(() => {
     if (shouldUseNewLoader()) {
-      const mediaRootEid = findAncestorWithComponent(APP.world, MediaContentBounds, object.eid);
+      const mediaRootEid = findAncestorWithComponent(APP.world, MediaLoader, object.eid);
       setPinned(hubChannel, APP.world, mediaRootEid, true);
     } else {
       const el = object.el;
@@ -77,7 +70,7 @@ export function usePinObject(hubChannel, scene, object) {
 
   const unpinObject = useCallback(() => {
     if (shouldUseNewLoader()) {
-      const mediaRootEid = findAncestorWithComponent(APP.world, MediaContentBounds, object.eid);
+      const mediaRootEid = findAncestorWithComponent(APP.world, MediaLoader, object.eid);
       setPinned(hubChannel, APP.world, mediaRootEid, false);
     } else {
       const el = object.el;
@@ -136,7 +129,7 @@ export function usePinObject(hubChannel, scene, object) {
 
   let targetEid;
   if (shouldUseNewLoader()) {
-    targetEid = findAncestorWithComponent(APP.world, MediaContentBounds, object.eid);
+    targetEid = findAncestorWithComponent(APP.world, MediaLoader, object.eid);
   } else {
     targetEid = object.el.eid;
   }

@@ -14,7 +14,7 @@ import {
   Rigidbody,
   Deleting,
   Deletable,
-  MediaContentBounds
+  MediaLoader
 } from "../bit-components";
 import { anyEntityWith, findAncestorWithComponent, findAncestorWithComponents } from "../utils/bit-utils";
 import { createNetworkedEntity } from "../utils/create-networked-entity";
@@ -241,7 +241,7 @@ function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
   // need to check its state to show/hide certain buttons
   // TODO At this moment all objects that have an object menu have been loaded by a media loader
   // but this might not be true in the future if we allow adding object menus to arbitrary objects.
-  const mediaLoader = findAncestorWithComponent(world, MediaContentBounds, target);
+  const mediaLoader = findAncestorWithComponent(world, MediaLoader, target);
   target = mediaLoader ? mediaLoader : target;
 
   const canISpawnMove = APP.hubChannel.can("spawn_and_move_media");
