@@ -921,8 +921,8 @@ class GLTFMozBehaviorExtension {
       }
       if (graph.variables) {
         for (const variable of graph.variables) {
-          const type = variable.valueTypeName;
-          const value = variable.initialValue;
+          const value = variable.valueTypeName.initialValue;
+          const type = value?.__mhc_link_type;
           if (type && value.index !== undefined) {
             deps.push(
               parser.getDependency(type, value.index).then(loadedDep => {
