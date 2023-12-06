@@ -40,8 +40,9 @@ export class Node {
 export class Graph {
   constructor() {}
 
-  Init(hubID) {
-    const roomProperties = GetRoomProperties(hubID);
+  async Init(hubID) {
+    const roomProperties = await GetRoomProperties(hubID);
+
     if (!roomProperties) {
       console.error("Cannot read room properties, navigation is not enabled for this room");
       this.enabled = false;

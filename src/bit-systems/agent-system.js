@@ -154,6 +154,7 @@ export default class VirtualAgent {
   }
 
   async Navigate(destName, userQuery, userIntent, skipModule = false) {
+    if (!sceneGraph.enabled) return;
     try {
       const startIndex = sceneGraph.GetClosestIndex(virtualAgent.avatarPos);
       const navigation = sceneGraph.GetInstructions(startIndex, destName);
