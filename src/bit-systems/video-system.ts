@@ -32,11 +32,12 @@ import { HubsVideoTexture } from "../textures/HubsVideoTexture";
 import { create360ImageMesh, createImageMesh } from "../utils/create-image-mesh";
 import { ClearFunction, JobRunner } from "../utils/coroutine-utils";
 import { loadVideoTexture } from "../utils/load-video-texture";
-import { resolveMediaInfo } from "../utils/media-utils";
+import { MediaType, resolveMediaInfo } from "../utils/media-utils";
 import { swapObject3DComponent } from "../utils/jsx-entity";
 import { MediaInfo } from "./media-loading";
 import { VIDEO_FLAGS } from "../inflators/video";
 import { ProjectionModeName, getProjectionNameFromProjection } from "../utils/projection-mode";
+import { loadAudioTexture } from "../utils/load-audio-texture";
 
 export const MediaVideoUpdateSrcEvent = defineComponent();
 
@@ -48,11 +49,19 @@ function* loadSrc(
   clearRollbacks: ClearFunction
 ) {
   const projection = getProjectionNameFromProjection(NetworkedVideo.projection[eid]);
-  const autoPlay = NetworkedVideo.flags[eid] && VIDEO_FLAGS.AUTO_PLAY ? true : false;
-  const loop = NetworkedVideo.flags[eid] && VIDEO_FLAGS.LOOP ? true : false;
-  const { accessibleUrl, contentType } = (yield resolveMediaInfo(src)) as MediaInfo;
-  const { texture, ratio, video }: { texture: HubsVideoTexture; ratio: number; video: HTMLVideoElement } =
-    yield loadVideoTexture(accessibleUrl, contentType, loop, autoPlay);
+  const autoPlay = NetworkedVideo.flags[eid] & VIDEO_FLAGS.AUTO_PLAY ? true : false;
+  const loop = NetworkedVideo.flags[eid] & VIDEO_FLAGS.LOOP ? true : false;
+  const { accessibleUrl, contentType, mediaType } = (yield resolveMediaInfo(src)) as MediaInfo;
+  let data: any;
+  if (mediaType === MediaType.VIDEO) {
+    data = (yield loadVideoTexture(accessibleUrl, contentType, loop, autoPlay)) as unknown;
+  } else if (mediaType === MediaType.AUDIO) {
+    data = (yield loadAudioTexture(accessibleUrl, loop, autoPlay)) as unknown;
+  } else {
+    return;
+  }
+
+  const { texture, ratio, video }: { texture: HubsVideoTexture; ratio: number; video: HTMLVideoElement } = data;
 
   clearRollbacks(); // After this point, normal entity cleanup will take care of things
 
@@ -81,7 +90,7 @@ function* loadSrc(
 
   swapObject3DComponent(world, eid, videoObj);
 
-  if ((NetworkedVideo.flags[eid] & VIDEO_FLAGS.PAUSED) === 0) {
+  if ((NetworkedVideo.flags[eid] & VIDEO_FLAGS.PAUSED) === 0 || autoPlay) {
     video.play();
   }
 
@@ -154,8 +163,22 @@ export function videoSystem(world: HubsWorld, audioSystem: AudioSystem) {
     const video = MediaVideoData.get(eid)!;
     if (hasComponent(world, Owned, eid)) {
       NetworkedVideo.time[eid] = video.currentTime;
-      let flags = 0;
-      flags |= video.paused ? VIDEO_FLAGS.PAUSED : 0;
+      let flags = NetworkedVideo.flags[eid];
+      if (video.paused) {
+        flags |= VIDEO_FLAGS.PAUSED;
+      } else {
+        flags &= ~VIDEO_FLAGS.PAUSED;
+      }
+      if (video.loop) {
+        flags |= VIDEO_FLAGS.LOOP;
+      } else {
+        flags &= ~VIDEO_FLAGS.LOOP;
+      }
+      if (video.autoplay) {
+        flags |= VIDEO_FLAGS.AUTO_PLAY;
+      } else {
+        flags &= ~VIDEO_FLAGS.AUTO_PLAY;
+      }
       NetworkedVideo.flags[eid] = flags;
       NetworkedVideo.src[eid] = APP.getSid(video.src);
     } else {

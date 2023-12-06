@@ -5,6 +5,7 @@ import { HubsWorld } from "../../app";
 import { findChildWithComponent } from "../../utils/bit-utils";
 import { hasComponent } from "bitecs";
 import { MediaVideoUpdateSrcEvent, updateVideoSrc } from "../video-system";
+import { takeOwnership } from "../../utils/take-ownership";
 
 type MediaEventState = {
   emitters: {
@@ -104,7 +105,11 @@ export const MediaNodes = definitionListToMap([
     ],
     initialState: undefined,
     out: { flow: "flow" },
-    triggered: ({ read, commit, triggeringSocketName, graph }) => {
+    configuration: {
+      networked: { valueType: "boolean" }
+    },
+
+    triggered: ({ read, commit, triggeringSocketName, graph, configuration }) => {
       const entity = read("entity") as EntityID;
       const world = graph.getDependency("world") as HubsWorld;
 
@@ -112,6 +117,9 @@ export const MediaNodes = definitionListToMap([
       if (media) {
         const video = MediaVideoData.get(media) as HTMLVideoElement;
         if (video) {
+          if (configuration.networked) {
+            takeOwnership(world, media);
+          }
           if (triggeringSocketName === "play") {
             video.play();
           } else if (triggeringSocketName === "pause") {

@@ -244,9 +244,7 @@ function ECSDebugSidebar({
           <section>
             {materials.map(m => m && <MaterialItem mat={m} key={m.eid} setSelectedObj={setSelectedObj} />)}
             {textures.map(t => t && <TextureItem tex={t} key={t.eid} setSelectedObj={setSelectedObj} />)}
-            {actions.map(a => (
-              <ActionItem action={a} key={a.eid} setSelectedObj={setSelectedObj} />
-            ))}
+            {actions.map(a => a && <ActionItem action={a} key={a.eid} setSelectedObj={setSelectedObj} />)}
           </section>
         </div>
         <div className="object-properties">{selectedObj && <ObjectProperties obj={selectedObj} />}</div>

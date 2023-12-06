@@ -30,7 +30,7 @@ export function setObjectMaterial(world: HubsWorld, eid: EntityID, matEid: Entit
   }
 }
 
-export function getObjectMaterial(world: HubsWorld, eid: EntityID): Material | null {
+export function getObjectMaterial(world: HubsWorld, eid: EntityID): EntityID | null {
   const obj = world.eid2obj.get(eid);
   if (!obj) {
     return null;
@@ -39,5 +39,5 @@ export function getObjectMaterial(world: HubsWorld, eid: EntityID): Material | n
   if (!mesh.isMesh) {
     return null;
   }
-  return Array.isArray(mesh.material) ? mesh.material[0] : mesh.material;
+  return Array.isArray(mesh.material) ? mesh.material[0].eid! : mesh.material.eid!;
 }

@@ -6,6 +6,7 @@ import { findChildWithComponent } from "../../utils/bit-utils";
 import { hasComponent } from "bitecs";
 import { ArrayVec3 } from "../../utils/jsx-entity";
 import { CONSTANTS } from "three-ammo";
+import { takeOwnership } from "../../utils/take-ownership";
 
 export const PhysicsNodes = definitionListToMap([
   makeFlowNodeDefinition({
@@ -23,12 +24,18 @@ export const PhysicsNodes = definitionListToMap([
     ],
     initialState: undefined,
     out: { flow: "flow" },
-    triggered: ({ read, commit, triggeringSocketName, graph }) => {
+    configuration: {
+      networked: { valueType: "boolean" }
+    },
+    triggered: ({ read, commit, triggeringSocketName, graph, configuration }) => {
       const entity = read("entity") as EntityID;
       const world = graph.getDependency("world") as HubsWorld;
 
       const cmp = findChildWithComponent(world, Rigidbody, entity);
       if (cmp && hasComponent(world, Owned, cmp)) {
+        if (configuration.networked) {
+          takeOwnership(world, cmp);
+        }
         if (triggeringSocketName === "setType") {
           const physicsSystem = APP.scene?.systems["hubs-systems"].physicsSystem;
           physicsSystem.updateRigidBody(cmp, {

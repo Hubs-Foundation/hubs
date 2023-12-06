@@ -35,6 +35,19 @@ export function action2Component(world: HubsWorld, eid: EntityID, action: Animat
 }
 
 function component2Action(world: HubsWorld, eid: EntityID, action: AnimationAction) {
+  if (BitAnimationAction.timeScale[eid] !== NetworkedAnimationAction.timeScale[eid]) {
+    BitAnimationAction.timeScale[eid] = NetworkedAnimationAction.timeScale[eid];
+    action.timeScale = NetworkedAnimationAction.timeScale[eid];
+  }
+
+  if (BitAnimationAction.weight[eid] !== NetworkedAnimationAction.weight[eid]) {
+    BitAnimationAction.weight[eid] = NetworkedAnimationAction.weight[eid];
+    action.weight = NetworkedAnimationAction.weight[eid];
+  }
+  if (BitAnimationAction.time[eid] !== NetworkedAnimationAction.time[eid]) {
+    BitAnimationAction.time[eid] = NetworkedAnimationAction.time[eid];
+    action.time = NetworkedAnimationAction.time[eid];
+  }
   if (BitAnimationAction.flags[eid] !== NetworkedAnimationAction.flags[eid]) {
     if (
       (BitAnimationAction.flags[eid] & ANIMATION_FLAGS.CLAMP_WHEN_FINISHED) !==
@@ -67,6 +80,7 @@ function component2Action(world: HubsWorld, eid: EntityID, action: AnimationActi
     ) {
       const paused = NetworkedAnimationAction.flags[eid] & ANIMATION_FLAGS.PAUSED ? true : false;
       action.paused = paused;
+      action.play();
     }
     if (
       (BitAnimationAction.flags[eid] & ANIMATION_FLAGS.RUNNING) !==
@@ -74,28 +88,26 @@ function component2Action(world: HubsWorld, eid: EntityID, action: AnimationActi
     ) {
       const running = NetworkedAnimationAction.flags[eid] & ANIMATION_FLAGS.RUNNING ? true : false;
       if (running) {
-        action.play();
+        if (
+          (BitAnimationAction.flags[eid] & ANIMATION_FLAGS.RESET) !==
+          (NetworkedAnimationAction.flags[eid] & ANIMATION_FLAGS.RESET)
+        ) {
+          action.reset();
+        }
+        const finished = NetworkedAnimationAction.flags[eid] & ANIMATION_FLAGS.FINISHED ? true : false;
+        if (!finished) {
+          action.play();
+        }
       } else {
-        action.stop();
+        action.paused = true;
       }
     }
-    BitAnimationAction.flags[eid] = NetworkedAnimationAction.flags[eid];
   }
 
-  if (BitAnimationAction.timeScale[eid] !== NetworkedAnimationAction.timeScale[eid]) {
-    BitAnimationAction.timeScale[eid] = NetworkedAnimationAction.timeScale[eid];
-    action.timeScale = NetworkedAnimationAction.timeScale[eid];
-  }
-
-  if (BitAnimationAction.weight[eid] !== NetworkedAnimationAction.weight[eid]) {
-    BitAnimationAction.weight[eid] = NetworkedAnimationAction.weight[eid];
-    action.weight = NetworkedAnimationAction.weight[eid];
-  }
-
-  if (BitAnimationAction.time[eid] !== NetworkedAnimationAction.time[eid]) {
-    BitAnimationAction.time[eid] = NetworkedAnimationAction.time[eid];
-    action.time = NetworkedAnimationAction.time[eid];
-  }
+  BitAnimationAction.flags[eid] = NetworkedAnimationAction.flags[eid];
+  BitAnimationAction.timeScale[eid] = NetworkedAnimationAction.timeScale[eid];
+  BitAnimationAction.weight[eid] = NetworkedAnimationAction.weight[eid];
+  BitAnimationAction.time[eid] = NetworkedAnimationAction.time[eid];
 }
 
 const behaviorGraphsQuery = defineQuery([BehaviorGraph]);
@@ -124,6 +136,8 @@ export function animationSystem(world: HubsWorld) {
     const action = APP.world.eid2action.get(eid)!;
     if (!hasComponent(world, Owned, eid)) {
       component2Action(world, eid, action);
+    } else {
+      action2Component(world, eid, action);
     }
   });
 }

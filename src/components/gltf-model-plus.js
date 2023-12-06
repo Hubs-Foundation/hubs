@@ -919,6 +919,27 @@ class GLTFMozBehaviorExtension {
           }
         }
       }
+      if (graph.variables) {
+        for (const variable of graph.variables) {
+          const value = variable.valueTypeName.initialValue;
+          const type = value?.__mhc_link_type;
+          if (type && value.index !== undefined) {
+            deps.push(
+              parser.getDependency(type, value.index).then(loadedDep => {
+                if (type === "texture" && !parser.json.textures[value.index].extensions?.MOZ_texture_rgbe) {
+                  loadedDep.encoding = THREE.sRGBEncoding;
+                }
+                // Not associated materials don't get their components resolved in GLTFHubsComponentsExtension as they are not referenced by any object
+                if (type === "material" && !loadedDep.userData.gltfExtensions) {
+                  loadedDep.userData.gltfExtensions = Object.assign({}, parser.json.materials[value.index].extensions);
+                }
+                value.dep = loadedDep;
+                return loadedDep;
+              })
+            );
+          }
+        }
+      }
 
       scenes[0].userData.behaviorGraph = graph;
       return Promise.all(deps);

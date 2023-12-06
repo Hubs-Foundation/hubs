@@ -1,3 +1,4 @@
+import { hasComponent } from "bitecs";
 import { HubsWorld } from "../../../app";
 import { EntityID, MediaVideo, MediaVideoData, NetworkedVideo } from "../../../bit-components";
 import { VIDEO_FLAGS } from "../../../inflators/video";
@@ -6,6 +7,7 @@ import {
   getProjectionFromProjectionName,
   getProjectionNameFromProjection
 } from "../../../utils/projection-mode";
+import { MediaVideoUpdateSrcEvent, updateVideoSrc } from "../../video-system";
 
 export interface GLTFVideoParams {
   src: string;
@@ -27,16 +29,33 @@ export function getVideo(world: HubsWorld, eid: EntityID): GLTFVideoParams {
 }
 
 export function setVideo(world: HubsWorld, eid: EntityID, params: GLTFVideoParams) {
-  params = Object.assign({}, getVideo(world, eid), params);
-  if (params.autoPlay) {
-    NetworkedVideo.flags[eid] |= VIDEO_FLAGS.AUTO_PLAY;
+  if (params.controls !== undefined) {
+    if (params.controls) {
+      NetworkedVideo.flags[eid] |= VIDEO_FLAGS.CONTROLS;
+    } else {
+      NetworkedVideo.flags[eid] &= ~VIDEO_FLAGS.CONTROLS;
+    }
   }
-  if (params.loop) {
-    NetworkedVideo.flags[eid] |= VIDEO_FLAGS.LOOP;
+  if (params.projection !== undefined) {
+    NetworkedVideo.projection[eid] = getProjectionFromProjectionName(params.projection);
   }
-  if (params.controls) {
-    NetworkedVideo.flags[eid] |= VIDEO_FLAGS.CONTROLS;
+
+  const video = MediaVideoData.get(eid)!;
+  let shouldUpdateVideo = false;
+  if (params.autoPlay !== undefined) {
+    shouldUpdateVideo ||= video.autoplay !== params.autoPlay;
+    video.autoplay = params.autoPlay;
   }
-  NetworkedVideo.src[eid] = APP.getSid(params.src);
-  NetworkedVideo.projection[eid] = getProjectionFromProjectionName(params.projection);
+  if (params.loop !== undefined) {
+    shouldUpdateVideo ||= video.loop !== params.loop;
+    video.loop = params.loop;
+  }
+  let src = video.src;
+  if (params.src !== undefined) {
+    shouldUpdateVideo ||= video.src !== params.src;
+    src = params.src;
+  }
+  if (shouldUpdateVideo && !hasComponent(world, MediaVideoUpdateSrcEvent, eid)) {
+    updateVideoSrc(world, eid, src, video);
+  }
 }
