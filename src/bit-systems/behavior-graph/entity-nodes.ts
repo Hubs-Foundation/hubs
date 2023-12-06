@@ -28,6 +28,8 @@ import { definitionListToMap } from "./utils";
 import { getComponentBindings } from "./bindings/bindings";
 import { camelCase } from "../../inflators/model";
 import { takeOwnership } from "../../utils/take-ownership";
+import { hubIdFromUrl } from "../../utils/media-url-utils";
+import { changeHub } from "../../change-hub";
 
 type SocketTypeName =
   | "string"
@@ -125,7 +127,6 @@ function makeEntityEventNode(
     }
   });
 }
-
 
 function makeObjectPropertyFlowNode<T extends keyof Object3D>(property: T, valueType: SocketTypeName) {
   const typeName = `hubs/entity/set/${property}`;
@@ -312,26 +313,25 @@ export const EntityNodes = definitionListToMap([
     }
   }),
   makeFlowNodeDefinition({
-    typeName: "hubs/misc/iframeopen",
+    typeName: "hubs/misc/changehub",
     category: "Components" as any,
-    label: "Open Iframe",
+    label: "Change Hub",
     in: {
       flow: "flow",
       //   entity: "entity",
-      text: "string"
+      url: "string"
     },
     out: { flow: "flow" },
     initialState: undefined,
     triggered: ({ read, commit, graph }) => {
-      //   const world = graph.getDependency<HubsWorld>("world")!;
-      // //   const eid = read<EntityID>("entity");
-      // //   const obj = world.eid2obj.get(eid);
-      //   if (!obj || !(obj as Text).isTroikaText) {
-      //     console.error(`Text: Set Text, could not find entity with text`, eid);
-      //     return;
-      //   }
-      //   const text = obj as Text;
-      alert("cliced" + read("text"));
+      const src: string = read("url");
+      const url = new URL(src);
+      //   alert("cliced" + read("text"));
+
+      const waypoint = url.hash && url.hash.substring(1);
+      // move to new room without page load or entry flow
+      const hubId = hubIdFromUrl(src);
+      changeHub(hubId, true, waypoint);
       commit("flow");
     }
   }),
