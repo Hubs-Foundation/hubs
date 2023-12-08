@@ -29,7 +29,7 @@ import { waitForDOMContentLoaded } from "../utils/async-utils";
 
 import { SHAPE } from "three-ammo/constants";
 import { addComponent } from "bitecs";
-import { MediaContentBounds, MediaLoaded } from "../bit-components";
+import { MediaContentBounds } from "../bit-components";
 
 let loadingObject;
 
