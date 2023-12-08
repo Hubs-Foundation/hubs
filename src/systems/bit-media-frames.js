@@ -20,7 +20,6 @@ import {
   MediaFrame,
   MediaImage,
   MediaLoaded,
-  MediaLoading,
   MediaPDF,
   MediaVideo,
   Networked,
@@ -102,7 +101,7 @@ function getCapturableEntity(world, physicsSystem, frame) {
     const eid = bodyData.object3D.eid;
     if (
       MediaFrame.mediaType[frame] & mediaTypeMaskFor(world, eid) &&
-      !hasComponent(world, MediaLoading, eid) &&
+      hasComponent(world, MediaContentBounds, eid) &&
       !inOtherFrame(world, frame, eid) &&
       !isAncestor(bodyData.object3D, frameObj)
     ) {
