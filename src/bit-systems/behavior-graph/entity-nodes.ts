@@ -225,7 +225,6 @@ export const EntityNodes = definitionListToMap([
     addComponent(APP.world, RemoteHoverTarget, target);
   }),
   makeEntityEventNode("onCollisionEnter", "entity", "On Collision Enter"),
-  //   makeEntityEventNode("onButtonClicked", "entity", "On Button Clicked"),
   makeEntityEventNode("onCollisionStay", "entity", "On Collision Stay"),
   makeEntityEventNode("onCollisionExit", "entity", "On Collision Exit"),
   makeEntityEventNode("onPlayerCollisionEnter", "player", "On Player Collision Enter"),
@@ -327,7 +326,6 @@ export const EntityNodes = definitionListToMap([
     label: "Change Hub",
     in: {
       flow: "flow",
-      //   entity: "entity",
       url: "string"
     },
     out: { flow: "flow" },
@@ -335,10 +333,8 @@ export const EntityNodes = definitionListToMap([
     triggered: ({ read, commit, graph }) => {
       const src: string = read("url");
       const url = new URL(src);
-      //   alert("cliced" + read("text"));
 
       const waypoint = url.hash && url.hash.substring(1);
-      // move to new room without page load or entry flow
       const hubId = hubIdFromUrl(src);
       changeHub(hubId, true, waypoint);
       commit("flow");
