@@ -7,8 +7,8 @@ import { hasComponent } from "bitecs";
 import { isPinned as getPinnedState } from "../../bit-systems/networking";
 import { deleteTheDeletableAncestor } from "../../bit-systems/delete-entity-system";
 import { isAEntityPinned } from "../../systems/hold-system";
-import { AEntity, LocalAvatar, MediaInfo, RemoteAvatar, Static, MediaContentBounds } from "../../bit-components";
-import { setPinned } from "../../utils/bit-pinning-helper";
+import { AEntity, LocalAvatar, MediaInfo, RemoteAvatar, Static, MediaLoader } from "../../bit-components";
+import { setPinned, canPin as canPinObject } from "../../utils/bit-pinning-helper";
 import { debounce } from "lodash";
 
 export function isMe(object) {
@@ -49,14 +49,7 @@ function isObjectPinned(world, eid) {
   if (hasComponent(world, AEntity, eid)) {
     return isAEntityPinned(APP.world, eid);
   } else {
-    // This hook is making decisions based on components attached to the root MediaLoader entity
-    // and the child media entity. ie. The MediaInfo component lives in the child media but the
-    // networked state lives in the root. This is not great, there is a lot of places where we need to
-    // do component searches to find either the media root or the actual media. It's not even reasonable
-    // to look for a component name MediaContentBounds just to get the MediaLoader (as we remove that
-    // after loading the media).
-    // We should probably find a better way of dealing with spawned media entity hierarchies.
-    const mediaRootEid = findAncestorWithComponent(APP.world, MediaContentBounds, eid);
+    const mediaRootEid = findAncestorWithComponent(APP.world, MediaLoader, eid);
     return getPinnedState(mediaRootEid);
   }
 }
@@ -66,7 +59,7 @@ export function usePinObject(hubChannel, scene, object) {
 
   const pinObject = useCallback(() => {
     if (shouldUseNewLoader()) {
-      const mediaRootEid = findAncestorWithComponent(APP.world, MediaContentBounds, object.eid);
+      const mediaRootEid = findAncestorWithComponent(APP.world, MediaLoader, object.eid);
       setPinned(hubChannel, APP.world, mediaRootEid, true);
     } else {
       const el = object.el;
@@ -77,7 +70,7 @@ export function usePinObject(hubChannel, scene, object) {
 
   const unpinObject = useCallback(() => {
     if (shouldUseNewLoader()) {
-      const mediaRootEid = findAncestorWithComponent(APP.world, MediaContentBounds, object.eid);
+      const mediaRootEid = findAncestorWithComponent(APP.world, MediaLoader, object.eid);
       setPinned(hubChannel, APP.world, mediaRootEid, false);
     } else {
       const el = object.el;
@@ -125,18 +118,21 @@ export function usePinObject(hubChannel, scene, object) {
     };
   }, [object]);
 
-  let userOwnsFile = true;
-  if (!shouldUseNewLoader()) {
+  let canBePinned = false;
+  if (shouldUseNewLoader()) {
+    const mediaRootEid = findAncestorWithComponent(APP.world, MediaLoader, object.eid);
+    canBePinned = canPinObject(APP.hubChannel, mediaRootEid);
+  } else {
     const el = object.el;
     if (el.components["media-loader"]) {
       const { fileIsOwned, fileId } = el.components["media-loader"].data;
-      userOwnsFile = fileIsOwned || (fileId && getPromotionTokenForFile(fileId));
+      canBePinned = fileIsOwned || (fileId && getPromotionTokenForFile(fileId));
     }
   }
 
   let targetEid;
   if (shouldUseNewLoader()) {
-    targetEid = findAncestorWithComponent(APP.world, MediaContentBounds, object.eid);
+    targetEid = findAncestorWithComponent(APP.world, MediaLoader, object.eid);
   } else {
     targetEid = object.el.eid;
   }
@@ -147,7 +143,7 @@ export function usePinObject(hubChannel, scene, object) {
     !isPlayer(object) &&
     !isStatic &&
     hubChannel.can("pin_objects") &&
-    userOwnsFile
+    canBePinned
   );
 
   return { canPin, isPinned, togglePinned, pinObject, unpinObject };
@@ -191,12 +187,25 @@ export function useRemoveObject(hubChannel, scene, object) {
 
   const eid = object.eid;
 
+  let canBePinned = false;
+  if (shouldUseNewLoader()) {
+    const mediaRootEid = findAncestorWithComponent(APP.world, MediaLoader, object.eid);
+    canBePinned = canPinObject(APP.hubChannel, mediaRootEid);
+  } else {
+    const el = object.el;
+    if (el.components["media-loader"]) {
+      const { fileIsOwned, fileId } = el.components["media-loader"].data;
+      canBePinned = fileIsOwned || (fileId && getPromotionTokenForFile(fileId));
+    }
+  }
+
   const canRemoveObject = !!(
     scene.is("entered") &&
     !isPlayer(object) &&
     !isObjectPinned(APP.world, eid) &&
     !hasComponent(APP.world, Static, eid) &&
-    hubChannel.can("spawn_and_move_media")
+    hubChannel.can("spawn_and_move_media") &&
+    canBePinned
   );
 
   return { removeObject, canRemoveObject };
