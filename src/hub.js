@@ -406,10 +406,15 @@ export async function getSceneUrlForHub(hub) {
     sceneUrl = document.querySelector("a-scene").is("entered") ? sceneUrl : loadingEnvironment;
   } else if (isLegacyBundle) {
     // Deprecated
-    const res = await fetch(sceneUrl);
-    const data = await res.json();
-    const baseURL = new URL(THREE.LoaderUtils.extractUrlBase(sceneUrl), window.location.href);
-    sceneUrl = new URL(data.assets[0].src, baseURL).href;
+    try {
+      const res = await fetch(sceneUrl);
+      const data = await res.json();
+      const baseURL = new URL(THREE.LoaderUtils.extractUrlBase(sceneUrl), window.location.href);
+      sceneUrl = new URL(data.assets[0].src, baseURL).href;
+    } catch (e) {
+      sceneUrl = loadingEnvironment;
+      console.error("Error fetching the scene: ", e);
+    }
   } else {
     sceneUrl = proxiedUrlFor(sceneUrl);
   }
