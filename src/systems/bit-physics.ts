@@ -2,9 +2,10 @@ import { defineQuery, enterQuery, entityExists, exitQuery, hasComponent, Not } f
 import { Object3DTag, Rigidbody, PhysicsShape, AEntity, SceneRoot } from "../bit-components";
 import { getShapeFromPhysicsShape } from "../inflators/physics-shape";
 import { findAncestorWithComponent } from "../utils/bit-utils";
-import { getBodyFromRigidBody } from "../inflators/rigid-body";
+import { getBodyFromRigidBody, Type } from "../inflators/rigid-body";
 import { HubsWorld } from "../app";
 import { PhysicsSystem } from "./physics-system";
+import { takeSoftOwnership } from "../utils/take-soft-ownership";
 
 const rigidbodyQuery = defineQuery([Rigidbody, Object3DTag, Not(AEntity)]);
 const rigidbodyEnteredQuery = enterQuery(rigidbodyQuery);
@@ -27,6 +28,10 @@ export const physicsCompatSystem = (world: HubsWorld, physicsSystem: PhysicsSyst
     const body = getBodyFromRigidBody(eid);
     const bodyId = physicsSystem.addBody(obj, body);
     Rigidbody.bodyId[eid] = bodyId;
+
+    if (Rigidbody.type[eid] === Type.DYNAMIC) {
+      takeSoftOwnership(world, eid);
+    }
   });
 
   shapeEnterQuery(world).forEach(eid => {
