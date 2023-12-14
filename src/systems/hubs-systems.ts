@@ -81,7 +81,6 @@ import { mixerAnimatableSystem } from "../bit-systems/mixer-animatable";
 import { loopAnimationSystem } from "../bit-systems/loop-animation";
 import { linkSystem } from "../bit-systems/link-system";
 import { behaviorGraphSystem } from "../bit-systems/behavior-graph";
-import { interactableObjectSystem } from "./interactable-system";
 
 declare global {
   interface Window {
@@ -228,7 +227,6 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   hubsSystems.twoPointStretchingSystem.tick();
 
   floatyObjectSystem(world);
-  interactableObjectSystem(world);
 
   hubsSystems.holdableButtonSystem.tick();
   hubsSystems.hoverButtonSystem.tick();

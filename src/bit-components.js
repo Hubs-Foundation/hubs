@@ -151,7 +151,8 @@ export const Rigidbody = defineComponent({
   activationState: Types.ui8,
   collisionFilterGroup: Types.ui32,
   collisionFilterMask: Types.ui32,
-  flags: Types.ui8
+  flags: Types.ui8,
+  prevType: Types.ui8
 });
 
 export const PhysicsShape = defineComponent({
@@ -451,9 +452,7 @@ export const NetworkedBehavior = defineComponent({
  * @type {Map<EntityId, Map}>}
  */
 export const NetworkedBehaviorData = new Map();
-export const InteractableObject = defineComponent({
-  type: Types.ui8
-});
+export const InteractableObject = defineComponent();
 export const BitAnimationAction = defineComponent({
   time: Types.f32,
   timeScale: Types.f32,

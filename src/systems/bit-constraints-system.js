@@ -23,6 +23,7 @@ import {
   Networked
 } from "../bit-components";
 import { takeOwnership } from "../utils/take-ownership";
+import { getBodyTypeFromType } from "../inflators/rigid-body";
 
 const queryRemoteRight = defineQuery([HeldRemoteRight, OffersRemoteConstraint]);
 const queryEnterRemoteRight = enterQuery(queryRemoteRight);
@@ -49,6 +50,7 @@ function add(world, physicsSystem, interactor, constraintComponent, entities) {
     if (hasComponent(world, Networked, eid)) {
       takeOwnership(world, eid);
     }
+    Rigidbody.prevType[eid] = Rigidbody.type[eid];
     physicsSystem.updateRigidBody(eid, grabBodyOptions);
     physicsSystem.addConstraint(interactor, Rigidbody.bodyId[eid], Rigidbody.bodyId[interactor], {});
     addComponent(world, Constraint, eid);
@@ -61,7 +63,10 @@ function remove(world, offersConstraint, constraintComponent, physicsSystem, int
     const eid = findAncestorEntity(world, entities[i], ancestor => hasComponent(world, Rigidbody, ancestor));
     if (!entityExists(world, eid)) continue;
     if (hasComponent(world, offersConstraint, entities[i]) && hasComponent(world, Rigidbody, eid)) {
-      physicsSystem.updateRigidBody(eid, releaseBodyOptions);
+      physicsSystem.updateRigidBody(eid, {
+        type: getBodyTypeFromType(Rigidbody.prevType[eid]),
+        ...releaseBodyOptions
+      });
       physicsSystem.removeConstraint(interactor);
       removeComponent(world, constraintComponent, eid);
       if (
