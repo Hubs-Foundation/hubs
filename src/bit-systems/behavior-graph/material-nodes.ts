@@ -117,7 +117,7 @@ export const MaterialNodes = definitionListToMap([
 
       const { get } = getComponentBindings("material")!;
       const material = get!(APP.world, matEid);
-      return (material as any)[propertyName];
+      write(propertyName, material[propertyName]);
     }
   }),
   makeFlowNodeDefinition({
