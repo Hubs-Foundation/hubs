@@ -4,23 +4,16 @@ import { EntityID, Owned, Rigidbody } from "../../bit-components";
 import { HubsWorld } from "../../app";
 import { findChildWithComponent } from "../../utils/bit-utils";
 import { hasComponent } from "bitecs";
-import { ArrayVec3 } from "../../utils/jsx-entity";
-import { CONSTANTS } from "three-ammo";
-import { takeOwnership } from "../../utils/take-ownership";
+import { Type, getBodyFromRigidBody } from "../../inflators/rigid-body";
 
 export const PhysicsNodes = definitionListToMap([
   makeFlowNodeDefinition({
-    typeName: "physics/setRigidBodyProperties",
+    typeName: "physics/setRigidBodyActive",
     category: "Physics" as any,
-    label: "Set Rigid Body Property",
+    label: "Activate Rigid Body",
     in: () => [
       { key: "entity", valueType: "entity" },
-      { key: "setType", valueType: "flow" },
-      { key: "type", valueType: "string", defaultValue: CONSTANTS.TYPE.KINEMATIC },
-      { key: "setMass", valueType: "flow" },
-      { key: "mass", valueType: "float", defaultValue: 1.0 },
-      { key: "setGravity", valueType: "flow" },
-      { key: "gravity", valueType: "vec3", defaultValue: { x: 0, y: -9.8, z: 0 } }
+      { key: "setActive", valueType: "flow" }
     ],
     initialState: undefined,
     out: { flow: "flow" },
@@ -33,25 +26,14 @@ export const PhysicsNodes = definitionListToMap([
 
       const cmp = findChildWithComponent(world, Rigidbody, entity);
       if (cmp && hasComponent(world, Owned, cmp)) {
-        if (configuration.networked) {
-          takeOwnership(world, cmp);
-        }
-        if (triggeringSocketName === "setType") {
-          const physicsSystem = APP.scene?.systems["hubs-systems"].physicsSystem;
-          physicsSystem.updateRigidBody(cmp, {
-            type: read("type") as string
-          });
-        } else if (triggeringSocketName === "setMass") {
-          const physicsSystem = APP.scene?.systems["hubs-systems"].physicsSystem;
-          physicsSystem.updateRigidBody(cmp, {
-            mass: read("mass") as number
-          });
-        } else if (triggeringSocketName === "setGravity") {
-          const gravity = read("gravity") as ArrayVec3;
-          const physicsSystem = APP.scene?.systems["hubs-systems"].physicsSystem;
-          physicsSystem.updateRigidBody(cmp, {
-            gravity: { x: gravity[0], y: gravity[1], z: gravity[2] }
-          });
+        if (triggeringSocketName === "setActive") {
+          if (Rigidbody.type[cmp] === Type.DYNAMIC) {
+            const physicsSystem = APP.scene?.systems["hubs-systems"].physicsSystem;
+            const bodyId = Rigidbody.bodyId[cmp];
+            physicsSystem.activateBody(bodyId);
+            // This shouldn't be necessary but for some reason it doesn't activate the body if we don't update the body
+            physicsSystem.updateRigidBody(cmp, getBodyFromRigidBody(cmp));
+          }
         }
       }
       commit("flow");
