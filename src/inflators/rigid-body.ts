@@ -1,5 +1,5 @@
 import { addComponent } from "bitecs";
-import { Rigidbody } from "../bit-components";
+import { NetworkedRigidBody, Rigidbody } from "../bit-components";
 import { HubsWorld } from "../app";
 import { CONSTANTS } from "three-ammo";
 import { COLLISION_LAYERS } from "../constants";
@@ -226,6 +226,7 @@ export function inflateRigidBody(world: HubsWorld, eid: number, params: Partial<
   const bodyParams = Object.assign({}, DEFAULTS, params) as RigidBodyParams;
 
   addComponent(world, Rigidbody, eid);
+  addComponent(world, NetworkedRigidBody, eid);
 
   Rigidbody.type[eid] = bodyParams.type;
   Rigidbody.mass[eid] = bodyParams.mass;

@@ -154,6 +154,9 @@ export const Rigidbody = defineComponent({
   flags: Types.ui8,
   prevType: Types.ui8
 });
+export const NetworkedRigidBody = defineComponent({
+  prevType: Types.ui8
+});
 
 export const PhysicsShape = defineComponent({
   bodyId: Types.ui16,

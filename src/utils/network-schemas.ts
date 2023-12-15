@@ -9,6 +9,7 @@ import {
   NetworkedMediaFrame,
   NetworkedObjectMaterial,
   NetworkedPDF,
+  NetworkedRigidBody,
   NetworkedText,
   NetworkedTransform,
   NetworkedVideo,
@@ -28,6 +29,7 @@ import { NetworkedTextSchema } from "./networked-text-schema";
 import { NetworkedVisibleSchema } from "./networked-visible-schema";
 import { NetworkedObject3DMaterialSchema } from "./networked-object-material-schema";
 import { NetworkedMaterialSchema } from "./networked-material-schema";
+import { NetworkedRigidBodySchema } from "./networked-transform-rigid-body";
 
 export interface StoredComponent {
   version: number;
@@ -64,6 +66,7 @@ schemas.set(NetworkedText, NetworkedTextSchema);
 schemas.set(NetworkedVisible, NetworkedVisibleSchema);
 schemas.set(NetworkedObjectMaterial, NetworkedObject3DMaterialSchema);
 schemas.set(NetworkedMaterial, NetworkedMaterialSchema);
+schemas.set(NetworkedRigidBody, NetworkedRigidBodySchema);
 
 export const networkableComponents = Array.from(schemas.keys());
 

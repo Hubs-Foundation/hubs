@@ -1,10 +1,11 @@
 import { makeFlowNodeDefinition } from "@oveddan-behave-graph/core";
 import { definitionListToMap } from "./utils";
-import { EntityID, Owned, Rigidbody } from "../../bit-components";
+import { EntityID, Networked, Owned, Rigidbody } from "../../bit-components";
 import { HubsWorld } from "../../app";
 import { findChildWithComponent } from "../../utils/bit-utils";
 import { hasComponent } from "bitecs";
 import { Type, getBodyFromRigidBody } from "../../inflators/rigid-body";
+import { takeOwnership } from "../../utils/take-ownership";
 
 export const PhysicsNodes = definitionListToMap([
   makeFlowNodeDefinition({
@@ -17,9 +18,6 @@ export const PhysicsNodes = definitionListToMap([
     ],
     initialState: undefined,
     out: { flow: "flow" },
-    configuration: {
-      networked: { valueType: "boolean" }
-    },
     triggered: ({ read, commit, triggeringSocketName, graph, configuration }) => {
       const entity = read("entity") as EntityID;
       const world = graph.getDependency("world") as HubsWorld;
@@ -31,8 +29,11 @@ export const PhysicsNodes = definitionListToMap([
             const physicsSystem = APP.scene?.systems["hubs-systems"].physicsSystem;
             const bodyId = Rigidbody.bodyId[cmp];
             physicsSystem.activateBody(bodyId);
-            // This shouldn't be necessary but for some reason it doesn't activate the body if we don't update the body
+            // This shouldn't be necessary but for some reason it doesn't activate the body if we don't update the body afterwards
             physicsSystem.updateRigidBody(cmp, getBodyFromRigidBody(cmp));
+            if (hasComponent(world, Networked, cmp)) {
+              takeOwnership(world, cmp);
+            }
           }
         }
       }

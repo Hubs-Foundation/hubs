@@ -1,5 +1,14 @@
 import { defineQuery, enterQuery, entityExists, exitQuery, hasComponent, Not } from "bitecs";
-import { Object3DTag, Rigidbody, PhysicsShape, AEntity, SceneRoot } from "../bit-components";
+import {
+  Object3DTag,
+  Rigidbody,
+  PhysicsShape,
+  AEntity,
+  NetworkedRigidBody,
+  Owned,
+  EntityID,
+  Networked
+} from "../bit-components";
 import { getShapeFromPhysicsShape } from "../inflators/physics-shape";
 import { findAncestorWithComponent } from "../utils/bit-utils";
 import { getBodyFromRigidBody, Type } from "../inflators/rigid-body";
@@ -22,14 +31,23 @@ function addPhysicsShapes(world: HubsWorld, physicsSystem: PhysicsSystem, eid: n
   PhysicsShape.shapeId[eid] = shapeId;
 }
 
+export function updatePrevBodyType(world: HubsWorld, eid: EntityID) {
+  // If someone else owned the entity we want to preserve the prevType state
+  if (hasComponent(world, Owned, eid) || Networked.owner[eid] === APP.getSid("reticulum")) {
+    Rigidbody.prevType[eid] = Rigidbody.type[eid];
+  } else {
+    Rigidbody.prevType[eid] = NetworkedRigidBody.prevType[eid];
+  }
+}
+
+const networkedRigidBodyQuery = defineQuery([Rigidbody, NetworkedRigidBody]);
 export const physicsCompatSystem = (world: HubsWorld, physicsSystem: PhysicsSystem) => {
   rigidbodyEnteredQuery(world).forEach(eid => {
     const obj = world.eid2obj.get(eid);
     const body = getBodyFromRigidBody(eid);
     const bodyId = physicsSystem.addBody(obj, body);
     Rigidbody.bodyId[eid] = bodyId;
-
-    if (Rigidbody.type[eid] === Type.DYNAMIC) {
+    if (hasComponent(world, Networked, eid)) {
       takeSoftOwnership(world, eid);
     }
   });
@@ -52,5 +70,13 @@ export const physicsCompatSystem = (world: HubsWorld, physicsSystem: PhysicsSyst
       // The PhysicsShape is still on this entity!
     }
     physicsSystem.removeBody(Rigidbody.bodyId[eid]);
+  });
+
+  networkedRigidBodyQuery(world).forEach(eid => {
+    if (hasComponent(world, Owned, eid)) {
+      NetworkedRigidBody.prevType[eid] = Rigidbody.prevType[eid];
+    } else {
+      Rigidbody.prevType[eid] = NetworkedRigidBody.prevType[eid];
+    }
   });
 };
