@@ -25,12 +25,12 @@ export function HomePage() {
   const auth = useContext(AuthContext);
   const intl = useIntl();
 
-  // This takes a page location such as "https://myhubs.club/index.html#https://3dstreet.app/file.glb" 
+  // This takes a page location such as "https://myhubs.club/index.html#https://3dstreet.app/file.glb"
   // and saves to local storage just the part after the # symbol such as "https://3dstreet.app/file.glb"
   const gltfPath = window.location.hash.substring(1);
-  console.log('[3DStreet Loader] window.location.hash', gltfPath);
-  localStorage.setItem('gltf-path', gltfPath);
-  console.log('[3DStreet Loader] Set as gltf-path in localStorage');
+  console.log("[3DStreet Loader] window.location.hash", gltfPath);
+  localStorage.setItem("gltf-path", gltfPath);
+  console.log("[3DStreet Loader] Set as gltf-path in localStorage");
 
   const { results: favoriteRooms } = useFavoriteRooms();
   const { results: publicRooms } = usePublicRooms();
