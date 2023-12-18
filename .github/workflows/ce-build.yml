@@ -1,0 +1,63 @@
+name: ce
+
+on:
+  workflow_dispatch:
+    inputs:
+      codePath:
+        type: string
+      DOCKER_HUB_USR:
+        type: string
+      dockerfile:
+        type: string
+        default: RetPageOriginDockerfile
+      registry:
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+  
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+        with:
+          install: true
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ inputs.DOCKER_HUB_USR }}
+          password: ${{ secrets.DOCKER_HUB_PWD }}
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          path: "./repo"
+
+      - name: Use codePath for multirepo
+        if: ${{ inputs.codePath != ''}}
+        run: |
+          mkdir ./_repo
+          cp -rf ./repo/${{ inputs.codePath }}/* ./_repo
+          rm -rf ./repo
+          mv ./_repo ./repo
+          ls ./repo
+
+      - name: Docker Buildx setup
+        uses: docker/setup-buildx-action@v1
+        with:
+          install: true
+
+      - name: Docker Build and Push
+        uses: docker/build-push-action@v2
+        with:
+          context: repo/
+          file: repo/${{ inputs.dockerfile }}
+          tags: ${{ inputs.registry }}/${{ github.workflow }}:latest,${{ inputs.registry }}/${{ github.workflow }}:${{ github.run_number }}
+          cache-from: type=registry,ref=${{ inputs.registry }}/${{ github.workflow }}:buildcache
+          cache-to: type=registry,ref=${{ inputs.registry }}/${{ github.workflow }}:buildcache,mode=max
+          push: true
