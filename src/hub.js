@@ -780,20 +780,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   const onSceneLoaded = () => {
     const physicsSystem = scene.systems["hubs-systems"].physicsSystem;
     physicsSystem.setDebug(isDebug || physicsSystem.debug);
-    
+
     // load 3DStreet items from local storage
-    var streetEl = document.createElement('a-entity');
-    console.log('[3DStreet Loader] getting gltf-path from localStorage...')
-    const gltfPath = localStorage.getItem('gltf-path');
-    console.log('[3DStreet Loader] gltfPath: ', gltfPath);
-    console.log('[3DStreet Loader] Creating new entity and setting attributes...')
-    streetEl.setAttribute("media-loader", { src: gltfPath, fitToBox: true, resolve: true })
-    streetEl.setAttribute("networked", { template: "#interactable-media" } );
-    streetEl.id = 'streetEl';
-    streetEl.setAttribute('scale', '100 100 100');
-    streetEl.setAttribute('position', '0 1 0');
-    document.getElementById('objects-scene').append(streetEl);
-    console.log('[3DStreet Loader] Entity appended to scene.')
+    const streetEl = document.createElement("a-entity");
+    console.log("[3DStreet Loader] getting gltf-path from localStorage...");
+    const gltfPath = localStorage.getItem("gltf-path");
+    console.log("[3DStreet Loader] gltfPath: ", gltfPath);
+    console.log("[3DStreet Loader] Creating new entity and setting attributes...");
+    streetEl.setAttribute("media-loader", { src: gltfPath, fitToBox: true, resolve: true });
+    streetEl.setAttribute("networked", { template: "#interactable-media" });
+    streetEl.id = "streetEl";
+    streetEl.setAttribute("scale", "100 100 100");
+    streetEl.setAttribute("position", "0 1 0");
+    document.getElementById("objects-scene").append(streetEl);
+    console.log("[3DStreet Loader] Entity appended to scene.");
   };
   if (scene.hasLoaded) {
     onSceneLoaded();
