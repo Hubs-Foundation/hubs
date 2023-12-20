@@ -57,6 +57,7 @@ async function handleLinkClick(world: HubsWorld, button: EntityID) {
   const menu = findAncestorWithComponent(world, LinkHoverMenu, button)!;
   const linkEid = LinkHoverMenu.targetObjectRef[menu];
   const src = APP.getString(Link.url[linkEid])!;
+  if (!src) return;
   const url = new URL(src);
   const linkType = Link.type[linkEid];
   switch (linkType) {
