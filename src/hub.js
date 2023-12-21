@@ -13,10 +13,9 @@ import "core-js/stable";
 import "regenerator-runtime/runtime";
 
 console.log(
-  `App version: ${
-    configs.IS_LOCAL_OR_CUSTOM_CLIENT
-      ? `Custom client or local client (undeploy custom client to run build ${process.env.BUILD_VERSION})`
-      : process.env.BUILD_VERSION || "?"
+  `App version: ${configs.IS_LOCAL_OR_CUSTOM_CLIENT
+    ? `Custom client or local client (undeploy custom client to run build ${process.env.BUILD_VERSION})`
+    : process.env.BUILD_VERSION || "?"
   }`
 );
 
@@ -139,6 +138,7 @@ import "./components/avatar-audio-source";
 import "./components/avatar-inspect-collider";
 import "./components/video-texture-target";
 import "./components/mirror";
+import "./components/fullbody-animation";
 
 import React from "react";
 import { createRoot } from "react-dom/client";
@@ -710,7 +710,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
 
 async function runBotMode(scene, entryManager) {
   console.log("Running in bot mode...");
-  const noop = () => {};
+  const noop = () => { };
   const alwaysFalse = () => false;
   scene.renderer = {
     setAnimationLoop: noop,

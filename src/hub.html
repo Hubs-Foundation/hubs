@@ -131,7 +131,8 @@
 
                     <a-entity class="model" gltf-model-plus="inflate: true">
                         <template data-name="AvatarRoot">
-                            <a-entity ik-controller hand-pose__left hand-pose__right networked-audio-analyser>
+                            <a-entity ik-controller hand-pose__left hand-pose__right networked-audio-analyser
+                                fullbody-animation-play>
                             </a-entity>
                         </template>
 
@@ -723,8 +724,9 @@
             </a-entity>
         </a-entity>
         <!-- Avatar Rig -->
-        <a-entity id="avatar-rig" ik-root player-info set-yxz-order periodic-full-syncs visible="false"
-            tags="inspectable: true; preventAudioBoost: true" inspect-pivot-child-selector="selector:.inspect-pivot">
+        <a-entity id="avatar-rig" fullbody-animation-change networked-avatar ik-root player-info set-yxz-order
+            periodic-full-syncs visible="false" tags="inspectable: true; preventAudioBoost: true"
+            inspect-pivot-child-selector="selector:.inspect-pivot">
             <a-entity id="avatar-pov-node" class="camera" personal-space-bubble="radius: 0.4;" rotation
                 pitch-yaw-rotator set-yxz-order position="0 1.6 0">
                 <a-entity class="inspect-pivot" inspect-pivot-offset-from-camera></a-entity>
@@ -817,7 +819,8 @@
                     <a-entity ik-controller="alwaysUpdate: true" disable-frustum-culling hand-pose__left
                         hand-pose__right
                         hand-pose-controller__left="networkedAvatar:#avatar-rig;eventSrc:#player-left-controller"
-                        hand-pose-controller__right="networkedAvatar:#avatar-rig;eventSrc:#player-right-controller"></a-entity>
+                        hand-pose-controller__right="networkedAvatar:#avatar-rig;eventSrc:#player-right-controller"
+                        fullbody-animation-play></a-entity>
                 </template>
 
                 <template data-name="Spine">
