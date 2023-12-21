@@ -1,6 +1,7 @@
 import { defineQuery } from "bitecs";
 import { CameraTool } from "../bit-components";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
+import { FullBodyIKSolver } from "./tools/fullbody-ik-solver";
 const { Vector3, Quaternion, Matrix4, Euler } = THREE;
 
 function quaternionAlmostEquals(epsilon, u, v) {
@@ -145,6 +146,20 @@ AFRAME.registerComponent("ik-controller", {
       foot: this.avatar.getObjectByName('RightFoot'),
     }
 
+    const hasArms = left.upperArm && right.upperArm
+
+    if (hasArms) {
+      var sphereGeometry = new THREE.SphereGeometry(0.00);
+
+      left.handTarget = new THREE.Mesh(sphereGeometry, new THREE.MeshBasicMaterial({ color: 0xff0000 }));
+      this.avatar.add(left.handTarget);
+
+      right.handTarget = new THREE.Mesh(sphereGeometry, new THREE.MeshBasicMaterial({ color: 0x0000ff }));
+      this.avatar.add(right.handTarget);
+
+      this.IKSolver = new FullBodyIKSolver({ left, right });
+    }
+
     this.left = left
     this.right = right
 
@@ -285,7 +300,10 @@ AFRAME.registerComponent("ik-controller", {
     const { left, right } = this;
     const hasArms = left.upperArm || right.upperArm
 
-    if (!hasArms) {
+    if (hasArms) {
+      this.updateHandForFullbody(leftController, rightController, left, right);
+    }
+    else {
       if (left.hand) this.updateHand(HAND_ROTATIONS.left, left.hand, leftController.object3D, true, this.isInView);
       if (right.hand) this.updateHand(HAND_ROTATIONS.right, right.hand, rightController.object3D, false, this.isInView);
     }
@@ -326,6 +344,39 @@ AFRAME.registerComponent("ik-controller", {
     }
   },
 
+  updateHandForFullbody(leftController, rightController, left, right) {
+    const hasLeftController = leftController && leftController.object3D.visible
+
+    if (hasLeftController) {
+      const worldPosition = new THREE.Vector3();
+      leftController.object3D.matrixWorld.decompose(worldPosition, new THREE.Quaternion(), new THREE.Vector3());
+
+      left.handTarget.position.copy(this.avatar.worldToLocal(worldPosition.clone()))
+      left.handTarget.matrixNeedsUpdate = true;
+    }
+
+    const hasRightController = rightController && rightController.object3D.visible
+
+    if (hasRightController) {
+      const worldPosition = new THREE.Vector3();
+      rightController.object3D.matrixWorld.decompose(worldPosition, new THREE.Quaternion(), new THREE.Vector3());
+
+      right.handTarget.position.copy(this.avatar.worldToLocal(worldPosition.clone()))
+      right.handTarget.matrixNeedsUpdate = true;
+    }
+
+    if (this.IKSolver && (hasRightController || hasLeftController)) {
+      this.IKSolver.update();
+
+      left.upperArm.matrixNeedsUpdate = true;
+      left.lowerArm.matrixNeedsUpdate = true;
+      left.hand.matrixNeedsUpdate = true;
+
+      right.upperArm.matrixNeedsUpdate = true;
+      right.lowerArm.matrixNeedsUpdate = true;
+      right.hand.matrixNeedsUpdate = true;
+    }
+  },
   _runScheduledWork() {
     // Every scheduled run, we force an IK update on the next frame (so at most one avatar with forced IK per frame)
     // and also update the this.isInView bit on the avatar which is used to determine if an IK update should be run
