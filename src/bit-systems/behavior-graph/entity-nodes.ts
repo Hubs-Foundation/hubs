@@ -28,6 +28,8 @@ import { definitionListToMap } from "./utils";
 import { getComponentBindings } from "./bindings/bindings";
 import { camelCase } from "../../inflators/model";
 import { takeOwnership } from "../../utils/take-ownership";
+import { hubIdFromUrl } from "../../utils/media-url-utils";
+import { changeHub } from "../../change-hub";
 
 type SocketTypeName =
   | "string"
@@ -315,6 +317,26 @@ export const EntityNodes = definitionListToMap([
       }
       const text = obj as Text;
       text.text = read("text");
+      commit("flow");
+    }
+  }),
+  makeFlowNodeDefinition({
+    typeName: "hubs/misc/changehub",
+    category: "Components" as any,
+    label: "Change Hub",
+    in: {
+      flow: "flow",
+      url: "string"
+    },
+    out: { flow: "flow" },
+    initialState: undefined,
+    triggered: ({ read, commit, graph }) => {
+      const src: string = read("url");
+      const url = new URL(src);
+
+      const waypoint = url.hash && url.hash.substring(1);
+      const hubId = hubIdFromUrl(src);
+      changeHub(hubId, true, waypoint);
       commit("flow");
     }
   }),
