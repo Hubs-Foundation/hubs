@@ -114,6 +114,7 @@ export function inflateModel(world: HubsWorld, rootEid: number, { model }: Model
     // Re-use the the uuid for animation targeting.
     // TODO: This is weird... Should we be rewriting the animations instead?
     replacement.uuid = old.uuid;
+    replacement.name = old.name;
 
     old.parent!.add(replacement);
     old.removeFromParent();
