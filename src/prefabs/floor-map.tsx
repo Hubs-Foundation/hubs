@@ -2,8 +2,8 @@
 import { COLLISION_LAYERS } from "../constants";
 import { createElementEntity, renderAsEntity, Ref, createRef, EntityDef } from "../utils/jsx-entity";
 // import nametagSrc from "../assets/images/floorPlan_prototype.png";
-import nametagSrc from "../assets/images/demo_map.png";
-import spotSrc from "../assets/images/red_spot.png";
+import nametagSrc from "../assets/images/tradeshows_map.png";
+import spotSrc from "../assets/images/pointer.png";
 import { textureLoader } from "../utils/media-utils";
 import { HubsWorld } from "../app";
 import { Object3D, Vector3 } from "three";
@@ -27,9 +27,9 @@ export function FloorMapPanel(position: Vector3, pointPos: Vector3) {
       name={"floor-map"}
       image={{
         texture: panelTexture,
-        ratio: 1,
+        ratio: 1.1,
         projection: ProjectionMode.FLAT,
-        alphaMode: AlphaMode.Opaque,
+        alphaMode: AlphaMode.Blend,
         cacheKey: ""
       }}
       floorMap={{ planeRef: panelRef, pointRef: pointRef }}
@@ -44,6 +44,7 @@ export function FloorMapPanel(position: Vector3, pointPos: Vector3) {
       floatyObject
       rigidbody={{ collisionGroup: COLLISION_LAYERS.INTERACTABLES, collisionMask: COLLISION_LAYERS.HANDS }}
       physicsShape={{ halfExtents: [0.22, 0.14, 0.1] }}
+      followFov
     >
       <entity
         name="point"
@@ -65,6 +66,7 @@ export function FloorMapPanel(position: Vector3, pointPos: Vector3) {
 export function addFloorMap(world: HubsWorld, position: Vector3, pointPos: Vector3, userPOV: Object3D) {
   const eid = renderAsEntity(world, FloorMapPanel(position, pointPos));
   const obj = world.eid2obj.get(eid)!;
-  userPOV.add(obj);
+  obj.scale.multiplyScalar(2);
+  APP.world.scene.add(obj);
   return eid;
 }

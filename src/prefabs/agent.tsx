@@ -41,7 +41,7 @@ export function AgentEntity() {
       floatyObject
       rigidbody={{ collisionGroup: COLLISION_LAYERS.INTERACTABLES, collisionMask: COLLISION_LAYERS.HANDS }}
       physicsShape={{ halfExtents: [0.22, 0.14, 0.1] }}
-      lookatuser
+      followFov
     >
       <SimplePanel panelRef={panelRef} textRef={textRef} micRef={micRef} />
     </entity>
@@ -51,9 +51,10 @@ export function AgentEntity() {
 export function addAgentToScene(world: HubsWorld, userPOV: Object3D) {
   const eid = renderAsEntity(world, AgentEntity());
   const obj = world.eid2obj.get(eid)!;
-  userPOV.add(obj);
+  // userPOV.add(obj);
+  world.scene.add(obj);
   let a = virtualAgent.avatarDirection;
-  obj.position.copy(obj.position.clone().add(a.multiplyScalar(2)));
+  // obj.position.copy(obj.position.clone().add(a.multiplyScalar(2)));
   return eid;
 }
 

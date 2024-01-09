@@ -20,6 +20,8 @@ export const Agent = defineComponent({
   prevRef: Types.eid
 });
 
+export const FollowFov = defineComponent();
+
 export const Hidden = defineComponent();
 export const AgentTextPanel = defineComponent();
 export const MicButtonTag = defineComponent();

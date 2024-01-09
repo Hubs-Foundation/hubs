@@ -85,6 +85,7 @@ import { PanelIndexSystem } from "../bit-systems/agent-slideshow-system";
 import { HiddenSystem } from "../bit-systems/hidden-system";
 import { FloorMapSystem } from "../bit-systems/map-system";
 import { FlagPanelSystem } from "../bit-systems/subtitling-system";
+import { followFovSystem } from "../components/follow-user";
 
 declare global {
   interface Window {
@@ -276,6 +277,8 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
 
   AgentSystem();
   FloorMapSystem(world);
+
+  followFovSystem(dt);
   FlagPanelSystem(world);
 
   HiddenSystem(world);

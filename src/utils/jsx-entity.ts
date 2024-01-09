@@ -47,7 +47,8 @@ import {
   PanelIndex,
   MicButtonTag,
   FloorMap,
-  FlagPanelManager
+  FlagPanelManager,
+  FollowFov
 } from "../bit-components";
 
 import { inflateMediaLoader } from "../inflators/media-loader";
@@ -391,6 +392,7 @@ export interface JSXComponentData extends ComponentData {
   loopAnimation?: LoopAnimationParams;
   lookatuser?: any;
   micButtonTag?: any;
+  followFov?: any;
 }
 
 export interface GLTFComponentData extends ComponentData {
@@ -512,7 +514,8 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   lookatuser: createDefaultInflator(LookAtUser),
   agentTextPanel: createDefaultInflator(AgentTextPanel),
   panelIndex: createDefaultInflator(PanelIndex),
-  micButtonTag: createDefaultInflator(MicButtonTag)
+  micButtonTag: createDefaultInflator(MicButtonTag),
+  followFov: createDefaultInflator(FollowFov)
 };
 
 export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorFn }> = {
