@@ -4,7 +4,7 @@ interface saliencyProp {
   box: [number, number, number, number];
 }
 
-interface JSONProperties {
+interface JSONRoomProperties {
   room: string;
   id: string;
   targets: saliencyProp[];
@@ -12,34 +12,56 @@ interface JSONProperties {
   connectors?: { end1: [number, number, number]; end2: [number, number, number] }[];
 }
 
-export async function GetRoomProperties(_roomID: string): Promise<JSONProperties | false> {
-  try {
-    const roomProps = (await GetPropertiesFile()) as Array<JSONProperties>;
-    for (let i = 0; i < roomProps.length; i++) {
-      if (roomProps[i].id === _roomID) return roomProps[i];
-    }
+interface JSONMapProperties {
+  id: string;
+  file: string;
+  ratio: number;
+  mapToImage: Array<Number>;
+  center: Array<Number>;
+  centeroffset: Array<Number>;
+}
 
-    return false;
+export enum PropertyType {
+  ROOM = "https://kontopoulosdm.github.io/room_properties.json",
+  MAP = "https://kontopoulosdm.github.io/maps.json"
+}
+
+export async function GetProperties(
+  _roomID: string,
+  type: PropertyType
+): Promise<JSONRoomProperties | JSONMapProperties | false> {
+  let props;
+  try {
+    if (type === PropertyType.ROOM) {
+      props = await GetPropertiesFile<JSONRoomProperties[]>(type);
+    } else if (type === PropertyType.MAP) {
+      props = await GetPropertiesFile<JSONMapProperties[]>(type);
+    } else {
+      throw new Error("Invalid property type");
+    }
   } catch (error) {
     console.log(error);
     return false;
   }
+
+  for (let i = 0; i < props.length; i++) {
+    if (props[i].id === _roomID) return props[i];
+  }
+  return false;
 }
 
-export async function GetPropertiesFile(): Promise<Array<JSONProperties> | string> {
+export async function GetPropertiesFile<T>(link: PropertyType): Promise<T> {
   try {
-    const response = await fetch("https://kontopoulosdm.github.io/room_properties.json", {
+    const response = await fetch(link, {
       method: "GET"
     });
 
     if (!response.ok) {
-      throw "Resp not ok";
+      throw new Error("Response not OK");
     }
-
-    const responseData = (await response.json()) as Array<JSONProperties>;
-
+    const responseData = (await response.json()) as T;
     return responseData;
   } catch (error) {
-    throw "Could not fetch";
+    throw new Error("Could not fetch data: " + error.message);
   }
 }

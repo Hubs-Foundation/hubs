@@ -95,7 +95,7 @@ export function FlagButton({ width, name = "FlagButton", type, flag, ...props }:
           alphaMode: AlphaMode.Mask,
           cacheKey: ""
         }}
-        scale={[0.6, 0.6, 0.6]}
+        scale={[0.5, 0.5, 0.5]}
         ref={labelRef}
         layers={1 << Layers.CAMERA_LAYER_UI}
         position={[0, 0, 0.01]}

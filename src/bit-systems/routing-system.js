@@ -1,6 +1,6 @@
 import { DiscreteInterpolant, Vector3 } from "three";
 import { virtualAgent } from "./agent-system";
-import { GetRoomProperties } from "../utils/rooms-properties";
+import { GetProperties, PropertyType } from "../utils/rooms-properties";
 import { node } from "prop-types";
 
 const INF = Number.MAX_SAFE_INTEGER;
@@ -41,7 +41,7 @@ export class Graph {
   constructor() {}
 
   async Init(hubID) {
-    const roomProperties = await GetRoomProperties(hubID);
+    const roomProperties = await GetProperties(hubID, PropertyType.ROOM);
 
     if (!roomProperties) {
       console.error("Cannot read room properties, navigation is not enabled for this room");

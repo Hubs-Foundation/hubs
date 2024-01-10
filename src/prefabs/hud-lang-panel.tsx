@@ -1,9 +1,9 @@
 /** @jsx createElementEntity */
 import { createElementEntity, renderAsEntity, Ref, createRef } from "../utils/jsx-entity";
 import { textureLoader } from "../utils/media-utils";
-import selectedTextureSrc from "../assets/images/flags/flag_background-selected.png";
+import selectedTextureSrc from "../assets/images/flags/flag_background_active.png";
 import normalTextureSrc from "../assets/images/flags/flag_background.png";
-import backgroundTextureSrc from "../assets/images/flags/plane_background.png";
+import backgroundTextureSrc from "../assets/images/flags/language_panel_2.png";
 
 import { ProjectionMode } from "../utils/projection-mode";
 import { AlphaMode } from "../utils/create-image-mesh";
@@ -48,10 +48,10 @@ export function HUDLangPanel() {
     <entity position={pos.toArray()} followFov>
       <entity
         name="hud-lang-panel"
-        scale={[2, 1.3 / 0.65, 1]}
+        // scale={[2, 1.3 / 0.65, 1]}
         image={{
           texture: backgroundTexture,
-          ratio: 0.65,
+          ratio: 0.6,
           projection: ProjectionMode.FLAT,
           alphaMode: AlphaMode.Blend,
           cacheKey: ""
@@ -60,49 +60,49 @@ export function HUDLangPanel() {
       ></entity>
       <FlagButton
         name="de_flag"
-        width={0.5}
+        width={0.172}
         ref={deRef}
-        position={[0.62, 0.31, 0.1]}
+        position={[-0.246, 0.076, 0.1]}
         flag={FLAGS.DE}
         type={BUTTON_TYPES.MIC}
       ></FlagButton>
       <FlagButton
         name="du_flag"
-        width={0.5}
+        width={0.172}
         ref={duRef}
-        position={[0, 0.31, 0.1]}
+        position={[0, 0.076, 0.1]}
         flag={FLAGS.DU}
         type={BUTTON_TYPES.MIC}
       ></FlagButton>
       <FlagButton
         name="it_flag"
-        width={0.5}
+        width={0.172}
         ref={itRef}
-        position={[-0.62, 0.31, 0.1]}
+        position={[0.246, 0.076, 0.1]}
         flag={FLAGS.IT}
         type={BUTTON_TYPES.MIC}
       ></FlagButton>
       <FlagButton
         name="es_flag"
-        width={0.5}
+        width={0.172}
         ref={esRef}
-        position={[-0.62, -0.31, 0.1]}
+        position={[-0.246, -0.136, 0.1]}
         flag={FLAGS.ES}
         type={BUTTON_TYPES.MIC}
       ></FlagButton>
       <FlagButton
         name="el_flag"
-        width={0.5}
+        width={0.172}
         ref={elRef}
-        position={[0, -0.31, 0.1]}
+        position={[0, -0.136, 0.1]}
         flag={FLAGS.EL}
         type={BUTTON_TYPES.MIC}
       ></FlagButton>
       <FlagButton
         name="en_flag"
-        width={0.5}
+        width={0.172}
         ref={enRef}
-        position={[0.62, -0.31, 0.1]}
+        position={[0.246, -0.136, 0.1]}
         flag={FLAGS.EN}
         type={BUTTON_TYPES.MIC}
       ></FlagButton>
