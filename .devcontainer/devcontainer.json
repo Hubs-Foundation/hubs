@@ -1,0 +1,31 @@
+// For format details, see https://aka.ms/vscode-remote/devcontainer.json or this file's README at:
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.122.1/containers/docker-existing-dockerfile
+{
+    "name": "${containerWorkspaceFolderBasename}",
+    "context": ".",
+    "dockerFile": "Dockerfile",
+    "mounts": [
+        "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+    ],
+    "customizations": {
+        "vscode": {
+            "extensions": []
+        }
+    },
+    "remoteEnv": {
+        "WORKSPACE_ROOT": "${containerWorkspaceFolder}",
+        "NODE_ENV": "development"
+    },
+    "runArgs": [
+        "--name",
+        "${containerWorkspaceFolderBasename}-vscode"
+    ],
+    "initializeCommand": "docker rm -f client admin",
+    "postCreateCommand": "npm ci && npm ci --prefix admin",
+    "appPort": [
+        // hubs
+        "0.0.0.0:8080:8080",
+        // admin
+        "0.0.0.0:8989:8989"
+    ]
+}
