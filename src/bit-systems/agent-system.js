@@ -5,16 +5,18 @@ import { PermissionStatus } from "../utils/media-devices-utils";
 import { stageUpdate } from "../systems/single-action-button-system";
 import { audioModules, intentionModule, knowledgeModule, toggleRecording, vlModule } from "../utils/asr-adapter";
 import { COMPONENT_ENDPOINTS, COMPONENT_CODES } from "../utils/component-types";
-import { addAgentToScene } from "../prefabs/agent";
+import { addAgentToScene, addLangPanelToScene } from "../prefabs/agent";
 import { SnapDepthPOV, SnapPOV } from "../utils/vlm-adapters";
 import { sceneGraph } from "./routing-system";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { NavigationLine, pivotPoint } from "../prefabs/nav-line";
-import { AxesHelper } from "three";
 import { subtitleSystem } from "./subtitling-system";
+import UpdateTextPanel from "../utils/interactive-panels";
+import { Vector3 } from "three";
 
 const agentQuery = defineQuery([Agent]);
 const enterAgentQuery = enterQuery(agentQuery);
+const skipModule = true;
 
 function clicked(eid) {
   return hasComponent(APP.world, Interacted, eid);
@@ -25,107 +27,95 @@ export function getRandomInt(max) {
 }
 
 export function AgentSystem() {
-  if (!virtualAgent.IsEntered() || virtualAgent.hidden) return;
+  enterAgentQuery(APP.world).forEach(eid => {
+    virtualAgent.Enter(eid, false);
+  });
 
-  virtualAgent.MovementActions();
+  if (!virtualAgent.active) return;
+
   virtualAgent.ButtonInteractions();
-  virtualAgent.agentObj.updateMatrix();
+  virtualAgent.agent.obj.updateMatrix();
+}
+
+export class objElement {
+  constructor(eid) {
+    this.eid = eid;
+    this.obj = APP.world.eid2obj.get(eid);
+  }
 }
 
 export default class VirtualAgent {
   constructor() {}
 
   Init() {
-    addAgentToScene(APP.world);
-    this.hidden = true;
-    this.exists = false;
+    this.avatarPovObj = document.querySelector("#avatar-pov-node").object3D;
+    addAgentToScene(APP.world, this.avatarPovObj);
     APP.scene.addEventListener("agent-toggle", () => {
-      if (this.hidden) {
-        if (APP.scene.is("map")) {
-          APP.scene.emit("map-toggle");
-        }
-        removeComponent(APP.world, Hidden, this.eid);
-        APP.scene.addState("agent");
-        this.hidden = false;
+      if (!APP.scene.is("agent")) {
+        if (APP.scene.is("map")) APP.scene.emit("map-toggle");
+        this.Reset();
       } else {
         APP.scene.removeState("agent");
-        this.hidden = true;
-        addComponent(APP.world, Hidden, this.eid);
+        this.agent.obj.visible = false;
       }
+      this.active = APP.scene.is("agent");
+    });
+    APP.scene.addEventListener("lang-toggle", () => {
+      if (!APP.scene.is("lang-panel")) {
+        this.LangPanelEid = addLangPanelToScene(APP.world);
+        APP.scene.addState("lang-panel");
+      } else {
+        if (this.LangPanelEid) {
+          APP.scene.remove(APP.world.eid2obj.get(this.LangPanelEid));
+          removeEntity(APP.world, this.LangPanelEid);
+        }
+        APP.scene.removeState("lang-panel");
+      }
+      this.active = APP.scene.is("lang-panel");
     });
   }
 
-  IsEntered() {
-    enterAgentQuery(APP.world).forEach(agentEid => {
-      this.eid = agentEid;
-      this.arrowNext = Agent.nextRef[this.eid];
-      this.arrowPrev = Agent.prevRef[this.eid];
-      this.buttonMic = Agent.micRef[this.eid];
-      this.buttonMicObj = APP.world.eid2obj.get(this.buttonMic);
-      this.buttonSnap = Agent.snapRef[this.eid];
-      this.agentObj = APP.world.eid2obj.get(this.eid);
-      this.panelObj = APP.world.eid2obj.get(Agent.panelRef[this.eid]);
-      this.scene = AFRAME.scenes[0];
-      this.camera = this.scene.camera;
-      this.renderer = this.scene.renderer;
-      this.avatarPovObj = document.querySelector("#avatar-pov-node").object3D;
+  Enter(agentEid, showPivots) {
+    this.agent = new objElement(agentEid);
+    this.nextArrow = new objElement(Agent.nextRef[agentEid]);
+    this.prevArrow = new objElement(Agent.prevRef[agentEid]);
+    this.micButton = new objElement(Agent.micRef[agentEid]);
+    this.snapButton = new objElement(Agent.snapRef[agentEid]);
+    this.panel = new objElement(Agent.panelRef[agentEid]);
+    this.text = new objElement(Agent.textRef[agentEid]);
 
-      APP.dialog.on("mic-state-changed", () => this.setMicStatus());
-      this.setMicStatus();
+    this.scene = AFRAME.scenes[0];
+    this.camera = this.scene.camera;
+    this.renderer = this.scene.renderer;
+    this.updateText = text => {
+      UpdateTextPanel(text, this.text.obj, this.panel.eid, false, true);
+    };
 
-      APP.scene.emit("agent-toggle");
+    APP.dialog.on("mic-state-changed", () => this.setMicStatus());
+    this.setMicStatus();
+    APP.scene.emit("agent-toggle");
 
-      this.scene.object3D.add(new AxesHelper());
+    if (showPivots) {
+      const pointEid = renderAsEntity(APP.world, pivotPoint(sceneGraph.nodes));
+      const pivotObjs = APP.world.eid2obj.get(pointEid);
+      this.scene.object3D.add(pivotObjs);
+      sceneGraph.nodes.forEach(node => {
+        if (node.x === 2 && node.z > 29) console.log(node);
+      });
+    }
 
-      const showPivots = false; //Change this to see points
-
-      if (showPivots) {
-        const pointEid = renderAsEntity(APP.world, pivotPoint(sceneGraph.nodes));
-        const pivotObjs = APP.world.eid2obj.get(pointEid);
-        this.scene.object3D.add(pivotObjs);
-        console.log(sceneGraph.nodes);
-        console.log(sceneGraph.edges);
-
-        sceneGraph.nodes.forEach(node => {
-          if (node.x === 2 && node.z > 29) console.log(node);
-        });
-      }
-    });
-
-    if (this.eid) return true;
+    if (this.agent) return true;
     else return false;
   }
 
   setMicStatus() {
     const permissionsGranted = APP.mediaDevicesManager.getPermissionsStatus("microphone") === PermissionStatus.GRANTED;
     const isMicNotDisabled = APP.mediaDevicesManager.isMicEnabled !== false;
-    this.buttonMicObj.visible = permissionsGranted && isMicNotDisabled;
-  }
-
-  MovementActions() {
-    const agentPos = this.agentObj.getWorldPosition(new THREE.Vector3());
-    const avatarPos = this.avatarPovObj.getWorldPosition(new THREE.Vector3());
-    const dist = agentPos.distanceTo(avatarPos);
-
-    if (dist > 2) {
-      const dir = new THREE.Vector3().subVectors(avatarPos, agentPos).normalize();
-      const newPos = new THREE.Vector3().copy(avatarPos.sub(dir.multiplyScalar(2)));
-      this.agentObj.position.copy(newPos);
-    }
-
-    if (dist < 0.3) {
-      this.agentObj.visible = false;
-    } else {
-      this.agentObj.visible = true;
-    }
+    this.micButton.obj.visible = permissionsGranted && isMicNotDisabled;
   }
 
   async ButtonInteractions() {
-    if (clicked(this.arrowNext)) raiseIndex();
-    if (clicked(this.arrowPrev)) lowerIndex();
-    if (clicked(this.buttonMic)) this.MicrophoneActions();
-    if (clicked(this.buttonSnap))
-      await this.Navigate("conference room", "how can i go to the conference room?", "navigation");
+    if (clicked(this.micButton.eid)) this.MicrophoneActions();
   }
 
   async MicrophoneActions(savefile) {
@@ -136,61 +126,52 @@ export default class VirtualAgent {
       if (toggleResponse.status.code === COMPONENT_CODES.Successful) {
         const sourceLang = subtitleSystem.targetLanguage ? subtitleSystem.targetLanguage : "en";
         const nmtParameters = { source_language: sourceLang, target_language: "en", return_transcription: "true" };
-        let t11, t12, t21, t22, t31, t32, elapsedTime1, elapsedTime2, elapsedTime3, knowledgeRespone;
-        t11 = performance.now();
+        let knowledgeRespone;
+
         const nmtResponse = await audioModules(
           COMPONENT_ENDPOINTS.TRANSLATE_AUDIO_FILES,
           toggleResponse.data.file,
           nmtParameters
         );
-        t12 = performance.now();
-        elapsedTime1 = t12 - t11;
-
-        t21 = performance.now();
-        const intentResponse = await intentionModule(nmtResponse.data.translations[0]);
-        t22 = performance.now();
-        elapsedTime2 = t22 - t21;
+        let intentResponse;
+        if (skipModule) intentResponse = { data: { intent: "navigation", destination: "conference room" } };
+        else intentResponse = await intentionModule(nmtResponse.data.translations[0]);
 
         if (intentResponse.data.intent === "navigation") {
           const destName = intentResponse.data.destination;
 
-          t31 = performance.now();
           knowledgeRespone = await this.Navigate(
             destName,
             nmtResponse.data.translations[0],
-            intentResponse.data.intent
+            intentResponse.data.intent,
+            skipModule
           );
-          t32 = performance.now();
-          elapsedTime3 = t32 - t31;
         }
-
-        const log = `NMT: {Query: "${nmtResponse.data.translations[0]}", Time: ${elapsedTime1}ms}\n
-        Intent: {Intent: ${intentResponse.data.intent}, Destination: ${intentResponse.data.destination}, Time: ${elapsedTime2}ms}\n
-        Response: {Knowledege: "${knowledgeRespone.data.response}", Time: ${elapsedTime3}ms}`;
-
-        console.log(log);
       }
     } catch (error) {
       console.log("error", error);
     }
   }
 
-  async Navigate(destName, userQuery, userIntent) {
+  async Navigate(destName, userQuery, userIntent, skipModule = false) {
+    if (!sceneGraph.enabled) return;
     try {
-      const startIndex = sceneGraph.GetClosestIndex(virtualAgent.AvatarPos());
+      const startIndex = sceneGraph.GetClosestIndex(virtualAgent.avatarPos);
       const navigation = sceneGraph.GetInstructions(startIndex, destName);
-      const knowledge = await knowledgeModule(userQuery, userIntent, navigation.knowledge);
-      UpdateTextSystem(APP.world, knowledge.data.response);
-      // return knowledge;
-
-      if (this.cube !== undefined) {
+      let knowledge;
+      if (!skipModule) knowledge = await knowledgeModule(userQuery, userIntent, navigation.knowledge);
+      if (!!this.cube) {
         removeEntity(APP.world, this.cube);
         this.scene.object3D.remove(this.arrowObjs);
+        this.cube = null;
+        knowledge = { data: { response: "Instructions cleared. How else could I help you?" } };
+      } else {
+        this.cube = renderAsEntity(APP.world, NavigationLine(navigation));
+        this.arrowObjs = APP.world.eid2obj.get(this.cube);
+        this.scene.object3D.add(this.arrowObjs);
+        knowledge = { data: { response: "This is a demo showing you instructions to go to the conference room" } };
       }
-      console.log(navigation);
-      this.cube = renderAsEntity(APP.world, NavigationLine(navigation));
-      this.arrowObjs = APP.world.eid2obj.get(this.cube);
-      this.scene.object3D.add(this.arrowObjs);
+      this.updateText(knowledge.data.response);
 
       return knowledge;
     } catch (error) {
@@ -200,7 +181,7 @@ export default class VirtualAgent {
 
   async SnapActions() {
     try {
-      const responses = await Promise.all([SnapPOV(this.agentObj, false), SnapDepthPOV(false)]);
+      const responses = await Promise.all([SnapPOV(this.agent.obj, false), SnapDepthPOV(false)]);
       const vlResponse = await vlModule(responses[0], COMPONENT_ENDPOINTS.LXMERT);
       console.log(vlResponse);
     } catch (error) {
@@ -208,27 +189,34 @@ export default class VirtualAgent {
     }
   }
 
-  GetRandomDest() {
-    const targetNames = Object.keys(sceneGraph.targetInfo);
-    const randomKeyIndex = Math.floor(Math.random() * targetNames.length);
-    const destName = targetNames[randomKeyIndex];
-    return destName;
-  }
-
   HandleArrows(renderArrows) {
-    APP.world.eid2obj.get(this.arrowNext).visible = renderArrows;
-    APP.world.eid2obj.get(this.arrowPrev).visible = renderArrows;
+    this.nextArrow.obj.visible = renderArrows;
+    this.prevArrow.obj.visible = renderArrows;
   }
 
-  AvatarPos() {
+  Reset() {
+    const initialPosition = new THREE.Vector3(0.2, 0, -2);
+    const initialRotation = new THREE.Euler(0, 0, 0, "XYZ");
+    this.agent.obj.position.copy(initialPosition);
+    this.agent.obj.rotation.copy(initialRotation);
+    this.scene.addState("agent");
+    this.agent.obj.visible = true;
+    this.updateText("Hello I am your personal Agent");
+    this.agent.obj.updateMatrixWorld();
+  }
+
+  get avatarDirection() {
+    const playerForward = new THREE.Vector3();
+    this.avatarPovObj.getWorldDirection(playerForward);
+    return playerForward.multiplyScalar(-1);
+  }
+
+  get avatarPos() {
     return this.avatarPovObj.getWorldPosition(new THREE.Vector3());
   }
 
-  AvatarDirection() {
-    const playerForward = new THREE.Vector3();
-    this.avatarPovObj.getWorldDirection(playerForward);
-
-    return playerForward.multiplyScalar(-1);
+  get flatAvatarDirection() {
+    return virtualAgent.avatarDirection.setY(0).normalize();
   }
 }
 

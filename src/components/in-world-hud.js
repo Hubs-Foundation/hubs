@@ -13,6 +13,7 @@ AFRAME.registerComponent("in-world-hud", {
     this.cameraBtn = this.el.querySelector(".camera-btn");
     this.agentBtn = this.el.querySelector(".agent-btn");
     this.mapBtn = this.el.querySelector(".map-btn");
+    this.langBtn = this.el.querySelector(".lang-btn");
     this.inviteBtn = this.el.querySelector(".invite-btn");
     this.background = this.el.querySelector(".bg");
 
@@ -27,6 +28,7 @@ AFRAME.registerComponent("in-world-hud", {
       this.cameraBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("camera"));
       this.agentBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("agent"));
       this.mapBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("map"));
+      this.langBtn.setAttribute("flag-button", "active", this.el.sceneEl.is("lang-panel"));
       if (window.APP.hubChannel) {
         this.spawn.setAttribute("icon-button", "disabled", !window.APP.hubChannel.can("spawn_and_move_media"));
         this.pen.setAttribute("icon-button", "disabled", !window.APP.hubChannel.can("spawn_drawing"));
@@ -65,6 +67,10 @@ AFRAME.registerComponent("in-world-hud", {
       this.el.emit("map-toggle");
     };
 
+    this.onLangClick = () => {
+      this.el.emit("lang-toggle");
+    };
+
     this.onPenClick = e => {
       if (!window.APP.hubChannel.can("spawn_drawing")) return;
       this.el.emit("spawn_pen", { object3D: e.object3D });
@@ -98,6 +104,7 @@ AFRAME.registerComponent("in-world-hud", {
     this.cameraBtn.object3D.addEventListener("interact", this.onCameraClick);
     this.agentBtn.object3D.addEventListener("interact", this.onAgentClick);
     this.mapBtn.object3D.addEventListener("interact", this.onMapClick);
+    this.langBtn.object3D.addEventListener("interact", this.onLangClick);
     this.inviteBtn.object3D.addEventListener("interact", this.onInviteClick);
   },
 
@@ -112,6 +119,7 @@ AFRAME.registerComponent("in-world-hud", {
     this.cameraBtn.object3D.removeEventListener("interact", this.onCameraClick);
     this.agentBtn.object3D.removeEventListener("interact", this.onAgentClick);
     this.mapBtn.object3D.removeEventListener("interact", this.onMapClick);
+    this.langBtn.object3D.removeEventListener("interact", this.onLangClick);
     this.inviteBtn.object3D.removeEventListener("interact", this.onInviteClick);
   }
 });

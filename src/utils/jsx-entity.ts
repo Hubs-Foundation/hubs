@@ -46,7 +46,9 @@ import {
   AgentTextPanel,
   PanelIndex,
   MicButtonTag,
-  FloorMap
+  FloorMap,
+  FlagPanelManager,
+  FollowFov
 } from "../bit-components";
 
 import { inflateMediaLoader } from "../inflators/media-loader";
@@ -317,6 +319,7 @@ export interface JSXComponentData extends ComponentData {
   // @TODO Define all the anys
   networked?: any;
   textButton?: any;
+  flagPanelManager?: any;
   iconButton?: any;
   hoverButton?: any;
   rigidbody?: OptionalParams<RigidBodyParams>;
@@ -365,6 +368,7 @@ export interface JSXComponentData extends ComponentData {
   };
   agent?: {
     panelRef: Ref;
+    textRef: Ref;
     micRef: Ref;
     snapRef: Ref;
     nextRef: Ref;
@@ -388,6 +392,7 @@ export interface JSXComponentData extends ComponentData {
   loopAnimation?: LoopAnimationParams;
   lookatuser?: any;
   micButtonTag?: any;
+  followFov?: any;
 }
 
 export interface GLTFComponentData extends ComponentData {
@@ -466,6 +471,7 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   holdableButton: createDefaultInflator(HoldableButton),
   textButton: createDefaultInflator(TextButton),
   iconButton: createDefaultInflator(IconButton),
+  flagPanelManager: createDefaultInflator(FlagPanelManager),
   hoverButton: createDefaultInflator(HoverButton),
   holdable: createDefaultInflator(Holdable),
   deletable: createDefaultInflator(Deletable),
@@ -508,7 +514,8 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   lookatuser: createDefaultInflator(LookAtUser),
   agentTextPanel: createDefaultInflator(AgentTextPanel),
   panelIndex: createDefaultInflator(PanelIndex),
-  micButtonTag: createDefaultInflator(MicButtonTag)
+  micButtonTag: createDefaultInflator(MicButtonTag),
+  followFov: createDefaultInflator(FollowFov)
 };
 
 export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorFn }> = {

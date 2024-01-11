@@ -155,7 +155,7 @@
                                         mixin="rounded-text-button" tags="lookAtUser: true;"
                                         class="translate-background"></a-entity>
                                     <a-entity
-                                        text="value: This is my translation panel and i love it so fucking much ; side: double; textAlign: center; color: #000; fontSize: 0.05;"
+                                        text="value: This is my translation panel and i love it so  much ; side: double; textAlign: center; color: #000; fontSize: 0.05;"
                                         text-raycast-hack text-raycast-hack class="translate-text"
                                         position="0 0 0.01"></a-entity>
                                 </a-entity>
@@ -841,6 +841,11 @@
                         activeHoverImage: map_on-hover.png;
                         disabledImage: spawn-point.png;" scale="0.1 0.1 0.1" position="0.50 0 0.001"
                         class="hud map-btn"></a-entity>
+                    <a-entity is-remote-hover-target tags="singleActionButton: true" sprite flag-button="
+                        tooltip: #hud-tooltip;
+                        tooltipText: Language;
+                        activeTooltipText: Language;" scale="0.1 0.1 0.1" position="0.61 0 0.001"
+                        class="hud lang-btn"></a-entity>
                 </a-entity>
             </a-entity>
 

@@ -4,7 +4,6 @@ import { Slice9 } from "../bit-components";
 import { updateSlice9Geometry } from "../update-slice9-geometry";
 
 export function inflateSlice9(world, eid, { size, insets, texture }) {
-  //console.log("slice9 did inflate", eid);
   const geometry = new THREE.PlaneBufferGeometry(1, 1, 3, 3);
   const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, toneMapped: false });
   const obj = new THREE.Mesh(geometry, material);

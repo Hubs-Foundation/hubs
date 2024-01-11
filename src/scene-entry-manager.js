@@ -27,7 +27,7 @@ import { Agent, Hidden, MyCameraTool } from "./bit-components";
 import { anyEntityWith } from "./utils/bit-utils";
 import { moveToSpawnPoint } from "./bit-systems/waypoint";
 import { spawnFromFileList, spawnFromUrl } from "./load-media-on-paste-or-drop";
-import { isLockedDownDemoRoom } from "./utils/hub-utils";
+import { getCurrentHubId, isLockedDownDemoRoom } from "./utils/hub-utils";
 import { virtualAgent } from "./bit-systems/agent-system";
 import { floorMap } from "./bit-systems/map-system";
 import { subtitleSystem } from "./bit-systems/subtitling-system";
@@ -460,7 +460,7 @@ export default class SceneEntryManager {
   };
 
   _setupMap = () => {
-    floorMap.Init();
+    floorMap.Init(getCurrentHubId());
   };
 
   _setupSubtitles = () => {

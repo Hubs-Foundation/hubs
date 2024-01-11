@@ -12,14 +12,15 @@ export const FloorMap = defineComponent({
 });
 
 export const Agent = defineComponent({
-  language: Types.ui8,
-  modelRef: Types.eid,
   panelRef: Types.eid,
+  textRef: Types.eid,
   micRef: Types.eid,
   snapRef: Types.eid,
   nextRef: Types.eid,
   prevRef: Types.eid
 });
+
+export const FollowFov = defineComponent();
 
 export const Hidden = defineComponent();
 export const AgentTextPanel = defineComponent();
@@ -110,6 +111,14 @@ export const TogglesHoveredActionSet = defineComponent();
 export const HoverButton = defineComponent({ type: Types.ui8 });
 export const TextButton = defineComponent({ labelRef: Types.eid });
 export const IconButton = defineComponent({ labelRef: Types.eid });
+export const FlagPanelManager = defineComponent({
+  deRef: Types.eid,
+  duRef: Types.eid,
+  itRef: Types.eid,
+  elRef: Types.eid,
+  esRef: Types.eid,
+  enRef: Types.eid
+});
 export const HoldableButton = defineComponent();
 export const SingleActionButton = defineComponent();
 export const Pen = defineComponent();

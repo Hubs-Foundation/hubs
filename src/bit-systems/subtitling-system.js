@@ -1,8 +1,14 @@
+import { FlagPanelManager, Interacted } from "../bit-components";
 import { getMediaStream } from "../components/avatar-audio-source";
 import { paths } from "../systems/userinput/paths";
 import { audioModules } from "../utils/asr-adapter";
 import { COMPONENT_ENDPOINTS } from "../utils/component-types";
 import { UpdateTextSystem } from "./agent-slideshow-system";
+import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
+import { objElement, virtualAgent } from "./agent-system";
+import { loadTexture } from "../utils/load-texture";
+import { textureLoader } from "../utils/media-utils";
+import { selectMaterial, normalMaterial } from "../prefabs/hud-lang-panel";
 
 export class SubtitleSystem {
   constructor() {
@@ -19,7 +25,9 @@ export class SubtitleSystem {
     this.dataArray;
     this.mediaRecorder;
     this.animationFrameID;
-    this.onLanguageUpdate = this.onLanguageUpdate.bind(this);
+    this.FlagManagerID;
+    this.onLanguageAvailable = this.onLanguageAvailable.bind(this);
+    this.flagObjs = { it: null, es: null, nl: null, de: null, el: null, en: null };
   }
 
   Init() {
@@ -31,11 +39,32 @@ export class SubtitleSystem {
     this.initialized = true;
     this.cleanup = false;
     this.counter = 0;
-    this.scene.addEventListener("language_updated", this.onLanguageUpdate);
+    this.scene.addEventListener("language_available", this.onLanguageAvailable);
   }
 
-  onLanguageUpdate(event) {
-    this.targetLanguage = event.detail.language;
+  ResetPanel() {
+    if (!this.FlagManagerID) return;
+
+    try {
+      Object.keys(this.flagObjs).forEach(key => {
+        this.flagObjs[key].obj.material = normalMaterial.clone();
+      });
+      if (this.targetLanguage) {
+        this.flagObjs[this.targetLanguage].obj.material = selectMaterial.clone();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  onLanguageAvailable(event) {
+    this.updateLanguage(event.detail.language);
+  }
+
+  updateLanguage(lang) {
+    this.targetLanguage = lang;
+    this.ResetPanel();
+    APP.scene.emit("language_updated", { language: this.targetLanguage });
   }
 
   SelectTarget(_target) {
@@ -233,6 +262,64 @@ export class SubtitleSystem {
   SetLanguage(_language) {
     this.myLanguage = _language;
   }
+
+  checkPanel(world) {
+    if (hasComponent(world, Interacted, this.flagObjs.de.eid)) {
+      console.log("de interacted");
+      if (this.targetLanguage === "de") this.updateLanguage(null);
+      else this.updateLanguage("de");
+    }
+    if (hasComponent(world, Interacted, this.flagObjs.nl.eid)) {
+      if (this.targetLanguage === "nl") this.updateLanguage(null);
+      else this.updateLanguage("nl");
+    }
+    if (hasComponent(world, Interacted, this.flagObjs.it.eid)) {
+      if (this.targetLanguage === "it") this.updateLanguage(null);
+      else this.updateLanguage("it");
+    }
+    if (hasComponent(world, Interacted, this.flagObjs.es.eid)) {
+      if (this.targetLanguage === "es") this.updateLanguage(null);
+      else this.updateLanguage("es");
+    }
+    if (hasComponent(world, Interacted, this.flagObjs.el.eid)) {
+      if (this.targetLanguage === "el") this.updateLanguage(null);
+      else this.updateLanguage("el");
+    }
+    if (hasComponent(world, Interacted, this.flagObjs.en.eid)) {
+      if (this.targetLanguage === "en") this.updateLanguage(null);
+      else this.updateLanguage("en");
+    }
+  }
+}
+
+const panelManagerQuery = defineQuery([FlagPanelManager]);
+const enterpanelManagerQuery = enterQuery(panelManagerQuery);
+const exitpanelManagerQuery = exitQuery(panelManagerQuery);
+
+export function FlagPanelSystem(world) {
+  enterpanelManagerQuery(world).forEach(managerEid => {
+    subtitleSystem.FlagManagerID = managerEid;
+    subtitleSystem.flagObjs.de = new objElement(FlagPanelManager.deRef[managerEid]);
+    subtitleSystem.flagObjs.nl = new objElement(FlagPanelManager.duRef[managerEid]);
+    subtitleSystem.flagObjs.es = new objElement(FlagPanelManager.esRef[managerEid]);
+    subtitleSystem.flagObjs.it = new objElement(FlagPanelManager.itRef[managerEid]);
+    subtitleSystem.flagObjs.el = new objElement(FlagPanelManager.elRef[managerEid]);
+    subtitleSystem.flagObjs.en = new objElement(FlagPanelManager.enRef[managerEid]);
+
+    console.log("registered flagManager with eid", managerEid);
+    subtitleSystem.ResetPanel();
+  });
+  panelManagerQuery(world).forEach(eid => {
+    subtitleSystem.checkPanel(world);
+  });
+  exitpanelManagerQuery(world).forEach(managerEid => {
+    if (subtitleSystem.FlagManagerID === managerEid) subtitleSystem.FlagManagerID = null;
+
+    Object.keys(subtitleSystem.flagObjs).forEach(key => {
+      subtitleSystem.flagObjs[key] = null;
+    });
+    console.log("remove flagManager with eid", managerEid);
+  });
 }
 
 export const subtitleSystem = new SubtitleSystem();

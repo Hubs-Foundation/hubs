@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { ReactComponent as Dutch } from "../icons/nl.svg";
 import { ReactComponent as German } from "../icons/de.svg";
+import { ReactComponent as English } from "../icons/en.svg";
 import { ReactComponent as Greek } from "../icons/gr.svg";
 import { ReactComponent as Italian } from "../icons/it.svg";
 import { ReactComponent as Spanish } from "../icons/es.svg";
@@ -28,38 +29,46 @@ function useTranslate(scene) {
   }, [scene, language]);
 
   const toggleDutch = useCallback(() => {
-    if (language === "nl") {
-      scene.emit("language_updated", { language: null });
+    if (language === "du") {
+      scene.emit("language_available", { language: null });
     } else {
-      scene.emit("language_updated", { language: "nl" });
+      scene.emit("language_available", { language: "nl" });
     }
   });
   const toggleGerman = useCallback(() => {
     if (language === "de") {
-      scene.emit("language_updated", { language: null });
+      scene.emit("language_available", { language: null });
     } else {
-      scene.emit("language_updated", { language: "de" });
+      scene.emit("language_available", { language: "de" });
     }
   });
   const toggleGreek = useCallback(() => {
     if (language === "el") {
-      scene.emit("language_updated", { language: null });
+      scene.emit("language_available", { language: null });
     } else {
-      scene.emit("language_updated", { language: "el" });
+      scene.emit("language_available", { language: "el" });
     }
   });
   const toggleItalian = useCallback(() => {
     if (language === "it") {
-      scene.emit("language_updated", { language: null });
+      scene.emit("language_available", { language: null });
     } else {
-      scene.emit("language_updated", { language: "it" });
+      scene.emit("language_available", { language: "it" });
     }
   });
   const toggleSpanish = useCallback(() => {
     if (language === "es") {
-      scene.emit("language_updated", { language: null });
+      scene.emit("language_available", { language: null });
     } else {
-      scene.emit("language_updated", { language: "es" });
+      scene.emit("language_available", { language: "es" });
+    }
+  });
+
+  const toggleEnglish = useCallback(() => {
+    if (language === "en") {
+      scene.emit("language_available", { language: null });
+    } else {
+      scene.emit("language_available", { language: "en" });
     }
   });
 
@@ -69,12 +78,14 @@ function useTranslate(scene) {
     toggleGerman,
     toggleGreek,
     toggleItalian,
-    toggleSpanish
+    toggleSpanish,
+    toggleEnglish
   };
 }
 
 export function TranslatePopoverContainer({ scene }) {
-  const { language, toggleDutch, toggleGerman, toggleGreek, toggleItalian, toggleSpanish } = useTranslate(scene);
+  const { language, toggleDutch, toggleGerman, toggleGreek, toggleItalian, toggleSpanish, toggleEnglish } =
+    useTranslate(scene);
 
   const items = [
     {
@@ -108,6 +119,14 @@ export function TranslatePopoverContainer({ scene }) {
       label: <FormattedMessage id="translate-popover.lang.it" defaultMessage="Italian" />,
       onSelect: toggleItalian,
       active: language === "it"
+    },
+    {
+      id: "en",
+      icon: English,
+      color: "accent5",
+      label: <FormattedMessage id="translate-popover.lang.en" defaultMessage="English" />,
+      onSelect: toggleEnglish,
+      active: language === "en"
     },
     {
       id: "es",

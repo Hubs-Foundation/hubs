@@ -12,10 +12,17 @@ export interface PanelParams {
   text: Array<string>;
   panelRef: Ref;
   micRef: Ref;
-  nextRef: Ref;
-  prevRef: Ref;
-  snapRef: Ref;
-  maxSlideCount: number;
+  nextRef?: Ref;
+  prevRef?: Ref;
+  snapRef?: Ref;
+  maxSlideCount?: number;
+  textRef?: Ref;
+}
+
+export interface SimplePanelParams {
+  panelRef: Ref;
+  textRef: Ref;
+  micRef: Ref;
 }
 
 export function AgentPanel({ text, panelRef, nextRef, prevRef, micRef, snapRef, maxSlideCount }: PanelParams) {
@@ -23,7 +30,7 @@ export function AgentPanel({ text, panelRef, nextRef, prevRef, micRef, snapRef, 
   const buttonHeight = 0.2;
   let slidesArray = [];
 
-  for (let i = 0; i < maxSlideCount; i++) {
+  for (let i = 0; i < maxSlideCount!; i++) {
     slidesArray.push(
       <entity
         name={`slide ${i}`}
@@ -87,6 +94,47 @@ export function AgentPanel({ text, panelRef, nextRef, prevRef, micRef, snapRef, 
         scale={[buttonScale[0], buttonScale[1], buttonScale[2]]}
         type={BUTTON_TYPES.CAMERA}
         position={[-0.25, 0.15, 0]}
+        width={buttonHeight}
+        height={buttonHeight}
+      />
+    </entity>
+  );
+}
+
+export function SimplePanel({ panelRef, textRef, micRef }: SimplePanelParams) {
+  const buttonScale = [0.4, 0.4, 0.4];
+  const buttonHeight = 0.2;
+  return (
+    <entity>
+      <entity
+        name="agentPanel"
+        ref={panelRef}
+        rotation={[0, 0, 0]}
+        slice9={{ size: [0.6, 0.3], insets: [64, 66, 64, 66], texture: panelTexture }}
+        position={[-0.7, 0, 0.1]}
+        scale={[1.0, 1.0, 1.0]}
+      >
+        <entity
+          name={`text`}
+          position={[0, 0, 0.01]}
+          ref={textRef}
+          text={{
+            value: "This is a test",
+            color: "#000000",
+            textAlign: "center",
+            anchorX: "center",
+            anchorY: "middle",
+            fontSize: 0.05,
+            maxWidth: 1
+          }}
+        />
+      </entity>
+
+      <IconButton
+        ref={micRef}
+        scale={[buttonScale[0], buttonScale[1], buttonScale[2]]}
+        type={BUTTON_TYPES.MIC}
+        position={[0.3, 0.15, 0]}
         width={buttonHeight}
         height={buttonHeight}
       />
