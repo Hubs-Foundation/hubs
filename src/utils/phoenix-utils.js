@@ -435,3 +435,7 @@ export const tryGetMatchingMeta = async ({ ret_pool, ret_version }, shouldAbando
   }
   return didMatchMeta;
 };
+
+window.$P = {
+  getReticulumFetchUrl
+};
