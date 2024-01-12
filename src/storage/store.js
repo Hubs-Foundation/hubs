@@ -129,7 +129,6 @@ export const SCHEMA = {
         disableIdleDetection: { type: "bool", default: false },
         fastRoomSwitching: { type: "bool", default: false }, // No longer used. TODO How to remove this safely?
         lazyLoadSceneMedia: { type: "bool", default: false },
-        preferMobileObjectInfoPanel: { type: "bool", default: false },
         // if unset, maxResolution = screen resolution
         maxResolutionWidth: { type: "number", default: undefined },
         maxResolutionHeight: { type: "number", default: undefined },

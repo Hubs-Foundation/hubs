@@ -489,10 +489,6 @@ const preferenceLabels = defineMessages({
     id: "preferences-screen.preference.disable-idle-detection",
     defaultMessage: "Disable auto-exit when idle or backgrounded"
   },
-  preferMobileObjectInfoPanel: {
-    id: "preferences-screen.preference.prefer-mobile-object-info-panel",
-    defaultMessage: "Prefer Mobile Object Info Panel"
-  },
   showRtcDebugPanel: {
     id: "preferences-screen.preference.show-rtc-debug-panel",
     defaultMessage: "Show RTC Panel"
@@ -1277,10 +1273,6 @@ class PreferencesScreen extends Component {
           },
           {
             key: "lazyLoadSceneMedia",
-            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
-          },
-          {
-            key: "preferMobileObjectInfoPanel",
             prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
           },
           {
