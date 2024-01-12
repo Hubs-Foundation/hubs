@@ -100,8 +100,5 @@ export const floorMap = new FloorMapClass();
 
 export function FloorMapSystem(world) {
   if (!floorMap.Active() || !floorMap.enabled) return;
-
-  console.log("the floor map system movement works");
-
   floorMap.Movement();
 }

@@ -9,14 +9,18 @@ import { FormattedMessage } from "react-intl";
 export function AvatarSettingsContent({
   displayName,
   pronouns,
+  language,
   displayNameInputRef,
   pronounsInputRef,
+  languageInputRef,
   disableDisplayNameInput,
   onChangeDisplayName,
   onChangePronouns,
+  onChangeLanguage,
   avatarPreview,
   displayNamePattern,
   pronounsPattern,
+  languagePattern,
   onChangeAvatar,
   ...rest
 }) {
@@ -46,6 +50,14 @@ export function AvatarSettingsContent({
         onChange={onChangePronouns}
         ref={pronounsInputRef}
       />
+      <TextInputField
+        label={<FormattedMessage id="avatar-settings-content.language-label" defaultMessage="Language" />}
+        value={language}
+        pattern={languagePattern}
+        spellCheck="false"
+        onChange={onChangeLanguage}
+        ref={languageInputRef}
+      />
       <div className={styles.avatarPreviewContainer}>
         {avatarPreview || <div />}
         <Button type="button" preset="basic" onClick={onChangeAvatar}>
@@ -61,13 +73,17 @@ AvatarSettingsContent.propTypes = {
   className: PropTypes.string,
   displayName: PropTypes.string,
   pronouns: PropTypes.string,
+  language: PropTypes.string,
   displayNameInputRef: PropTypes.func,
   pronounsInputRef: PropTypes.func,
+  languageInputRef: PropTypes.func,
   disableDisplayNameInput: PropTypes.bool,
   displayNamePattern: PropTypes.string,
   pronounsPattern: PropTypes.string,
+  languagePattern: PropTypes.string,
   onChangeDisplayName: PropTypes.func,
   onChangePronouns: PropTypes.func,
+  onChangeLanguage: PropTypes.func,
   avatarPreview: PropTypes.node,
   onChangeAvatar: PropTypes.func
 };

@@ -207,7 +207,7 @@ AFRAME.registerComponent("name-tag", {
 
   updateFromPresenceMeta(presenceMeta) {
     this.displayName = presenceMeta.profile.displayName;
-    this.pronouns = presenceMeta.profile.pronouns;
+    this.pronouns = presenceMeta.profile.language;
     this.identityName = presenceMeta.profile.identityName;
     this.isRecording = !!(presenceMeta.streaming || presenceMeta.recording);
     this.isOwner = !!(presenceMeta.roles && presenceMeta.roles.owner);

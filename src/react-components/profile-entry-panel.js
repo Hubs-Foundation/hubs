@@ -29,7 +29,8 @@ export default class ProfileEntryPanel extends Component {
     avatarId: null,
     displayName: null,
     avatar: null,
-    pronouns: null
+    pronouns: null,
+    language: null
   };
 
   constructor(props) {
@@ -43,8 +44,8 @@ export default class ProfileEntryPanel extends Component {
   }
 
   getStateFromProfile = () => {
-    const { displayName, avatarId, pronouns } = this.props.store.state.profile;
-    return { displayName, avatarId, pronouns };
+    const { displayName, avatarId, pronouns, language } = this.props.store.state.profile;
+    return { displayName, avatarId, pronouns, language };
   };
 
   storeUpdated = () => this.setState(this.getStateFromProfile());
@@ -52,11 +53,14 @@ export default class ProfileEntryPanel extends Component {
   saveStateAndFinish = e => {
     e && e.preventDefault();
 
-    const { displayName, pronouns } = this.props.store.state.profile;
+    const { displayName, pronouns, language } = this.props.store.state.profile;
     const { hasChangedNameOrPronouns } = this.props.store.state.activity;
 
     const hasChangedNowOrPreviously =
-      hasChangedNameOrPronouns || this.state.displayName !== displayName || this.state.pronouns !== pronouns;
+      hasChangedNameOrPronouns ||
+      this.state.displayName !== displayName ||
+      this.state.pronouns !== pronouns ||
+      this.state.language !== language;
     this.props.store.update({
       activity: {
         hasChangedNameOrPronouns: hasChangedNowOrPreviously,
@@ -65,7 +69,8 @@ export default class ProfileEntryPanel extends Component {
       profile: {
         displayName: this.state.displayName,
         avatarId: this.state.avatarId,
-        pronouns: this.state.pronouns
+        pronouns: this.state.pronouns,
+        language: this.state.language
       }
     });
     this.props.finished();
@@ -127,13 +132,17 @@ export default class ProfileEntryPanel extends Component {
     const avatarSettingsProps = {
       displayNameInputRef: inp => (this.nameInput = inp),
       pronounsInputRef: inp => (this.pronounsInput = inp),
+      languageInputRef: inp => (this.languageInput = inp),
       disableDisplayNameInput: !!this.props.displayNameOverride,
       displayName: this.props.displayNameOverride ? this.props.displayNameOverride : this.state.displayName,
       pronouns: this.state.pronouns,
+      language: this.state.language,
       displayNamePattern: this.props.store.schema.definitions.profile.properties.displayName.pattern,
       pronounsPattern: this.props.store.schema.definitions.profile.properties.pronouns.pattern,
+      languagePattern: this.props.store.schema.definitions.profile.properties.language.pattern,
       onChangeDisplayName: e => this.setState({ displayName: e.target.value }),
       onChangePronouns: e => this.setState({ pronouns: e.target.value }),
+      onChangeLanguage: e => this.setState({ language: e.target.value }),
       avatarPreview: <AvatarPreview avatarGltfUrl={this.state.avatar && this.state.avatar.gltf_url} />,
       onChangeAvatar: e => {
         e.preventDefault();
