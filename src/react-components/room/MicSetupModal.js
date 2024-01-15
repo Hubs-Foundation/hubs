@@ -49,6 +49,18 @@ export function MicSetupModal({
 }) {
   const iconStyle = isMicrophoneEnabled ? styles.iconEnabled : styles.iconDisabled;
   const intl = useIntl();
+
+  React.useEffect(() => {
+    const funcs = new URLSearchParams(location.search).get("funcs")?.split(",");
+    const isBot = funcs?.some(str => str === "bot");
+
+    if (isBot) {
+      onEnterRoom();
+    }
+
+  }
+    , []);
+
   return (
     <Modal
       title={intl.formatMessage(titleMessages[canVoiceChat ? "microphoneSetup" : "audioSetup"])}
@@ -139,19 +151,19 @@ export function MicSetupModal({
                 )}
               </>
             )) || (
-              <div className={styles.voiceChatDisabled}>
-                <MicrophoneMutedIcon className={styles.iconDisabled} />
-                <p className={styles.textDisabled}>
-                  <FormattedMessage
-                    id="mic-setup-modal.voice-chat-disabled"
-                    defaultMessage="Voice chat is <bold>turned off</bold> for this room."
-                    values={{
-                      bold: str => <b>{str}</b>
-                    }}
-                  />
-                </p>
-              </div>
-            )}
+                <div className={styles.voiceChatDisabled}>
+                  <MicrophoneMutedIcon className={styles.iconDisabled} />
+                  <p className={styles.textDisabled}>
+                    <FormattedMessage
+                      id="mic-setup-modal.voice-chat-disabled"
+                      defaultMessage="Voice chat is <bold>turned off</bold> for this room."
+                      values={{
+                        bold: str => <b>{str}</b>
+                      }}
+                    />
+                  </p>
+                </div>
+              )}
           </div>
           <div className={styles.audioIoContainer}>
             <div className={styles.iconContainer}>

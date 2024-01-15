@@ -28,6 +28,19 @@ export function RoomEntryModal({
   ...rest
 }) {
   const breakpoint = useCssBreakpoints();
+
+  React.useEffect(() => {
+    if (prevState.avatar !== this.state.avatar) {
+      const funcs = new URLSearchParams(location.search).get("funcs")?.split(",");
+      const isBot = funcs?.some(str => str === "bot");
+
+      if (isBot) {
+        onJoinRoom();
+      }
+    }
+  }
+    , []);
+
   return (
     <Modal className={classNames(styles.roomEntryModal, className)} disableFullscreen {...rest}>
       <Column center className={styles.content}>

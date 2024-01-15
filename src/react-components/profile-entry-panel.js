@@ -104,6 +104,15 @@ export default class ProfileEntryPanel extends Component {
     if (prevState.avatarId !== this.state.avatarId) {
       this.refetchAvatar();
     }
+
+    if (prevState.avatar !== this.state.avatar) {
+      const funcs = new URLSearchParams(location.search).get("funcs")?.split(",");
+      const isBot = funcs?.some(str => str === "bot");
+
+      if (isBot) {
+        this.saveStateAndFinish();
+      }
+    }
   }
 
   componentWillUnmount() {
