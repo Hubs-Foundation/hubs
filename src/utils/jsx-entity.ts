@@ -39,7 +39,8 @@ import {
   Quack,
   MixerAnimatableInitialize,
   Inspectable,
-  ObjectMenu
+  ObjectMenu,
+  HoverableVisuals
 } from "../bit-components";
 import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
@@ -306,6 +307,7 @@ export interface JSXComponentData extends ComponentData {
   networked?: any;
   textButton?: any;
   hoverButton?: any;
+  hoverableVisuals?: any;
   rigidbody?: OptionalParams<RigidBodyParams>;
   physicsShape?: OptionalParams<PhysicsShapeParams>;
   floatyObject?: any;
@@ -444,6 +446,7 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   holdableButton: createDefaultInflator(HoldableButton),
   textButton: createDefaultInflator(TextButton),
   hoverButton: createDefaultInflator(HoverButton),
+  hoverableVisuals: createDefaultInflator(HoverableVisuals),
   holdable: createDefaultInflator(Holdable),
   deletable: createDefaultInflator(Deletable),
   rigidbody: inflateRigidBody,

@@ -29,6 +29,7 @@ export function MediaPrefab(params: MediaLoaderParams): EntityDef {
       }}
       scale={[1, 1, 1]}
       inspectable
+      hoverableVisuals
     />
   );
 }

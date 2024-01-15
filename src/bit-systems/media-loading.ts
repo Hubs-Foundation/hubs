@@ -13,6 +13,7 @@ import { Box3, Group, Matrix4, Quaternion, Vector3 } from "three";
 import { HubsWorld } from "../app";
 import {
   GLTFModel,
+  HoverableVisuals,
   LoadedByMediaLoader,
   MediaContentBounds,
   MediaImageLoaderData,
@@ -47,6 +48,7 @@ import { inflateGrabbable } from "../inflators/grabbable";
 import { findAncestorsWithComponent, findChildWithComponent } from "../utils/bit-utils";
 import { setMatrixWorld } from "../utils/three-utils";
 import { computeObjectAABB, getScaleCoefficient } from "../utils/auto-box-collider";
+import { updateHoverableVisuals } from "./hoverable-visuals-system";
 
 export function* waitForMediaLoaded(world: HubsWorld, eid: EntityID) {
   while (hasComponent(world, MediaLoader, eid)) {
@@ -170,6 +172,9 @@ function* finish(world: HubsWorld, mediaLoaderEid: EntityID) {
       type: Shape.HULL,
       minHalfExtent: 0.04
     });
+    if (hasComponent(world, HoverableVisuals, mediaLoaderEid)) {
+      updateHoverableVisuals(world, mediaLoaderEid);
+    }
   }
 }
 
