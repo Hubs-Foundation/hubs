@@ -31,6 +31,8 @@ import { getCurrentHubId, isLockedDownDemoRoom } from "./utils/hub-utils";
 import { virtualAgent } from "./bit-systems/agent-system";
 import { floorMap } from "./bit-systems/map-system";
 import { subtitleSystem } from "./bit-systems/subtitling-system";
+import { GetHubProperties } from "./utils/rooms-properties";
+import { sceneGraph } from "./bit-systems/routing-system";
 const useNewLoader = qsTruthy("newLoader");
 
 export default class SceneEntryManager {
@@ -60,6 +62,14 @@ export default class SceneEntryManager {
 
   hasEntered = () => {
     return this._entered;
+  };
+
+  setupVRConferece = async () => {
+    const hubProperties = await GetHubProperties(getCurrentHubId());
+    virtualAgent.Init(hubProperties);
+    floorMap.Init(hubProperties);
+    sceneGraph.Init(hubProperties);
+    subtitleSystem.Init();
   };
 
   enterScene = async (enterInVR, muteOnEntry) => {
@@ -99,9 +109,10 @@ export default class SceneEntryManager {
     this._setupKicking();
     this._setupMedia();
     this._setupCamera();
-    this._setupAgent();
-    this._setupMap();
-    this._setupSubtitles();
+    this.setupVRConferece();
+    // this._setupAgent();
+    // this._setupMap();
+    // this._setupSubtitles();
 
     if (qsTruthy("offline")) return;
 
@@ -453,18 +464,6 @@ export default class SceneEntryManager {
     this.mediaSearchStore.addEventListener("media-exit", () => {
       exit2DInterstitialAndEnterVR();
     });
-  };
-
-  _setupAgent = () => {
-    virtualAgent.Init();
-  };
-
-  _setupMap = () => {
-    floorMap.Init(getCurrentHubId());
-  };
-
-  _setupSubtitles = () => {
-    subtitleSystem.Init();
   };
 
   _setupCamera = () => {

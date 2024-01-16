@@ -1,19 +1,21 @@
-interface saliencyProp {
-  name: string;
-  pivot: [number, number, number];
-  box: [number, number, number, number];
+import { string } from "prop-types";
+
+const propertiesURL = "https://kontopoulosdm.github.io/properties.json";
+const unkonwnRoom = {
+  room: "unknown",
+  id: "uknown",
+  allow_map: false,
+  allow_agent: false,
+  allow_navigation: false
+};
+
+interface RoomProperties {
+  targets: { name: string; pivot: Array<Number>; box: Array<Number> };
+  dimensions: { height: number; box: Array<Number> }[];
+  connectors?: { end1: Array<Number>; end2: Array<Number> }[];
 }
 
-interface JSONRoomProperties {
-  room: string;
-  id: string;
-  targets: saliencyProp[];
-  dimensions: { height: number; box: [number, number, number, number] }[];
-  connectors?: { end1: [number, number, number]; end2: [number, number, number] }[];
-}
-
-interface JSONMapProperties {
-  id: string;
+interface MapProperties {
   file: string;
   ratio: number;
   mapToImage: Array<Number>;
@@ -21,21 +23,42 @@ interface JSONMapProperties {
   centeroffset: Array<Number>;
 }
 
-export enum PropertyType {
-  ROOM = "https://kontopoulosdm.github.io/room_properties.json",
-  MAP = "https://kontopoulosdm.github.io/maps.json"
+interface JSONHubProperties {
+  room: string;
+  id: string;
+  allow_map: boolean;
+  allow_agent: boolean;
+  allow_navigation: boolean;
+  navigation?: RoomProperties;
+  map?: MapProperties;
+}
+
+export async function GetHubProperties(HubID: string): Promise<JSONHubProperties> {
+  try {
+    const response = await fetch(propertiesURL, { method: "GET" });
+    if (!response.ok) throw new Error("Response not OK");
+    const roomArray = (await response.json()) as JSONHubProperties[];
+
+    for (let i = 0; i < roomArray.length; i++) {
+      if (roomArray[i].id === HubID) return roomArray[i];
+    }
+    return unkonwnRoom;
+  } catch (error) {
+    console.log(error);
+    return unkonwnRoom;
+  }
 }
 
 export async function GetProperties(
   _roomID: string,
   type: PropertyType
-): Promise<JSONRoomProperties | JSONMapProperties | false> {
+): Promise<JSONRoomProperties_old | JSONMapProperties_old | false> {
   let props;
   try {
     if (type === PropertyType.ROOM) {
-      props = await GetPropertiesFile<JSONRoomProperties[]>(type);
+      props = await GetPropertiesFile<JSONRoomProperties_old[]>(type);
     } else if (type === PropertyType.MAP) {
-      props = await GetPropertiesFile<JSONMapProperties[]>(type);
+      props = await GetPropertiesFile<JSONMapProperties_old[]>(type);
     } else {
       throw new Error("Invalid property type");
     }
@@ -64,4 +87,26 @@ export async function GetPropertiesFile<T>(link: PropertyType): Promise<T> {
   } catch (error) {
     throw new Error("Could not fetch data: " + error.message);
   }
+}
+
+interface JSONRoomProperties_old {
+  room: string;
+  id: string;
+  targets: { name: string; pivot: Array<Number>; box: Array<Number> };
+  dimensions: { height: number; box: Array<Number> }[];
+  connectors?: { end1: Array<Number>; end2: Array<Number> }[];
+}
+
+interface JSONMapProperties_old {
+  id: string;
+  file: string;
+  ratio: number;
+  mapToImage: Array<Number>;
+  center: Array<Number>;
+  centeroffset: Array<Number>;
+}
+
+export enum PropertyType {
+  ROOM = "https://kontopoulosdm.github.io/room_properties.json",
+  MAP = "https://kontopoulosdm.github.io/maps.json"
 }

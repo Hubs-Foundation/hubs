@@ -1,10 +1,7 @@
 import { defineQuery, enterQuery, exitQuery, removeEntity } from "bitecs";
 import { FloorMap } from "../bit-components";
 import { addFloorMap } from "../prefabs/floor-map";
-import { anyEntityWith } from "../utils/bit-utils";
-import { createRef } from "../utils/jsx-entity";
 import { Vector3 } from "three";
-import { GetProperties, PropertyType } from "../utils/rooms-properties";
 
 const mapQuery = defineQuery([FloorMap]);
 const enterMapQuery = enterQuery(mapQuery);
@@ -16,25 +13,25 @@ class FloorMapClass {
     this.eid = null;
   }
 
-  async Init(hubID) {
-    this.userPov = document.querySelector("#avatar-pov-node").object3D;
-    this.userObj = document.querySelector("#avatar-rig").object3D;
-    const mapProperties = await GetProperties(hubID, PropertyType.MAP);
-
-    if (!mapProperties) {
+  Init(hubProperties) {
+    if (!hubProperties.allow_map) {
       console.error("Cannot read map properties, map is not enabled for this room");
-      this.enabled = false;
       this.file = "https://kontopoulosdm.github.io/unavailable_map.png";
       this.imageRatio = 0.5;
-    } else {
-      this.enabled = true;
-      this.imageRatio = mapProperties.ratio;
-      this.mapToImage = mapProperties.mapToImage;
-      this.file = mapProperties.file;
-      this.roomLength = mapProperties.roomLength;
-      this.center = mapProperties.center;
-      this.centerOffset = mapProperties.centeroffset;
+      this.allowed = false;
+      return;
     }
+    this.allowed = true;
+    this.userPov = document.querySelector("#avatar-pov-node").object3D;
+    this.userObj = document.querySelector("#avatar-rig").object3D;
+
+    const mapProperties = hubProperties.map;
+    this.imageRatio = mapProperties.ratio;
+    this.mapToImage = mapProperties.mapToImage;
+    this.file = mapProperties.file;
+    this.roomLength = mapProperties.roomLength;
+    this.center = mapProperties.center;
+    this.centerOffset = mapProperties.centeroffset;
 
     APP.scene.addEventListener("map-toggle", () => {
       if (this.Active()) {
@@ -60,7 +57,7 @@ class FloorMapClass {
       this.pointEID = FloorMap.pointRef[mapEID];
       this.pointObj = APP.world.eid2obj.get(this.pointEID);
 
-      if (this.enabled) {
+      if (this.allowed) {
         this.ratio = new Vector3(
           (this.mapToImage[0] * this.imageSize.x) / this.roomLength[0],
           1,
@@ -99,6 +96,6 @@ class FloorMapClass {
 export const floorMap = new FloorMapClass();
 
 export function FloorMapSystem(world) {
-  if (!floorMap.Active() || !floorMap.enabled) return;
+  if (!floorMap.Active() || !floorMap.allowed) return;
   floorMap.Movement();
 }

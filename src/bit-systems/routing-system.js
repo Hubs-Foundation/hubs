@@ -40,115 +40,116 @@ export class Node {
 export class Graph {
   constructor() {}
 
-  async Init(hubID) {
-    const roomProperties = await GetProperties(hubID, PropertyType.ROOM);
+  async Init(hubProperties) {
+    if (!hubProperties.allow_navigation) {
+      console.error("Navigation is not allowed for this room");
+      this.allowed = false;
+      return;
+    }
 
-    if (!roomProperties) {
-      console.error("Cannot read room properties, navigation is not enabled for this room");
-      this.enabled = false;
-    } else {
-      this.enabled = true;
-      this.nodes = [];
-      this.edges = [];
+    const roomProperties = hubProperties.navigation;
 
-      const connectorPairs = [];
-      const manualIndices = [];
-      this.targetInfo = {};
+    this.allowed = true;
+    this.nodes = [];
+    this.edges = [];
 
-      roomProperties.connectors.forEach(object => {
-        const end1 = object.end1;
-        const end2 = object.end2;
-        const node1 = new Node(end1[0], end1[1], -end1[2]);
-        const node2 = new Node(end2[0], end2[1], -end2[2]);
+    const connectorPairs = [];
+    const manualIndices = [];
+    this.targetInfo = {};
 
-        let index1 = this.FindInArray(this.nodes, node1);
-        if (index1 === -1) {
-          index1 = this.nodes.push(node1) - 1;
-          manualIndices.push(index1);
-        }
+    roomProperties.connectors.forEach(object => {
+      const end1 = object.end1;
+      const end2 = object.end2;
+      const node1 = new Node(end1[0], end1[1], -end1[2]);
+      const node2 = new Node(end2[0], end2[1], -end2[2]);
 
-        let index2 = this.FindInArray(this.nodes, node2);
-        if (index2 === -1) {
-          index2 = this.nodes.push(node2) - 1;
-          manualIndices.push(index2);
-        }
-        connectorPairs.push([index1, index2]);
-      });
+      let index1 = this.FindInArray(this.nodes, node1);
+      if (index1 === -1) {
+        index1 = this.nodes.push(node1) - 1;
+        manualIndices.push(index1);
+      }
 
-      roomProperties.targets.forEach(target => {
-        const value = target.pivot;
-        const targetNode = new Node(value[0], value[1], -value[2]);
-        const index = this.nodes.push(targetNode) - 1;
+      let index2 = this.FindInArray(this.nodes, node2);
+      if (index2 === -1) {
+        index2 = this.nodes.push(node2) - 1;
+        manualIndices.push(index2);
+      }
+      connectorPairs.push([index1, index2]);
+    });
 
-        manualIndices.push(index);
-        this.targetInfo[target.name] = index;
-      });
+    roomProperties.targets.forEach(target => {
+      const value = target.pivot;
+      const targetNode = new Node(value[0], value[1], -value[2]);
+      const index = this.nodes.push(targetNode) - 1;
 
-      let count = -1;
-      roomProperties.dimensions.forEach(dimensionElement => {
-        count++;
-        const dimension = dimensionElement.box;
-        const height = dimensionElement.height;
+      manualIndices.push(index);
+      this.targetInfo[target.name] = index;
+    });
 
-        for (let z = dimension[2]; z <= dimension[3]; z++) {
-          for (let x = dimension[0]; x <= dimension[1]; x++) {
-            let discard = false;
-            for (let i = 0; i < roomProperties.targets.length; i++) {
-              const exception = roomProperties.targets[i].box;
-              const exceptionHeight = roomProperties.targets[i].pivot[1];
-              discard =
-                x >= exception[0] &&
-                x <= exception[1] &&
-                z >= exception[2] &&
-                z <= exception[3] &&
-                height === exceptionHeight;
-              if (discard) break;
-            }
-            const node = new Node(x, height, -z);
-            if (!discard) {
-              manualIndices.forEach(manualIndex => {
-                const manualNode = this.nodes[manualIndex];
-                if (manualNode.IsIdentical(node)) {
-                  discard = true;
-                }
-              });
-            }
-            if (!discard) {
-              this.nodes.push(node);
-            }
+    let count = -1;
+    roomProperties.dimensions.forEach(dimensionElement => {
+      count++;
+      const dimension = dimensionElement.box;
+      const height = dimensionElement.height;
+
+      for (let z = dimension[2]; z <= dimension[3]; z++) {
+        for (let x = dimension[0]; x <= dimension[1]; x++) {
+          let discard = false;
+          for (let i = 0; i < roomProperties.targets.length; i++) {
+            const exception = roomProperties.targets[i].box;
+            const exceptionHeight = roomProperties.targets[i].pivot[1];
+            discard =
+              x >= exception[0] &&
+              x <= exception[1] &&
+              z >= exception[2] &&
+              z <= exception[3] &&
+              height === exceptionHeight;
+            if (discard) break;
           }
-        }
-      });
-
-      for (let i = 0; i < this.nodes.length; i++) {
-        for (let j = i + 1; j < this.nodes.length; j++) {
-          if (this.AreNodesAdjacent(this.nodes[i], this.nodes[j])) {
-            const distance = this.nodes[i].vector.manhattanDistanceTo(this.nodes[j]);
-            if (distance > 0) {
-              this.nodes[i].neighboors[j] = distance;
-              this.nodes[j].neighboors[i] = distance;
-            }
+          const node = new Node(x, height, -z);
+          if (!discard) {
+            manualIndices.forEach(manualIndex => {
+              const manualNode = this.nodes[manualIndex];
+              if (manualNode.IsIdentical(node)) {
+                discard = true;
+              }
+            });
+          }
+          if (!discard) {
+            this.nodes.push(node);
           }
         }
       }
+    });
 
-      connectorPairs.forEach(pair => {
-        const index1 = pair[0];
-        const index2 = pair[1];
-        const distance = this.nodes[index1].vector.manhattanDistanceTo(this.nodes[index2]);
-        if (!Object.keys(this.nodes[index1].neighboors).includes(index2)) {
-          this.nodes[index1].neighboors[index2] = distance;
-          this.nodes[index2].neighboors[index1] = distance;
+    for (let i = 0; i < this.nodes.length; i++) {
+      for (let j = i + 1; j < this.nodes.length; j++) {
+        if (this.AreNodesAdjacent(this.nodes[i], this.nodes[j])) {
+          const distance = this.nodes[i].vector.manhattanDistanceTo(this.nodes[j]);
+          if (distance > 0) {
+            this.nodes[i].neighboors[j] = distance;
+            this.nodes[j].neighboors[i] = distance;
+          }
         }
-      });
-
-      this.nodeCount = this.nodes.length;
-      this.mapped = false;
-      this.mappedNodes = new Array(this.nodeCount).fill(false);
-      this.paths = new Array(this.nodeCount);
-      for (let j = 0; j < this.nodeCount; j++) {
-        this.paths[j] = [];
       }
+    }
+
+    connectorPairs.forEach(pair => {
+      const index1 = pair[0];
+      const index2 = pair[1];
+      const distance = this.nodes[index1].vector.manhattanDistanceTo(this.nodes[index2]);
+      if (!Object.keys(this.nodes[index1].neighboors).includes(index2)) {
+        this.nodes[index1].neighboors[index2] = distance;
+        this.nodes[index2].neighboors[index1] = distance;
+      }
+    });
+
+    this.nodeCount = this.nodes.length;
+    this.mapped = false;
+    this.mappedNodes = new Array(this.nodeCount).fill(false);
+    this.paths = new Array(this.nodeCount);
+    for (let j = 0; j < this.nodeCount; j++) {
+      this.paths[j] = [];
     }
   }
 

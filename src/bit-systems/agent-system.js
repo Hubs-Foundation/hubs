@@ -47,9 +47,16 @@ export class objElement {
 export default class VirtualAgent {
   constructor() {}
 
-  Init() {
+  Init(hubProperties) {
+    if (!hubProperties.allow_agent) {
+      this.allowed = false;
+      return;
+    }
+
+    this.allowed = true;
     this.avatarPovObj = document.querySelector("#avatar-pov-node").object3D;
     addAgentToScene(APP.world, this.avatarPovObj);
+
     APP.scene.addEventListener("agent-toggle", () => {
       if (!APP.scene.is("agent")) {
         if (APP.scene.is("map")) APP.scene.emit("map-toggle");
@@ -60,6 +67,7 @@ export default class VirtualAgent {
       }
       this.active = APP.scene.is("agent");
     });
+
     APP.scene.addEventListener("lang-toggle", () => {
       if (!APP.scene.is("lang-panel")) {
         this.LangPanelEid = addLangPanelToScene(APP.world);
@@ -154,7 +162,7 @@ export default class VirtualAgent {
   }
 
   async Navigate(destName, userQuery, userIntent, skipModule = false) {
-    if (!sceneGraph.enabled) return;
+    if (!sceneGraph.allowed) return;
     try {
       const startIndex = sceneGraph.GetClosestIndex(virtualAgent.avatarPos);
       const navigation = sceneGraph.GetInstructions(startIndex, destName);
