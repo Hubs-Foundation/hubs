@@ -31,9 +31,10 @@ export class SubtitleSystem {
   }
 
   Init() {
+    this.targetLanguage = null;
+    this.updateLanguage(window.APP.store.state.profile.language);
     this.sourceLanguage = null;
     this.target = null;
-    this.targetLanguage = null;
     this.scene = APP.scene;
     this.VRmode = this.scene.is("vr-mode");
     this.initialized = true;
@@ -70,12 +71,13 @@ export class SubtitleSystem {
       window.APP.store.update({ profile: { language: "" } });
     }
 
-    console.log(window.APP.store.state.profile);
+    // console.log(window.APP.store.state.profile);
     APP.scene.emit("language_updated", { language: this.targetLanguage });
   }
 
   SetSourceLanguage(_lang) {
     this.sourceLanguage = _lang;
+    console.log("Translate from:", this.sourceLanguage, this.targetLanguage);
   }
 
   SelectTarget(_target) {
@@ -84,7 +86,7 @@ export class SubtitleSystem {
     if (this.target === _target) this.target = null;
     else this.target = _target;
     APP.scene.emit("translation-target-updated", { owner: this.target });
-    console.log("translation-target-updated", { owner: this.target });
+
     if (this.hasTarget()) {
       APP.scene.emit("translation-available", { text: "The audio translation will be displayed here!" });
       this.StartTranslating();
@@ -106,6 +108,7 @@ export class SubtitleSystem {
   }
 
   StartTranslating() {
+    console.log("Translate from:", this.sourceLanguage, this.targetLanguage);
     this.GetTargetStream(this.target)
       .then(stream => {
         console.log(stream);
@@ -183,7 +186,6 @@ export class SubtitleSystem {
           inference =
             inference && chunks.length > 0 && recordingBlob.size > 0 && !!this.targetLanguage && !!this.sourceLanguage;
           chunks.length = 0;
-          console.log("inference to translate from:", this.sourceLanguage, this.targetLanguage);
 
           if (inference) {
             // this.saveAudio(recordingBlob);
@@ -195,7 +197,7 @@ export class SubtitleSystem {
               .then(translateRespone => {
                 // console.log(translateRespone);
                 APP.scene.emit("translation-available", { text: translateRespone.data.translations[0] });
-                console.log("i emit translation available");
+
                 UpdateTextSystem(APP.world, translateRespone.data.translations[0]);
               })
               .catch(error => {
@@ -299,7 +301,6 @@ export function FlagPanelSystem(world) {
     subtitleSystem.flagObjs.greek = new objElement(FlagPanelManager.elRef[managerEid]);
     subtitleSystem.flagObjs.english = new objElement(FlagPanelManager.enRef[managerEid]);
 
-    console.log("registered flagManager with eid", managerEid);
     subtitleSystem.ResetPanel();
   });
   panelManagerQuery(world).forEach(eid => {
@@ -311,7 +312,6 @@ export function FlagPanelSystem(world) {
     Object.keys(subtitleSystem.flagObjs).forEach(key => {
       subtitleSystem.flagObjs[key] = null;
     });
-    console.log("remove flagManager with eid", managerEid);
   });
 }
 

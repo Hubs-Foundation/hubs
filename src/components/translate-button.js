@@ -36,8 +36,9 @@ AFRAME.registerComponent("translate-button", {
 
     this.onClick = () => {
       subtitleSystem.SelectTarget(this.owner);
+      console.log("The clicked user has this language:", this.userLanguage);
       if (!!this.userLanguage) {
-        subtitleSystem.SetSourceLanguage(languages[this.userLanguage]);
+        subtitleSystem.SetSourceLanguage(this.userLanguage);
       } else {
         subtitleSystem.SetSourceLanguage(this.userLanguage);
       }
@@ -63,7 +64,6 @@ AFRAME.registerComponent("translate-button", {
 
     if (subtitleSystem.target === this.owner) {
       subtitleSystem.SetSourceLanguage(this.userLanguage);
-      console.log(`Setting source language to ${this.userLanguage}`);
       return;
     }
     console.log(`Setting ${this.owner} language to ${this.userLanguage} without changing source language`);
