@@ -31,6 +31,7 @@ export class SubtitleSystem {
   }
 
   Init() {
+    console.log("TEST THIS IS A CSP RULE CLIENT");
     this.targetLanguage = null;
     this.updateLanguage(window.APP.store.state.profile.language);
     this.sourceLanguage = null;
