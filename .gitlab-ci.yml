@@ -1,0 +1,12 @@
+stages:
+  - mirror
+
+variables:
+  GITHUB_TOKEN: "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"
+
+mirror:
+  stage: mirror
+  script:
+    - git push --mirror $GITHUB_TOKEN@github.com:kontopoulosdm/hubs.git
+  only:
+    - master # Trigger only for changes in the master branch
