@@ -1,9 +1,6 @@
 stages:
   - mirror
 
-variables:
-  GITHUB_TOKEN: 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
-
 mirror:
   stage: mirror
   script:
