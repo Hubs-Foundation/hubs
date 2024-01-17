@@ -27,11 +27,11 @@ export class SubtitleSystem {
     this.animationFrameID;
     this.FlagManagerID;
     this.onLanguageAvailable = this.onLanguageAvailable.bind(this);
-    this.flagObjs = { it: null, es: null, nl: null, de: null, el: null, en: null };
+    this.flagObjs = { italian: null, spanish: null, dutch: null, german: null, greek: null, english: null };
   }
 
   Init() {
-    this.myLanguage = "en";
+    this.sourceLanguage = null;
     this.target = null;
     this.targetLanguage = null;
     this.scene = APP.scene;
@@ -64,7 +64,18 @@ export class SubtitleSystem {
   updateLanguage(lang) {
     this.targetLanguage = lang;
     this.ResetPanel();
+    if (!!this.targetLanguage) {
+      window.APP.store.update({ profile: { language: this.targetLanguage } });
+    } else {
+      window.APP.store.update({ profile: { language: "" } });
+    }
+
+    console.log(window.APP.store.state.profile);
     APP.scene.emit("language_updated", { language: this.targetLanguage });
+  }
+
+  SetSourceLanguage(_lang) {
+    this.sourceLanguage = _lang;
   }
 
   SelectTarget(_target) {
@@ -73,9 +84,9 @@ export class SubtitleSystem {
     if (this.target === _target) this.target = null;
     else this.target = _target;
     APP.scene.emit("translation-target-updated", { owner: this.target });
+    console.log("translation-target-updated", { owner: this.target });
     if (this.hasTarget()) {
       APP.scene.emit("translation-available", { text: "The audio translation will be displayed here!" });
-      // this.DemoTranslating();
       this.StartTranslating();
     }
   }
@@ -92,27 +103,6 @@ export class SubtitleSystem {
     this.audioContext = null;
     this.analyser = null;
     this.animationFrameID = null;
-  }
-
-  DemoTranslating() {
-    let text;
-    switch (this.counter % 4) {
-      case 0:
-        text = "Here is new text for my translation panel";
-        break;
-      case 1:
-        text = "My name is Amalia Antonopoulou and I represent the beautiful island of Greece";
-        break;
-      case 2:
-        text = "Lucky that my breasts are small and humble so you don't confuse them with mountains";
-        break;
-      case 3:
-        text = "Hello everybody";
-        break;
-    }
-
-    this.counter++;
-    APP.scene.emit("translation-available", { text: text });
   }
 
   StartTranslating() {
@@ -169,10 +159,11 @@ export class SubtitleSystem {
             wasEvernotSilent = true;
           }
 
-          const recordingTime = performance.now() - recordingStartTime;
-          if (recordingTime > maxRecordingDuration) {
-            restartRec();
-          }
+          // Don't care about the duration
+          // const recordingTime = performance.now() - recordingStartTime;
+          // if (recordingTime > maxRecordingDuration) {
+          //   restartRec();
+          // }
 
           this.animationFrameID = requestAnimationFrame(detectSilence);
         };
@@ -190,14 +181,15 @@ export class SubtitleSystem {
         this.mediaRecorder.onstop = () => {
           const recordingBlob = new Blob(chunks, { type: "audio/wav" });
           inference =
-            inference && chunks.length > 0 && recordingBlob.size > 0 && !!this.targetLanguage && !!this.myLanguage;
+            inference && chunks.length > 0 && recordingBlob.size > 0 && !!this.targetLanguage && !!this.sourceLanguage;
           chunks.length = 0;
+          console.log("inference to translate from:", this.sourceLanguage, this.targetLanguage);
 
           if (inference) {
             // this.saveAudio(recordingBlob);
             audioModules(COMPONENT_ENDPOINTS.TRANSLATE_AUDIO_FILES, recordingBlob, {
-              source_language: this.myLanguage,
-              target_language: this.targetLanguage,
+              source_language: languageCodes[this.sourceLanguage],
+              target_language: languageCodes[this.targetLanguage],
               return_transcription: "true"
             })
               .then(translateRespone => {
@@ -259,35 +251,36 @@ export class SubtitleSystem {
     return !!this.targetLanguage;
   }
 
-  SetLanguage(_language) {
-    this.myLanguage = _language;
+  SetTargetLanguage(_language) {
+    this.targetLanguage = _language;
+    window.APP.store.update({ profile: { language: _language } });
+    console.log(window.APP.store);
   }
 
   checkPanel(world) {
-    if (hasComponent(world, Interacted, this.flagObjs.de.eid)) {
-      console.log("de interacted");
-      if (this.targetLanguage === "de") this.updateLanguage(null);
-      else this.updateLanguage("de");
+    if (hasComponent(world, Interacted, this.flagObjs.german.eid)) {
+      if (this.targetLanguage === "german") this.updateLanguage("");
+      else this.updateLanguage("german");
     }
-    if (hasComponent(world, Interacted, this.flagObjs.nl.eid)) {
-      if (this.targetLanguage === "nl") this.updateLanguage(null);
-      else this.updateLanguage("nl");
+    if (hasComponent(world, Interacted, this.flagObjs.dutch.eid)) {
+      if (this.targetLanguage === "dutch") this.updateLanguage("");
+      else this.updateLanguage("dutch");
     }
-    if (hasComponent(world, Interacted, this.flagObjs.it.eid)) {
-      if (this.targetLanguage === "it") this.updateLanguage(null);
-      else this.updateLanguage("it");
+    if (hasComponent(world, Interacted, this.flagObjs.italian.eid)) {
+      if (this.targetLanguage === "italian") this.updateLanguage("");
+      else this.updateLanguage("italian");
     }
-    if (hasComponent(world, Interacted, this.flagObjs.es.eid)) {
-      if (this.targetLanguage === "es") this.updateLanguage(null);
-      else this.updateLanguage("es");
+    if (hasComponent(world, Interacted, this.flagObjs.spanish.eid)) {
+      if (this.targetLanguage === "spanish") this.updateLanguage("");
+      else this.updateLanguage("spanish");
     }
-    if (hasComponent(world, Interacted, this.flagObjs.el.eid)) {
-      if (this.targetLanguage === "el") this.updateLanguage(null);
-      else this.updateLanguage("el");
+    if (hasComponent(world, Interacted, this.flagObjs.greek.eid)) {
+      if (this.targetLanguage === "greek") this.updateLanguage("");
+      else this.updateLanguage("greek");
     }
-    if (hasComponent(world, Interacted, this.flagObjs.en.eid)) {
-      if (this.targetLanguage === "en") this.updateLanguage(null);
-      else this.updateLanguage("en");
+    if (hasComponent(world, Interacted, this.flagObjs.english.eid)) {
+      if (this.targetLanguage === "english") this.updateLanguage("");
+      else this.updateLanguage("english");
     }
   }
 }
@@ -299,12 +292,12 @@ const exitpanelManagerQuery = exitQuery(panelManagerQuery);
 export function FlagPanelSystem(world) {
   enterpanelManagerQuery(world).forEach(managerEid => {
     subtitleSystem.FlagManagerID = managerEid;
-    subtitleSystem.flagObjs.de = new objElement(FlagPanelManager.deRef[managerEid]);
-    subtitleSystem.flagObjs.nl = new objElement(FlagPanelManager.duRef[managerEid]);
-    subtitleSystem.flagObjs.es = new objElement(FlagPanelManager.esRef[managerEid]);
-    subtitleSystem.flagObjs.it = new objElement(FlagPanelManager.itRef[managerEid]);
-    subtitleSystem.flagObjs.el = new objElement(FlagPanelManager.elRef[managerEid]);
-    subtitleSystem.flagObjs.en = new objElement(FlagPanelManager.enRef[managerEid]);
+    subtitleSystem.flagObjs.german = new objElement(FlagPanelManager.deRef[managerEid]);
+    subtitleSystem.flagObjs.dutch = new objElement(FlagPanelManager.duRef[managerEid]);
+    subtitleSystem.flagObjs.spanish = new objElement(FlagPanelManager.esRef[managerEid]);
+    subtitleSystem.flagObjs.italian = new objElement(FlagPanelManager.itRef[managerEid]);
+    subtitleSystem.flagObjs.greek = new objElement(FlagPanelManager.elRef[managerEid]);
+    subtitleSystem.flagObjs.english = new objElement(FlagPanelManager.enRef[managerEid]);
 
     console.log("registered flagManager with eid", managerEid);
     subtitleSystem.ResetPanel();
@@ -323,3 +316,12 @@ export function FlagPanelSystem(world) {
 }
 
 export const subtitleSystem = new SubtitleSystem();
+
+const languageCodes = {
+  greek: "el",
+  english: "en",
+  spanish: "es",
+  italian: "it",
+  dutch: "du",
+  german: "de"
+};

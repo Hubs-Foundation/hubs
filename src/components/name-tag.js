@@ -197,6 +197,7 @@ AFRAME.registerComponent("name-tag", {
     this.el.sceneEl.removeEventListener("presence_updated", this.onPresenceUpdated);
     window.APP.store.removeEventListener("statechanged", this.onStateChanged);
     this.el.sceneEl.systems["hubs-systems"].nameTagSystem.unregister(this);
+    window.APP.scene.removeEventListener("translation-target-updated", this.onTargetUpdate);
   },
 
   onPresenceUpdated({ detail: presenceMeta }) {
@@ -207,7 +208,7 @@ AFRAME.registerComponent("name-tag", {
 
   updateFromPresenceMeta(presenceMeta) {
     this.displayName = presenceMeta.profile.displayName;
-    this.pronouns = presenceMeta.profile.language;
+    this.pronouns = presenceMeta.profile.language; /*subtitleSystem.targetLanguage;*/
     this.identityName = presenceMeta.profile.identityName;
     this.isRecording = !!(presenceMeta.streaming || presenceMeta.recording);
     this.isOwner = !!(presenceMeta.roles && presenceMeta.roles.owner);

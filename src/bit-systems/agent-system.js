@@ -55,7 +55,7 @@ export default class VirtualAgent {
 
     this.allowed = true;
     this.avatarPovObj = document.querySelector("#avatar-pov-node").object3D;
-    addAgentToScene(APP.world, this.avatarPovObj);
+    addAgentToScene(APP.world);
 
     APP.scene.addEventListener("agent-toggle", () => {
       if (!APP.scene.is("agent")) {
@@ -203,10 +203,10 @@ export default class VirtualAgent {
   }
 
   Reset() {
-    const initialPosition = new THREE.Vector3(0.2, 0, -2);
-    const initialRotation = new THREE.Euler(0, 0, 0, "XYZ");
-    this.agent.obj.position.copy(initialPosition);
-    this.agent.obj.rotation.copy(initialRotation);
+    // const initialPosition = new THREE.Vector3(0.2, 0, -2);
+    // const initialRotation = new THREE.Euler(0, 0, 0, "XYZ");
+    // this.agent.obj.position.copy(initialPosition);
+    // this.agent.obj.rotation.copy(initialRotation);
     this.scene.addState("agent");
     this.agent.obj.visible = true;
     this.updateText("Hello I am your personal Agent");

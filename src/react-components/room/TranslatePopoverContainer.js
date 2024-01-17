@@ -15,7 +15,7 @@ import { MediaDevicesEvents, MediaDevices } from "../../utils/media-devices-util
 import { TranslatePopover } from "./TranslatePopover";
 
 function useTranslate(scene) {
-  const [language, setLanguage] = useState(null);
+  const [language, setLanguage] = useState("");
 
   useEffect(() => {
     const onLanguageUpdate = event => {
@@ -29,46 +29,46 @@ function useTranslate(scene) {
   }, [scene, language]);
 
   const toggleDutch = useCallback(() => {
-    if (language === "du") {
-      scene.emit("language_available", { language: null });
+    if (language === "dutch") {
+      scene.emit("language_available", { language: "" });
     } else {
-      scene.emit("language_available", { language: "nl" });
+      scene.emit("language_available", { language: "dutch" });
     }
   });
   const toggleGerman = useCallback(() => {
-    if (language === "de") {
-      scene.emit("language_available", { language: null });
+    if (language === "german") {
+      scene.emit("language_available", { language: "" });
     } else {
-      scene.emit("language_available", { language: "de" });
+      scene.emit("language_available", { language: "german" });
     }
   });
   const toggleGreek = useCallback(() => {
-    if (language === "el") {
-      scene.emit("language_available", { language: null });
+    if (language === "greek") {
+      scene.emit("language_available", { language: "" });
     } else {
-      scene.emit("language_available", { language: "el" });
+      scene.emit("language_available", { language: "greek" });
     }
   });
   const toggleItalian = useCallback(() => {
-    if (language === "it") {
-      scene.emit("language_available", { language: null });
+    if (language === "italian") {
+      scene.emit("language_available", { language: "" });
     } else {
-      scene.emit("language_available", { language: "it" });
+      scene.emit("language_available", { language: "italian" });
     }
   });
   const toggleSpanish = useCallback(() => {
-    if (language === "es") {
-      scene.emit("language_available", { language: null });
+    if (language === "spanish") {
+      scene.emit("language_available", { language: "" });
     } else {
-      scene.emit("language_available", { language: "es" });
+      scene.emit("language_available", { language: "spanish" });
     }
   });
 
   const toggleEnglish = useCallback(() => {
-    if (language === "en") {
-      scene.emit("language_available", { language: null });
+    if (language === "english") {
+      scene.emit("language_available", { language: "" });
     } else {
-      scene.emit("language_available", { language: "en" });
+      scene.emit("language_available", { language: "english" });
     }
   });
 
@@ -94,7 +94,7 @@ export function TranslatePopoverContainer({ scene }) {
       color: "accent5",
       label: <FormattedMessage id="translate-popover.lang.nl" defaultMessage="Dutch" />,
       onSelect: toggleDutch,
-      active: language === "nl"
+      active: language === "dutch"
     },
     {
       id: "de",
@@ -102,7 +102,7 @@ export function TranslatePopoverContainer({ scene }) {
       color: "accent5",
       label: <FormattedMessage id="translate-popover.lang.de" defaultMessage="German" />,
       onSelect: toggleGerman,
-      active: language === "de"
+      active: language === "german"
     },
     {
       id: "el",
@@ -110,7 +110,7 @@ export function TranslatePopoverContainer({ scene }) {
       color: "accent5",
       label: <FormattedMessage id="translate-popover.lang.gr" defaultMessage="Greek" />,
       onSelect: toggleGreek,
-      active: language === "el"
+      active: language === "greek"
     },
     {
       id: "it",
@@ -118,7 +118,7 @@ export function TranslatePopoverContainer({ scene }) {
       color: "accent5",
       label: <FormattedMessage id="translate-popover.lang.it" defaultMessage="Italian" />,
       onSelect: toggleItalian,
-      active: language === "it"
+      active: language === "italian"
     },
     {
       id: "en",
@@ -126,7 +126,7 @@ export function TranslatePopoverContainer({ scene }) {
       color: "accent5",
       label: <FormattedMessage id="translate-popover.lang.en" defaultMessage="English" />,
       onSelect: toggleEnglish,
-      active: language === "en"
+      active: language === "english"
     },
     {
       id: "es",
@@ -134,7 +134,7 @@ export function TranslatePopoverContainer({ scene }) {
       color: "accent5",
       label: <FormattedMessage id="translate-popover.lang.es" defaultMessage="Spanish" />,
       onSelect: toggleSpanish,
-      active: language === "es"
+      active: language === "spanish"
     }
   ];
 

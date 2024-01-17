@@ -48,13 +48,10 @@ export function AgentEntity() {
   );
 }
 
-export function addAgentToScene(world: HubsWorld, userPOV: Object3D) {
+export function addAgentToScene(world: HubsWorld) {
   const eid = renderAsEntity(world, AgentEntity());
   const obj = world.eid2obj.get(eid)!;
-  // userPOV.add(obj);
   world.scene.add(obj);
-  let a = virtualAgent.avatarDirection;
-  // obj.position.copy(obj.position.clone().add(a.multiplyScalar(2)));
   return eid;
 }
 

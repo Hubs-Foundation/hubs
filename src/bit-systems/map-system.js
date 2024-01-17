@@ -11,27 +11,25 @@ class FloorMapClass {
   constructor() {
     this.obj = null;
     this.eid = null;
+    this.file = null;
+    this.imageRatio = 0.5;
+    this.allowed = false;
   }
 
   Init(hubProperties) {
-    if (!hubProperties.allow_map) {
-      console.error("Cannot read map properties, map is not enabled for this room");
-      this.file = "https://kontopoulosdm.github.io/unavailable_map.png";
-      this.imageRatio = 0.5;
-      this.allowed = false;
-      return;
-    }
-    this.allowed = true;
-    this.userPov = document.querySelector("#avatar-pov-node").object3D;
-    this.userObj = document.querySelector("#avatar-rig").object3D;
+    if (hubProperties.allow_map) {
+      this.allowed = true;
+      this.userPov = document.querySelector("#avatar-pov-node").object3D;
+      this.userObj = document.querySelector("#avatar-rig").object3D;
 
-    const mapProperties = hubProperties.map;
-    this.imageRatio = mapProperties.ratio;
-    this.mapToImage = mapProperties.mapToImage;
-    this.file = mapProperties.file;
-    this.roomLength = mapProperties.roomLength;
-    this.center = mapProperties.center;
-    this.centerOffset = mapProperties.centeroffset;
+      const mapProperties = hubProperties.map;
+      this.imageRatio = mapProperties.ratio;
+      this.mapToImage = mapProperties.mapToImage;
+      this.file = mapProperties.file;
+      this.roomLength = mapProperties.roomLength;
+      this.center = mapProperties.center;
+      this.centerOffset = mapProperties.centeroffset;
+    }
 
     APP.scene.addEventListener("map-toggle", () => {
       if (this.Active()) {
@@ -39,9 +37,8 @@ class FloorMapClass {
         removeEntity(APP.world, this.eid);
         APP.scene.removeState("map");
       } else {
-        const MapPos = new Vector3(0, 0, -1);
         APP.scene.addState("map");
-        this.imageSize = addFloorMap(APP.world, MapPos, this.imageRatio, this.file);
+        this.imageSize = addFloorMap(APP.world, this.imageRatio, this.file);
         console.log(this.imageSize);
       }
     });

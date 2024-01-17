@@ -1,8 +1,7 @@
 /** @jsx createElementEntity */
 import { COLLISION_LAYERS } from "../constants";
 import { createElementEntity, renderAsEntity, Ref, createRef, EntityDef } from "../utils/jsx-entity";
-// import nametagSrc from "../assets/images/floorPlan_prototype.png";
-import nametagSrc from "../assets/images/lobby_map.png";
+import unavailableMapSrc from "../assets/images/unavailable_map.png";
 import spotSrc from "../assets/images/pointer.png";
 import { textureLoader } from "../utils/media-utils";
 import { HubsWorld } from "../app";
@@ -17,10 +16,10 @@ interface FloorMapPanelParamaters {
   pointRef: Ref;
 }
 
-export function FloorMapPanel(position: Vector3, ratio: number, imageSrc: string) {
+export function FloorMapPanel(ratio: number, imageSrc: string) {
   const panelRef = createRef();
   const pointRef = createRef();
-  const panelTexture = textureLoader.load(imageSrc);
+  const panelTexture = !!imageSrc ? textureLoader.load(imageSrc) : textureLoader.load(unavailableMapSrc);
   return (
     <entity
       name={"floor-map"}
@@ -61,8 +60,8 @@ export function FloorMapPanel(position: Vector3, ratio: number, imageSrc: string
   );
 }
 
-export function addFloorMap(world: HubsWorld, position: Vector3, ratio: number, image: string): Vector3 {
-  const eid = renderAsEntity(world, FloorMapPanel(position, ratio, image));
+export function addFloorMap(world: HubsWorld, ratio: number, image: string): Vector3 {
+  const eid = renderAsEntity(world, FloorMapPanel(ratio, image));
   const obj = world.eid2obj.get(eid)!;
   var boundingBox = new THREE.Box3();
   boundingBox.setFromObject(obj);

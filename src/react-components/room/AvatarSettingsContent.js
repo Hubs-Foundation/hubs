@@ -50,14 +50,14 @@ export function AvatarSettingsContent({
         onChange={onChangePronouns}
         ref={pronounsInputRef}
       />
-      <TextInputField
+      {/* <TextInputField
         label={<FormattedMessage id="avatar-settings-content.language-label" defaultMessage="Language" />}
         value={language}
         pattern={languagePattern}
         spellCheck="false"
         onChange={onChangeLanguage}
         ref={languageInputRef}
-      />
+      /> */}
       <div className={styles.avatarPreviewContainer}>
         {avatarPreview || <div />}
         <Button type="button" preset="basic" onClick={onChangeAvatar}>
