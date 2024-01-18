@@ -148,6 +148,9 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
     hubName: hub.name,
     showLineBreak: true
   });
+
+  APP.entryManager.setupVRConferece();
+  console.log("Reseting vr conference parameters");
 }
 window.changeHub = changeHub;
 
