@@ -14,9 +14,20 @@ import {
   Rigidbody,
   Deleting,
   Deletable,
-  MediaLoader
+  MediaLoader,
+  ObjectDropped,
+  FloatyObject,
+  Owned,
+  MediaVideo,
+  MediaImage,
+  MediaPDF
 } from "../bit-components";
-import { anyEntityWith, findAncestorWithComponent, findAncestorWithComponents } from "../utils/bit-utils";
+import {
+  anyEntityWith,
+  findAncestorWithComponent,
+  findAncestorWithComponents,
+  hasAnyComponent
+} from "../utils/bit-utils";
 import { createNetworkedEntity } from "../utils/create-networked-entity";
 import HubChannel from "../utils/hub-channel";
 import type { EntityID } from "../utils/networking-types";
@@ -28,7 +39,8 @@ import { TRANSFORM_MODE } from "../components/transform-object-button";
 import { ScalingHandler } from "../components/scale-button";
 import { canPin, setPinned } from "../utils/bit-pinning-helper";
 import { ObjectMenuTransformFlags } from "../inflators/object-menu-transform";
-
+import { COLLISION_LAYERS } from "../constants";
+import { FLOATY_OBJECT_FLAGS } from "../systems/floaty-object-system";
 // Working variables.
 const _vec3_1 = new Vector3();
 const _vec3_2 = new Vector3();
@@ -178,7 +190,7 @@ function handleClicks(world: HubsWorld, menu: EntityID, hubChannel: HubChannel) 
     ObjectMenu.flags[menu] &= ~ObjectMenuFlags.Visible;
     deleteTheDeletableAncestor(world, ObjectMenu.targetRef[menu]);
   } else if (clicked(world, ObjectMenu.dropButtonRef[menu])) {
-    console.log("Clicked drop");
+    addComponent(world, ObjectDropped, ObjectMenu.targetRef[menu]);
   } else if (clicked(world, ObjectMenu.inspectButtonRef[menu])) {
     console.log("Clicked inspect");
   } else if (clicked(world, ObjectMenu.deserializeDrawingButtonRef[menu])) {
@@ -247,6 +259,8 @@ function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
   const canISpawnMove = APP.hubChannel.can("spawn_and_move_media");
   const canIPin = !!(target && canPin(APP.hubChannel, target));
   const isEntityPinned = isPinned(target);
+  const media = MediaLoader.mediaRef[target];
+  const isVideoImagePdf = hasAnyComponent(world, [MediaVideo, MediaImage, MediaPDF], media);
 
   // Parent visibility doesn't block raycasting, so we must set each button to be invisible
   // TODO: Ensure that children of invisible entities aren't raycastable
@@ -259,6 +273,8 @@ function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
   world.eid2obj.get(ObjectMenu.scaleButtonRef[menu])!.visible =
     visible && (!isEntityPinned || canIPin) && canISpawnMove;
   world.eid2obj.get(ObjectMenu.openLinkButtonRef[menu])!.visible = visible;
+  world.eid2obj.get(ObjectMenu.dropButtonRef[menu])!.visible =
+    !isVideoImagePdf && !isEntityPinned && !hasComponent(world, ObjectDropped, target);
 
   // This is a hacky way of giving a chance to the object-menu-transform system to center the menu based on the
   // visible buttons without accounting for the background plane.
@@ -272,7 +288,6 @@ function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
   world.eid2obj.get(ObjectMenu.deserializeDrawingButtonRef[menu])!.visible = false;
   world.eid2obj.get(ObjectMenu.mirrorButtonRef[menu])!.visible = false;
   world.eid2obj.get(ObjectMenu.inspectButtonRef[menu])!.visible = false;
-  world.eid2obj.get(ObjectMenu.dropButtonRef[menu])!.visible = false;
   world.eid2obj.get(ObjectMenu.refreshButtonRef[menu])!.visible = false;
 }
 
@@ -280,6 +295,8 @@ const hoveredQuery = defineQuery([HoveredRemoteRight]);
 const heldQuery = defineQuery([HeldRemoteRight]);
 const heldEnterQuery = enterQuery(heldQuery);
 const heldExitQuery = exitQuery(heldQuery);
+const objectDroppedQuery = defineQuery([ObjectDropped]);
+const objectDroppedEnterQuery = enterQuery(objectDroppedQuery);
 export function objectMenuSystem(world: HubsWorld, sceneIsFrozen: boolean, hubChannel: HubChannel) {
   const menu = anyEntityWith(world, ObjectMenu)!;
 
@@ -301,5 +318,25 @@ export function objectMenuSystem(world: HubsWorld, sceneIsFrozen: boolean, hubCh
       scalingHandler.tick();
     }
   }
+
+  objectDroppedEnterQuery(world).forEach(eid => {
+    takeOwnership(world, eid);
+    if (!hasComponent(world, Owned, eid)) return;
+
+    const physicsSystem = APP.scene?.systems["hubs-systems"].physicsSystem;
+    FloatyObject.flags[eid] &= ~FLOATY_OBJECT_FLAGS.MODIFY_GRAVITY_ON_RELEASE;
+    physicsSystem.updateRigidBody(eid, {
+      type: "dynamic",
+      gravity: { x: 0, y: -9.8, z: 0 },
+      angularDamping: 0.01,
+      linearDamping: 0.01,
+      linearSleepingThreshold: 1.6,
+      angularSleepingThreshold: 2.5,
+      collisionFilterMask: COLLISION_LAYERS.DEFAULT_INTERACTABLE
+    });
+
+    physicsSystem.activateBody(Rigidbody.bodyId[eid]);
+  });
+
   updateVisibility(world, menu, sceneIsFrozen);
 }

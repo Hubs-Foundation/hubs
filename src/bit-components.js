@@ -296,6 +296,7 @@ export const ObjectMenu = defineComponent({
   handlingTargetRef: Types.eid,
   flags: Types.ui8
 });
+export const ObjectDropped = defineComponent();
 // TODO: Store this data elsewhere, since only one or two will ever exist.
 export const LinkHoverMenu = defineComponent({
   targetObjectRef: Types.eid,
