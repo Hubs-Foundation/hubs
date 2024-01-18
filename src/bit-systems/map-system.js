@@ -14,9 +14,27 @@ class FloorMapClass {
     this.file = null;
     this.imageRatio = 0.5;
     this.allowed = false;
+    this.initialized = false;
   }
 
   Init(hubProperties) {
+    const onMapToggle = () => {
+      if (this.Active()) {
+        APP.scene.remove(this.obj);
+        removeEntity(APP.world, this.eid);
+        APP.scene.removeState("map");
+      } else {
+        APP.scene.addState("map");
+        this.imageSize = addFloorMap(APP.world, this.imageRatio, this.file);
+        console.log(this.imageSize);
+      }
+    };
+
+    if (this.initialized) {
+      APP.scene.removeEventListener("map-toggle", onMapToggle());
+      this.initialized = false;
+      if (this.Active()) onMapToggle();
+    }
     if (hubProperties.allow_map) {
       this.allowed = true;
       this.userPov = document.querySelector("#avatar-pov-node").object3D;
@@ -29,19 +47,10 @@ class FloorMapClass {
       this.roomLength = mapProperties.roomLength;
       this.center = mapProperties.center;
       this.centerOffset = mapProperties.centeroffset;
+      this.initialized = true;
     }
 
-    APP.scene.addEventListener("map-toggle", () => {
-      if (this.Active()) {
-        APP.scene.remove(this.obj);
-        removeEntity(APP.world, this.eid);
-        APP.scene.removeState("map");
-      } else {
-        APP.scene.addState("map");
-        this.imageSize = addFloorMap(APP.world, this.imageRatio, this.file);
-        console.log(this.imageSize);
-      }
-    });
+    APP.scene.addEventListener("map-toggle", onMapToggle());
   }
 
   Active() {

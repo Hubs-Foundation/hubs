@@ -45,30 +45,12 @@ export class objElement {
 }
 
 export default class VirtualAgent {
-  constructor() {}
+  constructor() {
+    this.initialized = false;
+  }
 
   Init(hubProperties) {
-    if (!hubProperties.allow_agent) {
-      this.allowed = false;
-      return;
-    }
-
-    this.allowed = true;
-    this.avatarPovObj = document.querySelector("#avatar-pov-node").object3D;
-    addAgentToScene(APP.world);
-
-    APP.scene.addEventListener("agent-toggle", () => {
-      if (!APP.scene.is("agent")) {
-        if (APP.scene.is("map")) APP.scene.emit("map-toggle");
-        this.Reset();
-      } else {
-        APP.scene.removeState("agent");
-        this.agent.obj.visible = false;
-      }
-      this.active = APP.scene.is("agent");
-    });
-
-    APP.scene.addEventListener("lang-toggle", () => {
+    const langToggle = () => {
       if (!APP.scene.is("lang-panel")) {
         this.LangPanelEid = addLangPanelToScene(APP.world);
         APP.scene.addState("lang-panel");
@@ -80,7 +62,37 @@ export default class VirtualAgent {
         APP.scene.removeState("lang-panel");
       }
       this.active = APP.scene.is("lang-panel");
-    });
+    };
+    const agentToggle = () => {
+      if (!APP.scene.is("agent")) {
+        if (APP.scene.is("map")) APP.scene.emit("map-toggle");
+        this.Reset();
+      } else {
+        APP.scene.removeState("agent");
+        this.agent.obj.visible = false;
+      }
+      this.active = APP.scene.is("agent");
+    };
+
+    if (this.initialized) {
+      APP.scene.removeEventListener("agent-toggle", agentToggle());
+      APP.scene.removeEventListener("lang-toggle", langToggle());
+      if (this.active) agentToggle();
+    }
+
+    if (!hubProperties.allow_agent) {
+      this.allowed = false;
+      return;
+    }
+
+    this.allowed = true;
+    this.avatarPovObj = document.querySelector("#avatar-pov-node").object3D;
+    addAgentToScene(APP.world);
+
+    APP.scene.addEventListener("agent-toggle", agentToggle());
+    APP.scene.addEventListener("lang-toggle", langToggle());
+
+    this.initialized = true;
   }
 
   Enter(agentEid, showPivots) {
