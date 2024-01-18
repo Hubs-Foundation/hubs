@@ -5,8 +5,8 @@ export enum COMPONENT_ENDPOINTS {
   TRANSLATE_AUDIO_FILES = "https://dev.speech-voxreality.maggioli-research.gr/translate_audio_files",
   LXMERT = "https://dev.voxreality.maggioli-research.gr/lxmert/",
   GPT = "https://dev.gpt-voxreality.maggioli-research.gr/cap_gpt2/",
-  INTENTION = "https://192.168.169.219:443/intent_dest/",
-  TASK_RESPONSE = "https://192.168.169.219:443/response/"
+  INTENTION = "https://dev.conference-agent-voxreality.lab.synelixis.com/intent_dest/",
+  TASK_RESPONSE = "https://dev.conference-agent-voxreality.lab.synelixis.com/response/"
 }
 
 export enum RECORDER_CODES {
