@@ -31,6 +31,7 @@ export function AgentEntity() {
       agent={{ panelRef, textRef, micRef, snapRef, nextRef, prevRef }}
       ref={agentRef}
       model={{ model: cloneModelFromCache(agentModelSrc).scene }}
+      visible={false}
       cursorRaycastable
       remoteHoverTarget
       handCollisionTarget
@@ -50,13 +51,6 @@ export function AgentEntity() {
 
 export function addAgentToScene(world: HubsWorld) {
   const eid = renderAsEntity(world, AgentEntity());
-  const obj = world.eid2obj.get(eid)!;
-  world.scene.add(obj);
-  return eid;
-}
-
-export function addLangPanelToScene(world: HubsWorld) {
-  const eid = renderAsEntity(world, HUDLangPanel());
   const obj = world.eid2obj.get(eid)!;
   world.scene.add(obj);
   return eid;

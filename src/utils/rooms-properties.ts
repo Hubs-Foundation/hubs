@@ -3,7 +3,7 @@ import { string } from "prop-types";
 const propertiesURL = "https://kontopoulosdm.github.io/properties.json";
 const unkonwnRoom = {
   room: "unknown",
-  id: "uknown",
+  id: ["uknown"],
   allow_map: false,
   allow_agent: false,
   allow_navigation: false
@@ -25,7 +25,7 @@ interface MapProperties {
 
 interface JSONHubProperties {
   room: string;
-  id: string;
+  id: Array<string>;
   allow_map: boolean;
   allow_agent: boolean;
   allow_navigation: boolean;
@@ -40,7 +40,9 @@ export async function GetHubProperties(HubID: string): Promise<JSONHubProperties
     const roomArray = (await response.json()) as JSONHubProperties[];
 
     for (let i = 0; i < roomArray.length; i++) {
-      if (roomArray[i].id === HubID) return roomArray[i];
+      for (let j = 0; j < roomArray[i].id.length; j++) {
+        if (roomArray[i].id[j] === HubID) return roomArray[i];
+      }
     }
     return unkonwnRoom;
   } catch (error) {

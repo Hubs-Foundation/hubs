@@ -5,19 +5,142 @@ import { audioModules } from "../utils/asr-adapter";
 import { COMPONENT_ENDPOINTS } from "../utils/component-types";
 import { UpdateTextSystem } from "./agent-slideshow-system";
 import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
-import { objElement, virtualAgent } from "./agent-system";
+import { virtualAgent } from "./agent-system";
 import { loadTexture } from "../utils/load-texture";
 import { textureLoader } from "../utils/media-utils";
-import { selectMaterial, normalMaterial } from "../prefabs/hud-lang-panel";
+import { selectMaterial, normalMaterial, HUDLangPanel } from "../prefabs/hud-lang-panel";
+import { renderAsEntity } from "../utils/jsx-entity";
+
+const panelManagerQuery = defineQuery([FlagPanelManager]);
+const enterpanelManagerQuery = enterQuery(panelManagerQuery);
+const exitpanelManagerQuery = exitQuery(panelManagerQuery);
+
+const languageCodes = {
+  greek: "el",
+  english: "en",
+  spanish: "es",
+  italian: "it",
+  dutch: "du",
+  german: "de"
+};
+
+class objElement {
+  constructor() {
+    this.eid = null;
+    this.obj = null;
+  }
+  update(eid) {
+    this.eid = eid;
+    this.obj = APP.world.eid2obj.get(eid);
+  }
+}
+
+export class LanguagePanel {
+  constructor() {
+    this.initialized = false;
+    this.panel = new objElement();
+    this.flagButtons = {
+      italian: new objElement(),
+      spanish: new objElement(),
+      dutch: new objElement(),
+      german: new objElement(),
+      greek: new objElement(),
+      english: new objElement()
+    };
+    this.Setup = this.Setup.bind(this);
+    this.Remove = this.Remove.bind(this);
+  }
+
+  Init() {
+    const langToggle = () => {
+      if (!APP.scene.is("panel")) {
+        this.Instantiate();
+      } else {
+        this.Remove();
+      }
+    };
+
+    if (this.initialized) {
+      APP.scene.removeEventListener("lang-toggle", langToggle);
+      this.initialized = false;
+    }
+
+    APP.scene.addEventListener("lang-toggle", langToggle);
+  }
+
+  Instantiate() {
+    const eid = renderAsEntity(APP.world, HUDLangPanel());
+    const obj = APP.world.eid2obj.get(eid);
+    APP.world.scene.add(obj);
+    APP.scene.addState("panel");
+  }
+
+  Remove() {
+    console.log(this.panel.obj.parent);
+    APP.scene.remove(this.panel.obj.parent);
+    Object.values(this.flagButtons).forEach(button => {
+      APP.scene.remove(button);
+    });
+
+    removeEntity(APP.world, this.panel.eid);
+
+    APP.scene.removeState("panel");
+  }
+
+  Setup(panelEid) {
+    this.panel.update(panelEid);
+    const refs = {
+      german: FlagPanelManager.deRef[panelEid],
+      dutch: FlagPanelManager.duRef[panelEid],
+      spanish: FlagPanelManager.esRef[panelEid],
+      italian: FlagPanelManager.itRef[panelEid],
+      greek: FlagPanelManager.elRef[panelEid],
+      english: FlagPanelManager.enRef[panelEid]
+    };
+
+    Object.keys(refs).forEach(key => {
+      this.flagButtons[key].update(refs[key]);
+    });
+
+    this.Update();
+  }
+
+  Update() {
+    try {
+      Object.keys(this.flagButtons).forEach(key => {
+        this.flagButtons[key].obj.material = normalMaterial.clone();
+      });
+      if (subtitleSystem.targetLanguage) {
+        this.flagObjs[this.targetLanguage].obj.material = selectMaterial.clone();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  Cleanup(eid) {
+    if (this.panel.eid === eid) this.panel.update(null);
+    Object.keys(this.flagButtons).forEach(key => {
+      this.flagButtons[key].update(null);
+    });
+  }
+
+  Interactions(world) {
+    Object.keys(this.flagButtons).forEach(key => {
+      if (hasComponent(world, Interacted, this.flagButtons[key].eid)) {
+        if (subtitleSystem.targetLanguage === key) subtitleSystem.updateLanguage("");
+        else subtitleSystem.updateLanguage(key);
+      }
+    });
+  }
+}
 
 export class SubtitleSystem {
   constructor() {
-    this.mylanguage;
     this.target;
     this.VRmode;
     this.targetLanguage;
     this.scene;
-    this.initialized;
     this.audioContext;
     this.analyser;
     this.minSilenceDuration;
@@ -25,38 +148,19 @@ export class SubtitleSystem {
     this.dataArray;
     this.mediaRecorder;
     this.animationFrameID;
-    this.FlagManagerID;
     this.onLanguageAvailable = this.onLanguageAvailable.bind(this);
-    this.flagObjs = { italian: null, spanish: null, dutch: null, german: null, greek: null, english: null };
   }
 
   Init() {
-    console.log("TEST THIS IS A CSP RULE CLIENT");
     this.targetLanguage = null;
     this.updateLanguage(window.APP.store.state.profile.language);
     this.sourceLanguage = null;
     this.target = null;
     this.scene = APP.scene;
     this.VRmode = this.scene.is("vr-mode");
-    this.initialized = true;
     this.cleanup = false;
     this.counter = 0;
     this.scene.addEventListener("language_available", this.onLanguageAvailable);
-  }
-
-  ResetPanel() {
-    if (!this.FlagManagerID) return;
-
-    try {
-      Object.keys(this.flagObjs).forEach(key => {
-        this.flagObjs[key].obj.material = normalMaterial.clone();
-      });
-      if (this.targetLanguage) {
-        this.flagObjs[this.targetLanguage].obj.material = selectMaterial.clone();
-      }
-    } catch (e) {
-      console.error(e);
-    }
   }
 
   onLanguageAvailable(event) {
@@ -65,14 +169,12 @@ export class SubtitleSystem {
 
   updateLanguage(lang) {
     this.targetLanguage = lang;
-    this.ResetPanel();
+    // languagePanel.Update();
     if (!!this.targetLanguage) {
       window.APP.store.update({ profile: { language: this.targetLanguage } });
     } else {
       window.APP.store.update({ profile: { language: "" } });
     }
-
-    // console.log(window.APP.store.state.profile);
     APP.scene.emit("language_updated", { language: this.targetLanguage });
   }
 
@@ -82,7 +184,6 @@ export class SubtitleSystem {
   }
 
   SelectTarget(_target) {
-    //TODO:: Fix error when leaving unexpectidly
     if (this.hasTarget()) this.StopTranslating();
     if (this.target === _target) this.target = null;
     else this.target = _target;
@@ -259,70 +360,19 @@ export class SubtitleSystem {
     window.APP.store.update({ profile: { language: _language } });
     console.log(window.APP.store);
   }
-
-  checkPanel(world) {
-    if (hasComponent(world, Interacted, this.flagObjs.german.eid)) {
-      if (this.targetLanguage === "german") this.updateLanguage("");
-      else this.updateLanguage("german");
-    }
-    if (hasComponent(world, Interacted, this.flagObjs.dutch.eid)) {
-      if (this.targetLanguage === "dutch") this.updateLanguage("");
-      else this.updateLanguage("dutch");
-    }
-    if (hasComponent(world, Interacted, this.flagObjs.italian.eid)) {
-      if (this.targetLanguage === "italian") this.updateLanguage("");
-      else this.updateLanguage("italian");
-    }
-    if (hasComponent(world, Interacted, this.flagObjs.spanish.eid)) {
-      if (this.targetLanguage === "spanish") this.updateLanguage("");
-      else this.updateLanguage("spanish");
-    }
-    if (hasComponent(world, Interacted, this.flagObjs.greek.eid)) {
-      if (this.targetLanguage === "greek") this.updateLanguage("");
-      else this.updateLanguage("greek");
-    }
-    if (hasComponent(world, Interacted, this.flagObjs.english.eid)) {
-      if (this.targetLanguage === "english") this.updateLanguage("");
-      else this.updateLanguage("english");
-    }
-  }
 }
 
-const panelManagerQuery = defineQuery([FlagPanelManager]);
-const enterpanelManagerQuery = enterQuery(panelManagerQuery);
-const exitpanelManagerQuery = exitQuery(panelManagerQuery);
-
 export function FlagPanelSystem(world) {
-  enterpanelManagerQuery(world).forEach(managerEid => {
-    subtitleSystem.FlagManagerID = managerEid;
-    subtitleSystem.flagObjs.german = new objElement(FlagPanelManager.deRef[managerEid]);
-    subtitleSystem.flagObjs.dutch = new objElement(FlagPanelManager.duRef[managerEid]);
-    subtitleSystem.flagObjs.spanish = new objElement(FlagPanelManager.esRef[managerEid]);
-    subtitleSystem.flagObjs.italian = new objElement(FlagPanelManager.itRef[managerEid]);
-    subtitleSystem.flagObjs.greek = new objElement(FlagPanelManager.elRef[managerEid]);
-    subtitleSystem.flagObjs.english = new objElement(FlagPanelManager.enRef[managerEid]);
-
-    subtitleSystem.ResetPanel();
+  enterpanelManagerQuery(world).forEach(panelEid => {
+    languagePanel.Setup(panelEid);
   });
-  panelManagerQuery(world).forEach(eid => {
-    subtitleSystem.checkPanel(world);
+  exitpanelManagerQuery(world).forEach(panelEid => {
+    languagePanel.Cleanup(panelEid);
   });
-  exitpanelManagerQuery(world).forEach(managerEid => {
-    if (subtitleSystem.FlagManagerID === managerEid) subtitleSystem.FlagManagerID = null;
-
-    Object.keys(subtitleSystem.flagObjs).forEach(key => {
-      subtitleSystem.flagObjs[key] = null;
-    });
+  panelManagerQuery(world).forEach(panelEid => {
+    languagePanel.Interactions(world);
   });
 }
 
 export const subtitleSystem = new SubtitleSystem();
-
-const languageCodes = {
-  greek: "el",
-  english: "en",
-  spanish: "es",
-  italian: "it",
-  dutch: "du",
-  german: "de"
-};
+export const languagePanel = new LanguagePanel();

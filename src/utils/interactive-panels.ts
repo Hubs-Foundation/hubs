@@ -22,7 +22,7 @@ function UpdateTextPanel(
     let [x, y] = updateTextSize(textObj, panelEid);
     if (changePos) {
       const panelObj = APP.world.eid2obj.get(panelEid);
-      console.log("panelObj:", panelObj, "position:", panelObj?.position);
+
       const newPos = new Vector3(-x / 2 - 0.3, 0, 0);
       panelObj?.position.copy(newPos);
       panelObj?.updateMatrix();

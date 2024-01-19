@@ -30,12 +30,10 @@ function addObjectToSystem(eid) {
 
 export function followFovSystem(dt) {
   enterFollowFovQuery(APP.world).forEach(enteredEid => {
-    console.log("One map has entered");
     addObjectToSystem(enteredEid);
   });
 
   exitFollowFovQuery(APP.world).forEach(exitedEid => {
-    console.log("One map has exited");
     delete objectStates[exitedEid];
   });
 

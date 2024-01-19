@@ -5,7 +5,7 @@ import { PermissionStatus } from "../utils/media-devices-utils";
 import { stageUpdate } from "../systems/single-action-button-system";
 import { audioModules, intentionModule, knowledgeModule, toggleRecording, vlModule } from "../utils/asr-adapter";
 import { COMPONENT_ENDPOINTS, COMPONENT_CODES } from "../utils/component-types";
-import { addAgentToScene, addLangPanelToScene } from "../prefabs/agent";
+import { AgentEntity, addAgentToScene, addLangPanelToScene } from "../prefabs/agent";
 import { SnapDepthPOV, SnapPOV } from "../utils/vlm-adapters";
 import { sceneGraph } from "./routing-system";
 import { renderAsEntity } from "../utils/jsx-entity";
@@ -28,17 +28,21 @@ export function getRandomInt(max) {
 
 export function AgentSystem() {
   enterAgentQuery(APP.world).forEach(eid => {
-    virtualAgent.Enter(eid, false);
+    virtualAgent.Setup(eid);
   });
-
-  if (!virtualAgent.active) return;
-
-  virtualAgent.ButtonInteractions();
-  virtualAgent.agent.obj.updateMatrix();
+  agentQuery(APP.world).forEach(_ => {
+    virtualAgent.ButtonInteractions();
+    virtualAgent.agent.obj.updateMatrix();
+  });
 }
 
-export class objElement {
-  constructor(eid) {
+class objElement {
+  constructor() {
+    this.eid = null;
+    this.obj = null;
+  }
+
+  update(eid) {
     this.eid = eid;
     this.obj = APP.world.eid2obj.get(eid);
   }
@@ -47,85 +51,84 @@ export class objElement {
 export default class VirtualAgent {
   constructor() {
     this.initialized = false;
+    this.allowed = null;
+    this.agent = new objElement();
+    this.nextArrow = new objElement();
+    this.prevArrow = new objElement();
+    this.micButton = new objElement();
+    this.snapButton = new objElement();
+    this.panel = new objElement();
+    this.text = new objElement();
   }
 
   Init(hubProperties) {
-    const langToggle = () => {
-      if (!APP.scene.is("lang-panel")) {
-        this.LangPanelEid = addLangPanelToScene(APP.world);
-        APP.scene.addState("lang-panel");
-      } else {
-        if (this.LangPanelEid) {
-          APP.scene.remove(APP.world.eid2obj.get(this.LangPanelEid));
-          removeEntity(APP.world, this.LangPanelEid);
-        }
-        APP.scene.removeState("lang-panel");
-      }
-      this.active = APP.scene.is("lang-panel");
-    };
     const agentToggle = () => {
       if (!APP.scene.is("agent")) {
-        if (APP.scene.is("map")) APP.scene.emit("map-toggle");
-        this.Reset();
+        this.Instantiate();
       } else {
-        APP.scene.removeState("agent");
-        this.agent.obj.visible = false;
+        this.Remove();
       }
-      this.active = APP.scene.is("agent");
     };
 
     if (this.initialized) {
-      APP.scene.removeEventListener("agent-toggle", agentToggle());
-      APP.scene.removeEventListener("lang-toggle", langToggle());
-      if (this.active) agentToggle();
+      APP.scene.removeEventListener("agent-toggle", agentToggle);
+      this.initialized = false;
     }
 
     if (!hubProperties.allow_agent) {
       this.allowed = false;
+      console.warn("Virtual Agent is not enabled in this room");
       return;
     }
 
     this.allowed = true;
     this.avatarPovObj = document.querySelector("#avatar-pov-node").object3D;
-    addAgentToScene(APP.world);
-
-    APP.scene.addEventListener("agent-toggle", agentToggle());
-    APP.scene.addEventListener("lang-toggle", langToggle());
-
+    APP.scene.addEventListener("agent-toggle", agentToggle);
+    APP.scene.emit("agent-toggle");
     this.initialized = true;
   }
 
-  Enter(agentEid, showPivots) {
-    this.agent = new objElement(agentEid);
-    this.nextArrow = new objElement(Agent.nextRef[agentEid]);
-    this.prevArrow = new objElement(Agent.prevRef[agentEid]);
-    this.micButton = new objElement(Agent.micRef[agentEid]);
-    this.snapButton = new objElement(Agent.snapRef[agentEid]);
-    this.panel = new objElement(Agent.panelRef[agentEid]);
-    this.text = new objElement(Agent.textRef[agentEid]);
+  Remove() {
+    APP.dialog.off("mic-state-changed", this.setMicStatus);
+    APP.scene.remove(this.agent.obj);
+    removeEntity(APP.world, this.agent.eid);
+    APP.scene.removeState("agent");
+  }
 
+  Instantiate() {
+    APP.scene.addState("agent");
+    const eid = renderAsEntity(APP.world, AgentEntity());
+    const obj = APP.world.eid2obj.get(eid);
+    APP.world.scene.add(obj);
+  }
+
+  Setup(agentEid) {
+    this.agent.update(agentEid);
+    this.nextArrow.update(Agent.nextRef[agentEid]);
+    this.prevArrow.update(Agent.prevRef[agentEid]);
+    this.micButton.update(Agent.micRef[agentEid]);
+    this.snapButton.update(Agent.snapRef[agentEid]);
+    this.panel.update(Agent.panelRef[agentEid]);
+    this.text.update(Agent.textRef[agentEid]);
+
+    //Do not delete this, these are for VLM. Try to not use them, but practice TODO: Migrate
     this.scene = AFRAME.scenes[0];
     this.camera = this.scene.camera;
     this.renderer = this.scene.renderer;
-    this.updateText = text => {
-      UpdateTextPanel(text, this.text.obj, this.panel.eid, false, true);
-    };
+    //-----------------------------------------
 
-    APP.dialog.on("mic-state-changed", () => this.setMicStatus());
+    this.UpdateText("Hello I am your personal Agent");
+    APP.dialog.on("mic-state-changed", this.setMicStatus);
     this.setMicStatus();
-    APP.scene.emit("agent-toggle");
+    this.agent.obj.visible = true;
+  }
 
-    if (showPivots) {
-      const pointEid = renderAsEntity(APP.world, pivotPoint(sceneGraph.nodes));
-      const pivotObjs = APP.world.eid2obj.get(pointEid);
-      this.scene.object3D.add(pivotObjs);
-      sceneGraph.nodes.forEach(node => {
-        if (node.x === 2 && node.z > 29) console.log(node);
-      });
-    }
+  get exists() {
+    return !!this.agent.eid;
+  }
 
-    if (this.agent) return true;
-    else return false;
+  UpdateText(text) {
+    UpdateTextPanel(text, this.text.obj, this.panel.eid, false, true);
   }
 
   setMicStatus() {
@@ -182,13 +185,13 @@ export default class VirtualAgent {
       if (!skipModule) knowledge = await knowledgeModule(userQuery, userIntent, navigation.knowledge);
       if (!!this.cube) {
         removeEntity(APP.world, this.cube);
-        this.scene.object3D.remove(this.arrowObjs);
+        APP.scene.object3D.remove(this.arrowObjs);
         this.cube = null;
         knowledge = { data: { response: "Instructions cleared. How else could I help you?" } };
       } else {
         this.cube = renderAsEntity(APP.world, NavigationLine(navigation));
         this.arrowObjs = APP.world.eid2obj.get(this.cube);
-        this.scene.object3D.add(this.arrowObjs);
+        APP.scene.object3D.add(this.arrowObjs);
         knowledge = { data: { response: "This is a demo showing you instructions to go to the conference room" } };
       }
       this.updateText(knowledge.data.response);
@@ -212,17 +215,6 @@ export default class VirtualAgent {
   HandleArrows(renderArrows) {
     this.nextArrow.obj.visible = renderArrows;
     this.prevArrow.obj.visible = renderArrows;
-  }
-
-  Reset() {
-    // const initialPosition = new THREE.Vector3(0.2, 0, -2);
-    // const initialRotation = new THREE.Euler(0, 0, 0, "XYZ");
-    // this.agent.obj.position.copy(initialPosition);
-    // this.agent.obj.rotation.copy(initialRotation);
-    this.scene.addState("agent");
-    this.agent.obj.visible = true;
-    this.updateText("Hello I am your personal Agent");
-    this.agent.obj.updateMatrixWorld();
   }
 
   get avatarDirection() {
