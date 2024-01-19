@@ -322,7 +322,7 @@ export const EntityNodes = definitionListToMap([
   }),
   makeFlowNodeDefinition({
     typeName: "hubs/misc/changehub",
-    category: "Components" as any,
+    category: "Misc" as any,
     label: "Change Hub",
     in: {
       flow: "flow",
