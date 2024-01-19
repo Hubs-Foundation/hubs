@@ -20,7 +20,8 @@ import {
   Owned,
   MediaVideo,
   MediaImage,
-  MediaPDF
+  MediaPDF,
+  MediaMirrored
 } from "../bit-components";
 import {
   anyEntityWith,
@@ -202,7 +203,7 @@ function handleClicks(world: HubsWorld, menu: EntityID, hubChannel: HubChannel) 
   } else if (clicked(world, ObjectMenu.cloneButtonRef[menu])) {
     cloneObject(world, ObjectMenu.targetRef[menu]);
   } else if (clicked(world, ObjectMenu.mirrorButtonRef[menu])) {
-    console.log("Clicked mirror");
+    addComponent(world, MediaMirrored, ObjectMenu.targetRef[menu]);
   }
 }
 
@@ -261,6 +262,7 @@ function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
   const isEntityPinned = isPinned(target);
   const media = MediaLoader.mediaRef[target];
   const isVideoImagePdf = hasAnyComponent(world, [MediaVideo, MediaImage, MediaPDF], media);
+  const isMirrored = hasComponent(world, MediaMirrored, target);
 
   // Parent visibility doesn't block raycasting, so we must set each button to be invisible
   // TODO: Ensure that children of invisible entities aren't raycastable
@@ -275,6 +277,7 @@ function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
   world.eid2obj.get(ObjectMenu.openLinkButtonRef[menu])!.visible = visible;
   world.eid2obj.get(ObjectMenu.dropButtonRef[menu])!.visible =
     !isVideoImagePdf && !isEntityPinned && !hasComponent(world, ObjectDropped, target);
+  world.eid2obj.get(ObjectMenu.mirrorButtonRef[menu])!.visible = isVideoImagePdf && !isMirrored;
 
   // This is a hacky way of giving a chance to the object-menu-transform system to center the menu based on the
   // visible buttons without accounting for the background plane.
@@ -286,7 +289,6 @@ function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
   world.eid2obj.get(ObjectMenu.cameraFocusButtonRef[menu])!.visible = false;
   world.eid2obj.get(ObjectMenu.cameraTrackButtonRef[menu])!.visible = false;
   world.eid2obj.get(ObjectMenu.deserializeDrawingButtonRef[menu])!.visible = false;
-  world.eid2obj.get(ObjectMenu.mirrorButtonRef[menu])!.visible = false;
   world.eid2obj.get(ObjectMenu.inspectButtonRef[menu])!.visible = false;
   world.eid2obj.get(ObjectMenu.refreshButtonRef[menu])!.visible = false;
 }

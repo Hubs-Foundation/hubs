@@ -18,7 +18,6 @@ export function inflateMediaLoader(
   eid: number,
   { src, recenter, resize, animateLoad, fileId, isObjectMenuTarget, moveParentNotObject }: MediaLoaderParams
 ) {
-  addComponent(world, Networked, eid);
   addComponent(world, MediaLoader, eid);
   addComponent(world, MediaLoading, eid);
   let flags = 0;

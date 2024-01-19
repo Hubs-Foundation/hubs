@@ -226,12 +226,17 @@ export const MediaPDF = defineComponent({
   pageNumber: Types.ui8
 });
 MediaPDF.map = new Map();
+export const MediaPDFUpdated = defineComponent({
+  pageNumber: Types.ui8
+});
 
 export const MediaVideo = defineComponent({
   ratio: Types.f32,
   flags: Types.ui8,
-  projection: Types.ui8
+  projection: Types.ui8,
+  lastUpdate: Types.ui32
 });
+export const MediaVideoUpdated = defineComponent();
 /**
  * @type {Map<EntityId, HTMLVideoElement}>}
  */
@@ -306,6 +311,27 @@ export const ObjectMenu = defineComponent({
   flags: Types.ui8
 });
 export const ObjectDropped = defineComponent();
+export const MediaMirrored = defineComponent({
+  linkedRef: Types.eid
+});
+export const MirroredMedia = defineComponent({
+  linkedRef: Types.eid
+});
+export const LinkedMedia = defineComponent({
+  linkedRef: Types.eid
+});
+export const FollowInFov = defineComponent({
+  offset: [Types.f32, 3],
+  angle: Types.f32,
+  speed: Types.f32,
+  started: Types.ui8
+});
+export const MirrorMenu = defineComponent({
+  closeRef: Types.eid,
+  mirrorTargetRef: Types.eid,
+  flags: Types.ui8
+});
+export const AvatarPOVNode = defineComponent();
 // TODO: Store this data elsewhere, since only one or two will ever exist.
 export const LinkHoverMenu = defineComponent({
   targetObjectRef: Types.eid,

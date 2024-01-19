@@ -726,7 +726,7 @@
         <a-entity id="avatar-rig" ik-root player-info set-yxz-order periodic-full-syncs visible="false"
             tags="inspectable: true; preventAudioBoost: true" inspect-pivot-child-selector="selector:.inspect-pivot">
             <a-entity id="avatar-pov-node" class="camera" personal-space-bubble="radius: 0.4;" rotation
-                pitch-yaw-rotator set-yxz-order position="0 1.6 0">
+                pitch-yaw-rotator set-yxz-order position="0 1.6 0" avatar-pov-node>
                 <a-entity class="inspect-pivot" inspect-pivot-offset-from-camera></a-entity>
                 <a-entity id="gaze-teleport" position="0.15 0 0"
                     teleporter="start: /actions/startTeleport; confirm: /actions/stopTeleport;"></a-entity>

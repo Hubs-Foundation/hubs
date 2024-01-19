@@ -85,6 +85,11 @@ import { bitPenCompatSystem } from "./bit-pen-system";
 import { sfxButtonSystem } from "../bit-systems/sfx-button-system";
 import { sfxMediaSystem } from "../bit-systems/sfx-media-system";
 import { hoverableVisualsSystem } from "../bit-systems/hoverable-visuals-system";
+import { linkedMenuSystem } from "../bit-systems/linked-menu-system";
+import { followInFovSystem } from "../bit-systems/follow-in-fov-system";
+import { linkedMediaSystem } from "../bit-systems/linked-media-system";
+import { linkedVideoSystem } from "../bit-systems/linked-video-system";
+import { linkedPDFSystem } from "../bit-systems/linked-pdf-system";
 
 declare global {
   interface Window {
@@ -257,6 +262,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   uvScrollSystem(world);
   hubsSystems.shadowSystem.tick();
   objectMenuSystem(world, sceneEl.is("frozen"), APP.hubChannel!);
+  linkedMenuSystem(world);
   videoMenuSystem(world, aframeSystems.userinput, sceneEl.is("frozen"));
   videoSystem(world, hubsSystems.audioSystem);
   pdfMenuSystem(world, sceneEl.is("frozen"));
@@ -273,6 +279,10 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   simpleWaterSystem(world);
   linearTransformSystem(world);
   quackSystem(world);
+  followInFovSystem(world);
+  linkedMediaSystem(world);
+  linkedVideoSystem(world);
+  linkedPDFSystem(world);
 
   objectMenuTransformSystem(world);
 

@@ -41,6 +41,7 @@ export function inflateVideo(world: HubsWorld, eid: EntityID, params: VideoParam
   }
   MediaVideo.projection[eid] = requiredParams.projection;
   MediaVideo.ratio[eid] = requiredParams.ratio;
+  MediaVideo.lastUpdate[eid] = 0;
   MediaVideoData.set(eid, video);
   return eid;
 }

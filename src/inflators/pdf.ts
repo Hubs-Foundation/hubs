@@ -2,7 +2,7 @@ import { addComponent } from "bitecs";
 import { PDFDocumentProxy } from "pdfjs-dist";
 import { Mesh, MeshBasicMaterial } from "three";
 import { HubsWorld } from "../app";
-import { MediaPDF, Networked, NetworkedPDF } from "../bit-components";
+import { MediaPDF } from "../bit-components";
 import { PDFResourcesMap } from "../bit-systems/pdf-system";
 import { addObject3DComponent } from "../utils/jsx-entity";
 import { EntityID } from "../utils/networking-types";
@@ -26,8 +26,6 @@ export function inflatePDF(world: HubsWorld, eid: EntityID, params: PDFParams) {
   );
   addComponent(world, MediaPDF, eid);
   PDFResourcesMap.set(eid, params);
-  addComponent(world, Networked, eid);
-  addComponent(world, NetworkedPDF, eid);
-  NetworkedPDF.pageNumber[eid] = 1; // Must be a valid page number. (Zero is invalid.)
+  MediaPDF.pageNumber[eid] = 1;
   return eid;
 }

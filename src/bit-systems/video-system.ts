@@ -1,4 +1,4 @@
-import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent } from "bitecs";
+import { addComponent, defineQuery, enterQuery, entityExists, exitQuery, hasComponent, removeComponent } from "bitecs";
 import { Mesh } from "three";
 import { HubsWorld } from "../app";
 import {
@@ -7,6 +7,7 @@ import {
   MediaLoaded,
   MediaVideo,
   MediaVideoData,
+  MediaVideoUpdated,
   Networked,
   NetworkedVideo,
   Owned
@@ -16,12 +17,13 @@ import { AudioSystem } from "../systems/audio-system";
 import { findAncestorWithComponent } from "../utils/bit-utils";
 import { Emitter2Audio, Emitter2Params, makeAudioEntity } from "./audio-emitter-system";
 import { takeSoftOwnership } from "../utils/take-soft-ownership";
+import { crNextFrame } from "../utils/coroutine";
 
 enum Flags {
   PAUSED = 1 << 0
 }
 
-const OUT_OF_SYNC_SEC = 5;
+export const OUT_OF_SYNC_SEC = 5;
 const networkedVideoQuery = defineQuery([Networked, NetworkedVideo]);
 const networkedVideoEnterQuery = enterQuery(networkedVideoQuery);
 const mediaVideoQuery = defineQuery([MediaVideo]);
@@ -73,7 +75,11 @@ export function videoSystem(world: HubsWorld, audioSystem: AudioSystem) {
   networkedVideoQuery(world).forEach(function (eid) {
     const video = MediaVideoData.get(eid)!;
     if (hasComponent(world, Owned, eid)) {
-      NetworkedVideo.time[eid] = video.currentTime;
+      const now = performance.now();
+      if (now - MediaVideo.lastUpdate[eid] > 1000) {
+        NetworkedVideo.time[eid] = video.currentTime;
+        MediaVideo.lastUpdate[eid] = now;
+      }
       let flags = 0;
       flags |= video.paused ? Flags.PAUSED : 0;
       NetworkedVideo.flags[eid] = flags;
@@ -86,10 +92,20 @@ export function videoSystem(world: HubsWorld, audioSystem: AudioSystem) {
               console.error("Error playing video.");
             })
           : video.pause();
+        addComponent(world, MediaVideoUpdated, eid);
       }
       if (networkedPauseState || Math.abs(NetworkedVideo.time[eid] - video.currentTime) > OUT_OF_SYNC_SEC) {
         video.currentTime = NetworkedVideo.time[eid];
+        addComponent(world, MediaVideoUpdated, eid);
       }
     }
+  });
+  mediaVideoQuery(world).forEach(eid => {
+    // We need to delay this a frame to give a chance to other services to process this event
+    crNextFrame().then(() => {
+      if (entityExists(world, eid)) {
+        removeComponent(world, MediaVideoUpdated, eid);
+      }
+    });
   });
 }

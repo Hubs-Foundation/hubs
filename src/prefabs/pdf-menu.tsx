@@ -28,7 +28,7 @@ function PDFPageButton(props: PDFPageButtonProps) {
 const UI_Z = 0.001;
 const POSITION_PREV: ArrayVec3 = [-0.45, 0.0, UI_Z];
 const POSITION_NEXT: ArrayVec3 = [0.45, 0.0, UI_Z];
-const POSITION_LABEL: ArrayVec3 = [0.0, -0.45, UI_Z];
+const POSITION_LABEL: ArrayVec3 = [0.0, -0.35, UI_Z];
 const PAGE_LABEL_COLOR = new Color(0.1, 0.1, 0.1);
 export function PDFMenuPrefab() {
   const refPrev = createRef();
