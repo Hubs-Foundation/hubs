@@ -59,11 +59,13 @@ export default class VirtualAgent {
     this.snapButton = new objElement();
     this.panel = new objElement();
     this.text = new objElement();
+    this.onClear = this.onClear.bind(this);
   }
 
   Init(hubProperties) {
     const agentToggle = () => {
       if (!APP.scene.is("agent")) {
+        APP.scene.emit("clear-scene");
         this.Instantiate();
       } else {
         this.Remove();
@@ -72,6 +74,7 @@ export default class VirtualAgent {
 
     if (this.initialized) {
       APP.scene.removeEventListener("agent-toggle", agentToggle);
+      APP.scene.removeEventListener("clear-scene", this.onClear);
       this.initialized = false;
     }
 
@@ -84,8 +87,15 @@ export default class VirtualAgent {
     this.allowed = true;
     this.avatarPovObj = document.querySelector("#avatar-pov-node").object3D;
     APP.scene.addEventListener("agent-toggle", agentToggle);
+    APP.scene.addEventListener("clear-scene", this.onClear);
     APP.scene.emit("agent-toggle");
     this.initialized = true;
+  }
+
+  onClear() {
+    if (APP.scene.is("agent")) {
+      this.Remove();
+    }
   }
 
   Remove() {

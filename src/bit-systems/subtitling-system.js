@@ -49,11 +49,24 @@ export class LanguagePanel {
     };
     this.Setup = this.Setup.bind(this);
     this.Remove = this.Remove.bind(this);
+    this.Update = this.Update.bind(this);
+    this.onLanguageUpdated = this.onLanguageUpdated.bind(this);
+    this.onClear = this.onClear.bind(this);
   }
 
+  onLanguageUpdated(event) {
+    this.Update(event.detail.language);
+  }
+
+  onClear() {
+    if (APP.scene.is("panel")) {
+      this.Remove();
+    }
+  }
   Init() {
     const langToggle = () => {
       if (!APP.scene.is("panel")) {
+        APP.scene.emit("clear-scene");
         this.Instantiate();
       } else {
         this.Remove();
@@ -62,10 +75,12 @@ export class LanguagePanel {
 
     if (this.initialized) {
       APP.scene.removeEventListener("lang-toggle", langToggle);
+      APP.scene.removeEventListener("clear-scene", this.onClear);
       this.initialized = false;
     }
 
     APP.scene.addEventListener("lang-toggle", langToggle);
+    APP.scene.addEventListener("clear-scene", this.onClear);
   }
 
   Instantiate() {
@@ -73,17 +88,12 @@ export class LanguagePanel {
     const obj = APP.world.eid2obj.get(eid);
     APP.world.scene.add(obj);
     APP.scene.addState("panel");
+    console.log(APP.scene);
   }
 
   Remove() {
-    console.log(this.panel.obj.parent);
-    APP.scene.remove(this.panel.obj.parent);
-    Object.values(this.flagButtons).forEach(button => {
-      APP.scene.remove(button);
-    });
-
+    APP.world.scene.remove(this.panel.obj.parent);
     removeEntity(APP.world, this.panel.eid);
-
     APP.scene.removeState("panel");
   }
 
@@ -102,16 +112,17 @@ export class LanguagePanel {
       this.flagButtons[key].update(refs[key]);
     });
 
-    this.Update();
+    this.Update(subtitleSystem.targetLanguage);
+    APP.scene.addEventListener("language_updated", this.onLanguageUpdated);
   }
 
-  Update() {
+  Update(language) {
     try {
       Object.keys(this.flagButtons).forEach(key => {
         this.flagButtons[key].obj.material = normalMaterial.clone();
       });
-      if (subtitleSystem.targetLanguage) {
-        this.flagObjs[this.targetLanguage].obj.material = selectMaterial.clone();
+      if (language) {
+        this.flagButtons[language].obj.material = selectMaterial.clone();
       }
     } catch (e) {
       console.error(e);
@@ -123,6 +134,7 @@ export class LanguagePanel {
     Object.keys(this.flagButtons).forEach(key => {
       this.flagButtons[key].update(null);
     });
+    APP.scene.removeEventListener("language_updated", this.onLanguageUpdated);
   }
 
   Interactions(world) {

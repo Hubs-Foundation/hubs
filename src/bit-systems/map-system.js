@@ -16,6 +16,7 @@ class FloorMapClass {
     this.imageRatio = 0.5;
     this.allowed = null;
     this.initialized = false;
+    this.onClear = this.onClear.bind(this);
   }
 
   Init(hubProperties) {
@@ -23,12 +24,14 @@ class FloorMapClass {
       if (APP.scene.is("map")) {
         this.Remove();
       } else {
+        APP.scene.emit("clear-scene");
         this.Instantiate();
       }
     };
 
     if (this.initialized) {
       APP.scene.removeEventListener("map-toggle", mapToggle);
+      APP.scene.removeEventListener("clear-scene", this.onClear);
       this.obj = null;
       this.eid = null;
       this.file = null;
@@ -56,6 +59,13 @@ class FloorMapClass {
     this.initialized = true;
 
     APP.scene.addEventListener("map-toggle", mapToggle);
+    APP.scene.addEventListener("clear-scene", this.onClear);
+  }
+
+  onClear() {
+    if (APP.scene.is("map")) {
+      this.Remove();
+    }
   }
 
   Instantiate() {
