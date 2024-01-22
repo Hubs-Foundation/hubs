@@ -70,6 +70,13 @@ export const HoveredHandRight = defineComponent();
 export const HoveredHandLeft = defineComponent();
 export const HoveredRemoteRight = defineComponent();
 export const HoveredRemoteLeft = defineComponent();
+export const HoverableVisuals = defineComponent({
+  geometryRadius: Types.f32
+});
+/**
+ * @type {Map<EntityId, Uniform[]}>}
+ */
+export const HoverableVisualsUniforms = new Map();
 export const HeldHandRight = defineComponent();
 export const HeldHandLeft = defineComponent();
 export const HeldRemoteRight = defineComponent();

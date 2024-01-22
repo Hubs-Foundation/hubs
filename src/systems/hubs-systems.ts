@@ -84,6 +84,7 @@ import { objectMenuTransformSystem } from "../bit-systems/object-menu-transform-
 import { bitPenCompatSystem } from "./bit-pen-system";
 import { sfxButtonSystem } from "../bit-systems/sfx-button-system";
 import { sfxMediaSystem } from "../bit-systems/sfx-media-system";
+import { hoverableVisualsSystem } from "../bit-systems/hoverable-visuals-system";
 
 declare global {
   interface Window {
@@ -208,6 +209,8 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   hubsSystems.physicsSystem.tick(dt);
   constraintsSystem(world, hubsSystems.physicsSystem);
   floatyObjectSystem(world);
+
+  hoverableVisualsSystem(world);
 
   // We run this earlier in the frame so things have a chance to override properties run by animations
   hubsSystems.animationMixerSystem.tick(dt);
