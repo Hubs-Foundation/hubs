@@ -53,10 +53,8 @@ class FloorMapClass {
       this.file = mapProperties.file;
       this.roomLength = mapProperties.roomLength;
       this.center = mapProperties.center;
-      this.centerOffset = mapProperties.ce;
+      this.centerOffset = mapProperties.centeroffset;
     }
-
-    nteroffset;
     this.initialized = true;
 
     APP.scene.addEventListener("map-toggle", mapToggle);
