@@ -16,6 +16,7 @@ import {
 import { injectCustomShaderChunks } from "../utils/media-utils";
 import { anyEntityWith, findChildWithComponent } from "../utils/bit-utils";
 import { EntityID } from "../utils/networking-types";
+import { isPinned } from "./networking";
 
 export const updateHoverableVisuals = (function () {
   const boundingBox = new THREE.Box3();
@@ -44,10 +45,13 @@ export function hoverableVisualsSystem(world: HubsWorld) {
   hoverableVisualsExitQuery(world).forEach(eid => HoverableVisualsUniforms.delete(eid));
   hoverableVisualsEnterQuery(world).forEach(eid => updateHoverableVisuals(world, eid));
   hoverableVisualsQuery(world).forEach(eid => {
+    const isFrozen = APP.scene!.is("frozen");
+    const isEntityPinned = isPinned(eid);
+    const showEffect = !isEntityPinned || isFrozen;
+
     const uniforms = HoverableVisualsUniforms.get(eid);
     if (uniforms && uniforms.length) {
       const obj = world.eid2obj.get(eid)!;
-      const isFrozen = APP.scene!.is("frozen");
 
       let interactorOne, interactorTwo;
 
@@ -101,16 +105,16 @@ export function hoverableVisualsSystem(world: HubsWorld) {
       const uniforms = HoverableVisualsUniforms.get(eid)! as any;
       for (let i = 0, l = uniforms.length; i < l; i++) {
         const uniform = uniforms[i];
-        uniform.hubs_EnableSweepingEffect.value = true;
+        uniform.hubs_EnableSweepingEffect.value = showEffect;
         uniform.hubs_IsFrozen.value = isFrozen;
         uniform.hubs_SweepParams.value = sweepParams;
 
-        uniform.hubs_HighlightInteractorOne.value = !!interactorOne && !isTouchscreen;
+        uniform.hubs_HighlightInteractorOne.value = !!interactorOne && !isTouchscreen && showEffect;
         uniform.hubs_InteractorOnePos.value[0] = interactorOneTransform[12];
         uniform.hubs_InteractorOnePos.value[1] = interactorOneTransform[13];
         uniform.hubs_InteractorOnePos.value[2] = interactorOneTransform[14];
 
-        uniform.hubs_HighlightInteractorTwo.value = !!interactorTwo && !isTouchscreen;
+        uniform.hubs_HighlightInteractorTwo.value = !!interactorTwo && !isTouchscreen && showEffect;
         uniform.hubs_InteractorTwoPos.value[0] = interactorTwoTransform[12];
         uniform.hubs_InteractorTwoPos.value[1] = interactorTwoTransform[13];
         uniform.hubs_InteractorTwoPos.value[2] = interactorTwoTransform[14];
