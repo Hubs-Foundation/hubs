@@ -65,6 +65,7 @@ export default class SceneEntryManager {
   };
 
   setupVRConferece = async () => {
+    this.scene.emit("clear-scene");
     const hubProperties = await GetHubProperties(getCurrentHubId());
     virtualAgent.Init(hubProperties);
     floorMap.Init(hubProperties);
