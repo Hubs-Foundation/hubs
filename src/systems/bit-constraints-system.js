@@ -44,6 +44,7 @@ const releaseBodyOptions = { activationState: ACTIVE_TAG };
 function add(world, physicsSystem, interactor, constraintComponent, entities) {
   for (let i = 0; i < entities.length; i++) {
     const eid = findAncestorEntity(world, entities[i], ancestor => hasComponent(world, Rigidbody, ancestor));
+    if (!entityExists(world, eid)) continue;
     physicsSystem.updateRigidBodyOptions(eid, grabBodyOptions);
     physicsSystem.addConstraint(interactor, Rigidbody.bodyId[eid], Rigidbody.bodyId[interactor], {});
     addComponent(world, Constraint, eid);
