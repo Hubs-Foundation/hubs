@@ -96,6 +96,14 @@ declare module "aframe" {
     invaders: PersonalSpaceInvader[];
   }
 
+  interface PenToolsSystem extends ASystem {
+    myPen: AElement;
+  }
+
+  interface PenComponent extends AComponent {
+    targets: Object3D[];
+  }
+
   interface TransformSelectedObjectSystem extends ASystem {
     startTransform(targetObj: Object3D, handObj: Object3D, data: object): void;
     stopTransform(): void;
@@ -119,6 +127,7 @@ declare module "aframe" {
       /** @deprecated see bit-interaction-system */
       interaction: InteractionSystem;
       nav: NavSystem;
+      "pen-tools": PenToolsSystem;
     };
     emit(string, any?): void;
     addState(string): void;
