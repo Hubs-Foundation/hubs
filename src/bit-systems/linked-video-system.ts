@@ -1,4 +1,4 @@
-import { defineQuery, enterQuery, exitQuery, hasComponent, removeComponent } from "bitecs";
+import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent } from "bitecs";
 import { HubsWorld } from "../app";
 import {
   MirroredMedia,
@@ -6,18 +6,21 @@ import {
   MediaVideo,
   NetworkedVideo,
   MediaVideoData,
-  MediaVideoUpdated
+  MediaVideoUpdated,
+  AudioEmitter
 } from "../bit-components";
 import { findAncestorWithComponent, findChildWithComponent } from "../utils/bit-utils";
 import { takeOwnership } from "../utils/take-ownership";
 import { OUT_OF_SYNC_SEC } from "./video-system";
 import { linkMedia } from "./linked-media-system";
+import { updateAudioSettings } from "../update-audio-settings";
 
 const mediaVideoQuery = defineQuery([MediaVideo]);
 const mediaVideoEnterQuery = enterQuery(mediaVideoQuery);
-const mediaVideoExitQuery = exitQuery(mediaVideoQuery);
 const updatedVideoQuery = defineQuery([MediaVideoUpdated]);
 const updatedVideoEnterQuery = enterQuery(updatedVideoQuery);
+const linkedMediaQuery = defineQuery([LinkedMedia]);
+const linkedMediaExitQuery = exitQuery(linkedMediaQuery);
 export function linkedVideoSystem(world: HubsWorld) {
   mediaVideoEnterQuery(world).forEach(eid => {
     const mirroredMediaEid = findAncestorWithComponent(world, MirroredMedia, eid);
@@ -26,17 +29,14 @@ export function linkedVideoSystem(world: HubsWorld) {
       const sourceMediaEid = findChildWithComponent(world, MediaVideo, mediaMirroredEid)!;
       if (sourceMediaEid) {
         linkMedia(world, eid, sourceMediaEid);
-        const video = MediaVideoData.get(eid)!;
-        const linkedVideo = MediaVideoData.get(sourceMediaEid)!;
-        if (video.paused !== linkedVideo.paused) {
-          if (linkedVideo.paused) {
-            video.pause();
-          } else {
-            video.play().catch(() => console.error("Error playing video."));
+        addComponent(world, MediaVideoUpdated, sourceMediaEid);
+        const sourceAudioEid = findChildWithComponent(world, AudioEmitter, sourceMediaEid);
+        if (sourceAudioEid) {
+          APP.linkedMutedState.add(sourceAudioEid);
+          const audio = APP.audios.get(sourceAudioEid);
+          if (audio) {
+            updateAudioSettings(sourceAudioEid, audio);
           }
-        }
-        if (Math.abs(video.currentTime - linkedVideo.currentTime) > OUT_OF_SYNC_SEC) {
-          video.currentTime = linkedVideo.currentTime;
         }
       }
     }
@@ -57,16 +57,23 @@ export function linkedVideoSystem(world: HubsWorld) {
         linkedVideo.play().catch(() => console.error("Error playing video."));
       }
     }
-    if (Math.abs(video.currentTime - linkedVideo.currentTime) > OUT_OF_SYNC_SEC) {
+    if (Math.abs(video.currentTime - linkedVideo.currentTime)) {
       if (!hasComponent(world, NetworkedVideo, eid)) {
         takeOwnership(world, linked);
       }
       linkedVideo.currentTime = video.currentTime;
     }
   });
-  mediaVideoExitQuery(world).forEach(eid => {
-    if (hasComponent(world, LinkedMedia, eid)) {
-      removeComponent(world, LinkedMedia, eid);
+  linkedMediaExitQuery(world).forEach(eid => {
+    if (hasComponent(world, MediaVideo, eid)) {
+      const audioEid = findChildWithComponent(world, AudioEmitter, eid);
+      if (audioEid) {
+        APP.linkedMutedState.delete(audioEid);
+        const audio = APP.audios.get(audioEid);
+        if (audio) {
+          updateAudioSettings(audioEid, audio);
+        }
+      }
     }
   });
 }

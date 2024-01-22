@@ -75,6 +75,7 @@ export function getCurrentAudioSettings(el) {
   if (
     APP.clippingState.has(el) ||
     APP.mutedState.has(el) ||
+    APP.linkedMutedState.has(el) ||
     (isNonModeratorAvatarAudio && !APP.hub.member_permissions?.voice_chat)
   ) {
     settings.gain = 0;

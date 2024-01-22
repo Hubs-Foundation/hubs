@@ -51,7 +51,7 @@ AFRAME.registerSystem("linked-media", {
     elB.setAttribute("linked-media", "");
 
     // As a convenience, if elA has audio, we turn its volume off so we don't hear it twice
-    APP.mutedState.add(elA);
+    APP.linkedMutedState.add(elA);
     const audio = APP.audios.get(elA);
     if (audio) {
       updateAudioSettings(elA, audio);
@@ -68,7 +68,7 @@ AFRAME.registerSystem("linked-media", {
         elB.removeEventListener("componentchanged", handlerB);
       }
 
-      APP.mutedState.delete(elA);
+      APP.linkedMutedState.delete(elA);
       const audio = APP.audios.get(elA);
       if (audio) {
         updateAudioSettings(elA, audio);

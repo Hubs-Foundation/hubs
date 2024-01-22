@@ -1,4 +1,4 @@
-import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent } from "bitecs";
+import { addComponent, defineQuery, enterQuery, hasComponent } from "bitecs";
 import { HubsWorld } from "../app";
 import { MirroredMedia, LinkedMedia, MediaPDF, NetworkedPDF, MediaPDFUpdated } from "../bit-components";
 import { findAncestorWithComponent, findChildWithComponent } from "../utils/bit-utils";
@@ -7,7 +7,6 @@ import { linkMedia } from "./linked-media-system";
 
 const mediaPDFQuery = defineQuery([MediaPDF]);
 const mediaPDFEnterQuery = enterQuery(mediaPDFQuery);
-const mediaPDFExitQuery = exitQuery(mediaPDFQuery);
 const updatedPDFQuery = defineQuery([MediaPDFUpdated]);
 const updatedPDFEnterQuery = enterQuery(updatedPDFQuery);
 export function linkedPDFSystem(world: HubsWorld) {
@@ -32,11 +31,6 @@ export function linkedPDFSystem(world: HubsWorld) {
       }
       addComponent(world, MediaPDFUpdated, linked);
       MediaPDFUpdated.pageNumber[linked] = MediaPDFUpdated.pageNumber[eid];
-    }
-  });
-  mediaPDFExitQuery(world).forEach(eid => {
-    if (hasComponent(world, LinkedMedia, eid)) {
-      removeComponent(world, LinkedMedia, eid);
     }
   });
 }

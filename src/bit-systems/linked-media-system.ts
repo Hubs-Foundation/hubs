@@ -1,9 +1,9 @@
-import { addComponent, defineQuery, enterQuery, entityExists, exitQuery, hasComponent, removeComponent } from "bitecs";
+import { addComponent, defineQuery, enterQuery, entityExists, exitQuery, removeComponent } from "bitecs";
 import { HubsWorld } from "../app";
-import { MirroredMedia, MediaMirrored, MediaLoaded, LinkedMedia } from "../bit-components";
+import { MirroredMedia, MediaMirrored, LinkedMedia } from "../bit-components";
 import { cloneObject } from "./linked-menu-system";
 import { deleteTheDeletableAncestor } from "./delete-entity-system";
-import { anyEntityWith, findChildWithComponent } from "../utils/bit-utils";
+import { anyEntityWith } from "../utils/bit-utils";
 import { EntityID } from "../utils/networking-types";
 
 export function linkMedia(world: HubsWorld, eid: EntityID, sourceMediaEid: EntityID) {
@@ -26,14 +26,12 @@ const mediaMirroredExitQuery = exitQuery(mediaMirroredQuery);
 const mirroredMediaQuery = defineQuery([MirroredMedia]);
 const mirroredMediaEnterQuery = enterQuery(mirroredMediaQuery);
 const mirroredMediaExitQuery = exitQuery(mirroredMediaQuery);
+const linkedMediaQuery = defineQuery([LinkedMedia]);
+const linkedMediaExitQuery = exitQuery(linkedMediaQuery);
 export function linkedMediaSystem(world: HubsWorld) {
   mirroredMediaExitQuery(world).forEach(eid => {
     const mediaMirroredEid = MirroredMedia.linkedRef[eid];
     if (entityExists(world, mediaMirroredEid)) {
-      const sourceMediaEid = findChildWithComponent(world, MediaLoaded, mediaMirroredEid)!;
-      if (hasComponent(world, LinkedMedia, sourceMediaEid)) {
-        removeComponent(world, LinkedMedia, sourceMediaEid);
-      }
       removeComponent(world, MediaMirrored, mediaMirroredEid);
     }
   });
@@ -50,5 +48,8 @@ export function linkedMediaSystem(world: HubsWorld) {
 
     addComponent(world, MirroredMedia, clonedEid);
     MirroredMedia.linkedRef[clonedEid] = eid;
+  });
+  linkedMediaExitQuery(world).forEach(eid => {
+    removeComponent(world, LinkedMedia, LinkedMedia.linkedRef[eid]);
   });
 }
