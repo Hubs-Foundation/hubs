@@ -8,7 +8,8 @@ import {
   Interacted,
   LinkHoverMenuItem,
   LinkInitializing,
-  ObjectMenuTransform
+  ObjectMenuTransform,
+  CursorRaycastable
 } from "../bit-components";
 import { findAncestorWithComponent, findChildWithComponent } from "../utils/bit-utils";
 import { hubIdFromUrl } from "../utils/media-url-utils";
@@ -23,6 +24,12 @@ const menuQuery = defineQuery([LinkHoverMenu]);
 const hoveredLinksQuery = defineQuery([HoveredRemoteRight, Link, Not(LinkInitializing)]);
 const hoveredMenuItemQuery = defineQuery([HoveredRemoteRight, LinkHoverMenuItem]);
 const clickedMenuItemQuery = defineQuery([Interacted, LinkHoverMenuItem]);
+
+function setCursorRaycastable(world: HubsWorld, menu: EntityID, enable: boolean) {
+  let change = enable ? addComponent : removeComponent;
+  change(world, CursorRaycastable, menu);
+  change(world, CursorRaycastable, LinkHoverMenu.linkButtonRef[menu]);
+}
 
 function updateLinkMenuTarget(world: HubsWorld, menu: EntityID, sceneIsFrozen: boolean) {
   if (LinkHoverMenu.targetObjectRef[menu] && !entityExists(world, LinkHoverMenu.targetObjectRef[menu])) {
@@ -145,6 +152,8 @@ function flushToObject3Ds(world: HubsWorld, menu: EntityID, frozen: boolean, for
   } else {
     buttonObj.visible = false;
   }
+
+  setCursorRaycastable(world, menu, visible);
 }
 
 export function linkHoverMenuSystem(world: HubsWorld, sceneIsFrozen: boolean) {

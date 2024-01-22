@@ -33,6 +33,8 @@ function setCursorRaycastable(world: HubsWorld, menu: number, enable: boolean) {
   let change = enable ? addComponent : removeComponent;
   change(world, CursorRaycastable, menu);
   change(world, CursorRaycastable, VideoMenu.trackRef[menu]);
+  change(world, CursorRaycastable, VideoMenu.playIndicatorRef[menu]);
+  change(world, CursorRaycastable, VideoMenu.pauseIndicatorRef[menu]);
 }
 
 const intersectInThePlaneOf = (() => {
