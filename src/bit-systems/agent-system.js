@@ -204,7 +204,7 @@ export default class VirtualAgent {
         APP.scene.object3D.add(this.arrowObjs);
         knowledge = { data: { response: "This is a demo showing you instructions to go to the conference room" } };
       }
-      this.updateText(knowledge.data.response);
+      this.UpdateText(knowledge.data.response);
 
       return knowledge;
     } catch (error) {
