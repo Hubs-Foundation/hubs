@@ -43,19 +43,20 @@ class FloorMapClass {
     if (!hubProperties.allow_map) {
       console.warn("No available map for this room");
       this.allowed = false;
-      return;
+    } else {
+      this.allowed = true;
+      this.userPov = document.querySelector("#avatar-pov-node").object3D;
+      this.userObj = document.querySelector("#avatar-rig").object3D;
+      const mapProperties = hubProperties.map;
+      this.imageRatio = mapProperties.ratio;
+      this.mapToImage = mapProperties.mapToImage;
+      this.file = mapProperties.file;
+      this.roomLength = mapProperties.roomLength;
+      this.center = mapProperties.center;
+      this.centerOffset = mapProperties.ce;
     }
 
-    this.allowed = true;
-    this.userPov = document.querySelector("#avatar-pov-node").object3D;
-    this.userObj = document.querySelector("#avatar-rig").object3D;
-    const mapProperties = hubProperties.map;
-    this.imageRatio = mapProperties.ratio;
-    this.mapToImage = mapProperties.mapToImage;
-    this.file = mapProperties.file;
-    this.roomLength = mapProperties.roomLength;
-    this.center = mapProperties.center;
-    this.centerOffset = mapProperties.centeroffset;
+    nteroffset;
     this.initialized = true;
 
     APP.scene.addEventListener("map-toggle", mapToggle);
