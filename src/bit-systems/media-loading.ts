@@ -162,10 +162,10 @@ export function* animateScale(world: HubsWorld, mediaLoaderEid: EntityID) {
 }
 
 function* finish(world: HubsWorld, mediaLoaderEid: EntityID) {
+  if (entityExists(world, mediaLoaderEid) && MediaLoader.flags[mediaLoaderEid] & MEDIA_LOADER_FLAGS.ANIMATE_LOAD) {
+    yield* animateScale(world, mediaLoaderEid);
+  }
   if (entityExists(world, mediaLoaderEid)) {
-    if (MediaLoader.flags[mediaLoaderEid] & MEDIA_LOADER_FLAGS.ANIMATE_LOAD) {
-      yield* animateScale(world, mediaLoaderEid);
-    }
     inflatePhysicsShape(world, mediaLoaderEid, {
       type: Shape.HULL,
       minHalfExtent: 0.04

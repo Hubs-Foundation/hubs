@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { MediaDevices, MediaDevicesEvents } from "../../../utils/media-devices-utils";
+import { SOUND_TOGGLE_MIC } from "../../../systems/sound-effects-system";
 
 export function useMicrophoneStatus(scene) {
   const mediaDevicesManager = APP.mediaDevicesManager;
@@ -45,7 +46,8 @@ export function useMicrophoneStatus(scene) {
     } else {
       mediaDevicesManager.startMicShare({ unmute: true });
     }
-  }, [mediaDevicesManager]);
+    scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_TOGGLE_MIC);
+  }, [mediaDevicesManager, scene]);
 
   return {
     isMicMuted,

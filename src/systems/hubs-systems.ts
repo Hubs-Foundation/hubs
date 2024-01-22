@@ -82,6 +82,8 @@ import { loopAnimationSystem } from "../bit-systems/loop-animation";
 import { linkSystem } from "../bit-systems/link-system";
 import { objectMenuTransformSystem } from "../bit-systems/object-menu-transform-system";
 import { bitPenCompatSystem } from "./bit-pen-system";
+import { sfxButtonSystem } from "../bit-systems/sfx-button-system";
+import { sfxMediaSystem } from "../bit-systems/sfx-media-system";
 
 declare global {
   interface Window {
@@ -191,6 +193,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   onOwnershipLost(world);
   sceneLoadingSystem(world, hubsSystems.environmentSystem, hubsSystems.characterController);
   mediaLoadingSystem(world);
+  sfxMediaSystem(world, aframeSystems["hubs-systems"].soundEffectsSystem);
 
   networkedTransformSystem(world);
 
@@ -199,6 +202,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   interactionSystem(world, hubsSystems.cursorTargettingSystem, t, aframeSystems);
 
   buttonSystems(world);
+  sfxButtonSystem(world, aframeSystems["hubs-systems"].soundEffectsSystem);
 
   physicsCompatSystem(world, hubsSystems.physicsSystem);
   hubsSystems.physicsSystem.tick(dt);
