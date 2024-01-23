@@ -35,13 +35,12 @@ AFRAME.registerComponent("translate-button", {
     };
 
     this.onClick = () => {
-      subtitleSystem.SelectTarget(this.owner);
-      console.log("The clicked user has this language:", this.userLanguage);
-      if (!!this.userLanguage) {
-        subtitleSystem.SetSourceLanguage(this.userLanguage);
-      } else {
-        subtitleSystem.SetSourceLanguage(this.userLanguage);
-      }
+      // subtitleSystem.SelectTarget(this.owner);
+      APP.scene.emit("translation_updates_available", {
+        type: "target",
+        target: this.owner,
+        language: this.userLanguage
+      });
     };
   },
   play() {
@@ -63,10 +62,9 @@ AFRAME.registerComponent("translate-button", {
     this.userLanguage = presenceMeta.profile.language;
 
     if (subtitleSystem.target === this.owner) {
-      subtitleSystem.SetSourceLanguage(this.userLanguage);
+      APP.scene.emit("translation_updates_available", { type: "language", language: this.userLanguage });
       return;
     }
-    console.log(`Setting ${this.owner} language to ${this.userLanguage} without changing source language`);
   }
 });
 

@@ -16,55 +16,43 @@ class FloorMapClass {
     this.imageRatio = 0.5;
     this.allowed = null;
     this.initialized = false;
+
     this.onClear = this.onClear.bind(this);
+    this.onToggle = this.onToggle.bind(this);
+    this.Init = this.Init.bind(this);
   }
 
-  Init(hubProperties) {
-    const mapToggle = () => {
-      if (APP.scene.is("map")) {
-        this.Remove();
-      } else {
-        APP.scene.emit("clear-scene");
-        this.Instantiate();
-      }
-    };
-
-    if (this.initialized) {
-      APP.scene.removeEventListener("map-toggle", mapToggle);
+  Init(hubProperties, reset) {
+    if (reset) {
+      APP.scene.removeEventListener("map-toggle", this.onToggle);
       APP.scene.removeEventListener("clear-scene", this.onClear);
+
       this.obj = null;
       this.eid = null;
       this.file = null;
       this.imageRatio = 0.5;
       this.allowed = null;
-      this.initialized = false;
     }
+
+    APP.scene.addEventListener("map-toggle", this.onToggle);
+    APP.scene.addEventListener("clear-scene", this.onClear);
 
     if (!hubProperties.allow_map) {
       console.warn("No available map for this room");
       this.allowed = false;
-    } else {
-      this.allowed = true;
-      this.userPov = document.querySelector("#avatar-pov-node").object3D;
-      this.userObj = document.querySelector("#avatar-rig").object3D;
-      const mapProperties = hubProperties.map;
-      this.imageRatio = mapProperties.ratio;
-      this.mapToImage = mapProperties.mapToImage;
-      this.file = mapProperties.file;
-      this.roomLength = mapProperties.roomLength;
-      this.center = mapProperties.center;
-      this.centerOffset = mapProperties.centeroffset;
+      return;
     }
-    this.initialized = true;
 
-    APP.scene.addEventListener("map-toggle", mapToggle);
-    APP.scene.addEventListener("clear-scene", this.onClear);
-  }
-
-  onClear() {
-    if (APP.scene.is("map")) {
-      this.Remove();
-    }
+    this.allowed = true;
+    this.userPov = document.querySelector("#avatar-pov-node").object3D;
+    this.userObj = document.querySelector("#avatar-rig").object3D;
+    const mapProperties = hubProperties.map;
+    this.imageRatio = mapProperties.ratio;
+    this.mapToImage = mapProperties.mapToImage;
+    this.file = mapProperties.file;
+    this.roomLength = mapProperties.roomLength;
+    this.center = mapProperties.center;
+    this.centerOffset = mapProperties.centeroffset;
   }
 
   Instantiate() {
@@ -121,6 +109,21 @@ class FloorMapClass {
     this.pointObj.rotation.z = this.userObj.rotation.y;
     this.pointObj.updateMatrix();
     this.obj.updateMatrix();
+  }
+
+  onClear() {
+    if (APP.scene.is("map")) {
+      this.Remove();
+    }
+  }
+
+  onToggle() {
+    if (APP.scene.is("map")) {
+      this.Remove();
+    } else {
+      APP.scene.emit("clear-scene");
+      this.Instantiate();
+    }
   }
 }
 

@@ -25,6 +25,7 @@ export function AgenSpawnButton({ scene }) {
   };
 
   window.addEventListener("agent-toggle", activateButton);
+  window.addEventListener("clear-scene", activateButton);
 
   return (
     <ToolTip description={description}>

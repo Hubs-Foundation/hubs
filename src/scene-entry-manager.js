@@ -64,14 +64,14 @@ export default class SceneEntryManager {
     return this._entered;
   };
 
-  setupVRConferece = async () => {
+  setupVRConferece = async reset => {
     this.scene.emit("clear-scene");
     const hubProperties = await GetHubProperties(getCurrentHubId());
-    virtualAgent.Init(hubProperties);
-    floorMap.Init(hubProperties);
-    sceneGraph.Init(hubProperties);
-    languagePanel.Init();
-    subtitleSystem.Init();
+    virtualAgent.Init(hubProperties, reset);
+    floorMap.Init(hubProperties, reset);
+    sceneGraph.Init(hubProperties, reset);
+    languagePanel.Init(reset);
+    subtitleSystem.Init(reset);
   };
 
   enterScene = async (enterInVR, muteOnEntry) => {
@@ -111,10 +111,6 @@ export default class SceneEntryManager {
     this._setupKicking();
     this._setupMedia();
     this._setupCamera();
-    this.setupVRConferece();
-    // this._setupAgent();
-    // this._setupMap();
-    // this._setupSubtitles();
 
     if (qsTruthy("offline")) return;
 
@@ -151,6 +147,7 @@ export default class SceneEntryManager {
     setTimeout(() => this.store.bumpEntryCount(), 30000);
 
     this.scene.addState("entered");
+    await this.setupVRConferece(false);
 
     APP.mediaDevicesManager.micEnabled = !muteOnEntry;
   };

@@ -50,36 +50,16 @@ export class LanguagePanel {
     this.Setup = this.Setup.bind(this);
     this.Remove = this.Remove.bind(this);
     this.Update = this.Update.bind(this);
+
     this.onLanguageUpdated = this.onLanguageUpdated.bind(this);
     this.onClear = this.onClear.bind(this);
+    this.onToggle = this.onToggle.bind(this);
   }
 
-  onLanguageUpdated(event) {
-    this.Update(event.detail.language);
-  }
+  Init(reset) {
+    if (reset) return;
 
-  onClear() {
-    if (APP.scene.is("panel")) {
-      this.Remove();
-    }
-  }
-  Init() {
-    const langToggle = () => {
-      if (!APP.scene.is("panel")) {
-        APP.scene.emit("clear-scene");
-        this.Instantiate();
-      } else {
-        this.Remove();
-      }
-    };
-
-    if (this.initialized) {
-      APP.scene.removeEventListener("lang-toggle", langToggle);
-      APP.scene.removeEventListener("clear-scene", this.onClear);
-      this.initialized = false;
-    }
-
-    APP.scene.addEventListener("lang-toggle", langToggle);
+    APP.scene.addEventListener("lang-toggle", this.onToggle);
     APP.scene.addEventListener("clear-scene", this.onClear);
   }
 
@@ -88,7 +68,6 @@ export class LanguagePanel {
     const obj = APP.world.eid2obj.get(eid);
     APP.world.scene.add(obj);
     APP.scene.addState("panel");
-    console.log(APP.scene);
   }
 
   Remove() {
@@ -112,7 +91,7 @@ export class LanguagePanel {
       this.flagButtons[key].update(refs[key]);
     });
 
-    this.Update(subtitleSystem.targetLanguage);
+    this.Update(subtitleSystem.mylanguage);
     APP.scene.addEventListener("language_updated", this.onLanguageUpdated);
   }
 
@@ -140,10 +119,29 @@ export class LanguagePanel {
   Interactions(world) {
     Object.keys(this.flagButtons).forEach(key => {
       if (hasComponent(world, Interacted, this.flagButtons[key].eid)) {
-        if (subtitleSystem.targetLanguage === key) subtitleSystem.updateLanguage("");
-        else subtitleSystem.updateLanguage(key);
+        if (subtitleSystem.mylanguage === key) subtitleSystem.updateMyLanguage("");
+        else subtitleSystem.updateMyLanguage(key);
       }
     });
+  }
+
+  onLanguageUpdated(event) {
+    this.Update(event.detail.language);
+  }
+
+  onClear() {
+    if (APP.scene.is("panel")) {
+      this.Remove();
+    }
+  }
+
+  onToggle() {
+    if (!APP.scene.is("panel")) {
+      APP.scene.emit("clear-scene");
+      this.Instantiate();
+    } else {
+      this.Remove();
+    }
   }
 }
 
@@ -151,7 +149,7 @@ export class SubtitleSystem {
   constructor() {
     this.target;
     this.VRmode;
-    this.targetLanguage;
+    this.mylanguage;
     this.scene;
     this.audioContext;
     this.analyser;
@@ -161,47 +159,59 @@ export class SubtitleSystem {
     this.mediaRecorder;
     this.animationFrameID;
     this.onLanguageAvailable = this.onLanguageAvailable.bind(this);
+    this.onTranslationUpdatesAvailable = this.onTranslationUpdatesAvailable.bind(this);
   }
 
-  Init() {
+  Init(reset) {
+    if (reset) {
+      this.target = null;
+      this.counter = 0;
+      return;
+    }
+
+    this.mylanguage = null;
+    this.updateMyLanguage(window.APP.store.state.profile.language);
     this.targetLanguage = null;
-    this.updateLanguage(window.APP.store.state.profile.language);
-    this.sourceLanguage = null;
     this.target = null;
     this.scene = APP.scene;
     this.VRmode = this.scene.is("vr-mode");
     this.cleanup = false;
     this.counter = 0;
     this.scene.addEventListener("language_available", this.onLanguageAvailable);
+    this.scene.addEventListener("translation_updates_available", this.onTranslationUpdatesAvailable);
+  }
+
+  onTranslationUpdatesAvailable(event) {
+    if (event.detail.type === "target") this.UpdateTarget(event.detail.target);
+    this.updateTargetLanguage(event.detail.language);
   }
 
   onLanguageAvailable(event) {
-    this.updateLanguage(event.detail.language);
+    this.updateMyLanguage(event.detail.language);
   }
 
-  updateLanguage(lang) {
-    this.targetLanguage = lang;
-    // languagePanel.Update();
-    if (!!this.targetLanguage) {
-      window.APP.store.update({ profile: { language: this.targetLanguage } });
+  updateTargetLanguage(newLang) {
+    this.targetLanguage = newLang;
+    APP.scene.emit("translation_target_language_updated", { language: this.targetLanguage });
+  }
+
+  updateMyLanguage(newLang) {
+    this.mylanguage = newLang;
+    if (this.hasMyLanguage) {
+      window.APP.store.update({ profile: { language: this.mylanguage } });
     } else {
       window.APP.store.update({ profile: { language: "" } });
     }
-    APP.scene.emit("language_updated", { language: this.targetLanguage });
+    APP.scene.emit("language_updated", { language: this.mylanguage });
   }
 
-  SetSourceLanguage(_lang) {
-    this.sourceLanguage = _lang;
-    console.log("Translate from:", this.sourceLanguage, this.targetLanguage);
-  }
-
-  SelectTarget(_target) {
-    if (this.hasTarget()) this.StopTranslating();
-    if (this.target === _target) this.target = null;
-    else this.target = _target;
+  UpdateTarget(newTarget) {
+    if (this.hasTarget) this.StopTranslating();
+    if (this.target === newTarget) this.target = null;
+    else this.target = newTarget;
     APP.scene.emit("translation-target-updated", { owner: this.target });
 
-    if (this.hasTarget()) {
+    if (this.hasTarget) {
       APP.scene.emit("translation-available", { text: "The audio translation will be displayed here!" });
       this.StartTranslating();
     }
@@ -222,7 +232,7 @@ export class SubtitleSystem {
   }
 
   StartTranslating() {
-    console.log("Translate from:", this.sourceLanguage, this.targetLanguage);
+    console.log("Translate from:", this.targetLanguage, this.mylanguage);
     this.GetTargetStream(this.target)
       .then(stream => {
         console.log(stream);
@@ -298,14 +308,14 @@ export class SubtitleSystem {
         this.mediaRecorder.onstop = () => {
           const recordingBlob = new Blob(chunks, { type: "audio/wav" });
           inference =
-            inference && chunks.length > 0 && recordingBlob.size > 0 && !!this.targetLanguage && !!this.sourceLanguage;
+            inference && chunks.length > 0 && recordingBlob.size > 0 && this.hasMyLanguage && this.hasTargetLanguage;
           chunks.length = 0;
 
           if (inference) {
             // this.saveAudio(recordingBlob);
             audioModules(COMPONENT_ENDPOINTS.TRANSLATE_AUDIO_FILES, recordingBlob, {
-              source_language: languageCodes[this.sourceLanguage],
-              target_language: languageCodes[this.targetLanguage],
+              source_language: languageCodes[this.targetLanguage],
+              target_language: languageCodes[this.mylanguage],
               return_transcription: "true"
             })
               .then(translateRespone => {
@@ -348,7 +358,7 @@ export class SubtitleSystem {
   }
 
   async GetTargetStream(peerID) {
-    if (!this.hasTarget()) return;
+    if (!this.hasTarget) return;
 
     const stream = await APP.dialog.getMediaStream(peerID).catch(e => {
       console.error(INFO_INIT_FAILED, `Error getting media stream for ${peerID}`, e);
@@ -359,16 +369,20 @@ export class SubtitleSystem {
     return stream;
   }
 
-  hasTarget() {
+  get hasTarget() {
     return !!this.target;
   }
 
-  hasTargetLanguage() {
+  get hasMyLanguage() {
+    return !!this.mylanguage;
+  }
+
+  get hasTargetLanguage() {
     return !!this.targetLanguage;
   }
 
   SetTargetLanguage(_language) {
-    this.targetLanguage = _language;
+    this.mylanguage = _language;
     window.APP.store.update({ profile: { language: _language } });
     console.log(window.APP.store);
   }

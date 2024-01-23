@@ -19,11 +19,13 @@ AFRAME.registerComponent("translate-panel", {
     this.onTargetUpdate = this.onTargetUpdate.bind(this);
     this.onLanguageUpdate = this.onLanguageUpdate.bind(this);
     this.checkAndRender = this.checkAndRender.bind(this);
+    this.onTargetLanguageUpdate = this.onTargetLanguageUpdate.bind(this);
 
     this.size = new Vector3();
     this.preformatText;
     this.formattedText;
-    this.languageCheck = false;
+    this.targetLanguageCheck = false;
+    this.userLanguageCheck = false;
     this.userCheck = false;
 
     NAF.utils
@@ -40,6 +42,8 @@ AFRAME.registerComponent("translate-panel", {
     APP.scene.addEventListener("translation-available", this.onAvailableTranslation);
     APP.scene.addEventListener("translation-target-updated", this.onTargetUpdate);
     APP.scene.addEventListener("language_updated", this.onLanguageUpdate);
+    APP.scene.addEventListener("translation_target_language_updated", this.onTargetLanguageUpdate);
+
     this.translateText.el.setAttribute("text", {
       value: this.formattedText
     });
@@ -50,7 +54,10 @@ AFRAME.registerComponent("translate-panel", {
   pause() {
     APP.scene.removeEventListener("translation-available", this.onAvailableTranslation);
     APP.scene.removeEventListener("translation-target-updated", this.onTargetUpdate);
+    APP.scene.removeEventListener("language_updated", this.onLanguageUpdate);
+    APP.scene.removeEventListener("translation_target_language_updated", this.onTargetLanguageUpdate);
   },
+
   onAvailableTranslation(event) {
     this.preformatText = event.detail.text;
     this.fortmatLines();
@@ -82,11 +89,21 @@ AFRAME.registerComponent("translate-panel", {
   },
 
   onLanguageUpdate(event) {
-    this.languageCheck = !!event.detail.language;
+    this.userLanguageCheck = !!event.detail.language;
+    this.checkAndRender();
+  },
+
+  onTargetLanguageUpdate(event) {
+    console.log(`target lanugage changed to: ${event.detail.language}`);
+    this.targetLanguageCheck = !!event.detail.language;
     this.checkAndRender();
   },
 
   checkAndRender() {
-    this.el.object3D.visible = this.userCheck && this.languageCheck;
+    const check = this.userCheck && this.targetLanguageCheck && this.userLanguageCheck;
+    this.el.object3D.visible = check;
+    console.log(
+      `Panel updates. user check: ${this.userCheck} | user lanugage check: ${this.userLanguageCheck} | target language check: ${this.targetLanguageCheck}, should be visible: ${check}`
+    );
   }
 });

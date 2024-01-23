@@ -18,14 +18,15 @@ export function MapSpawnButton({ scene }) {
   const description = intl.formatMessage(MapTooltipDescription);
 
   const clickCallback = () => {
-    scene.emit("map-toggle");
+    scene.emit("lang-toggle");
   };
 
   const activateButton = () => {
     setActive(scene.is("map"));
   };
 
-  window.addEventListener("map-toggle", activateButton);
+  window.addEventListener("lang-toggle", activateButton);
+  window.addEventListener("clear-scene", activateButton);
 
   return (
     <ToolTip description={description}>

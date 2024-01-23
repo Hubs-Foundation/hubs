@@ -50,8 +50,8 @@ class objElement {
 
 export default class VirtualAgent {
   constructor() {
-    this.initialized = false;
     this.allowed = null;
+
     this.agent = new objElement();
     this.nextArrow = new objElement();
     this.prevArrow = new objElement();
@@ -59,23 +59,16 @@ export default class VirtualAgent {
     this.snapButton = new objElement();
     this.panel = new objElement();
     this.text = new objElement();
+
     this.onClear = this.onClear.bind(this);
+    this.onToggle = this.onToggle.bind(this);
+    this.setMicStatus = this.setMicStatus.bind(this);
   }
 
-  Init(hubProperties) {
-    const agentToggle = () => {
-      if (!APP.scene.is("agent")) {
-        APP.scene.emit("clear-scene");
-        this.Instantiate();
-      } else {
-        this.Remove();
-      }
-    };
-
-    if (this.initialized) {
-      APP.scene.removeEventListener("agent-toggle", agentToggle);
+  Init(hubProperties, reset) {
+    if (reset) {
+      APP.scene.removeEventListener("agent-toggle", this.onToggle);
       APP.scene.removeEventListener("clear-scene", this.onClear);
-      this.initialized = false;
     }
 
     if (!hubProperties.allow_agent) {
@@ -86,16 +79,9 @@ export default class VirtualAgent {
 
     this.allowed = true;
     this.avatarPovObj = document.querySelector("#avatar-pov-node").object3D;
-    APP.scene.addEventListener("agent-toggle", agentToggle);
+    APP.scene.addEventListener("agent-toggle", this.onToggle);
     APP.scene.addEventListener("clear-scene", this.onClear);
     APP.scene.emit("agent-toggle");
-    this.initialized = true;
-  }
-
-  onClear() {
-    if (APP.scene.is("agent")) {
-      this.Remove();
-    }
   }
 
   Remove() {
@@ -133,6 +119,31 @@ export default class VirtualAgent {
     this.agent.obj.visible = true;
   }
 
+  Cleanup() {
+    this.agent.update(null);
+    this.nextArrow.update(null);
+    this.prevArrow.update(null);
+    this.micButton.update(null);
+    this.snapButton.update(null);
+    this.panel.update(null);
+    this.text.update(null);
+  }
+
+  onClear() {
+    if (APP.scene.is("agent")) {
+      this.Remove();
+    }
+  }
+
+  onToggle() {
+    if (!APP.scene.is("agent")) {
+      APP.scene.emit("clear-scene");
+      this.Instantiate();
+    } else {
+      this.Remove();
+    }
+  }
+
   get exists() {
     return !!this.agent.eid;
   }
@@ -157,7 +168,7 @@ export default class VirtualAgent {
       const toggleResponse = await toggleRecording(savefile);
 
       if (toggleResponse.status.code === COMPONENT_CODES.Successful) {
-        const sourceLang = subtitleSystem.targetLanguage ? subtitleSystem.targetLanguage : "en";
+        const sourceLang = subtitleSystem.mylanguage ? subtitleSystem.mylanguage : "en";
         const nmtParameters = { source_language: sourceLang, target_language: "en", return_transcription: "true" };
         let knowledgeRespone;
 

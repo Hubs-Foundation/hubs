@@ -131,7 +131,8 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
       iceTransportPolicy: APP.dialog._iceTransportPolicy
     }),
 
-    NAF.connection.adapter.connect()
+    NAF.connection.adapter.connect(),
+    APP.entryManager.setupVRConferece(true)
   ]);
 
   if (qsTruthy("newLoader")) {
@@ -148,9 +149,6 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
     hubName: hub.name,
     showLineBreak: true
   });
-
-  APP.entryManager.setupVRConferece();
-  console.log("Reseting vr conference parameters");
 }
 window.changeHub = changeHub;
 
