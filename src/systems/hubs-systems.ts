@@ -90,6 +90,7 @@ import { followInFovSystem } from "../bit-systems/follow-in-fov-system";
 import { linkedMediaSystem } from "../bit-systems/linked-media-system";
 import { linkedVideoSystem } from "../bit-systems/linked-video-system";
 import { linkedPDFSystem } from "../bit-systems/linked-pdf-system";
+import { inspectSystem } from "../bit-systems/inspect-system";
 
 declare global {
   interface Window {
@@ -283,6 +284,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   linkedMediaSystem(world);
   linkedVideoSystem(world);
   linkedPDFSystem(world);
+  inspectSystem(world, hubsSystems.cameraSystem);
 
   objectMenuTransformSystem(world);
 

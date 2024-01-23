@@ -7,6 +7,7 @@ import scaleIconSrc from "../assets/scale-action.png";
 import removeIconSrc from "../assets/remove-action.png";
 import dropIconSrc from "../assets/drop-action.png";
 import mirrorIconSrc from "../assets/mirror-action.png";
+import inspectIconSrc from "../assets/focus-action.png";
 import { Plane } from "./plane";
 import { FrontSide } from "three";
 import { Layers } from "../camera-layers";
@@ -17,7 +18,8 @@ export async function loadObjectMenuButtonIcons() {
     loadTexture(scaleIconSrc, 1, "image/png"),
     loadTexture(removeIconSrc, 1, "image/png"),
     loadTexture(dropIconSrc, 1, "image/png"),
-    loadTexture(mirrorIconSrc, 1, "image/png")
+    loadTexture(mirrorIconSrc, 1, "image/png"),
+    loadTexture(inspectIconSrc, 1, "image/png")
   ]);
 }
 
@@ -112,14 +114,16 @@ function DropButton(props: Attrs) {
 }
 
 function InspectButton(props: Attrs) {
+  const { texture, cacheKey } = loadTextureFromCache(inspectIconSrc, 1);
   return (
     <Button3D
       name="Inspect Button"
       scale={buttonScale}
-      width={0.4}
+      width={buttonHeight}
       height={buttonHeight}
       type={BUTTON_TYPES.DEFAULT}
-      text={"inspect"}
+      holdable
+      icon={{ texture, cacheKey, scale: [0.165, 0.165, 0.165] }}
       {...props}
     />
   );
@@ -237,7 +241,7 @@ const position = {
   track:              [ 0.25,  0.375, uiZ] as ArrayVec3,
   remove:             [    0, -0.275, uiZ] as ArrayVec3,
   drop:               [    0, -0.425, uiZ] as ArrayVec3,
-  inspect:            [ -0.1, -0.625, uiZ] as ArrayVec3,
+  inspect:            [    0, -0.425, uiZ] as ArrayVec3,
   deserializeDrawing: [ -0.3, -0.625, uiZ] as ArrayVec3,
   openLink:           [ 0.25, -0.275, uiZ] as ArrayVec3,
   refresh:            [  0.3, -0.625, uiZ] as ArrayVec3,

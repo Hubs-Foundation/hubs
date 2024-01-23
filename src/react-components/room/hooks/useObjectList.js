@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useContext, createContext, useCallback, Children, cloneElement } from "react";
 import PropTypes from "prop-types";
 import { mediaSort, mediaSortAframe, getMediaType, getMediaTypeAframe } from "../../../utils/media-sorting.js";
-import { shouldUseNewLoader } from "../../../utils/bit-utils";
-import { defineQuery, hasComponent } from "bitecs";
-import { MediaInfo } from "../../../bit-components.js";
+import { anyEntityWith, shouldUseNewLoader } from "../../../utils/bit-utils";
+import { addComponent, defineQuery, hasComponent, removeComponent } from "bitecs";
+import { Inspected, MediaInfo } from "../../../bit-components.js";
 
 function getUrl(eid) {
   return hasComponent(APP.world, MediaInfo, eid) ? APP.getString(MediaInfo.accessibleUrl[eid]) : "";
@@ -56,14 +56,22 @@ function handleInspect(scene, object, callback) {
 
   callback(object);
 
-  const object3D = shouldUseNewLoader() ? APP.world.eid2obj.get(object.eid) : object.el.object3D;
-
-  if (object3D !== cameraSystem.inspectable) {
-    if (cameraSystem.inspectable) {
-      cameraSystem.uninspect(false);
+  if (shouldUseNewLoader()) {
+    const inspected = anyEntityWith(APP.world, Inspected);
+    if (inspected != object.eid) {
+      if (inspected) {
+        removeComponent(APP.world, Inspected, inspected);
+      }
+      addComponent(APP.world, Inspected, object.eid);
     }
+  } else {
+    if (object.el.object3D !== cameraSystem.inspectable) {
+      if (cameraSystem.inspectable) {
+        cameraSystem.uninspect(false);
+      }
 
-    cameraSystem.inspect(object3D, 1.5, false);
+      cameraSystem.inspect(object.el.object3D, 1.5, false);
+    }
   }
 }
 
@@ -72,11 +80,20 @@ function handleDeselect(scene, object, callback) {
 
   callback(null);
 
-  cameraSystem.uninspect(false);
+  if (shouldUseNewLoader()) {
+    const inspected = anyEntityWith(APP.world, Inspected);
+    if (inspected) {
+      removeComponent(APP.world, Inspected, inspected);
+    }
+    if (object) {
+      addComponent(APP.world, Inspected, object.eid);
+    }
+  } else {
+    cameraSystem.uninspect(false);
 
-  if (object) {
-    const object3D = shouldUseNewLoader() ? APP.world.eid2obj.get(object.eid) : object.el.object3D;
-    cameraSystem.inspect(object3D, 1.5, false);
+    if (object) {
+      cameraSystem.inspect(object.el.object3D, 1.5, false);
+    }
   }
 }
 

@@ -1,4 +1,4 @@
-import { addComponent, defineQuery, enterQuery, entityExists, exitQuery, hasComponent } from "bitecs";
+import { addComponent, defineQuery, enterQuery, entityExists, exitQuery, hasComponent, removeComponent } from "bitecs";
 import { Matrix4, Vector3 } from "three";
 import type { HubsWorld } from "../app";
 import {
@@ -13,7 +13,6 @@ import {
   RemoteRight,
   Rigidbody,
   Deleting,
-  Deletable,
   MediaLoader,
   ObjectDropped,
   FloatyObject,
@@ -21,7 +20,11 @@ import {
   MediaVideo,
   MediaImage,
   MediaPDF,
-  MediaMirrored
+  MediaMirrored,
+  Inspected,
+  Inspectable,
+  Deletable,
+  InspectTargetChanged
 } from "../bit-components";
 import {
   anyEntityWith,
@@ -58,6 +61,11 @@ function clicked(world: HubsWorld, eid: EntityID) {
 }
 
 function objectMenuTarget(world: HubsWorld, menu: EntityID, sceneIsFrozen: boolean) {
+  const held = heldQuery(world).map(eid => eid === ObjectMenu.inspectButtonRef[menu])[0];
+  if (held) {
+    return ObjectMenu.targetRef[menu];
+  }
+
   if (!sceneIsFrozen) {
     return 0;
   }
@@ -81,7 +89,6 @@ function objectMenuTarget(world: HubsWorld, menu: EntityID, sceneIsFrozen: boole
   if (entityExists(world, ObjectMenu.targetRef[menu])) {
     return ObjectMenu.targetRef[menu];
   }
-
   return 0;
 }
 
@@ -192,8 +199,6 @@ function handleClicks(world: HubsWorld, menu: EntityID, hubChannel: HubChannel) 
     deleteTheDeletableAncestor(world, ObjectMenu.targetRef[menu]);
   } else if (clicked(world, ObjectMenu.dropButtonRef[menu])) {
     addComponent(world, ObjectDropped, ObjectMenu.targetRef[menu]);
-  } else if (clicked(world, ObjectMenu.inspectButtonRef[menu])) {
-    console.log("Clicked inspect");
   } else if (clicked(world, ObjectMenu.deserializeDrawingButtonRef[menu])) {
     console.log("Clicked deserialize drawing");
   } else if (clicked(world, ObjectMenu.openLinkButtonRef[menu])) {
@@ -217,6 +222,13 @@ function handleHeldEnter(world: HubsWorld, eid: EntityID, menuEid: EntityID) {
       ObjectMenu.flags[menuEid] &= ~ObjectMenuFlags.Visible;
       startScaling(world, menuEid, ObjectMenu.targetRef[menuEid]);
       break;
+    case ObjectMenu.inspectButtonRef[menuEid]:
+      if (!hasComponent(world, Inspected, ObjectMenu.targetRef[menuEid])) {
+        ObjectMenu.flags[menuEid] &= ~ObjectMenuFlags.Visible;
+        addComponent(world, Inspected, ObjectMenu.targetRef[menuEid]);
+        addComponent(world, InspectTargetChanged, ObjectMenu.targetRef[menuEid]);
+      }
+      break;
   }
 }
 
@@ -229,6 +241,13 @@ function handleHeldExit(world: HubsWorld, eid: EntityID, menuEid: EntityID) {
     case ObjectMenu.scaleButtonRef[menuEid]:
       ObjectMenu.flags[menuEid] |= ObjectMenuFlags.Visible;
       stopScaling(world, menuEid);
+      break;
+    case ObjectMenu.inspectButtonRef[menuEid]:
+      if (hasComponent(world, Inspected, ObjectMenu.targetRef[menuEid])) {
+        ObjectMenu.flags[menuEid] |= ObjectMenuFlags.Visible;
+        removeComponent(world, Inspected, ObjectMenu.targetRef[menuEid]);
+        addComponent(world, InspectTargetChanged, ObjectMenu.targetRef[menuEid]);
+      }
       break;
   }
 }
@@ -263,6 +282,8 @@ function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
   const media = MediaLoader.mediaRef[target];
   const isVideoImagePdf = hasAnyComponent(world, [MediaVideo, MediaImage, MediaPDF], media);
   const isMirrored = hasComponent(world, MediaMirrored, target);
+  const isInspectable = hasComponent(world, Inspectable, target);
+  const isInspected = hasComponent(world, Inspected, target);
 
   // Parent visibility doesn't block raycasting, so we must set each button to be invisible
   // TODO: Ensure that children of invisible entities aren't raycastable
@@ -278,6 +299,7 @@ function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
   world.eid2obj.get(ObjectMenu.dropButtonRef[menu])!.visible =
     !isVideoImagePdf && !isEntityPinned && !hasComponent(world, ObjectDropped, target);
   world.eid2obj.get(ObjectMenu.mirrorButtonRef[menu])!.visible = isVideoImagePdf && !isMirrored;
+  world.eid2obj.get(ObjectMenu.inspectButtonRef[menu])!.visible = isVideoImagePdf && isInspectable && !isInspected;
 
   // This is a hacky way of giving a chance to the object-menu-transform system to center the menu based on the
   // visible buttons without accounting for the background plane.
@@ -289,7 +311,6 @@ function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
   world.eid2obj.get(ObjectMenu.cameraFocusButtonRef[menu])!.visible = false;
   world.eid2obj.get(ObjectMenu.cameraTrackButtonRef[menu])!.visible = false;
   world.eid2obj.get(ObjectMenu.deserializeDrawingButtonRef[menu])!.visible = false;
-  world.eid2obj.get(ObjectMenu.inspectButtonRef[menu])!.visible = false;
   world.eid2obj.get(ObjectMenu.refreshButtonRef[menu])!.visible = false;
 }
 
