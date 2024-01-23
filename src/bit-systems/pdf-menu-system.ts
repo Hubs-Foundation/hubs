@@ -1,8 +1,7 @@
-import { addComponent, defineQuery, entityExists, hasComponent, removeComponent } from "bitecs";
+import { addComponent, defineQuery, entityExists, hasComponent } from "bitecs";
 import { Text } from "troika-three-text";
 import type { HubsWorld } from "../app";
 import {
-  CursorRaycastable,
   Deleting,
   EntityStateDirty,
   HoveredRemoteRight,
@@ -19,13 +18,6 @@ import type { EntityID } from "../utils/networking-types";
 import { takeOwnership } from "../utils/take-ownership";
 import { PDFResourcesMap } from "./pdf-system";
 import { ObjectMenuTransformFlags } from "../inflators/object-menu-transform";
-
-function setCursorRaycastable(world: HubsWorld, menu: EntityID, enable: boolean) {
-  let change = enable ? addComponent : removeComponent;
-  change(world, CursorRaycastable, menu);
-  change(world, CursorRaycastable, PDFMenu.prevButtonRef[menu]);
-  change(world, CursorRaycastable, PDFMenu.nextButtonRef[menu]);
-}
 
 function clicked(world: HubsWorld, eid: EntityID) {
   return hasComponent(world, Interacted, eid);
@@ -118,8 +110,6 @@ function flushToObject3Ds(world: HubsWorld, menu: EntityID, frozen: boolean) {
     const numPages = PDFResourcesMap.get(target)!.pdf.numPages;
     (world.eid2obj.get(PDFMenu.pageLabelRef[menu]) as Text).text = `${MediaPDF.pageNumber[target]} / ${numPages}`;
   }
-
-  setCursorRaycastable(world, menu, visible);
 }
 
 const hoveredQuery = defineQuery([HoveredRemoteRight]);
