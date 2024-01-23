@@ -6,7 +6,7 @@ import { useObjectList } from "./hooks/useObjectList";
 
 export function ObjectsSidebarContainer({ onClose, hubChannel }) {
   const listRef = useRef();
-  const { objects, selectedObject, selectObject, unfocusObject, focusObject } = useObjectList();
+  const { objects, selectedObject, selectObject, deselectObject, unfocusObject, focusObject } = useObjectList();
 
   const onUnfocusListItem = useCallback(
     e => {
@@ -17,8 +17,13 @@ export function ObjectsSidebarContainer({ onClose, hubChannel }) {
     [unfocusObject, listRef]
   );
 
+  const onCloseWrapper = useCallback(() => {
+    deselectObject();
+    onClose();
+  }, [deselectObject, onClose]);
+
   return (
-    <ObjectsSidebar objectCount={objects.length} onClose={onClose}>
+    <ObjectsSidebar objectCount={objects.length} onClose={onCloseWrapper}>
       {objects.length > 0 ? (
         <List ref={listRef}>
           {objects.map(object => (
