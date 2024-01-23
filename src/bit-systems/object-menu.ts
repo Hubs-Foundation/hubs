@@ -22,7 +22,8 @@ import {
   MediaPDF,
   MediaMirrored,
   Inspected,
-  Inspectable
+  Inspectable,
+  Deletable
 } from "../bit-components";
 import {
   anyEntityWith,
@@ -73,7 +74,7 @@ function objectMenuTarget(world: HubsWorld, menu: EntityID, sceneIsFrozen: boole
   // We should probably use something more meaningful to refer to that spawned media root than Deletable.
   // Maybe something like MediaRoot or SpawnedMediaRoot.
   const target = hoveredQuery(world).map(eid =>
-    findAncestorWithComponents(world, [Inspectable, ObjectMenuTarget], eid)
+    findAncestorWithComponents(world, [Deletable, ObjectMenuTarget], eid)
   )[0];
   if (target) {
     if (hasComponent(world, Deleting, target)) {
