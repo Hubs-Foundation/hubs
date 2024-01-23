@@ -2,6 +2,7 @@
 
 import { hasComponent } from "bitecs";
 import { HoldableButton } from "../bit-components";
+import { CAMERA_MODE_INSPECT } from "../systems/camera-system";
 
 // https://github.com/mozilla/hubs/wiki/Hubs-authorization
 export function showHoverEffect(el) {
@@ -15,7 +16,8 @@ export function showHoverEffect(el) {
       ? window.APP.hubChannel.can("spawn_emoji")
       : window.APP.hubChannel.can("spawn_and_move_media")) &&
     (!isPinned || window.APP.hubChannel.can("pin_objects"));
-  return (isSpawner || !isPinned || isFrozen) && canMove;
+  const isInspecting = el.sceneEl.systems["hubs-systems"].cameraSystem.mode === CAMERA_MODE_INSPECT;
+  return (isSpawner || !isPinned || isFrozen) && canMove && !isInspecting;
 }
 
 export function canMove(entity) {

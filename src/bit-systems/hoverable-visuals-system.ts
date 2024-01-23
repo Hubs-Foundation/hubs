@@ -10,6 +10,7 @@ import {
   HoveredHandRight,
   HoveredRemoteLeft,
   HoveredRemoteRight,
+  Inspected,
   RemoteLeft,
   RemoteRight
 } from "../bit-components";
@@ -45,9 +46,10 @@ export function hoverableVisualsSystem(world: HubsWorld) {
   hoverableVisualsExitQuery(world).forEach(eid => HoverableVisualsUniforms.delete(eid));
   hoverableVisualsEnterQuery(world).forEach(eid => updateHoverableVisuals(world, eid));
   hoverableVisualsQuery(world).forEach(eid => {
+    const isInspecting = anyEntityWith(world, Inspected);
     const isFrozen = APP.scene!.is("frozen");
     const isEntityPinned = isPinned(eid);
-    const showEffect = !isEntityPinned || isFrozen;
+    const showEffect = (!isEntityPinned && !isInspecting) || isFrozen;
 
     const uniforms = HoverableVisualsUniforms.get(eid);
     if (uniforms && uniforms.length) {
