@@ -174,7 +174,11 @@ export function audioDebugSystem(world: HubsWorld) {
   if (isEnabled && uniforms) {
     let idx = 0;
     APP.audios.forEach((audio: AudioObject3D, audioEmitterId: ElOrEid) => {
-      if (APP.isAudioPaused.has(audioEmitterId) || APP.mutedState.has(audioEmitterId)) {
+      if (
+        APP.isAudioPaused.has(audioEmitterId) ||
+        APP.mutedState.has(audioEmitterId) ||
+        APP.linkedMutedState.has(audioEmitterId)
+      ) {
         return;
       }
       if (idx >= maxDebugEmitters) return;

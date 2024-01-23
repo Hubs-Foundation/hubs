@@ -5,13 +5,16 @@ import { Text as TroikaText } from "troika-three-text";
 import { HubsWorld } from "../app";
 import {
   CursorRaycastable,
+  Deleting,
   EntityStateDirty,
   Held,
   HeldRemoteRight,
   HoveredRemoteRight,
   Interacted,
+  MediaLoader,
   MediaVideo,
   MediaVideoData,
+  MediaVideoUpdated,
   NetworkedVideo,
   ObjectMenuTransform,
   VideoMenu
@@ -88,7 +91,12 @@ function findVideoMenuTarget(world: HubsWorld, menu: EntityID, sceneIsFrozen: bo
 
 function flushToObject3Ds(world: HubsWorld, menu: EntityID, frozen: boolean) {
   const target = VideoMenu.videoRef[menu];
-  const visible = !!(target && !frozen);
+  let visible = !!(target && !frozen);
+
+  const loader = findAncestorWithComponent(world, MediaLoader, target);
+  if (loader && hasComponent(world, Deleting, loader)) {
+    visible = false;
+  }
 
   const obj = world.eid2obj.get(menu)!;
   obj.visible = visible;
@@ -123,6 +131,7 @@ function handleClicks(world: HubsWorld, menu: EntityID) {
       takeOwnership(world, videoEid);
       addComponent(world, EntityStateDirty, videoEid);
     }
+    addComponent(world, MediaVideoUpdated, videoEid);
   } else if (clicked(world, VideoMenu.pauseIndicatorRef[menu])) {
     video.pause();
     APP.isAudioPaused.add(audioEid);
@@ -130,6 +139,7 @@ function handleClicks(world: HubsWorld, menu: EntityID) {
       takeOwnership(world, videoEid);
       addComponent(world, EntityStateDirty, videoEid);
     }
+    addComponent(world, MediaVideoUpdated, videoEid);
   }
 }
 
@@ -177,6 +187,7 @@ export function videoMenuSystem(world: HubsWorld, userinput: any, sceneIsFrozen:
         takeOwnership(world, videoEid);
         addComponent(world, EntityStateDirty, videoEid);
       }
+      addComponent(world, MediaVideoUpdated, videoEid);
     }
     headObj.position.x = mapLinear(video.currentTime, 0, video.duration, -sliderHalfWidth, sliderHalfWidth);
     headObj.matrixNeedsUpdate = true;

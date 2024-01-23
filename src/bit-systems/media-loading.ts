@@ -23,8 +23,10 @@ import {
   MediaLoader,
   MediaLoading,
   MediaVideoLoaderData,
+  MirroredMedia,
   Networked,
-  ObjectMenuTarget
+  ObjectMenuTarget,
+  Rigidbody
 } from "../bit-components";
 import { inflatePhysicsShape, Shape } from "../inflators/physics-shape";
 import { ErrorObject } from "../prefabs/error-object";
@@ -168,12 +170,14 @@ function* finish(world: HubsWorld, mediaLoaderEid: EntityID) {
     yield* animateScale(world, mediaLoaderEid);
   }
   if (entityExists(world, mediaLoaderEid)) {
-    inflatePhysicsShape(world, mediaLoaderEid, {
-      type: Shape.HULL,
-      minHalfExtent: 0.04
-    });
     if (hasComponent(world, HoverableVisuals, mediaLoaderEid)) {
       updateHoverableVisuals(world, mediaLoaderEid);
+    }
+    if (hasComponent(world, Rigidbody, mediaLoaderEid)) {
+      inflatePhysicsShape(world, mediaLoaderEid, {
+        type: Shape.HULL,
+        minHalfExtent: 0.04
+      });
     }
   }
 }
@@ -219,6 +223,7 @@ function* loadByMediaType(
   //       transporting data from the inflators. This may be like
   //       special and a bit less maintainable.
   let mediaEid;
+  const isLinked = hasComponent(world, MirroredMedia, eid);
   switch (mediaType) {
     case MediaType.IMAGE:
       mediaEid = yield* loadImage(
@@ -235,20 +240,22 @@ function* loadByMediaType(
         eid,
         accessibleUrl,
         contentType,
-        MediaVideoLoaderData.has(eid) ? MediaVideoLoaderData.get(eid)! : {}
+        MediaVideoLoaderData.has(eid) ? MediaVideoLoaderData.get(eid)! : {},
+        !isLinked
       );
       break;
     case MediaType.MODEL:
       mediaEid = yield* loadModel(world, accessibleUrl, contentType, true);
       break;
     case MediaType.PDF:
-      return yield* loadPDF(world, eid, accessibleUrl);
+      return yield* loadPDF(world, eid, accessibleUrl, !isLinked);
     case MediaType.AUDIO:
       mediaEid = yield* loadAudio(
         world,
         eid,
         accessibleUrl,
-        MediaVideoLoaderData.has(eid) ? MediaVideoLoaderData.get(eid)! : {}
+        MediaVideoLoaderData.has(eid) ? MediaVideoLoaderData.get(eid)! : {},
+        !isLinked
       );
       break;
     case MediaType.HTML:

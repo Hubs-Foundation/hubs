@@ -6,7 +6,9 @@ import {
   EntityStateDirty,
   HoveredRemoteRight,
   Interacted,
+  MediaLoader,
   MediaPDF,
+  MediaPDFUpdated,
   NetworkedPDF,
   ObjectMenuTransform,
   PDFMenu
@@ -58,24 +60,32 @@ function wrapAround(n: number, min: number, max: number) {
 }
 
 function setPage(world: HubsWorld, eid: EntityID, pageNumber: number) {
-  takeOwnership(world, eid);
-  addComponent(world, EntityStateDirty, eid);
-  NetworkedPDF.pageNumber[eid] = wrapAround(pageNumber, 1, PDFResourcesMap.get(eid)!.pdf.numPages);
+  if (hasComponent(world, NetworkedPDF, eid)) {
+    takeOwnership(world, eid);
+    addComponent(world, EntityStateDirty, eid);
+  }
+  addComponent(world, MediaPDFUpdated, eid);
+  MediaPDFUpdated.pageNumber[eid] = wrapAround(pageNumber, 1, PDFResourcesMap.get(eid)!.pdf.numPages);
 }
 
 function handleClicks(world: HubsWorld, menu: EntityID) {
   if (clicked(world, PDFMenu.nextButtonRef[menu])) {
     const pdf = PDFMenu.targetRef[menu];
-    setPage(world, pdf, NetworkedPDF.pageNumber[pdf] + 1);
+    setPage(world, pdf, MediaPDF.pageNumber[pdf] + 1);
   } else if (clicked(world, PDFMenu.prevButtonRef[menu])) {
     const pdf = PDFMenu.targetRef[menu];
-    setPage(world, pdf, NetworkedPDF.pageNumber[pdf] - 1);
+    setPage(world, pdf, MediaPDF.pageNumber[pdf] - 1);
   }
 }
 
 function flushToObject3Ds(world: HubsWorld, menu: EntityID, frozen: boolean) {
   const target = PDFMenu.targetRef[menu];
-  const visible = !!(target && !frozen);
+  let visible = !!(target && !frozen);
+
+  const loader = findAncestorWithComponent(world, MediaLoader, target);
+  if (loader && hasComponent(world, Deleting, loader)) {
+    visible = false;
+  }
 
   const obj = world.eid2obj.get(menu)!;
   obj.visible = visible;
@@ -98,7 +108,7 @@ function flushToObject3Ds(world: HubsWorld, menu: EntityID, frozen: boolean) {
 
   if (target) {
     const numPages = PDFResourcesMap.get(target)!.pdf.numPages;
-    (world.eid2obj.get(PDFMenu.pageLabelRef[menu]) as Text).text = `${NetworkedPDF.pageNumber[target]} / ${numPages}`;
+    (world.eid2obj.get(PDFMenu.pageLabelRef[menu]) as Text).text = `${MediaPDF.pageNumber[target]} / ${numPages}`;
   }
 }
 

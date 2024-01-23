@@ -1,8 +1,8 @@
-import { defineQuery, exitQuery } from "bitecs";
+import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent } from "bitecs";
 import { GlobalWorkerOptions, PDFPageProxy } from "pdfjs-dist";
 import { Object3D } from "three";
 import { HubsWorld } from "../app";
-import { MediaPDF, NetworkedPDF } from "../bit-components";
+import { MediaPDF, MediaPDFUpdated, NetworkedPDF, Owned } from "../bit-components";
 import { PDFResources } from "../inflators/pdf";
 import { JobRunner } from "../utils/coroutine-utils";
 import { EntityID } from "../utils/networking-types";
@@ -58,18 +58,33 @@ export function* loadPageAndSetScale(world: HubsWorld, eid: EntityID, pageNumber
   // so wait until it is finished. This is rarely necessary.
   yield* waitForMediaLoaded(world, mesh.parent!.eid!);
   fitToAspect(mesh, aspect);
+  MediaPDF.pageNumber[eid] = pageNumber;
+  removeComponent(world, MediaPDFUpdated, eid);
 }
 
 const jobs = new JobRunner();
-const pdfQuery = defineQuery([MediaPDF, NetworkedPDF]);
+const pdfQuery = defineQuery([MediaPDF]);
+const pdfEnterQuery = enterQuery(pdfQuery);
+const pdfUpdatedQuery = defineQuery([MediaPDF, MediaPDFUpdated]);
+const pdfUpdatedEnterQuery = enterQuery(pdfUpdatedQuery);
+const networkedPdfQuery = defineQuery([MediaPDF, NetworkedPDF]);
 const pdfExitQuery = exitQuery(pdfQuery);
 export function pdfSystem(world: HubsWorld) {
-  pdfQuery(world).forEach(function (eid) {
-    if (MediaPDF.pageNumber[eid] !== NetworkedPDF.pageNumber[eid]) {
-      MediaPDF.pageNumber[eid] = NetworkedPDF.pageNumber[eid];
-
-      jobs.stop(eid);
-      jobs.add(eid, () => loadPageAndSetScale(world, eid, NetworkedPDF.pageNumber[eid]));
+  pdfEnterQuery(world).forEach(eid => {
+    jobs.add(eid, () => loadPageAndSetScale(world, eid, MediaPDF.pageNumber[eid]));
+  });
+  pdfUpdatedEnterQuery(world).forEach(eid => {
+    jobs.stop(eid);
+    jobs.add(eid, () => loadPageAndSetScale(world, eid, MediaPDFUpdated.pageNumber[eid]));
+  });
+  networkedPdfQuery(world).forEach(function (eid) {
+    if (hasComponent(world, Owned, eid)) {
+      NetworkedPDF.pageNumber[eid] = MediaPDF.pageNumber[eid];
+    } else {
+      if (MediaPDF.pageNumber[eid] !== NetworkedPDF.pageNumber[eid] && !hasComponent(world, MediaPDFUpdated, eid)) {
+        addComponent(world, MediaPDFUpdated, eid);
+        MediaPDFUpdated.pageNumber[eid] = NetworkedPDF.pageNumber[eid];
+      }
     }
   });
 
