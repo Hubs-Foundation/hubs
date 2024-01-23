@@ -8,9 +8,21 @@ import { qsGet } from "../utils/qs_truthy";
 const customFOV = qsGet("fov");
 const enableThirdPersonMode = qsTruthy("thirdPerson");
 import { Layers } from "../camera-layers";
-import { HoveredRemoteRight, Inspectable, LocalAvatar, RemoteAvatar } from "../bit-components";
-import { findAncestorWithAnyComponent, findAncestorWithComponent, shouldUseNewLoader } from "../utils/bit-utils";
-import { defineQuery } from "bitecs";
+import {
+  HoveredRemoteRight,
+  InspectTargetChanged,
+  Inspectable,
+  Inspected,
+  LocalAvatar,
+  RemoteAvatar
+} from "../bit-components";
+import {
+  anyEntityWith,
+  findAncestorWithAnyComponent,
+  findAncestorWithComponent,
+  shouldUseNewLoader
+} from "../utils/bit-utils";
+import { addComponent, defineQuery, removeComponent } from "bitecs";
 
 function getInspectableInHierarchy(eid) {
   let inspectable = findAncestorWithComponent(APP.world, Inspectable, eid);
@@ -460,8 +472,8 @@ export class CameraSystem {
         if (shouldUseNewLoader()) {
           if (hoveredQuery(APP.world).length) {
             const hovered = hoveredQuery(APP.world)[0];
-            const obj = APP.world.eid2obj.get(hovered);
-            this.inspect(obj, 1.5);
+            addComponent(APP.world, Inspected, hovered);
+            addComponent(APP.world, InspectTargetChanged, hovered);
           }
         } else {
           const hoverEl = this.interaction.state.rightRemote.hovered || this.interaction.state.leftRemote.hovered;
@@ -472,7 +484,14 @@ export class CameraSystem {
         }
       } else if (this.mode === CAMERA_MODE_INSPECT && this.userinput.get(paths.actions.stopInspecting)) {
         scene.emit("uninspect");
-        this.uninspect();
+        if (shouldUseNewLoader()) {
+          const inspected = anyEntityWith(APP.world, Inspected);
+          if (inspected) {
+            removeComponent(APP.world, Inspected, inspected);
+          }
+        } else {
+          this.uninspect();
+        }
       }
 
       if (this.userinput.get(paths.actions.nextCameraMode)) {

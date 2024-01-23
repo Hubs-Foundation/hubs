@@ -23,7 +23,8 @@ import {
   MediaMirrored,
   Inspected,
   Inspectable,
-  Deletable
+  Deletable,
+  InspectTargetChanged
 } from "../bit-components";
 import {
   anyEntityWith,
@@ -225,7 +226,7 @@ function handleHeldEnter(world: HubsWorld, eid: EntityID, menuEid: EntityID) {
       if (!hasComponent(world, Inspected, ObjectMenu.targetRef[menuEid])) {
         ObjectMenu.flags[menuEid] &= ~ObjectMenuFlags.Visible;
         addComponent(world, Inspected, ObjectMenu.targetRef[menuEid]);
-        Inspectable.fireChangeEvent[ObjectMenu.targetRef[menuEid]] = 1;
+        addComponent(world, InspectTargetChanged, ObjectMenu.targetRef[menuEid]);
       }
       break;
   }
@@ -245,7 +246,7 @@ function handleHeldExit(world: HubsWorld, eid: EntityID, menuEid: EntityID) {
       if (hasComponent(world, Inspected, ObjectMenu.targetRef[menuEid])) {
         ObjectMenu.flags[menuEid] |= ObjectMenuFlags.Visible;
         removeComponent(world, Inspected, ObjectMenu.targetRef[menuEid]);
-        Inspectable.fireChangeEvent[ObjectMenu.targetRef[menuEid]] = 1;
+        addComponent(world, InspectTargetChanged, ObjectMenu.targetRef[menuEid]);
       }
       break;
   }
