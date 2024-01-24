@@ -100,8 +100,9 @@ export const PenActive = defineComponent();
 export const PenUpdated = defineComponent();
 export const HoverMenuChild = defineComponent();
 export const Static = defineComponent();
-export const Inspectable = defineComponent();
-export const InspectTargetChanged = defineComponent();
+export const Inspectable = defineComponent({
+  flags: Types.ui8
+});
 export const Inspected = defineComponent();
 export const PreventAudioBoost = defineComponent();
 export const IgnoreSpaceBubble = defineComponent();

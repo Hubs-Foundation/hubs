@@ -117,6 +117,11 @@ export function ObjectListProvider({ scene, children }) {
             eid: eid
           }));
         setObjects(objects);
+
+        const inspected = anyEntityWith(APP.world, Inspected);
+        if (!inspected || !objects.find(o => o.eid === inspected)) {
+          setSelectedObject(null);
+        }
       } else {
         const objects = scene.systems["listed-media"].els.sort(mediaSortAframe).map(el => ({
           id: el.object3D.id,
@@ -126,6 +131,13 @@ export function ObjectListProvider({ scene, children }) {
           el
         }));
         setObjects(objects);
+
+        const cameraSystem = scene.systems["hubs-systems"].cameraSystem;
+        const inspectedEl = cameraSystem.inspectable && cameraSystem.inspectable.el;
+
+        if (!inspectedEl || !objects.find(o => o.el === inspectedEl)) {
+          setSelectedObject(null);
+        }
       }
     }
 
@@ -145,32 +157,31 @@ export function ObjectListProvider({ scene, children }) {
       scene.removeEventListener("listed_media_changed", updateMediaEntities);
       clearTimeout(timeout);
     };
-  }, [scene, setObjects]);
+  }, [scene, setObjects, setSelectedObject]);
 
   useEffect(() => {
     function onInspectTargetChanged() {
-      const cameraSystem = scene.systems["hubs-systems"].cameraSystem;
-
       if (shouldUseNewLoader()) {
-        const inspectedEid = cameraSystem.inspectable && cameraSystem.inspectable.eid;
+        const inspected = anyEntityWith(APP.world, Inspected);
 
-        if (inspectedEid) {
-          const object = objects.find(o => o.eid === inspectedEid);
+        if (inspected) {
+          const object = objects.find(o => o.eid === inspected);
 
           if (object) {
             setSelectedObject(object);
           } else {
             setSelectedObject({
-              id: APP.world.eid2obj.get(inspectedEid)?.id,
-              name: getDisplayString(getUrl(inspectedEid)),
-              type: getMediaType(inspectedEid),
-              eid: inspectedEid
+              id: APP.world.eid2obj.get(inspected)?.id,
+              name: getDisplayString(getUrl(inspected)),
+              type: getMediaType(inspected),
+              eid: inspected
             });
           }
         } else {
           setSelectedObject(null);
         }
       } else {
+        const cameraSystem = scene.systems["hubs-systems"].cameraSystem;
         const inspectedEl = cameraSystem.inspectable && cameraSystem.inspectable.el;
 
         if (inspectedEl) {

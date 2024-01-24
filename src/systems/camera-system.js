@@ -8,14 +8,7 @@ import { qsGet } from "../utils/qs_truthy";
 const customFOV = qsGet("fov");
 const enableThirdPersonMode = qsTruthy("thirdPerson");
 import { Layers } from "../camera-layers";
-import {
-  HoveredRemoteRight,
-  InspectTargetChanged,
-  Inspectable,
-  Inspected,
-  LocalAvatar,
-  RemoteAvatar
-} from "../bit-components";
+import { HoveredRemoteRight, Inspectable, Inspected, LocalAvatar, RemoteAvatar } from "../bit-components";
 import {
   anyEntityWith,
   findAncestorWithAnyComponent,
@@ -23,6 +16,7 @@ import {
   shouldUseNewLoader
 } from "../utils/bit-utils";
 import { addComponent, defineQuery, removeComponent } from "bitecs";
+import { INSPECTABLE_FLAGS } from "../bit-systems/inspect-system";
 
 function getInspectableInHierarchy(eid) {
   let inspectable = findAncestorWithComponent(APP.world, Inspectable, eid);
@@ -473,7 +467,7 @@ export class CameraSystem {
           if (hoveredQuery(APP.world).length) {
             const hovered = hoveredQuery(APP.world)[0];
             addComponent(APP.world, Inspected, hovered);
-            addComponent(APP.world, InspectTargetChanged, hovered);
+            Inspectable.flags[hovered] |= INSPECTABLE_FLAGS.TARGET_CHANGED;
           }
         } else {
           const hoverEl = this.interaction.state.rightRemote.hovered || this.interaction.state.leftRemote.hovered;
