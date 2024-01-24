@@ -23,8 +23,7 @@ import {
   MediaMirrored,
   Inspected,
   Inspectable,
-  Deletable,
-  InspectTargetChanged
+  Deletable
 } from "../bit-components";
 import {
   anyEntityWith,
@@ -45,6 +44,7 @@ import { canPin, setPinned } from "../utils/bit-pinning-helper";
 import { ObjectMenuTransformFlags } from "../inflators/object-menu-transform";
 import { COLLISION_LAYERS } from "../constants";
 import { FLOATY_OBJECT_FLAGS } from "../systems/floaty-object-system";
+import { INSPECTABLE_FLAGS } from "./inspect-system";
 // Working variables.
 const _vec3_1 = new Vector3();
 const _vec3_2 = new Vector3();
@@ -226,7 +226,7 @@ function handleHeldEnter(world: HubsWorld, eid: EntityID, menuEid: EntityID) {
       if (!hasComponent(world, Inspected, ObjectMenu.targetRef[menuEid])) {
         ObjectMenu.flags[menuEid] &= ~ObjectMenuFlags.Visible;
         addComponent(world, Inspected, ObjectMenu.targetRef[menuEid]);
-        addComponent(world, InspectTargetChanged, ObjectMenu.targetRef[menuEid]);
+        Inspectable.flags[ObjectMenu.targetRef[menuEid]] |= INSPECTABLE_FLAGS.TARGET_CHANGED;
       }
       break;
   }
@@ -246,7 +246,6 @@ function handleHeldExit(world: HubsWorld, eid: EntityID, menuEid: EntityID) {
       if (hasComponent(world, Inspected, ObjectMenu.targetRef[menuEid])) {
         ObjectMenu.flags[menuEid] |= ObjectMenuFlags.Visible;
         removeComponent(world, Inspected, ObjectMenu.targetRef[menuEid]);
-        addComponent(world, InspectTargetChanged, ObjectMenu.targetRef[menuEid]);
       }
       break;
   }
