@@ -130,7 +130,7 @@ export async function intentionModule(englishTranscription: string): Promise<Res
   }
 }
 
-export async function knowledgeModule(userQuery: string, intent: string, mozillaInput: string): Promise<ResponseData> {
+export async function dsResponseModule(userQuery: string, intent: string, mozillaInput: string): Promise<ResponseData> {
   const headers = {
     Accept: "application/json",
     "Content-Type": "application/json"

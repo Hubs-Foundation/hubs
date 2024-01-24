@@ -3,20 +3,20 @@ import { Agent, Hidden, Interacted } from "../bit-components";
 import { UpdateTextSystem, lowerIndex, raiseIndex } from "./agent-slideshow-system";
 import { PermissionStatus } from "../utils/media-devices-utils";
 import { stageUpdate } from "../systems/single-action-button-system";
-import { audioModules, intentionModule, knowledgeModule, toggleRecording, vlModule } from "../utils/asr-adapter";
+import { audioModules, intentionModule, dsResponseModule, toggleRecording, vlModule } from "../utils/asr-adapter";
 import { COMPONENT_ENDPOINTS, COMPONENT_CODES } from "../utils/component-types";
 import { AgentEntity, addAgentToScene, addLangPanelToScene } from "../prefabs/agent";
 import { SnapDepthPOV, SnapPOV } from "../utils/vlm-adapters";
-import { sceneGraph } from "./routing-system";
+import { navSystem } from "./routing-system";
 import { renderAsEntity } from "../utils/jsx-entity";
-import { NavigationLine, pivotPoint } from "../prefabs/nav-line";
-import { subtitleSystem } from "./subtitling-system";
+import { NavigationCues, pivotPoint } from "../prefabs/nav-line";
+import { languageCodes, subtitleSystem } from "./subtitling-system";
 import UpdateTextPanel from "../utils/interactive-panels";
 import { Vector3 } from "three";
 
 const agentQuery = defineQuery([Agent]);
 const enterAgentQuery = enterQuery(agentQuery);
-const skipModule = true;
+const skipModule = false;
 
 function clicked(eid) {
   return hasComponent(APP.world, Interacted, eid);
@@ -144,10 +144,6 @@ export default class VirtualAgent {
     }
   }
 
-  get exists() {
-    return !!this.agent.eid;
-  }
-
   UpdateText(text) {
     UpdateTextPanel(text, this.text.obj, this.panel.eid, false, true);
   }
@@ -159,7 +155,7 @@ export default class VirtualAgent {
   }
 
   async ButtonInteractions() {
-    if (clicked(this.micButton.eid)) this.MicrophoneActions();
+    if (clicked(this.micButton.eid)) this.MicrophoneActions(false);
   }
 
   async MicrophoneActions(savefile) {
@@ -168,58 +164,29 @@ export default class VirtualAgent {
       const toggleResponse = await toggleRecording(savefile);
 
       if (toggleResponse.status.code === COMPONENT_CODES.Successful) {
-        const sourceLang = subtitleSystem.mylanguage ? subtitleSystem.mylanguage : "en";
+        const sourceLang = subtitleSystem.mylanguage ? languageCodes[subtitleSystem.mylanguage] : "en";
         const nmtParameters = { source_language: sourceLang, target_language: "en", return_transcription: "true" };
-        let knowledgeRespone;
 
         const nmtResponse = await audioModules(
           COMPONENT_ENDPOINTS.TRANSLATE_AUDIO_FILES,
           toggleResponse.data.file,
           nmtParameters
         );
-        let intentResponse;
-        if (skipModule) intentResponse = { data: { intent: "navigation", destination: "conference room" } };
-        else intentResponse = await intentionModule(nmtResponse.data.translations[0]);
 
-        if (intentResponse.data.intent === "navigation") {
-          const destName = intentResponse.data.destination;
+        const intentResponse = await intentionModule(nmtResponse.data.translations[0]);
+        const navigation = navSystem.GetInstructions(this.avatarPos, intentResponse.data.destination);
 
-          knowledgeRespone = await this.Navigate(
-            destName,
-            nmtResponse.data.translations[0],
-            intentResponse.data.intent,
-            skipModule
-          );
-        }
+        const response = await dsResponseModule(
+          nmtResponse.data.translations[0],
+          intentResponse.data.intent,
+          navigation.knowledge
+        );
+
+        this.UpdateText(response.data.response);
+        navSystem.RenderCues();
       }
     } catch (error) {
       console.log("error", error);
-    }
-  }
-
-  async Navigate(destName, userQuery, userIntent, skipModule = false) {
-    if (!sceneGraph.allowed) return;
-    try {
-      const startIndex = sceneGraph.GetClosestIndex(virtualAgent.avatarPos);
-      const navigation = sceneGraph.GetInstructions(startIndex, destName);
-      let knowledge;
-      if (!skipModule) knowledge = await knowledgeModule(userQuery, userIntent, navigation.knowledge);
-      if (!!this.cube) {
-        removeEntity(APP.world, this.cube);
-        APP.scene.object3D.remove(this.arrowObjs);
-        this.cube = null;
-        knowledge = { data: { response: "Instructions cleared. How else could I help you?" } };
-      } else {
-        this.cube = renderAsEntity(APP.world, NavigationLine(navigation));
-        this.arrowObjs = APP.world.eid2obj.get(this.cube);
-        APP.scene.object3D.add(this.arrowObjs);
-        knowledge = { data: { response: "This is a demo showing you instructions to go to the conference room" } };
-      }
-      this.UpdateText(knowledge.data.response);
-
-      return knowledge;
-    } catch (error) {
-      console.log(error);
     }
   }
 
@@ -236,6 +203,10 @@ export default class VirtualAgent {
   HandleArrows(renderArrows) {
     this.nextArrow.obj.visible = renderArrows;
     this.prevArrow.obj.visible = renderArrows;
+  }
+
+  get exists() {
+    return !!this.agent.eid;
   }
 
   get avatarDirection() {

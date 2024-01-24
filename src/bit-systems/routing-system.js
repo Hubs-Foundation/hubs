@@ -37,12 +37,23 @@ export class Node {
   }
 }
 
-export class Graph {
-  constructor() {}
+export class NavigationSystem {
+  constructor() {
+    this.allowed = false;
+    this.nodes = [];
+    this.edges = [];
+    this.targetInfo = {};
+    this.nodeCount = null;
+    this.mapped = false;
+    this.mappedNodes = null;
+    this.paths = null;
+    this.quesEid = null;
+    this.quesObj = null;
+  }
 
   async Init(hubProperties) {
     if (!hubProperties.allow_navigation) {
-      console.error("Navigation is not allowed for this room");
+      console.warn("Navigation is not allowed for this room");
       this.allowed = false;
       return;
     }
@@ -200,10 +211,11 @@ export class Graph {
     this.mappedNodes[startIndex] = true;
   }
 
-  GetInstructions(startIndex, stopName) {
+  GetInstructions(startPos, stopName) {
+    const startIndex = this.GetClosestIndex(startPos);
     const stopIndex = this.GetDestIndex(stopName);
 
-    if (!stopIndex) return { knowledge: "" };
+    if (!stopIndex || !this.allowed) return { path: [], instructions: [], knowledge: "no location" };
 
     if (!this.mappedNodes[startIndex]) {
       if (this.mapped) this.Reset();
@@ -219,9 +231,10 @@ export class Graph {
 
     const navigation = {
       path: pathVectors,
-      instructions: [{ action: "start", from: startIndex }],
-      knowledge: [{ action: "start" }]
+      instructions: [{ action: "start", from: startIndex }]
     };
+
+    const knowledgeArray = [{ action: "start" }];
     const playerForward = virtualAgent.avatarDirection;
 
     let distanceSum = 0;
@@ -254,16 +267,16 @@ export class Graph {
       });
 
       if (turn.action === "turn" || turn.action === "stairs") {
-        if (distanceSum !== 0) navigation.knowledge.push({ action: "move", distance: distanceSum });
-        navigation.knowledge.push({ action: turn.action, direction: turn.direction });
+        if (distanceSum !== 0) knowledgeArray.push({ action: "move", distance: distanceSum });
+        knowledgeArray.push({ action: turn.action, direction: turn.direction });
         distanceSum = 0;
       }
 
       distanceSum += Math.floor(nextLine.length());
     }
     navigation.instructions.push({ action: "finish", to: stopIndex });
-    navigation.knowledge.push({ action: "move", distance: distanceSum }, { action: "finish" });
-    const navigationString = navigation.knowledge
+    knowledgeArray.push({ action: "move", distance: distanceSum }, { action: "finish" });
+    navigation["knowledge"] = knowledgeArray
       .map(actionObj => {
         const { action, direction, distance } = actionObj;
         if (distance) {
@@ -275,7 +288,7 @@ export class Graph {
         }
       })
       .join(", ");
-    navigation.knowledge = navigationString;
+
     return navigation;
   }
 
@@ -330,11 +343,6 @@ export class Graph {
     });
   }
 
-  Random() {
-    const randomNumber = Math.random();
-    return randomNumber * 2 - 1;
-  }
-
   GetClosestIndex(position) {
     let max = INF;
     let index;
@@ -356,6 +364,21 @@ export class Graph {
     }
     return -1; // Element not found in the array
   }
+
+  RenderCues() {
+    if (!!this.cuesEid) {
+      removeEntity(APP.world, this.cuesEid);
+      APP.scene.object3D.remove(this.cuesObj);
+      this.cuesEid = null;
+    }
+    try {
+      this.cuesEid = renderAsEntity(APP.world, NavigationCues(navigation));
+      this.cuesObj = APP.world.eid2obj.get(this.cuesEid);
+      APP.scene.object3D.add(this.cuesObj);
+    } catch (error) {
+      console.log(error);
+    }
+  }
 }
 
-export const sceneGraph = new Graph(10, 10);
+export const navSystem = new NavigationSystem(10, 10);

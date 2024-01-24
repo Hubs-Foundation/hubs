@@ -15,7 +15,7 @@ const panelManagerQuery = defineQuery([FlagPanelManager]);
 const enterpanelManagerQuery = enterQuery(panelManagerQuery);
 const exitpanelManagerQuery = exitQuery(panelManagerQuery);
 
-const languageCodes = {
+export const languageCodes = {
   greek: "el",
   english: "en",
   spanish: "es",
@@ -171,6 +171,7 @@ export class SubtitleSystem {
 
     this.mylanguage = null;
     this.updateMyLanguage(window.APP.store.state.profile.language);
+    console.log(this.mylanguage);
     this.targetLanguage = null;
     this.target = null;
     this.scene = APP.scene;
@@ -235,8 +236,6 @@ export class SubtitleSystem {
     console.log("Translate from:", this.targetLanguage, this.mylanguage);
     this.GetTargetStream(this.target)
       .then(stream => {
-        console.log(stream);
-
         this.audioContext = new window.AudioContext();
         this.mediaRecorder = new MediaRecorder(stream);
         this.analyser = this.audioContext.createAnalyser();

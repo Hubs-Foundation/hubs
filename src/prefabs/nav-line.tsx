@@ -18,6 +18,7 @@ const height = 0.05;
 interface navigationData {
   path: Vector3[];
   instructions: instruction[];
+  knowledge: string;
 }
 
 interface instruction {
@@ -33,7 +34,7 @@ interface instruction {
   distance?: number;
 }
 
-export function NavigationLine(navigation: navigationData) {
+export function NavigationCues(navigation: navigationData) {
   const lines = [];
   const turns: any[] | undefined = [];
   const points = navigation.path;

@@ -25,7 +25,7 @@ AFRAME.registerComponent("translate-panel", {
     this.preformatText;
     this.formattedText;
     this.targetLanguageCheck = false;
-    this.userLanguageCheck = false;
+    this.userLanguageCheck = window.APP.store.state.profile.language;
     this.userCheck = false;
 
     NAF.utils

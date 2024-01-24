@@ -32,7 +32,7 @@ import { virtualAgent } from "./bit-systems/agent-system";
 import { floorMap } from "./bit-systems/map-system";
 import { languagePanel, subtitleSystem } from "./bit-systems/subtitling-system";
 import { GetHubProperties } from "./utils/rooms-properties";
-import { sceneGraph } from "./bit-systems/routing-system";
+import { navSystem } from "./bit-systems/routing-system";
 const useNewLoader = qsTruthy("newLoader");
 
 export default class SceneEntryManager {
@@ -69,7 +69,7 @@ export default class SceneEntryManager {
     const hubProperties = await GetHubProperties(getCurrentHubId());
     virtualAgent.Init(hubProperties, reset);
     floorMap.Init(hubProperties, reset);
-    sceneGraph.Init(hubProperties, reset);
+    navSystem.Init(hubProperties, reset);
     languagePanel.Init(reset);
     subtitleSystem.Init(reset);
   };
