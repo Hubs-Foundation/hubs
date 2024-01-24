@@ -10,6 +10,7 @@ import {
   MediaLoader,
   MediaPDF,
   MediaPDFUpdated,
+  MediaSnapped,
   NetworkedPDF,
   ObjectMenuTransform,
   PDFMenu
@@ -25,6 +26,7 @@ function setCursorRaycastable(world: HubsWorld, menu: EntityID, enable: boolean)
   change(world, CursorRaycastable, menu);
   change(world, CursorRaycastable, PDFMenu.prevButtonRef[menu]);
   change(world, CursorRaycastable, PDFMenu.nextButtonRef[menu]);
+  change(world, CursorRaycastable, PDFMenu.snapRef[menu]);
 }
 
 function clicked(world: HubsWorld, eid: EntityID) {
@@ -83,6 +85,9 @@ function handleClicks(world: HubsWorld, menu: EntityID) {
   } else if (clicked(world, PDFMenu.prevButtonRef[menu])) {
     const pdf = PDFMenu.targetRef[menu];
     setPage(world, pdf, MediaPDF.pageNumber[pdf] - 1);
+  } else if (clicked(world, PDFMenu.snapRef[menu])) {
+    const pdf = PDFMenu.targetRef[menu];
+    addComponent(world, MediaSnapped, pdf);
   }
 }
 
@@ -106,13 +111,6 @@ function flushToObject3Ds(world: HubsWorld, menu: EntityID, frozen: boolean) {
   } else {
     ObjectMenuTransform.flags[menu] &= ~ObjectMenuTransformFlags.Enabled;
   }
-
-  [PDFMenu.prevButtonRef[menu], PDFMenu.nextButtonRef[menu]].forEach(buttonRef => {
-    const buttonObj = world.eid2obj.get(buttonRef)!;
-    // Parent visibility doesn't block raycasting, so we must set each button to be invisible
-    // TODO: Ensure that children of invisible entities aren't raycastable
-    buttonObj.visible = visible;
-  });
 
   if (target) {
     const numPages = PDFResourcesMap.get(target)!.pdf.numPages;

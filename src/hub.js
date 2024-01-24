@@ -192,6 +192,7 @@ import { renderAsEntity } from "./utils/jsx-entity";
 import { VideoMenuPrefab, loadVideoMenuButtonIcons } from "./prefabs/video-menu";
 import { loadObjectMenuButtonIcons, ObjectMenuPrefab } from "./prefabs/object-menu";
 import { loadMirrorMenuButtonIcons, MirrorMenuPrefab } from "./prefabs/mirror-menu";
+import { loadPDFMenuButtonIcons } from "./prefabs/pdf-menu";
 import { LinkHoverMenuPrefab } from "./prefabs/link-hover-menu";
 import { PDFMenuPrefab } from "./prefabs/pdf-menu";
 import { loadWaypointPreviewModel, WaypointPreview } from "./prefabs/waypoint-preview";
@@ -206,7 +207,7 @@ function addToScene(entityDef, visible) {
     obj.visible = !!visible;
   });
 }
-preload(addToScene(PDFMenuPrefab(), false));
+preload(loadPDFMenuButtonIcons().then(() => addToScene(PDFMenuPrefab(), false)));
 preload(loadObjectMenuButtonIcons().then(() => addToScene(ObjectMenuPrefab(), false)));
 preload(loadMirrorMenuButtonIcons().then(() => addToScene(MirrorMenuPrefab(), false)));
 preload(addToScene(LinkHoverMenuPrefab(), false));

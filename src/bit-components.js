@@ -179,7 +179,8 @@ export const MediaContentBounds = defineComponent({
 });
 export const MediaInfo = defineComponent({
   accessibleUrl: Types.ui32,
-  contentType: Types.ui32
+  contentType: Types.ui32,
+  mediaType: Types.ui8
 });
 MediaInfo.accessibleUrl[$isStringType] = true;
 MediaInfo.contentType[$isStringType] = true;
@@ -279,6 +280,7 @@ export const VideoMenu = defineComponent({
   headRef: Types.eid,
   playIndicatorRef: Types.eid,
   pauseIndicatorRef: Types.eid,
+  snapRef: Types.eid,
   clearTargetTimer: Types.f64
 });
 export const AudioEmitter = defineComponent({
@@ -353,12 +355,14 @@ export const PDFMenu = defineComponent({
   prevButtonRef: Types.eid,
   nextButtonRef: Types.eid,
   pageLabelRef: Types.eid,
+  snapRef: Types.eid,
   targetRef: Types.eid,
   clearTargetTimer: Types.f64
 });
 export const ObjectMenuTarget = defineComponent({
   flags: Types.ui8
 });
+export const MediaSnapped = defineComponent();
 export const NetworkDebug = defineComponent();
 export const NetworkDebugRef = defineComponent({
   ref: Types.eid

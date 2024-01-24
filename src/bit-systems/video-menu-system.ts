@@ -11,7 +11,9 @@ import {
   HeldRemoteRight,
   HoveredRemoteRight,
   Interacted,
+  MediaInfo,
   MediaLoader,
+  MediaSnapped,
   MediaVideo,
   MediaVideoData,
   MediaVideoUpdated,
@@ -27,6 +29,7 @@ import { Emitter2Audio } from "./audio-emitter-system";
 import { EntityID } from "../utils/networking-types";
 import { findAncestorWithComponent, hasAnyComponent } from "../utils/bit-utils";
 import { ObjectMenuTransformFlags } from "../inflators/object-menu-transform";
+import { MediaType } from "../utils/media-utils";
 
 const videoMenuQuery = defineQuery([VideoMenu]);
 const hoveredQuery = defineQuery([HoveredRemoteRight]);
@@ -38,6 +41,7 @@ function setCursorRaycastable(world: HubsWorld, menu: number, enable: boolean) {
   change(world, CursorRaycastable, VideoMenu.trackRef[menu]);
   change(world, CursorRaycastable, VideoMenu.playIndicatorRef[menu]);
   change(world, CursorRaycastable, VideoMenu.pauseIndicatorRef[menu]);
+  change(world, CursorRaycastable, VideoMenu.snapRef[menu]);
 }
 
 const intersectInThePlaneOf = (() => {
@@ -110,10 +114,11 @@ function flushToObject3Ds(world: HubsWorld, menu: EntityID, frozen: boolean) {
     APP.world.scene.add(obj);
     ObjectMenuTransform.targetObjectRef[menu] = target;
     ObjectMenuTransform.flags[menu] |= ObjectMenuTransformFlags.Enabled;
+    const snapButton = world.eid2obj.get(VideoMenu.snapRef[menu])!;
+    snapButton.visible = MediaInfo.mediaType[target] === MediaType.VIDEO;
   } else {
     obj.removeFromParent();
     setCursorRaycastable(world, menu, false);
-
     ObjectMenuTransform.flags[menu] &= ~ObjectMenuTransformFlags.Enabled;
   }
 }
@@ -142,6 +147,9 @@ function handleClicks(world: HubsWorld, menu: EntityID) {
       addComponent(world, EntityStateDirty, videoEid);
     }
     addComponent(world, MediaVideoUpdated, videoEid);
+  } else if (clicked(world, VideoMenu.snapRef[menu])) {
+    const video = VideoMenu.videoRef[menu];
+    addComponent(world, MediaSnapped, video);
   }
 }
 

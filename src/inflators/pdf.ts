@@ -11,6 +11,7 @@ import { createPlaneBufferGeometry } from "../utils/three-utils";
 export interface PDFResources {
   pdf: PDFDocumentProxy;
   material: MeshBasicMaterial;
+  canvas: HTMLCanvasElement;
   canvasContext: CanvasRenderingContext2D;
 }
 

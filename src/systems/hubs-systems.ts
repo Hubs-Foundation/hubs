@@ -91,6 +91,7 @@ import { linkedMediaSystem } from "../bit-systems/linked-media-system";
 import { linkedVideoSystem } from "../bit-systems/linked-video-system";
 import { linkedPDFSystem } from "../bit-systems/linked-pdf-system";
 import { inspectSystem } from "../bit-systems/inspect-system";
+import { snapMediaSystem } from "../bit-systems/snap-media-system";
 
 declare global {
   interface Window {
@@ -298,6 +299,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   audioDebugSystem(world);
 
   bitPenCompatSystem(world, aframeSystems["pen-tools"]);
+  snapMediaSystem(world, aframeSystems["hubs-systems"].soundEffectsSystem);
 
   deleteEntitySystem(world, aframeSystems.userinput);
   destroyAtExtremeDistanceSystem(world);

@@ -282,6 +282,7 @@ function* loadMedia(world: HubsWorld, eid: EntityID) {
     addComponent(world, MediaInfo, media);
     MediaInfo.accessibleUrl[media] = APP.getSid(urlData.accessibleUrl);
     MediaInfo.contentType[media] = APP.getSid(urlData.contentType);
+    MediaInfo.mediaType[media] = urlData.mediaType || 0;
   } catch (e) {
     console.error(e);
     media = renderAsEntity(world, ErrorObject());

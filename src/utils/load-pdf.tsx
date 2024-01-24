@@ -21,7 +21,7 @@ function* createPDFResources(url: string): Generator<any, PDFResources, any> {
   material.map = texture;
   material.side = DoubleSide;
   material.transparent = false;
-  return { pdf, canvasContext, material };
+  return { pdf, canvas, canvasContext, material };
 }
 
 export function* loadPDF(world: HubsWorld, eid: EntityID, url: string, isNetworked: boolean) {
