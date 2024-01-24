@@ -138,7 +138,10 @@ function clicked(world: HubsWorld, eid: EntityID) {
 
 const MAX_GAIN_MULTIPLIER = 2;
 function changeVolumeBy(audioEid: EntityID, volume: number) {
-  let gainMultiplier = APP.gainMultipliers.get(audioEid) || 1;
+  let gainMultiplier = 1.0;
+  if (APP.gainMultipliers.has(audioEid)) {
+    gainMultiplier = APP.gainMultipliers.get(audioEid)!;
+  }
   gainMultiplier = MathUtils.clamp(gainMultiplier + volume, 0, MAX_GAIN_MULTIPLIER);
   APP.gainMultipliers.set(audioEid, gainMultiplier);
   const audio = APP.audios.get(audioEid);
