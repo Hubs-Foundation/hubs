@@ -178,7 +178,8 @@ export const MediaContentBounds = defineComponent({
 });
 export const MediaInfo = defineComponent({
   accessibleUrl: Types.ui32,
-  contentType: Types.ui32
+  contentType: Types.ui32,
+  mediaType: Types.ui8
 });
 MediaInfo.accessibleUrl[$isStringType] = true;
 MediaInfo.contentType[$isStringType] = true;

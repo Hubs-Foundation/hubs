@@ -53,7 +53,7 @@ function VideoActionButton({ buttonIcon, ...props }: VideoButtonProps) {
   const { texture, cacheKey } = loadTextureFromCache(buttonIcon, 1);
   return (
     <Button3D
-      position={[0, -0.1, uiZ]}
+      position={[0, 0, uiZ]}
       scale={BIG_BUTTON_SCALE}
       width={BUTTON_HEIGHT}
       height={BUTTON_WIDTH}
@@ -102,7 +102,7 @@ export function VideoMenuPrefab() {
         scale={[0.5, 0.5, 0.5]}
         position={[0.5 - 0.02, halfHeight - 0.02, uiZ]}
       />
-      <SnapButton name="Snap Button" ref={snapRef} position={[0.0, 0.2, uiZ]} />
+      <SnapButton name="Snap Button" ref={snapRef} position={[0, 0.2, uiZ]} />
       <Slider ref={sliderRef} trackRef={trackRef} headRef={headRef} position={[0, -halfHeight + 0.025, uiZ]} />
       <VideoActionButton ref={playIndicatorRef} name={"Play Button"} buttonIcon={playImageUrl} />
       <VideoActionButton ref={pauseIndicatorRef} name={"Pause Button"} buttonIcon={pauseImageUrl} />
