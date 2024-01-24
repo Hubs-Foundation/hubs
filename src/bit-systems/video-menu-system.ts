@@ -12,6 +12,7 @@ import {
   HoveredRemoteRight,
   Interacted,
   MediaLoader,
+  MediaSnapped,
   MediaVideo,
   MediaVideoData,
   MediaVideoUpdated,
@@ -38,6 +39,7 @@ function setCursorRaycastable(world: HubsWorld, menu: number, enable: boolean) {
   change(world, CursorRaycastable, VideoMenu.trackRef[menu]);
   change(world, CursorRaycastable, VideoMenu.playIndicatorRef[menu]);
   change(world, CursorRaycastable, VideoMenu.pauseIndicatorRef[menu]);
+  change(world, CursorRaycastable, VideoMenu.snapRef[menu]);
 }
 
 const intersectInThePlaneOf = (() => {
@@ -113,7 +115,6 @@ function flushToObject3Ds(world: HubsWorld, menu: EntityID, frozen: boolean) {
   } else {
     obj.removeFromParent();
     setCursorRaycastable(world, menu, false);
-
     ObjectMenuTransform.flags[menu] &= ~ObjectMenuTransformFlags.Enabled;
   }
 }
@@ -142,6 +143,9 @@ function handleClicks(world: HubsWorld, menu: EntityID) {
       addComponent(world, EntityStateDirty, videoEid);
     }
     addComponent(world, MediaVideoUpdated, videoEid);
+  } else if (clicked(world, VideoMenu.snapRef[menu])) {
+    const video = VideoMenu.videoRef[menu];
+    addComponent(world, MediaSnapped, video);
   }
 }
 

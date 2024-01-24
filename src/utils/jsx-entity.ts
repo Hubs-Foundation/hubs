@@ -289,6 +289,7 @@ export interface JSXComponentData extends ComponentData {
     headRef: Ref;
     playIndicatorRef: Ref;
     pauseIndicatorRef: Ref;
+    snapRef: Ref;
   };
   videoMenuItem?: true;
   cursorRaycastable?: true;
@@ -345,6 +346,7 @@ export interface JSXComponentData extends ComponentData {
     prevButtonRef: Ref;
     nextButtonRef: Ref;
     pageLabelRef: Ref;
+    snapRef: Ref;
   };
   cameraTool?: {
     snapMenuRef: Ref;
