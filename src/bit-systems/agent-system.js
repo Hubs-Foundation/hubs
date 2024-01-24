@@ -155,7 +155,16 @@ export default class VirtualAgent {
   }
 
   async ButtonInteractions() {
-    if (clicked(this.micButton.eid)) this.MicrophoneActions(false);
+    if (clicked(this.micButton.eid)) {
+      this.MicrophoneActions(false);
+      // this.DatasetCreate("conference room");
+      // this.DatasetCreate("booth 1");
+      // this.DatasetCreate("booth 2");
+      // this.DatasetCreate("booth 3");
+      // this.DatasetCreate("booth 4");
+      // this.DatasetCreate("exit");
+      // this.DatasetCreate("business room");
+    }
   }
 
   async MicrophoneActions(savefile) {
@@ -176,6 +185,10 @@ export default class VirtualAgent {
         const intentResponse = await intentionModule(nmtResponse.data.translations[0]);
         const navigation = navSystem.GetInstructions(this.avatarPos, intentResponse.data.destination);
 
+        // if (intentResponse.data.destination === "no-location") {
+        //   intentResponse.data.intent = "general";
+        // }
+
         const response = await dsResponseModule(
           nmtResponse.data.translations[0],
           intentResponse.data.intent,
@@ -183,11 +196,16 @@ export default class VirtualAgent {
         );
 
         this.UpdateText(response.data.response);
-        navSystem.RenderCues();
+        if (navigation.instructions.length) navSystem.RenderCues(navigation);
       }
     } catch (error) {
       console.log("error", error);
     }
+  }
+
+  DatasetCreate(destination) {
+    const navigation = navSystem.GetInstructions(this.avatarPos, destination);
+    console.log(`{"destination": "${destination}", "intent":"navigation", "mozilla_input":${navigation.knowledge}},`);
   }
 
   async SnapActions() {
@@ -216,7 +234,9 @@ export default class VirtualAgent {
   }
 
   get avatarPos() {
-    return this.avatarPovObj.getWorldPosition(new THREE.Vector3());
+    const avatarPos = new THREE.Vector3();
+    this.avatarPovObj.getWorldPosition(avatarPos);
+    return avatarPos;
   }
 
   get flatAvatarDirection() {

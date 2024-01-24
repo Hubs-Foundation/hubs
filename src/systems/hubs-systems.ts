@@ -86,6 +86,7 @@ import { HiddenSystem } from "../bit-systems/hidden-system";
 import { FloorMapSystem } from "../bit-systems/map-system";
 import { FlagPanelSystem } from "../bit-systems/subtitling-system";
 import { followFovSystem } from "../components/follow-user";
+import { NavigatingSystem } from "../bit-systems/routing-system";
 
 declare global {
   interface Window {
@@ -280,6 +281,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
 
   followFovSystem(dt);
   FlagPanelSystem(world);
+  NavigatingSystem(world);
 
   HiddenSystem(world);
 

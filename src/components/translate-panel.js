@@ -57,9 +57,12 @@ AFRAME.registerComponent("translate-panel", {
     APP.scene.removeEventListener("language_updated", this.onLanguageUpdate);
     APP.scene.removeEventListener("translation_target_language_updated", this.onTargetLanguageUpdate);
   },
-
   onAvailableTranslation(event) {
-    this.preformatText = event.detail.text;
+    this.UpdateText(event.detail.text);
+  },
+
+  UpdateText(text) {
+    this.preformatText = text;
     this.fortmatLines();
     this.translateText.el.addEventListener("text-updated", this.updateTextSize);
     this.translateText.el.setAttribute("text", {
@@ -102,8 +105,15 @@ AFRAME.registerComponent("translate-panel", {
   checkAndRender() {
     const check = this.userCheck && this.targetLanguageCheck && this.userLanguageCheck;
     this.el.object3D.visible = check;
-    console.log(
-      `Panel updates. user check: ${this.userCheck} | user lanugage check: ${this.userLanguageCheck} | target language check: ${this.targetLanguageCheck}, should be visible: ${check}`
-    );
+    const langCode = subtitleSystem.mylanguage ? subtitleSystem.mylanguage : "en";
+    if (check) this.UpdateText(GreetingPhrases[langCode]);
   }
 });
+
+const GreetingPhrases = {
+  spanish: "La traducción se mostrará aquí",
+  italian: "La traduzione verrà mostrata qui",
+  greek: "Η μετάφραση θα εμφανιστεί εδώ",
+  dutch: "De vertaling wordt hier getoond",
+  german: "Die Übersetzung wird hier angezeigt"
+};

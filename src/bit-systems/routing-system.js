@@ -1,7 +1,10 @@
 import { DiscreteInterpolant, Vector3 } from "three";
-import { virtualAgent } from "./agent-system";
+import VirtualAgent, { virtualAgent } from "./agent-system";
 import { GetProperties, PropertyType } from "../utils/rooms-properties";
 import { node } from "prop-types";
+import { renderAsEntity } from "../utils/jsx-entity";
+import { removeEntity } from "bitecs";
+import { NavigationCues } from "../prefabs/nav-line";
 
 const INF = Number.MAX_SAFE_INTEGER;
 export class Node {
@@ -49,6 +52,7 @@ export class NavigationSystem {
     this.paths = null;
     this.quesEid = null;
     this.quesObj = null;
+    this.dest = { active: false, pos: null, time: null };
   }
 
   async Init(hubProperties) {
@@ -289,6 +293,8 @@ export class NavigationSystem {
       })
       .join(", ");
 
+    this.dest.pos = this.nodes[stopIndex];
+    console.log("Destination position changed to: ", this.dest.pos);
     return navigation;
   }
 
@@ -365,20 +371,41 @@ export class NavigationSystem {
     return -1; // Element not found in the array
   }
 
-  RenderCues() {
-    if (!!this.cuesEid) {
-      removeEntity(APP.world, this.cuesEid);
-      APP.scene.object3D.remove(this.cuesObj);
-      this.cuesEid = null;
-    }
+  RenderCues(navigation) {
+    this.RemoveCues();
     try {
       this.cuesEid = renderAsEntity(APP.world, NavigationCues(navigation));
       this.cuesObj = APP.world.eid2obj.get(this.cuesEid);
       APP.scene.object3D.add(this.cuesObj);
+      this.dest.active = true;
+      this.dest.time = new Date();
+      console.log("Destination is now active: ", this.dest);
     } catch (error) {
       console.log(error);
+    }
+  }
+
+  RemoveCues() {
+    if (!!this.cuesEid) {
+      removeEntity(APP.world, this.cuesEid);
+      APP.scene.object3D.remove(this.cuesObj);
+      this.cuesEid = null;
+      this.dest = { active: false, pos: null, time: null };
+      console.log("Destination is now inactive: ", this.dest);
+    }
+  }
+
+  ShouldFinish() {
+    if (virtualAgent.avatarPos.distanceTo(this.dest.pos) < 3 || new Date() - this.dest.time > 30000) {
+      this.RemoveCues();
+      virtualAgent.UpdateText("How else could I be helpfull?");
     }
   }
 }
 
 export const navSystem = new NavigationSystem(10, 10);
+
+export function NavigatingSystem(world) {
+  if (!navSystem.dest.active) return;
+  navSystem.ShouldFinish();
+}

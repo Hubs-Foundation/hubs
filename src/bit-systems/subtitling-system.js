@@ -20,7 +20,7 @@ export const languageCodes = {
   english: "en",
   spanish: "es",
   italian: "it",
-  dutch: "du",
+  dutch: "nl",
   german: "de"
 };
 
