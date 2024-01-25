@@ -3,7 +3,14 @@ import { Agent, Hidden, Interacted } from "../bit-components";
 import { UpdateTextSystem, lowerIndex, raiseIndex } from "./agent-slideshow-system";
 import { PermissionStatus } from "../utils/media-devices-utils";
 import { stageUpdate } from "../systems/single-action-button-system";
-import { audioModules, intentionModule, dsResponseModule, toggleRecording, vlModule } from "../utils/asr-adapter";
+import {
+  audioModules,
+  intentionModule,
+  dsResponseModule,
+  toggleRecording,
+  vlModule,
+  textModule
+} from "../utils/asr-adapter";
 import { COMPONENT_ENDPOINTS, COMPONENT_CODES } from "../utils/component-types";
 import { AgentEntity, addAgentToScene, addLangPanelToScene } from "../prefabs/agent";
 import { SnapDepthPOV, SnapPOV } from "../utils/vlm-adapters";
@@ -13,6 +20,7 @@ import { NavigationCues, pivotPoint } from "../prefabs/nav-line";
 import { languageCodes, subtitleSystem } from "./subtitling-system";
 import UpdateTextPanel from "../utils/interactive-panels";
 import { Vector3 } from "three";
+import { agentDialogs } from "../utils/localization";
 
 const agentQuery = defineQuery([Agent]);
 const enterAgentQuery = enterQuery(agentQuery);
@@ -48,6 +56,13 @@ class objElement {
   }
 }
 
+class textElement extends objElement {
+  constructor() {
+    super();
+    this.value = null;
+  }
+}
+
 export default class VirtualAgent {
   constructor() {
     this.allowed = null;
@@ -58,11 +73,19 @@ export default class VirtualAgent {
     this.micButton = new objElement();
     this.snapButton = new objElement();
     this.panel = new objElement();
-    this.text = new objElement();
+    this.text = new textElement();
+    this.currentOccasion = null;
 
     this.onClear = this.onClear.bind(this);
     this.onToggle = this.onToggle.bind(this);
     this.setMicStatus = this.setMicStatus.bind(this);
+    this.onLanguageUpdated = this.onLanguageUpdated.bind(this);
+
+    this.occasions = {
+      greetings: ["greetings"],
+      success: ["success", "anythingElse"],
+      cleared: ["cleared", "anythingElse"]
+    };
   }
 
   Init(hubProperties, reset) {
@@ -113,9 +136,11 @@ export default class VirtualAgent {
     this.renderer = this.scene.renderer;
     //-----------------------------------------
 
-    this.UpdateText("Hello I am your personal Agent");
+    // this.UpdateText("Hello I am your personal Agent");
+    this.UpdateWithRandomPhrase("greetings");
     APP.dialog.on("mic-state-changed", this.setMicStatus);
     this.setMicStatus();
+    APP.scene.addEventListener("language_updated", this.onLanguageUpdated);
     this.agent.obj.visible = true;
   }
 
@@ -127,6 +152,8 @@ export default class VirtualAgent {
     this.snapButton.update(null);
     this.panel.update(null);
     this.text.update(null);
+
+    this.currentOccasion = null;
   }
 
   onClear() {
@@ -144,8 +171,13 @@ export default class VirtualAgent {
     }
   }
 
+  onLanguageUpdated(event) {
+    this.UpdateWithRandomPhrase(this.currentOccasion);
+  }
+
   UpdateText(text) {
     UpdateTextPanel(text, this.text.obj, this.panel.eid, false, true);
+    this.text.value = text;
   }
 
   setMicStatus() {
@@ -174,12 +206,12 @@ export default class VirtualAgent {
 
       if (toggleResponse.status.code === COMPONENT_CODES.Successful) {
         const sourceLang = subtitleSystem.mylanguage ? languageCodes[subtitleSystem.mylanguage] : "en";
-        const nmtParameters = { source_language: sourceLang, target_language: "en", return_transcription: "true" };
+        const nmtAudioParams = { source_language: sourceLang, target_language: "en", return_transcription: "true" };
 
         const nmtResponse = await audioModules(
           COMPONENT_ENDPOINTS.TRANSLATE_AUDIO_FILES,
           toggleResponse.data.file,
-          nmtParameters
+          nmtAudioParams
         );
 
         const intentResponse = await intentionModule(nmtResponse.data.translations[0]);
@@ -195,7 +227,18 @@ export default class VirtualAgent {
           navigation.knowledge
         );
 
-        this.UpdateText(response.data.response);
+        const targetLang = subtitleSystem.mylanguage ? languageCodes[subtitleSystem.mylanguage] : "en";
+        const nmtTextParams = { source_language: "en", target_language: targetLang };
+
+        const nmtTextResponse = await textModule(
+          COMPONENT_ENDPOINTS.TRANSLATE_TEXT,
+          response.data.response,
+          nmtTextParams
+        );
+
+        console.log(nmtTextResponse);
+
+        this.UpdateText(nmtTextResponse.data.translations[0]);
         if (navigation.instructions.length) navSystem.RenderCues(navigation);
       }
     } catch (error) {
@@ -221,6 +264,23 @@ export default class VirtualAgent {
   HandleArrows(renderArrows) {
     this.nextArrow.obj.visible = renderArrows;
     this.prevArrow.obj.visible = renderArrows;
+  }
+
+  UpdateWithRandomPhrase(occasion) {
+    const phrases = [];
+    const lang = subtitleSystem.mylanguage ? subtitleSystem.mylanguage : "english";
+    console.log(`Lang: ${lang}, occasions: ${this.occasions[occasion]}`);
+    this.occasions[occasion].forEach(occasionKey => {
+      const availablePhrases = agentDialogs[occasionKey][lang];
+
+      const randomIndex = Math.floor(Math.random() * availablePhrases.length);
+
+      phrases.push(availablePhrases[randomIndex]);
+    });
+
+    console.log(phrases);
+    this.UpdateText(phrases.length === 1 ? phrases[0] : phrases.join(" "));
+    this.currentOccasion = occasion;
   }
 
   get exists() {

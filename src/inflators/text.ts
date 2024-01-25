@@ -55,7 +55,7 @@ const DEFAULTS: Required<TextParams> = {
   depthOffset: 0,
   direction: "auto",
   fillOpacity: 1.0,
-  fontUrl: null,
+  fontUrl: "https://kontopoulosdm.github.io/manrope.ttf",
   fontSize: 0.075,
   glyphGeometryDetail: 1.0,
   gpuAccelerateSDF: true,

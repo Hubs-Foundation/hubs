@@ -396,9 +396,12 @@ export class NavigationSystem {
   }
 
   ShouldFinish() {
-    if (virtualAgent.avatarPos.distanceTo(this.dest.pos) < 3 || new Date() - this.dest.time > 30000) {
+    if (virtualAgent.avatarPos.distanceTo(this.dest.pos) < 3) {
       this.RemoveCues();
-      virtualAgent.UpdateText("How else could I be helpfull?");
+      virtualAgent.UpdateWithRandomPhrase("success");
+    } else if (new Date() - this.dest.time > 30000) {
+      this.RemoveCues();
+      virtualAgent.UpdateWithRandomPhrase("cleared");
     }
   }
 }

@@ -39,10 +39,10 @@ AFRAME.registerComponent("flag-button", {
   },
 
   play() {
-    this.updateButtonState();
     this.el.object3D.addEventListener("hovered", this.onHover);
     this.el.object3D.addEventListener("unhovered", this.onHoverOut);
     this.el.sceneEl.addEventListener("language_updated", this.onLanguageUpdate);
+    this.updateButtonState();
   },
 
   pause() {

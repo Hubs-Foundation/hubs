@@ -169,9 +169,7 @@ export class SubtitleSystem {
       return;
     }
 
-    this.mylanguage = null;
-    this.updateMyLanguage(window.APP.store.state.profile.language);
-    console.log(this.mylanguage);
+    this.updateMyLanguage("");
     this.targetLanguage = null;
     this.target = null;
     this.scene = APP.scene;
@@ -204,6 +202,7 @@ export class SubtitleSystem {
       window.APP.store.update({ profile: { language: "" } });
     }
     APP.scene.emit("language_updated", { language: this.mylanguage });
+    console.log("language_updated", { language: this.mylanguage });
   }
 
   UpdateTarget(newTarget) {

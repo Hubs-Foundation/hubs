@@ -108,6 +108,38 @@ export async function audioModules(
   }
 }
 
+export async function textModule(
+  endPoint: COMPONENT_ENDPOINTS,
+  data: string,
+  parameters: Record<string, any>
+): Promise<ResponseData> {
+  const queryString = Object.keys(parameters)
+    .map(key => `${key}=${parameters[key]}`)
+    .join("&");
+
+  const requestBody = { text: data };
+
+  try {
+    const response = await fetch(endPoint + `?${queryString}`, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(requestBody)
+    });
+
+    const responseBody = await response.json();
+
+    return {
+      status: { code: COMPONENT_CODES.Successful, text: CODE_DESCRIPTIONS[COMPONENT_CODES.Successful] },
+      data: responseBody
+    };
+  } catch (error) {
+    throw { status: { code: COMPONENT_CODES.FetchError, text: CODE_DESCRIPTIONS[COMPONENT_CODES.FetchError] } };
+  }
+}
+
 export async function intentionModule(englishTranscription: string): Promise<ResponseData> {
   const headers = { Accept: "application/json", "Content-Type": "application/json" };
   const data = { user_query: englishTranscription };
