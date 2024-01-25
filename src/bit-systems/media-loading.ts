@@ -81,8 +81,8 @@ function resizeAndRecenter(world: HubsWorld, mediaLoaderEid: EntityID, box: Box3
   const moveParentNotObject = MediaLoader.flags[mediaLoaderEid] & MEDIA_LOADER_FLAGS.MOVE_PARENT_NOT_OBJECT;
 
   const mediaLoaderObj = world.eid2obj.get(mediaLoaderEid)!;
-  const mediaEid = findChildWithComponent(world, LoadedByMediaLoader, mediaLoaderEid)!;
-  const mediaObj = world.eid2obj.get(mediaEid)!;
+  const offsetEid = findChildWithComponent(world, MediaLoaderOffset, mediaLoaderEid)!;
+  const offsetObj = world.eid2obj.get(offsetEid)!;
 
   let scalar = 1;
   if (recenter) {
@@ -110,9 +110,9 @@ function resizeAndRecenter(world: HubsWorld, mediaLoaderEid: EntityID, box: Box3
     diff.multiplyScalar(scalar);
     transformPosition.addVectors(rootPosition, diff);
 
-    // Set the new media world matrix and restore the media loader original matrix
+    // Set the new offset world matrix and restore the media loader original matrix
     tmpMat.compose(transformPosition, rootRotation.identity(), rootScale);
-    setMatrixWorld(mediaObj, tmpMat);
+    setMatrixWorld(offsetObj, tmpMat);
     setMatrixWorld(mediaLoaderObj, origMat);
   } else if (moveParentNotObject) {
     mediaLoaderObj.updateMatrices();
@@ -134,7 +134,7 @@ function resizeAndRecenter(world: HubsWorld, mediaLoaderEid: EntityID, box: Box3
 
     tmpMat.compose(transformPosition, rootRotation, rootScale);
     setMatrixWorld(mediaLoaderObj, tmpMat);
-    setMatrixWorld(mediaObj, origMat);
+    setMatrixWorld(offsetObj, origMat);
   }
 
   addComponent(world, MediaContentBounds, mediaLoaderEid);
