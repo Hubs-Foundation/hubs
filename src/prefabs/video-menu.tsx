@@ -147,7 +147,7 @@ export function VideoMenuPrefab() {
   return (
     <entity
       name="Video Menu"
-      objectMenuTransform={{ center: false, scale: true }}
+      objectMenuTransform={{ scale: true }}
       videoMenu={{
         sliderRef,
         timeLabelRef,

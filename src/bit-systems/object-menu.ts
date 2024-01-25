@@ -46,6 +46,7 @@ import { ObjectMenuTransformFlags } from "../inflators/object-menu-transform";
 import { COLLISION_LAYERS } from "../constants";
 import { FLOATY_OBJECT_FLAGS } from "../systems/floaty-object-system";
 import { INSPECTABLE_FLAGS } from "./inspect-system";
+import { ObjectMenuPositions } from "../prefabs/object-menu";
 // Working variables.
 const _vec3_1 = new Vector3();
 const _vec3_2 = new Vector3();
@@ -282,26 +283,62 @@ function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
   const media = MediaLoader.mediaRef[target];
   const isVideoImagePdf = hasAnyComponent(world, [MediaVideo, MediaImage, MediaPDF], media);
   const isMirrored = hasComponent(world, MediaMirrored, target);
+  const isDropped = hasComponent(world, ObjectDropped, target);
   const isInspectable = hasComponent(world, Inspectable, target);
   const isInspected = hasComponent(world, Inspected, target);
   const isRefreshing = hasComponent(world, MediaRefresh, target);
 
-  // Parent visibility doesn't block raycasting, so we must set each button to be invisible
-  // TODO: Ensure that children of invisible entities aren't raycastable
-  world.eid2obj.get(ObjectMenu.unpinButtonRef[menu])!.visible = visible && isEntityPinned && canIPin;
-  world.eid2obj.get(ObjectMenu.pinButtonRef[menu])!.visible = visible && !isEntityPinned && canIPin;
-  world.eid2obj.get(ObjectMenu.removeButtonRef[menu])!.visible = visible && !isEntityPinned && canISpawnMove;
-  world.eid2obj.get(ObjectMenu.cloneButtonRef[menu])!.visible = visible && canISpawnMove;
-  world.eid2obj.get(ObjectMenu.rotateButtonRef[menu])!.visible =
-    visible && (!isEntityPinned || canIPin) && canISpawnMove;
-  world.eid2obj.get(ObjectMenu.scaleButtonRef[menu])!.visible =
-    visible && (!isEntityPinned || canIPin) && canISpawnMove;
-  world.eid2obj.get(ObjectMenu.openLinkButtonRef[menu])!.visible = visible;
-  world.eid2obj.get(ObjectMenu.dropButtonRef[menu])!.visible =
-    !isVideoImagePdf && !isEntityPinned && !hasComponent(world, ObjectDropped, target);
-  world.eid2obj.get(ObjectMenu.mirrorButtonRef[menu])!.visible = isVideoImagePdf && !isMirrored;
-  world.eid2obj.get(ObjectMenu.inspectButtonRef[menu])!.visible = isVideoImagePdf && isInspectable && !isInspected;
-  world.eid2obj.get(ObjectMenu.refreshButtonRef[menu])!.visible = visible && canIPin && canISpawnMove && !isRefreshing;
+  const openLinkButtonObj = world.eid2obj.get(ObjectMenu.openLinkButtonRef[menu])!;
+  const mirrorButtonObj = world.eid2obj.get(ObjectMenu.mirrorButtonRef[menu])!;
+  const inspectButtonObj = world.eid2obj.get(ObjectMenu.inspectButtonRef[menu])!;
+  const refreshButtonObj = world.eid2obj.get(ObjectMenu.refreshButtonRef[menu])!;
+
+  openLinkButtonObj.visible = visible;
+  mirrorButtonObj.visible = visible && isVideoImagePdf && !isMirrored;
+  inspectButtonObj.visible = visible && isInspectable && !isInspected;
+  refreshButtonObj.visible = visible && !isRefreshing;
+
+  if (canISpawnMove) {
+    world.eid2obj.get(ObjectMenu.unpinButtonRef[menu])!.visible = visible && isEntityPinned && canIPin;
+    world.eid2obj.get(ObjectMenu.pinButtonRef[menu])!.visible = visible && !isEntityPinned && canIPin;
+    world.eid2obj.get(ObjectMenu.removeButtonRef[menu])!.visible = visible && !isEntityPinned;
+    world.eid2obj.get(ObjectMenu.cloneButtonRef[menu])!.visible = visible;
+    world.eid2obj.get(ObjectMenu.rotateButtonRef[menu])!.visible = visible && (!isEntityPinned || canIPin);
+    world.eid2obj.get(ObjectMenu.scaleButtonRef[menu])!.visible = visible && (!isEntityPinned || canIPin);
+    world.eid2obj.get(ObjectMenu.dropButtonRef[menu])!.visible =
+      visible && !isVideoImagePdf && !isEntityPinned && !isDropped;
+
+    openLinkButtonObj.position.fromArray(ObjectMenuPositions.openLink);
+    mirrorButtonObj.position.fromArray(ObjectMenuPositions.mirror);
+    if (isEntityPinned) {
+      inspectButtonObj.position.fromArray(ObjectMenuPositions.inspectP);
+    } else {
+      inspectButtonObj.position.fromArray(ObjectMenuPositions.inspect);
+    }
+    refreshButtonObj.position.fromArray(ObjectMenuPositions.refresh);
+  } else {
+    [
+      ObjectMenu.unpinButtonRef[menu],
+      ObjectMenu.pinButtonRef[menu],
+      ObjectMenu.removeButtonRef[menu],
+      ObjectMenu.cloneButtonRef[menu],
+      ObjectMenu.rotateButtonRef[menu],
+      ObjectMenu.scaleButtonRef[menu],
+      ObjectMenu.dropButtonRef[menu]
+    ].forEach(ref => {
+      world.eid2obj.get(ref)!.visible = false;
+    });
+
+    openLinkButtonObj.position.fromArray(ObjectMenuPositions.openLinkU);
+    mirrorButtonObj.position.fromArray(ObjectMenuPositions.mirrorU);
+    inspectButtonObj.position.fromArray(ObjectMenuPositions.inspectU);
+    refreshButtonObj.position.fromArray(ObjectMenuPositions.refreshU);
+  }
+
+  openLinkButtonObj.matrixNeedsUpdate = true;
+  mirrorButtonObj.matrixNeedsUpdate = true;
+  inspectButtonObj.matrixNeedsUpdate = true;
+  refreshButtonObj.matrixNeedsUpdate = true;
 
   // This is a hacky way of giving a chance to the object-menu-transform system to center the menu based on the
   // visible buttons without accounting for the background plane.
