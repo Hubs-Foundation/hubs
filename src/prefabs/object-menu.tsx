@@ -123,6 +123,7 @@ function InspectButton(props: Attrs) {
       height={buttonHeight}
       type={BUTTON_TYPES.DEFAULT}
       holdable
+      holdableButton
       icon={{ texture, cacheKey, scale: [0.165, 0.165, 0.165] }}
       {...props}
     />
@@ -195,6 +196,7 @@ function RotateButton(props: Attrs) {
       height={buttonHeight}
       type={BUTTON_TYPES.ACTION}
       holdable
+      holdableButton
       icon={{ texture, cacheKey, scale: [0.165, 0.165, 0.165] }}
       {...props}
     />
@@ -226,6 +228,7 @@ function ScaleButton(props: Attrs) {
       height={buttonHeight}
       type={BUTTON_TYPES.ACTION}
       holdable
+      holdableButton
       icon={{ texture, cacheKey, scale: [0.165, 0.165, 0.165] }}
       {...props}
     />
@@ -233,22 +236,27 @@ function ScaleButton(props: Attrs) {
 }
 
 // prettier-ignore
-const position = {
+export const ObjectMenuPositions = {
   background:         [    0,  0,     uiZ - 0.0005] as ArrayVec3,
-  pin:                [    0,  0.125, uiZ] as ArrayVec3,
-  unpin:              [    0,  0.125, uiZ] as ArrayVec3,
-  focus:              [-0.25,  0.375, uiZ] as ArrayVec3,
-  track:              [ 0.25,  0.375, uiZ] as ArrayVec3,
-  remove:             [    0, -0.275, uiZ] as ArrayVec3,
-  drop:               [    0, -0.425, uiZ] as ArrayVec3,
-  inspect:            [    0, -0.425, uiZ] as ArrayVec3,
-  deserializeDrawing: [ -0.3, -0.625, uiZ] as ArrayVec3,
-  openLink:           [ 0.25, -0.275, uiZ] as ArrayVec3,
-  refresh:            [ 0.25, -0.425, uiZ] as ArrayVec3,
-  clone:              [-0.25, -0.275, uiZ] as ArrayVec3,
-  rotate:             [ -0.2, -0.125, uiZ] as ArrayVec3,
-  mirror:             [    0, -0.125, uiZ] as ArrayVec3,
-  scale:              [  0.2, -0.125, uiZ] as ArrayVec3,
+  pin:                [    0,  0.225, uiZ] as ArrayVec3,
+  unpin:              [    0,  0.225, uiZ] as ArrayVec3,
+  focus:              [-0.25,  0.575, uiZ] as ArrayVec3,
+  track:              [ 0.25,  0.575, uiZ] as ArrayVec3,
+  remove:             [    0, -0.075, uiZ] as ArrayVec3,
+  drop:               [    0, -0.225, uiZ] as ArrayVec3,
+  inspect:            [    0, -0.225, uiZ] as ArrayVec3,
+  inspectU:           [    0,  0.075, uiZ] as ArrayVec3,
+  inspectP:           [    0, -0.075, uiZ] as ArrayVec3,
+  deserializeDrawing: [ -0.3, -0.425, uiZ] as ArrayVec3,
+  openLink:           [ 0.25, -0.075, uiZ] as ArrayVec3,
+  openLinkU:          [    0, -0.075, uiZ] as ArrayVec3,
+  refresh:            [ 0.25, -0.225, uiZ] as ArrayVec3,
+  refreshU:           [    0, -0.225, uiZ] as ArrayVec3,
+  clone:              [-0.25, -0.075, uiZ] as ArrayVec3,
+  rotate:             [ -0.2,  0.075, uiZ] as ArrayVec3,
+  mirror:             [    0,  0.075, uiZ] as ArrayVec3,
+  mirrorU:            [    0,  0.225, uiZ] as ArrayVec3,
+  scale:              [  0.2,  0.075, uiZ] as ArrayVec3,
 };
 
 export function ObjectMenuPrefab() {
@@ -273,7 +281,7 @@ export function ObjectMenuPrefab() {
   return (
     <entity
       name="Interactable Object Menu"
-      objectMenuTransform={{ center: true }}
+      objectMenuTransform
       objectMenu={{
         backgroundRef: refs.background,
         pinButtonRef: refs.pin,
@@ -295,75 +303,27 @@ export function ObjectMenuPrefab() {
       <Plane
         name={"Background"}
         ref={refs.background}
-        position={position.background}
+        position={ObjectMenuPositions.background}
         width={0.8}
         height={0.8}
         material={{ transparent: true, opacity: 0, side: FrontSide }}
         renderOrder={APP.RENDER_ORDER.HUD_BACKGROUND}
         layers={1 << Layers.CAMERA_LAYER_UI}
       />
-      <PinButton ref={refs.pin} position={position.pin} />
-      <UnpinButton ref={refs.unpin} position={position.unpin} />
-      <CameraFocusButton ref={refs.focus} position={position.focus} />
-      <CameraTrackButton ref={refs.track} position={position.track} />
-      <RemoveButton ref={refs.remove} position={position.remove} />
-      <DropButton ref={refs.drop} position={position.drop} />
-      <InspectButton ref={refs.inspect} position={position.inspect} />
-      <DeserializeDrawingButton ref={refs.deserializeDrawing} position={position.deserializeDrawing} />
-      <OpenLinkButton ref={refs.openLink} position={position.openLink} />
-      <RefreshButton ref={refs.refresh} position={position.refresh} />
-      <CloneButton ref={refs.clone} position={position.clone} />
-      <RotateButton ref={refs.rotate} position={position.rotate} />
-      <MirrorButton ref={refs.mirror} position={position.mirror} />
-      <ScaleButton ref={refs.scale} position={position.scale} />
+      <PinButton ref={refs.pin} position={ObjectMenuPositions.pin} />
+      <UnpinButton ref={refs.unpin} position={ObjectMenuPositions.unpin} />
+      <CameraFocusButton ref={refs.focus} position={ObjectMenuPositions.focus} />
+      <CameraTrackButton ref={refs.track} position={ObjectMenuPositions.track} />
+      <RemoveButton ref={refs.remove} position={ObjectMenuPositions.remove} />
+      <DropButton ref={refs.drop} position={ObjectMenuPositions.drop} />
+      <InspectButton ref={refs.inspect} position={ObjectMenuPositions.inspect} />
+      <DeserializeDrawingButton ref={refs.deserializeDrawing} position={ObjectMenuPositions.deserializeDrawing} />
+      <OpenLinkButton ref={refs.openLink} position={ObjectMenuPositions.openLink} />
+      <RefreshButton ref={refs.refresh} position={ObjectMenuPositions.refresh} />
+      <CloneButton ref={refs.clone} position={ObjectMenuPositions.clone} />
+      <RotateButton ref={refs.rotate} position={ObjectMenuPositions.rotate} />
+      <MirrorButton ref={refs.mirror} position={ObjectMenuPositions.mirror} />
+      <ScaleButton ref={refs.scale} position={ObjectMenuPositions.scale} />
     </entity>
   );
 }
-
-// ui interactable-ui
-// layers mask 768
-// withPermission: spawn_and_move_media
-
-// pinButtonTip: Pinning will broadcast this object to Discord.
-
-// sprite camera-action.png
-// cameraFocusLabel focus
-
-// sprite camera-action.png
-// cameraTrackLabel track
-
-// sprite remove-action.png
-//
-
-// visibility on content types:
-// "contentTypes: video/ audio/ image/ application/vnd.apple.mpegurl application/x-mpegurl application/pdf; visible: false;"
-// sprite drop-action.png
-// hide-when-pinned-and-forbidden
-
-// holdable
-// sprite focus-action.png
-// visibility-on-content-types="contentTypes: video/ audio/ image/ application/vnd.apple.mpegurl application/x-mpegurl application/pdf;"
-
-// sprite deserialize-action.png
-// class="deserialize-drawing" : lookup what else is using this
-
-// text: open link
-
-// text: refresh
-
-// text: clone
-
-// sprite: rotate-action.png
-// hide-when-pinned-and-forbidden
-
-// sprite: inspect-action.png
-// visibility-on-content-types="contentTypes: video/ audio/ image/ application/vnd.apple.mpegurl application/x-mpegurl application/pdf;"
-
-// sprite: scale-action.png
-// hide-when-pinned-and-forbidden
-
-// unprivileged menu...
-// refreshButton
-// openLinkButton
-// mirrorMediaButton
-// inspectButton
