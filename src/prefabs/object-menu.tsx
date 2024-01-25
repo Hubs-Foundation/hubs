@@ -244,7 +244,7 @@ const position = {
   inspect:            [    0, -0.425, uiZ] as ArrayVec3,
   deserializeDrawing: [ -0.3, -0.625, uiZ] as ArrayVec3,
   openLink:           [ 0.25, -0.275, uiZ] as ArrayVec3,
-  refresh:            [  0.3, -0.625, uiZ] as ArrayVec3,
+  refresh:            [ 0.25, -0.425, uiZ] as ArrayVec3,
   clone:              [-0.25, -0.275, uiZ] as ArrayVec3,
   rotate:             [ -0.2, -0.125, uiZ] as ArrayVec3,
   mirror:             [    0, -0.125, uiZ] as ArrayVec3,

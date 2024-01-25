@@ -172,8 +172,10 @@ export const MediaLoader = defineComponent({
 });
 MediaLoader.src[$isStringType] = true;
 MediaLoader.fileId[$isStringType] = true;
+export const MediaLoaderOffset = defineComponent();
 export const MediaLoaded = defineComponent();
 export const LoadedByMediaLoader = defineComponent();
+export const MediaRefresh = defineComponent();
 export const MediaContentBounds = defineComponent({
   bounds: [Types.f32, 3]
 });
