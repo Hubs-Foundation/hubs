@@ -21,12 +21,14 @@ import {
   MediaLink,
   MediaLoaded,
   MediaLoader,
+  MediaRefresh,
   MediaLoading,
   MediaVideoLoaderData,
   MirroredMedia,
   Networked,
   ObjectMenuTarget,
-  Rigidbody
+  Rigidbody,
+  MediaLoaderOffset
 } from "../bit-components";
 import { inflatePhysicsShape, Shape } from "../inflators/physics-shape";
 import { ErrorObject } from "../prefabs/error-object";
@@ -308,6 +310,7 @@ function* loadAndAnimateMedia(world: HubsWorld, mediaLoaderEid: EntityID, clearR
   const mediaTransformObj = new Group();
   mediaTransformObj.name = "Media Loader Offset";
   addObject3DComponent(world, mediaTransformEid, mediaTransformObj);
+  addComponent(world, MediaLoaderOffset, mediaTransformEid);
   add(world, mediaTransformEid, mediaLoaderEid);
   add(world, mediaEid, mediaTransformEid);
 
@@ -315,6 +318,13 @@ function* loadAndAnimateMedia(world: HubsWorld, mediaLoaderEid: EntityID, clearR
 
   removeComponent(world, MediaLoading, mediaLoaderEid);
   removeComponent(world, MediaLink, mediaLoaderEid);
+}
+
+function* refreshMedia(world: HubsWorld, eid: EntityID, clearRollbacks: ClearFunction) {
+  removeComponent(world, MediaRefresh, eid);
+  const offsetEid = findChildWithComponent(world, MediaLoaderOffset, eid)!;
+  removeEntity(world, offsetEid);
+  addComponent(world, MediaLoading, eid);
 }
 
 const loadingCubes = new Map();
@@ -325,6 +335,8 @@ const mediaLoadingExitQuery = exitQuery(mediaLoadingQuery);
 const mediaLoadedQuery = defineQuery([MediaLoaded]);
 const mediaLoadedEnterQuery = enterQuery(mediaLoadedQuery);
 const mediaLoadedExitQuery = exitQuery(mediaLoadedQuery);
+const mediaRefreshQuery = defineQuery([MediaRefresh]);
+const mediaRefreshEnterQuery = enterQuery(mediaRefreshQuery);
 export function mediaLoadingSystem(world: HubsWorld) {
   mediaLoadingEnterQuery(world).forEach(function (eid) {
     const mediaLoaderEids = findAncestorsWithComponent(world, MediaLoader, eid);
@@ -383,6 +395,12 @@ export function mediaLoadingSystem(world: HubsWorld) {
 
   mediaLoadedEnterQuery(world).forEach(() => APP.scene?.emit("listed_media_changed"));
   mediaLoadedExitQuery(world).forEach(() => APP.scene?.emit("listed_media_changed"));
+
+  mediaRefreshEnterQuery(world).forEach(eid => {
+    if (!jobs.has(eid)) {
+      jobs.add(eid, clearRollbacks => refreshMedia(world, eid, clearRollbacks));
+    }
+  });
 
   jobs.tick();
 }

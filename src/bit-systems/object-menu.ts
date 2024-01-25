@@ -23,7 +23,8 @@ import {
   MediaMirrored,
   Inspected,
   Inspectable,
-  Deletable
+  Deletable,
+  MediaRefresh
 } from "../bit-components";
 import {
   anyEntityWith,
@@ -204,7 +205,7 @@ function handleClicks(world: HubsWorld, menu: EntityID, hubChannel: HubChannel) 
   } else if (clicked(world, ObjectMenu.openLinkButtonRef[menu])) {
     openLink(world, ObjectMenu.targetRef[menu]);
   } else if (clicked(world, ObjectMenu.refreshButtonRef[menu])) {
-    console.log("Clicked refresh");
+    addComponent(world, MediaRefresh, ObjectMenu.targetRef[menu]);
   } else if (clicked(world, ObjectMenu.cloneButtonRef[menu])) {
     cloneObject(world, ObjectMenu.targetRef[menu]);
   } else if (clicked(world, ObjectMenu.mirrorButtonRef[menu])) {
@@ -283,6 +284,7 @@ function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
   const isMirrored = hasComponent(world, MediaMirrored, target);
   const isInspectable = hasComponent(world, Inspectable, target);
   const isInspected = hasComponent(world, Inspected, target);
+  const isRefreshing = hasComponent(world, MediaRefresh, target);
 
   // Parent visibility doesn't block raycasting, so we must set each button to be invisible
   // TODO: Ensure that children of invisible entities aren't raycastable
@@ -299,6 +301,7 @@ function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
     !isVideoImagePdf && !isEntityPinned && !hasComponent(world, ObjectDropped, target);
   world.eid2obj.get(ObjectMenu.mirrorButtonRef[menu])!.visible = isVideoImagePdf && !isMirrored;
   world.eid2obj.get(ObjectMenu.inspectButtonRef[menu])!.visible = isVideoImagePdf && isInspectable && !isInspected;
+  world.eid2obj.get(ObjectMenu.refreshButtonRef[menu])!.visible = visible && canIPin && canISpawnMove && !isRefreshing;
 
   // This is a hacky way of giving a chance to the object-menu-transform system to center the menu based on the
   // visible buttons without accounting for the background plane.
@@ -310,7 +313,6 @@ function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
   world.eid2obj.get(ObjectMenu.cameraFocusButtonRef[menu])!.visible = false;
   world.eid2obj.get(ObjectMenu.cameraTrackButtonRef[menu])!.visible = false;
   world.eid2obj.get(ObjectMenu.deserializeDrawingButtonRef[menu])!.visible = false;
-  world.eid2obj.get(ObjectMenu.refreshButtonRef[menu])!.visible = false;
 }
 
 const hoveredQuery = defineQuery([HoveredRemoteRight]);
