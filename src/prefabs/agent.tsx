@@ -26,25 +26,27 @@ export function AgentEntity() {
   const textRef = createRef();
 
   return (
-    <entity
-      name="Agent"
-      agent={{ panelRef, textRef, micRef, snapRef, nextRef, prevRef }}
-      ref={agentRef}
-      model={{ model: cloneModelFromCache(agentModelSrc).scene }}
-      visible={false}
-      cursorRaycastable
-      remoteHoverTarget
-      handCollisionTarget
-      offersRemoteConstraint
-      offersHandConstraint
-      makeKinematicOnRelease
-      holdable
-      floatyObject
-      rigidbody={{ collisionGroup: COLLISION_LAYERS.INTERACTABLES, collisionMask: COLLISION_LAYERS.HANDS }}
-      physicsShape={{ halfExtents: [0.22, 0.14, 0.1] }}
-      followFov
-    >
-      <SimplePanel panelRef={panelRef} textRef={textRef} micRef={micRef} />
+    <entity followFov>
+      <entity
+        name="Agent"
+        agent={{ panelRef, textRef, micRef, snapRef, nextRef, prevRef }}
+        ref={agentRef}
+        model={{ model: cloneModelFromCache(agentModelSrc).scene }}
+        visible={false}
+        position={[0.35, 0, 0.1]}
+        // cursorRaycastable
+        // remoteHoverTarget
+        // handCollisionTarget
+        // offersRemoteConstraint
+        // offersHandConstraint
+        // makeKinematicOnRelease
+        // holdable
+        // floatyObject
+        // rigidbody={{ collisionGroup: COLLISION_LAYERS.INTERACTABLES, collisionMask: COLLISION_LAYERS.HANDS }}
+        // physicsShape={{ halfExtents: [0.22, 0.14, 0.1] }}
+      >
+        <SimplePanel panelRef={panelRef} textRef={textRef} micRef={micRef} />
+      </entity>
     </entity>
   );
 }

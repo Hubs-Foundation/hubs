@@ -111,7 +111,7 @@ export function SimplePanel({ panelRef, textRef, micRef }: SimplePanelParams) {
         ref={panelRef}
         rotation={[0, 0, 0]}
         slice9={{ size: [0.6, 0.3], insets: [64, 66, 64, 66], texture: panelTexture }}
-        position={[-0.7, 0, 0.1]}
+        position={[-0.35, 0, 0.1]}
         scale={[1.0, 1.0, 1.0]}
       >
         <entity
