@@ -28,7 +28,8 @@ import {
   Networked,
   ObjectMenuTarget,
   Rigidbody,
-  MediaLoaderOffset
+  MediaLoaderOffset,
+  MediaVideo
 } from "../bit-components";
 import { inflatePhysicsShape, Shape } from "../inflators/physics-shape";
 import { ErrorObject } from "../prefabs/error-object";
@@ -53,6 +54,7 @@ import { findAncestorsWithComponent, findChildWithComponent } from "../utils/bit
 import { setMatrixWorld } from "../utils/three-utils";
 import { computeObjectAABB, getScaleCoefficient } from "../utils/auto-box-collider";
 import { updateHoverableVisuals } from "./hoverable-visuals-system";
+import { VIDEO_FLAGS } from "../inflators/video";
 
 export function* waitForMediaLoaded(world: HubsWorld, eid: EntityID) {
   while (hasComponent(world, MediaLoader, eid)) {
@@ -380,7 +382,11 @@ export function mediaLoadingSystem(world: HubsWorld) {
 
         const mediaEid = MediaLoader.mediaRef[mediaLoaderEid];
         const mediaObj = world.eid2obj.get(mediaEid)!;
-        mediaObj.visible = true;
+        if (MediaInfo.mediaType[mediaEid] === MediaType.AUDIO) {
+          mediaObj.visible = Boolean(MediaVideo.flags[mediaEid] & VIDEO_FLAGS.CONTROLS);
+        } else {
+          mediaObj.visible = true;
+        }
 
         resizeAndRecenter(world, mediaLoaderEid, box);
 

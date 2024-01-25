@@ -33,6 +33,7 @@ import { ObjectMenuTransformFlags } from "../inflators/object-menu-transform";
 import { MediaType } from "../utils/media-utils";
 import { VolumeControlsMaterial } from "../prefabs/video-menu";
 import { updateAudioSettings } from "../update-audio-settings";
+import { VIDEO_FLAGS } from "../inflators/video";
 
 const videoMenuQuery = defineQuery([VideoMenu]);
 const hoveredQuery = defineQuery([HoveredRemoteRight]);
@@ -100,7 +101,7 @@ function findVideoMenuTarget(world: HubsWorld, menu: EntityID, sceneIsFrozen: bo
 
 function flushToObject3Ds(world: HubsWorld, menu: EntityID, frozen: boolean) {
   const target = VideoMenu.videoRef[menu];
-  let visible = !!(target && !frozen);
+  let visible = !!(target && !frozen) && Boolean(MediaVideo.flags[target] & VIDEO_FLAGS.CONTROLS);
 
   const loader = findAncestorWithComponent(world, MediaLoader, target);
   if (loader && hasComponent(world, Deleting, loader)) {
