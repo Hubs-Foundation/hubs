@@ -17,7 +17,6 @@ const tmpMat42 = new Matrix4();
 const aabb = new Box3();
 const sphere = new Sphere();
 const yVector = new Vector3(0, 1, 0);
-const UNIT_V3 = new Vector3(1, 1, 1);
 
 // Calculate the AABB without accounting for the root object rotation
 function getAABB(obj: Object3D, box: Box3, onlyVisible: boolean = false) {
@@ -85,7 +84,8 @@ function transformMenu(world: HubsWorld, menu: EntityID) {
   } else {
     targetObj.updateMatrices(true, true);
     targetObj.matrixWorld.decompose(tmpVec1, tmpQuat1, tmpVec2);
-    tmpMat42.compose(tmpVec1, tmpQuat1, UNIT_V3);
+    targetObj.getWorldScale(tmpVec2);
+    tmpMat42.compose(tmpVec1, tmpQuat1, tmpVec2);
     tmpMat4.copy(tmpMat42);
 
     const isFacing = isFacingCamera(targetObj);
