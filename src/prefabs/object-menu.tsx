@@ -245,6 +245,7 @@ export const ObjectMenuPositions = {
   remove:             [    0, -0.075, uiZ] as ArrayVec3,
   drop:               [    0, -0.225, uiZ] as ArrayVec3,
   inspect:            [    0, -0.225, uiZ] as ArrayVec3,
+  inspectM:           [    0, -0.375, uiZ] as ArrayVec3,
   inspectU:           [    0,  0.075, uiZ] as ArrayVec3,
   inspectP:           [    0, -0.075, uiZ] as ArrayVec3,
   deserializeDrawing: [ -0.3, -0.425, uiZ] as ArrayVec3,

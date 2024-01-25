@@ -331,8 +331,10 @@ function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
     mirrorButtonObj.position.fromArray(ObjectMenuPositions.mirror);
     if (isEntityPinned) {
       inspectButtonObj.position.fromArray(ObjectMenuPositions.inspectP);
-    } else {
+    } else if (isVideoImagePdf) {
       inspectButtonObj.position.fromArray(ObjectMenuPositions.inspect);
+    } else {
+      inspectButtonObj.position.fromArray(ObjectMenuPositions.inspectM);
     }
     refreshButtonObj.position.fromArray(ObjectMenuPositions.refresh);
 
