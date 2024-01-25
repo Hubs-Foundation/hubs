@@ -29,7 +29,8 @@ import {
   ObjectMenuTarget,
   Rigidbody,
   MediaLoaderOffset,
-  MediaVideo
+  MediaVideo,
+  NetworkedTransform
 } from "../bit-components";
 import { inflatePhysicsShape, Shape } from "../inflators/physics-shape";
 import { ErrorObject } from "../prefabs/error-object";
@@ -341,6 +342,9 @@ const mediaRefreshQuery = defineQuery([MediaRefresh]);
 const mediaRefreshEnterQuery = enterQuery(mediaRefreshQuery);
 export function mediaLoadingSystem(world: HubsWorld) {
   mediaLoadingEnterQuery(world).forEach(function (eid) {
+    const mediaLoaderObj = world.eid2obj.get(eid)!;
+    mediaLoaderObj.visible = false;
+
     const mediaLoaderEids = findAncestorsWithComponent(world, MediaLoader, eid);
     mediaLoaderEids.forEach(mediaLoaderEid => {
       MediaLoader.count[mediaLoaderEid]++;
@@ -365,6 +369,9 @@ export function mediaLoadingSystem(world: HubsWorld) {
     if (MediaVideoLoaderData.has(eid)) {
       MediaVideoLoaderData.delete(eid);
     }
+
+    const mediaLoaderObj = world.eid2obj.get(eid)!;
+    mediaLoaderObj.visible = true;
 
     const mediaLoaderEids = findAncestorsWithComponent(world, MediaLoader, eid);
     for (let i = 0; i < mediaLoaderEids.length; i++) {
@@ -396,6 +403,14 @@ export function mediaLoadingSystem(world: HubsWorld) {
           jobs.add(mediaLoaderEid, () => finish(world, mediaLoaderEid));
         }
       }
+    }
+  });
+
+  mediaLoadingQuery(world).forEach(eid => {
+    const mediaLoaderObj = world.eid2obj.get(eid)!;
+    transformPosition.fromArray(NetworkedTransform.position[eid]);
+    if (mediaLoaderObj.position.near(transformPosition, 0.001)) {
+      mediaLoaderObj.visible = true;
     }
   });
 
