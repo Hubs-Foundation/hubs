@@ -24,4 +24,8 @@ declare module "three" {
   interface Mesh {
     reflectionProbeMode: "static" | "dynamic" | false;
   }
+
+  interface Vector3 {
+    near: Function;
+  }
 }
