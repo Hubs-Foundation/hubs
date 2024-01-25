@@ -24,7 +24,9 @@ import {
   Inspected,
   Inspectable,
   Deletable,
-  MediaRefresh
+  MediaRefresh,
+  MyCameraTool,
+  CameraTool
 } from "../bit-components";
 import {
   anyEntityWith,
@@ -187,15 +189,31 @@ function cloneObject(world: HubsWorld, sourceEid: EntityID) {
   setMatrixWorld(clonedObj, clonedMatrixWorld);
 }
 
+const tmpPos = new Vector3();
+function focus(world: HubsWorld, menu: EntityID, track: boolean = false) {
+  const myCam = anyEntityWith(APP.world, MyCameraTool);
+  if (!myCam) return;
+
+  let target = ObjectMenu.targetRef[menu];
+  if (track) {
+    const tracking = CameraTool.trackTarget[myCam];
+    CameraTool.trackTarget[myCam] = tracking === target ? 0 : target;
+  } else {
+    const targetObj = world.eid2obj.get(target)!;
+    targetObj.getWorldPosition(tmpPos);
+    world.eid2obj.get(myCam)!.lookAt(tmpPos);
+  }
+}
+
 function handleClicks(world: HubsWorld, menu: EntityID, hubChannel: HubChannel) {
   if (clicked(world, ObjectMenu.pinButtonRef[menu])) {
     setPinned(hubChannel, world, ObjectMenu.targetRef[menu], true);
   } else if (clicked(world, ObjectMenu.unpinButtonRef[menu])) {
     setPinned(hubChannel, world, ObjectMenu.targetRef[menu], false);
   } else if (clicked(world, ObjectMenu.cameraFocusButtonRef[menu])) {
-    console.log("Clicked focus");
+    focus(world, menu);
   } else if (clicked(world, ObjectMenu.cameraTrackButtonRef[menu])) {
-    console.log("Clicked track");
+    focus(world, menu, true);
   } else if (clicked(world, ObjectMenu.removeButtonRef[menu])) {
     ObjectMenu.flags[menu] &= ~ObjectMenuFlags.Visible;
     deleteTheDeletableAncestor(world, ObjectMenu.targetRef[menu]);
@@ -287,6 +305,7 @@ function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
   const isInspectable = hasComponent(world, Inspectable, target);
   const isInspected = hasComponent(world, Inspected, target);
   const isRefreshing = hasComponent(world, MediaRefresh, target);
+  const isCameraActive = !!anyEntityWith(APP.world, MyCameraTool);
 
   const openLinkButtonObj = world.eid2obj.get(ObjectMenu.openLinkButtonRef[menu])!;
   const mirrorButtonObj = world.eid2obj.get(ObjectMenu.mirrorButtonRef[menu])!;
@@ -316,6 +335,9 @@ function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
       inspectButtonObj.position.fromArray(ObjectMenuPositions.inspect);
     }
     refreshButtonObj.position.fromArray(ObjectMenuPositions.refresh);
+
+    world.eid2obj.get(ObjectMenu.cameraFocusButtonRef[menu])!.visible = isCameraActive;
+    world.eid2obj.get(ObjectMenu.cameraTrackButtonRef[menu])!.visible = isCameraActive;
   } else {
     [
       ObjectMenu.unpinButtonRef[menu],
@@ -324,7 +346,9 @@ function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
       ObjectMenu.cloneButtonRef[menu],
       ObjectMenu.rotateButtonRef[menu],
       ObjectMenu.scaleButtonRef[menu],
-      ObjectMenu.dropButtonRef[menu]
+      ObjectMenu.dropButtonRef[menu],
+      ObjectMenu.cameraFocusButtonRef[menu],
+      ObjectMenu.cameraTrackButtonRef[menu]
     ].forEach(ref => {
       world.eid2obj.get(ref)!.visible = false;
     });
@@ -347,8 +371,6 @@ function updateVisibility(world: HubsWorld, menu: EntityID, frozen: boolean) {
 
   // Hide unimplemented features for now.
   // TODO: Implement and show the buttons.
-  world.eid2obj.get(ObjectMenu.cameraFocusButtonRef[menu])!.visible = false;
-  world.eid2obj.get(ObjectMenu.cameraTrackButtonRef[menu])!.visible = false;
   world.eid2obj.get(ObjectMenu.deserializeDrawingButtonRef[menu])!.visible = false;
 }
 
