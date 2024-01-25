@@ -61,7 +61,7 @@ export function PDFMenuPrefab() {
   return (
     <entity
       name="PDF Menu"
-      objectMenuTransform={{ center: false }}
+      objectMenuTransform={{ center: false, scale: true }}
       pdfMenu={{
         prevButtonRef: refPrev,
         nextButtonRef: refNext,
