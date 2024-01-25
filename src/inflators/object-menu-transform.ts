@@ -5,11 +5,13 @@ import { ObjectMenuTransform } from "../bit-components";
 
 export const ObjectMenuTransformFlags = {
   Enabled: 1 << 0,
-  Center: 1 << 1
+  Center: 1 << 1,
+  Scale: 1 << 2
 };
 
 export type ObjectMenuTransformParams = {
   center?: boolean;
+  scale?: boolean;
 };
 
 const DEFAULTS = {
@@ -21,5 +23,8 @@ export function inflateObjectMenuTransform(world: HubsWorld, eid: EntityID, para
   addComponent(world, ObjectMenuTransform, eid);
   if (params.center === true) {
     ObjectMenuTransform.flags[eid] |= ObjectMenuTransformFlags.Center;
+  }
+  if (params.scale === true) {
+    ObjectMenuTransform.flags[eid] |= ObjectMenuTransformFlags.Scale;
   }
 }
