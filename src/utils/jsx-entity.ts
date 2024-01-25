@@ -290,6 +290,8 @@ export interface JSXComponentData extends ComponentData {
     playIndicatorRef: Ref;
     pauseIndicatorRef: Ref;
     snapRef: Ref;
+    volUpRef: Ref;
+    volDownRef: Ref;
   };
   videoMenuItem?: true;
   cursorRaycastable?: true;

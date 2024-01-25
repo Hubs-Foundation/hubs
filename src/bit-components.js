@@ -281,6 +281,8 @@ export const VideoMenu = defineComponent({
   playIndicatorRef: Types.eid,
   pauseIndicatorRef: Types.eid,
   snapRef: Types.eid,
+  volUpRef: Types.eid,
+  volDownRef: Types.eid,
   clearTargetTimer: Types.f64
 });
 export const AudioEmitter = defineComponent({

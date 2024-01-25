@@ -1,9 +1,10 @@
 import { addComponent, defineQuery, entityExists, hasComponent, removeComponent } from "bitecs";
-import { Object3D, Plane, Ray, Vector3 } from "three";
+import { MathUtils, Object3D, Plane, Ray, Vector3 } from "three";
 import { clamp, mapLinear } from "three/src/math/MathUtils";
 import { Text as TroikaText } from "troika-three-text";
 import { HubsWorld } from "../app";
 import {
+  AudioEmitter,
   CursorRaycastable,
   Deleting,
   EntityStateDirty,
@@ -27,9 +28,11 @@ import { paths } from "../systems/userinput/paths";
 import { isFacingCamera } from "../utils/three-utils";
 import { Emitter2Audio } from "./audio-emitter-system";
 import { EntityID } from "../utils/networking-types";
-import { findAncestorWithComponent, hasAnyComponent } from "../utils/bit-utils";
+import { findAncestorWithComponent, findChildWithComponent, hasAnyComponent } from "../utils/bit-utils";
 import { ObjectMenuTransformFlags } from "../inflators/object-menu-transform";
 import { MediaType } from "../utils/media-utils";
+import { VolumeControlsMaterial } from "../prefabs/video-menu";
+import { updateAudioSettings } from "../update-audio-settings";
 
 const videoMenuQuery = defineQuery([VideoMenu]);
 const hoveredQuery = defineQuery([HoveredRemoteRight]);
@@ -116,6 +119,12 @@ function flushToObject3Ds(world: HubsWorld, menu: EntityID, frozen: boolean) {
     ObjectMenuTransform.flags[menu] |= ObjectMenuTransformFlags.Enabled;
     const snapButton = world.eid2obj.get(VideoMenu.snapRef[menu])!;
     snapButton.visible = MediaInfo.mediaType[target] === MediaType.VIDEO;
+
+    const audioEid = findChildWithComponent(world, AudioEmitter, target)!;
+    if (audioEid) {
+      const audio = APP.audios.get(audioEid)!;
+      VolumeControlsMaterial.uniforms.volume.value = audio.gain.gain.value;
+    }
   } else {
     obj.removeFromParent();
     setCursorRaycastable(world, menu, false);
@@ -125,6 +134,20 @@ function flushToObject3Ds(world: HubsWorld, menu: EntityID, frozen: boolean) {
 
 function clicked(world: HubsWorld, eid: EntityID) {
   return hasComponent(world, Interacted, eid);
+}
+
+const MAX_GAIN_MULTIPLIER = 2;
+function changeVolumeBy(audioEid: EntityID, volume: number) {
+  let gainMultiplier = 1.0;
+  if (APP.gainMultipliers.has(audioEid)) {
+    gainMultiplier = APP.gainMultipliers.get(audioEid)!;
+  }
+  gainMultiplier = MathUtils.clamp(gainMultiplier + volume, 0, MAX_GAIN_MULTIPLIER);
+  APP.gainMultipliers.set(audioEid, gainMultiplier);
+  const audio = APP.audios.get(audioEid);
+  if (audio) {
+    updateAudioSettings(audioEid, audio);
+  }
 }
 
 function handleClicks(world: HubsWorld, menu: EntityID) {
@@ -150,6 +173,16 @@ function handleClicks(world: HubsWorld, menu: EntityID) {
   } else if (clicked(world, VideoMenu.snapRef[menu])) {
     const video = VideoMenu.videoRef[menu];
     addComponent(world, MediaSnapped, video);
+  } else if (clicked(world, VideoMenu.volUpRef[menu])) {
+    const audioEid = findChildWithComponent(world, AudioEmitter, VideoMenu.videoRef[menu])!;
+    if (audioEid) {
+      changeVolumeBy(audioEid, 0.2);
+    }
+  } else if (clicked(world, VideoMenu.volDownRef[menu])) {
+    const audioEid = findChildWithComponent(world, AudioEmitter, VideoMenu.videoRef[menu])!;
+    if (audioEid) {
+      changeVolumeBy(audioEid, -0.2);
+    }
   }
 }
 

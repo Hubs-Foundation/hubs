@@ -1,5 +1,5 @@
 /** @jsx createElementEntity */
-import { BoxBufferGeometry, Mesh, MeshBasicMaterial, PlaneBufferGeometry } from "three";
+import { BoxBufferGeometry, FrontSide, Mesh, MeshBasicMaterial, PlaneBufferGeometry, ShaderChunk } from "three";
 import { Label } from "../prefabs/camera-tool";
 import { ArrayVec3, Attrs, createElementEntity, createRef } from "../utils/jsx-entity";
 import playImageUrl from "../assets/images/sprites/notice/play.png";
@@ -16,10 +16,36 @@ export async function loadVideoMenuButtonIcons() {
   ]);
 }
 
+export const VolumeControlsMaterial = new THREE.ShaderMaterial({
+  uniforms: {
+    volume: { value: 0.0 }
+  },
+  vertexShader: `
+    varying vec2 vUv;
+    void main()
+    {
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.);
+      vUv = uv;
+    }
+  `,
+  fragmentShader: `
+    uniform float time;
+    uniform float volume;
+    varying vec2 vUv;
+    
+    void main() {
+      float step = step(volume, vUv.x);
+      gl_FragColor = mix(vec4(vec3(0.8), 1.0), vec4(vec3(0.2), 1.0), step);
+    }
+  `
+});
+VolumeControlsMaterial.side = FrontSide;
+
 const uiZ = 0.001;
 const BUTTON_HEIGHT = 0.2;
 const BIG_BUTTON_SCALE: ArrayVec3 = [0.8, 0.8, 0.8];
 const BUTTON_SCALE: ArrayVec3 = [0.6, 0.6, 0.6];
+const SMALL_BUTTON_SCALE: ArrayVec3 = [0.4, 0.4, 0.4];
 const BUTTON_WIDTH = 0.2;
 
 function Slider({ trackRef, headRef, ...props }: any) {
@@ -41,6 +67,33 @@ function Slider({ trackRef, headRef, ...props }: any) {
           ref={headRef}
         />
       </entity>
+    </entity>
+  );
+}
+
+interface VolumeButtonProps extends Attrs {
+  text: string;
+}
+
+function VolumeButton(props: VolumeButtonProps) {
+  return (
+    <Button3D
+      name={props.name}
+      scale={SMALL_BUTTON_SCALE}
+      width={BUTTON_WIDTH}
+      height={BUTTON_HEIGHT}
+      type={BUTTON_TYPES.ACTION}
+      {...props}
+    />
+  );
+}
+
+function VolumeControls({ volUpRef, volDownRef, ...props }: any) {
+  return (
+    <entity {...props} name="Volume Controls">
+      <entity name="Volume Bar" object3D={new Mesh(new PlaneBufferGeometry(0.5, 0.05), VolumeControlsMaterial)} />
+      <VolumeButton name="Decrease Volume button" text="-" ref={volDownRef} position={[-0.35, 0, 0]} />
+      <VolumeButton name="Increase Volume Button" text="+" ref={volUpRef} position={[0.35, 0, 0]} />
     </entity>
   );
 }
@@ -87,13 +140,25 @@ export function VideoMenuPrefab() {
   const playIndicatorRef = createRef();
   const pauseIndicatorRef = createRef();
   const snapRef = createRef();
+  const volUpRef = createRef();
+  const volDownRef = createRef();
   const halfHeight = 9 / 16 / 2;
 
   return (
     <entity
       name="Video Menu"
       objectMenuTransform={{ center: false }}
-      videoMenu={{ sliderRef, timeLabelRef, headRef, trackRef, playIndicatorRef, pauseIndicatorRef, snapRef }}
+      videoMenu={{
+        sliderRef,
+        timeLabelRef,
+        headRef,
+        trackRef,
+        playIndicatorRef,
+        pauseIndicatorRef,
+        snapRef,
+        volUpRef,
+        volDownRef
+      }}
     >
       <Label
         name="Time Label"
@@ -106,6 +171,7 @@ export function VideoMenuPrefab() {
       <Slider ref={sliderRef} trackRef={trackRef} headRef={headRef} position={[0, -halfHeight + 0.025, uiZ]} />
       <VideoActionButton ref={playIndicatorRef} name={"Play Button"} buttonIcon={playImageUrl} />
       <VideoActionButton ref={pauseIndicatorRef} name={"Pause Button"} buttonIcon={pauseImageUrl} />
+      <VolumeControls volUpRef={volUpRef} volDownRef={volDownRef} position={[0, -0.15, uiZ]} />
     </entity>
   );
 }
