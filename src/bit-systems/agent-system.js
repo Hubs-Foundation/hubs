@@ -76,6 +76,7 @@ export default class VirtualAgent {
     this.text = new textElement();
     this.currentOccasion = null;
     this.waitingForResponse = null;
+    this.micStatus = false;
 
     this.onClear = this.onClear.bind(this);
     this.onToggle = this.onToggle.bind(this);
@@ -139,14 +140,13 @@ export default class VirtualAgent {
 
     // this.UpdateText("Hello I am your personal Agent");
     this.UpdateWithRandomPhrase("greetings");
+    this.micStatus = false;
     APP.dialog.on("mic-state-changed", this.setMicStatus);
     this.waitingForResponse = false;
     APP.mediaDevicesManager.micEnabled = false;
-    this.setMicStatus();
     APP.scene.addEventListener("language_updated", this.onLanguageUpdated);
     this.agent.obj.visible = true;
-
-    this.micStatus = false;
+    this.micButton.obj.visible = false;
   }
 
   Cleanup() {
@@ -188,6 +188,7 @@ export default class VirtualAgent {
 
   setMicStatus() {
     const permissionsGranted = APP.mediaDevicesManager.getPermissionsStatus("microphone") === PermissionStatus.GRANTED;
+    console.log(this.micStatus, APP.mediaDevicesManager.isMicEnabled);
     if (this.micStatus !== (permissionsGranted && APP.mediaDevicesManager.isMicEnabled)) {
       this.micStatus = permissionsGranted && APP.mediaDevicesManager.isMicEnabled;
       this.MicrophoneActions(false);
