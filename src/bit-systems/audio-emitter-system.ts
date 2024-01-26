@@ -1,4 +1,4 @@
-import { addComponent, addEntity, defineQuery, removeComponent } from "bitecs";
+import { addComponent, addEntity, defineQuery, enterQuery, removeComponent } from "bitecs";
 import { PositionalAudio, Audio as StereoAudio, AudioListener as ThreeAudioListener } from "three";
 import { HubsWorld } from "../app";
 import { AudioEmitter, AudioSettingsChanged, MediaVideoData } from "../bit-components";
@@ -94,7 +94,13 @@ export function makeAudioEntity(world: HubsWorld, source: number, sourceType: So
 }
 
 const staleAudioEmittersQuery = defineQuery([AudioEmitter, AudioSettingsChanged]);
+const audioEmitterQuery = defineQuery([AudioEmitter]);
+const audioEmitterEnterQuery = enterQuery(audioEmitterQuery);
 export function audioEmitterSystem(world: HubsWorld, audioSystem: AudioSystem) {
+  audioEmitterEnterQuery(world).forEach(eid => {
+    const audio = APP.audios.get(eid)!;
+    audio.updateMatrixWorld(true);
+  });
   staleAudioEmittersQuery(world).forEach(function (eid) {
     const audio = world.eid2obj.get(eid)! as PositionalAudio | StereoAudio;
     const settings = getCurrentAudioSettings(eid);
