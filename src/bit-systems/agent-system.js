@@ -141,10 +141,11 @@ export default class VirtualAgent {
     this.UpdateWithRandomPhrase("greetings");
     APP.dialog.on("mic-state-changed", this.setMicStatus);
     this.waitingForResponse = false;
+    APP.mediaDevicesManager.micEnabled = false;
     this.setMicStatus();
     APP.scene.addEventListener("language_updated", this.onLanguageUpdated);
     this.agent.obj.visible = true;
-    APP.mediaDevicesManager.micEnabled = false;
+
     this.micStatus = false;
   }
 
