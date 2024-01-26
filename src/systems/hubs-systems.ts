@@ -92,6 +92,7 @@ import { linkedVideoSystem } from "../bit-systems/linked-video-system";
 import { linkedPDFSystem } from "../bit-systems/linked-pdf-system";
 import { inspectSystem } from "../bit-systems/inspect-system";
 import { snapMediaSystem } from "../bit-systems/snap-media-system";
+import { scaleWhenGrabbedSystem } from "../bit-systems/scale-when-grabbed-system";
 
 declare global {
   interface Window {
@@ -286,6 +287,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   linkedVideoSystem(world);
   linkedPDFSystem(world);
   inspectSystem(world, hubsSystems.cameraSystem);
+  scaleWhenGrabbedSystem(world, aframeSystems.userinput);
 
   objectMenuTransformSystem(world);
 
