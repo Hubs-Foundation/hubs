@@ -317,6 +317,18 @@ export const oculusTouchUserBindings = addSetsToBindings({
       xform: xforms.any
     },
     {
+      src: { value: upperButtons },
+      dest: { value: paths.actions.muteMic },
+      priority: 1,
+      xform: xforms.rising
+    },
+    {
+      src: { value: upperButtons },
+      dest: { value: paths.actions.muteMic },
+      priority: 1,
+      xform: xforms.falling
+    },
+    {
       src: { value: lowerButtons },
       dest: { value: ensureFrozenViaButtons },
       xform: xforms.copy
@@ -811,11 +823,11 @@ export const oculusTouchUserBindings = addSetsToBindings({
   ],
 
   [sets.inspecting]: [
-    {
-      src: { value: upperButtons },
-      dest: { value: paths.actions.stopInspecting },
-      xform: xforms.falling
-    }
+    // {
+    //   src: { value: upperButtons },
+    //   dest: { value: paths.actions.stopInspecting },
+    //   xform: xforms.falling
+    // }
   ],
 
   [sets.leftHandHoldingInteractable]: [
@@ -900,12 +912,13 @@ export const oculusTouchUserBindings = addSetsToBindings({
       dest: { value: paths.actions.cursor.right.grab },
       xform: xforms.any,
       priority: 2
-    },
-    {
-      src: { value: upperButtons },
-      dest: { value: paths.actions.startInspecting },
-      xform: xforms.rising
     }
+    // ,
+    // {
+    //   src: { value: upperButtons },
+    //   dest: { value: paths.actions.startInspecting },
+    //   xform: xforms.rising
+    // }
   ],
 
   [sets.leftCursorHoveringOnInteractable]: [
@@ -926,12 +939,13 @@ export const oculusTouchUserBindings = addSetsToBindings({
       dest: { value: paths.actions.cursor.left.grab },
       xform: xforms.any,
       priority: 2
-    },
-    {
-      src: { value: upperButtons },
-      dest: { value: paths.actions.startInspecting },
-      xform: xforms.rising
     }
+    // ,
+    // {
+    //   src: { value: upperButtons },
+    //   dest: { value: paths.actions.startInspecting },
+    //   xform: xforms.rising
+    // }
   ],
 
   [sets.rightCursorHoldingUI]: [

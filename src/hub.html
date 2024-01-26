@@ -67,8 +67,10 @@
 
     <a-scene hubs-systems capture-system listed-media local-audio-analyser class="grab-cursor"
         networked-scene="audio: true; debug: true; connectOnLoad: false;"
-        mute-mic="eventSrc: a-scene; toggleEvents: action_mute"
-        action-to-event__mute="path: /actions/muteMic; event: action_mute;" freeze-controller
+        mute-mic="eventSrc: a-scene; toggleEvents: action_mute; muteEvents: action_disable_mic; unmuteEvents: action_enable_mic; "
+        action-to-event__mute="path: /actions/muteMic; event: action_mute;"
+        action-to-event__disable="path: /actions/disableMic; event: action_disable_mic; "
+        action-to-event__enable="path: /actions/enableMic; event: action_enable_mic; " freeze-controller
         personal-space-bubble="debug: false;" rotate-selected-object>
         <a-assets>
             <!-- Note our fork of aframe doesn't actually do any preloading with a-assets. These a-asset-items are only used for their src attribute. -->

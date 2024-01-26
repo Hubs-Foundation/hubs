@@ -67,6 +67,7 @@ const snapRotateLeft2 = v("snapRotateLeft2");
 const centerStripPressed = v("centerStripPressed");
 const touchpadReleased = v("touchpadReleased");
 const lowerButtonsReleased = v("lowerButtonsReleased");
+const upperButtonsReleased = v("upperButtonsReleased");
 
 export const webXRUserBindings = addSetsToBindings({
   [sets.global]: [
@@ -209,6 +210,18 @@ export const webXRUserBindings = addSetsToBindings({
       dest: { value: upperButtons },
       xform: xforms.any
     },
+    // {
+    //   src: { value: upperButtons },
+    //   dest: { value: paths.actions.muteMic },
+    //   priority: 1,
+    //   xform: xforms.rising
+    // },
+    // {
+    //   src: { value: upperButtons },
+    //   dest: { value: paths.actions.muteMic },
+    //   priority: 1,
+    //   xform: xforms.falling
+    // },
     {
       src: { value: rightDpadWest },
       dest: { value: paths.actions.snapRotateLeft },
@@ -365,6 +378,11 @@ export const webXRUserBindings = addSetsToBindings({
       xform: xforms.any
     },
     {
+      src: [centerStripPressed, upperButtons],
+      dest: { value: paths.actions.enableMic },
+      xform: xforms.any
+    },
+    {
       src: { value: rightButton.touchpad.pressed },
       dest: { value: touchpadReleased },
       xform: xforms.falling
@@ -375,8 +393,18 @@ export const webXRUserBindings = addSetsToBindings({
       xform: xforms.falling
     },
     {
+      src: { value: upperButtons },
+      dest: { value: upperButtonsReleased },
+      xform: xforms.falling
+    },
+    {
       src: [touchpadReleased, lowerButtonsReleased],
       dest: { value: paths.actions.thaw },
+      xform: xforms.any
+    },
+    {
+      src: [touchpadReleased, upperButtonsReleased],
+      dest: { value: paths.actions.disableMic },
       xform: xforms.any
     },
     {
@@ -507,11 +535,11 @@ export const webXRUserBindings = addSetsToBindings({
   ],
 
   [sets.inspecting]: [
-    {
-      src: { value: upperButtons },
-      dest: { value: paths.actions.stopInspecting },
-      xform: xforms.falling
-    }
+    // {
+    //   src: { value: upperButtons },
+    //   dest: { value: paths.actions.stopInspecting },
+    //   xform: xforms.falling
+    // }
   ],
 
   [sets.leftHandHoldingInteractable]: [
@@ -580,12 +608,13 @@ export const webXRUserBindings = addSetsToBindings({
       dest: { value: paths.actions.cursor.right.grab },
       xform: xforms.any,
       priority: 2
-    },
-    {
-      src: { value: upperButtons },
-      dest: { value: paths.actions.startInspecting },
-      xform: xforms.rising
     }
+    // ,
+    // {
+    //   src: { value: upperButtons },
+    //   dest: { value: paths.actions.startInspecting },
+    //   xform: xforms.rising
+    // }
   ],
 
   [sets.leftCursorHoveringOnInteractable]: [
@@ -600,12 +629,13 @@ export const webXRUserBindings = addSetsToBindings({
       dest: { value: paths.actions.cursor.left.grab },
       xform: xforms.any,
       priority: 2
-    },
-    {
-      src: { value: upperButtons },
-      dest: { value: paths.actions.startInspecting },
-      xform: xforms.rising
     }
+    // ,
+    // {
+    //   src: { value: upperButtons },
+    //   dest: { value: paths.actions.startInspecting },
+    //   xform: xforms.rising
+    // }
   ],
 
   [sets.rightCursorHoldingUI]: [
