@@ -365,9 +365,10 @@ export function createPlaneBufferGeometry(width, height, widthSegments, heightSe
 }
 
 import { Layers } from "../camera-layers";
-import { Box3, DoubleSide, Mesh, MeshBasicMaterial, Object3D, Vector3 } from "three";
+import { Box3, DoubleSide, Group, Mesh, MeshBasicMaterial, Object3D, Vector3 } from "three";
 import { TEXTURES_FLIP_Y } from "../loaders/HubsTextureLoader";
 import { MediaVideo } from "../bit-components";
+import { Text } from "troika-three-text";
 
 // This code is from three-vrm. We will likely be using that in the future and this inlined code can go away
 function excludeTriangles(triangles, bws, skinIndex, exclude) {
@@ -595,6 +596,19 @@ THREE.Object3D.prototype.clone = (function () {
       }
 
       return videoMesh;
+    } else if (this.type === "Group") {
+      const group = new Group().copy(this, false);
+      for (let i = 0; i < this.children.length; i++) {
+        const child = this.children[i];
+        // Troika text material crashes when cloning: https://github.com/protectwise/troika/issues/248
+        // Ignoring for now...
+        if (child instanceof Text) {
+          group.add(new Object3D());
+        } else {
+          group.add(child.clone());
+        }
+      }
+      return group;
     } else {
       return this._clone();
     }
