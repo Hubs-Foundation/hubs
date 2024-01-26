@@ -24,9 +24,9 @@ AFRAME.registerComponent("translate-panel", {
     this.size = new Vector3();
     this.preformatText;
     this.formattedText;
-    this.targetLanguageCheck = false;
-    this.userLanguageCheck = window.APP.store.state.profile.language;
-    this.userCheck = false;
+    this.targetLanguage = false;
+    this.userLanguage = window.APP.store.state.profile.language;
+    this.user = false;
 
     NAF.utils
       .getNetworkedEntity(this.el)
@@ -42,7 +42,7 @@ AFRAME.registerComponent("translate-panel", {
     APP.scene.addEventListener("translation-available", this.onAvailableTranslation);
     APP.scene.addEventListener("translation-target-updated", this.onTargetUpdate);
     APP.scene.addEventListener("language_updated", this.onLanguageUpdate);
-    APP.scene.addEventListener("translation_target_language_updated", this.onTargetLanguageUpdate);
+    APP.scene.addEventListener("translation_target_properties_updated", this.onTargetLanguageUpdate);
 
     this.translateText.el.setAttribute("text", {
       value: this.formattedText
@@ -55,13 +55,14 @@ AFRAME.registerComponent("translate-panel", {
     APP.scene.removeEventListener("translation-available", this.onAvailableTranslation);
     APP.scene.removeEventListener("translation-target-updated", this.onTargetUpdate);
     APP.scene.removeEventListener("language_updated", this.onLanguageUpdate);
-    APP.scene.removeEventListener("translation_target_language_updated", this.onTargetLanguageUpdate);
+    APP.scene.removeEventListener("translation_target_properties_updated", this.onTargetLanguageUpdate);
   },
   onAvailableTranslation(event) {
     this.UpdateText(event.detail.text);
   },
 
   UpdateText(text) {
+    if (!text) return;
     this.preformatText = text;
     this.fortmatLines();
     this.translateText.el.addEventListener("text-updated", this.updateTextSize);
@@ -87,23 +88,26 @@ AFRAME.registerComponent("translate-panel", {
   },
 
   onTargetUpdate(event) {
-    this.userCheck = this.owner === event.detail.owner;
+    this.user = this.owner === event.detail.owner;
+    this.targetLanguage = event.detail.language;
+    console.log(`Target Updated. Target language  : ${this.targetLanguage}`);
     this.checkAndRender();
   },
 
   onLanguageUpdate(event) {
-    this.userLanguageCheck = !!event.detail.language;
+    this.userLanguage = event.detail.language;
     this.checkAndRender();
   },
 
   onTargetLanguageUpdate(event) {
     console.log(`target lanugage changed to: ${event.detail.language}`);
-    this.targetLanguageCheck = !!event.detail.language;
+    if (this.targetLanguage === event.detail.language) return;
+    this.targetLanguage = event.detail.language;
     this.checkAndRender();
   },
 
   checkAndRender() {
-    const check = this.userCheck && this.targetLanguageCheck && this.userLanguageCheck;
+    const check = !!this.user && !!this.targetLanguage && !!this.userLanguage;
     this.el.object3D.visible = check;
     const langCode = subtitleSystem.mylanguage ? subtitleSystem.mylanguage : "en";
     if (check) this.UpdateText(GreetingPhrases[langCode]);

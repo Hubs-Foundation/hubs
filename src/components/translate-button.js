@@ -11,35 +11,34 @@ AFRAME.registerComponent("translate-button", {
 
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.playerSessionId = NAF.utils.getCreator(networkedEl);
+
       const playerPresence = window.APP.hubChannel.presence.state[this.playerSessionId];
       this.owner = networkedEl.components.networked.data.owner;
-      if (playerPresence) {
-        this.updateFromPresenceMeta(playerPresence.metas[0]);
-      }
-      console.log(playerPresence);
-      if (playerPresence) {
-        this.updateFromPresenceMeta(playerPresence.metas[0]);
-      }
+
+      if (playerPresence) this.updateFromPresenceMeta(playerPresence.metas[0]);
     });
+
     this.onTargetUpdate = event => {
       const text = this.el.querySelector(".translate-button-text").object3D;
-      if (event.detail.owner === this.owner) {
-        text.el.setAttribute("text", {
-          value: "Stop"
-        });
-      } else {
-        text.el.setAttribute("text", {
-          value: "Translate"
-        });
+      if (text) {
+        if (event.detail.owner === this.owner) {
+          text.el.setAttribute("text", {
+            value: "Stop"
+          });
+        } else {
+          text.el.setAttribute("text", {
+            value: "Translate"
+          });
+        }
       }
     };
 
     this.onClick = () => {
-      // subtitleSystem.SelectTarget(this.owner);
       APP.scene.emit("translation_updates_available", {
         type: "target",
         target: this.owner,
-        language: this.userLanguage
+        language: this.userLanguage,
+        micStatus: this.micStatus
       });
     };
   },
@@ -60,10 +59,14 @@ AFRAME.registerComponent("translate-button", {
   //need for bind?
   updateFromPresenceMeta(presenceMeta) {
     this.userLanguage = presenceMeta.profile.language;
+    this.micStatus = presenceMeta.profile.micStatus;
 
     if (subtitleSystem.target === this.owner) {
-      APP.scene.emit("translation_updates_available", { type: "language", language: this.userLanguage });
-      return;
+      APP.scene.emit("translation_updates_available", {
+        type: "properties",
+        language: this.userLanguage,
+        micStatus: this.micStatus
+      });
     }
   }
 });

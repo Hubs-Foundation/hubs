@@ -158,8 +158,11 @@ export class SubtitleSystem {
     this.dataArray;
     this.mediaRecorder;
     this.animationFrameID;
+    this.micStatus;
+    this.isRecording;
     this.onLanguageAvailable = this.onLanguageAvailable.bind(this);
     this.onTranslationUpdatesAvailable = this.onTranslationUpdatesAvailable.bind(this);
+    this.setMicStatus = this.setMicStatus.bind(this);
   }
 
   Init(reset) {
@@ -171,27 +174,133 @@ export class SubtitleSystem {
 
     this.updateMyLanguage("");
     this.targetLanguage = null;
+    this.targetMicStatus = null;
     this.target = null;
     this.scene = APP.scene;
     this.VRmode = this.scene.is("vr-mode");
     this.cleanup = false;
     this.counter = 0;
+    this.isRecording = false;
+    this.micStatus = this.setMicStatus();
     this.scene.addEventListener("language_available", this.onLanguageAvailable);
     this.scene.addEventListener("translation_updates_available", this.onTranslationUpdatesAvailable);
+    APP.dialog.on("mic-state-changed", this.setMicStatus);
+  }
+
+  setMicStatus() {
+    this.micStatus = APP.mediaDevicesManager.isMicEnabled;
+    window.APP.store.update({ profile: { micStatus: this.micStatus } });
+    console.log(window.APP.store.state.profile);
   }
 
   onTranslationUpdatesAvailable(event) {
-    if (event.detail.type === "target") this.UpdateTarget(event.detail.target);
-    this.updateTargetLanguage(event.detail.language);
+    console.log(event.detail);
+    if (event.detail.type === "target") this.UpdateTarget(event.detail);
+    else if (event.detail.type === "properties") this.updateTargetProperties(event.detail);
+  }
+
+  UpdateTarget(newTargetDetails) {
+    if (this.isRecording) this.StopTranslating();
+
+    if (this.target === newTargetDetails.target) {
+      this.target = null;
+      this.targetLanguage = null;
+      this.targetMicStatus = null;
+    } else {
+      this.target = newTargetDetails.target;
+      this.targetLanguage = newTargetDetails.language;
+      this.targetMicStatus = newTargetDetails.micStatus;
+    }
+
+    const announcedProperties = { owner: this.target, language: this.targetLanguage, micStatus: this.micStatus };
+
+    APP.scene.emit("translation-target-updated", announcedProperties);
+
+    this.TranslateCheck();
+
+    // if (this.hasTarget) {
+    //   // APP.scene.emit("translation-available", { text: "The audio translation will be displayed here!" });
+    //   // this.StartTranslating();
+    //   APP.scene.addEventListener("translation_target_properties_updated", this.onTargetPropsUpdate);
+    // this.onTargetPropsUpdate({ micStatus: this.micStatus, language: this.targetLanguage });
+    // } else {
+    //   APP.scene.removeEventListener("translation_target_properties_updated", this.onTargetPropsUpdate);
+    // }
+  }
+
+  updateTargetProperties(newProperties) {
+    this.targetLanguage = newProperties.language;
+    this.targetMicStatus = newProperties.micStatus;
+    const announcedProperties = { language: this.targetLanguage, micStatus: this.micStatus };
+    APP.scene.emit("translation_target_properties_updated", announcedProperties);
+    this.TranslateCheck();
+  }
+
+  TranslateCheck() {
+    if (this.targetLanguage && this.targetMicStatus && !this.isRecording) {
+      console.log("Translation start");
+      this.StartTranslating();
+    } else if (!this.micStatus && this.isRecording) {
+      console.log("translaton stop");
+      this.StopTranslating();
+    }
+  }
+
+  async StartTranslating() {
+    console.log("Translate from:", this.targetLanguage, this.mylanguage);
+
+    const stream = await this.GetTargetStream(this.target);
+    this.mediaRecorder = new MediaRecorder(stream);
+    const chunks = [];
+
+    this.mediaRecorder.ondataavailable = function (e) {
+      chunks.push(e.data);
+    };
+
+    this.mediaRecorder.onstop = async () => {
+      const recordingBlob = new Blob(chunks, { type: "audio/wav" });
+      const inference = chunks.length > 0 && recordingBlob.size > 0 && this.hasMyLanguage && this.hasTargetLanguage;
+      chunks.length = 0;
+
+      if (inference) {
+        // this.saveAudio(recordingBlob);
+
+        const inferenceParams = {
+          source_language: languageCodes[this.targetLanguage],
+          target_language: languageCodes[this.mylanguage],
+          return_transcription: "true"
+        };
+
+        const translateRespone = await audioModules(
+          COMPONENT_ENDPOINTS.TRANSLATE_AUDIO_FILES,
+          recordingBlob,
+          inferenceParams
+        );
+
+        APP.scene.emit("translation-available", { text: translateRespone.data.translations[0] });
+        UpdateTextSystem(APP.world, translateRespone.data.translations[0]);
+      }
+
+      this.isRecording = false;
+    };
+
+    this.mediaRecorder.onerror = event => {
+      reject({
+        status: { code: RECORDER_CODES.ERROR, text: RECORDER_TEXT[RECORDER_CODES.ERROR] }
+      });
+      console.log(event);
+    };
+
+    this.mediaRecorder.start();
+    this.isRecording = true;
+  }
+
+  StopTranslating() {
+    if (this.mediaRecorder && this.isRecording) this.mediaRecorder.stop();
   }
 
   onLanguageAvailable(event) {
     this.updateMyLanguage(event.detail.language);
-  }
-
-  updateTargetLanguage(newLang) {
-    this.targetLanguage = newLang;
-    APP.scene.emit("translation_target_language_updated", { language: this.targetLanguage });
   }
 
   updateMyLanguage(newLang) {
@@ -203,147 +312,6 @@ export class SubtitleSystem {
     }
     APP.scene.emit("language_updated", { language: this.mylanguage });
     console.log("language_updated", { language: this.mylanguage });
-  }
-
-  UpdateTarget(newTarget) {
-    if (this.hasTarget) this.StopTranslating();
-    if (this.target === newTarget) this.target = null;
-    else this.target = newTarget;
-    APP.scene.emit("translation-target-updated", { owner: this.target });
-
-    if (this.hasTarget) {
-      APP.scene.emit("translation-available", { text: "The audio translation will be displayed here!" });
-      this.StartTranslating();
-    }
-  }
-
-  StopTranslating() {
-    // Stop procedures
-    if (this.mediaRecorder && this.isRecording) this.mediaRecorder.stop();
-    if (this.sourceNode) this.sourceNode.disconnect();
-    if (this.audioContext) this.audioContext.close().then();
-    if (this.animationFrameID) cancelAnimationFrame(this.animationFrameID);
-
-    // Cleanup
-    this.mediaRecorder = null;
-    this.audioContext = null;
-    this.analyser = null;
-    this.animationFrameID = null;
-  }
-
-  StartTranslating() {
-    console.log("Translate from:", this.targetLanguage, this.mylanguage);
-    this.GetTargetStream(this.target)
-      .then(stream => {
-        this.audioContext = new window.AudioContext();
-        this.mediaRecorder = new MediaRecorder(stream);
-        this.analyser = this.audioContext.createAnalyser();
-        this.sourceNode = this.audioContext.createMediaStreamSource(stream);
-        this.sourceNode.connect(this.analyser);
-        this.analyser.fftSize = 256;
-
-        const dataArray = new Uint8Array(this.analyser.frequencyBinCount);
-        const silenceThreshold = 0.1;
-        const minSilenceDuration = 1000;
-        const maxRecordingDuration = 3000;
-        const chunks = [];
-
-        let isSilent = false;
-        let silenceStartTime = 0;
-        let recordingStartTime = 0;
-        let isRecording = false;
-        let wasEvernotSilent = false;
-        let inference = false;
-
-        const restartRec = () => {
-          inference = wasEvernotSilent;
-          this.mediaRecorder.stop();
-          isRecording = false;
-          isSilent = false;
-          wasEvernotSilent = false;
-        };
-
-        const detectSilence = () => {
-          this.analyser.getByteFrequencyData(dataArray);
-          const amplitude = dataArray.reduce((sum, value) => sum + value, 0) / dataArray.length / 255;
-
-          if (amplitude < silenceThreshold) {
-            if (!isSilent) {
-              isSilent = true;
-              silenceStartTime = performance.now();
-            } else {
-              const currentTime = performance.now();
-              const silenceDuration = currentTime - silenceStartTime;
-
-              if (silenceDuration >= minSilenceDuration && isRecording) {
-                restartRec();
-              }
-            }
-          } else {
-            isSilent = false;
-            wasEvernotSilent = true;
-          }
-
-          // Don't care about the duration
-          // const recordingTime = performance.now() - recordingStartTime;
-          // if (recordingTime > maxRecordingDuration) {
-          //   restartRec();
-          // }
-
-          this.animationFrameID = requestAnimationFrame(detectSilence);
-        };
-
-        detectSilence();
-
-        this.mediaRecorder.ondataavailable = function (e) {
-          chunks.push(e.data);
-        };
-
-        this.mediaRecorder.onstart = () => {
-          recordingStartTime = performance.now();
-        };
-
-        this.mediaRecorder.onstop = () => {
-          const recordingBlob = new Blob(chunks, { type: "audio/wav" });
-          inference =
-            inference && chunks.length > 0 && recordingBlob.size > 0 && this.hasMyLanguage && this.hasTargetLanguage;
-          chunks.length = 0;
-
-          if (inference) {
-            // this.saveAudio(recordingBlob);
-            audioModules(COMPONENT_ENDPOINTS.TRANSLATE_AUDIO_FILES, recordingBlob, {
-              source_language: languageCodes[this.targetLanguage],
-              target_language: languageCodes[this.mylanguage],
-              return_transcription: "true"
-            })
-              .then(translateRespone => {
-                // console.log(translateRespone);
-                APP.scene.emit("translation-available", { text: translateRespone.data.translations[0] });
-
-                UpdateTextSystem(APP.world, translateRespone.data.translations[0]);
-              })
-              .catch(error => {
-                console.error(error);
-              });
-          }
-
-          this.mediaRecorder.start();
-          isRecording = true;
-        };
-
-        this.mediaRecorder.onerror = event => {
-          reject({
-            status: { code: RECORDER_CODES.ERROR, text: RECORDER_TEXT[RECORDER_CODES.ERROR] }
-          });
-          console.log(event);
-        };
-
-        this.mediaRecorder.start();
-        isRecording = true;
-      })
-      .catch(e => {
-        console.error(e);
-      });
   }
 
   saveAudio(blob) {
@@ -379,11 +347,11 @@ export class SubtitleSystem {
     return !!this.targetLanguage;
   }
 
-  SetTargetLanguage(_language) {
-    this.mylanguage = _language;
-    window.APP.store.update({ profile: { language: _language } });
-    console.log(window.APP.store);
-  }
+  // SetTargetLanguage(_language) {
+  //   this.mylanguage = _language;
+  //   window.APP.store.update({ profile: { language: _language } });
+  //   console.log(window.APP.store);
+  // }
 }
 
 export function FlagPanelSystem(world) {

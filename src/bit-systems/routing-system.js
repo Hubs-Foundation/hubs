@@ -181,6 +181,8 @@ export class NavigationSystem {
     if (Object.keys(this.targetInfo).includes(salientName)) {
       return this.targetInfo[salientName];
     }
+
+    return false;
     console.error(`Invalid Salient Name: ${salientName}`);
   }
 
@@ -219,7 +221,7 @@ export class NavigationSystem {
     const startIndex = this.GetClosestIndex(startPos);
     const stopIndex = this.GetDestIndex(stopName);
 
-    if (!stopIndex || !this.allowed) return { path: [], instructions: [], knowledge: "no location" };
+    if (!stopIndex || !this.allowed) return { path: [], instructions: [], knowledge: "no location", valid: false };
 
     if (!this.mappedNodes[startIndex]) {
       if (this.mapped) this.Reset();
@@ -293,6 +295,7 @@ export class NavigationSystem {
       })
       .join(", ");
 
+    navigation["valid"] = true;
     this.dest.pos = this.nodes[stopIndex];
     console.log("Destination position changed to: ", this.dest.pos);
     return navigation;

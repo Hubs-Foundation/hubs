@@ -75,6 +75,7 @@ export default class VirtualAgent {
     this.panel = new objElement();
     this.text = new textElement();
     this.currentOccasion = null;
+    this.waitingForResponse = null;
 
     this.onClear = this.onClear.bind(this);
     this.onToggle = this.onToggle.bind(this);
@@ -139,6 +140,7 @@ export default class VirtualAgent {
     // this.UpdateText("Hello I am your personal Agent");
     this.UpdateWithRandomPhrase("greetings");
     APP.dialog.on("mic-state-changed", this.setMicStatus);
+    this.waitingForResponse = false;
     this.setMicStatus();
     APP.scene.addEventListener("language_updated", this.onLanguageUpdated);
     this.agent.obj.visible = true;
@@ -154,6 +156,7 @@ export default class VirtualAgent {
     this.text.update(null);
 
     this.currentOccasion = null;
+    this.waitingForResponse = null;
   }
 
   onClear() {
@@ -183,19 +186,12 @@ export default class VirtualAgent {
   setMicStatus() {
     const permissionsGranted = APP.mediaDevicesManager.getPermissionsStatus("microphone") === PermissionStatus.GRANTED;
     const isMicNotDisabled = APP.mediaDevicesManager.isMicEnabled !== false;
-    this.micButton.obj.visible = permissionsGranted && isMicNotDisabled;
+    this.micButton.obj.visible = permissionsGranted && isMicNotDisabled && !this.waitingForResponse;
   }
 
   async ButtonInteractions() {
     if (clicked(this.micButton.eid)) {
       this.MicrophoneActions(false);
-      // this.DatasetCreate("conference room");
-      // this.DatasetCreate("booth 1");
-      // this.DatasetCreate("booth 2");
-      // this.DatasetCreate("booth 3");
-      // this.DatasetCreate("booth 4");
-      // this.DatasetCreate("exit");
-      // this.DatasetCreate("business room");
     }
   }
 
@@ -205,6 +201,8 @@ export default class VirtualAgent {
       const toggleResponse = await toggleRecording(savefile);
 
       if (toggleResponse.status.code === COMPONENT_CODES.Successful) {
+        this.waitingForResponse = true;
+        this.setMicStatus();
         const sourceLang = subtitleSystem.mylanguage ? languageCodes[subtitleSystem.mylanguage] : "en";
         const nmtAudioParams = { source_language: sourceLang, target_language: "en", return_transcription: "true" };
 
@@ -217,10 +215,6 @@ export default class VirtualAgent {
         const intentResponse = await intentionModule(nmtResponse.data.translations[0]);
         const navigation = navSystem.GetInstructions(this.avatarPos, intentResponse.data.destination);
 
-        // if (intentResponse.data.destination === "no-location") {
-        //   intentResponse.data.intent = "general";
-        // }
-
         const response = await dsResponseModule(
           nmtResponse.data.translations[0],
           intentResponse.data.intent,
@@ -229,21 +223,21 @@ export default class VirtualAgent {
 
         const targetLang = subtitleSystem.mylanguage ? languageCodes[subtitleSystem.mylanguage] : "en";
         const nmtTextParams = { source_language: "en", target_language: targetLang };
+        let output;
+        if (nmtTextParams.source_language === nmtTextParams.target_language) output = response.data.response;
+        else
+          output = (await textModule(COMPONENT_ENDPOINTS.TRANSLATE_TEXT, response.data.response, nmtTextParams)).data
+            .transcriptions[0];
 
-        const nmtTextResponse = await textModule(
-          COMPONENT_ENDPOINTS.TRANSLATE_TEXT,
-          response.data.response,
-          nmtTextParams
-        );
-
-        console.log(nmtTextResponse);
-
-        this.UpdateText(nmtTextResponse.data.translations[0]);
-        if (navigation.instructions.length) navSystem.RenderCues(navigation);
+        this.UpdateText(output);
+        if (navigation.valid) navSystem.RenderCues(navigation);
       }
     } catch (error) {
       console.log("error", error);
     }
+
+    this.waitingForResponse = false;
+    this.setMicStatus();
   }
 
   DatasetCreate(destination) {
