@@ -196,7 +196,7 @@ export default class VirtualAgent {
   }
 
   async MicrophoneActions(savefile) {
-    stageUpdate();
+    this.micButton.obj.children[0].text = "Send";
     try {
       const toggleResponse = await toggleRecording(savefile);
 
@@ -234,6 +234,8 @@ export default class VirtualAgent {
       }
     } catch (error) {
       console.log("error", error);
+    } finally {
+      this.micButton.obj.children[0].text = "Ask";
     }
 
     this.waitingForResponse = false;

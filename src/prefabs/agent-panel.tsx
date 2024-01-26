@@ -130,14 +130,23 @@ export function SimplePanel({ panelRef, textRef, micRef }: SimplePanelParams) {
         />
       </entity>
 
-      <IconButton
+      <Button3D
+        ref={micRef}
+        scale={[buttonScale[0], buttonScale[1], buttonScale[2]]}
+        position={[0.0, -0.15, 0.3]}
+        width={0.4}
+        height={buttonHeight}
+        type={BUTTON_TYPES.DEFAULT}
+        text={"Ask"}
+      />
+      {/* <IconButton
         ref={micRef}
         scale={[buttonScale[0], buttonScale[1], buttonScale[2]]}
         type={BUTTON_TYPES.MIC}
         position={[0.3, 0.15, 0]}
         width={buttonHeight}
         height={buttonHeight}
-      />
+      /> */}
     </entity>
   );
 }
