@@ -144,6 +144,8 @@ export default class VirtualAgent {
     this.setMicStatus();
     APP.scene.addEventListener("language_updated", this.onLanguageUpdated);
     this.agent.obj.visible = true;
+    APP.mediaDevicesManager.micEnabled = false;
+    this.micStatus = false;
   }
 
   Cleanup() {
@@ -185,8 +187,10 @@ export default class VirtualAgent {
 
   setMicStatus() {
     const permissionsGranted = APP.mediaDevicesManager.getPermissionsStatus("microphone") === PermissionStatus.GRANTED;
-    const isMicNotDisabled = APP.mediaDevicesManager.isMicEnabled !== false;
-    this.micButton.obj.visible = permissionsGranted && isMicNotDisabled && !this.waitingForResponse;
+    if (this.micStatus !== (permissionsGranted && APP.mediaDevicesManager.isMicEnabled)) {
+      this.micStatus = permissionsGranted && APP.mediaDevicesManager.isMicEnabled;
+      this.MicrophoneActions(false);
+    }
   }
 
   async ButtonInteractions() {
@@ -196,7 +200,8 @@ export default class VirtualAgent {
   }
 
   async MicrophoneActions(savefile) {
-    this.micButton.obj.children[0].text = "Send";
+    this.micButton.obj.children[0].text = "Listening...";
+    this.micButton.obj.visible = true;
     try {
       const toggleResponse = await toggleRecording(savefile);
 
@@ -235,7 +240,8 @@ export default class VirtualAgent {
     } catch (error) {
       console.log("error", error);
     } finally {
-      this.micButton.obj.children[0].text = "Ask";
+      this.micButton.obj.children[0].text = "Not listeling...";
+      this.micButton.obj.visible = false;
     }
 
     this.waitingForResponse = false;

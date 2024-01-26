@@ -194,7 +194,6 @@ export class SubtitleSystem {
   }
 
   onTranslationUpdatesAvailable(event) {
-    console.log(event.detail);
     if (event.detail.type === "target") this.UpdateTarget(event.detail);
     else if (event.detail.type === "properties") this.updateTargetProperties(event.detail);
   }
@@ -229,11 +228,15 @@ export class SubtitleSystem {
   }
 
   updateTargetProperties(newProperties) {
-    this.targetLanguage = newProperties.language;
-    this.targetMicStatus = newProperties.micStatus;
-    const announcedProperties = { language: this.targetLanguage, micStatus: this.micStatus };
-    APP.scene.emit("translation_target_properties_updated", announcedProperties);
-    this.TranslateCheck();
+    const announcedProperties = { language: newProperties.language, micStatus: newProperties.micStatus };
+    if (this.targetLanguage !== newProperties.language) {
+      APP.scene.emit("translation_target_properties_updated", announcedProperties);
+      this.targetLanguage = newProperties.language;
+    }
+    if (this.targetMicStatus !== newProperties.micStatus) {
+      this.targetMicStatus = newProperties.micStatus;
+      this.TranslateCheck();
+    }
   }
 
   TranslateCheck() {
