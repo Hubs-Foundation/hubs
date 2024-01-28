@@ -11,7 +11,7 @@ const exitFollowFovQuery = exitQuery(followFovQuery);
 function addObjectToSystem(eid) {
   const objectState = {
     targetObject: null,
-    offset: new THREE.Vector3(0, 0, -1.0), // Example offset
+    offset: new THREE.Vector3(0, 0, -1.5), // Example offset
     speed: 0.002,
     angle: 20,
     hoveredFrames: 0,

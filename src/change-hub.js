@@ -131,8 +131,7 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
       iceTransportPolicy: APP.dialog._iceTransportPolicy
     }),
 
-    NAF.connection.adapter.connect(),
-    APP.entryManager.setupVRConferece(true)
+    NAF.connection.adapter.connect()
   ]);
 
   if (qsTruthy("newLoader")) {
@@ -149,6 +148,9 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
     hubName: hub.name,
     showLineBreak: true
   });
+
+  APP.entryManager.setupVRConferece(true);
+  APP.mediaDevicesManager.isMicEnabled = false;
 }
 window.changeHub = changeHub;
 
