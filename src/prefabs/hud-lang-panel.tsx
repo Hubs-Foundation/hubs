@@ -40,12 +40,9 @@ export function HUDLangPanel() {
     createRef(),
     createRef()
   ];
-  const agentPos = virtualAgent.avatarPos;
-  const agentdir = virtualAgent.flatAvatarDirection;
-  const pos = new Vector3().addVectors(agentPos, agentdir.multiplyScalar(2));
 
   return (
-    <entity position={pos.toArray()} followFov>
+    <entity followFov>
       <entity
         name="hud-lang-panel"
         // scale={[2, 1.3 / 0.65, 1]}

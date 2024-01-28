@@ -57,8 +57,7 @@ export class LanguagePanel {
   }
 
   Init(reset) {
-    APP.scene.removeEventListener("lang-toggle", this.onToggle);
-    APP.scene.removeEventListener("clear-scene", this.onClear);
+    if (reset) return;
 
     APP.scene.addEventListener("lang-toggle", this.onToggle);
     APP.scene.addEventListener("clear-scene", this.onClear);
@@ -182,7 +181,7 @@ export class SubtitleSystem {
     this.cleanup = false;
     this.counter = 0;
     this.isRecording = false;
-    this.micStatus = this.setMicStatus();
+
     this.scene.addEventListener("language_available", this.onLanguageAvailable);
     this.scene.addEventListener("translation_updates_available", this.onTranslationUpdatesAvailable);
     APP.dialog.on("mic-state-changed", this.setMicStatus);
