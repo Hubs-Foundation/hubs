@@ -139,6 +139,15 @@ const agentSuccessfulInstruction = {
   ]
 };
 
+const agentSomethingWentWrong = {
+  english: ["Unfortunately, I didn't catch that. Please try asking again!"],
+  greek: ["Δυστυχώς δεν σας κατάλαβα. Δοκιμάστε να ρωτήσετε ξανά!"],
+  spanish: ["Desafortunadamente, no entendí eso. ¡Intenta preguntar de nuevo!"],
+  italian: ["Sfortunatamente non l'ho capito. Per favore prova a chiedere di nuovo!"],
+  dutch: ["Helaas heb ik dat niet meegekregen. Probeer het nog eens te vragen!"],
+  german: ["Das habe ich leider nicht mitbekommen. Bitte fragen Sie noch einmal nach!"]
+};
+
 const agentInstructionsCleared = {
   english: ["Instructions cleared!"],
   greek: ["Οι οδηγίες διαγράφηκαν"],
@@ -152,5 +161,6 @@ export const agentDialogs = {
   greetings: agentGreetingPhrases,
   success: agentSuccessfulInstruction,
   cleared: agentInstructionsCleared,
-  anythingElse: agentAnythingElse
+  anythingElse: agentAnythingElse,
+  error: agentSomethingWentWrong
 };

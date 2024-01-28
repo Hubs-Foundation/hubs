@@ -10,6 +10,46 @@ let recordingPromise: Promise<any>;
 //TODO:: automate the query parameters
 export function queryPreprocess() {}
 
+export async function RecordQuestion(savefile: boolean): Promise<any> {
+  return new Promise((resolve, reject) => {
+    const audioTrack = APP.mediaDevicesManager!.audioTrack;
+    const recordingTrack = audioTrack.clone();
+    const recordingStream = new MediaStream([recordingTrack]);
+    mediaRecorder = new MediaRecorder(recordingStream);
+    audioTrack.enabled = false;
+
+    mediaRecorder.ondataavailable = event => {
+      chunks.push(event.data);
+    };
+
+    mediaRecorder.onstop = () => {
+      const recordingBlob = new Blob(chunks, { type: "audio/wav" });
+      chunks.length = 0;
+      audioTrack.enabled = true;
+      recordingStream.removeTrack(recordingTrack);
+      recordingTrack.stop();
+      if (savefile) saveAudio(recordingBlob);
+
+      resolve({
+        status: { code: COMPONENT_CODES.Successful, text: CODE_DESCRIPTIONS[COMPONENT_CODES.Successful] },
+        data: { file: recordingBlob }
+      });
+    };
+
+    mediaRecorder.onerror = event => {
+      reject({
+        status: {
+          code: COMPONENT_CODES.MediaRecorderError,
+          text: CODE_DESCRIPTIONS[COMPONENT_CODES.MediaRecorderError]
+        }
+      });
+    };
+
+    mediaRecorder.start();
+    isRecording = true;
+  });
+}
+
 export async function toggleRecording(savefile: boolean): Promise<ResponseData> {
   if (!isRecording) {
     recordingPromise = startRecording(savefile);
@@ -65,7 +105,7 @@ async function startRecording(savefile: boolean): Promise<ResponseData> {
   });
 }
 
-function stopRecording() {
+export function stopRecording() {
   mediaRecorder!.stop();
   isRecording = false;
 }

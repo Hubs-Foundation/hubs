@@ -9,7 +9,9 @@ import {
   dsResponseModule,
   toggleRecording,
   vlModule,
-  textModule
+  textModule,
+  RecordQuestion,
+  stopRecording
 } from "../utils/asr-adapter";
 import { COMPONENT_ENDPOINTS, COMPONENT_CODES } from "../utils/component-types";
 import { AgentEntity, addAgentToScene, addLangPanelToScene } from "../prefabs/agent";
@@ -86,7 +88,8 @@ export default class VirtualAgent {
     this.occasions = {
       greetings: ["greetings"],
       success: ["success", "anythingElse"],
-      cleared: ["cleared", "anythingElse"]
+      cleared: ["cleared", "anythingElse"],
+      error: ["error"]
     };
   }
 
@@ -188,16 +191,75 @@ export default class VirtualAgent {
 
   setMicStatus() {
     const permissionsGranted = APP.mediaDevicesManager.getPermissionsStatus("microphone") === PermissionStatus.GRANTED;
-    console.log(this.micStatus, APP.mediaDevicesManager.isMicEnabled);
-    if (this.micStatus !== (permissionsGranted && APP.mediaDevicesManager.isMicEnabled)) {
+    const changedMicStatus = this.micStatus !== (permissionsGranted && APP.mediaDevicesManager.isMicEnabled);
+    if (changedMicStatus) {
       this.micStatus = permissionsGranted && APP.mediaDevicesManager.isMicEnabled;
-      this.MicrophoneActions(false);
+      if (this.micStatus && !this.waitingForResponse) {
+        this.AskAgent(false);
+      } else {
+        stopRecording();
+
+        this.micButton.obj.children[0].text = "Not listeling...";
+        this.micButton.obj.visible = false;
+      }
+
+      // this.MicrophoneActions(false);
     }
   }
 
   async ButtonInteractions() {
     if (clicked(this.micButton.eid)) {
       this.MicrophoneActions(false);
+    }
+  }
+
+  async AskAgent(savefile) {
+    this.micButton.obj.children[0].text = "Listening...";
+    this.micButton.obj.visible = true;
+    this.waitingForResponse = true;
+    this.setMicStatus();
+
+    try {
+      const recordedQuestion = await RecordQuestion(savefile);
+      console.log(recordedQuestion);
+
+      this.panel.obj.visible = false;
+      const sourceLang = subtitleSystem.mylanguage ? languageCodes[subtitleSystem.mylanguage] : "en";
+      const nmtAudioParams = { source_language: sourceLang, target_language: "en", return_transcription: "true" };
+
+      const nmtResponse = await audioModules(
+        COMPONENT_ENDPOINTS.TRANSLATE_AUDIO_FILES,
+        recordedQuestion.data.file,
+        nmtAudioParams
+      );
+
+      const intentResponse = await intentionModule(nmtResponse.data.translations[0]);
+      const navigation = navSystem.GetInstructions(this.avatarPos, intentResponse.data.destination);
+
+      const response = await dsResponseModule(
+        nmtResponse.data.translations[0],
+        intentResponse.data.intent,
+        navigation.knowledge
+      );
+
+      const targetLang = subtitleSystem.mylanguage ? languageCodes[subtitleSystem.mylanguage] : "en";
+      const nmtTextParams = { source_language: "en", target_language: targetLang };
+      let output;
+      if (nmtTextParams.source_language === nmtTextParams.target_language) output = response.data.response;
+      else
+        output = (await textModule(COMPONENT_ENDPOINTS.TRANSLATE_TEXT, response.data.response, nmtTextParams)).data
+          .transcriptions[0];
+
+      this.UpdateText(output);
+
+      if (navigation.valid) navSystem.RenderCues(navigation);
+    } catch (error) {
+      console.log("error", error);
+      this.UpdateWithRandomPhrase("error");
+    } finally {
+      this.panel.obj.visible = true;
+      this.setMicStatus();
+      this.waitingForResponse = false;
     }
   }
 
