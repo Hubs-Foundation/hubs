@@ -216,15 +216,6 @@ export class SubtitleSystem {
     APP.scene.emit("translation-target-updated", announcedProperties);
 
     this.TranslateCheck();
-
-    // if (this.hasTarget) {
-    //   // APP.scene.emit("translation-available", { text: "The audio translation will be displayed here!" });
-    //   // this.StartTranslating();
-    //   APP.scene.addEventListener("translation_target_properties_updated", this.onTargetPropsUpdate);
-    // this.onTargetPropsUpdate({ micStatus: this.micStatus, language: this.targetLanguage });
-    // } else {
-    //   APP.scene.removeEventListener("translation_target_properties_updated", this.onTargetPropsUpdate);
-    // }
   }
 
   updateTargetProperties(newProperties) {

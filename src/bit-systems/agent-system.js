@@ -23,6 +23,7 @@ import { languageCodes, subtitleSystem } from "./subtitling-system";
 import UpdateTextPanel from "../utils/interactive-panels";
 import { Vector3 } from "three";
 import { agentDialogs } from "../utils/localization";
+import { resolve } from "url";
 
 const agentQuery = defineQuery([Agent]);
 const enterAgentQuery = enterQuery(agentQuery);
@@ -211,7 +212,7 @@ export default class VirtualAgent {
 
   async ButtonInteractions() {
     if (clicked(this.micButton.eid)) {
-      this.MicrophoneActions(false);
+      // this.MicrophoneActions(false);
     }
   }
 
@@ -248,13 +249,34 @@ export default class VirtualAgent {
       const nmtTextParams = { source_language: "en", target_language: targetLang };
       let output;
       if (nmtTextParams.source_language === nmtTextParams.target_language) output = response.data.response;
-      else
-        output = (await textModule(COMPONENT_ENDPOINTS.TRANSLATE_TEXT, response.data.response, nmtTextParams)).data
-          .transcriptions[0];
+      else {
+        const segmentedOutput = response.data.response.split("\n");
+        console.log(segmentedOutput);
+        const translatePromises = [];
+        segmentedOutput.forEach(sentence => {
+          const translatePromise =
+            sentence.length === 0
+              ? new Promise(resolve => {
+                  resolve({ data: { translations: [""] } });
+                })
+              : textModule(COMPONENT_ENDPOINTS.TRANSLATE_TEXT, sentence, nmtTextParams);
+          translatePromises.push(translatePromise);
+        });
+
+        const translatedResponses = await Promise.all(translatePromises);
+        console.log(translatePromises);
+        output = translatedResponses
+          .map(element => {
+            return element.data.translations[0];
+          })
+          .join("\n");
+
+        console.log(output);
+      }
 
       this.UpdateText(output);
-
-      if (navigation.valid) navSystem.RenderCues(navigation);
+      console.log(navigation.valid, intentResponse.data.intent);
+      if (navigation.valid && intentResponse.data.intent.includes("navigation")) navSystem.RenderCues(navigation);
     } catch (error) {
       console.log("error", error);
       this.UpdateWithRandomPhrase("error");
@@ -263,55 +285,6 @@ export default class VirtualAgent {
       this.setMicStatus();
       this.waitingForResponse = false;
     }
-  }
-
-  async MicrophoneActions(savefile) {
-    this.micButton.obj.children[0].text = "Listening...";
-    this.micButton.obj.visible = true;
-    try {
-      const toggleResponse = await toggleRecording(savefile);
-
-      if (toggleResponse.status.code === COMPONENT_CODES.Successful) {
-        this.waitingForResponse = true;
-        this.setMicStatus();
-        const sourceLang = subtitleSystem.mylanguage ? languageCodes[subtitleSystem.mylanguage] : "en";
-        const nmtAudioParams = { source_language: sourceLang, target_language: "en", return_transcription: "true" };
-
-        const nmtResponse = await audioModules(
-          COMPONENT_ENDPOINTS.TRANSLATE_AUDIO_FILES,
-          toggleResponse.data.file,
-          nmtAudioParams
-        );
-
-        const intentResponse = await intentionModule(nmtResponse.data.translations[0]);
-        const navigation = navSystem.GetInstructions(this.avatarPos, intentResponse.data.destination);
-
-        const response = await dsResponseModule(
-          nmtResponse.data.translations[0],
-          intentResponse.data.intent,
-          navigation.knowledge
-        );
-
-        const targetLang = subtitleSystem.mylanguage ? languageCodes[subtitleSystem.mylanguage] : "en";
-        const nmtTextParams = { source_language: "en", target_language: targetLang };
-        let output;
-        if (nmtTextParams.source_language === nmtTextParams.target_language) output = response.data.response;
-        else
-          output = (await textModule(COMPONENT_ENDPOINTS.TRANSLATE_TEXT, response.data.response, nmtTextParams)).data
-            .transcriptions[0];
-
-        this.UpdateText(output);
-        if (navigation.valid) navSystem.RenderCues(navigation);
-      }
-    } catch (error) {
-      console.log("error", error);
-    } finally {
-      this.micButton.obj.children[0].text = "Not listeling...";
-      this.micButton.obj.visible = false;
-    }
-
-    this.waitingForResponse = false;
-    this.setMicStatus();
   }
 
   DatasetCreate(destination) {
