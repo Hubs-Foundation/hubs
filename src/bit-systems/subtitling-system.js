@@ -57,7 +57,8 @@ export class LanguagePanel {
   }
 
   Init(reset) {
-    if (reset) return;
+    APP.scene.removeEventListener("lang-toggle", this.onToggle);
+    APP.scene.removeEventListener("clear-scene", this.onClear);
 
     APP.scene.addEventListener("lang-toggle", this.onToggle);
     APP.scene.addEventListener("clear-scene", this.onClear);
