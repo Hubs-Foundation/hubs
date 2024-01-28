@@ -119,5 +119,6 @@ const GreetingPhrases = {
   italian: "La traduzione verrà mostrata qui",
   greek: "Η μετάφραση θα εμφανιστεί εδώ",
   dutch: "De vertaling wordt hier getoond",
-  german: "Die Übersetzung wird hier angezeigt"
+  german: "Die Übersetzung wird hier angezeigt",
+  english: "The translation will be displayed here"
 };

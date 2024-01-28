@@ -189,7 +189,7 @@ export class SubtitleSystem {
 
   setMicStatus() {
     this.micStatus = APP.mediaDevicesManager.isMicEnabled;
-    window.APP.store.update({ profile: { micStatus: this.micStatus } });
+    window.APP.store.update({ profile: { micStatus: !!this.micStatus } });
     console.log(window.APP.store.state.profile);
   }
 

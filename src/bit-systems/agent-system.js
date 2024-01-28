@@ -113,6 +113,7 @@ export default class VirtualAgent {
   }
 
   Remove() {
+    APP.scene.removeEventListener("language_updated", this.onLanguageUpdated);
     APP.dialog.off("mic-state-changed", this.setMicStatus);
     APP.scene.remove(this.agent.obj);
     removeEntity(APP.world, this.agent.eid);
@@ -185,6 +186,7 @@ export default class VirtualAgent {
   }
 
   UpdateText(text) {
+    console.log(`Updating text with: "${text}"`);
     UpdateTextPanel(text, this.text.obj, this.panel.eid, false, true);
     this.text.value = text;
   }
