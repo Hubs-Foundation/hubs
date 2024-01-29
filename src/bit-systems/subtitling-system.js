@@ -5,11 +5,12 @@ import { audioModules } from "../utils/asr-adapter";
 import { COMPONENT_ENDPOINTS } from "../utils/component-types";
 import { UpdateTextSystem } from "./agent-slideshow-system";
 import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
-import { virtualAgent } from "./agent-system";
+import { logger, virtualAgent } from "./agent-system";
 import { loadTexture } from "../utils/load-texture";
 import { textureLoader } from "../utils/media-utils";
 import { selectMaterial, normalMaterial, HUDLangPanel } from "../prefabs/hud-lang-panel";
 import { renderAsEntity } from "../utils/jsx-entity";
+import { Logger } from "../utils/logging_systems";
 
 const panelManagerQuery = defineQuery([FlagPanelManager]);
 const enterpanelManagerQuery = enterQuery(panelManagerQuery);
@@ -259,17 +260,32 @@ export class SubtitleSystem {
       if (inference) {
         // this.saveAudio(recordingBlob);
 
+        logger.action = "translation";
+
         const inferenceParams = {
           source_language: languageCodes[this.targetLanguage],
           target_language: languageCodes[this.mylanguage],
           return_transcription: "true"
         };
 
+        logger.audioTranslation.start = new Date();
+
         const translateRespone = await audioModules(
           COMPONENT_ENDPOINTS.TRANSLATE_AUDIO_FILES,
           recordingBlob,
           inferenceParams
         );
+
+        logger.audioTranslation.finish = new Date();
+        logger.audioTranslation.input = {
+          file: "audio_file",
+          source_language: inferenceParams.source_language,
+          target_language: inferenceParams.target_language
+        };
+        logger.audioTranslation.output = {
+          translation: translateRespone.data.translations[0],
+          transcription: translateRespone.data.transcriptions[0]
+        };
 
         APP.scene.emit("translation-available", { text: translateRespone.data.translations[0] });
         UpdateTextSystem(APP.world, translateRespone.data.translations[0]);

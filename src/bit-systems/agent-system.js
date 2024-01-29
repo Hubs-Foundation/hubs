@@ -13,17 +13,15 @@ import {
   RecordQuestion,
   stopRecording
 } from "../utils/asr-adapter";
-import { COMPONENT_ENDPOINTS, COMPONENT_CODES } from "../utils/component-types";
-import { AgentEntity, addAgentToScene, addLangPanelToScene } from "../prefabs/agent";
+import { COMPONENT_ENDPOINTS } from "../utils/component-types";
+import { AgentEntity } from "../prefabs/agent";
 import { SnapDepthPOV, SnapPOV } from "../utils/vlm-adapters";
 import { navSystem } from "./routing-system";
 import { renderAsEntity } from "../utils/jsx-entity";
-import { NavigationCues, pivotPoint } from "../prefabs/nav-line";
 import { languageCodes, subtitleSystem } from "./subtitling-system";
 import UpdateTextPanel from "../utils/interactive-panels";
-import { Vector3 } from "three";
 import { agentDialogs } from "../utils/localization";
-import { resolve } from "url";
+import { Logger } from "../utils/logging_systems";
 
 const agentQuery = defineQuery([Agent]);
 const enterAgentQuery = enterQuery(agentQuery);
@@ -205,14 +203,11 @@ export default class VirtualAgent {
         this.micButton.obj.children[0].text = "Not listeling...";
         this.micButton.obj.visible = false;
       }
-
-      // this.MicrophoneActions(false);
     }
   }
 
   async ButtonInteractions() {
     if (clicked(this.micButton.eid)) {
-      // this.MicrophoneActions(false);
     }
   }
 
@@ -223,36 +218,63 @@ export default class VirtualAgent {
     this.setMicStatus();
 
     try {
+      logger.action = "dialog_system";
       const recordedQuestion = await RecordQuestion(savefile);
-      console.log(recordedQuestion);
-
       this.panel.obj.visible = false;
       const sourceLang = subtitleSystem.mylanguage ? languageCodes[subtitleSystem.mylanguage] : "en";
       const nmtAudioParams = { source_language: sourceLang, target_language: "en", return_transcription: "true" };
 
+      logger.audioTranslation.start = new Date();
       const nmtResponse = await audioModules(
         COMPONENT_ENDPOINTS.TRANSLATE_AUDIO_FILES,
         recordedQuestion.data.file,
         nmtAudioParams
       );
 
+      logger.audioTranslation.finish = new Date();
+      logger.audioTranslation.input = {
+        file: "audiofile",
+        source_language: nmtAudioParams.source_language,
+        target_language: nmtAudioParams.target_language
+      };
+      logger.audioTranslation.output = {
+        translation: nmtResponse.data.transcriptions[0],
+        transcription: nmtResponse.data.translations[0]
+      };
+
+      logger.intent.start = new Date();
       const intentResponse = await intentionModule(nmtResponse.data.translations[0]);
+      logger.intent.finish = new Date();
+      logger.intent.input = nmtResponse.data.translations[0];
+      logger.intent.output = { intent: intentResponse.data.intent, destination: intentResponse.data.destination };
+
       const navigation = navSystem.GetInstructions(this.avatarPos, intentResponse.data.destination);
 
+      logger.response.start = new Date();
       const response = await dsResponseModule(
         nmtResponse.data.translations[0],
         intentResponse.data.intent,
         navigation.knowledge
       );
+      logger.response.finish = new Date();
+      logger.response.input = {
+        user_query: nmtResponse.data.translations[0],
+        intent: intentResponse.data.intent,
+        mozilla_input: navigation.knowledge
+      };
+      logger.response.output = response.data.response;
 
       const targetLang = subtitleSystem.mylanguage ? languageCodes[subtitleSystem.mylanguage] : "en";
       const nmtTextParams = { source_language: "en", target_language: targetLang };
       let output;
-      if (nmtTextParams.source_language === nmtTextParams.target_language) output = response.data.response;
-      else {
+      if (nmtTextParams.source_language === nmtTextParams.target_language) {
+        output = response.data.response;
+        logger.textTranslation.total = 0;
+      } else {
         const segmentedOutput = response.data.response.split("\n");
-        console.log(segmentedOutput);
+
         const translatePromises = [];
+        logger.textTranslation.start = new Date();
         segmentedOutput.forEach(sentence => {
           const translatePromise =
             sentence.length === 0
@@ -271,7 +293,13 @@ export default class VirtualAgent {
           })
           .join("\n");
 
-        console.log(output);
+        logger.textTranslation.finish = new Date();
+        logger.textTranslation.output = output;
+        logger.textTranslation.input = {
+          text: response.data.response,
+          source_language: nmtTextParams.source_language,
+          target_language: nmtTextParams.target_language
+        };
       }
 
       this.UpdateText(output);
@@ -284,6 +312,7 @@ export default class VirtualAgent {
       this.panel.obj.visible = true;
       this.setMicStatus();
       this.waitingForResponse = false;
+      logger.Log();
     }
   }
 
@@ -346,3 +375,4 @@ export default class VirtualAgent {
 }
 
 export const virtualAgent = new VirtualAgent();
+export const logger = new Logger();
