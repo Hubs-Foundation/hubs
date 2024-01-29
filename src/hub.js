@@ -273,6 +273,7 @@ import { exposeBitECSDebugHelpers } from "./bitecs-debug-helpers";
 import { loadLegacyRoomObjects } from "./utils/load-legacy-room-objects";
 import { loadSavedEntityStates } from "./utils/entity-state-utils";
 import { shouldUseNewLoader } from "./utils/bit-utils";
+import { addons } from "./addons";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -543,8 +544,18 @@ export async function updateEnvironmentForHub(hub, entryManager) {
   }
 }
 
-export async function updateUIForHub(hub, hubChannel, showBitECSBasedClientRefreshPrompt = false) {
-  remountUI({ hub, entryDisallowed: !hubChannel.canEnterRoom(hub), showBitECSBasedClientRefreshPrompt });
+export async function updateUIForHub(
+  hub,
+  hubChannel,
+  showBitECSBasedClientRefreshPrompt = false,
+  showAddonRefreshPrompt = false
+) {
+  remountUI({
+    hub,
+    entryDisallowed: !hubChannel.canEnterRoom(hub),
+    showBitECSBasedClientRefreshPrompt,
+    showAddonRefreshPrompt
+  });
 }
 
 function onConnectionError(entryManager, connectError) {
@@ -1388,16 +1399,27 @@ document.addEventListener("DOMContentLoaded", async () => {
     const displayName = (userInfo && userInfo.metas[0].profile.displayName) || "API";
 
     let showBitECSBasedClientRefreshPrompt = false;
-
     if (!!hub.user_data?.hubs_use_bitecs_based_client !== !!window.APP.hub.user_data?.hubs_use_bitecs_based_client) {
       showBitECSBasedClientRefreshPrompt = true;
       setTimeout(() => {
         document.location.reload();
       }, 5000);
     }
+    let showAddonRefreshPrompt = false;
+    [...addons.keys()].map(id => {
+      const key = `addon_${id}`;
+      const oldAddonState = !!window.APP.hub.user_data && window.APP.hub.user_data[key];
+      const newAddonState = !!hub.user_data && hub.user_data[key];
+      if (newAddonState !== oldAddonState) {
+        showAddonRefreshPrompt = true;
+        setTimeout(() => {
+          document.location.reload();
+        }, 5000);
+      }
+    });
 
     window.APP.hub = hub;
-    updateUIForHub(hub, hubChannel, showBitECSBasedClientRefreshPrompt);
+    updateUIForHub(hub, hubChannel, showBitECSBasedClientRefreshPrompt, showAddonRefreshPrompt);
 
     if (
       stale_fields.includes("scene") ||
@@ -1484,4 +1506,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   authChannel.setSocket(socket);
   linkChannel.setSocket(socket);
+
+  APP.notifyOnInit();
 });

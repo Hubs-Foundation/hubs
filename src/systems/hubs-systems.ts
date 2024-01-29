@@ -76,7 +76,6 @@ import { textSystem } from "../bit-systems/text";
 import { audioTargetSystem } from "../bit-systems/audio-target-system";
 import { scenePreviewCameraSystem } from "../bit-systems/scene-preview-camera-system";
 import { linearTransformSystem } from "../bit-systems/linear-transform";
-import { quackSystem } from "../bit-systems/quack";
 import { mixerAnimatableSystem } from "../bit-systems/mixer-animatable";
 import { loopAnimationSystem } from "../bit-systems/loop-animation";
 import { linkSystem } from "../bit-systems/link-system";
@@ -94,6 +93,7 @@ import { inspectSystem } from "../bit-systems/inspect-system";
 import { snapMediaSystem } from "../bit-systems/snap-media-system";
 import { scaleWhenGrabbedSystem } from "../bit-systems/scale-when-grabbed-system";
 import { interactableSystem } from "../bit-systems/interactable-system";
+import { SystemConfigT } from "../types";
 
 declare global {
   interface Window {
@@ -199,6 +199,10 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
     aframeSystems[systemNames[i]].tick(t, dt);
   }
 
+  APP.addon_systems.setup.forEach((systemConfig: SystemConfigT) => {
+    systemConfig.system(APP);
+  });
+
   networkReceiveSystem(world);
   onOwnershipLost(world);
   sceneLoadingSystem(world, hubsSystems.environmentSystem, hubsSystems.characterController);
@@ -214,10 +218,18 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   buttonSystems(world);
   sfxButtonSystem(world, aframeSystems["hubs-systems"].soundEffectsSystem);
 
+  APP.addon_systems.prePhysics.forEach((systemConfig: SystemConfigT) => {
+    systemConfig.system(APP);
+  });
+
   physicsCompatSystem(world, hubsSystems.physicsSystem);
   hubsSystems.physicsSystem.tick(dt);
   constraintsSystem(world, hubsSystems.physicsSystem);
   floatyObjectSystem(world);
+
+  APP.addon_systems.postPhysics.forEach((systemConfig: SystemConfigT) => {
+    systemConfig.system(APP);
+  });
 
   hoverableVisualsSystem(world);
 
@@ -283,7 +295,6 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   hubsSystems.nameTagSystem.tick();
   simpleWaterSystem(world);
   linearTransformSystem(world);
-  quackSystem(world);
   followInFovSystem(world);
   linkedMediaSystem(world);
   linkedVideoSystem(world);
@@ -322,13 +333,30 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
 
   scene.updateMatrixWorld();
 
+  APP.addon_systems.matricesUpdate.forEach((systemConfig: SystemConfigT) => {
+    systemConfig.system(APP);
+  });
+
   renderer.info.reset();
   if (APP.fx.composer) {
+    APP.addon_systems.postProcessing.forEach((systemConfig: SystemConfigT) => {
+      systemConfig.system(APP);
+    });
     APP.fx.composer.render();
   } else {
+    APP.addon_systems.beforeRender.forEach((systemConfig: SystemConfigT) => {
+      systemConfig.system(APP);
+    });
     renderer.render(scene, camera);
+    APP.addon_systems.afterRender.forEach((systemConfig: SystemConfigT) => {
+      systemConfig.system(APP);
+    });
   }
 
   // tock()s on components and system will fire here. (As well as any other time render() is called without unbinding onAfterRender)
   // TODO inline invoking tocks instead of using onAfterRender registered in a-scene
+
+  APP.addon_systems.tearDown.forEach((systemConfig: SystemConfigT) => {
+    systemConfig.system(APP);
+  });
 }

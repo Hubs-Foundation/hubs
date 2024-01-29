@@ -49,6 +49,8 @@ features.show_newsletter_signup = { category = "features", type = "boolean", int
 features.change_hub_near_room_links = { category = "features", type = "boolean", internal = "true" }
 features.is_locked_down_demo_room = { category = "features", type = "string", internal = "true", description = "A comma separated list of hubIds to be designated as demo rooms with simplified UI." }
 
+features.addons_config = { category = "features", type="longstring", name="Add-ons config JSON", description="Add-ons config JSON file" }
+
 images.logo = { category = "images", type = "file", name = "Hub Logo", description = "Appears throughout your hub including lobby and loading screens." }
 images.logo_dark = { category = "images", type = "file", name = "Hub logo for dark mode", description = "The hub logo which appears for visitors who have dark mode enabled." }
 images.favicon = { category = "images", type = "file", name = "Favicon", description = "The favicon is the small picture which appears in the web browser tab." }
@@ -92,5 +94,5 @@ links.promotion = { category = "links", type = "string", name = "Promotion Info"
 links.remixing = { category = "links", type = "string", name = "Remixing Info", description = "Link to info about remixing info and licensing."}
 links.model_collection = { category = "links", type = "string", name = "Model Collection", description = "Link to a collection of recommended models."}
 
-auth.login_subject = { category = "auth", type="string", name="Magic Link Email Subject", description="Customize the email subject line for users logging in" }
+login_subject = { category = "auth", type="string", name="Magic Link Email Subject", description="Customize the email subject line for users logging in" }
 auth.login_body = { category = "auth", type="longstring", name="Magic Link Email Body", description="Customize message. Add '{{ link }}' to insert the magic link, otherwise it will be appended at the end." }

@@ -447,7 +447,6 @@ export const LinearScale = defineComponent({
   targetY: Types.f32,
   targetZ: Types.f32
 });
-export const Quack = defineComponent();
 export const TrimeshTag = defineComponent();
 export const HeightFieldTag = defineComponent();
 export const LocalAvatar = defineComponent();

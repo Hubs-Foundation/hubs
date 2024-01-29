@@ -16,6 +16,7 @@ import { BackButton } from "../input/BackButton";
 import { SceneInfo } from "./RoomSidebar";
 import { Column } from "../layout/Column";
 import { InviteLinkInputField } from "./InviteLinkInputField";
+import { addons } from "../../addons";
 
 export function RoomSettingsSidebar({
   showBackButton,
@@ -215,6 +216,16 @@ export function RoomSettingsSidebar({
             }
             {...register("user_data.hubs_use_bitecs_based_client")}
           />
+        </InputField>
+        <InputField label={"Add-ons"} fullWidth>
+          {[...addons.entries()].map(([id, addon]) => (
+            <ToggleInput
+              key={addon.name}
+              label={addon.name}
+              {...register(`user_data.addon_${id}`)}
+              description={addon.description}
+            />
+          ))}
         </InputField>
         <ApplyButton type="submit" />
       </Column>

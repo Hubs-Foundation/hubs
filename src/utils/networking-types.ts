@@ -1,10 +1,10 @@
 import { MediaLoaderParams } from "../inflators/media-loader";
-import { PrefabName } from "../prefabs/prefabs";
+import { PrefabNameT } from "../types";
 
 export type EntityID = number;
 export type InitialData = MediaLoaderParams | any;
 export interface CreateMessageData {
-  prefabName: PrefabName;
+  prefabName: PrefabNameT;
   initialData: InitialData;
 }
 export type ClientID = string;
@@ -13,7 +13,7 @@ export type StringID = number;
 export type CreateMessage = {
   version: 1;
   networkId: NetworkID;
-  prefabName: PrefabName;
+  prefabName: PrefabNameT;
   initialData: InitialData;
 };
 export interface CursorBuffer extends Array<any> {
