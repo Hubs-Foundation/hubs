@@ -36,7 +36,6 @@ import {
   Billboard,
   MaterialTag,
   VideoTextureSource,
-  Quack,
   MixerAnimatableInitialize,
   Inspectable,
   ObjectMenu,
@@ -105,6 +104,7 @@ import { inflateObjectMenuTarget, ObjectMenuTargetParams } from "../inflators/ob
 import { inflateObjectMenuTransform, ObjectMenuTransformParams } from "../inflators/object-menu-transform";
 import { inflatePlane, PlaneParams } from "../inflators/plane";
 import { FollowInFovParams, inflateFollowInFov } from "../inflators/follow-in-fov";
+import { ComponentDataT } from "../types";
 
 preload(
   new Promise(resolve => {
@@ -146,7 +146,7 @@ export type Attrs = {
 };
 
 export type EntityDef = {
-  components: JSXComponentData;
+  components: ComponentDataT;
   attrs: Attrs;
   children: EntityDef[];
   ref?: Ref;
@@ -156,10 +156,10 @@ function isReservedAttr(attr: string): attr is keyof Attrs {
   return reservedAttrs.includes(attr);
 }
 
-type ComponentFn = string | ((attrs: Attrs & JSXComponentData, children?: EntityDef[]) => EntityDef);
+type ComponentFn = string | ((attrs: Attrs & ComponentDataT, children?: EntityDef[]) => EntityDef);
 export function createElementEntity(
   tag: "entity" | ComponentFn,
-  attrs: Attrs & JSXComponentData,
+  attrs: Attrs & ComponentDataT,
   ...children: EntityDef[]
 ): EntityDef {
   attrs = attrs || {};
@@ -167,7 +167,7 @@ export function createElementEntity(
     return tag(attrs, children);
   } else if (tag === "entity") {
     const outputAttrs: Attrs = {};
-    const components: JSXComponentData & Attrs = {};
+    const components: ComponentDataT & Attrs = {};
     let ref = undefined;
 
     for (const attr in attrs) {
@@ -177,7 +177,7 @@ export function createElementEntity(
         ref = attrs[attr];
       } else {
         // if jsx transformed the attr into attr: true, change it to attr: {}.
-        const c = attr as keyof JSXComponentData;
+        const c = attr as keyof ComponentDataT;
         components[c] = attrs[c] === true ? {} : attrs[c];
       }
     }
@@ -224,7 +224,7 @@ export function addMaterialComponent(world: HubsWorld, eid: number, mat: Materia
   return eid;
 }
 
-const createDefaultInflator = (C: Component, defaults = {}): InflatorFn => {
+export const createDefaultInflator = (C: Component, defaults = {}): InflatorFn => {
   return (world, eid, componentProps) => {
     componentProps = Object.assign({}, defaults, componentProps);
     addComponent(world, C, eid, true);
@@ -306,7 +306,6 @@ export interface JSXComponentData extends ComponentData {
   deletable?: true;
   makeKinematicOnRelease?: true;
   destroyAtExtremeDistance?: true;
-  quack?: true;
 
   // @TODO Define all the anys
   networked?: any;
@@ -416,7 +415,7 @@ export interface GLTFComponentData extends ComponentData {
 declare global {
   namespace createElementEntity.JSX {
     interface IntrinsicElements {
-      entity: JSXComponentData &
+      entity: ComponentDataT &
         Attrs & {
           children?: IntrinsicElements[];
         };
@@ -428,7 +427,7 @@ declare global {
   }
 }
 
-export const commonInflators: Required<{ [K in keyof ComponentData]: InflatorFn }> = {
+export const commonInflators: Required<{ [K in keyof ComponentDataT]: InflatorFn }> = {
   grabbable: inflateGrabbable,
   billboard: createDefaultInflator(Billboard),
 
@@ -445,7 +444,7 @@ export const commonInflators: Required<{ [K in keyof ComponentData]: InflatorFn 
   text: inflateText
 };
 
-const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
+export const jsxInflators: Required<{ [K in keyof ComponentDataT]: InflatorFn }> = {
   ...commonInflators,
   cursorRaycastable: createDefaultInflator(CursorRaycastable),
   remoteHoverTarget: createDefaultInflator(RemoteHoverTarget),
@@ -484,7 +483,6 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   waypointPreview: createDefaultInflator(WaypointPreview),
   pdf: inflatePDF,
   mediaLoader: inflateMediaLoader,
-  quack: createDefaultInflator(Quack),
   mixerAnimatable: createDefaultInflator(MixerAnimatableInitialize),
   loopAnimation: inflateLoopAnimationInitialize,
   inspectable: createDefaultInflator(Inspectable),
@@ -500,7 +498,7 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   plane: inflatePlane
 };
 
-export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorFn }> = {
+export const gltfInflators: Required<{ [K in keyof ComponentDataT]: InflatorFn }> = {
   ...commonInflators,
   pdf: inflatePDFLoader,
   // Temporarily reuse video loader for audio because of
@@ -536,11 +534,11 @@ export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorF
   mediaLink: inflateMediaLink
 };
 
-function jsxInflatorExists(name: string): name is keyof JSXComponentData {
+function jsxInflatorExists(name: string) {
   return Object.prototype.hasOwnProperty.call(jsxInflators, name);
 }
 
-export function gltfInflatorExists(name: string): name is keyof GLTFComponentData {
+export function gltfInflatorExists(name: string) {
   return Object.prototype.hasOwnProperty.call(gltfInflators, name);
 }
 

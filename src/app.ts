@@ -30,6 +30,8 @@ import SceneEntryManager from "./scene-entry-manager";
 import { store } from "./utils/store-instance";
 import { addObject3DComponent } from "./utils/jsx-entity";
 import { ElOrEid } from "./utils/bit-utils";
+import { onAddonsInit } from "./addons";
+import { CoreSystemKeyT, HubsSystemKeyT, SystemConfigT, SystemKeyT, SystemT } from "./types";
 
 declare global {
   interface Window {
@@ -63,7 +65,7 @@ export function getScene() {
   return promiseToScene;
 }
 
-interface HubDescription {
+export interface HubDescription {
   hub_id: string;
   user_data?: any;
 }
@@ -103,6 +105,18 @@ export class App {
   audioListener: AudioListener;
 
   dialog = new DialogAdapter();
+
+  addon_systems = {
+    setup: new Array<{ order: number; system: SystemT }>(),
+    prePhysics: new Array<{ order: number; system: SystemT }>(),
+    postPhysics: new Array<{ order: number; system: SystemT }>(),
+    matricesUpdate: new Array<{ order: number; system: SystemT }>(),
+    beforeRender: new Array<{ order: number; system: SystemT }>(),
+    render: new Array<{ order: number; system: SystemT }>(),
+    afterRender: new Array<{ order: number; system: SystemT }>(),
+    postProcessing: new Array<{ order: number; system: SystemT }>(),
+    tearDown: new Array<{ order: number; system: SystemT }>()
+  };
 
   RENDER_ORDER = {
     HUD_BACKGROUND: 1,
@@ -157,6 +171,19 @@ export class App {
 
   getString(sid: number) {
     return this.sid2str.get(sid);
+  }
+
+  notifyOnInit() {
+    onAddonsInit(this);
+  }
+
+  getSystem(id: SystemKeyT) {
+    const systems = this.scene?.systems!;
+    if (id in systems) {
+      return systems[id as CoreSystemKeyT];
+    } else {
+      return systems["hubs-systems"][id as HubsSystemKeyT];
+    }
   }
 
   // This gets called by a-scene to setup the renderer, camera, and audio listener
