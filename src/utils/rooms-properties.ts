@@ -6,7 +6,8 @@ const unkonwnRoom = {
   id: ["uknown"],
   allow_map: false,
   allow_agent: false,
-  allow_navigation: false
+  allow_navigation: false,
+  allow_translation: false
 };
 
 interface RoomProperties {
@@ -29,6 +30,7 @@ interface JSONHubProperties {
   allow_map: boolean;
   allow_agent: boolean;
   allow_navigation: boolean;
+  allow_translation: boolean;
   navigation?: RoomProperties;
   map?: MapProperties;
 }
@@ -41,12 +43,17 @@ export async function GetHubProperties(HubID: string): Promise<JSONHubProperties
 
     for (let i = 0; i < roomArray.length; i++) {
       for (let j = 0; j < roomArray[i].id.length; j++) {
-        if (roomArray[i].id[j] === HubID) return roomArray[i];
+        if (roomArray[i].id[j] === HubID) {
+          APP.scene!.emit("properties_loaded", { premissions: roomArray[i] });
+          return roomArray[i];
+        }
       }
     }
+    APP.scene!.emit("properties_loaded", { premissions: unkonwnRoom });
     return unkonwnRoom;
   } catch (error) {
     console.log(error);
+    APP.scene!.emit("properties_loaded", { premissions: unkonwnRoom });
     return unkonwnRoom;
   }
 }
