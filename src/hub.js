@@ -87,6 +87,7 @@ import "./components/flag-button";
 import "./components/text-button";
 import "./components/block-button";
 import "./components/translate-button";
+import "./components/translate-badge";
 import "./components/translate-panel";
 import "./components/mute-button";
 import "./components/kick-button";

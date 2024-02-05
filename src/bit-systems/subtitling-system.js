@@ -197,6 +197,7 @@ export class SubtitleSystem {
   onTranslationUpdatesAvailable(event) {
     if (event.detail.type === "target") this.UpdateTarget(event.detail);
     else if (event.detail.type === "properties") this.updateTargetProperties(event.detail);
+    else if (event.detail.type === "stop") this.StopTranslating();
   }
 
   UpdateTarget(newTargetDetails) {
