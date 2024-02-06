@@ -41,6 +41,7 @@ AFRAME.registerComponent("translate-panel", {
   play() {
     APP.scene.addEventListener("translation-available", this.onAvailableTranslation);
     APP.scene.addEventListener("translation-target-updated", this.onTargetUpdate);
+    APP.scene.addEventListener("translation-stopped", this.onTargetUpdate);
     APP.scene.addEventListener("language_updated", this.onLanguageUpdate);
     APP.scene.addEventListener("translation_target_properties_updated", this.onTargetLanguageUpdate);
 
@@ -54,6 +55,7 @@ AFRAME.registerComponent("translate-panel", {
   pause() {
     APP.scene.removeEventListener("translation-available", this.onAvailableTranslation);
     APP.scene.removeEventListener("translation-target-updated", this.onTargetUpdate);
+    APP.scene.removeEventListener("translation-stopped", this.onTargetUpdate);
     APP.scene.removeEventListener("language_updated", this.onLanguageUpdate);
     APP.scene.removeEventListener("translation_target_properties_updated", this.onTargetLanguageUpdate);
   },
@@ -88,9 +90,8 @@ AFRAME.registerComponent("translate-panel", {
   },
 
   onTargetUpdate(event) {
-    this.user = this.owner === event.detail.owner;
-    this.targetLanguage = event.detail.language;
-    console.log(`Target Updated. Target language  : ${this.targetLanguage}`);
+    this.user = !!event.detail ? this.owner === event.detail.owner : false;
+    if (this.user) this.targetLanguage = event.detail.language;
     this.checkAndRender();
   },
 

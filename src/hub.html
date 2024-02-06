@@ -128,13 +128,26 @@
                             scale="0.10 0.10 0.10" position="0 0.25 0.001" visible="false"></a-entity>
                         <a-entity is-not-remote-hover-target class="modBadge" sprite="name: mod-badge.png"
                             scale="0.10 0.10 0.10" position="0 0.25 0.001" visible="false"></a-entity>
-                        <a-entity is-not-remote-hover-target class="translateBadge" sprite="name: translate-badge.png"
-                            scale="0.10 0.10 0.10" position="-0.25 -0.35 0.001" visible="false"></a-entity>
+
                         <a-entity class="identityName"
                             text="side: double; textAlign: center; color: #ddd; fontSize: 0.1; outlineWidth: 1%;"
                             visibility-while-frozen="withinDistance: 100; requireHoverOnNonMobile: false;"
                             position="0 0.4 0"></a-entity>
+
+                        <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-text-button"
+                            translate-button position="0 -.5 .5 " scale="0.8 0.8 0.8" class="interactable">
+                            <a-entity text="value:Translate; textAlign:center;" class="translate-button-text"
+                                text-raycast-hack position="0 0 0.001"></a-entity>
+                        </a-entity>
+
+                        <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-button"
+                            class="translateBadge interactable" position="-0.25 -0.35 0.00" scale="0.6 0.6 0.6"
+                            visible="true" translate-badge>
+                            <a-entity sprite scale="0.165 0.165 0.165" position="0 0 0.02"
+                                icon-button="image: translate-text.png; hoverImage: translate-text-hovered.png;"></a-entity>
+                        </a-entity>
                     </a-entity>
+
 
                     <a-entity class="model" gltf-model-plus="inflate: true">
                         <template data-name="AvatarRoot">
@@ -194,13 +207,7 @@
                                                 position="0 0 0.001"></a-entity>
                                         </a-entity>
                                         <!-- this the the button for translate -->
-                                        <a-entity is-remote-hover-target tags="singleActionButton:true;"
-                                            mixin="rounded-text-button" translate-button position=".5 0 .35"
-                                            scale="0.8 0.8 0.8">
-                                            <a-entity text="value:Translate; textAlign:center;"
-                                                class="translate-button-text" text-raycast-hack
-                                                position="0 0 0.001"></a-entity>
-                                        </a-entity>
+
                                         <!-- end -->
                                         <a-entity is-remote-hover-target tags="singleActionButton:true;"
                                             mixin="rounded-text-button" visible-if-permitted="mute_users" mute-button
