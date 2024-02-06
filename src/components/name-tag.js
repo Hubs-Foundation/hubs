@@ -43,7 +43,6 @@ AFRAME.registerComponent("name-tag", {
     this.displayName = null;
     this.pronouns = null;
     this.identityName = null;
-    this.Istranslated = false;
     this.isTalking = false;
     this.isTyping = false;
     this.isOwner = false;
@@ -65,7 +64,6 @@ AFRAME.registerComponent("name-tag", {
     this.onModelIkFirstTick = this.onModelIkFirstTick.bind(this);
     this.onStateChanged = this.onStateChanged.bind(this);
     this.updateNametagWidth = this.updateNametagWidth.bind(this);
-    this.onTargetUpdate = this.onTargetUpdate.bind(this);
 
     this.nametag = this.el.object3D;
     this.nametagIdentityName = this.el.querySelector(".identityName").object3D;
@@ -73,7 +71,7 @@ AFRAME.registerComponent("name-tag", {
     this.nametagStatusBorder = this.el.querySelector(".nametag-status-border").object3D;
     this.recordingBadge = this.el.querySelector(".recordingBadge").object3D;
     this.modBadge = this.el.querySelector(".modBadge").object3D;
-    this.translateBadge = this.el.querySelector(".translateBadge").object3D;
+
     this.nametagText = this.el.querySelector(".nametag-text").object3D;
     this.pronounsText = this.el.querySelector(".pronouns-text").object3D;
 
@@ -161,7 +159,6 @@ AFRAME.registerComponent("name-tag", {
         this.nametagStatusBorder.visible = this.isTyping || this.isTalking || this.isHandRaised;
         this.recordingBadge.visible = this.isRecording;
         this.modBadge.visible = this.isOwner && !this.isRecording;
-        this.translateBadge.visible = this.Istranslated;
 
         this.neck.getWorldPosition(worldPos);
         worldPos.setY(this.nametagElPosY + this.ikRoot.position.y);
@@ -187,7 +184,6 @@ AFRAME.registerComponent("name-tag", {
     this.el.sceneEl.addEventListener("presence_updated", this.onPresenceUpdated);
     window.APP.store.addEventListener("statechanged", this.onStateChanged);
     this.el.sceneEl.systems["hubs-systems"].nameTagSystem.register(this);
-    window.APP.scene.addEventListener("translation-target-updated", this.onTargetUpdate);
   },
 
   pause() {
@@ -197,7 +193,6 @@ AFRAME.registerComponent("name-tag", {
     this.el.sceneEl.removeEventListener("presence_updated", this.onPresenceUpdated);
     window.APP.store.removeEventListener("statechanged", this.onStateChanged);
     this.el.sceneEl.systems["hubs-systems"].nameTagSystem.unregister(this);
-    window.APP.scene.removeEventListener("translation-target-updated", this.onTargetUpdate);
   },
 
   onPresenceUpdated({ detail: presenceMeta }) {
@@ -370,16 +365,5 @@ AFRAME.registerComponent("name-tag", {
     this.avatarAABB.setFromObject(this.model);
     this.avatarAABB.getSize(this.avatarAABBSize);
     this.avatarAABB.getCenter(this.avatarAABBCenter);
-  },
-  onTargetUpdate(event) {
-    NAF.utils
-      .getNetworkedEntity(this.el)
-      .then(networkedEl => {
-        const owner = networkedEl.components.networked.data.owner;
-        this.Istranslated = owner === event.detail.owner;
-      })
-      .catch(error => {
-        console.error(error);
-      });
   }
 });

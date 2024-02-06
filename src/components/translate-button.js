@@ -11,6 +11,7 @@ AFRAME.registerComponent("translate-button", {
     this.onPresenceUpdated = this.onPresenceUpdated.bind(this);
     this.updateFromPresenceMeta = this.updateFromPresenceMeta.bind(this);
     this.updateVisibility = this.updateVisibility.bind(this);
+    this.onTranslationStopped = this.onTranslationStopped.bind(this);
 
     this.camWorldPos = new THREE.Vector3();
     this.objWorldPos = new THREE.Vector3();
@@ -45,16 +46,23 @@ AFRAME.registerComponent("translate-button", {
   },
   play() {
     this.el.object3D.addEventListener("interact", this.onClick);
-    APP.scene.addEventListener("translation-target-updated", this.onTargetUpdate);
+    this.el.sceneEl.addEventListener("translation-target-updated", this.onTargetUpdate);
     this.el.sceneEl.addEventListener("presence_updated", this.onPresenceUpdated);
+    this.el.sceneEl.addEventListener("translation-stopped", this.onTranslationStopped);
   },
   pause() {
     this.el.object3D.removeEventListener("interact", this.onClick);
     this.el.sceneEl.removeEventListener("presence_updated", this.onPresenceUpdated);
+    this.el.sceneEl.removeEventListener("translation-target-updated", this.onTargetUpdate);
+    this.el.sceneEl.removeEventListener("translation-stopped", this.onTranslationStopped);
   },
   tick() {
     this.updateVisibility();
   },
+  onTranslationStopped() {
+    this.isTarget = false;
+  },
+
   onPresenceUpdated({ detail: presenceMeta }) {
     if (presenceMeta.sessionId === this.playerSessionId) {
       this.updateFromPresenceMeta(presenceMeta);

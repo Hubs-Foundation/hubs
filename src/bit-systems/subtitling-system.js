@@ -197,48 +197,48 @@ export class SubtitleSystem {
   onTranslationUpdatesAvailable(event) {
     if (event.detail.type === "target") this.UpdateTarget(event.detail);
     else if (event.detail.type === "properties") this.updateTargetProperties(event.detail);
-    else if (event.detail.type === "stop") this.StopTranslating();
+    else if (event.detail.type === "stop") {
+      this.stopTranslating();
+      console.log("Event listened. translation stopped");
+    }
+    this.TranslateCheck();
+  }
+
+  stopTranslating() {
+    this.StopRecording();
+    this.target = null;
+    this.targetLanguage = null;
+    this.targetMicStatus = null;
+    APP.scene.emit("translation-stopped");
   }
 
   UpdateTarget(newTargetDetails) {
-    if (this.isRecording) this.StopTranslating();
-
-    if (this.target === newTargetDetails.target) {
-      this.target = null;
-      this.targetLanguage = null;
-      this.targetMicStatus = null;
-    } else {
-      this.target = newTargetDetails.target;
-      this.targetLanguage = newTargetDetails.language;
-      this.targetMicStatus = newTargetDetails.micStatus;
-    }
-
+    this.StopRecording();
+    this.target = newTargetDetails.target;
+    this.targetLanguage = newTargetDetails.language;
+    this.targetMicStatus = newTargetDetails.micStatus;
     const announcedProperties = { owner: this.target, language: this.targetLanguage, micStatus: this.micStatus };
-
     APP.scene.emit("translation-target-updated", announcedProperties);
-
-    this.TranslateCheck();
   }
 
   updateTargetProperties(newProperties) {
     const announcedProperties = { language: newProperties.language, micStatus: newProperties.micStatus };
+
     if (this.targetLanguage !== newProperties.language) {
       APP.scene.emit("translation_target_properties_updated", announcedProperties);
       this.targetLanguage = newProperties.language;
     }
+
     if (this.targetMicStatus !== newProperties.micStatus) {
       this.targetMicStatus = newProperties.micStatus;
-      this.TranslateCheck();
     }
   }
 
   TranslateCheck() {
     if (this.targetLanguage && this.targetMicStatus && !this.isRecording) {
-      console.log("Translation start");
       this.StartTranslating();
     } else if (!this.micStatus && this.isRecording) {
-      console.log("translaton stop");
-      this.StopTranslating();
+      this.StopRecording();
     }
   }
 
@@ -306,7 +306,7 @@ export class SubtitleSystem {
     this.isRecording = true;
   }
 
-  StopTranslating() {
+  StopRecording() {
     if (this.mediaRecorder && this.isRecording) this.mediaRecorder.stop();
   }
 
@@ -357,12 +357,6 @@ export class SubtitleSystem {
   get hasTargetLanguage() {
     return !!this.targetLanguage;
   }
-
-  // SetTargetLanguage(_language) {
-  //   this.mylanguage = _language;
-  //   window.APP.store.update({ profile: { language: _language } });
-  //   console.log(window.APP.store);
-  // }
 }
 
 export function FlagPanelSystem(world) {
