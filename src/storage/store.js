@@ -68,8 +68,7 @@ export const SCHEMA = {
         pronouns: { type: "string" },
         // personalAvatarId is obsolete, but we need it here for backwards compatibility.
         personalAvatarId: { type: "string" },
-        language: { type: "string" },
-        micStatus: { type: "boolean" }
+        language: { type: "string" }
       }
     },
 
