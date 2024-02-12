@@ -13,7 +13,7 @@ const DISABLE_GRACE_PERIOD_MS = 10000;
 const IS_TALKING_THRESHOLD_MS = 1000;
 const MIN_VOLUME_THRESHOLD = 0.08;
 
-const calculateVolume = (analyser, levels) => {
+export const calculateVolume = (analyser, levels) => {
   // take care with compatibility, e.g. safari doesn't support getFloatTimeDomainData
   analyser.getByteTimeDomainData(levels);
   let sum = 0;
@@ -25,7 +25,7 @@ const calculateVolume = (analyser, levels) => {
   return currVolume;
 };
 
-function updateVolume(component) {
+export function updateVolume(component) {
   const newRawVolume = calculateVolume(component.analyser, component.levels);
 
   const newPerceivedVolume = Math.log(THREE.MathUtils.mapLinear(newRawVolume, 0, 1, 1, Math.E));

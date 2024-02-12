@@ -178,12 +178,8 @@ export class NavigationSystem {
   }
 
   GetDestIndex(salientName) {
-    if (Object.keys(this.targetInfo).includes(salientName)) {
-      return this.targetInfo[salientName];
-    }
-
+    if (Object.keys(this.targetInfo).includes(salientName)) return this.targetInfo[salientName];
     return false;
-    console.error(`Invalid Salient Name: ${salientName}`);
   }
 
   Dijkstra(startIndex) {
@@ -218,6 +214,7 @@ export class NavigationSystem {
   }
 
   GetInstructions(startPos, stopName) {
+    this.RemoveCues();
     const startIndex = this.GetClosestIndex(startPos);
     const stopIndex = this.GetDestIndex(stopName);
 
@@ -297,7 +294,7 @@ export class NavigationSystem {
 
     navigation["valid"] = true;
     this.dest.pos = this.nodes[stopIndex];
-    console.log("Destination position changed to: ", this.dest.pos);
+    console.log(`Destination has changed to:`, this.dest);
     return navigation;
   }
 
@@ -375,7 +372,6 @@ export class NavigationSystem {
   }
 
   RenderCues(navigation) {
-    this.RemoveCues();
     try {
       this.cuesEid = renderAsEntity(APP.world, NavigationCues(navigation));
       this.cuesObj = APP.world.eid2obj.get(this.cuesEid);
@@ -395,17 +391,20 @@ export class NavigationSystem {
       this.cuesEid = null;
       this.dest = { active: false, pos: null, time: null };
       console.log("Destination is now inactive: ", this.dest);
+      virtualAgent.navUI.obj.visible = false;
+    }
+  }
+
+  StopNavigating(reason) {
+    if (this.dest.active) {
+      this.RemoveCues();
+      virtualAgent.UpdateWithRandomPhrase(reason);
     }
   }
 
   ShouldFinish() {
-    if (virtualAgent.avatarPos.distanceTo(this.dest.pos) < 3) {
-      this.RemoveCues();
-      virtualAgent.UpdateWithRandomPhrase("success");
-    } else if (new Date() - this.dest.time > 30000) {
-      this.RemoveCues();
-      virtualAgent.UpdateWithRandomPhrase("cleared");
-    }
+    if (virtualAgent.avatarPos.distanceTo(this.dest.pos) < 3) this.StopNavigating("success");
+    // else if (new Date() - this.dest.time > 30000) this.StopNavigating("cleared");
   }
 }
 

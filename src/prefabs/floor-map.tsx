@@ -21,41 +21,43 @@ export function FloorMapPanel(ratio: number, imageSrc: string) {
   const pointRef = createRef();
   const panelTexture = !!imageSrc ? textureLoader.load(imageSrc) : textureLoader.load(unavailableMapSrc);
   return (
-    <entity
-      name={"floor-map"}
-      image={{
-        texture: panelTexture,
-        ratio: ratio,
-        projection: ProjectionMode.FLAT,
-        alphaMode: AlphaMode.Blend,
-        cacheKey: ""
-      }}
-      floorMap={{ planeRef: panelRef, pointRef: pointRef }}
-      cursorRaycastable
-      remoteHoverTarget
-      handCollisionTarget
-      offersRemoteConstraint
-      offersHandConstraint
-      makeKinematicOnRelease
-      holdable
-      floatyObject
-      rigidbody={{ collisionGroup: COLLISION_LAYERS.INTERACTABLES, collisionMask: COLLISION_LAYERS.HANDS }}
-      physicsShape={{ halfExtents: [0.22, 0.14, 0.1] }}
-      followFov
-    >
+    <entity followFov>
       <entity
-        name="point"
-        position={[0, 0, 0.02]}
-        scale={[0.02, 0.02, 0.02]}
-        ref={pointRef}
+        name={"floor-map"}
         image={{
-          texture: spotTexture,
-          ratio: 1,
+          texture: panelTexture,
+          ratio: ratio,
           projection: ProjectionMode.FLAT,
-          alphaMode: AlphaMode.Mask,
+          alphaMode: AlphaMode.Blend,
           cacheKey: ""
         }}
-      />
+        floorMap={{ planeRef: panelRef, pointRef: pointRef }}
+        cursorRaycastable
+        remoteHoverTarget
+        handCollisionTarget
+        offersRemoteConstraint
+        offersHandConstraint
+        makeKinematicOnRelease
+        holdable
+        floatyObject
+        position={[0, 0, 0.7]}
+        lookatuser
+        rigidbody={{ collisionGroup: COLLISION_LAYERS.INTERACTABLES, collisionMask: COLLISION_LAYERS.HANDS }}
+        physicsShape={{ halfExtents: [0.22, 0.14, 0.1] }}
+      >
+        <entity
+          name="point"
+          scale={[0.02, 0.02, 0.02]}
+          ref={pointRef}
+          image={{
+            texture: spotTexture,
+            ratio: 1,
+            projection: ProjectionMode.FLAT,
+            alphaMode: AlphaMode.Mask,
+            cacheKey: ""
+          }}
+        />
+      </entity>
     </entity>
   );
 }

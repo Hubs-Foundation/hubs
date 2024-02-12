@@ -1,7 +1,7 @@
 import { FlagPanelManager, Interacted } from "../bit-components";
 import { getMediaStream } from "../components/avatar-audio-source";
 import { paths } from "../systems/userinput/paths";
-import { audioModules } from "../utils/asr-adapter";
+import { audioModules } from "../utils/ml-adapters";
 import { COMPONENT_ENDPOINTS } from "../utils/component-types";
 import { UpdateTextSystem } from "./agent-slideshow-system";
 import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
@@ -118,12 +118,16 @@ export class LanguagePanel {
   }
 
   Interactions(world) {
+    let closePanel = false;
     Object.keys(this.flagButtons).forEach(key => {
       if (hasComponent(world, Interacted, this.flagButtons[key].eid)) {
+        closePanel = true;
         if (subtitleSystem.mylanguage === key) subtitleSystem.updateMyLanguage("");
         else subtitleSystem.updateMyLanguage(key);
       }
     });
+
+    if (closePanel) APP.scene.emit("lang-toggle");
   }
 
   onLanguageUpdated(event) {

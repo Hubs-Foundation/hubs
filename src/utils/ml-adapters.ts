@@ -1,14 +1,10 @@
-import { string } from "prop-types";
-import { Object3D, PerspectiveCamera, WebGLRenderer } from "three";
+import { virtualAgent } from "../bit-systems/agent-system";
 import { ResponseData, COMPONENT_ENDPOINTS, COMPONENT_CODES, CODE_DESCRIPTIONS } from "./component-types";
+import { SoundAnalyzer } from "./silence-detector";
 
 let mediaRecorder: MediaRecorder | null = null;
 let chunks: any[] = [];
 export let isRecording = false;
-let recordingPromise: Promise<any>;
-
-//TODO:: automate the query parameters
-export function queryPreprocess() {}
 
 export async function RecordQuestion(savefile: boolean): Promise<any> {
   return new Promise((resolve, reject) => {
@@ -17,6 +13,18 @@ export async function RecordQuestion(savefile: boolean): Promise<any> {
     const recordingStream = new MediaStream([recordingTrack]);
     mediaRecorder = new MediaRecorder(recordingStream);
     audioTrack.enabled = false;
+
+    const soundAnalyzer = new SoundAnalyzer({ stream: recordingStream });
+
+    soundAnalyzer.on("start", () => {
+      virtualAgent.isListening = true;
+    });
+
+    soundAnalyzer.on("stop", () => {
+      virtualAgent.isListening = false;
+    });
+
+    soundAnalyzer.Start();
 
     mediaRecorder.ondataavailable = event => {
       chunks.push(event.data);
@@ -28,6 +36,7 @@ export async function RecordQuestion(savefile: boolean): Promise<any> {
       audioTrack.enabled = true;
       recordingStream.removeTrack(recordingTrack);
       recordingTrack.stop();
+      soundAnalyzer.Stop();
       if (savefile) saveAudio(recordingBlob);
 
       resolve({
@@ -47,61 +56,6 @@ export async function RecordQuestion(savefile: boolean): Promise<any> {
 
     mediaRecorder.start();
     isRecording = true;
-  });
-}
-
-export async function toggleRecording(savefile: boolean): Promise<ResponseData> {
-  if (!isRecording) {
-    recordingPromise = startRecording(savefile);
-    return recordingPromise;
-  } else {
-    stopRecording();
-    return Promise.resolve({
-      status: { code: COMPONENT_CODES.RecordingStopped, text: CODE_DESCRIPTIONS[COMPONENT_CODES.RecordingStopped] }
-    });
-  }
-}
-
-async function startRecording(savefile: boolean): Promise<ResponseData> {
-  return new Promise((resolve, reject) => {
-    const audioTrack = APP.mediaDevicesManager!.audioTrack;
-    const recordingTrack = audioTrack.clone();
-    const recordingStream = new MediaStream([recordingTrack]);
-    mediaRecorder = new MediaRecorder(recordingStream);
-    audioTrack.enabled = false;
-
-    mediaRecorder.ondataavailable = function (e) {
-      chunks.push(e.data);
-    };
-
-    mediaRecorder.onstop = () => {
-      const recordingBlob = new Blob(chunks, { type: "audio/wav" });
-      chunks.length = 0;
-      audioTrack.enabled = true;
-      recordingStream.removeTrack(recordingTrack);
-      recordingTrack.stop();
-      if (savefile) {
-        saveAudio(recordingBlob);
-      }
-
-      resolve({
-        status: { code: COMPONENT_CODES.Successful, text: CODE_DESCRIPTIONS[COMPONENT_CODES.Successful] },
-        data: { file: recordingBlob }
-      });
-    };
-
-    mediaRecorder.onerror = event => {
-      reject({
-        status: {
-          code: COMPONENT_CODES.MediaRecorderError,
-          text: CODE_DESCRIPTIONS[COMPONENT_CODES.MediaRecorderError]
-        }
-      });
-      console.log(event);
-    };
-
-    isRecording = true;
-    mediaRecorder.start();
   });
 }
 
