@@ -15,7 +15,18 @@ export const AxisAlignType = {
 };
 
 export const MEDIA_FRAME_FLAGS = {
-  SCALE_TO_BOUNDS: 1 << 0
+  ACTIVE: 1 << 0,
+  SNAP_TO_CENTER: 1 << 1,
+  LOCKED: 1 << 2
+};
+
+export const MediaTypes = {
+  all: MediaType.ALL,
+  "all-2d": MediaType.ALL_2D,
+  model: MediaType.MODEL | MediaType.OBJECT,
+  image: MediaType.IMAGE,
+  video: MediaType.VIDEO,
+  pdf: MediaType.PDF
 };
 
 const DEFAULTS = {
