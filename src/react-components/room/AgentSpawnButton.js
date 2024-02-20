@@ -16,8 +16,8 @@ export function AgenSpawnButton({ scene }) {
   const description = intl.formatMessage(AgentTooltipDescription);
 
   const clickCallback = () => {
-    // scene.emit("agent-toggle");
-    scene.emit("lang-toggle");
+    scene.emit("agent-toggle");
+    // scene.emit("lang-toggle");
   };
 
   const activateButton = () => {

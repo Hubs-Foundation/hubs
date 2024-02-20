@@ -289,20 +289,33 @@ export default class VirtualAgent {
     });
   }
 
-  TestNavigationUI() {
+  async TestNavigationUI() {
     const targets = this.navProperties.navigation.targets;
+    const avatarPosition = this.avatarPos;
 
-    const randInt = getRandomInt(targets.length);
+    const update = () => {
+      this.UpdateText(
+        `This is a demo text that gives you guidance to reach the random destination with index \nYou will find your destination called  by following the green lines and the blue arrows. \nWe hope this text is large enough so it takes up a lot of space and will allow us to test also the transparent nametag texture.\nThank you, if you have any further questions do not hesitate to reach me.`
+      );
+    };
 
-    const navigation = navSystem.GetInstructions(this.avatarPos, targets[randInt].name);
+    return new Promise(resolve => {
+      console.log("waiting");
+      setTimeout(function () {
+        // Your code to be executed after the delay (2 seconds in this case)
+        const randInt = getRandomInt(targets.length);
 
-    if (navigation.valid) {
-      navSystem.RenderCues(navigation);
-    }
+        const navigation = navSystem.GetInstructions(avatarPosition, targets[randInt].name);
 
-    this.UpdateText(
-      `This is a demo text that gives you guidance to reach the random destination with index ${randInt}\nYou will find your destination called ${targets[randInt].name} by following the green lines and the blue arrows. \nWe hope this text is large enough so it takes up a lot of space and will allow us to test also the transparent nametag texture.\nThank you, if you have any further questions do not hesitate to reach me. XOXO`
-    );
+        if (navigation.valid) {
+          navSystem.RenderCues(navigation);
+        }
+
+        update();
+
+        resolve();
+      }, 2000);
+    });
   }
 
   async AskAgent(savefile) {
@@ -316,7 +329,10 @@ export default class VirtualAgent {
 
       const recordedQuestion = await RecordQuestion(savefile);
 
-      this.TestNavigationUI();
+      this.isProccessing = true;
+
+      await this.TestNavigationUI();
+
       return;
 
       this.isProccessing = true;
