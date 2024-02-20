@@ -1,0 +1,28 @@
+name: browser-stack
+
+on:
+  schedule:
+    - cron: '0 18 * * *'
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+
+      - name: Run browser-stack test
+        env:
+          BROWSER_STACK_USER_NAME: ${{ secrets.BROWSER_STACK_USER_NAME }}
+          BROWSER_STACK_ACCESS_KEY: ${{ secrets.BROWSER_STACK_ACCESS_KEY }}
+        run: |
+          cd test/browser-stack
+          npm ci
+          npm test

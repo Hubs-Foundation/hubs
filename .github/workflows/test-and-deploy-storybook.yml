@@ -1,0 +1,28 @@
+name: test-and-deploy-storybook
+
+on:
+  push:
+    branches:
+  workflow_dispatch:
+
+jobs:
+  test-and-deploy-storybook:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - run: npm ci
+      - run: npm test
+
+      - run: cd admin && npm ci --legacy-peer-deps
+      - run: cd admin && npm test
+
+      - if: ${{ github.ref == 'refs/heads/master' }}
+        run: npm run deploy-storybook -- --ci
+        env:
+          GH_TOKEN: ${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}
