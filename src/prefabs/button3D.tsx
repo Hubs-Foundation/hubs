@@ -33,7 +33,7 @@ export interface Button3DParams extends Attrs {
 }
 
 export function Button3D({
-  text,
+  text = "",
   width,
   height,
   texture = buttonTexture,
@@ -52,6 +52,7 @@ export function Button3D({
       textButton={{ labelRef }}
       singleActionButton
       layers={1 << Layers.CAMERA_LAYER_UI}
+      lookatuser
       {...props}
     >
       <entity
@@ -60,6 +61,7 @@ export function Button3D({
         text={{ value: text, color: "#000000", textAlign: "center", anchorX: "center", anchorY: "middle" }}
         position={[0, 0, 0.01]}
         name={`${name} Label`}
+        lookatuser
       />
     </entity>
   );

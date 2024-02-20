@@ -373,6 +373,7 @@ export interface JSXComponentData extends ComponentData {
     snapRef: Ref;
     nextRef: Ref;
     prevRef: Ref;
+    navRef: Ref;
   };
   agentTextPanel?: any;
   floorMap?: {

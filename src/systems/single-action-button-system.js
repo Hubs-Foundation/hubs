@@ -16,7 +16,7 @@ import { getThemeColor, onThemeChanged } from "../utils/theme";
 import { CAMERA_MODE_INSPECT } from "./camera-system";
 import { paths } from "./userinput/paths";
 import { startRecButtonTexture, stopRecButtonTexture } from "../prefabs/icon-button";
-import { isRecording } from "../utils/asr-adapter";
+import { isRecording } from "../utils/ml-adapters";
 
 function interact(world, entities, path, interactor) {
   if (AFRAME.scenes[0].systems.userinput.get(path)) {

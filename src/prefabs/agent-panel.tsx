@@ -22,7 +22,8 @@ export interface PanelParams {
 export interface SimplePanelParams {
   panelRef: Ref;
   textRef: Ref;
-  micRef: Ref;
+  listenRef: Ref;
+  navRef: Ref;
 }
 
 export function AgentPanel({ text, panelRef, nextRef, prevRef, micRef, snapRef, maxSlideCount }: PanelParams) {
@@ -101,7 +102,7 @@ export function AgentPanel({ text, panelRef, nextRef, prevRef, micRef, snapRef, 
   );
 }
 
-export function SimplePanel({ panelRef, textRef, micRef }: SimplePanelParams) {
+export function SimplePanel({ panelRef, textRef, listenRef: listenRef, navRef: navRef }: SimplePanelParams) {
   const buttonScale = [0.4, 0.4, 0.4];
   const buttonHeight = 0.2;
   return (
@@ -109,10 +110,8 @@ export function SimplePanel({ panelRef, textRef, micRef }: SimplePanelParams) {
       <entity
         name="agentPanel"
         ref={panelRef}
-        rotation={[0, 0, 0]}
         slice9={{ size: [0.8, 0.6], insets: [64, 66, 64, 66], texture: panelTexture }}
-        position={[-0.35, 0, 0.1]}
-        scale={[1.0, 1.0, 1.0]}
+        position={[0, -0.3, 0.3]}
       >
         <entity
           name={`text`}
@@ -128,25 +127,27 @@ export function SimplePanel({ panelRef, textRef, micRef }: SimplePanelParams) {
             maxWidth: 1
           }}
         />
+
+        <Button3D
+          ref={navRef}
+          scale={[buttonScale[0], buttonScale[1], buttonScale[2]]}
+          width={0.5}
+          height={buttonHeight}
+          type={BUTTON_TYPES.DEFAULT}
+          text={"Clear"}
+          visible={false}
+        />
       </entity>
 
       <Button3D
-        ref={micRef}
+        ref={listenRef}
         scale={[buttonScale[0], buttonScale[1], buttonScale[2]]}
-        position={[0.0, -0.15, 0.3]}
-        width={0.4}
+        position={[0, -0.3, 0.3]}
+        width={0.5}
         height={buttonHeight}
         type={BUTTON_TYPES.DEFAULT}
         text={"Ask"}
       />
-      {/* <IconButton
-        ref={micRef}
-        scale={[buttonScale[0], buttonScale[1], buttonScale[2]]}
-        type={BUTTON_TYPES.MIC}
-        position={[0.3, 0.15, 0]}
-        width={buttonHeight}
-        height={buttonHeight}
-      /> */}
     </entity>
   );
 }

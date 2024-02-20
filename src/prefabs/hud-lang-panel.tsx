@@ -11,6 +11,7 @@ import { FLAGS, FlagButton } from "./lang-button";
 import { BUTTON_TYPES } from "./button3D";
 import { virtualAgent } from "../bit-systems/agent-system";
 import { Color, Vector3 } from "three";
+import { COLLISION_LAYERS } from "../constants";
 
 const selectedTexture = textureLoader.load(selectedTextureSrc);
 const normalTexture = textureLoader.load(normalTextureSrc);
@@ -45,7 +46,7 @@ export function HUDLangPanel() {
     <entity followFov>
       <entity
         name="hud-lang-panel"
-        // scale={[2, 1.3 / 0.65, 1]}
+        position={[0, 0, 0.6]}
         image={{
           texture: backgroundTexture,
           ratio: 0.6,
@@ -54,55 +55,67 @@ export function HUDLangPanel() {
           cacheKey: ""
         }}
         flagPanelManager={{ deRef: deRef, duRef: duRef, itRef: itRef, elRef: elRef, esRef: esRef, enRef: enRef }}
-      ></entity>
-      <FlagButton
-        name="de_flag"
-        width={0.172}
-        ref={deRef}
-        position={[-0.246, 0.076, 0.1]}
-        flag={FLAGS.DE}
-        type={BUTTON_TYPES.MIC}
-      ></FlagButton>
-      <FlagButton
-        name="du_flag"
-        width={0.172}
-        ref={duRef}
-        position={[0, 0.076, 0.1]}
-        flag={FLAGS.DU}
-        type={BUTTON_TYPES.MIC}
-      ></FlagButton>
-      <FlagButton
-        name="it_flag"
-        width={0.172}
-        ref={itRef}
-        position={[0.246, 0.076, 0.1]}
-        flag={FLAGS.IT}
-        type={BUTTON_TYPES.MIC}
-      ></FlagButton>
-      <FlagButton
-        name="es_flag"
-        width={0.172}
-        ref={esRef}
-        position={[-0.246, -0.136, 0.1]}
-        flag={FLAGS.ES}
-        type={BUTTON_TYPES.MIC}
-      ></FlagButton>
-      <FlagButton
-        name="el_flag"
-        width={0.172}
-        ref={elRef}
-        position={[0, -0.136, 0.1]}
-        flag={FLAGS.EL}
-        type={BUTTON_TYPES.MIC}
-      ></FlagButton>
-      <FlagButton
-        name="en_flag"
-        width={0.172}
-        ref={enRef}
-        position={[0.246, -0.136, 0.1]}
-        flag={FLAGS.EN}
-        type={BUTTON_TYPES.MIC}
-      ></FlagButton>
+        lookatuser
+        cursorRaycastable
+        remoteHoverTarget
+        handCollisionTarget
+        offersRemoteConstraint
+        offersHandConstraint
+        makeKinematicOnRelease
+        holdable
+        floatyObject
+        rigidbody={{ collisionGroup: COLLISION_LAYERS.INTERACTABLES, collisionMask: COLLISION_LAYERS.HANDS }}
+        physicsShape={{ halfExtents: [0.22, 0.14, 0.1] }}
+      >
+        <FlagButton
+          name="de_flag"
+          width={0.172}
+          ref={deRef}
+          position={[-0.246, 0.076, 0.1]}
+          flag={FLAGS.DE}
+          type={BUTTON_TYPES.MIC}
+        ></FlagButton>
+        <FlagButton
+          name="du_flag"
+          width={0.172}
+          ref={duRef}
+          position={[0, 0.076, 0.1]}
+          flag={FLAGS.DU}
+          type={BUTTON_TYPES.MIC}
+        ></FlagButton>
+        <FlagButton
+          name="it_flag"
+          width={0.172}
+          ref={itRef}
+          position={[0.246, 0.076, 0.1]}
+          flag={FLAGS.IT}
+          type={BUTTON_TYPES.MIC}
+        ></FlagButton>
+        <FlagButton
+          name="es_flag"
+          width={0.172}
+          ref={esRef}
+          position={[-0.246, -0.136, 0.1]}
+          flag={FLAGS.ES}
+          type={BUTTON_TYPES.MIC}
+        ></FlagButton>
+        <FlagButton
+          name="el_flag"
+          width={0.172}
+          ref={elRef}
+          position={[0, -0.136, 0.1]}
+          flag={FLAGS.EL}
+          type={BUTTON_TYPES.MIC}
+        ></FlagButton>
+        <FlagButton
+          name="en_flag"
+          width={0.172}
+          ref={enRef}
+          position={[0.246, -0.136, 0.1]}
+          flag={FLAGS.EN}
+          type={BUTTON_TYPES.MIC}
+        ></FlagButton>
+      </entity>
     </entity>
   );
 }

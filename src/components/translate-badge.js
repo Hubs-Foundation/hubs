@@ -35,9 +35,7 @@ AFRAME.registerComponent("translate-badge", {
   },
 
   onTargetUpdate(event) {
-    console.log("badge", event.detail.owner, this.owner, event.detail.owner === this.owner);
     this.el.object3D.visible = event.detail.owner === this.owner;
-    console.log(this.el.object3D);
   },
   onTranslationStopped() {
     this.el.object3D.visible = false;

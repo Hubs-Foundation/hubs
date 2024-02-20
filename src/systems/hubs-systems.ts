@@ -276,7 +276,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   loopAnimationSystem(world);
   lookAtUserSystem(world);
 
-  AgentSystem();
+  AgentSystem(t);
   FloorMapSystem(world);
 
   followFovSystem(dt);

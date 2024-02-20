@@ -17,7 +17,8 @@ export const Agent = defineComponent({
   micRef: Types.eid,
   snapRef: Types.eid,
   nextRef: Types.eid,
-  prevRef: Types.eid
+  prevRef: Types.eid,
+  navRef: Types.eid
 });
 
 export const FollowFov = defineComponent();

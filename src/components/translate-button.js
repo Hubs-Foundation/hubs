@@ -39,8 +39,7 @@ AFRAME.registerComponent("translate-button", {
       APP.scene.emit("translation_updates_available", {
         type: "target",
         target: this.owner,
-        language: this.userLanguage,
-        micStatus: this.micStatus
+        language: this.userLanguage
       });
     };
   },
@@ -71,13 +70,11 @@ AFRAME.registerComponent("translate-button", {
   //need for bind?
   updateFromPresenceMeta(presenceMeta) {
     this.userLanguage = presenceMeta.profile.language;
-    this.micStatus = presenceMeta.profile.micStatus;
 
     if (subtitleSystem.target === this.owner) {
       APP.scene.emit("translation_updates_available", {
         type: "properties",
-        language: this.userLanguage,
-        micStatus: this.micStatus
+        language: this.userLanguage
       });
     }
   },

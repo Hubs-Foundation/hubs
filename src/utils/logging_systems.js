@@ -29,9 +29,12 @@ export class Logger {
       action: "translation",
       audio_translation: this.audioTranslation
     };
+
+    this.active = false;
   }
 
   Log() {
+    if (!this.active) return;
     this.modules.forEach(module => {
       if (module.start && module.finish) {
         module.total = module.finish - module.start;
