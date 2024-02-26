@@ -225,6 +225,7 @@ function* loadMedia(world: HubsWorld, eid: EntityID) {
   let media: EntityID;
   try {
     const urlData = (yield resolveMediaInfo(src)) as MediaInfo;
+    APP.getSid(urlData.accessibleUrl); // Register the sid as this is what we will get over the network for media.
     media = yield* loadByMediaType(world, eid, urlData);
     addComponent(world, MediaRoot, eid);
     addComponent(world, MediaLoaded, media);
