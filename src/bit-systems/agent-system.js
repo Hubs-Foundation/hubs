@@ -329,11 +329,11 @@ export default class VirtualAgent {
 
       const recordedQuestion = await RecordQuestion(savefile);
 
-      this.isProccessing = true;
+      // this.isProccessing = true;
 
-      await this.TestNavigationUI();
+      // await this.TestNavigationUI();
 
-      return;
+      // return;
 
       this.isProccessing = true;
       // UpdatePanelSize(this.panel.eid, [0.02, 0.01]);

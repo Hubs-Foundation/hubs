@@ -6,6 +6,8 @@ import { cloneModelFromCache, loadModel } from "../components/gltf-model-plus";
 import { HubsWorld } from "../app";
 import { AgentPanel, SimplePanel } from "./agent-panel";
 import { COLLISION_LAYERS } from "../constants";
+import { FLOATY_OBJECT_FLAGS } from "../systems/floaty-object-system";
+import { Type } from "../inflators/rigid-body";
 
 preload(loadModel(agentModelSrc, null, true));
 
@@ -35,9 +37,20 @@ export function AgentEntity() {
         offersHandConstraint
         makeKinematicOnRelease
         holdable
-        floatyObject
-        rigidbody={{ collisionGroup: COLLISION_LAYERS.INTERACTABLES, collisionMask: COLLISION_LAYERS.HANDS }}
-        physicsShape={{ halfExtents: [0.22, 0.14, 0.1] }}
+        grabbable={{ cursor: true, hand: true }}
+        destroyAtExtremeDistance
+        floatyObject={{
+          flags: FLOATY_OBJECT_FLAGS.MODIFY_GRAVITY_ON_RELEASE,
+          releaseGravity: 0
+        }}
+        networkedFloatyObject={{
+          flags: FLOATY_OBJECT_FLAGS.MODIFY_GRAVITY_ON_RELEASE
+        }}
+        rigidbody={{
+          type: Type.KINEMATIC,
+          collisionGroup: COLLISION_LAYERS.INTERACTABLES,
+          collisionMask: COLLISION_LAYERS.HANDS
+        }}
       >
         <SimplePanel panelRef={panelRef} textRef={textRef} listenRef={micRef} navRef={navRef} />
       </entity>

@@ -329,7 +329,6 @@ export class SubtitleSystem {
 
     if (inference) {
       // this.saveAudio(recordingBlob);
-
       this.inferencing = true;
 
       logger.action = "translation";
