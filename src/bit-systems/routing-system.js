@@ -391,19 +391,20 @@ export class NavigationSystem {
       this.cuesEid = null;
       this.dest = { active: false, pos: null, time: null };
       console.log("Destination is now inactive: ", this.dest);
-      virtualAgent.navUI.obj.visible = false;
     }
   }
 
-  StopNavigating(reason) {
+  StopNavigating() {
     if (this.dest.active) {
       this.RemoveCues();
-      virtualAgent.UpdateWithRandomPhrase(reason);
     }
   }
 
   ShouldFinish() {
-    if (virtualAgent.avatarPos.distanceTo(this.dest.pos) < 3) this.StopNavigating("success");
+    if (virtualAgent.avatarPos.distanceTo(this.dest.pos) < 3) {
+      this.StopNavigating();
+      virtualAgent.UpdateWithRandomPhrase("success");
+    }
     // else if (new Date() - this.dest.time > 30000) this.StopNavigating("cleared");
   }
 }
