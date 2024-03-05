@@ -60,7 +60,7 @@ AFRAME.registerComponent("in-world-hud", {
     };
 
     this.onAgentClick = () => {
-      this.el.emit("agent-toggle");
+      this.el.sceneEl.emit("agent-toggle");
     };
 
     this.onMapClick = () => {

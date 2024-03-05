@@ -8,6 +8,7 @@ import { AgentPanel, SimplePanel } from "./agent-panel";
 import { COLLISION_LAYERS } from "../constants";
 import { FLOATY_OBJECT_FLAGS } from "../systems/floaty-object-system";
 import { Type } from "../inflators/rigid-body";
+import { Fit, Shape } from "../inflators/physics-shape";
 
 preload(loadModel(agentModelSrc, null, true));
 
@@ -38,18 +39,16 @@ export function AgentEntity() {
         makeKinematicOnRelease
         holdable
         grabbable={{ cursor: true, hand: true }}
-        destroyAtExtremeDistance
-        floatyObject={{
-          flags: FLOATY_OBJECT_FLAGS.MODIFY_GRAVITY_ON_RELEASE,
-          releaseGravity: 0
-        }}
-        networkedFloatyObject={{
-          flags: FLOATY_OBJECT_FLAGS.MODIFY_GRAVITY_ON_RELEASE
-        }}
+        floatyObject
         rigidbody={{
           type: Type.KINEMATIC,
           collisionGroup: COLLISION_LAYERS.INTERACTABLES,
           collisionMask: COLLISION_LAYERS.HANDS
+        }}
+        physicsShape={{
+          fit: Fit.MANUAL,
+          type: Shape.SPHERE,
+          halfExtents: [0.25, 0.5, 0.45]
         }}
       >
         <SimplePanel panelRef={panelRef} textRef={textRef} listenRef={micRef} navRef={navRef} />

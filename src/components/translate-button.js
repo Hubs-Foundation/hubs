@@ -91,7 +91,7 @@ AFRAME.registerComponent("translate-button", {
 
     const distance = this.objWorldPos.distanceTo(this.camWorldPos);
 
-    const shouldBeVisible = distance < 2 && !this.isTarget;
+    const shouldBeVisible = distance < 2 && !this.isTarget && subtitleSystem.allowed;
 
     if (isVisible !== shouldBeVisible) {
       this.el.setAttribute("visible", shouldBeVisible);

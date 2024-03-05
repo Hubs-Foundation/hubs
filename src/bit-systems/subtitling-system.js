@@ -162,9 +162,13 @@ export class SubtitleSystem {
     this.InferenceAudio = this.InferenceAudio.bind(this);
   }
 
-  Init(reset) {
+  Init(hubProperties, reset) {
     if (reset) {
       this.target = null;
+      this.allowed = hubProperties.allow_translation;
+      if (!hubProperties.allow_translation) {
+        console.warn("Translation is not enabled in this room");
+      }
       return;
     }
 
@@ -172,6 +176,10 @@ export class SubtitleSystem {
     this.targetLanguage = null;
     this.target = null;
     this.silenceCheckInterval = null;
+    this.allowed = hubProperties.allow_translation;
+    if (!hubProperties.allow_translation) {
+      console.warn("Translation is not enabled in this room");
+    }
 
     this.recordingAverage = [];
     this.inactiveAverage = [];

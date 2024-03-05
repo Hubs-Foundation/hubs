@@ -66,10 +66,11 @@ export default class SceneEntryManager {
 
   setupVRConferece = async reset => {
     languagePanel.Init(reset);
-    subtitleSystem.Init(reset);
+
     if (reset) this.scene.emit("clear-scene");
     const hubProperties = await GetHubProperties(getCurrentHubId());
     virtualAgent.Init(hubProperties, reset);
+    subtitleSystem.Init(hubProperties, reset);
     floorMap.Init(hubProperties, reset);
     navSystem.Init(hubProperties, reset);
   };

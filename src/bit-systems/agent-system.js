@@ -76,10 +76,13 @@ export default class VirtualAgent {
     this.prevArrow = new objElement();
     this.infoPanel = new objElement();
     this.snapButton = new objElement();
-    this.navUI = new objElement();
+    this.clearButton = new objElement();
+    this.agentParent = new objElement();
 
     this.panel = new objElement();
     this.text = new textElement();
+
+    this.refsList = [];
     this.currentOccasion = null;
     this.waitingForResponse = null;
 
@@ -87,6 +90,7 @@ export default class VirtualAgent {
     this.loadingObj = null;
     this.isProccessing = false;
     this.isListening = false;
+    this.successResult = false;
 
     this.onClear = this.onClear.bind(this);
     this.onToggle = this.onToggle.bind(this);
@@ -97,7 +101,7 @@ export default class VirtualAgent {
     this.occasions = {
       greetings: ["greetings"],
       success: ["success", "anythingElse"],
-      cleared: ["cleared", "anythingElse"],
+      cleared: ["anythingElse"],
       error: ["error"]
     };
   }
@@ -126,9 +130,15 @@ export default class VirtualAgent {
     this.text.obj.removeEventListener("synccomplete", this.OntextUpdate);
     APP.scene.removeEventListener("language_updated", this.onLanguageUpdated);
     APP.dialog.off("mic-state-changed", this.setMicStatus);
-    APP.scene.remove(this.agent.obj);
+
+    removeEntity(APP.world, this.agentParent.eid);
     removeEntity(APP.world, this.agent.eid);
     APP.scene.removeState("agent");
+    // this.refsList.forEach(ref => {
+    //   removeEntity(APP.world, ref.eid);
+    // });
+
+    // APP.scene.remove(this.agent.obj);
   }
 
   Instantiate() {
@@ -137,6 +147,7 @@ export default class VirtualAgent {
 
     const obj = APP.world.eid2obj.get(eid);
     APP.world.scene.add(obj);
+    this.agentParent.update(eid);
   }
 
   Setup(agentEid) {
@@ -145,9 +156,29 @@ export default class VirtualAgent {
     this.prevArrow.update(Agent.prevRef[agentEid]);
     this.infoPanel.update(Agent.micRef[agentEid]);
     this.snapButton.update(Agent.snapRef[agentEid]);
-    this.navUI.update(Agent.navRef[agentEid]);
+    this.clearButton.update(Agent.navRef[agentEid]);
     this.panel.update(Agent.panelRef[agentEid]);
     this.text.update(Agent.textRef[agentEid]);
+
+    this.refsList = [
+      this.nextArrow,
+      this.prevArrow,
+      this.infoPanel,
+      this.snapButton,
+      this.clearButton,
+      this.panel,
+      this.text
+    ];
+
+    const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
+    physicsSystem.updateRigidBodyOptions(agentEid, {
+      type: "kinematic",
+      gravity: {
+        x: 0,
+        y: 0,
+        z: 0
+      }
+    });
 
     //Do not delete this, these are for VLM. Try to not use them, but practice TODO: Migrate
     this.scene = AFRAME.scenes[0];
@@ -157,6 +188,7 @@ export default class VirtualAgent {
 
     this.isProccessing = false;
     this.isListening = false;
+    this.successResult = false;
 
     // this.UpdateText("Hello I am your personal Agent");
 
@@ -193,16 +225,20 @@ export default class VirtualAgent {
     this.prevArrow.update(null);
     this.infoPanel.update(null);
     this.snapButton.update(null);
-    this.navUI.update(null);
+    this.clearButton.update(null);
     this.panel.update(null);
     this.text.update(null);
+    this.agentParent.update(null);
 
     this.loadingObj = null;
     this.isProccessing = false;
     this.isListening = false;
+    this.successResult = false;
 
     this.currentOccasion = null;
     this.waitingForResponse = null;
+
+    this.refsList = [];
   }
 
   onClear() {
@@ -231,10 +267,12 @@ export default class VirtualAgent {
     UpdatePanelSize(this.panel.eid, size);
     this.panel.size = size;
 
-    if (navSystem.dest.active) {
-      this.navUI.obj.position.copy(new Vector3(0, -size[1] / 2 + PANEL_PADDING, 0.2));
-      this.navUI.obj.visible = true;
-      this.navUI.obj.updateMatrix();
+    if (this.successResult) {
+      this.clearButton.obj.position.copy(new Vector3(0, -size[1] / 2 + PANEL_PADDING, 0.2));
+      this.clearButton.obj.updateMatrix();
+      this.clearButton.obj.visible = true;
+    } else {
+      this.clearButton.obj.visible = false;
     }
   }
 
@@ -256,8 +294,10 @@ export default class VirtualAgent {
   }
 
   async ButtonInteractions() {
-    if (clicked(this.navUI.eid)) {
-      navSystem.StopNavigating("cleared");
+    if (clicked(this.clearButton.eid)) {
+      navSystem.StopNavigating();
+      this.successResult = false;
+      this.UpdateWithRandomPhrase("cleared");
     }
   }
 
@@ -420,9 +460,13 @@ export default class VirtualAgent {
         };
       }
 
-      if (navigation.valid && intentResponse.data.intent.includes("navigation")) {
+      if (intentResponse.data.intent.includes("navigation") && navigation.valid) {
+        this.successResult = true;
         navSystem.RenderCues(navigation);
-        this.navUI.obj.visible = true;
+      } else if (intentResponse.data.intent.includes("program_info")) {
+        this.successResult = true;
+      } else {
+        this.successResult = false;
       }
 
       this.UpdateText(output);
