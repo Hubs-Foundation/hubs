@@ -88,8 +88,7 @@ function grab(world, userinput, queryHovered, held, grabPath) {
     target &&
     userinput.get(grabPath) &&
     (!isEntityPinned || AFRAME.scenes[0].is("frozen")) &&
-    hasPermissionToGrab(world, target) &&
-    !anyEntityWith(world, PenActive)
+    hasPermissionToGrab(world, target)
   ) {
     if (hasComponent(world, Networked, target)) {
       takeOwnership(world, target);
@@ -101,7 +100,7 @@ function grab(world, userinput, queryHovered, held, grabPath) {
 
 function drop(world, userinput, queryHeld, held, dropPath) {
   const heldEid = queryHeld(world)[0];
-  if (heldEid && userinput.get(dropPath) && !anyEntityWith(world, PenActive)) {
+  if (heldEid && userinput.get(dropPath)) {
     // TODO: Drop on ownership lost
     removeComponent(world, held, heldEid);
 
