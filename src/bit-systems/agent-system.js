@@ -17,7 +17,7 @@ import { AgentEntity } from "../prefabs/agent";
 import { SnapDepthPOV, SnapPOV } from "../utils/vlm-adapters";
 import { navSystem } from "./routing-system";
 import { renderAsEntity } from "../utils/jsx-entity";
-import { languageCodes, subtitleSystem } from "./subtitling-system";
+import { languageCodes, translationSystem } from "./translation-system";
 import { UpdatePanelSize, GetTextSize } from "../utils/interactive-panels";
 import { agentDialogs } from "../utils/localization";
 import { Logger } from "../utils/logging_systems";
@@ -47,7 +47,7 @@ export function AgentSystem(t) {
   });
 }
 
-class objElement {
+export class objElement {
   constructor() {
     this.eid = null;
     this.obj = null;
@@ -122,7 +122,7 @@ export default class VirtualAgent {
     this.avatarPovObj = document.querySelector("#avatar-pov-node").object3D;
     APP.scene.addEventListener("agent-toggle", this.onToggle);
     APP.scene.addEventListener("clear-scene", this.onClear);
-    APP.scene.emit("agent-toggle");
+    // APP.scene.emit("agent-toggle");
     this.navProperties = hubProperties;
   }
 
@@ -378,7 +378,7 @@ export default class VirtualAgent {
       this.isProccessing = true;
       // UpdatePanelSize(this.panel.eid, [0.02, 0.01]);
 
-      const sourceLang = subtitleSystem.mylanguage ? languageCodes[subtitleSystem.mylanguage] : "en";
+      const sourceLang = translationSystem.mylanguage ? languageCodes[translationSystem.mylanguage] : "en";
       const nmtAudioParams = { source_language: sourceLang, target_language: "en", return_transcription: "true" };
 
       logger.audioTranslation.start = new Date();
@@ -422,7 +422,7 @@ export default class VirtualAgent {
       };
       logger.response.output = response.data.response;
 
-      const targetLang = subtitleSystem.mylanguage ? languageCodes[subtitleSystem.mylanguage] : "en";
+      const targetLang = translationSystem.mylanguage ? languageCodes[translationSystem.mylanguage] : "en";
       const nmtTextParams = { source_language: "en", target_language: targetLang };
       let output;
       if (nmtTextParams.source_language === nmtTextParams.target_language) {
@@ -505,7 +505,7 @@ export default class VirtualAgent {
 
   UpdateWithRandomPhrase(occasion) {
     const phrases = [];
-    const lang = subtitleSystem.mylanguage ? subtitleSystem.mylanguage : "english";
+    const lang = translationSystem.mylanguage ? translationSystem.mylanguage : "english";
 
     this.occasions[occasion].forEach(occasionKey => {
       const availablePhrases = agentDialogs[occasionKey][lang];

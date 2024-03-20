@@ -502,6 +502,7 @@ export class DialogAdapter extends EventEmitter {
 
   getMediaStream(clientId, kind = "audio") {
     let track;
+    let found = false;
 
     if (this._clientId === clientId) {
       if (kind === "audio" && this._micProducer) {
@@ -517,9 +518,12 @@ export class DialogAdapter extends EventEmitter {
       this._consumers.forEach(consumer => {
         if (consumer.appData.peerId === clientId && kind == consumer.track.kind) {
           track = consumer.track;
+          found = true;
         }
       });
     }
+
+    if (!found) console.warn(`consumer was not found`);
 
     if (track) {
       debug(`Already had ${kind} for ${clientId}`);

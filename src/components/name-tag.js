@@ -8,7 +8,6 @@ import { createPlaneBufferGeometry, setMatrixWorld } from "../utils/three-utils"
 import { textureLoader } from "../utils/media-utils";
 
 import handRaisedIconSrc from "../assets/hud/hand-raised.png";
-import { subtitleSystem } from "../bit-systems/subtitling-system";
 
 const DEBUG = qsTruthy("debug");
 const NAMETAG_BACKGROUND_PADDING = 0.05;
@@ -203,7 +202,7 @@ AFRAME.registerComponent("name-tag", {
 
   updateFromPresenceMeta(presenceMeta) {
     this.displayName = presenceMeta.profile.displayName;
-    this.pronouns = presenceMeta.profile.language; /*subtitleSystem.targetLanguage;*/
+    this.pronouns = presenceMeta.profile.language;
     this.identityName = presenceMeta.profile.identityName;
     this.isRecording = !!(presenceMeta.streaming || presenceMeta.recording);
     this.isOwner = !!(presenceMeta.roles && presenceMeta.roles.owner);
