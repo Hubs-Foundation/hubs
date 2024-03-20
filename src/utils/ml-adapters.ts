@@ -77,7 +77,8 @@ function saveAudio(blob: Blob) {
 export async function audioModules(
   endPoint: COMPONENT_ENDPOINTS,
   data: Blob,
-  parameters: Record<string, any>
+  parameters: Record<string, any>,
+  signal?: AbortSignal
 ): Promise<ResponseData> {
   const formData = new FormData();
   formData.append("audio_files", data, "recording.wav");
@@ -88,7 +89,8 @@ export async function audioModules(
   try {
     const response = await fetch(endPoint + `?${queryString}`, {
       method: "POST",
-      body: formData
+      body: formData,
+      signal: signal
     });
 
     const data = await response.json();

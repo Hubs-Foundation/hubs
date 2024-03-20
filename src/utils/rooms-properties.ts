@@ -1,13 +1,13 @@
 import { string } from "prop-types";
 
 const propertiesURL = "https://kontopoulosdm.github.io/properties.json";
-const unkonwnRoom = {
+const unknownRoom = {
   room: "unknown",
   id: ["uknown"],
   allow_map: false,
   allow_agent: false,
   allow_navigation: false,
-  allow_translation: false
+  translation: { allow: false }
 };
 
 interface RoomProperties {
@@ -24,13 +24,26 @@ interface MapProperties {
   centeroffset: Array<Number>;
 }
 
+interface TranslationProperties {
+  allow: boolean;
+  conversation?: "bubble" | "duo" | "presentation";
+  spatiality?: {
+    type: "borders" | "room";
+    data?: Array<Array<Number>>;
+  };
+  panel?: {
+    type: "avatar" | "fixed";
+    data?: Array<Number>;
+  };
+}
+
 interface JSONHubProperties {
   room: string;
   id: Array<string>;
   allow_map: boolean;
   allow_agent: boolean;
   allow_navigation: boolean;
-  allow_translation: boolean;
+  translation: TranslationProperties;
   navigation?: RoomProperties;
   map?: MapProperties;
 }
@@ -49,12 +62,12 @@ export async function GetHubProperties(HubID: string): Promise<JSONHubProperties
         }
       }
     }
-    APP.scene!.emit("properties_loaded", { premissions: unkonwnRoom });
-    return unkonwnRoom;
+    APP.scene!.emit("properties_loaded", { premissions: unknownRoom });
+    return unknownRoom;
   } catch (error) {
     console.log(error);
-    APP.scene!.emit("properties_loaded", { premissions: unkonwnRoom });
-    return unkonwnRoom;
+    APP.scene!.emit("properties_loaded", { premissions: unknownRoom });
+    return unknownRoom;
   }
 }
 

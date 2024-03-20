@@ -5,21 +5,27 @@
  */
 
 import { Vector3 } from "three";
-import { FromatNewText } from "../bit-systems/agent-slideshow-system";
-import { subtitleSystem } from "../bit-systems/subtitling-system";
+import { translationSystem } from "../bit-systems/translation-system";
+
 const PANEL_PADDING = 0.05;
 
 AFRAME.registerComponent("translate-panel", {
   init() {
     this.translateText = this.el.querySelector(".translate-text").object3D;
     this.translateBackground = this.el.querySelector(".translate-background").object3D;
-    this.onAvailableTranslation = this.onAvailableTranslation.bind(this);
+
     this.updateTextSize = this.updateTextSize.bind(this);
     this.fortmatLines = this.fortmatLines.bind(this);
     this.onTargetUpdate = this.onTargetUpdate.bind(this);
     this.onLanguageUpdate = this.onLanguageUpdate.bind(this);
-    this.checkAndRender = this.checkAndRender.bind(this);
-    this.onTargetLanguageUpdate = this.onTargetLanguageUpdate.bind(this);
+
+    NAF.utils
+      .getNetworkedEntity(this.el)
+      .then(networkedEl => {
+        this.playerSessionId = NAF.utils.getCreator(networkedEl);
+        this.owner = networkedEl.components.networked.data.owner;
+      })
+      .catch(error => console.log(error));
 
     this.size = new Vector3();
     this.preformatText;
@@ -36,31 +42,22 @@ AFRAME.registerComponent("translate-panel", {
       .catch(error => {
         console.error(error);
       });
+
+    this.onAvailableTranslation = ({ detail: response }) => {
+      if (response.id === this.owner) this.UpdateText(response.text);
+    };
+
+    this.el.object3D.visible = false;
   },
 
   play() {
-    APP.scene.addEventListener("translation-available", this.onAvailableTranslation);
-    APP.scene.addEventListener("translation-target-updated", this.onTargetUpdate);
-    APP.scene.addEventListener("translation-stopped", this.onTargetUpdate);
-    APP.scene.addEventListener("language_updated", this.onLanguageUpdate);
-    APP.scene.addEventListener("translation_target_properties_updated", this.onTargetLanguageUpdate);
-
-    this.translateText.el.setAttribute("text", {
-      value: this.formattedText
-    });
-
-    this.checkAndRender();
+    this.el.sceneEl.addEventListener("translation_updates_applied", this.onTargetUpdate);
+    this.el.sceneEl.addEventListener("language_updated", this.onLanguageUpdate);
   },
 
   pause() {
-    APP.scene.removeEventListener("translation-available", this.onAvailableTranslation);
-    APP.scene.removeEventListener("translation-target-updated", this.onTargetUpdate);
-    APP.scene.removeEventListener("translation-stopped", this.onTargetUpdate);
-    APP.scene.removeEventListener("language_updated", this.onLanguageUpdate);
-    APP.scene.removeEventListener("translation_target_properties_updated", this.onTargetLanguageUpdate);
-  },
-  onAvailableTranslation(event) {
-    this.UpdateText(event.detail.text);
+    this.el.sceneEl.removeEventListener("translation_updates_applied", this.onTargetUpdated);
+    this.el.sceneEl.removeEventListener("language_updated", this.onLanguageUpdate);
   },
 
   UpdateText(text) {
@@ -89,29 +86,21 @@ AFRAME.registerComponent("translate-panel", {
     this.formattedText = lines.map((word, index) => (index % step === step - 1 ? word + "\n" : word)).join(" ");
   },
 
-  onTargetUpdate(event) {
-    this.user = !!event.detail ? this.owner === event.detail.owner : false;
-    if (this.user) this.targetLanguage = event.detail.language;
-    this.checkAndRender();
+  onTargetUpdate({ detail: updates }) {
+    if (updates.id !== this.owner) return;
+
+    const show = updates.type === "add";
+    if (show && !this.el.object3D.visible) {
+      this.el.sceneEl.addEventListener("translation_available", this.onAvailableTranslation);
+      this.UpdateText(GreetingPhrases[translationSystem.mylanguage]);
+    } else if (!show) this.el.sceneEl.removeEventListener("translation_available", this.onAvailableTranslation);
+
+    this.el.object3D.visible = show;
   },
 
-  onLanguageUpdate(event) {
-    this.userLanguage = event.detail.language;
-    this.checkAndRender();
-  },
-
-  onTargetLanguageUpdate(event) {
-    console.log(`target lanugage changed to: ${event.detail.language}`);
-    if (this.targetLanguage === event.detail.language) return;
-    this.targetLanguage = event.detail.language;
-    this.checkAndRender();
-  },
-
-  checkAndRender() {
-    const check = !!this.user && !!this.targetLanguage && !!this.userLanguage;
-    this.el.object3D.visible = check;
-    const langCode = subtitleSystem.mylanguage ? subtitleSystem.mylanguage : "en";
-    if (check) this.UpdateText(GreetingPhrases[langCode]);
+  onLanguageUpdate({ detail: language }) {
+    console.log("new language", language);
+    this.UpdateText(GreetingPhrases[translationSystem.mylanguage]);
   }
 });
 

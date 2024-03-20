@@ -1,6 +1,3 @@
-import { virtualAgent } from "../bit-systems/agent-system";
-import { subtitleSystem } from "../bit-systems/subtitling-system";
-
 /**
  * A button with an image, tooltip, hover states.
  * @namespace ui

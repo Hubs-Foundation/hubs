@@ -138,8 +138,11 @@
                         <a-entity is-remote-hover-target tags="singleActionButton:true;" mixin="rounded-button"
                             class="translateBadge interactable" position="-0.25 -0.35 0.2" scale="0.6 0.6 0.6"
                             visible="true" translate-badge>
+                            <a-entity sprite scale="0.165 0.165 0.165" position="0 0 0.02" class="translate_badge_icon"
+                                icon-button="image: translate-text.png; hoverImage: translate-text.png;"></a-entity>
                             <a-entity sprite scale="0.165 0.165 0.165" position="0 0 0.02"
-                                icon-button="image: translate-text.png; hoverImage: translate-text-hovered.png;"></a-entity>
+                                class="cancel_translate_badge_icon" visible="false" icon-button=" image: translate-text-hovered.png; hoverImage:
+                                translate-text-hovered.png;"></a-entity>
                         </a-entity>
                     </a-entity>
 
@@ -162,13 +165,13 @@
                                 <!-- this is the translate panel -->
                                 <a-entity billboard="onlyY: true;" position="0 0 0" visible="true">
 
-                                    <a-entity is-remote-hover-target tags="singleActionButton:true; "
+                                    <!-- <a-entity is-remote-hover-target tags="singleActionButton:true; "
                                         mixin="rounded-text-button" translate-button position="0 -.1 .3"
                                         billboard="onlyY: false;" scale="0.8 0.8 0.8" class="interactable">
                                         <a-entity text="value:Translate; textAlign:center;"
                                             class="translate-button-text" text-raycast-hack
                                             position="0 0 0.01"></a-entity>
-                                    </a-entity>
+                                    </a-entity> -->
 
 
                                     <a-entity translate-panel billboard="onlyY: false;" position="0 -.5 .3">

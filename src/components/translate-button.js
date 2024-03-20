@@ -1,4 +1,3 @@
-import { subtitleSystem } from "../bit-systems/subtitling-system";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { getLastWorldPosition } from "../utils/three-utils";
 /**
@@ -10,12 +9,14 @@ AFRAME.registerComponent("translate-button", {
   init() {
     this.onPresenceUpdated = this.onPresenceUpdated.bind(this);
     this.updateFromPresenceMeta = this.updateFromPresenceMeta.bind(this);
-    this.updateVisibility = this.updateVisibility.bind(this);
-    this.onTranslationStopped = this.onTranslationStopped.bind(this);
-
+    this.onPropertiesRead = this.onPropertiesRead.bind(this);
     this.camWorldPos = new THREE.Vector3();
-    this.objWorldPos = new THREE.Vector3();
     this.isTarget = false;
+    this.distanceBased = false;
+    this.withinBorder = false;
+    this.translationAllowed = false;
+    this.borderConstrained = false;
+    this.borders = [];
 
     NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
       this.playerSessionId = NAF.utils.getCreator(networkedEl);
@@ -28,38 +29,65 @@ AFRAME.registerComponent("translate-button", {
 
     waitForDOMContentLoaded().then(() => {
       this.cameraEl = document.getElementById("viewing-camera");
-      this.updateVisibility();
+      // this.updateVisibility(); // this most probably is not neeeded since we check for the camera in the mainloop
     });
 
-    this.onTargetUpdate = event => {
-      this.isTarget = event.detail.owner === this.owner;
+    this.onTargetUpdated = event => {
+      // isTarget is toggled if the event is about this user
+      this.isTarget = event.detail.id === this.owner ? !this.isTarget : this.isTarget;
     };
 
     this.onClick = () => {
       APP.scene.emit("translation_updates_available", {
         type: "target",
-        target: this.owner,
+        id: this.owner,
         language: this.userLanguage
       });
     };
+
+    this.el.setAttribute("visible", false);
   },
   play() {
     this.el.object3D.addEventListener("interact", this.onClick);
-    this.el.sceneEl.addEventListener("translation-target-updated", this.onTargetUpdate);
     this.el.sceneEl.addEventListener("presence_updated", this.onPresenceUpdated);
-    this.el.sceneEl.addEventListener("translation-stopped", this.onTranslationStopped);
+    this.el.sceneEl.addEventListener("properties_read", this.onPropertiesRead);
+    this.el.sceneEl.addEventListener("target_added", this.onTargetUpdated);
+    this.el.sceneEl.addEventListener("target_removed", this.onTargetUpdated);
   },
   pause() {
     this.el.object3D.removeEventListener("interact", this.onClick);
     this.el.sceneEl.removeEventListener("presence_updated", this.onPresenceUpdated);
-    this.el.sceneEl.removeEventListener("translation-target-updated", this.onTargetUpdate);
-    this.el.sceneEl.removeEventListener("translation-stopped", this.onTranslationStopped);
+    this.el.sceneEl.removeEventListener("properties_read", this.onPropertiesRead);
+    this.el.sceneEl.removeEventListener("target_added", this.onTargetUpdated);
+    this.el.sceneEl.removeEventListener("target_removed", this.onTargetUpdated);
   },
   tick() {
-    this.updateVisibility();
+    // if translation is allowed it computes if the button should be visible based on distance and borders
+    // if room is not border contstrained then variable expressing this, is set to true and does not ever change
+    if (!(this.cameraEl && this.translationAllowed)) return;
+    const isVisible = this.el.object3D.visible;
+    getLastWorldPosition(this.cameraEl.object3DMap.camera, this.camWorldPos);
+    const worldPos = this.el.object3D.getWorldPosition(new THREE.Vector3());
+    if (this.borderConstrained)
+      this.withinBorder =
+        this.borders[0] < worldPos.x < this.borders[1] && this.borders[2] < worldPos.z < this.borders[3];
+
+    const shouldBeVisible = this.withinBorder && !this.isTarget && worldPos.distanceTo(this.camWorldPos) < 2;
+    if (isVisible !== shouldBeVisible) this.el.setAttribute("visible", shouldBeVisible);
   },
-  onTranslationStopped() {
-    this.isTarget = false;
+  onPropertiesRead({ detail: roomProps }) {
+    // reads room properties. translate button needs to be visible only if translation
+    // is allowed and the conversation type is bubble. check if there is need for border check
+
+    this.translationAllowed = roomProps.translation.allow && roomProps.translation.conversation === "bubble";
+    if (!this.translationAllowed) return;
+
+    this.borderConstrained = roomProps.translation.spatiality.type === "borders";
+
+    if (this.borderConstrained) {
+      this.borders = roomProps.spatiality.data;
+      //add event listener for border status changed
+    } else this.withinBorder = true; //start checking
   },
 
   onPresenceUpdated({ detail: presenceMeta }) {
@@ -71,31 +99,11 @@ AFRAME.registerComponent("translate-button", {
   updateFromPresenceMeta(presenceMeta) {
     this.userLanguage = presenceMeta.profile.language;
 
-    if (subtitleSystem.target === this.owner) {
-      APP.scene.emit("translation_updates_available", {
-        type: "properties",
-        language: this.userLanguage
-      });
-    }
-  },
-  updateVisibility() {
-    if (!this.cameraEl) {
-      this.el.setAttribute("visible", false);
-      return;
-    }
-
-    const isVisible = this.el.object3D.visible;
-
-    getLastWorldPosition(this.cameraEl.object3DMap.camera, this.camWorldPos);
-    this.objWorldPos = this.el.object3D.getWorldPosition(new THREE.Vector3());
-
-    const distance = this.objWorldPos.distanceTo(this.camWorldPos);
-
-    const shouldBeVisible = distance < 2 && !this.isTarget && subtitleSystem.allowed;
-
-    if (isVisible !== shouldBeVisible) {
-      this.el.setAttribute("visible", shouldBeVisible);
-    }
+    APP.scene.emit("translation_updates_available", {
+      type: "properties",
+      id: this.owner,
+      language: this.userLanguage
+    });
   }
 });
 

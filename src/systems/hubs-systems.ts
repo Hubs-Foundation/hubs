@@ -84,9 +84,10 @@ import { lookAtUserSystem } from "../bit-systems/look-at-user";
 import { PanelIndexSystem } from "../bit-systems/agent-slideshow-system";
 import { HiddenSystem } from "../bit-systems/hidden-system";
 import { FloorMapSystem } from "../bit-systems/map-system";
-import { FlagPanelSystem } from "../bit-systems/subtitling-system";
+import { FlagPanelSystem } from "../bit-systems/language-panel";
 import { followFovSystem } from "../components/follow-user";
 import { NavigatingSystem } from "../bit-systems/routing-system";
+import { translationSystem } from "../bit-systems/translation-system";
 
 declare global {
   interface Window {
@@ -287,6 +288,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
 
   // All systems that update text properties should run before this
   PanelIndexSystem(world);
+  translationSystem.tick();
   textSystem(world);
 
   videoTextureSystem(world);
