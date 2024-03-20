@@ -14,14 +14,13 @@ import {
   AEntity,
   Networked,
   MediaLoader,
-  Deletable,
-  PenActive
+  Deletable
 } from "../bit-components";
 import { canMove } from "../utils/permissions-utils";
 import { canMove as canMoveEntity } from "../utils/bit-permissions-utils";
 import { isPinned } from "../bit-systems/networking";
 import { takeOwnership } from "../utils/take-ownership";
-import { anyEntityWith, findAncestorWithComponents } from "../utils/bit-utils";
+import { findAncestorWithComponents } from "../utils/bit-utils";
 
 const GRAB_REMOTE_RIGHT = paths.actions.cursor.right.grab;
 const DROP_REMOTE_RIGHT = paths.actions.cursor.right.drop;
