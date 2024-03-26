@@ -73,11 +73,13 @@ export class TranslationSystem {
           this.fixedPanelObj = APP.world.eid2obj.get(eid);
           this.eid = eid;
           APP.world.scene.add(this.fixedPanelObj);
+          APP.scene.addState("translation");
         } else {
           APP.world.scene.remove(this.fixedPanelObj);
           removeEntity(APP.world, this.eid);
           this.fixedPanelObj = null;
           this.eid = null;
+          APP.scene.removeState("translation");
         }
       };
       APP.scene.addEventListener("toggle_translation", this.onToggleTranslate);

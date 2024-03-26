@@ -103,7 +103,8 @@ import { ChatContextProvider } from "./room/contexts/ChatContext";
 import ChatToolbarButton from "./room/components/ChatToolbarButton/ChatToolbarButton";
 import { AgenSpawnButton } from "./room/AgentSpawnButton.js";
 import { MapSpawnButton } from "./room/MapSpawnButton";
-import { TranslatePopoverContainer } from "./room/TranslatePopoverContainer";
+import { LanguagePopoverContainer } from "./room/LanguagePopoverContainer";
+import { TranslateButton } from "./room/TranslateButton";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -1620,7 +1621,8 @@ class UIRoot extends Component {
                               showNonHistoriedDialog={this.showNonHistoriedDialog}
                             />
                             <AgenSpawnButton scene={this.props.scene} />
-                            <TranslatePopoverContainer scene={this.props.scene} />
+                            <TranslateButton scene={this.props.scene} />
+                            <LanguagePopoverContainer scene={this.props.scene} />
                             <MapSpawnButton scene={this.props.scene} />
                           </>
                         )}
