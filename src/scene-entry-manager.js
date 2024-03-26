@@ -30,7 +30,7 @@ import { spawnFromFileList, spawnFromUrl } from "./load-media-on-paste-or-drop";
 import { getCurrentHubId, isLockedDownDemoRoom } from "./utils/hub-utils";
 import { virtualAgent } from "./bit-systems/agent-system";
 import { floorMap } from "./bit-systems/map-system";
-import { GetHubProperties } from "./utils/rooms-properties";
+import { GetHubProperties, roomPropertiesReader } from "./utils/rooms-properties";
 import { navSystem } from "./bit-systems/routing-system";
 import { translationSystem } from "./bit-systems/translation-system";
 import { languagePanel } from "./bit-systems/language-panel";
@@ -68,8 +68,10 @@ export default class SceneEntryManager {
   setupVRConferece = async reset => {
     languagePanel.Init(reset);
 
-    if (reset) this.scene.emit("clear-scene");
-    const hubProperties = await GetHubProperties(getCurrentHubId());
+    if (reset) {
+      this.scene.emit("clear-scene");
+    }
+    const hubProperties = await roomPropertiesReader.Read(getCurrentHubId());
     this.scene.emit("properties_read", hubProperties);
     translationSystem.Init(hubProperties, reset);
     console.log("Hub Props", hubProperties);

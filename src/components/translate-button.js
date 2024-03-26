@@ -79,7 +79,7 @@ AFRAME.registerComponent("translate-button", {
     // reads room properties. translate button needs to be visible only if translation
     // is allowed and the conversation type is bubble. check if there is need for border check
 
-    this.translationAllowed = roomProps.translation.allow && roomProps.translation.conversation === "bubble";
+    this.translationAllowed = roomProps.translation.allow && roomProps.translation.conversation.type === "bubble";
     if (!this.translationAllowed) return;
 
     this.borderConstrained = roomProps.translation.spatiality.type === "borders";
