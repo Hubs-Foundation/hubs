@@ -6,6 +6,7 @@ import { anyEntityWith } from "../../utils/bit-utils";
 import { Agent } from "../../bit-components";
 import { ToolTip } from "@mozilla/lilypad-ui";
 import { virtualAgent } from "../../bit-systems/agent-system";
+import { roomPropertiesReader } from "../../utils/rooms-properties";
 
 const MapTooltipDescription = defineMessage({
   id: "map-tooltip.description",
@@ -13,32 +14,36 @@ const MapTooltipDescription = defineMessage({
 });
 
 export function MapSpawnButton({ scene }) {
-  const [active, setActive] = useState(false);
-  const intl = useIntl();
-  const description = intl.formatMessage(MapTooltipDescription);
+  if (roomPropertiesReader.mapProps.allow) {
+    const [active, setActive] = useState(false);
+    const intl = useIntl();
+    const description = intl.formatMessage(MapTooltipDescription);
 
-  const clickCallback = () => {
-    scene.emit("map-toggle");
-  };
+    const clickCallback = () => {
+      scene.emit("map-toggle");
+    };
 
-  const activateButton = () => {
-    setActive(scene.is("map"));
-  };
+    const activateButton = () => {
+      setActive(scene.is("map"));
+    };
 
-  window.addEventListener("map-toggle", activateButton);
-  window.addEventListener("clear-scene", activateButton);
+    window.addEventListener("map-toggle", activateButton);
+    window.addEventListener("clear-scene", activateButton);
 
-  return (
-    <ToolTip description={description}>
-      <ToolbarButton
-        onClick={clickCallback}
-        selected={active}
-        icon={<AgentIcon />}
-        preset="accent5"
-        label={<FormattedMessage id="map-toolbar-button" defaultMessage="Map" />}
-      />
-    </ToolTip>
-  );
+    return (
+      <ToolTip description={description}>
+        <ToolbarButton
+          onClick={clickCallback}
+          selected={active}
+          icon={<AgentIcon />}
+          preset="accent5"
+          label={<FormattedMessage id="map-toolbar-button" defaultMessage="Map" />}
+        />
+      </ToolTip>
+    );
+  }
+
+  return null;
 }
 
 // Ignore type lint error as we will be redoing ToolbarButton in the future

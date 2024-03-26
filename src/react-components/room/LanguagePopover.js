@@ -7,20 +7,20 @@ import { ReactComponent as TranslateIcon } from "../icons/Translate.svg";
 import { defineMessage, useIntl } from "react-intl";
 import { ToolTip } from "@mozilla/lilypad-ui";
 
-const translateTooltipDescription = defineMessage({
-  id: "translate-tooltip.description",
-  defaultMessage: "Choose the preffered language to recieve translation to"
+const LanguageTooltipDescription = defineMessage({
+  id: "languag-tooltip.description",
+  defaultMessage: "Choose your language"
 });
 
-const translatePopoverTitle = defineMessage({
-  id: "translate-popover.title",
-  defaultMessage: "Translate"
+const languagePopoverTitle = defineMessage({
+  id: "languag-popover.title",
+  defaultMessage: "Language"
 });
 
-export function TranslatePopover({ items }) {
+export function LanguagePopover({ items }) {
   const intl = useIntl();
-  const title = intl.formatMessage(translatePopoverTitle);
-  const description = intl.formatMessage(translateTooltipDescription);
+  const title = intl.formatMessage(languagePopoverTitle);
+  const description = intl.formatMessage(LanguageTooltipDescription);
 
   const filteredItems = items.filter(item => !!item);
 

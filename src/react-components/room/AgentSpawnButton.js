@@ -4,6 +4,7 @@ import { ReactComponent as AgentIcon } from "../icons/User.svg";
 import { FormattedMessage, defineMessage, useIntl } from "react-intl";
 import { ToolTip } from "@mozilla/lilypad-ui";
 import { virtualAgent } from "../../bit-systems/agent-system";
+import { roomPropertiesReader } from "../../utils/rooms-properties";
 
 const AgentTooltipDescription = defineMessage({
   id: "agent-tooltip.description",
@@ -11,31 +12,35 @@ const AgentTooltipDescription = defineMessage({
 });
 
 export function AgenSpawnButton({ scene }) {
-  const [active, setActive] = useState(false);
-  const intl = useIntl();
-  const description = intl.formatMessage(AgentTooltipDescription);
+  if (roomPropertiesReader.roomProps.allow_agent) {
+    const [active, setActive] = useState(false);
+    const intl = useIntl();
+    const description = intl.formatMessage(AgentTooltipDescription);
 
-  const clickCallback = () => {
-    // scene.emit("agent-toggle");
-    scene.emit("toggle_translation");
-  };
+    const clickCallback = () => {
+      scene.emit("agent-toggle");
+      // scene.emit("toggle_translation");
+    };
 
-  const activateButton = () => {
-    setActive(scene.is("agent"));
-  };
+    const activateButton = () => {
+      setActive(scene.is("agent"));
+    };
 
-  window.addEventListener("agent-toggle", activateButton);
-  window.addEventListener("clear-scene", activateButton);
+    window.addEventListener("agent-toggle", activateButton);
+    window.addEventListener("clear-scene", activateButton);
 
-  return (
-    <ToolTip description={description}>
-      <ToolbarButton
-        onClick={clickCallback}
-        selected={active}
-        icon={<AgentIcon />}
-        preset="accent5"
-        label={<FormattedMessage id="agent-toolbar-button" defaultMessage="Agent" />}
-      />
-    </ToolTip>
-  );
+    return (
+      <ToolTip description={description}>
+        <ToolbarButton
+          onClick={clickCallback}
+          selected={active}
+          icon={<AgentIcon />}
+          preset="accent5"
+          label={<FormattedMessage id="agent-toolbar-button" defaultMessage="Agent" />}
+        />
+      </ToolTip>
+    );
+  }
+
+  return null;
 }
