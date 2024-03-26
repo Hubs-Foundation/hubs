@@ -88,6 +88,7 @@ import { FlagPanelSystem } from "../bit-systems/language-panel";
 import { followFovSystem } from "../components/follow-user";
 import { NavigatingSystem } from "../bit-systems/routing-system";
 import { translationSystem } from "../bit-systems/translation-system";
+import { FixedPanelSystem } from "../bit-systems/fixed-panel-system";
 
 declare global {
   interface Window {
@@ -275,14 +276,15 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
 
   mixerAnimatableSystem(world);
   loopAnimationSystem(world);
-  lookAtUserSystem(world);
 
+  //VOXSystem
+  lookAtUserSystem(world);
   AgentSystem(t);
   FloorMapSystem(world);
-
   followFovSystem(dt);
   FlagPanelSystem(world);
   NavigatingSystem(world);
+  FixedPanelSystem(world);
 
   HiddenSystem(world);
 

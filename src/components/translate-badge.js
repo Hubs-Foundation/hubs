@@ -6,6 +6,7 @@
 
 import { translationSystem } from "../bit-systems/translation-system";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
+import { roomPropertiesReader } from "../utils/rooms-properties";
 import { getLastWorldPosition } from "../utils/three-utils";
 
 AFRAME.registerComponent("translate-badge", {
@@ -21,13 +22,18 @@ AFRAME.registerComponent("translate-badge", {
 
     this.el.object3D.visible = false;
     this.isTarget = false;
-    this.withinBorder = false;
-    this.badgeAllowed = false;
     this.borderConstrained = false;
-    this.language = "";
-    this.playerSessionId;
+    this.withinBorder = false;
+    this.withinPresenterBorders = false;
+    this.badgeAllowed = false;
+
+    this.presenterBoders = [];
     this.borders = [];
-    this.owner;
+
+    this.language = null;
+    this.owner = null;
+    this.playerSessionId = null;
+
     this.camWorldPos = new THREE.Vector3();
     this.translateIcon = this.el.querySelector(".translate_badge_icon").object3D;
     this.cancelIcon = this.el.querySelector(".cancel_translate_badge_icon").object3D;
@@ -47,24 +53,12 @@ AFRAME.registerComponent("translate-badge", {
 
     waitForDOMContentLoaded().then(() => {
       this.cameraEl = document.getElementById("viewing-camera");
-      // this.updateVisibility(); // this most probably is not neeeded since we check for the camera in the mainloop
     });
 
-    this.onClick = () => {
-      const type = this.isTarget ? "remove" : "add";
-      const eventDetails = { type: type, id: this.owner, language: this.language };
-      APP.scene.emit("translation_updates_available", eventDetails);
-    };
-
-    this.badgeAllowed = translationSystem.allowed && translationSystem.transProperties.conversation === "bubble";
-    if (!this.badgeAllowed) return;
-
-    this.borderConstrained = translationSystem.transProperties.spatiality.type === "borders";
-
-    if (this.borderConstrained) {
-      this.borders = translationSystem.transProperties.spatiality.data;
-      //add event listener for border status changed
-    } else this.withinBorder = true; //start checking
+    roomPropertiesReader.waitForProperties().then(() => {
+      this.transProps = roomPropertiesReader.transProps;
+      this.onPropertiesRead();
+    });
 
     this.translateIcon.visible = true;
     this.cancelIcon.visible = false;
@@ -74,52 +68,90 @@ AFRAME.registerComponent("translate-badge", {
   tick() {
     // if translation is allowed it computes if the button should be visible based on distance and borders
     // if room is not border contstrained then variable expressing this, is set to true and does not ever change
-    if (!(this.cameraEl && this.badgeAllowed)) {
-      return;
-    }
+    if (!this.transProps || !this.cameraEl || !this.transProps.allow) return;
 
-    const isVisible = this.el.object3D.visible;
-    getLastWorldPosition(this.cameraEl.object3DMap.camera, this.camWorldPos);
     const worldPos = this.el.object3D.getWorldPosition(new THREE.Vector3());
-    if (this.borderConstrained) {
-      this.withinBorder =
-        this.borders[0] < worldPos.x < this.borders[1] && this.borders[2] < worldPos.z < this.borders[3];
+
+    if (this.badgeAllowed) {
+      const isVisible = this.el.object3D.visible;
+      getLastWorldPosition(this.cameraEl.object3DMap.camera, this.camWorldPos);
+      if (this.borders.length > 0) {
+        this.withinBorder =
+          worldPos.x > this.borders[0] &&
+          worldPos.x < this.borders[1] &&
+          worldPos.z > this.borders[2] &&
+          worldPos.z < this.borders[3];
+      }
       this.withinBorder = this.withinBorder && translationSystem.prevBorderState;
+      const shouldBeVisible = this.withinBorder && worldPos.distanceTo(this.camWorldPos) < 2;
+      if (isVisible !== shouldBeVisible) this.el.object3D.visible = shouldBeVisible;
     }
 
-    const shouldBeVisible = this.withinBorder && worldPos.distanceTo(this.camWorldPos) < 2;
-    if (isVisible !== shouldBeVisible) this.el.object3D.visible = shouldBeVisible;
+    if (this.presenterBoders.length > 0) {
+      const _withinPresenterBorders =
+        worldPos.x > this.presenterBoders[0] &&
+        worldPos.x < this.presenterBoders[1] &&
+        worldPos.z > this.presenterBoders[2] &&
+        worldPos.z < this.presenterBoders[3];
+
+      if (this.withinPresenterBorders !== _withinPresenterBorders) {
+        const eventDetails = {
+          type: "presenter",
+          id: this.owner,
+          language: this.language,
+          action: _withinPresenterBorders
+        };
+        console.log("presenter state changed and it is emitting");
+        APP.scene.emit("translation_updates_available", eventDetails);
+      }
+
+      this.withinPresenterBorders = _withinPresenterBorders;
+    }
   },
 
   play() {
     this.el.object3D.addEventListener("interact", this.onClick);
     this.el.sceneEl.addEventListener("presence_updated", this.onPresenceUpdated);
-    this.el.sceneEl.addEventListener("properties_read", this.onPropertiesRead);
+    // this.el.sceneEl.addEventListener("properties_read", this.onPropertiesRead);
     this.el.sceneEl.addEventListener("translation_updates_applied", this.onTargetUpdate);
     this.el.sceneEl.addEventListener("border_state_change", this.onTargetUpdate);
+    if (this.badgeAllowed) this.el.sceneEl.addEventListener("translation_updates_applied", this.onTargetUpdate);
   },
 
   pause() {
     this.el.object3D.removeEventListener("interact", this.onClick);
     this.el.sceneEl.removeEventListener("presence_updated", this.onPresenceUpdated);
-    this.el.sceneEl.removeEventListener("properties_read", this.onPropertiesRead);
+    // this.el.sceneEl.removeEventListener("properties_read", this.onPropertiesRead);
     this.el.sceneEl.removeEventListener("translation_updates_applied", this.onTargetUpdate);
     this.el.sceneEl.removeEventListener("border_state_change", this.onTargetUpdate);
+    if (this.badgeAllowed) this.el.sceneEl.removeEventListener("translation_updates_applied", this.onTargetUpdate);
   },
 
-  onPropertiesRead({ detail: roomProps }) {
+  onPropertiesRead() {
     // reads room properties. translate button needs to be visible only if translation
     // is allowed and the conversation type is bubble. check if there is need for border check
 
-    this.badgeAllowed = roomProps.translation.allow && roomProps.translation.conversation === "bubble";
-    if (!this.badgeAllowed) return;
+    const transProps = roomPropertiesReader.transProps;
+    if (!transProps.allow) return;
 
-    this.borderConstrained = roomProps.translation.spatiality.type === "borders";
+    console.log(`translation is allowed`);
 
-    if (this.borderConstrained) {
-      this.borders = roomProps.translation.spatiality.data;
-      //add event listener for border status changed
-    } else this.withinBorder = true; //start checking
+    if (transProps.conversation.type === "bubble") {
+      console.log(`translation is bubble`);
+      this.badgeAllowed = true;
+      this.onClick = () => {
+        const type = this.isTarget ? "remove" : "add";
+        const eventDetails = { type: type, id: this.owner, language: this.language };
+        APP.scene.emit("translation_updates_available", eventDetails);
+      };
+
+      if (transProps.spatiality.type === "borders") this.borders = transProps.spatiality.data;
+      else this.withinBorder = true;
+    } else if (transProps.conversation.type === "presentation") {
+      console.log(`translation is presentation`);
+      this.presenterBoders = transProps.conversation.data;
+      console.log(`presenter borders exist`, this.presenterBoders);
+    }
   },
 
   onPresenceUpdated({ detail: presenceMeta }) {

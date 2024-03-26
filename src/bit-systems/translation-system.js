@@ -12,6 +12,7 @@ import { selectMaterial, normalMaterial, HUDLangPanel } from "../prefabs/hud-lan
 import { renderAsEntity } from "../utils/jsx-entity";
 import { Logger } from "../utils/logging_systems";
 import { mediaSortOrder } from "../utils/media-sorting";
+import { FixedPanel } from "../prefabs/fixed-panel";
 
 export const languageCodes = {
   greek: "el",
@@ -30,12 +31,14 @@ export class TranslationSystem {
     this.silenceCheckInterval;
     this.forcefail;
     this.avatarPovObj;
+    this.fixedPanelObj;
     this.proccessingQueue = {};
     this.inferencingQueue = {};
 
     this.onLanguageAvailable = this.onLanguageAvailable.bind(this);
     this.onTranslationUpdatesAvailable = this.onTranslationUpdatesAvailable.bind(this);
     this.InferenceAudio = this.InferenceAudio.bind(this);
+    this.UpdatePresenterTarget = this.UpdatePresenterTarget.bind(this);
   }
 
   Init(hubProperties, reset) {
@@ -62,6 +65,24 @@ export class TranslationSystem {
       this.prevBorderState = false;
     }
 
+    if (this.transProperties.panel.type === "fixed") {
+      this.onToggleTranslate = () => {
+        if (!this.fixedPanelObj) {
+          const pos = this.transProperties.panel.data;
+          const eid = renderAsEntity(APP.world, FixedPanel({ pos }));
+          this.fixedPanelObj = APP.world.eid2obj.get(eid);
+          this.eid = eid;
+          APP.world.scene.add(this.fixedPanelObj);
+        } else {
+          APP.world.scene.remove(this.fixedPanelObj);
+          removeEntity(APP.world, this.eid);
+          this.fixedPanelObj = null;
+          this.eid = null;
+        }
+      };
+      APP.scene.addEventListener("toggle_translation", this.onToggleTranslate);
+    }
+
     this.recordingAverage = [];
     this.inactiveAverage = [];
     this.forcefail = false;
@@ -78,8 +99,8 @@ export class TranslationSystem {
     this.silenceCheckInterval = null;
   }
 
-  async onTranslationUpdatesAvailable(event) {
-    const eventkey = event.detail.id;
+  async onTranslationUpdatesAvailable({ detail: updates }) {
+    const eventkey = updates.id;
     try {
       if (this.proccessingQueue[eventkey]) {
         console.log(`another request for this user is pending`);
@@ -96,17 +117,28 @@ export class TranslationSystem {
 
       let actionPromise;
 
-      if (event.detail.type === "add") actionPromise = this.AddTarget(event.detail);
-      else if (event.detail.type === "remove") actionPromise = this.RemoveTarget(event.detail);
+      if (updates.type === "add") actionPromise = this.AddTarget(updates);
+      else if (updates.type === "remove") actionPromise = this.RemoveTarget(updates);
+      else if (updates.type === "presenter") actionPromise = this.UpdatePresenterTarget(updates);
 
       await Promise.race([actionPromise, timeoutPromise]);
 
-      APP.scene.emit("translation_updates_applied", event.detail);
+      APP.scene.emit("translation_updates_applied", updates);
     } catch (error) {
       console.error(error);
     } finally {
       delete this.proccessingQueue[eventkey];
     }
+  }
+
+  async UpdatePresenterTarget(newTarget) {
+    if (this.targets.length > 0)
+      Object.values(this.targets).forEach(target => {
+        this.RemoveTarget(target);
+      });
+
+    console.log("system recieved update request for user", newTarget);
+    if (newTarget.action) await this.MonitorTargetAudio(newTarget);
   }
 
   async AddTarget(newTarget) {
@@ -180,7 +212,7 @@ export class TranslationSystem {
           console.log(`Stop recording`);
         }
       } catch (error) {
-        APP.scene.emit("translation_updates_available", { type: "remove", id: target.id });
+        this.onTranslationUpdatesAvailable({ detail: { type: "remove", id: target.id } });
       }
     };
 
@@ -272,7 +304,9 @@ export class TranslationSystem {
 
   tick() {
     if (!this.initialized || !APP.scene.is("entered")) return;
+
     const selfPos = this.avatarPovObj.getWorldPosition(new THREE.Vector3());
+    if (this.transProperties.spatiality.type !== "borders") return;
 
     const withinBorders =
       this.borders[0] < selfPos.x &&
@@ -283,11 +317,10 @@ export class TranslationSystem {
     if (withinBorders !== this.prevBorderState) {
       APP.scene.emit("border_state_change", withinBorders);
       this.prevBorderState = withinBorders;
-      console.log("border state change");
 
       if (!withinBorders) {
         Object.keys(this.targets).forEach(key => {
-          APP.scene.emit("translation_updates_available", { type: "remove", id: key });
+          this.onTranslationUpdatesAvailable({ detail: { type: "remove", id: key } });
         });
       }
     }

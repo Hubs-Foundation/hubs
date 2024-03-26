@@ -31,8 +31,6 @@ AFRAME.registerComponent("translate-panel", {
     this.preformatText;
     this.formattedText;
     this.targetLanguage = false;
-    this.userLanguage = window.APP.store.state.profile.language;
-    this.user = false;
 
     NAF.utils
       .getNetworkedEntity(this.el)
@@ -48,16 +46,21 @@ AFRAME.registerComponent("translate-panel", {
     };
 
     this.el.object3D.visible = false;
+    this.panelAllowed = translationSystem.allowed && translationSystem.transProperties.panel.type === "avatar";
   },
 
   play() {
-    this.el.sceneEl.addEventListener("translation_updates_applied", this.onTargetUpdate);
-    this.el.sceneEl.addEventListener("language_updated", this.onLanguageUpdate);
+    if (this.panelAllowed) {
+      this.el.sceneEl.addEventListener("translation_updates_applied", this.onTargetUpdate);
+      this.el.sceneEl.addEventListener("language_updated", this.onLanguageUpdate);
+    }
   },
 
   pause() {
-    this.el.sceneEl.removeEventListener("translation_updates_applied", this.onTargetUpdated);
-    this.el.sceneEl.removeEventListener("language_updated", this.onLanguageUpdate);
+    if (this.panelAllowed) {
+      this.el.sceneEl.removeEventListener("translation_updates_applied", this.onTargetUpdated);
+      this.el.sceneEl.removeEventListener("language_updated", this.onLanguageUpdate);
+    }
   },
 
   UpdateText(text) {
@@ -104,7 +107,7 @@ AFRAME.registerComponent("translate-panel", {
   }
 });
 
-const GreetingPhrases = {
+export const GreetingPhrases = {
   spanish: "La traducción se mostrará aquí",
   italian: "La traduzione verrà mostrata qui",
   greek: "Η μετάφραση θα εμφανιστεί εδώ",
