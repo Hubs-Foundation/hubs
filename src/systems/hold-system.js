@@ -14,14 +14,13 @@ import {
   AEntity,
   Networked,
   MediaLoader,
-  Deletable,
-  PenActive
+  Deletable
 } from "../bit-components";
 import { canMove } from "../utils/permissions-utils";
 import { canMove as canMoveEntity } from "../utils/bit-permissions-utils";
 import { isPinned } from "../bit-systems/networking";
 import { takeOwnership } from "../utils/take-ownership";
-import { anyEntityWith, findAncestorWithComponents } from "../utils/bit-utils";
+import { findAncestorWithComponents } from "../utils/bit-utils";
 
 const GRAB_REMOTE_RIGHT = paths.actions.cursor.right.grab;
 const DROP_REMOTE_RIGHT = paths.actions.cursor.right.drop;
@@ -88,8 +87,7 @@ function grab(world, userinput, queryHovered, held, grabPath) {
     target &&
     userinput.get(grabPath) &&
     (!isEntityPinned || AFRAME.scenes[0].is("frozen")) &&
-    hasPermissionToGrab(world, target) &&
-    !anyEntityWith(world, PenActive)
+    hasPermissionToGrab(world, target)
   ) {
     if (hasComponent(world, Networked, target)) {
       takeOwnership(world, target);
@@ -101,7 +99,7 @@ function grab(world, userinput, queryHovered, held, grabPath) {
 
 function drop(world, userinput, queryHeld, held, dropPath) {
   const heldEid = queryHeld(world)[0];
-  if (heldEid && userinput.get(dropPath) && !anyEntityWith(world, PenActive)) {
+  if (heldEid && userinput.get(dropPath)) {
     // TODO: Drop on ownership lost
     removeComponent(world, held, heldEid);
 
