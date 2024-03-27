@@ -1,4 +1,5 @@
 import { SOUND_SPAWN_PEN } from "../systems/sound-effects-system";
+import { roomPropertiesReader } from "../utils/rooms-properties";
 /**
  * HUD panel for muting, freezing, and other controls that don't necessarily have hardware buttons.
  * @namespace ui
@@ -13,6 +14,7 @@ AFRAME.registerComponent("in-world-hud", {
     this.agentBtn = this.el.querySelector(".agent-btn");
     this.mapBtn = this.el.querySelector(".map-btn");
     this.langBtn = this.el.querySelector(".lang-btn");
+    this.transBtn = this.el.querySelector(".trans-btn");
     this.inviteBtn = this.el.querySelector(".invite-btn");
     this.background = this.el.querySelector(".bg");
 
@@ -25,13 +27,23 @@ AFRAME.registerComponent("in-world-hud", {
       this.mic.setAttribute("mic-button", "active", APP.dialog.isMicEnabled);
       this.pen.setAttribute("icon-button", "active", this.el.sceneEl.is("pen"));
       this.cameraBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("camera"));
-      this.agentBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("agent"));
-      this.mapBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("map"));
       this.langBtn.setAttribute("flag-button", "active", this.el.sceneEl.is("panel"));
+
       if (window.APP.hubChannel) {
         this.spawn.setAttribute("icon-button", "disabled", !window.APP.hubChannel.can("spawn_and_move_media"));
         this.pen.setAttribute("icon-button", "disabled", !window.APP.hubChannel.can("spawn_drawing"));
         this.cameraBtn.setAttribute("icon-button", "disabled", !window.APP.hubChannel.can("spawn_camera"));
+      }
+      if (roomPropertiesReader.roomProps) {
+        this.agentBtn.setAttribute("icon-button", "disabled", !roomPropertiesReader.roomProps.allow_agent);
+        this.mapBtn.setAttribute("icon-button", "disabled", !roomPropertiesReader.roomProps.map.allow);
+        this.transBtn.setAttribute("icon-button", "disabled", !roomPropertiesReader.roomProps.translation.allow);
+        if (roomPropertiesReader.roomProps.allow_agent)
+          this.agentBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("agent"));
+        if (roomPropertiesReader.roomProps.map.allow)
+          this.mapBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("map"));
+        if (roomPropertiesReader.roomProps.translation.allow)
+          this.transBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("translation"));
       }
     };
 
@@ -69,6 +81,9 @@ AFRAME.registerComponent("in-world-hud", {
     this.onLangClick = () => {
       this.el.emit("lang-toggle");
     };
+    this.onTransClick = () => {
+      this.el.emit("toggle_translation");
+    };
 
     this.onPenClick = e => {
       if (!window.APP.hubChannel.can("spawn_drawing")) return;
@@ -104,6 +119,7 @@ AFRAME.registerComponent("in-world-hud", {
     this.agentBtn.object3D.addEventListener("interact", this.onAgentClick);
     this.mapBtn.object3D.addEventListener("interact", this.onMapClick);
     this.langBtn.object3D.addEventListener("interact", this.onLangClick);
+    this.transBtn.object3D.addEventListener("interact", this.onTransClick);
     this.inviteBtn.object3D.addEventListener("interact", this.onInviteClick);
   },
 
@@ -119,6 +135,7 @@ AFRAME.registerComponent("in-world-hud", {
     this.agentBtn.object3D.removeEventListener("interact", this.onAgentClick);
     this.mapBtn.object3D.removeEventListener("interact", this.onMapClick);
     this.langBtn.object3D.removeEventListener("interact", this.onLangClick);
+    this.transBtn.object3D.removeEventListener("interact", this.onTransClick);
     this.inviteBtn.object3D.removeEventListener("interact", this.onInviteClick);
   }
 });
