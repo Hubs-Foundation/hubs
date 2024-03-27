@@ -68,7 +68,7 @@ AFRAME.registerComponent("flag-button", {
 
     let image;
     if (disabled) {
-      image = "disabledImage";
+      image = "-disabled";
     } else if (active) {
       image = hovering ? "_on-hover" : "_on";
     } else {
@@ -76,8 +76,9 @@ AFRAME.registerComponent("flag-button", {
     }
 
     if (this.el.components.sprite) {
+      let icon_name;
       if (image) {
-        const icon_name = this.lang ? `${this.lang}_lang${image}.png` : `translate${image}.png`;
+        icon_name = `${this.lang}${image}.png`;
         this.el.setAttribute("sprite", "name", icon_name);
       } else {
         console.warn(`No ${image} image on me.`, this);

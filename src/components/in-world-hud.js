@@ -8,14 +8,15 @@ import { roomPropertiesReader } from "../utils/rooms-properties";
 AFRAME.registerComponent("in-world-hud", {
   init() {
     this.mic = this.el.querySelector(".mic");
-    this.spawn = this.el.querySelector(".spawn");
-    this.pen = this.el.querySelector(".penhud");
-    this.cameraBtn = this.el.querySelector(".camera-btn");
+    // this.spawn = this.el.querySelector(".spawn");
+    // this.pen = this.el.querySelector(".penhud");
+    // this.cameraBtn = this.el.querySelector(".camera-btn");
+
     this.agentBtn = this.el.querySelector(".agent-btn");
     this.mapBtn = this.el.querySelector(".map-btn");
     this.langBtn = this.el.querySelector(".lang-btn");
     this.transBtn = this.el.querySelector(".trans-btn");
-    this.inviteBtn = this.el.querySelector(".invite-btn");
+    // this.inviteBtn = this.el.querySelector(".invite-btn");
     this.background = this.el.querySelector(".bg");
 
     this.onMicStateChanged = () => {
@@ -25,16 +26,17 @@ AFRAME.registerComponent("in-world-hud", {
 
     this.updateButtonStates = () => {
       this.mic.setAttribute("mic-button", "active", APP.dialog.isMicEnabled);
-      this.pen.setAttribute("icon-button", "active", this.el.sceneEl.is("pen"));
-      this.cameraBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("camera"));
+      // this.pen.setAttribute("icon-button", "active", this.el.sceneEl.is("pen"));
+      // this.cameraBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("camera"));
       this.langBtn.setAttribute("flag-button", "active", this.el.sceneEl.is("panel"));
 
       if (window.APP.hubChannel) {
-        this.spawn.setAttribute("icon-button", "disabled", !window.APP.hubChannel.can("spawn_and_move_media"));
-        this.pen.setAttribute("icon-button", "disabled", !window.APP.hubChannel.can("spawn_drawing"));
-        this.cameraBtn.setAttribute("icon-button", "disabled", !window.APP.hubChannel.can("spawn_camera"));
+        // this.spawn.setAttribute("icon-button", "disabled", !window.APP.hubChannel.can("spawn_and_move_media"));
+        // this.pen.setAttribute("icon-button", "disabled", !window.APP.hubChannel.can("spawn_drawing"));
+        // this.cameraBtn.setAttribute("icon-button", "disabled", !window.APP.hubChannel.can("spawn_camera"));
       }
-      if (roomPropertiesReader.roomProps) {
+
+      roomPropertiesReader.waitForProperties().then(() => {
         this.agentBtn.setAttribute("icon-button", "disabled", !roomPropertiesReader.roomProps.allow_agent);
         this.mapBtn.setAttribute("icon-button", "disabled", !roomPropertiesReader.roomProps.map.allow);
         this.transBtn.setAttribute("icon-button", "disabled", !roomPropertiesReader.roomProps.translation.allow);
@@ -44,7 +46,7 @@ AFRAME.registerComponent("in-world-hud", {
           this.mapBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("map"));
         if (roomPropertiesReader.roomProps.translation.allow)
           this.transBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("translation"));
-      }
+      });
     };
 
     this.onStateChange = evt => {
@@ -54,7 +56,9 @@ AFRAME.registerComponent("in-world-hud", {
           evt.detail === "pen" ||
           evt.detail === "camera" ||
           evt.detail === "agent" ||
-          evt.detail === "map"
+          evt.detail === "map" ||
+          evt.detail === "panel" ||
+          evt.detail === "translation"
         )
       )
         return;
@@ -71,10 +75,12 @@ AFRAME.registerComponent("in-world-hud", {
     };
 
     this.onAgentClick = () => {
+      if (!roomPropertiesReader.roomProps.allow_agent) return;
       this.el.sceneEl.emit("agent-toggle");
     };
 
     this.onMapClick = () => {
+      if (!roomPropertiesReader.roomProps.map.allow) return;
       this.el.emit("map-toggle");
     };
 
@@ -82,6 +88,7 @@ AFRAME.registerComponent("in-world-hud", {
       this.el.emit("lang-toggle");
     };
     this.onTransClick = () => {
+      if (!roomPropertiesReader.roomProps.translation.allow) return;
       this.el.emit("toggle_translation");
     };
 
@@ -101,7 +108,7 @@ AFRAME.registerComponent("in-world-hud", {
     };
 
     this.onHubUpdated = e => {
-      this.inviteBtn.object3D.visible = e.detail.hub.entry_mode !== "invite";
+      // this.inviteBtn.object3D.visible = e.detail.hub.entry_mode !== "invite";
     };
   },
 
@@ -113,14 +120,14 @@ AFRAME.registerComponent("in-world-hud", {
     this.updateButtonStates();
 
     this.mic.object3D.addEventListener("interact", this.onMicClick);
-    this.spawn.object3D.addEventListener("interact", this.onSpawnClick);
-    this.pen.object3D.addEventListener("interact", this.onPenClick);
-    this.cameraBtn.object3D.addEventListener("interact", this.onCameraClick);
+    // this.spawn.object3D.addEventListener("interact", this.onSpawnClick);
+    // this.pen.object3D.addEventListener("interact", this.onPenClick);
+    // this.cameraBtn.object3D.addEventListener("interact", this.onCameraClick);
     this.agentBtn.object3D.addEventListener("interact", this.onAgentClick);
     this.mapBtn.object3D.addEventListener("interact", this.onMapClick);
     this.langBtn.object3D.addEventListener("interact", this.onLangClick);
     this.transBtn.object3D.addEventListener("interact", this.onTransClick);
-    this.inviteBtn.object3D.addEventListener("interact", this.onInviteClick);
+    // this.inviteBtn.object3D.addEventListener("interact", this.onInviteClick);
   },
 
   pause() {
@@ -129,13 +136,13 @@ AFRAME.registerComponent("in-world-hud", {
     window.APP.hubChannel.removeEventListener("permissions_updated", this.updateButtonStates);
     this.el.sceneEl.removeEventListener("hub_updated", this.onHubUpdated);
     this.mic.object3D.removeEventListener("interact", this.onMicClick);
-    this.spawn.object3D.removeEventListener("interact", this.onSpawnClick);
-    this.pen.object3D.removeEventListener("interact", this.onPenClick);
-    this.cameraBtn.object3D.removeEventListener("interact", this.onCameraClick);
+    // this.spawn.object3D.removeEventListener("interact", this.onSpawnClick);
+    // this.pen.object3D.removeEventListener("interact", this.onPenClick);
+    // this.cameraBtn.object3D.removeEventListener("interact", this.onCameraClick);
     this.agentBtn.object3D.removeEventListener("interact", this.onAgentClick);
     this.mapBtn.object3D.removeEventListener("interact", this.onMapClick);
     this.langBtn.object3D.removeEventListener("interact", this.onLangClick);
     this.transBtn.object3D.removeEventListener("interact", this.onTransClick);
-    this.inviteBtn.object3D.removeEventListener("interact", this.onInviteClick);
+    // this.inviteBtn.object3D.removeEventListener("interact", this.onInviteClick);
   }
 });
