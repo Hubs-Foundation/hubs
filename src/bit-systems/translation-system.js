@@ -43,7 +43,7 @@ export class TranslationSystem {
 
   Init(hubProperties, reset) {
     if (reset) {
-      this.targets = null;
+      this.targets = {};
       this.allowed = hubProperties.translation.allow;
 
       if (!this.allowed) console.warn("Translation is not enabled in this room");
