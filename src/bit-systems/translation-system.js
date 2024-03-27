@@ -134,12 +134,13 @@ export class TranslationSystem {
   }
 
   async UpdatePresenterTarget(newTarget) {
-    if (this.targets.length > 0)
-      Object.values(this.targets).forEach(target => {
-        this.RemoveTarget(target);
-      });
+    console.log("updating presenter", newTarget);
 
-    console.log("system recieved update request for user", newTarget);
+    Object.keys(this.targets).forEach(targetKey => {
+      this.RemoveTarget({ id: targetKey });
+      console.log("removing target", targetKey);
+    });
+
     if (newTarget.action) await this.MonitorTargetAudio(newTarget);
   }
 
@@ -155,7 +156,7 @@ export class TranslationSystem {
     if (mediaRecorder && mediaRecorder.state === "recording") mediaRecorder.stop();
     clearInterval(this.targets[target.id].interval);
     delete this.targets[target.id];
-    console.log(`target removed`, this.targets);
+    console.log(`target removed ${target.id}`);
   }
 
   async MonitorTargetAudio(target) {
@@ -220,7 +221,7 @@ export class TranslationSystem {
 
     const interval = setInterval(SilenceDetection, timeInterval);
     this.targets[target.id] = { language: target.language, mediaRecorder: mediaRecorder, interval: interval };
-    console.log(`new target registered`, this.targets);
+    console.log(`new target registered`);
     return;
   }
 
@@ -291,13 +292,12 @@ export class TranslationSystem {
 
   async GetTargetStream(peerID) {
     try {
-      console.log(`tryng to get stream`);
       const stream = await APP.dialog.getMediaStream(peerID);
       if (!stream) {
         new Error(INFO_INIT_FAILED, `Error getting media stream for ${peerID}`, e);
       }
-      console.log(stream);
-      console.log(stream.getTracks());
+
+      console.log(`stream collected`);
       return stream;
     } catch (e) {
       throw new Error(INFO_INIT_FAILED, `Error getting media stream for ${peerID}`, e);

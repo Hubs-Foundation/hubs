@@ -77,7 +77,9 @@ class RoomPropertiesReader {
     };
   }
 
-  async Read(HubID: string): Promise<RoomProperties> {
+  async Read(HubID: string, reset: boolean): Promise<RoomProperties> {
+    if (reset) this.read = false;
+
     if (this.read) return Promise.resolve(this.roomProps);
     else {
       try {
@@ -126,11 +128,6 @@ class RoomPropertiesReader {
 
   HasProps() {
     return this.read;
-  }
-
-  async Reset(HubID: string) {
-    this.read = false;
-    this.Read(HubID);
   }
 }
 
