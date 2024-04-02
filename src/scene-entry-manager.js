@@ -30,10 +30,11 @@ import { spawnFromFileList, spawnFromUrl } from "./load-media-on-paste-or-drop";
 import { getCurrentHubId, isLockedDownDemoRoom } from "./utils/hub-utils";
 import { virtualAgent } from "./bit-systems/agent-system";
 import { floorMap } from "./bit-systems/map-system";
-import { GetHubProperties, roomPropertiesReader } from "./utils/rooms-properties";
 import { navSystem } from "./bit-systems/routing-system";
 import { translationSystem } from "./bit-systems/translation-system";
 import { languagePanel } from "./bit-systems/language-panel";
+import { stepsArray, tutorialManager } from "./bit-systems/tutorial-system";
+import { roomPropertiesReader } from "./utils/rooms-properties";
 const useNewLoader = qsTruthy("newLoader");
 
 export default class SceneEntryManager {
@@ -75,6 +76,7 @@ export default class SceneEntryManager {
     virtualAgent.Init(hubProperties, reset);
     floorMap.Init(hubProperties, reset);
     navSystem.Init(hubProperties, reset);
+    tutorialManager.Init(stepsArray);
   };
 
   enterScene = async (enterInVR, muteOnEntry) => {

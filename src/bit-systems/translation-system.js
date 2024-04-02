@@ -1,17 +1,7 @@
-import { FlagPanelManager, Interacted } from "../bit-components";
-import { getMediaStream } from "../components/avatar-audio-source";
-import { paths } from "../systems/userinput/paths";
 import { audioModules } from "../utils/ml-adapters";
 import { COMPONENT_ENDPOINTS } from "../utils/component-types";
-import { UpdateTextSystem } from "./agent-slideshow-system";
-import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
-import { logger, virtualAgent } from "./agent-system";
-import { loadTexture } from "../utils/load-texture";
-import { textureLoader } from "../utils/media-utils";
-import { selectMaterial, normalMaterial, HUDLangPanel } from "../prefabs/hud-lang-panel";
+import { removeEntity } from "bitecs";
 import { renderAsEntity } from "../utils/jsx-entity";
-import { Logger } from "../utils/logging_systems";
-import { mediaSortOrder } from "../utils/media-sorting";
 import { FixedPanel } from "../prefabs/fixed-panel";
 
 export const languageCodes = {
@@ -59,7 +49,10 @@ export class TranslationSystem {
 
     this.silenceCheckInterval = [];
 
-    if (!this.allowed) console.warn("Translation is not enabled in this room");
+    if (!this.allowed) {
+      console.warn("Translation is not enabled in this room");
+      return;
+    }
     if (this.transProperties.spatiality.type === "borders") {
       this.borders = this.transProperties.spatiality.data;
       this.prevBorderState = false;

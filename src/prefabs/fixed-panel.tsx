@@ -18,7 +18,7 @@ export function FixedPanel({ pos }: FixedPanelParams) {
     <entity
       name="fixedPanel"
       ref={panelRef}
-      fixedPanel={{ textRef: textRef }}
+      fixedTextPanel={{ textRef: textRef }}
       slice9={{ size: [6.9, 2.1], insets: [60, 60, 60, 60], texture: panelTexture }}
       position={pos}
     >

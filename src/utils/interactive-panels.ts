@@ -5,7 +5,7 @@ import { updateSlice9Geometry } from "../update-slice9-geometry";
 
 const PANEL_PADDING = 0.05;
 
-export function UpdatePanelSize(panelEid: number, size: number[]) {
+export function UpdatePanelSize(panelEid: number, size: number[] | Float32Array) {
   Slice9.size[panelEid].set(size);
   updateSlice9Geometry(APP.world, panelEid);
   const panelObj = APP.world.eid2obj.get(panelEid);
@@ -19,9 +19,11 @@ function GetObjSize(obj: Object3D) {
   return [rawSize.x, rawSize.y];
 }
 
-export function GetTextSize(textObj: TroikaText) {
+export function GetTextSize(textObj: TroikaText): Float32Array {
   const rawSize = textObj.geometry.boundingBox?.getSize(new Vector3());
-  return [rawSize!.x, rawSize!.y];
+
+  const finalSize = new Float32Array([rawSize!.x, rawSize!.y]);
+  return finalSize;
 }
 
 function fortmatLines(newText: string): string {

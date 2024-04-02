@@ -11,11 +11,6 @@ import { AlphaMode } from "../utils/create-image-mesh";
 
 const spotTexture = textureLoader.load(spotSrc);
 
-interface FloorMapPanelParamaters {
-  panelRef: Ref;
-  pointRef: Ref;
-}
-
 export function FloorMapPanel(ratio: number, imageSrc: string) {
   const panelRef = createRef();
   const pointRef = createRef();

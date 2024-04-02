@@ -1,5 +1,6 @@
 import { string } from "prop-types";
 import { EventEmitter } from "eventemitter3";
+import { ArrayVec3 } from "./jsx-entity";
 
 const propertiesURL = "https://kontopoulosdm.github.io/properties.json";
 
@@ -10,16 +11,17 @@ interface RoomProperties {
   translation: TranslationProperties;
   navigation: NavigationProperties;
   map: MapProperties;
+  tutorial: TutorialProperties;
 }
 
-const unknownRoom = {
-  room: "unknown",
-  id: ["uknown"],
-  allow_agent: false,
-  translation: { allow: false },
-  navigation: { allow: false },
-  map: { allow: false }
-};
+interface TutorialProperties {
+  allow: boolean;
+  slides?: Array<string>;
+  congrats_slides?: Array<string>;
+  position?: ArrayVec3;
+  rotation?: ArrayVec3;
+  ratio?: number;
+}
 
 interface NavigationProperties {
   allow: boolean;
@@ -73,7 +75,8 @@ class RoomPropertiesReader {
       allow_agent: false,
       translation: { allow: false },
       navigation: { allow: false },
-      map: { allow: false }
+      map: { allow: false },
+      tutorial: { allow: false }
     };
   }
 
@@ -132,26 +135,3 @@ class RoomPropertiesReader {
 }
 
 export const roomPropertiesReader = new RoomPropertiesReader(propertiesURL);
-
-export async function GetHubProperties(HubID: string): Promise<RoomProperties> {
-  try {
-    const response = await fetch(propertiesURL, { method: "GET" });
-    if (!response.ok) throw new Error("Response not OK");
-    const roomArray = (await response.json()) as RoomProperties[];
-
-    for (let i = 0; i < roomArray.length; i++) {
-      for (let j = 0; j < roomArray[i].id.length; j++) {
-        if (roomArray[i].id[j] === HubID) {
-          APP.scene!.emit("properties_loaded", { premissions: roomArray[i] });
-          return roomArray[i];
-        }
-      }
-    }
-    APP.scene!.emit("properties_loaded", { premissions: unknownRoom });
-    return unknownRoom;
-  } catch (error) {
-    console.log(error);
-    APP.scene!.emit("properties_loaded", { premissions: unknownRoom });
-    return unknownRoom;
-  }
-}

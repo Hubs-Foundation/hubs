@@ -1,6 +1,6 @@
 import { defineQuery, enterQuery, exitQuery, removeComponent } from "bitecs";
 import { Object3D, Quaternion, Vector3 } from "three";
-import { Object3DTag, FixedPanel, Slice9 } from "../bit-components";
+import { Object3DTag, FixedTextPanel, Slice9 } from "../bit-components";
 import { HubsWorld } from "../app";
 import { Text } from "troika-three-text";
 import { GreetingPhrases } from "../components/translate-panel";
@@ -17,7 +17,7 @@ const PANEL_PADDING = 0.05;
 const PANEL_WIDTH = 6.9;
 const MIN_PANEL_HEIGHT = 1.5;
 
-const fixedPanelQuery = defineQuery([FixedPanel]);
+const fixedPanelQuery = defineQuery([FixedTextPanel]);
 const panelEnterQuery = enterQuery(fixedPanelQuery);
 const panelExitQuery = exitQuery(fixedPanelQuery);
 
@@ -35,7 +35,7 @@ export function FixedPanelSystem(world: HubsWorld) {
       APP.scene!.addEventListener("language_updated", onLanguageUpdate);
       fixedPanelRef = fixedPanelEid;
       fixedPanelObj = world.eid2obj.get(fixedPanelEid)!;
-      textRef = FixedPanel.textRef[fixedPanelEid];
+      textRef = FixedTextPanel.textRef[fixedPanelEid];
       textObj = world.eid2obj.get(textRef)! as Text;
       textObj.addEventListener("synccomplete", updateTextSize);
 

@@ -49,7 +49,8 @@ import {
   FloorMap,
   FlagPanelManager,
   FollowFov,
-  FixedPanel
+  FixedTextPanel,
+  FloatingTextPanel
 } from "../bit-components";
 
 import { inflateMediaLoader } from "../inflators/media-loader";
@@ -395,8 +396,14 @@ export interface JSXComponentData extends ComponentData {
   lookatuser?: any;
   micButtonTag?: any;
   followFov?: any;
-  fixedPanel?: {
+  fixedTextPanel?: {
     textRef: Ref;
+  };
+  floatingTextPanel?: {
+    textRef: Ref;
+    prevRef: Ref;
+    nextRef: Ref;
+    testRef: Ref;
   };
 }
 
@@ -521,7 +528,8 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   panelIndex: createDefaultInflator(PanelIndex),
   micButtonTag: createDefaultInflator(MicButtonTag),
   followFov: createDefaultInflator(FollowFov),
-  fixedPanel: createDefaultInflator(FixedPanel)
+  fixedTextPanel: createDefaultInflator(FixedTextPanel),
+  floatingTextPanel: createDefaultInflator(FloatingTextPanel)
 };
 
 export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorFn }> = {

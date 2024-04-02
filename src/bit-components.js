@@ -11,8 +11,14 @@ export const FloorMap = defineComponent({
   pointRef: Types.eid
 });
 
-export const FixedPanel = defineComponent({
+export const FixedTextPanel = defineComponent({
   textRef: Types.eid
+});
+export const FloatingTextPanel = defineComponent({
+  textRef: Types.eid,
+  nextRef: Types.eid,
+  prevRef: Types.eid,
+  testRef: Types.eid
 });
 
 export const Agent = defineComponent({

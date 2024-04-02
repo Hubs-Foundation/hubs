@@ -89,6 +89,7 @@ import { followFovSystem } from "../components/follow-user";
 import { NavigatingSystem } from "../bit-systems/routing-system";
 import { translationSystem } from "../bit-systems/translation-system";
 import { FixedPanelSystem } from "../bit-systems/fixed-panel-system";
+import { tutorialManager } from "../bit-systems/tutorial-system";
 
 declare global {
   interface Window {
@@ -285,6 +286,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   FlagPanelSystem(world);
   NavigatingSystem(world);
   FixedPanelSystem(world);
+  tutorialManager.Tick(world);
 
   HiddenSystem(world);
 

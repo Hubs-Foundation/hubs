@@ -379,7 +379,7 @@ export const webXRUserBindings = addSetsToBindings({
     },
     {
       src: [centerStripPressed, upperButtons],
-      dest: { value: paths.actions.enableMic },
+      dest: { value: paths.actions.enableMic }, //here is the binding for holding upper buttons and unmuting
       xform: xforms.any
     },
     {
@@ -404,7 +404,7 @@ export const webXRUserBindings = addSetsToBindings({
     },
     {
       src: [touchpadReleased, upperButtonsReleased],
-      dest: { value: paths.actions.disableMic },
+      dest: { value: paths.actions.disableMic }, // here is the binding of releasing upper buttons and muting back
       xform: xforms.any
     },
     {
