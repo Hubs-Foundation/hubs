@@ -75,7 +75,7 @@ class TutorialManager {
         this.AddTutorialPanel(
           roomPropertiesReader.roomProps.tutorial.slides!,
           roomPropertiesReader.roomProps.tutorial.congrats_slides!,
-          pos ? pos : [-9, 2.0, -10],
+          pos ? pos : [-9, 2.0, -5],
           rot ? rot : [0, degToRad(90), 0],
           ratio ? ratio : 1 / 2.2!
         );
@@ -181,6 +181,8 @@ class TutorialManager {
 
     if (congratulate) {
       this.activeStep = wellDoneStep();
+      this.activeSlide = 0;
+      console.log(`congatulating`, this.activeStep);
     } else {
       this.activeStepIndex += 1;
       this.activeSlide = 0;

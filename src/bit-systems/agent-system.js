@@ -22,6 +22,7 @@ import { UpdatePanelSize, GetTextSize } from "../utils/interactive-panels";
 import { agentDialogs } from "../utils/localization";
 import { Logger } from "../utils/logging_systems";
 import { Vector3 } from "three";
+import { roomPropertiesReader } from "../utils/rooms-properties";
 
 const agentQuery = defineQuery([Agent]);
 const enterAgentQuery = enterQuery(agentQuery);
@@ -286,7 +287,7 @@ export default class VirtualAgent {
     if (changedMicStatus) {
       this.micStatus = permissionsGranted && APP.mediaDevicesManager.isMicEnabled;
       if (this.micStatus && !this.waitingForResponse) {
-        this.AskAgent(false);
+        this.AskAgent(false, true);
       } else {
         stopRecording();
       }
@@ -358,7 +359,7 @@ export default class VirtualAgent {
     });
   }
 
-  async AskAgent(savefile) {
+  async AskAgent(savefile, testNav) {
     this.panel.obj.visible = false;
     this.infoPanel.obj.visible = true;
     this.waitingForResponse = true;
@@ -369,6 +370,14 @@ export default class VirtualAgent {
 
       const recordedQuestion = await RecordQuestion(savefile);
 
+      if (testNav) {
+        const randomInd = Math.floor(Math.random() * (roomPropertiesReader.navProps.targets.length - 1));
+        const dest = roomPropertiesReader.navProps.targets[randomInd].name;
+        const navigation = navSystem.GetInstructions(this.avatarPos, dest);
+        navSystem.RenderCues(navigation);
+        console.log(navigation);
+        return;
+      }
       // this.isProccessing = true;
 
       // await this.TestNavigationUI();

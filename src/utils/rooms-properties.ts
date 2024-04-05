@@ -25,9 +25,10 @@ interface TutorialProperties {
 
 interface NavigationProperties {
   allow: boolean;
-  targets?: { name: string; pivot: Array<Number>; box: Array<Number> }[];
-  dimensions?: { height: number; box: Array<Number> }[];
-  connectors?: { end1: Array<Number>; end2: Array<Number> }[];
+  targets?: Array<{ name: string; position: [number, number] }>;
+  dimensions?: [number, number, number, number];
+  polygon?: Array<[number, number]>;
+  obstacles?: Array<Array<[Number, Number]>>;
 }
 
 interface MapProperties {

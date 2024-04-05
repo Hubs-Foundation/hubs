@@ -1,10 +1,57 @@
-import { DiscreteInterpolant, Vector3 } from "three";
+import { DiscreteInterpolant, Vector2, Vector3 } from "three";
 import VirtualAgent, { virtualAgent } from "./agent-system";
-import { GetProperties, PropertyType } from "../utils/rooms-properties";
-import { node } from "prop-types";
+import { GetProperties, PropertyType, roomPropertiesReader } from "../utils/rooms-properties";
+import { node, object } from "prop-types";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { removeEntity } from "bitecs";
 import { NavigationCues } from "../prefabs/nav-line";
+import { distanceAndSkiddingToXY } from "@popperjs/core/lib/modifiers/offset";
+
+function matrixInverse(matrix) {
+  let det = matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0];
+  return [
+    [matrix[1][1] / det, -matrix[0][1] / det],
+    [-matrix[1][0] / det, matrix[0][0] / det]
+  ];
+}
+
+function matrixMultiplication(matrixA, matrixB) {
+  return [
+    matrixA[0][0] * matrixB[0] + matrixA[0][1] * matrixB[1],
+    matrixA[1][0] * matrixB[0] + matrixA[1][1] * matrixB[1]
+  ];
+}
+
+function SegToPointDist(point, sp1, sp2) {
+  const a = new Vector2(sp1[0], sp1[1]);
+  const b = new Vector2(sp2[0], sp2[1]);
+  const p = new Vector2(point[0], point[1]);
+
+  const ab = b.clone().sub(a);
+  const ap = p.clone().sub(a);
+  const proj = ap.dot(ab);
+  const abLengthSq = ab.lengthSq();
+  const d = proj / abLengthSq;
+
+  let distance;
+
+  if (a.manhattanDistanceTo(p) === 0) return [0, 0];
+  if (b.manhattanDistanceTo(p) === 0) return [0, 0];
+
+  if (d <= 0) {
+    distance = p.distanceTo(a);
+  } else if (d >= 1) {
+    distance = p.distanceTo(b);
+  } else {
+    const cp = a.clone().add(ab.clone().multiplyScalar(d));
+    distance = p.distanceTo(cp);
+  }
+
+  return [d, distance];
+}
+
+const step = 1;
+const outsidePoint = [15.7, 68.7];
 
 const INF = Number.MAX_SAFE_INTEGER;
 export class Node {
@@ -44,7 +91,6 @@ export class NavigationSystem {
   constructor() {
     this.allowed = false;
     this.nodes = [];
-    this.edges = [];
     this.targetInfo = {};
     this.nodeCount = null;
     this.mapped = false;
@@ -55,117 +101,97 @@ export class NavigationSystem {
     this.dest = { active: false, pos: null, time: null };
   }
 
-  async Init(hubProperties) {
-    if (!hubProperties.allow_navigation) {
-      console.warn("Navigation is not allowed for this room");
-      this.allowed = false;
-      return;
-    }
+  async Init(hubsProperties) {
+    roomPropertiesReader.waitForProperties().then(() => {
+      this.allowed = roomPropertiesReader.navProps.allow;
 
-    const roomProperties = hubProperties.navigation;
-
-    this.allowed = true;
-    this.nodes = [];
-    this.edges = [];
-
-    const connectorPairs = [];
-    const manualIndices = [];
-    this.targetInfo = {};
-
-    roomProperties.connectors.forEach(object => {
-      const end1 = object.end1;
-      const end2 = object.end2;
-      const node1 = new Node(end1[0], end1[1], -end1[2]);
-      const node2 = new Node(end2[0], end2[1], -end2[2]);
-
-      let index1 = this.FindInArray(this.nodes, node1);
-      if (index1 === -1) {
-        index1 = this.nodes.push(node1) - 1;
-        manualIndices.push(index1);
+      if (!this.allowed) {
+        console.warn("Navigation is not allowed for this room");
+        return;
       }
 
-      let index2 = this.FindInArray(this.nodes, node2);
-      if (index2 === -1) {
-        index2 = this.nodes.push(node2) - 1;
-        manualIndices.push(index2);
+      this.navProps = roomPropertiesReader.navProps;
+      this.nodes = [];
+      this.targetInfo = {};
+
+      const roomDimensions = this.navProps.dimensions;
+      const obstacles = this.navProps.obstacles;
+      const polygonPoints = this.navProps.polygon;
+      const targets = this.navProps.targets;
+
+      for (let x = roomDimensions[0]; x < roomDimensions[1]; x += step) {
+        for (let z = roomDimensions[2]; z < roomDimensions[3]; z += step) {
+          const point = [x, z];
+
+          let isInsideBox = false;
+          for (let i = 0; i < obstacles.length; i++) {
+            const obstacle = obstacles[i];
+            if (this.IsPointInside(point, obstacle, true)) {
+              isInsideBox = true;
+              break;
+            }
+          }
+          if (isInsideBox) {
+            console.log(x, z, `is inside box`);
+            continue;
+          }
+          if (this.IsPointInside(point, polygonPoints, false)) this.nodes.push(new Node(point[0], 0, point[1]));
+        }
       }
-      connectorPairs.push([index1, index2]);
-    });
 
-    roomProperties.targets.forEach(target => {
-      const value = target.pivot;
-      const targetNode = new Node(value[0], value[1], -value[2]);
-      const index = this.nodes.push(targetNode) - 1;
+      targets.forEach(target => {
+        const targetPos = target.position;
+        const targetNode = new Node(targetPos[0], 0, targetPos[1]);
 
-      manualIndices.push(index);
-      this.targetInfo[target.name] = index;
-    });
-
-    let count = -1;
-    roomProperties.dimensions.forEach(dimensionElement => {
-      count++;
-      const dimension = dimensionElement.box;
-      const height = dimensionElement.height;
-
-      for (let z = dimension[2]; z <= dimension[3]; z++) {
-        for (let x = dimension[0]; x <= dimension[1]; x++) {
-          let discard = false;
-          for (let i = 0; i < roomProperties.targets.length; i++) {
-            const exception = roomProperties.targets[i].box;
-            const exceptionHeight = roomProperties.targets[i].pivot[1];
-            discard =
-              x >= exception[0] &&
-              x <= exception[1] &&
-              z >= exception[2] &&
-              z <= exception[3] &&
-              height === exceptionHeight;
-            if (discard) break;
+        let minDistanceNodeIndex;
+        let minDistance = INF;
+        this.nodes.forEach((node, index) => {
+          const dist = targetNode.vector.distanceTo(node.vector);
+          if (dist < minDistance) {
+            minDistance = dist;
+            minDistanceNodeIndex = index;
           }
-          const node = new Node(x, height, -z);
-          if (!discard) {
-            manualIndices.forEach(manualIndex => {
-              const manualNode = this.nodes[manualIndex];
-              if (manualNode.IsIdentical(node)) {
-                discard = true;
-              }
-            });
-          }
-          if (!discard) {
-            this.nodes.push(node);
+        });
+
+        if (targetPos[1] % step !== 0) {
+          const helperNode = new Node(targetPos[0], 0, this.nodes[minDistanceNodeIndex].z);
+          minDistanceNodeIndex = this.nodes.push(helperNode) - 1;
+          minDistance = helperNode.vector.distanceTo(targetNode.vector);
+        }
+
+        const targetIndex = this.nodes.push(targetNode) - 1;
+        this.targetInfo[target.name] = targetIndex;
+
+        this.nodes[minDistanceNodeIndex].neighboors[targetIndex] = minDistance;
+        this.nodes[targetIndex].neighboors[minDistanceNodeIndex] = minDistance;
+      });
+
+      for (let i = 0; i < this.nodes.length; i++) {
+        for (let j = i + 1; j < this.nodes.length; j++) {
+          if (this.AreNodesAdjacent(this.nodes[i], this.nodes[j])) {
+            const distance = this.nodes[i].vector.manhattanDistanceTo(this.nodes[j]);
+            if (distance > 0) {
+              this.nodes[i].neighboors[j] = distance;
+              this.nodes[j].neighboors[i] = distance;
+            }
           }
         }
       }
+
+      this.nodes.forEach(node => {
+        let count = 0;
+        Object.keys(node.neighboors).forEach(_ => {
+          count++;
+        });
+        if (count === 0) console.log(node.x, node.z);
+      });
+
+      this.nodeCount = this.nodes.length;
+      this.mapped = false;
+      this.mappedNodes = new Array(this.nodeCount).fill(false);
+      this.paths = new Array(this.nodeCount);
+      for (let j = 0; j < this.nodeCount; j++) this.paths[j] = [];
     });
-
-    for (let i = 0; i < this.nodes.length; i++) {
-      for (let j = i + 1; j < this.nodes.length; j++) {
-        if (this.AreNodesAdjacent(this.nodes[i], this.nodes[j])) {
-          const distance = this.nodes[i].vector.manhattanDistanceTo(this.nodes[j]);
-          if (distance > 0) {
-            this.nodes[i].neighboors[j] = distance;
-            this.nodes[j].neighboors[i] = distance;
-          }
-        }
-      }
-    }
-
-    connectorPairs.forEach(pair => {
-      const index1 = pair[0];
-      const index2 = pair[1];
-      const distance = this.nodes[index1].vector.manhattanDistanceTo(this.nodes[index2]);
-      if (!Object.keys(this.nodes[index1].neighboors).includes(index2)) {
-        this.nodes[index1].neighboors[index2] = distance;
-        this.nodes[index2].neighboors[index1] = distance;
-      }
-    });
-
-    this.nodeCount = this.nodes.length;
-    this.mapped = false;
-    this.mappedNodes = new Array(this.nodeCount).fill(false);
-    this.paths = new Array(this.nodeCount);
-    for (let j = 0; j < this.nodeCount; j++) {
-      this.paths[j] = [];
-    }
   }
 
   AreNodesAdjacent(node1, node2) {
@@ -173,8 +199,53 @@ export class NavigationSystem {
     return (
       node1.y === node2.y &&
       (node1.x === node2.x || node1.z === node2.z) &&
-      node1.vector.distanceTo(node2.vector) <= 1.0
+      node1.vector.distanceTo(node2.vector) <= step
     );
+  }
+
+  RenderNodes(nodes, color) {
+    nodes.forEach(node => this.RenderNode(node, color));
+  }
+
+  RenderNode(node, color) {
+    const sphereGeometry = new THREE.BoxGeometry(0.1, 1, 0.1);
+    const mat = new THREE.MeshBasicMaterial({ color: color });
+    const sphereMesh = new THREE.Mesh(sphereGeometry, mat);
+
+    APP.world.scene.add(sphereMesh);
+    sphereMesh.position.set(node.x, node.y, node.z);
+  }
+
+  IsPointInside(point, vertices, inversed = false) {
+    if (vertices[0][0] !== vertices[vertices.length - 1][0] || vertices[0][1] !== vertices[vertices.length - 1][1])
+      vertices.push(vertices[0]);
+
+    let crosstimes = 0;
+    for (let j = 0; j < vertices.length - 1; j++) {
+      const a = outsidePoint;
+      const b = point;
+      const c = vertices[j + 1].map((val, ind) => val - vertices[j][ind]);
+      const d = vertices[j];
+
+      const [per, segtod] = SegToPointDist(point, vertices[j], vertices[j + 1]);
+      console.log(per, segtod);
+
+      const boundry = per > 0 && per < 1 ? step : step * Math.sqrt(2);
+
+      if (segtod <= boundry) return inversed;
+
+      const inversedMatrix = [
+        [a[0], -c[0]],
+        [a[1], -c[1]]
+      ];
+      const ts = matrixMultiplication(matrixInverse(inversedMatrix), [d[0] - b[0], d[1] - b[1]]);
+
+      if (ts && ts[0] > 0 && ts[1] >= 0 && ts[1] < 1) crosstimes++;
+    }
+
+    const isInside = crosstimes % 2 === 1;
+
+    return isInside;
   }
 
   GetDestIndex(salientName) {
@@ -193,6 +264,7 @@ export class NavigationSystem {
     for (let i = 0; i < this.nodeCount - 1; i++) {
       const minDistanceIndex = this.GetMinDistanceIndex(startingNode.distances, this.nodes);
 
+      console.log(minDistanceIndex);
       this.nodes[minDistanceIndex].Visit();
 
       for (let j = 0; j < this.nodeCount; j++) {
@@ -373,6 +445,7 @@ export class NavigationSystem {
 
   RenderCues(navigation) {
     try {
+      // this.RenderNodes(navigation.path, 0x00ffff);
       this.cuesEid = renderAsEntity(APP.world, NavigationCues(navigation));
       this.cuesObj = APP.world.eid2obj.get(this.cuesEid);
       APP.scene.object3D.add(this.cuesObj);
