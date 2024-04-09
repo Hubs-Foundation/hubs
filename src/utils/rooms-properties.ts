@@ -23,33 +23,33 @@ interface TutorialProperties {
   ratio?: number;
 }
 
-interface NavigationProperties {
+export interface NavigationProperties {
   allow: boolean;
   targets?: Array<{ name: string; position: [number, number] }>;
   dimensions?: [number, number, number, number];
   polygon?: Array<[number, number]>;
-  obstacles?: Array<Array<[Number, Number]>>;
+  obstacles?: Array<Array<[number, number]>>;
 }
 
 interface MapProperties {
   allow: boolean;
   file?: string;
   ratio?: number;
-  mapToImage?: Array<Number>;
-  center?: Array<Number>;
-  centeroffset?: Array<Number>;
+  mapToImage?: Array<number>;
+  center?: Array<number>;
+  centeroffset?: Array<number>;
 }
 
 interface TranslationProperties {
   allow: boolean;
-  conversation?: { type: "bubble" | "duo" | "presentation"; data?: Array<Number> };
+  conversation?: { type: "bubble" | "duo" | "presentation"; data?: Array<number> };
   spatiality?: {
     type: "borders" | "room";
-    data?: Array<Array<Number>>;
+    data?: Array<Array<number>>;
   };
   panel?: {
     type: "avatar" | "fixed";
-    data?: Array<Number>;
+    data?: Array<number>;
   };
 }
 

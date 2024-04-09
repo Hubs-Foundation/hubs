@@ -6,7 +6,7 @@ import rightArrowSrc from "../assets/models/arrow_right.glb";
 import pointSrc from "../assets/models/point.glb";
 import { preload } from "../utils/preload";
 import { cloneModelFromCache, loadModel } from "../components/gltf-model-plus";
-import { Node } from "../bit-systems/routing-system";
+import { Navigation, Node } from "../bit-systems/routing-system";
 
 preload(loadModel(rightArrowSrc, null, true));
 preload(loadModel(pointSrc, null, true));
@@ -14,12 +14,6 @@ preload(loadModel(pointSrc, null, true));
 const depth = 0.1;
 const halfDepth = depth / 2;
 const height = 0.05;
-
-interface navigationData {
-  path: Vector3[];
-  instructions: instruction[];
-  knowledge: string;
-}
 
 interface instruction {
   action: "start" | "finish" | "move" | "turn" | "continue" | "stairs";
@@ -34,7 +28,7 @@ interface instruction {
   distance?: number;
 }
 
-export function NavigationCues(navigation: navigationData) {
+export function NavigationCues(navigation: Navigation) {
   const lines = [];
   const turns: any[] | undefined = [];
   const points = navigation.path;

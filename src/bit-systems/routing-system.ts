@@ -1,13 +1,24 @@
-import { DiscreteInterpolant, Vector2, Vector3 } from "three";
+import { DiscreteInterpolant, Object3D, Vector2, Vector3 } from "three";
 import VirtualAgent, { virtualAgent } from "./agent-system";
-import { GetProperties, PropertyType, roomPropertiesReader } from "../utils/rooms-properties";
+import { NavigationProperties, PropertyType, roomPropertiesReader } from "../utils/rooms-properties";
 import { node, object } from "prop-types";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { removeEntity } from "bitecs";
 import { NavigationCues } from "../prefabs/nav-line";
-import { distanceAndSkiddingToXY } from "@popperjs/core/lib/modifiers/offset";
+import { HubsWorld } from "../app";
+import { radToDeg } from "three/src/math/MathUtils";
 
-function matrixInverse(matrix) {
+export interface Navigation {
+  path: Vector3[];
+  instructions: Array<Record<string, any>>;
+  knowledge: string;
+  valid: boolean;
+}
+const step = 1;
+const outsidePoint = [15.7, 68.7];
+const INF = Number.MAX_SAFE_INTEGER;
+
+function matrixInverse(matrix: [number, number][]): [number, number][] {
   let det = matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0];
   return [
     [matrix[1][1] / det, -matrix[0][1] / det],
@@ -15,14 +26,14 @@ function matrixInverse(matrix) {
   ];
 }
 
-function matrixMultiplication(matrixA, matrixB) {
+function matrixMultiplication(matrixA: [number, number][], matrixB: [number, number]) {
   return [
     matrixA[0][0] * matrixB[0] + matrixA[0][1] * matrixB[1],
     matrixA[1][0] * matrixB[0] + matrixA[1][1] * matrixB[1]
   ];
 }
 
-function SegToPointDist(point, sp1, sp2) {
+function SegToPointDist(point: Array<number>, sp1: Array<number>, sp2: Array<number>): [number, number] {
   const a = new Vector2(sp1[0], sp1[1]);
   const b = new Vector2(sp2[0], sp2[1]);
   const p = new Vector2(point[0], point[1]);
@@ -50,23 +61,27 @@ function SegToPointDist(point, sp1, sp2) {
   return [d, distance];
 }
 
-const step = 1;
-const outsidePoint = [15.7, 68.7];
-
-const INF = Number.MAX_SAFE_INTEGER;
 export class Node {
-  constructor(x, y, z) {
+  vector: Vector3;
+  visited: boolean;
+  path: Array<number>;
+  distances: Array<number>;
+  x: number;
+  y: number;
+  z: number;
+  neighboors: Record<number, number>;
+  constructor(x: number, y: number, z: number) {
     this.vector = new THREE.Vector3(x, y, z);
     this.visited = false;
     this.path = [];
-    this.distances = null;
+
     this.neighboors = {};
     this.x = this.vector.x;
     this.y = this.vector.y;
     this.z = this.vector.z;
   }
 
-  MakeStartingPoint(nodeCount, index) {
+  MakeStartingPoint(nodeCount: number, index: number) {
     this.distances = new Array(nodeCount).fill(INF);
     this.distances[index] = 0;
     this.path.push(index);
@@ -79,29 +94,37 @@ export class Node {
   Reset() {
     this.visited = false;
     this.path = [];
-    this.distances = null;
   }
 
-  IsIdentical(node) {
+  IsIdentical(node: Node) {
     return node.x === this.x && node.y === this.x && node.z === this.z;
   }
 }
 
 export class NavigationSystem {
+  allowed: boolean;
+  nodes: Array<Node>;
+  targetInfo: Record<string, number>;
+  nodeCount: number | null;
+  mapped: boolean;
+  mappedNodes: Array<boolean>;
+  paths: Array<Array<Array<number>>>;
+  dest: { active: boolean; pos?: Node; time?: Date };
+  navProps: NavigationProperties;
+  cuesEid: number;
+  cuesObj: Object3D;
+  activeDest: boolean;
+
   constructor() {
     this.allowed = false;
     this.nodes = [];
     this.targetInfo = {};
     this.nodeCount = null;
     this.mapped = false;
-    this.mappedNodes = null;
-    this.paths = null;
-    this.quesEid = null;
-    this.quesObj = null;
-    this.dest = { active: false, pos: null, time: null };
+    this.dest = { active: false };
   }
 
-  async Init(hubsProperties) {
+  async Init() {
     roomPropertiesReader.waitForProperties().then(() => {
       this.allowed = roomPropertiesReader.navProps.allow;
 
@@ -114,14 +137,14 @@ export class NavigationSystem {
       this.nodes = [];
       this.targetInfo = {};
 
-      const roomDimensions = this.navProps.dimensions;
-      const obstacles = this.navProps.obstacles;
-      const polygonPoints = this.navProps.polygon;
-      const targets = this.navProps.targets;
+      const roomDimensions = this.navProps.dimensions!;
+      const obstacles = this.navProps.obstacles!;
+      const polygonPoints = this.navProps.polygon!;
+      const targets = this.navProps.targets!;
 
       for (let x = roomDimensions[0]; x < roomDimensions[1]; x += step) {
         for (let z = roomDimensions[2]; z < roomDimensions[3]; z += step) {
-          const point = [x, z];
+          const point = [x, z] as [number, number];
 
           let isInsideBox = false;
           for (let i = 0; i < obstacles.length; i++) {
@@ -132,7 +155,6 @@ export class NavigationSystem {
             }
           }
           if (isInsideBox) {
-            console.log(x, z, `is inside box`);
             continue;
           }
           if (this.IsPointInside(point, polygonPoints, false)) this.nodes.push(new Node(point[0], 0, point[1]));
@@ -143,7 +165,7 @@ export class NavigationSystem {
         const targetPos = target.position;
         const targetNode = new Node(targetPos[0], 0, targetPos[1]);
 
-        let minDistanceNodeIndex;
+        let minDistanceNodeIndex: number;
         let minDistance = INF;
         this.nodes.forEach((node, index) => {
           const dist = targetNode.vector.distanceTo(node.vector);
@@ -154,7 +176,7 @@ export class NavigationSystem {
         });
 
         if (targetPos[1] % step !== 0) {
-          const helperNode = new Node(targetPos[0], 0, this.nodes[minDistanceNodeIndex].z);
+          const helperNode = new Node(targetPos[0], 0, this.nodes[minDistanceNodeIndex!].z);
           minDistanceNodeIndex = this.nodes.push(helperNode) - 1;
           minDistance = helperNode.vector.distanceTo(targetNode.vector);
         }
@@ -162,14 +184,14 @@ export class NavigationSystem {
         const targetIndex = this.nodes.push(targetNode) - 1;
         this.targetInfo[target.name] = targetIndex;
 
-        this.nodes[minDistanceNodeIndex].neighboors[targetIndex] = minDistance;
-        this.nodes[targetIndex].neighboors[minDistanceNodeIndex] = minDistance;
+        this.nodes[minDistanceNodeIndex!].neighboors[targetIndex] = minDistance;
+        this.nodes[targetIndex].neighboors[minDistanceNodeIndex!] = minDistance;
       });
 
       for (let i = 0; i < this.nodes.length; i++) {
         for (let j = i + 1; j < this.nodes.length; j++) {
           if (this.AreNodesAdjacent(this.nodes[i], this.nodes[j])) {
-            const distance = this.nodes[i].vector.manhattanDistanceTo(this.nodes[j]);
+            const distance = this.nodes[i].vector.manhattanDistanceTo(this.nodes[j].vector);
             if (distance > 0) {
               this.nodes[i].neighboors[j] = distance;
               this.nodes[j].neighboors[i] = distance;
@@ -194,7 +216,7 @@ export class NavigationSystem {
     });
   }
 
-  AreNodesAdjacent(node1, node2) {
+  AreNodesAdjacent(node1: Node, node2: Node) {
     if (node1.IsIdentical(node2)) return false;
     return (
       node1.y === node2.y &&
@@ -203,11 +225,11 @@ export class NavigationSystem {
     );
   }
 
-  RenderNodes(nodes, color) {
+  RenderNodes(nodes: Array<Node>, color: number) {
     nodes.forEach(node => this.RenderNode(node, color));
   }
 
-  RenderNode(node, color) {
+  RenderNode(node: Node, color: number) {
     const sphereGeometry = new THREE.BoxGeometry(0.1, 1, 0.1);
     const mat = new THREE.MeshBasicMaterial({ color: color });
     const sphereMesh = new THREE.Mesh(sphereGeometry, mat);
@@ -216,7 +238,7 @@ export class NavigationSystem {
     sphereMesh.position.set(node.x, node.y, node.z);
   }
 
-  IsPointInside(point, vertices, inversed = false) {
+  IsPointInside(point: [number, number], vertices: [number, number][], inversed = false) {
     if (vertices[0][0] !== vertices[vertices.length - 1][0] || vertices[0][1] !== vertices[vertices.length - 1][1])
       vertices.push(vertices[0]);
 
@@ -228,13 +250,12 @@ export class NavigationSystem {
       const d = vertices[j];
 
       const [per, segtod] = SegToPointDist(point, vertices[j], vertices[j + 1]);
-      console.log(per, segtod);
 
       const boundry = per > 0 && per < 1 ? step : step * Math.sqrt(2);
 
       if (segtod <= boundry) return inversed;
 
-      const inversedMatrix = [
+      const inversedMatrix: [number, number][] = [
         [a[0], -c[0]],
         [a[1], -c[1]]
       ];
@@ -248,68 +269,118 @@ export class NavigationSystem {
     return isInside;
   }
 
-  GetDestIndex(salientName) {
+  GetDestIndex(salientName: string): number {
     if (Object.keys(this.targetInfo).includes(salientName)) return this.targetInfo[salientName];
-    return false;
+    return -1;
   }
 
-  Dijkstra(startIndex) {
-    if (startIndex < 0 || startIndex > this.nodeCount - 1) throw new Error("Invalid starting index");
+  Dijkstra(startIndex: number, startPos: Vector3) {
+    if (startIndex < 0 || startIndex > this.nodeCount! - 1) throw new Error("Invalid starting index");
     if (this.mapped) {
       this.Reset();
     }
 
+    let visitedNodes: Array<Node> = [];
+    let prevNodeIndex = -1;
     let startingNode = this.nodes[startIndex];
-    startingNode.MakeStartingPoint(this.nodeCount, startIndex);
-    for (let i = 0; i < this.nodeCount - 1; i++) {
-      const minDistanceIndex = this.GetMinDistanceIndex(startingNode.distances, this.nodes);
+    startingNode.MakeStartingPoint(this.nodeCount!, startIndex);
 
-      console.log(minDistanceIndex);
+    for (let i = 0; i < this.nodeCount! - 1; i++) {
+      const minDistanceIndex = this.GetMinDistanceIndex(startingNode.distances, visitedNodes);
       this.nodes[minDistanceIndex].Visit();
+      visitedNodes.push(this.nodes[minDistanceIndex]);
 
-      for (let j = 0; j < this.nodeCount; j++) {
+      for (let j = 0; j < this.nodeCount!; j++) {
         if (!this.nodes[j].visited && this.nodes[j].neighboors[minDistanceIndex]) {
-          const totalDistance = startingNode.distances[minDistanceIndex] + this.nodes[j].neighboors[minDistanceIndex];
+          let totalDistance = startingNode!.distances[minDistanceIndex] + this.nodes[j].neighboors[minDistanceIndex];
+          let nodePath: Array<number> = this.nodes[minDistanceIndex].path;
+
+          let prevVec, curVec, nextVec: Vector3;
+
+          if (nodePath.length > 1) {
+            prevVec = this.nodes[nodePath[nodePath.length - 2]].vector.clone();
+            curVec = this.nodes[minDistanceIndex].vector.clone();
+            nextVec = this.nodes[j].vector.clone();
+            prevVec.setY(curVec.y);
+          } else {
+            prevVec = this.nodes[startIndex].vector.clone();
+            curVec = this.nodes[minDistanceIndex].vector.clone();
+            nextVec = this.nodes[j].vector.clone();
+            prevVec.setY(curVec.y);
+          }
+
+          const ax = curVec.clone().sub(prevVec.clone()).normalize();
+          const xb = nextVec.clone().sub(curVec.clone()).normalize();
+          const cross = xb.cross(ax);
+
+          if (cross.length() !== 0) totalDistance += 0.1;
 
           if (totalDistance < startingNode.distances[j]) {
             startingNode.distances[j] = totalDistance;
-
             this.nodes[j].path = [...this.nodes[minDistanceIndex].path, j];
           }
         }
         this.paths[startIndex][j] = this.nodes[j].path;
       }
+
+      prevNodeIndex = minDistanceIndex;
     }
 
     this.mapped = true;
     this.mappedNodes[startIndex] = true;
   }
 
-  GetInstructions(startPos, stopName) {
+  GetMinDistanceIndex(distances: Array<number>, visitedNodeLst: Array<Node>) {
+    let minDistance = INF;
+    let minDistanceIndex = -1;
+
+    for (let i = 0; i < this.nodeCount!; i++) {
+      let nodeDistance = distances[i];
+      // if (visitedNodeLst.length >= 0) {
+      //   const prevVec = this.nodes[prevNodeIndex].vector.clone();
+      //   const curVec = this.nodes[minDistanceIndex].vector.clone();
+      //   const nextVec = this.nodes[i].vector.clone();
+
+      //   const ax = curVec.sub(prevVec);
+      //   const xb = nextVec.sub(curVec);
+
+      //   const angle = xb.angleTo(ax);
+      // }
+      if (!this.nodes[i].visited && nodeDistance < minDistance) {
+        minDistance = distances[i];
+        minDistanceIndex = i;
+      }
+    }
+    return minDistanceIndex;
+  }
+
+  GetInstructions(startPos: Vector3, stopName: string) {
     this.RemoveCues();
     const startIndex = this.GetClosestIndex(startPos);
     const stopIndex = this.GetDestIndex(stopName);
 
-    if (!stopIndex || !this.allowed) return { path: [], instructions: [], knowledge: "no location", valid: false };
+    if (stopIndex < 0 || !this.allowed) return { path: [], instructions: [], knowledge: "no location", valid: false };
 
     if (!this.mappedNodes[startIndex]) {
       if (this.mapped) this.Reset();
-      this.Dijkstra(startIndex);
+      this.Dijkstra(startIndex, startPos);
     }
 
     const path = this.paths[startIndex][stopIndex];
-    const pathVectors = [];
+    const pathVectors: Array<Vector3> = [];
 
     path.forEach(index => {
       pathVectors.push(this.nodes[index].vector);
     });
 
-    const navigation = {
+    const navigation: Navigation = {
       path: pathVectors,
-      instructions: [{ action: "start", from: startIndex }]
+      instructions: [{ action: "start", from: startIndex }],
+      knowledge: "",
+      valid: false
     };
 
-    const knowledgeArray = [{ action: "start" }];
+    const knowledgeArray: Array<Record<string, any>> = [{ action: "start" }];
     const playerForward = virtualAgent.avatarDirection;
 
     let distanceSum = 0;
@@ -329,10 +400,9 @@ export class NavigationSystem {
       }
 
       const turn = this.Orient(prevLine.clone().normalize(), nextLine.clone().normalize());
-      turn.line = nextLine.clone().normalize();
-      turn.current = current;
+      const extendedTurn = { ...turn, line: nextLine.clone().normalize(), current: current };
 
-      navigation.instructions.push(turn);
+      navigation.instructions.push(extendedTurn);
 
       navigation.instructions.push({
         action: "move",
@@ -351,7 +421,7 @@ export class NavigationSystem {
     }
     navigation.instructions.push({ action: "finish", to: stopIndex });
     knowledgeArray.push({ action: "move", distance: distanceSum }, { action: "finish" });
-    navigation["knowledge"] = knowledgeArray
+    navigation.knowledge = knowledgeArray
       .map(actionObj => {
         const { action, direction, distance } = actionObj;
         if (distance) {
@@ -364,16 +434,23 @@ export class NavigationSystem {
       })
       .join(", ");
 
-    navigation["valid"] = true;
+    navigation.valid = true;
     this.dest.pos = this.nodes[stopIndex];
     console.log(`Destination has changed to:`, this.dest);
     return navigation;
   }
 
-  Orient(vector1, vector2) {
+  Orient(
+    vector1: Vector3,
+    vector2: Vector3
+  ): {
+    action: string;
+    direction: string;
+    angle: number;
+  } {
     let stairs = false;
-    let action = "turn";
-    let direction;
+    let action: "turn" | "stairs" | "continue" = "turn";
+    let direction: "down" | "around" | "left" | "right" | "up" | "down" | "forward";
 
     const crossVector = new THREE.Vector3();
     crossVector.crossVectors(vector1, vector2).normalize();
@@ -399,20 +476,7 @@ export class NavigationSystem {
         direction = "forward";
       }
     }
-    return { action: action, direction: direction, angle: Math.floor(signedAngle) };
-  }
-
-  GetMinDistanceIndex(distances, nodes) {
-    let minDistance = INF;
-    let minDistanceIndex = -1;
-
-    for (let i = 0; i < this.nodeCount; i++) {
-      if (!nodes[i].visited && distances[i] < minDistance) {
-        minDistance = distances[i];
-        minDistanceIndex = i;
-      }
-    }
-    return minDistanceIndex;
+    return { action: action, direction: direction!, angle: Math.floor(signedAngle) };
   }
 
   Reset() {
@@ -421,9 +485,9 @@ export class NavigationSystem {
     });
   }
 
-  GetClosestIndex(position) {
+  GetClosestIndex(position: Vector3): number {
     let max = INF;
-    let index;
+    let index = -1;
     for (let i = 0; i < this.nodes.length; i++) {
       const distance = this.nodes[i].vector.manhattanDistanceTo(position);
       if (distance < max) {
@@ -434,7 +498,7 @@ export class NavigationSystem {
     return index;
   }
 
-  FindInArray(myArray, myElement) {
+  FindInArray(myArray: Array<any>, myElement: any): number {
     for (let i = 0; i < myArray.length; i++) {
       if (myArray[i] === myElement) {
         return i; // Element found, return its index
@@ -443,12 +507,12 @@ export class NavigationSystem {
     return -1; // Element not found in the array
   }
 
-  RenderCues(navigation) {
+  RenderCues(navigation: Navigation) {
     try {
       // this.RenderNodes(navigation.path, 0x00ffff);
       this.cuesEid = renderAsEntity(APP.world, NavigationCues(navigation));
-      this.cuesObj = APP.world.eid2obj.get(this.cuesEid);
-      APP.scene.object3D.add(this.cuesObj);
+      this.cuesObj = APP.world.eid2obj.get(this.cuesEid)!;
+      APP.scene!.object3D.add(this.cuesObj);
       this.dest.active = true;
       this.dest.time = new Date();
       console.log("Destination is now active: ", this.dest);
@@ -460,10 +524,10 @@ export class NavigationSystem {
   RemoveCues() {
     if (!!this.cuesEid) {
       removeEntity(APP.world, this.cuesEid);
-      APP.scene.object3D.remove(this.cuesObj);
-      this.cuesEid = null;
-      this.dest = { active: false, pos: null, time: null };
-      console.log("Destination is now inactive: ", this.dest);
+      APP.scene!.object3D.remove(this.cuesObj);
+      this.dest = { active: false };
+      this.cuesEid = -1;
+      console.log("Destination is now inactive: ");
     }
   }
 
@@ -474,7 +538,7 @@ export class NavigationSystem {
   }
 
   ShouldFinish() {
-    if (virtualAgent.avatarPos.distanceTo(this.dest.pos) < 3) {
+    if (virtualAgent.avatarPos.distanceTo(this.dest.pos!.vector) < 3) {
       this.StopNavigating();
       virtualAgent.UpdateWithRandomPhrase("success");
     }
@@ -482,9 +546,9 @@ export class NavigationSystem {
   }
 }
 
-export const navSystem = new NavigationSystem(10, 10);
+export const navSystem = new NavigationSystem();
 
-export function NavigatingSystem(world) {
+export function NavigatingSystem(world: HubsWorld) {
   if (!navSystem.dest.active) return;
   navSystem.ShouldFinish();
 }

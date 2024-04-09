@@ -24,11 +24,16 @@ export class TranslationSystem {
     this.fixedPanelObj;
     this.proccessingQueue = {};
     this.inferencingQueue = {};
+    this.availableLanugages = ["english", "dutch", "german", "greek", "italian", "spanish"];
 
     this.onLanguageAvailable = this.onLanguageAvailable.bind(this);
     this.onTranslationUpdatesAvailable = this.onTranslationUpdatesAvailable.bind(this);
     this.InferenceAudio = this.InferenceAudio.bind(this);
     this.UpdatePresenterTarget = this.UpdatePresenterTarget.bind(this);
+  }
+
+  get AvailableLanguage() {
+    return;
   }
 
   Init(hubProperties, reset) {
