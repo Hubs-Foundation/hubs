@@ -67,7 +67,7 @@ class TutorialManager {
       this.avatarHead = avatarheadElement.object3D;
 
       const pos = roomPropertiesReader.roomProps.tutorial["position"];
-      const rot = roomPropertiesReader.roomProps.tutorial["position"];
+      const rot = roomPropertiesReader.roomProps.tutorial["rotation"];
       const ratio = roomPropertiesReader.roomProps.tutorial["ratio"];
 
       setTimeout(() => {
