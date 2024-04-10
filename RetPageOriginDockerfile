@@ -6,10 +6,10 @@ from node:16.16 as builder
 run mkdir -p /hubs/admin/ && cd /hubs
 copy package.json ./
 copy package-lock.json ./
-run npm ci
+run npm ci --loglevel verbose
 copy admin/package.json admin/
 copy admin/package-lock.json admin/
-run cd admin && npm ci --legacy-peer-deps && cd ..
+run cd admin && npm ci --loglevel verbose --legacy-peer-deps && cd ..
 copy . .
 env BASE_ASSETS_PATH="{{rawhubs-base-assets-path}}"
 run npm run build 1> /dev/null
