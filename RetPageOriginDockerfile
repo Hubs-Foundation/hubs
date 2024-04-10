@@ -6,7 +6,7 @@ from node:16.16 as builder
 run mkdir -p /hubs/admin/ && cd /hubs
 copy package.json ./
 copy package-lock.json ./
-run npm ci --loglevel verbose
+run npm ci --loglevel verbose --legacy-peer-deps
 copy admin/package.json admin/
 copy admin/package-lock.json admin/
 run cd admin && npm ci --loglevel verbose --legacy-peer-deps && cd ..
