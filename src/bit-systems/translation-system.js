@@ -3,6 +3,12 @@ import { COMPONENT_ENDPOINTS } from "../utils/component-types";
 import { removeEntity } from "bitecs";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { FixedPanel } from "../prefabs/fixed-panel";
+import { setLocale } from "../utils/i18n";
+import enData from "../assets/locales/en.json";
+import elData from "../assets/locales/el.json";
+// import du from "../assets/locales/de.json";
+// import de from "../assets/locales/de.json";
+// import de from "../assets/locales/de.json";
 
 export const languageCodes = {
   greek: "el",
@@ -13,10 +19,55 @@ export const languageCodes = {
   german: "de"
 };
 
+export const hudPanelLanguages = {
+  greek: {
+    agent: "Βοηθός",
+    translate: "Μετάφραση",
+    map: "Χάρτης",
+    langugage: "Γλώσσα",
+    visit: "Επίσκεψη στο Δωμάτιο "
+  },
+  english: {
+    agent: "Agent",
+    translate: "Translate",
+    map: "Map",
+    language: "Language",
+    visit: "Visit Room"
+  },
+  spanish: {
+    agent: "Agent",
+    translate: "Translate",
+    map: "Map",
+    language: "Language",
+    visit: "Visit Room"
+  },
+  italian: {
+    agent: "Agent",
+    translate: "Translate",
+    map: "Map",
+    language: "Language",
+    visit: "Visit Room"
+  },
+  dutch: {
+    agent: "Agent",
+    translate: "Translate",
+    map: "Map",
+    language: "Language",
+    visit: "Visit Room"
+  },
+  german: {
+    agent: "Agent",
+    translate: "Translate",
+    map: "Map",
+    language: "Language",
+    visit: "Visit Room"
+  }
+};
+
 export class TranslationSystem {
-  constructor() {
+  constructor(language) {
     this.targets;
-    this.mylanguage;
+
     this.targetLanguage;
     this.silenceCheckInterval;
     this.forcefail;
@@ -24,7 +75,17 @@ export class TranslationSystem {
     this.fixedPanelObj;
     this.proccessingQueue = {};
     this.inferencingQueue = {};
-    this.availableLanugages = ["english", "dutch", "german", "greek", "italian", "spanish"];
+    this.availableLanguages = ["english", "dutch", "german", "greek", "italian", "spanish"];
+    this.textTranslations = {
+      english: enData,
+      dutch: enData,
+      german: enData,
+      italian: enData,
+      spanish: enData,
+      greek: elData
+    };
+
+    this.mylanguage = language;
 
     this.onLanguageAvailable = this.onLanguageAvailable.bind(this);
     this.onTranslationUpdatesAvailable = this.onTranslationUpdatesAvailable.bind(this);
@@ -33,7 +94,45 @@ export class TranslationSystem {
   }
 
   get AvailableLanguage() {
-    return;
+    return this.availableLanguages.map(language => {
+      return { value: language, label: language.charAt(0).toUpperCase() + language.slice(1) };
+    });
+  }
+
+  get SelectedLanguage() {
+    return { value: this.mylanguage, label: this.mylanguage.charAt(0).toUpperCase() + this.mylanguage.slice(1) };
+  }
+
+  // "hud-panel.translate": "Translate",
+  // "hud-panel.agent": "Agent",
+  // "hud-panel.map": "Map",
+  // "hud-panel.lanugage": "Language",
+  // "hud-panel.mic": "Mute Mic",
+  // "hud-panel.mic.muted ": "Unmute mic",
+  // "change-hub.message": "Visit room"
+  get AgentButtonText() {
+    return this.textTranslations[this.mylanguage]["hud-panel.agent"];
+  }
+  get TranslateButtonText() {
+    return this.textTranslations[this.mylanguage]["hud-panel.translate"];
+  }
+  get MapButtonText() {
+    return this.textTranslations[this.mylanguage]["hud-panel.map"];
+  }
+  get LanguageButtonText() {
+    return this.textTranslations[this.mylanguage]["hud-panel.language"];
+  }
+  get MicButtonText() {
+    return this.textTranslations[this.mylanguage]["hud-panel.mic"];
+  }
+  get UnmuteMicButtonText() {
+    return this.textTranslations[this.mylanguage]["hud-panel.mic.muted"];
+  }
+  get VisitButtonText() {
+    return this.textTranslations[this.mylanguage]["change-hub.message"];
+  }
+  get TextTranslationDict() {
+    return this.textTranslations[this.mylanguage];
   }
 
   Init(hubProperties, reset) {
@@ -50,7 +149,7 @@ export class TranslationSystem {
     this.targets = {};
     this.avatarPovObj = document.querySelector("#avatar-pov-node").object3D;
 
-    this.updateMyLanguage("english");
+    this.updateMyLanguage(this.mylanguage);
 
     this.silenceCheckInterval = [];
 
@@ -272,10 +371,13 @@ export class TranslationSystem {
   }
 
   updateMyLanguage(newLang) {
+    if (this.availableLanguages.includes(newLang)) console.log("new language accepted", newLang);
     this.mylanguage = newLang;
     if (!!this.mylanguage) {
       window.APP.store.update({ profile: { language: this.mylanguage } });
       APP.scene.emit("language_updated", { language: this.mylanguage });
+      setLocale(languageCodes[newLang]);
+      console.log(languageCodes[newLang]);
     }
   }
 
@@ -327,4 +429,4 @@ export class TranslationSystem {
   }
 }
 
-export const translationSystem = new TranslationSystem();
+export const translationSystem = new TranslationSystem("english");

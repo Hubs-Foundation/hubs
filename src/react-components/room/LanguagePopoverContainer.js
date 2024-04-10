@@ -8,9 +8,10 @@ import { ReactComponent as Italian } from "../icons/it.svg";
 import { ReactComponent as Spanish } from "../icons/es.svg";
 import { FormattedMessage } from "react-intl";
 import { LanguagePopover } from "./LanguagePopover";
+import { translationSystem } from "../../bit-systems/translation-system";
 
 function useTranslate(scene) {
-  const [language, setLanguage] = useState("english");
+  const [language, setLanguage] = useState(translationSystem.mylanguage);
 
   useEffect(() => {
     const onLanguageUpdate = event => {

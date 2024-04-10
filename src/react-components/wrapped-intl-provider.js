@@ -19,6 +19,7 @@ export class WrappedIntlProvider extends React.Component {
   };
 
   updateLocale = () => {
+    console.log(`local updating to`, getLocale());
     this.setState({ locale: getLocale(), messages: getMessages() });
   };
 

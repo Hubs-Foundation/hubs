@@ -3,6 +3,10 @@
  * @namespace ui
  * @component icon-button
  */
+
+import { defineMessage, useIntl } from "react-intl";
+import { translationSystem } from "../bit-systems/translation-system";
+
 AFRAME.registerComponent("icon-button", {
   schema: {
     image: { type: "string" },
@@ -75,8 +79,13 @@ AFRAME.registerComponent("icon-button", {
     }
 
     if (this.data.tooltip && hovering) {
-      const tooltipText =
-        (this.data.active ? this.data.activeTooltipText : this.data.tooltipText) + (disabled ? " Disabled" : "");
+      let tooltipText;
+      if (this.data.tooltipText && translationSystem.TextTranslationDict[this.data.tooltipText])
+        tooltipText = translationSystem.TextTranslationDict[this.data.tooltipText];
+      else tooltipText = this.data.active ? this.data.activeTooltipText : this.data.tooltipText;
+
+      tooltipText = disabled ? "" : tooltipText;
+
       this.data.tooltip.querySelector("[text]").setAttribute("text", "value", tooltipText);
     }
   }

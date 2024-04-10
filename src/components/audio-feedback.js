@@ -3,6 +3,7 @@ import { waitForDOMContentLoaded } from "../utils/async-utils";
 import { easeOutQuadratic } from "../utils/easing";
 import { registerComponentInstance, deregisterComponentInstance } from "../utils/component-utils";
 import { MediaDevicesEvents } from "../utils/media-devices-utils";
+import { translationSystem } from "../bit-systems/translation-system";
 
 // This computation is expensive, so we run on at most one avatar per frame, including quiet avatars.
 // However if we detect an avatar is seen speaking (its volume is above DISABLE_AT_VOLUME_THRESHOLD)
@@ -323,7 +324,11 @@ AFRAME.registerComponent("mic-button", {
 
     if (this.data.tooltip && hovering) {
       this.textEl = this.textEl || this.data.tooltip.querySelector("[text]");
-      this.textEl.setAttribute("text", "value", active ? this.data.activeTooltipText : this.data.tooltipText);
+      this.textEl.setAttribute(
+        "text",
+        "value",
+        active ? translationSystem.MicButtonText : translationSystem.UnmuteMicButtonText
+      );
     }
   }
 });

@@ -105,6 +105,7 @@ import { AgenSpawnButton } from "./room/AgentSpawnButton.js";
 import { MapSpawnButton } from "./room/MapSpawnButton";
 import { LanguagePopoverContainer } from "./room/LanguagePopoverContainer";
 import { TranslateButton } from "./room/TranslateButton";
+import { LanguageSetupModalContainer } from "./room/LanguageSetupModalContainer";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -575,19 +576,21 @@ class UIRoot extends Component {
   performDirectEntryFlow = async enterInVR => {
     this.setState({ enterInVR, waitingOnAudio: true });
 
-    const hasGrantedMic = (await grantedMicLabels()).length > 0;
+    // const hasGrantedMic = (await grantedMicLabels()).length > 0;
 
-    if (hasGrantedMic) {
-      if (!this.mediaDevicesManager.isMicShared) {
-        await this.mediaDevicesManager.startMicShare({});
-      }
-      this.beginOrSkipAudioSetup();
-    } else {
-      this.onRequestMicPermission();
-      this.pushHistoryState("entry_step", "audio");
-    }
+    this.pushHistoryState("entry_step", "language");
 
-    this.setState({ waitingOnAudio: false });
+    // if (hasGrantedMic) {
+    //   if (!this.mediaDevicesManager.isMicShared) {
+    //     await this.mediaDevicesManager.startMicShare({});
+    //   }
+    //   this.beginOrSkipAudioSetup();
+    // } else {
+    //   this.onRequestMicPermission();
+    //   this.pushHistoryState("entry_step", "audio");
+    // }
+
+    // this.setState({ waitingOnAudio: false });
   };
 
   enter2D = async () => {
@@ -830,6 +833,7 @@ class UIRoot extends Component {
     // TODO: What does onEnteringCanceled do?
     return (
       <>
+        {/* roomentry */}
         <RoomEntryModal
           roomName={this.props.hub.name}
           showJoinRoom={!this.state.waitingOnAudio && !this.props.entryDisallowed}
@@ -844,12 +848,7 @@ class UIRoot extends Component {
             if (promptForNameAndAvatarBeforeEntry || !this.props.forcedVREntryType) {
               this.setState({ entering: true });
               this.props.hubChannel.sendEnteringEvent();
-              if (promptForNameAndAvatarBeforeEntry) {
-                this.pushHistoryState("entry_step", "profile");
-              } else {
-                this.onRequestMicPermission();
-                this.pushHistoryState("entry_step", "audio");
-              }
+              this.pushHistoryState("entry_step", "language");
             } else {
               this.handleForceEntry();
             }
@@ -875,6 +874,28 @@ class UIRoot extends Component {
           />
         )}
       </>
+    );
+  };
+
+  renderLanguageSetupPanel = () => {
+    // TODO: Show HMD mic not chosen warning
+    const { hasAcceptedProfile, hasChangedNameOrPronouns } = this.props.store.state.activity;
+    const isLockedDownDemo = isLockedDownDemoRoom();
+    const promptForNameAndAvatarBeforeEntry = this.props.hubIsBound ? !hasAcceptedProfile : !hasChangedNameOrPronouns;
+
+    return (
+      <LanguageSetupModalContainer
+        scene={this.props.scene}
+        onEnterRoom={() => {
+          if (promptForNameAndAvatarBeforeEntry) {
+            this.pushHistoryState("entry_step", "profile");
+          } else {
+            this.onRequestMicPermission();
+            this.pushHistoryState("entry_step", "audio");
+          }
+        }}
+        onBack={() => this.props.history.goBack()}
+      />
     );
   };
 
@@ -1054,6 +1075,7 @@ class UIRoot extends Component {
       !hide &&
       this.props.availableVREntryTypes.generic !== VR_DEVICE_AVAILABILITY.no;
 
+    ///entryDialog
     const entryDialog =
       this.props.availableVREntryTypes &&
       !preload &&
@@ -1070,6 +1092,9 @@ class UIRoot extends Component {
           </StateRoute>
           <StateRoute stateKey="entry_step" stateValue="audio" history={this.props.history}>
             {this.renderAudioSetupPanel()}
+          </StateRoute>
+          <StateRoute stateKey="entry_step" stateValue="language" history={this.props.history}>
+            {this.renderLanguageSetupPanel()}
           </StateRoute>
           <StateRoute
             stateKey="entry_step"
@@ -1098,6 +1123,7 @@ class UIRoot extends Component {
             )}
           />
           <StateRoute stateKey="entry_step" stateValue="" history={this.props.history}>
+            {/* roomEntry */}
             {this.renderEntryStartPanel()}
           </StateRoute>
         </>

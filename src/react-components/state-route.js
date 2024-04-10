@@ -20,6 +20,7 @@ class StateRoute extends React.Component {
       (history.location.state &&
         (history.location.state[stateKey] === stateValue || (!history.location.state[stateKey] && !stateValue)))
     ) {
+      console.log("StateValue", stateKey, stateValue);
       return <Route path="/" {...routeProps} />;
     }
 

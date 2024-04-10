@@ -9,7 +9,8 @@ export const AVAILABLE_LOCALES = {
   fr: "Français",
   ko: "한국어",
   de: "Deutsch",
-  "zh-tw": "繁體中文"
+  "zh-tw": "繁體中文",
+  el: "Greek"
 };
 
 // Map from alternative primary language tags to those we support

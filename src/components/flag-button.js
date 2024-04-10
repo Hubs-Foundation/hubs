@@ -1,3 +1,5 @@
+import { translationSystem } from "../bit-systems/translation-system";
+
 /**
  * A button with an image, tooltip, hover states.
  * @namespace ui
@@ -88,8 +90,12 @@ AFRAME.registerComponent("flag-button", {
     }
 
     if (this.data.tooltip && hovering) {
-      const tooltipText =
-        (this.data.active ? this.data.activeTooltipText : this.data.tooltipText) + (disabled ? " Disabled" : "");
+      let tooltipText;
+      if (this.data.tooltipText) tooltipText = translationSystem.LanguageButtonText;
+      else tooltipText = this.data.active ? this.data.activeTooltipText : this.data.tooltipText;
+
+      tooltipText = disabled ? "" : tooltipText;
+
       this.data.tooltip.querySelector("[text]").setAttribute("text", "value", tooltipText);
     }
   }

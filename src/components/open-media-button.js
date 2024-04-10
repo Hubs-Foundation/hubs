@@ -2,6 +2,7 @@ import { isLocalHubsUrl, isLocalHubsSceneUrl, isHubsRoomUrl, isLocalHubsAvatarUr
 import { guessContentType } from "../utils/media-url-utils";
 import { handleExitTo2DInterstitial } from "../utils/vr-interstitial";
 import { changeHub } from "../change-hub";
+import { translationSystem } from "../bit-systems/translation-system";
 
 AFRAME.registerComponent("open-media-button", {
   schema: {
@@ -32,7 +33,7 @@ AFRAME.registerComponent("open-media-button", {
             if (url.hash && window.APP.hub.hub_id === hubId) {
               label = "go to";
             } else {
-              label = "visit room";
+              label = translationSystem.VisitButtonText;
             }
           }
         }
