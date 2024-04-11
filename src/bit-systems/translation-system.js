@@ -4,11 +4,6 @@ import { removeEntity } from "bitecs";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { FixedPanel } from "../prefabs/fixed-panel";
 import { setLocale } from "../utils/i18n";
-import enData from "../assets/locales/en.json";
-import elData from "../assets/locales/el.json";
-// import du from "../assets/locales/de.json";
-// import de from "../assets/locales/de.json";
-// import de from "../assets/locales/de.json";
 
 export const languageCodes = {
   greek: "el",
@@ -17,6 +12,26 @@ export const languageCodes = {
   italian: "it",
   dutch: "nl",
   german: "de"
+};
+
+const enData = {
+  "hud-panel.translate": "Translate",
+  "hud-panel.agent": "Agent",
+  "hud-panel.map": "Map",
+  "hud-panel.language": "Language",
+  "hud-panel.mic": "Mute Mic",
+  "hud-panel.mic.muted ": "Unmute mic",
+  "change-hub.message": "Visit room"
+};
+
+const elData = {
+  "hud-panel.translate": "Μετάφραση",
+  "hud-panel.agent": "Βοηθός",
+  "hud-panel.map": "Χάρτης",
+  "hud-panel.language": "Γλώσσα",
+  "hud-panel.mic": "Σίγαση",
+  "hud-panel.mic.muted ": "Κατάργηση Σίγασης",
+  "change-hub.message": "Επίσκεψη στο Δωμάτιο"
 };
 
 export const hudPanelLanguages = {
