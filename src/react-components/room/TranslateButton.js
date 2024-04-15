@@ -12,7 +12,7 @@ const TranslateTooltipDescription = defineMessage({
 
 export function TranslateButton({ scene }) {
   const shouldExist =
-    roomPropertiesReader.transProps.allow &&
+    roomPropertiesReader.AllowTrans &&
     (roomPropertiesReader.transProps.conversation.type === "presentation" ||
       roomPropertiesReader.transProps.conversation.type === "duo");
 

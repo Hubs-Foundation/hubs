@@ -16,7 +16,7 @@ export function FloorMapPanel(ratio: number, imageSrc: string) {
   const pointRef = createRef();
   const panelTexture = !!imageSrc ? textureLoader.load(imageSrc) : textureLoader.load(unavailableMapSrc);
   return (
-    <entity followFov>
+    <entity followFov={{ offset: [0, 0, -1.5] }}>
       <entity
         name={"floor-map"}
         image={{

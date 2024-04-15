@@ -68,7 +68,7 @@ AFRAME.registerComponent("translate-badge", {
   tick() {
     // if translation is allowed it computes if the button should be visible based on distance and borders
     // if room is not border contstrained then variable expressing this, is set to true and does not ever change
-    if (!this.transProps || !this.cameraEl || !this.transProps.allow) return;
+    if (!this.transProps || !this.cameraEl || !roomPropertiesReader.AllowTrans) return;
 
     const worldPos = this.el.object3D.getWorldPosition(new THREE.Vector3());
 
@@ -129,7 +129,7 @@ AFRAME.registerComponent("translate-badge", {
     // is allowed and the conversation type is bubble. check if there is need for border check
 
     const transProps = roomPropertiesReader.transProps;
-    if (!transProps.allow) return;
+    if (!roomPropertiesReader.AllowTrans) return;
 
     console.log(`translation is allowed`);
 

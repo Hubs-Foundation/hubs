@@ -1,17 +1,20 @@
 import { FollowFov } from "../bit-components";
 import { defineQuery, enterQuery, exitQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
 import { floorMap } from "../bit-systems/map-system";
+import { Vector3 } from "three";
 
 const objectStates = {};
 
 const followFovQuery = defineQuery([FollowFov]);
 const enterFollowFovQuery = enterQuery(followFovQuery);
 const exitFollowFovQuery = exitQuery(followFovQuery);
-
+//0,0,-1.5
 function addObjectToSystem(eid) {
+  const offestObj = FollowFov.offset[eid];
+  const offsetVector = new Vector3(offestObj[0], offestObj[1], offestObj[2]);
   const objectState = {
     targetObject: null,
-    offset: new THREE.Vector3(0, 0, -1.5), // Example offset
+    offset: offsetVector, // Example offset
     speed: 0.01,
     angle: 20,
     hoveredFrames: 0,

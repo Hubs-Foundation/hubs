@@ -33,7 +33,7 @@ import { floorMap } from "./bit-systems/map-system";
 import { navSystem } from "./bit-systems/routing-system";
 import { translationSystem } from "./bit-systems/translation-system";
 import { languagePanel } from "./bit-systems/language-panel";
-import { stepsArray, tutorialManager } from "./bit-systems/tutorial-system";
+import { lobbySteps, tutorialManager } from "./bit-systems/tutorial-system";
 import { roomPropertiesReader } from "./utils/rooms-properties";
 const useNewLoader = qsTruthy("newLoader");
 
@@ -76,7 +76,7 @@ export default class SceneEntryManager {
     virtualAgent.Init(hubProperties, reset);
     floorMap.Init(hubProperties, reset);
     navSystem.Init(hubProperties, reset);
-    tutorialManager.Init(stepsArray);
+    tutorialManager.Init();
   };
 
   enterScene = async (enterInVR, muteOnEntry) => {

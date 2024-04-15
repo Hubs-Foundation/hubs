@@ -113,14 +113,15 @@ export default class VirtualAgent {
       APP.scene.removeEventListener("clear-scene", this.onClear);
     }
 
-    if (!hubProperties.allow_agent) {
+    this.avatarPovObj = document.querySelector("#avatar-pov-node").object3D;
+
+    if (!roomPropertiesReader.AllowsAgent) {
       this.allowed = false;
       console.warn("Virtual Agent is not enabled in this room");
       return;
     }
 
     this.allowed = true;
-    this.avatarPovObj = document.querySelector("#avatar-pov-node").object3D;
     APP.scene.addEventListener("agent-toggle", this.onToggle);
     APP.scene.addEventListener("clear-scene", this.onClear);
     // APP.scene.emit("agent-toggle");

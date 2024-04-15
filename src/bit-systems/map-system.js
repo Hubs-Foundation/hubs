@@ -37,7 +37,7 @@ class FloorMapClass {
     APP.scene.addEventListener("map-toggle", this.onToggle);
     APP.scene.addEventListener("clear-scene", this.onClear);
 
-    if (!hubProperties.map.allow) {
+    if (!hubProperties.AllowsMap) {
       console.warn("No available map for this room");
       this.allowed = false;
       return;

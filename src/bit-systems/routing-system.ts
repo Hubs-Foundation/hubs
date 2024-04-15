@@ -126,7 +126,7 @@ export class NavigationSystem {
 
   async Init() {
     roomPropertiesReader.waitForProperties().then(() => {
-      this.allowed = roomPropertiesReader.navProps.allow;
+      this.allowed = roomPropertiesReader.AllowsNav;
 
       if (!this.allowed) {
         console.warn("Navigation is not allowed for this room");
@@ -137,10 +137,18 @@ export class NavigationSystem {
       this.nodes = [];
       this.targetInfo = {};
 
-      const roomDimensions = this.navProps.dimensions!;
-      const obstacles = this.navProps.obstacles!;
-      const polygonPoints = this.navProps.polygon!;
-      const targets = this.navProps.targets!;
+      let roomDimensions, obstacles, polygonPoints, targets;
+      try {
+        roomDimensions = this.navProps.dimensions;
+        obstacles = this.navProps.obstacles;
+        polygonPoints = this.navProps.polygon;
+        targets = this.navProps.targets;
+
+        if (!roomDimensions || !obstacles || !polygonPoints || !targets) throw new Error("Could not read nav props");
+      } catch (e) {
+        this.allowed = false;
+        return;
+      }
 
       for (let x = roomDimensions[0]; x < roomDimensions[1]; x += step) {
         for (let z = roomDimensions[2]; z < roomDimensions[3]; z += step) {

@@ -4,6 +4,7 @@ import { removeEntity } from "bitecs";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { FixedPanel } from "../prefabs/fixed-panel";
 import { setLocale } from "../utils/i18n";
+import { roomPropertiesReader } from "../utils/rooms-properties";
 
 export const languageCodes = {
   greek: "el",
@@ -153,13 +154,13 @@ export class TranslationSystem {
   Init(hubProperties, reset) {
     if (reset) {
       this.targets = {};
-      this.allowed = hubProperties.translation.allow;
+      this.allowed = roomPropertiesReader.AllowTrans;
 
       if (!this.allowed) console.warn("Translation is not enabled in this room");
       return;
     }
 
-    this.allowed = hubProperties.translation.allow;
+    this.allowed = roomPropertiesReader.AllowTrans;
     this.transProperties = hubProperties.translation;
     this.targets = {};
     this.avatarPovObj = document.querySelector("#avatar-pov-node").object3D;

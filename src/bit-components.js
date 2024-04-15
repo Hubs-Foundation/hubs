@@ -31,7 +31,7 @@ export const Agent = defineComponent({
   navRef: Types.eid
 });
 
-export const FollowFov = defineComponent();
+export const FollowFov = defineComponent({ offset: [Types.f32, 3] });
 
 export const Hidden = defineComponent();
 export const AgentTextPanel = defineComponent();

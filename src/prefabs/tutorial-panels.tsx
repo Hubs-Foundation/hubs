@@ -8,6 +8,7 @@ import { ProjectionMode } from "../utils/projection-mode";
 import { AlphaMode } from "../utils/create-image-mesh";
 import { TextureCache } from "../utils/texture-cache";
 import { degToRad, radToDeg } from "three/src/math/MathUtils";
+import { FollowFov } from "../bit-components";
 
 const tutorialSchema = "https://kontopoulosdm.github.io/tutorial_";
 
@@ -78,7 +79,8 @@ export function TutorialImagePanel(
   congratsSlides: Array<string>,
   position: ArrayVec3,
   rotation: ArrayVec3,
-  ratio: number
+  ratio: number,
+  followUser: boolean
 ) {
   const textRef = createRef();
   const panelRef = createRef();
@@ -88,6 +90,8 @@ export function TutorialImagePanel(
 
   const slideEntities = [] as Array<EntityDef>;
   const cSlideEntities = [] as Array<EntityDef>;
+
+  const scale = followUser ? 2 : 4;
 
   slides.forEach((slide, index) => {
     slideEntities.push(
@@ -101,7 +105,7 @@ export function TutorialImagePanel(
           cacheKey: TextureCache.key(slide, 1)
         }}
         visible={false}
-        scale={[4, 4, 4]}
+        scale={[scale, scale, scale]}
       ></entity>
     );
   });
@@ -121,63 +125,121 @@ export function TutorialImagePanel(
           cacheKey: TextureCache.key(cSlide, 1)
         }}
         visible={false}
-        scale={[4, 4, 4]}
+        scale={[scale, scale, scale]}
       ></entity>
     );
   });
 
-  return (
-    <entity
-      name="tutorialPanel"
-      floatingTextPanel={{ textRef: textRef, nextRef: nextRef, prevRef: prevRef, testRef: testRef }}
-      ref={panelRef}
-      position={position}
-      rotation={rotation}
-    >
-      {slideEntities}
-      {cSlideEntities}
+  if (!followUser) {
+    return (
       <entity
-        name={`text`}
-        position={[0, 0, -0.03]}
-        ref={textRef}
-        text={{
-          value: "This is a test",
-          color: "#000000",
-          textAlign: "center",
-          anchorX: "center",
-          anchorY: "middle",
-          fontSize: 0.05,
-          maxWidth: 1
-        }}
-        visible={false}
-      />
-      <Button3D
-        ref={nextRef}
-        position={[2, 0, 0.3]}
-        width={0.2}
-        height={0.2}
-        type={BUTTON_TYPES.DEFAULT}
-        scale={[2, 2, 2]}
-        text={">"}
-      />
+        name="tutorialPanel"
+        floatingTextPanel={{ textRef: textRef, nextRef: nextRef, prevRef: prevRef, testRef: testRef }}
+        ref={panelRef}
+        position={position}
+        rotation={rotation}
+      >
+        {slideEntities}
+        {cSlideEntities}
+        <entity
+          name={`text`}
+          position={[0, 0, -0.03]}
+          ref={textRef}
+          text={{
+            value: "This is a test",
+            color: "#000000",
+            textAlign: "center",
+            anchorX: "center",
+            anchorY: "middle",
+            fontSize: 0.05,
+            maxWidth: 1
+          }}
+          visible={false}
+        />
+        <Button3D
+          ref={nextRef}
+          position={[2, 0, 0.3]}
+          width={0.2}
+          height={0.2}
+          type={BUTTON_TYPES.DEFAULT}
+          scale={[2, 2, 2]}
+          text={">"}
+        />
 
-      <Button3D
-        ref={prevRef}
-        position={[-2, 0, 0.3]}
-        scale={[2, 2, 2]}
-        width={0.2}
-        height={0.2}
-        type={BUTTON_TYPES.DEFAULT}
-        text={"<"}
-      />
-      <Button3D
-        ref={testRef}
-        position={[0, -1, 0.3]}
-        width={0.5}
-        height={0.2}
-        type={BUTTON_TYPES.DEFAULT}
-        text={"Click me!"}
-      />
-    </entity>
-  );
+        <Button3D
+          ref={prevRef}
+          position={[-2, 0, 0.3]}
+          scale={[2, 2, 2]}
+          width={0.2}
+          height={0.2}
+          type={BUTTON_TYPES.DEFAULT}
+          text={"<"}
+        />
+        <Button3D
+          ref={testRef}
+          position={[0, -1, 0.3]}
+          width={0.5}
+          height={0.2}
+          type={BUTTON_TYPES.DEFAULT}
+          text={"Click me!"}
+        />
+      </entity>
+    );
+  } else {
+    return (
+      <entity
+        name="tutorialPanel"
+        floatingTextPanel={{ textRef: textRef, nextRef: nextRef, prevRef: prevRef, testRef: testRef }}
+        ref={panelRef}
+        position={position}
+        rotation={rotation}
+        followFov={{ offset: [0, 0, -2] }}
+      >
+        {slideEntities}
+        {cSlideEntities}
+        <entity
+          name={`text`}
+          position={[0, 0, -0.03]}
+          ref={textRef}
+          text={{
+            value: "This is a test",
+            color: "#000000",
+            textAlign: "center",
+            anchorX: "center",
+            anchorY: "middle",
+            fontSize: 0.05,
+            maxWidth: 1
+          }}
+          visible={false}
+        />
+        <Button3D
+          ref={nextRef}
+          position={[2, 0, 0.3]}
+          width={0.2}
+          height={0.2}
+          type={BUTTON_TYPES.DEFAULT}
+          scale={[2, 2, 2]}
+          text={">"}
+        />
+
+        <Button3D
+          ref={prevRef}
+          position={[-2, 0, 0.3]}
+          scale={[2, 2, 2]}
+          width={0.2}
+          height={0.2}
+          type={BUTTON_TYPES.DEFAULT}
+          text={"<"}
+        />
+        <Button3D
+          ref={testRef}
+          position={[0, -1, 0.3]}
+          width={0.5}
+          height={0.2}
+          type={BUTTON_TYPES.DEFAULT}
+          text={"Click me!"}
+        />
+      </entity>
+    );
+  }
 }

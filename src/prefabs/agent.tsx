@@ -23,7 +23,7 @@ export function AgentEntity() {
   const navRef = createRef();
 
   return (
-    <entity followFov>
+    <entity followFov={{ offset: [0, 0, -1.5] }}>
       <entity
         name="Agent"
         agent={{ panelRef, textRef, micRef, snapRef, nextRef, prevRef, navRef }}

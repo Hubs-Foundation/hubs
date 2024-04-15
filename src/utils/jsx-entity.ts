@@ -395,7 +395,9 @@ export interface JSXComponentData extends ComponentData {
   loopAnimation?: LoopAnimationParams;
   lookatuser?: any;
   micButtonTag?: any;
-  followFov?: any;
+  followFov?: {
+    offset: ArrayVec3;
+  };
   fixedTextPanel?: {
     textRef: Ref;
   };
