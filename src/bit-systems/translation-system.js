@@ -41,7 +41,7 @@ export const hudPanelLanguages = {
     translate: "Μετάφραση",
     map: "Χάρτης",
     langugage: "Γλώσσα",
-    visit: "Επίσκεψη στο Δωμάτιο "
+    visit: "Επίσκεψη"
   },
   english: {
     agent: "Agent",
@@ -151,7 +151,7 @@ export class TranslationSystem {
     return this.textTranslations[this.mylanguage];
   }
 
-  Init(hubProperties, reset) {
+  async Init(reset) {
     if (reset) {
       this.targets = {};
       this.allowed = roomPropertiesReader.AllowTrans;
@@ -161,7 +161,7 @@ export class TranslationSystem {
     }
 
     this.allowed = roomPropertiesReader.AllowTrans;
-    this.transProperties = hubProperties.translation;
+    this.transProperties = roomPropertiesReader.transProps;
     this.targets = {};
     this.avatarPovObj = document.querySelector("#avatar-pov-node").object3D;
 
@@ -392,6 +392,7 @@ export class TranslationSystem {
     if (!!this.mylanguage) {
       window.APP.store.update({ profile: { language: this.mylanguage } });
       APP.scene.emit("language_updated", { language: this.mylanguage });
+      APP.store.update({ preferences: { locale: languageCodes[newLang] } });
       setLocale(languageCodes[newLang]);
       console.log(languageCodes[newLang]);
     }

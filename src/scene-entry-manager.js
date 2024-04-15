@@ -71,12 +71,12 @@ export default class SceneEntryManager {
 
     if (reset) this.scene.emit("clear-scene");
 
-    const hubProperties = await roomPropertiesReader.Read(getCurrentHubId(), reset);
-    translationSystem.Init(hubProperties, reset);
-    virtualAgent.Init(hubProperties, reset);
-    floorMap.Init(hubProperties, reset);
-    navSystem.Init(hubProperties, reset);
-    tutorialManager.Init();
+    await roomPropertiesReader.Read(getCurrentHubId(), reset);
+    translationSystem.Init(reset);
+    virtualAgent.Init(reset);
+    floorMap.Init(reset);
+    navSystem.Init(reset);
+    tutorialManager.Init(reset);
   };
 
   enterScene = async (enterInVR, muteOnEntry) => {

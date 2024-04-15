@@ -125,103 +125,101 @@ export class NavigationSystem {
   }
 
   async Init() {
-    roomPropertiesReader.waitForProperties().then(() => {
-      this.allowed = roomPropertiesReader.AllowsNav;
+    this.allowed = roomPropertiesReader.AllowsNav;
 
-      if (!this.allowed) {
-        console.warn("Navigation is not allowed for this room");
-        return;
-      }
+    if (!this.allowed) {
+      console.warn("Navigation is not allowed for this room");
+      return;
+    }
 
-      this.navProps = roomPropertiesReader.navProps;
-      this.nodes = [];
-      this.targetInfo = {};
+    this.navProps = roomPropertiesReader.navProps;
+    this.nodes = [];
+    this.targetInfo = {};
 
-      let roomDimensions, obstacles, polygonPoints, targets;
-      try {
-        roomDimensions = this.navProps.dimensions;
-        obstacles = this.navProps.obstacles;
-        polygonPoints = this.navProps.polygon;
-        targets = this.navProps.targets;
+    let roomDimensions, obstacles, polygonPoints, targets;
+    try {
+      roomDimensions = this.navProps.dimensions;
+      obstacles = this.navProps.obstacles;
+      polygonPoints = this.navProps.polygon;
+      targets = this.navProps.targets;
 
-        if (!roomDimensions || !obstacles || !polygonPoints || !targets) throw new Error("Could not read nav props");
-      } catch (e) {
-        this.allowed = false;
-        return;
-      }
+      if (!roomDimensions || !obstacles || !polygonPoints || !targets) throw new Error("Could not read nav props");
+    } catch (e) {
+      this.allowed = false;
+      return;
+    }
 
-      for (let x = roomDimensions[0]; x < roomDimensions[1]; x += step) {
-        for (let z = roomDimensions[2]; z < roomDimensions[3]; z += step) {
-          const point = [x, z] as [number, number];
+    for (let x = roomDimensions[0]; x < roomDimensions[1]; x += step) {
+      for (let z = roomDimensions[2]; z < roomDimensions[3]; z += step) {
+        const point = [x, z] as [number, number];
 
-          let isInsideBox = false;
-          for (let i = 0; i < obstacles.length; i++) {
-            const obstacle = obstacles[i];
-            if (this.IsPointInside(point, obstacle, true)) {
-              isInsideBox = true;
-              break;
-            }
+        let isInsideBox = false;
+        for (let i = 0; i < obstacles.length; i++) {
+          const obstacle = obstacles[i];
+          if (this.IsPointInside(point, obstacle, true)) {
+            isInsideBox = true;
+            break;
           }
-          if (isInsideBox) {
-            continue;
-          }
-          if (this.IsPointInside(point, polygonPoints, false)) this.nodes.push(new Node(point[0], 0, point[1]));
         }
-      }
-
-      targets.forEach(target => {
-        const targetPos = target.position;
-        const targetNode = new Node(targetPos[0], 0, targetPos[1]);
-
-        let minDistanceNodeIndex: number;
-        let minDistance = INF;
-        this.nodes.forEach((node, index) => {
-          const dist = targetNode.vector.distanceTo(node.vector);
-          if (dist < minDistance) {
-            minDistance = dist;
-            minDistanceNodeIndex = index;
-          }
-        });
-
-        if (targetPos[1] % step !== 0) {
-          const helperNode = new Node(targetPos[0], 0, this.nodes[minDistanceNodeIndex!].z);
-          minDistanceNodeIndex = this.nodes.push(helperNode) - 1;
-          minDistance = helperNode.vector.distanceTo(targetNode.vector);
+        if (isInsideBox) {
+          continue;
         }
+        if (this.IsPointInside(point, polygonPoints, false)) this.nodes.push(new Node(point[0], 0, point[1]));
+      }
+    }
 
-        const targetIndex = this.nodes.push(targetNode) - 1;
-        this.targetInfo[target.name] = targetIndex;
+    targets.forEach(target => {
+      const targetPos = target.position;
+      const targetNode = new Node(targetPos[0], 0, targetPos[1]);
 
-        this.nodes[minDistanceNodeIndex!].neighboors[targetIndex] = minDistance;
-        this.nodes[targetIndex].neighboors[minDistanceNodeIndex!] = minDistance;
+      let minDistanceNodeIndex: number;
+      let minDistance = INF;
+      this.nodes.forEach((node, index) => {
+        const dist = targetNode.vector.distanceTo(node.vector);
+        if (dist < minDistance) {
+          minDistance = dist;
+          minDistanceNodeIndex = index;
+        }
       });
 
-      for (let i = 0; i < this.nodes.length; i++) {
-        for (let j = i + 1; j < this.nodes.length; j++) {
-          if (this.AreNodesAdjacent(this.nodes[i], this.nodes[j])) {
-            const distance = this.nodes[i].vector.manhattanDistanceTo(this.nodes[j].vector);
-            if (distance > 0) {
-              this.nodes[i].neighboors[j] = distance;
-              this.nodes[j].neighboors[i] = distance;
-            }
-          }
-        }
+      if (targetPos[1] % step !== 0) {
+        const helperNode = new Node(targetPos[0], 0, this.nodes[minDistanceNodeIndex!].z);
+        minDistanceNodeIndex = this.nodes.push(helperNode) - 1;
+        minDistance = helperNode.vector.distanceTo(targetNode.vector);
       }
 
-      this.nodes.forEach(node => {
-        let count = 0;
-        Object.keys(node.neighboors).forEach(_ => {
-          count++;
-        });
-        if (count === 0) console.log(node.x, node.z);
-      });
+      const targetIndex = this.nodes.push(targetNode) - 1;
+      this.targetInfo[target.name] = targetIndex;
 
-      this.nodeCount = this.nodes.length;
-      this.mapped = false;
-      this.mappedNodes = new Array(this.nodeCount).fill(false);
-      this.paths = new Array(this.nodeCount);
-      for (let j = 0; j < this.nodeCount; j++) this.paths[j] = [];
+      this.nodes[minDistanceNodeIndex!].neighboors[targetIndex] = minDistance;
+      this.nodes[targetIndex].neighboors[minDistanceNodeIndex!] = minDistance;
     });
+
+    for (let i = 0; i < this.nodes.length; i++) {
+      for (let j = i + 1; j < this.nodes.length; j++) {
+        if (this.AreNodesAdjacent(this.nodes[i], this.nodes[j])) {
+          const distance = this.nodes[i].vector.manhattanDistanceTo(this.nodes[j].vector);
+          if (distance > 0) {
+            this.nodes[i].neighboors[j] = distance;
+            this.nodes[j].neighboors[i] = distance;
+          }
+        }
+      }
+    }
+
+    this.nodes.forEach(node => {
+      let count = 0;
+      Object.keys(node.neighboors).forEach(_ => {
+        count++;
+      });
+      if (count === 0) console.log(node.x, node.z);
+    });
+
+    this.nodeCount = this.nodes.length;
+    this.mapped = false;
+    this.mappedNodes = new Array(this.nodeCount).fill(false);
+    this.paths = new Array(this.nodeCount);
+    for (let j = 0; j < this.nodeCount; j++) this.paths[j] = [];
   }
 
   AreNodesAdjacent(node1: Node, node2: Node) {

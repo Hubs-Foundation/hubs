@@ -1468,6 +1468,8 @@ class PreferencesScreen extends Component {
     const intl = this.props.intl;
     const shouldPromptForRefresh = this.props.store.state.preferences.shouldPromptForRefresh;
 
+    console.log(this.props.store.state.preferences);
+
     return (
       <div className={classNames(styles.preferencesPanel)}>
         {shouldPromptForRefresh && (

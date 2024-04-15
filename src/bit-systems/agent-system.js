@@ -107,7 +107,7 @@ export default class VirtualAgent {
     };
   }
 
-  Init(hubProperties, reset) {
+  Init(reset) {
     if (reset) {
       APP.scene.removeEventListener("agent-toggle", this.onToggle);
       APP.scene.removeEventListener("clear-scene", this.onClear);
@@ -125,7 +125,7 @@ export default class VirtualAgent {
     APP.scene.addEventListener("agent-toggle", this.onToggle);
     APP.scene.addEventListener("clear-scene", this.onClear);
     // APP.scene.emit("agent-toggle");
-    this.navProperties = hubProperties;
+    this.navProperties = roomPropertiesReader.navProps;
   }
 
   Remove() {
@@ -332,7 +332,7 @@ export default class VirtualAgent {
   }
 
   async TestNavigationUI() {
-    const targets = this.navProperties.navigation.targets;
+    const targets = this.navProperties.targets;
     const avatarPosition = this.avatarPos;
 
     const update = () => {

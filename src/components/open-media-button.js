@@ -3,6 +3,7 @@ import { guessContentType } from "../utils/media-url-utils";
 import { handleExitTo2DInterstitial } from "../utils/vr-interstitial";
 import { changeHub } from "../change-hub";
 import { translationSystem } from "../bit-systems/translation-system";
+import { tutorialManager } from "../bit-systems/tutorial-system";
 
 AFRAME.registerComponent("open-media-button", {
   schema: {
@@ -34,6 +35,7 @@ AFRAME.registerComponent("open-media-button", {
               label = "go to";
             } else {
               label = translationSystem.VisitButtonText;
+              tutorialManager.changeRoomID = hubId;
             }
           }
         }

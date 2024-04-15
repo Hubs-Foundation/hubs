@@ -78,7 +78,6 @@ export function setLocale(locale) {
       });
     }
   }
-  console.log("locale changed");
 }
 
 const interval = window.setInterval(() => {

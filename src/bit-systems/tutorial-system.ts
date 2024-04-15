@@ -8,7 +8,7 @@ import { Text } from "troika-three-text";
 import { FloatingTextPanel, Interacted } from "../bit-components";
 import { GetTextSize, UpdatePanelSize } from "../utils/interactive-panels";
 import { updateSlice9Geometry } from "../update-slice9-geometry";
-import { defineQuery, enterQuery, hasComponent, removeEntity } from "bitecs";
+import { defineQuery, enterQuery, entityExists, hasComponent, removeEntity } from "bitecs";
 import { degToRad } from "three/src/math/MathUtils";
 import { languageCodes, translationSystem } from "./translation-system";
 import { navSystem } from "./routing-system";
@@ -73,6 +73,7 @@ class TutorialManager {
   testObj: Object3D;
 
   room: "lobby" | "tradeshows" | "conference";
+  changeRoomID: string;
 
   constructor() {
     this.allowed = false;
@@ -80,58 +81,62 @@ class TutorialManager {
     this.activeCategoryIndex = 0;
   }
 
-  Init() {
-    roomPropertiesReader.waitForProperties().then(() => {
-      if (!roomPropertiesReader.AllowsTutorial) {
-        this.allowed = false;
-        console.warn(`Tutorial is not allowed in this room`);
-        return;
+  Init(reset: boolean) {
+    if (reset) {
+      if (this.panelRef && entityExists(APP.world, this.panelRef)) {
+        this.RemovePanel();
       }
+    }
 
-      let startingTime: number;
+    if (!roomPropertiesReader.AllowsTutorial) {
+      this.allowed = false;
+      console.warn(`Tutorial is not allowed in this room`);
+      return;
+    }
 
-      if (roomPropertiesReader.roomProps.room === "Lobby") {
-        this.room = "lobby";
-        startingTime = 1000;
-        this.roomTutorial = lobbySteps;
-      } else if (roomPropertiesReader.roomProps.room === "Tradeshows") {
-        this.room = "tradeshows";
-        startingTime = 1000;
-        this.roomTutorial = TradeshowSteps;
-      } else if (roomPropertiesReader.roomProps.room === "Conference Room") {
-        this.room = "conference";
-        this.roomTutorial = ConferenceSteps;
-        startingTime = 500;
-      } else startingTime = 1000;
+    let startingTime: number;
 
-      this.categoriesArray = [];
-      if (roomPropertiesReader.AllowsNav) {
-        this.roomTutorial.forEach(stepCategory => {
-          if (stepCategory.type === "both" || stepCategory.type === "nav") this.categoriesArray.push(stepCategory);
-        });
-      } else {
-        this.roomTutorial.forEach(stepCategory => {
-          if (stepCategory.type === "both" || stepCategory.type === "noNav") this.categoriesArray.push(stepCategory);
-        });
-      }
+    if (roomPropertiesReader.roomProps.room === "Lobby") {
+      this.room = "lobby";
+      startingTime = 1000;
+      this.roomTutorial = lobbySteps;
+    } else if (roomPropertiesReader.roomProps.room === "Tradeshows") {
+      this.room = "tradeshows";
+      startingTime = 1000;
+      this.roomTutorial = TradeshowSteps;
+    } else if (roomPropertiesReader.roomProps.room === "Conference Room") {
+      this.room = "conference";
+      this.roomTutorial = ConferenceSteps;
+      startingTime = 500;
+    } else startingTime = 1000;
 
-      const avatarheadElement = document.querySelector("#avatar-pov-node") as AElement;
-      this.Ascene = document.querySelector("a-scene") as AScene;
-      this.avatarHead = avatarheadElement.object3D;
+    this.categoriesArray = [];
+    if (roomPropertiesReader.AllowsNav) {
+      this.roomTutorial.forEach(stepCategory => {
+        if (stepCategory.type === "both" || stepCategory.type === "nav") this.categoriesArray.push(stepCategory);
+      });
+    } else {
+      this.roomTutorial.forEach(stepCategory => {
+        if (stepCategory.type === "both" || stepCategory.type === "noNav") this.categoriesArray.push(stepCategory);
+      });
+    }
 
-      setTimeout(() => {
-        this.allowed = true;
-        console.log(roomPropertiesReader.tutorialProps.slides);
-        this.AddTutorialPanel(
-          roomPropertiesReader.roomProps.tutorial.slides!,
-          roomPropertiesReader.tutorialProps.position!,
-          roomPropertiesReader.tutorialProps.rotation!,
-          roomPropertiesReader.tutorialProps.ratio!
-        );
-      }, startingTime);
+    const avatarheadElement = document.querySelector("#avatar-pov-node") as AElement;
+    this.Ascene = document.querySelector("a-scene") as AScene;
+    this.avatarHead = avatarheadElement.object3D;
 
-      this.onMicEvent = this.onMicEvent.bind(this);
-    });
+    setTimeout(() => {
+      this.allowed = true;
+      console.log(roomPropertiesReader.tutorialProps.slides);
+      this.AddTutorialPanel(
+        roomPropertiesReader.roomProps.tutorial.slides!,
+        roomPropertiesReader.tutorialProps.position!,
+        roomPropertiesReader.tutorialProps.rotation!,
+        roomPropertiesReader.tutorialProps.ratio!
+      );
+    }, startingTime);
+
+    this.onMicEvent = this.onMicEvent.bind(this);
   }
 
   Tick(world: HubsWorld) {
@@ -191,8 +196,6 @@ class TutorialManager {
     this.activeStep = this.activeCategory.steps[this.activeStepIndex];
     this.RenderSlide();
     this.OnceFunc();
-
-    console.log(this.categoriesArray);
   }
 
   RemovePanel() {
