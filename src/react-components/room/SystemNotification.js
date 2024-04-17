@@ -8,10 +8,10 @@ import { Row } from "../layout/Row";
 import { Column } from "../layout/Column";
 import { ReactComponent as CloseIcon } from "../icons/Close.svg";
 
-export const SystemNotification = memo(({ className, body, link, onDismiss, ...rest }) => {
+export const SystemNotification = memo(({ body, link, onDismiss }) => {
   const handleOnLink = useCallback(() => {
     window.open(link);
-  }, []);
+  }, [link]);
 
   return (
     <Row noWrap className={styles.notification} padding="sm">
