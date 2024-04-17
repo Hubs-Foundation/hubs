@@ -1,3 +1,5 @@
 {
-  "addons": ["hubs-duck-addon", "hubs-portals-addon"]
+  "addons": [
+    "hubs-duck-addon"
+  ]
 }
