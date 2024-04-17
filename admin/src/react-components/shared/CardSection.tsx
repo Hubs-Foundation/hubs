@@ -7,27 +7,32 @@ type CardSectionPropsT = {
   ctaCallback: () => void;
   body: string;
   className?: string;
+  showIcon?: boolean;
 };
 
-const CardSection = ({ cta, ctaLabel, ctaCallback, body, className }: CardSectionPropsT) => {
+const CardSection = ({ cta, ctaLabel, ctaCallback, body, className, showIcon = true }: CardSectionPropsT) => {
   return (
     <div className={`card_section_wrapper ${className}`}>
       <div className="flex-align-items-center max-w-800-px">
-        <div>
-          <Icon name="arrow-right-circle" size={30} classProp="mr-20" />
-        </div>
+        {showIcon && (
+          <div>
+            <Icon name="arrow-right-circle" size={30} classProp="mr-20" />
+          </div>
+        )}
         <p className="body-md mr-10">{body}</p>
       </div>
 
-      <div className="flex-box">
-        <Button
-          onClick={ctaCallback}
-          label={ctaLabel ? ctaLabel : cta}
-          size={ButtonSizesE.SMALL}
-          text={cta}
-          classProp="nowrap"
-        />
-      </div>
+      {ctaCallback && (
+        <div className="flex-box">
+          <Button
+            onClick={ctaCallback}
+            label={ctaLabel ? ctaLabel : cta}
+            size={ButtonSizesE.SMALL}
+            text={cta}
+            classProp="nowrap"
+          />
+        </div>
+      )}
     </div>
   );
 };

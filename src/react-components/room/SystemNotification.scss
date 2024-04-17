@@ -1,0 +1,67 @@
+@use "../styles/theme.scss";
+
+:local(.notification) {
+  pointer-events: all;
+  border-radius: 24px;
+  background-color: theme.$cancel-color;
+  border: 1px solid theme.$cancel-color-pressed;
+  align-self: center;
+  font-size: theme.$font-size-md;
+
+  @media (min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
+    bottom: 24px;
+  }
+}
+
+:local(.notificationText) {
+  max-width: 40vw;
+  min-width: 150px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: theme.$text5-color;
+
+  @media (min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
+    bottom: 480;
+    max-width: 40vw;
+    min-width: 480px;
+  }
+}
+
+:local(.close-button) {
+  &:hover {
+    svg {
+      color: theme.$text5-color-hover;
+    }
+  }
+  svg {
+    color: theme.$text5-color;
+  }
+}
+
+:local(.inline-icon) {
+  border-radius: 36px;
+  background-color: var(--background1-color);
+  border: 1px solid var(--border1-color);
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  margin: 5px;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+:local(.end-button) {
+  flex: 0;
+  justify-content: end;
+  min-width: fit-content;
+  width: fit-content;
+  min-height: fit-content;
+  height: fit-content;
+}

@@ -11,8 +11,17 @@ import { Icon } from "@mozilla/lilypad-ui";
 import { DiscordIcon, BookIcon, QuestionIcon, GithubIcon } from "../shared/icons";
 import Card from "../shared/Card";
 import { hasPaidFeature, isBrandingDisabled } from "../../utils/feature_flags";
+import * as AppConfigUtils from "../../utils/app-config";
+import { store } from "hubs/src/utils/store-instance";
 
-const styles = withCommonStyles(() => ({}));
+const styles = withCommonStyles(() => ({
+  notificationCard: {
+    backgroundColor: "#F44336"
+  },
+  notificationCardSection: {
+    color: "#FFFFFF"
+  }
+}));
 
 const SystemEditorComponent = ({ classes }) => {
   const [adminInfo, setAdminInfo] = useState<AdminInfoT | null>(null);
@@ -23,6 +32,21 @@ const SystemEditorComponent = ({ classes }) => {
   const [exceededStorageQuota, setExceededStorageQuota] = useState<boolean>(false);
   const [isInSESSandbox, setIsInSESSandbox] = useState<boolean>(false);
   const [isUsingCloudflare, setIsUsingCloudflare] = useState<boolean>(false);
+  const [features, setFeatures] = useState<any | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      if (store.state && store.state.credentials && store.state.credentials.token) {
+        AppConfigUtils.setAuthToken(store.state.credentials.token);
+        const config = await AppConfigUtils.getConfig();
+        setFeatures(config["features"]);
+      }
+    })();
+
+    return () => {
+      setFeatures(null);
+    };
+  }, [setFeatures]);
 
   /**
    * Init Component
@@ -85,6 +109,21 @@ const SystemEditorComponent = ({ classes }) => {
 
   return (
     <div className="page_wrapper">
+      {features && features["show_global_notification"] && (
+        <Card className={`mb-24 ${classes.notificationCard}`}>
+          <CardSection
+            className={classes.notificationCardSection}
+            ctaCallback={() => {
+              features["global_notification_link"]
+                ? window.open(features["global_notification_link"])
+                : (window.location.href = "#/app-settings");
+            }}
+            cta={features["global_notification_link"] ? "Learn More" : "Go to App Settings"}
+            body={features["global_notification_body"] || "Notification body empty. Configure it in App Settings."}
+            showIcon={false}
+          />
+        </Card>
+      )}
       <Card className="mb-24">
         <h2 className="heading-lg mb-24">Getting Started</h2>
 
@@ -157,7 +196,6 @@ const SystemEditorComponent = ({ classes }) => {
           />
         </section>
       </Card>
-
       {/* WARNING  */}
       {reticulumMeta && adminInfo && (needsAvatars || needsScenes || isInSESSandbox || exceededStorageQuota) && (
         <Card>
@@ -265,7 +303,6 @@ const SystemEditorComponent = ({ classes }) => {
           )}
         </Card>
       )}
-
       <Card>
         <h2 className="heading-lg mb-24">Getting Help</h2>
         <div className="flex-align-items-center mb-20">
@@ -339,7 +376,6 @@ const SystemEditorComponent = ({ classes }) => {
           </p>
         </div>
       </Card>
-
       <div className="flex-align-items-center ml-12">
         <a href="https://hubs.mozilla.com/whats-new" target="_blank" rel="noopener noreferrer" className="link mr-24">
           What's new
@@ -348,7 +384,6 @@ const SystemEditorComponent = ({ classes }) => {
           <p className="body-md">{`Hubs version: ${process.env.BUILD_VERSION || "?"}`}</p>
         )}
       </div>
-
       {configs.IS_LOCAL_OR_CUSTOM_CLIENT && (
         <div className="body-md mt-12 ml-12">
           <p>App client: Custom client</p>

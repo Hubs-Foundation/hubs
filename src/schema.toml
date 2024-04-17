@@ -30,6 +30,9 @@ features.default_room_id = { category = "features", type = "string", name = "Hom
 features.enable_spoke = { category = "features", type = "boolean", name = "Enable Scene Editor", description = "Enable Scene Editor for all visitors."}
 features.enable_lobby_ghosts = { category = "features", type = "boolean", name = "Enable Lobby Ghosts", description = "Allow people in the lobby to explore the room while remaining invisible and inaudible." }
 features.public_api_access = { category = "features", type = "boolean", name = "Public API Access", description = "Enables a publicly-accessible API for managing backend resources programmatically.", internal = "false" }
+features.show_global_notification = { category = "features", type = "boolean", name = "Show System Notification", description = "Enable showing a system notification in the admin panel, Spoke and inside Hubs rooms." }
+features.global_notification_body = { category = "features", type = "string", name = "Notification Body Text", description = "The notification body." }
+features.global_notification_link = { category = "features", type = "string", name = "Notification Link Text", description = "An optional notification link button." }
 
 features.permissive_rooms = { category = "rooms", type = "boolean", name = "Permissive Rooms", description = "Enable full content creation permissions on new rooms." }
 features.disable_room_creation = { category = "rooms", type = "boolean", name = "Disable room creation", description = "Disable creating rooms for non-administrators." }

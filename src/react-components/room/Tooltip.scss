@@ -33,6 +33,7 @@
 
 :local(.tip-show-bottom) {
   animation: 0.2s ease normal soft-transition-bottom;
+  margin-top: 15px;
 }
 
 @keyframes soft-transition-bottom {
@@ -119,6 +120,7 @@
     width: 18px;
     height: 18px;
     margin-right: 10px;
+    color: theme.$text5-color;
   }
 }
 

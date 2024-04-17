@@ -6,8 +6,9 @@
   background-color: theme.$accent4-color;
   border-radius: 16px;
   display: flex;
-  color: theme.$text4-color;
+  color: theme.$text5-color;
   align-items: center;
+  margin-top: 15px;
 
   @media (min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
     bottom: 24px;

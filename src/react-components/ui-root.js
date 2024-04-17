@@ -93,6 +93,7 @@ import { CloseRoomModal } from "./room/CloseRoomModal";
 import { WebVRUnsupportedModal } from "./room/WebVRUnsupportedModal";
 import { TweetModalContainer } from "./room/TweetModalContainer";
 import { TipContainer, FullscreenTip, RecordModeTip } from "./room/TipContainer";
+import { SystemNotification } from "./room/SystemNotification.js";
 import { SpectatingLabel } from "./room/SpectatingLabel";
 import { SignInMessages } from "./auth/SignInModal";
 import { MediaDevicesEvents } from "../utils/media-devices-utils";
@@ -210,7 +211,8 @@ class UIRoot extends Component {
     sidebarId: null,
     presenceCount: 0,
     chatPrefix: "",
-    chatAutofocus: false
+    chatAutofocus: false,
+    globalNotificationDismissed: false
   };
 
   constructor(props) {
@@ -1335,6 +1337,10 @@ class UIRoot extends Component {
       }
     ];
 
+    const showGlobalNotification = configs.feature("show_global_notification");
+    const globalNotificationBody = configs.feature("global_notification_body");
+    const globalNotificationLink = configs.feature("global_notification_link");
+
     return (
       <MoreMenuContextProvider>
         <ReactAudioContext.Provider value={this.state.audioContext}>
@@ -1456,6 +1462,13 @@ class UIRoot extends Component {
                       />
                     )}
                     <NotificationsContainer>
+                      {showGlobalNotification && !this.state.globalNotificationDismissed && (
+                        <SystemNotification
+                          body={globalNotificationBody}
+                          link={globalNotificationLink}
+                          onDismiss={() => this.setState({ globalNotificationDismissed: true })}
+                        />
+                      )}
                       {(this.state.hide || this.state.hideUITip || !this.props.activeObject) && (
                         <TipContainer
                           inLobby={watching}
