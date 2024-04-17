@@ -26,31 +26,30 @@ Tips.propTypes = {
 };
 
 const TOOLTIP_STEPS = {
-  "tips.desktop.welcome": "Desktop Welcome Message",
-  "tips.desktop.locomotion": "Desktop Locomotion",
-  "tips.desktop.turning": "Desktop Turning",
-  "tips.desktop.invite": "Desktop Invite",
-  "tips.desktop.end": "Desktop End",
-  "tips.desktop.menu": "Desktop Menu",
-  "tips.mobile.welcome": "Mobile Welcome Message",
-  "tips.mobile.locomotion": "Mobile Locomotion",
-  "tips.mobile.turning": "Mobile Turning",
-  "tips.mobile.end": "Mobile End",
-  "tips.mobile.menu": "Mobile Menu"
+  "tips.desktop.welcome": "Welcome Message",
+  "tips.desktop.locomotion": "Locomotion",
+  "tips.desktop.turning": "Turning",
+  "tips.desktop.invite": "Invite",
+  "tips.desktop.end": "End",
+  "tips.desktop.menu": "Menu"
 };
+const steps = Object.keys(TOOLTIP_STEPS);
 
 export const Tooltips = ({ step }) => <RoomLayout viewport={<Tooltip step={step} />} />;
 
 Tooltips.argTypes = {
   step: {
     name: "Onboarding tips step",
-    options: Object.keys(TOOLTIP_STEPS),
+    options: steps,
     control: {
       type: "select",
       labels: TOOLTIP_STEPS
-    },
-    defaultValue: Object.keys(TOOLTIP_STEPS)[0]
+    }
   }
+};
+
+Tooltips.args = {
+  step: steps[0]
 };
 
 Tooltips.propTypes = {

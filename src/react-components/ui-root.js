@@ -1461,7 +1461,7 @@ class UIRoot extends Component {
                         onViewProfile={sessionId => this.setSidebar("user", { selectedUserId: sessionId })}
                       />
                     )}
-                    <NotificationsContainer>
+                    <NotificationsContainer isMobile={isMobile}>
                       {showGlobalNotification && !this.state.globalNotificationDismissed && (
                         <SystemNotification
                           body={globalNotificationBody}

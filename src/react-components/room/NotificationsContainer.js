@@ -3,9 +3,7 @@ import PropTypes from "prop-types";
 import classNames from "classnames";
 import styles from "./NotificationsContainer.scss";
 
-const isMobile = AFRAME.utils.device.isMobile();
-
-export function NotificationsContainer({ className, children, ...rest }) {
+export function NotificationsContainer({ className, children, isMobile, ...rest }) {
   return (
     <div className={classNames(className, styles.content, isMobile && styles.mobile)} {...rest}>
       {children}
@@ -15,5 +13,6 @@ export function NotificationsContainer({ className, children, ...rest }) {
 
 NotificationsContainer.propTypes = {
   className: PropTypes.string,
-  children: PropTypes.node
+  children: PropTypes.node,
+  isMobile: PropTypes.bool
 };

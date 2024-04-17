@@ -3,7 +3,6 @@ import React from "react";
 import { RoomLayout } from "../layout/RoomLayout";
 import styles from "../../assets/stylesheets/presence-log.scss";
 import PermissionMessage from "../permission-message";
-import { NotificationsContainer } from "./NotificationsContainer";
 
 export default {
   title: "Room/Notifications",
@@ -54,24 +53,19 @@ const entries = [
 export const Base = () => (
   <RoomLayout
     viewport={
-      <NotificationsContainer>
-        <div
-          style={{ alignItems: "center" }}
-          className={classNames(styles.presenceLog, styles["presenceLogPermission"])}
-        >
-          {entries.map(entry => {
-            return (
-              <PermissionMessage
-                key={entry.key}
-                permission={entry.permission}
-                className={classNames(entryClasses, styles.permission)}
-                body={entry.body}
-                isMod={false}
-              />
-            );
-          })}
-        </div>
-      </NotificationsContainer>
+      <div style={{ alignItems: "center" }} className={classNames(styles.presenceLog, styles["presenceLogPermission"])}>
+        {entries.map(entry => {
+          return (
+            <PermissionMessage
+              key={entry.key}
+              permission={entry.permission}
+              className={classNames(entryClasses, styles.permission)}
+              body={entry.body}
+              isMod={false}
+            />
+          );
+        })}
+      </div>
     }
   />
 );
