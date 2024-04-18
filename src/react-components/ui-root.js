@@ -1337,9 +1337,6 @@ class UIRoot extends Component {
       }
     ];
 
-    const globalNotificationBody = "COPY HERE";
-    const globalNotificationLink = "https://www.mozilla.com";
-
     return (
       <MoreMenuContextProvider>
         <ReactAudioContext.Provider value={this.state.audioContext}>
@@ -1461,10 +1458,10 @@ class UIRoot extends Component {
                       />
                     )}
                     <NotificationsContainer isMobile={isMobile}>
-                      {!this.state.globalNotificationDismissed && (
+                      {configs.sunset.notification && !this.state.globalNotificationDismissed && (
                         <SystemNotification
-                          body={globalNotificationBody}
-                          link={globalNotificationLink}
+                          body={configs.sunset.notification.body}
+                          link={configs.sunset.notification.link}
                           onDismiss={() => this.setState({ globalNotificationDismissed: true })}
                         />
                       )}

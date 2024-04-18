@@ -109,17 +109,17 @@ const SystemEditorComponent = ({ classes }) => {
 
   return (
     <div className="page_wrapper">
-      <Card className={`mb-24 ${classes.notificationCard}`}>
-        <CardSection
-          className={classes.notificationCardSection}
-          ctaCallback={() => {
-            window.open("https://www.mozilla.com");
-          }}
-          cta={"Learn More"}
-          body={"COPY HERE"}
-          showIcon={false}
-        />
-      </Card>
+      {configs.sunset.notification && (
+        <Card className={`mb-24 ${classes.notificationCard}`}>
+          <CardSection
+            className={classes.notificationCardSection}
+            ctaCallback={() => configs.sunset.notification.link}
+            cta={"Learn More"}
+            body={configs.sunset.notification.body}
+            showIcon={false}
+          />
+        </Card>
+      )}
       <Card className="mb-24">
         <h2 className="heading-lg mb-24">Getting Started</h2>
 

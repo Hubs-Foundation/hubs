@@ -18,4 +18,11 @@ const configs = {};
 const hasReticulumServerMetaTag = !!document.querySelector("meta[name='env:reticulum_server']");
 configs.IS_LOCAL_OR_CUSTOM_CLIENT = !hasReticulumServerMetaTag;
 
+configs.sunset = {
+  notification: {
+    body: "COPY HERE",
+    link: "https://www.mozilla.org"
+  }
+};
+
 export default configs;

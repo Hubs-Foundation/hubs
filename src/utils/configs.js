@@ -130,4 +130,11 @@ configs.translation = key => {
   );
 };
 
+configs.sunset = {
+  notification: {
+    body: "The copy will go here",
+    link: "https://www.mozilla.org"
+  }
+};
+
 export default configs;
