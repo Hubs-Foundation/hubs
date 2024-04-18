@@ -113,7 +113,7 @@ const SystemEditorComponent = ({ classes }) => {
         <Card className={`mb-24 ${classes.notificationCard}`}>
           <CardSection
             className={classes.notificationCardSection}
-            ctaCallback={() => configs.sunset.notification.link}
+            ctaCallback={() => window.open(configs.sunset.notification.link)}
             cta={"Learn More"}
             body={configs.sunset.notification.body}
             showIcon={false}
