@@ -1337,9 +1337,8 @@ class UIRoot extends Component {
       }
     ];
 
-    const showGlobalNotification = configs.feature("show_global_notification");
-    const globalNotificationBody = configs.feature("global_notification_body");
-    const globalNotificationLink = configs.feature("global_notification_link");
+    const globalNotificationBody = "COPY HERE";
+    const globalNotificationLink = "https://www.mozilla.com";
 
     return (
       <MoreMenuContextProvider>
@@ -1462,7 +1461,7 @@ class UIRoot extends Component {
                       />
                     )}
                     <NotificationsContainer isMobile={isMobile}>
-                      {showGlobalNotification && !this.state.globalNotificationDismissed && (
+                      {!this.state.globalNotificationDismissed && (
                         <SystemNotification
                           body={globalNotificationBody}
                           link={globalNotificationLink}

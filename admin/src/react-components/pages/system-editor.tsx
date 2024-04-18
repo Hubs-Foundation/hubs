@@ -109,21 +109,17 @@ const SystemEditorComponent = ({ classes }) => {
 
   return (
     <div className="page_wrapper">
-      {features && features["show_global_notification"] && (
-        <Card className={`mb-24 ${classes.notificationCard}`}>
-          <CardSection
-            className={classes.notificationCardSection}
-            ctaCallback={() => {
-              features["global_notification_link"]
-                ? window.open(features["global_notification_link"])
-                : (window.location.href = "#/app-settings");
-            }}
-            cta={features["global_notification_link"] ? "Learn More" : "Go to App Settings"}
-            body={features["global_notification_body"] || "Notification body empty. Configure it in App Settings."}
-            showIcon={false}
-          />
-        </Card>
-      )}
+      <Card className={`mb-24 ${classes.notificationCard}`}>
+        <CardSection
+          className={classes.notificationCardSection}
+          ctaCallback={() => {
+            window.open("https://www.mozilla.com");
+          }}
+          cta={"Learn More"}
+          body={"COPY HERE"}
+          showIcon={false}
+        />
+      </Card>
       <Card className="mb-24">
         <h2 className="heading-lg mb-24">Getting Started</h2>
 
