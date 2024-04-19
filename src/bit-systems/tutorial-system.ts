@@ -88,6 +88,9 @@ class TutorialManager {
       }
     }
 
+    this.allowed = false;
+    return;
+
     if (!roomPropertiesReader.AllowsTutorial) {
       this.allowed = false;
       console.warn(`Tutorial is not allowed in this room`);
