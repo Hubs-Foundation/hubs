@@ -139,6 +139,7 @@ export function resolveRef(world: HubsWorld, ref: Ref) {
 }
 
 export type ArrayVec3 = [x: number, y: number, z: number];
+export type ArrayVec2 = [x: number, y: number];
 export type Attrs = {
   position?: ArrayVec3;
   rotation?: ArrayVec3;

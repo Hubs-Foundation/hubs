@@ -261,7 +261,7 @@ export class PhysicsSystem {
 
   updateRigidBodyOptions(eid, options) {
     const bodyId = Rigidbody.bodyId[eid];
-    console.log(bodyId, options);
+    // console.log(bodyId, options);
     updateRigiBodyParams(eid, options);
     const bodyData = this.bodyUuidToData.get(bodyId);
     if (!bodyData) {

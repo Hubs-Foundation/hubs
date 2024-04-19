@@ -127,7 +127,7 @@ class TutorialManager {
 
     setTimeout(() => {
       this.allowed = true;
-      console.log(roomPropertiesReader.tutorialProps.slides);
+      // console.log(roomPropertiesReader.tutorialProps.slides);
       this.AddTutorialPanel(
         roomPropertiesReader.roomProps.tutorial.slides!,
         roomPropertiesReader.tutorialProps.position!,
@@ -162,7 +162,7 @@ class TutorialManager {
     const cSlides: Array<string> = [];
     for (let i = 0; i < slidesCount; i++) {
       slides.push(`${roomPropertiesReader.serverURL}/${this.room}/${languageCode}_tutorial_${i}.png`);
-      console.log(`pushing ${roomPropertiesReader.serverURL}/${this.room}/${languageCode}_tutorial_${i}.png`);
+      // console.log(`pushing ${roomPropertiesReader.serverURL}/${this.room}/${languageCode}_tutorial_${i}.png`);
     }
 
     for (let i = 0; i < CONGRATS_SLIDE_COUNT; i++)
@@ -220,7 +220,7 @@ class TutorialManager {
 
     this.slides[this.activeCategory.slides[this.activeStepIndex]].visible = true;
 
-    console.log(this.activeCategoryIndex, this.activeStepIndex);
+    // console.log(this.activeCategoryIndex, this.activeStepIndex);
   }
 
   Next(congratulate = false) {
@@ -375,9 +375,11 @@ const timeOutCategory: StepCategory = {
   steps: [
     {
       onceFunc: () => {
-        tutorialManager.panelObj.visible = true;
+        tutorialManager.panelObj.visible = false; //this need to be changed
+        tutorialManager.nextObj.visible = false;
+        tutorialManager.prevObj.visible = false;
         setTimeout(() => {
-          changeHub("bQ4vf2n"); ///provide correct ID in prod
+          changeHub("AxFm4cE"); ///provide correct ID in prod
         }, 5000);
       }
     }

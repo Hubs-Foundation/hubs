@@ -12,7 +12,7 @@ const AgentTooltipDescription = defineMessage({
 });
 
 export function AgenSpawnButton({ scene }) {
-  if (roomPropertiesReader.roomProps.allow_agent) {
+  if (roomPropertiesReader.AllowsAgent) {
     const [active, setActive] = useState(false);
     const intl = useIntl();
     const description = intl.formatMessage(AgentTooltipDescription);

@@ -288,7 +288,7 @@ export default class VirtualAgent {
     if (changedMicStatus) {
       this.micStatus = permissionsGranted && APP.mediaDevicesManager.isMicEnabled;
       if (this.micStatus && !this.waitingForResponse) {
-        this.AskAgent(false, true);
+        this.AskAgent(true, true);
       } else {
         stopRecording();
       }

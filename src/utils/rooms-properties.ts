@@ -1,6 +1,6 @@
 import { string } from "prop-types";
 import { EventEmitter } from "eventemitter3";
-import { ArrayVec3 } from "./jsx-entity";
+import { ArrayVec2, ArrayVec3 } from "./jsx-entity";
 
 interface RoomProperties {
   room: string;
@@ -36,13 +36,20 @@ export interface NavigationProperties {
   obstacles?: Array<Array<[number, number]>>;
 }
 
-interface MapProperties {
+interface OldMapProperties {
   allow: Array<string>;
   file?: string;
   ratio?: number;
   mapToImage?: Array<number>;
   center?: Array<number>;
   centeroffset?: Array<number>;
+}
+
+interface MapProperties {
+  allow: Array<string>;
+  image_ratio?: number;
+  scale?: number;
+  room_size?: ArrayVec2;
 }
 
 interface TranslationProperties {

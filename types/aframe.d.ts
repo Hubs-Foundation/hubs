@@ -123,6 +123,7 @@ declare module "aframe" {
     emit(string, any?): void;
     addState(string): void;
     is(string): boolean;
+    removeState(string): void;
   }
 
   interface Device {
