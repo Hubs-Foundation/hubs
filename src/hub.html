@@ -794,10 +794,10 @@
                 </a-entity>
                 <a-entity in-world-hud visibility-while-frozen="visible: false; requireHoverOnNonMobile: false;"
                     rotation="30 0 0">
-                    <a-entity sprite="name: Background.png" scale="0.2 0.08 1" position="-0.34 -0.005 0"
-                        class="hud bg"></a-entity>
-                    <a-entity id="hud-presence-count" text="value: ; textAlign:center;"
-                        position="-0.30 -0.005 0.001"></a-entity>
+                    <a-entity sprite="name: Background.png" scale="0.2 0.08 1" position="-0.34 -0.005 0" class="hud bg"
+                        visible="false"></a-entity>
+                    <a-entity id="hud-presence-count" text="value: ; textAlign:center;" position="-0.30 -0.005 0.001"
+                        visible="false"></a-entity>
                     <a-entity class="invite-btn" position="0 0.18 0" scale="0.7 0.7 0.7" is-remote-hover-target
                         tags="singleActionButton: true;" visible="false">
                         <a-entity mixin="rounded-text-action-button" slice9="width: 0.7" scale="0.8 0.8 1.0">
@@ -810,9 +810,7 @@
                         <a-entity text="value: ; textAlign:center; fontSize: 0.06; outlineWidth: 2%;"
                             position="0.2 0.04 0.001"></a-entity>
                     </a-entity>
-                    <a-entity is-remote-hover-target tags="singleActionButton: true" sprite
-                        mic-button="tooltip: #hud-tooltip; tooltipText: Mute Mic; activeTooltipText: Unmute Mic;"
-                        scale="0.1 0.1 0.1" position="-0.17 0 0.001" class="hud mic"></a-entity>
+
                     <a-entity is-remote-hover-target tags="singleActionButton: true" sprite icon-button="
                     tooltip: #hud-tooltip;
                     tooltipText: Create;
@@ -821,26 +819,38 @@
                     hoverImage: spawn-hover.png;
                     disabledImage: spawn-disabled.png;" scale="0.2 0.2 0.2" position="0 0 0.005" class="hud spawn"
                         visible="false"></a-entity>
+
                     <a-entity is-remote-hover-target tags="singleActionButton: true" sprite icon-button="
-                    tooltip: #hud-tooltip;
-                    tooltipText: Pen;
-                    activeTooltipText: Pen;
-                    image: pen_off.png;
-                    hoverImage: pen_off-hover.png;
-                    activeImage: pen_on.png;
-                    activeHoverImage: pen_on-hover.png;
-                    disabledImage: pen_off-disabled.png;" scale="0.1 0.1 0.1" position="0.17 0 0.001"
+                        tooltip: #hud-tooltip;
+                        tooltipText: Pen;
+                        activeTooltipText: Pen;
+                        image: pen_off.png;
+                        hoverImage: pen_off-hover.png;
+                        activeImage: pen_on.png;
+                        activeHoverImage: pen_on-hover.png;
+                        disabledImage: pen_off-disabled.png;" scale="0.1 0.1 0.1" position="0.17 0 0.001"
                         class="hud penhud" visible="false"></a-entity>
+
                     <a-entity is-remote-hover-target tags="singleActionButton: true" sprite icon-button="
-                    tooltip: #hud-tooltip;
-                    tooltipText: Camera;
-                    activeTooltipText: Camera;
-                    image: camera_off.png;
-                    hoverImage: camera_off-hover.png;
-                    activeImage: camera_on.png;
-                    activeHoverImage: camera_on-hover.png;
-                    disabledImage: camera_off-disabled.png;" scale="0.1 0.1 0.1" position="0.28 0 0.001"
+                            tooltip: #hud-tooltip;
+                            tooltipText: Camera;
+                            activeTooltipText: Camera;
+                            image: camera_off.png;
+                            hoverImage: camera_off-hover.png;
+                            activeImage: camera_on.png;
+                            activeHoverImage: camera_on-hover.png;
+                            disabledImage: camera_off-disabled.png;" scale="0.1 0.1 0.1" position="0.28 0 0.001"
                         class="hud camera-btn" visible="false"></a-entity>
+
+                    <a-entity is-remote-hover-target tags="singleActionButton: true" sprite flag-button="
+                                tooltip: #hud-tooltip;
+                                tooltipText: hud-panel.language;
+                                activeTooltipText: Language;" scale="0.1 0.1 0.1" position="0.28 0 0.001"
+                        class="hud lang-btn" visible="false"></a-entity>
+
+
+                    <!-- tooltip of pilots -->
+
                     <a-entity is-remote-hover-target tags="singleActionButton: true" sprite icon-button="
                         tooltip: #hud-tooltip;
                         tooltipText: hud-panel.agent;
@@ -849,8 +859,14 @@
                         hoverImage: agent_off-hover.png;
                         activeImage: agent_on.png;
                         activeHoverImage: agent_on-hover.png;
-                        disabledImage: agent_off-disabled.png;" scale="0.1 0.1 0.1" position="-0.05 0 0.001"
+                        disabledImage: _.png;" scale="0.1 0.1 0.1" position="-0.17 0 0.001"
                         class="hud agent-btn"></a-entity>
+
+                    <a-entity is-remote-hover-target tags="singleActionButton: true" sprite
+                        mic-button="tooltip: #hud-tooltip; tooltipText: Mute Mic; activeTooltipText: Unmute Mic;"
+                        scale="0.1 0.1 0.1" position="-0.05 0 0.001" class="hud mic"></a-entity>
+
+
                     <a-entity is-remote-hover-target tags="singleActionButton: true" sprite icon-button="
                         tooltip: #hud-tooltip;
                         tooltipText: hud-panel.map;
@@ -859,8 +875,29 @@
                         hoverImage: map_off-hover.png;
                         activeImage: map_on.png;
                         activeHoverImage: map_on-hover.png;
-                        disabledImage: map_off-disabled.png;" scale="0.1 0.1 0.1" position="0.06 0 0.001"
+                        disabledImage: _.png;" scale="0.1 0.1 0.1" position="0.06 0 0.001"
                         class="hud map-btn"></a-entity>
+
+                    <a-entity is-remote-hover-target tags="singleActionButton: true" sprite icon-button="
+                                tooltip: #hud-tooltip;
+                                tooltipText: hud-panel.help;
+                                activeTooltipText: Help;
+                                image: help_off.png;
+                                hoverImage: help_off-hover.png;
+                                activeImage: help_on.png;
+                                activeHoverImage: help_on-hover.png;
+                                disabledImage: _.png;" scale="0.1 0.1 0.1" position="0.17 0 0.001"
+                        class="hud help-btn"></a-entity>
+                    <a-entity is-remote-hover-target tags="singleActionButton: true" sprite icon-button="
+                                tooltip: #hud-tooltip;
+                                tooltipText: hud-panel.task;
+                                activeTooltipText: Task;
+                                image: task_off.png;
+                                hoverImage: task_off-hover.png;
+                                activeImage: task_on.png;
+                                activeHoverImage: task_on-hover.png;
+                                disabledImage: _.png;" scale="0.1 0.1 0.1" position="0.28 0 0.001"
+                        class="hud task-btn"></a-entity>
                     <a-entity is-remote-hover-target tags="singleActionButton: true" sprite icon-button="
                         tooltip: #hud-tooltip;
                         tooltipText: hud-panel.translate;
@@ -869,13 +906,9 @@
                         hoverImage: translate_off-hover.png;
                         activeImage: translate_on.png;
                         activeHoverImage: translate_on-hover.png;
-                        disabledImage: translate_off-disabled.png;" scale="0.1 0.1 0.1" position="0.17 0 0.001"
+                        disabledImage: none.png;" scale="0.1 0.1 0.1" position="0.39 0 0.001"
                         class="hud trans-btn"></a-entity>
-                    <a-entity is-remote-hover-target tags="singleActionButton: true" sprite flag-button="
-                        tooltip: #hud-tooltip;
-                        tooltipText: hud-panel.language;
-                        activeTooltipText: Language;" scale="0.1 0.1 0.1" position="0.28 0 0.001"
-                        class="hud lang-btn"></a-entity>
+
                 </a-entity>
             </a-entity>
 

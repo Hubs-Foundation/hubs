@@ -1,6 +1,6 @@
 /** @jsx createElementEntity */
 
-import { createElementEntity, renderAsEntity, Ref, createRef } from "../utils/jsx-entity";
+import { createElementEntity, renderAsEntity, Ref, createRef, EntityDef } from "../utils/jsx-entity";
 import nametagSrc from "../assets/hud/nametag.9.png";
 import { textureLoader } from "../utils/media-utils";
 import { Button3D, BUTTON_TYPES } from "./button3D";
@@ -24,6 +24,15 @@ export interface SimplePanelParams {
   textRef: Ref;
   listenRef: Ref;
   navRef: Ref;
+}
+
+interface InteractivePanelParams {
+  panelRef: Ref;
+  textRef: Ref;
+  dotsRef: Ref;
+  clearRef: Ref;
+  nextRef: Ref;
+  prevRef: Ref;
 }
 
 export function AgentPanel({ text, panelRef, nextRef, prevRef, micRef, snapRef, maxSlideCount }: PanelParams) {
@@ -102,7 +111,7 @@ export function AgentPanel({ text, panelRef, nextRef, prevRef, micRef, snapRef, 
   );
 }
 
-export function SimplePanel({ panelRef, textRef, listenRef: listenRef, navRef: navRef }: SimplePanelParams) {
+export function SimplePanel({ panelRef, textRef, listenRef, navRef }: SimplePanelParams) {
   const buttonScale = [0.4, 0.4, 0.4];
   const buttonHeight = 0.2;
   return (
@@ -118,7 +127,7 @@ export function SimplePanel({ panelRef, textRef, listenRef: listenRef, navRef: n
           position={[0, 0, 0.01]}
           ref={textRef}
           text={{
-            value: "This is a test",
+            value: "This is aaa test",
             color: "#000000",
             textAlign: "center",
             anchorX: "center",
@@ -147,6 +156,78 @@ export function SimplePanel({ panelRef, textRef, listenRef: listenRef, navRef: n
         height={buttonHeight}
         type={BUTTON_TYPES.DEFAULT}
         text={"Ask"}
+      />
+    </entity>
+  );
+}
+
+export function InteractivePanel({ panelRef, clearRef, dotsRef, nextRef, prevRef, textRef }: InteractivePanelParams) {
+  const buttonScale = [0.4, 0.4, 0.4];
+  const buttonHeight = 0.2;
+
+  return (
+    <entity>
+      <entity
+        name={`panel`}
+        ref={panelRef}
+        slice9={{ size: [0.8, 0.6], insets: [64, 66, 64, 66], texture: panelTexture }}
+        position={[0, -0.3, 0.3]}
+      >
+        <Button3D
+          name="clear"
+          ref={clearRef}
+          scale={[buttonScale[0], buttonScale[1], buttonScale[2]]}
+          width={0.5}
+          height={buttonHeight}
+          type={BUTTON_TYPES.DEFAULT}
+          text={""}
+          visible={false}
+        />
+
+        <Button3D
+          name="next"
+          ref={nextRef}
+          scale={[0.5, 0.5, 0.5]}
+          position={[0.7, 0, 0]}
+          width={0.2}
+          height={0.2}
+          type={BUTTON_TYPES.DEFAULT}
+          text={">"}
+        />
+        <Button3D
+          name="prev"
+          ref={prevRef}
+          scale={[0.5, 0.5, 0.5]}
+          position={[-0.7, 0, 0]}
+          width={0.2}
+          height={0.2}
+          type={BUTTON_TYPES.DEFAULT}
+          text={"<"}
+        />
+        <entity
+          name={`text`}
+          position={[0, 0, 0.01]}
+          ref={textRef}
+          text={{
+            value: "This is aaaaaaaa test",
+            color: "#000000",
+            textAlign: "center",
+            anchorX: "center",
+            anchorY: "middle",
+            fontSize: 0.05,
+            maxWidth: 1
+          }}
+        />
+      </entity>
+      <Button3D
+        name="dots"
+        ref={dotsRef}
+        scale={[buttonScale[0], buttonScale[1], buttonScale[2]]}
+        position={[0, -0.3, 0.3]}
+        width={0.5}
+        height={buttonHeight}
+        type={BUTTON_TYPES.DEFAULT}
+        text={"AAA"}
       />
     </entity>
   );

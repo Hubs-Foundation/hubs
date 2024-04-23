@@ -4,7 +4,7 @@ import { createElementEntity, renderAsEntity, createRef } from "../utils/jsx-ent
 import { preload } from "../utils/preload";
 import { cloneModelFromCache, loadModel } from "../components/gltf-model-plus";
 import { HubsWorld } from "../app";
-import { AgentPanel, SimplePanel } from "./agent-panel";
+import { AgentPanel, InteractivePanel, SimplePanel } from "./agent-panel";
 import { COLLISION_LAYERS } from "../constants";
 import { FLOATY_OBJECT_FLAGS } from "../systems/floaty-object-system";
 import { Type } from "../inflators/rigid-body";
@@ -30,7 +30,6 @@ export function AgentEntity() {
         ref={agentRef}
         model={{ model: cloneModelFromCache(agentModelSrc).scene }}
         visible={false}
-        lookatuser
         cursorRaycastable
         remoteHoverTarget
         handCollisionTarget
@@ -51,7 +50,14 @@ export function AgentEntity() {
           halfExtents: [0.25, 0.5, 0.45]
         }}
       >
-        <SimplePanel panelRef={panelRef} textRef={textRef} listenRef={micRef} navRef={navRef} />
+        <InteractivePanel
+          panelRef={panelRef}
+          textRef={textRef}
+          dotsRef={micRef}
+          clearRef={navRef}
+          nextRef={nextRef}
+          prevRef={prevRef}
+        />
       </entity>
     </entity>
   );

@@ -21,14 +21,22 @@ import { languageCodes, translationSystem } from "./translation-system";
 import { UpdatePanelSize, GetTextSize } from "../utils/interactive-panels";
 import { agentDialogs } from "../utils/localization";
 import { Logger } from "../utils/logging_systems";
-import { Vector3 } from "three";
+import { AxesHelper, Vector3 } from "three";
 import { roomPropertiesReader } from "../utils/rooms-properties";
 
 const agentQuery = defineQuery([Agent]);
 const enterAgentQuery = enterQuery(agentQuery);
 const PANEL_PADDING = 0.05;
 const skipModule = false;
+const output0 = "Hello All. this is a test wihtout a new line";
+const output1 =
+  "To reach the social space, follow these steps:\n- Start by moving forward 4 meters.\n- Turn left and proceed for 11 meters.\n- Turn right and move 4 meters.\n- Turn left and go 3 meters.\n- Take the stairs up.\n- Move 12 meters.\n- Turn right again and move 4 meters.\n- Turn right once more and go 13 meters.\n- Finally, turn left and move forward 5 meters.\n\nYou should now be in the social space.";
+const output2 =
+  "To find the bathroom, follow these steps:\n- Start by turning right.\n- Move forward 2 meters.\n- Turn left and go 16 meters.\n- Turn right and proceed for 6 meters.\n- Turn left and move 1 meter.\n\nYou should now be at the bathroom.";
+const output3 =
+  "To reach the garden, follow these steps:\n- Start by turning right.\n- Move forward 1 meter.\n- Turn left and go 17 meters.\n- Turn left again and proceed for 6 meters.\n- Turn right and move forward.\n\nYou should now be at the garden.";
 
+const testOutputs = [output1, output2, output3];
 function clicked(eid) {
   return hasComponent(APP.world, Interacted, eid);
 }
@@ -81,7 +89,10 @@ export default class VirtualAgent {
     this.agentParent = new objElement();
 
     this.panel = new objElement();
-    this.text = new textElement();
+    this.displayedText = new textElement();
+
+    this.textArray = [];
+    this.diplayedSenteceIndex = null;
 
     this.refsList = [];
     this.currentOccasion = null;
@@ -107,6 +118,14 @@ export default class VirtualAgent {
     };
   }
 
+  SegmentText(text) {
+    const sentences = text.split("\n");
+
+    return sentences.filter(sentence => {
+      return sentence !== "" && sentence !== " ";
+    });
+  }
+
   Init(reset) {
     if (reset) {
       APP.scene.removeEventListener("agent-toggle", this.onToggle);
@@ -129,7 +148,7 @@ export default class VirtualAgent {
   }
 
   Remove() {
-    this.text.obj.removeEventListener("synccomplete", this.OntextUpdate);
+    this.displayedText.obj.removeEventListener("synccomplete", this.OntextUpdate);
     APP.scene.removeEventListener("language_updated", this.onLanguageUpdated);
     APP.dialog.off("mic-state-changed", this.setMicStatus);
 
@@ -157,10 +176,10 @@ export default class VirtualAgent {
     this.nextArrow.update(Agent.nextRef[agentEid]);
     this.prevArrow.update(Agent.prevRef[agentEid]);
     this.infoPanel.update(Agent.micRef[agentEid]);
-    this.snapButton.update(Agent.snapRef[agentEid]);
     this.clearButton.update(Agent.navRef[agentEid]);
     this.panel.update(Agent.panelRef[agentEid]);
-    this.text.update(Agent.textRef[agentEid]);
+    this.displayedText.update(Agent.textRef[agentEid]);
+    this.snapButton.update(Agent.snapRef[agentEid]);
 
     this.refsList = [
       this.nextArrow,
@@ -169,7 +188,7 @@ export default class VirtualAgent {
       this.snapButton,
       this.clearButton,
       this.panel,
-      this.text
+      this.displayedText
     ];
 
     const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
@@ -209,7 +228,7 @@ export default class VirtualAgent {
 
     this.infoPanel.obj.add(this.loadingObj);
 
-    this.text.obj.addEventListener("synccomplete", this.OntextUpdate);
+    this.displayedText.obj.addEventListener("synccomplete", this.OntextUpdate);
 
     this.UpdateWithRandomPhrase("greetings");
     this.micStatus = false;
@@ -229,7 +248,7 @@ export default class VirtualAgent {
     this.snapButton.update(null);
     this.clearButton.update(null);
     this.panel.update(null);
-    this.text.update(null);
+    this.displayedText.update(null);
     this.agentParent.update(null);
 
     this.loadingObj = null;
@@ -263,7 +282,7 @@ export default class VirtualAgent {
   }
 
   OntextUpdate() {
-    const size = GetTextSize(this.text.obj);
+    const size = GetTextSize(this.displayedText.obj);
     size[0] += 2 * PANEL_PADDING;
     size[1] += 2 * PANEL_PADDING;
     UpdatePanelSize(this.panel.eid, size);
@@ -278,8 +297,28 @@ export default class VirtualAgent {
     }
   }
 
-  UpdateText(newText) {
-    this.text.obj.text = newText;
+  UpdateTextArray(newTextArray) {
+    this.textArray = newTextArray;
+    this.slideIndex = 0;
+    this.RenderSlide();
+  }
+
+  NextSentence() {
+    this.slideIndex += 1;
+    this.nextArrow.obj.visible = this.slideIndex !== this.textArray.length - 1;
+    this.RenderSlide();
+  }
+
+  PrevSentence() {
+    this.slideIndex -= 1;
+    this.prevArrow.obj.visible = this.slideIndex !== 0;
+    this.RenderSlide();
+  }
+
+  RenderSlide() {
+    this.nextArrow.obj.visible = this.slideIndex !== this.textArray.length - 1;
+    this.prevArrow.obj.visible = this.slideIndex !== 0;
+    this.displayedText.obj.text = this.textArray[this.slideIndex];
   }
 
   setMicStatus() {
@@ -288,7 +327,7 @@ export default class VirtualAgent {
     if (changedMicStatus) {
       this.micStatus = permissionsGranted && APP.mediaDevicesManager.isMicEnabled;
       if (this.micStatus && !this.waitingForResponse) {
-        this.AskAgent(true, true);
+        this.AskAgent(false, false);
       } else {
         stopRecording();
       }
@@ -300,6 +339,13 @@ export default class VirtualAgent {
       navSystem.StopNavigating();
       this.successResult = false;
       this.UpdateWithRandomPhrase("cleared");
+    }
+
+    if (clicked(this.nextArrow.eid)) {
+      this.NextSentence();
+    }
+    if (clicked(this.prevArrow.eid)) {
+      this.PrevSentence();
     }
   }
 
@@ -336,9 +382,9 @@ export default class VirtualAgent {
     const avatarPosition = this.avatarPos;
 
     const update = () => {
-      this.UpdateText(
+      this.UpdateTextArray([
         `This is a demo text that gives you guidance to reach the random destination with index \nYou will find your destination called  by following the green lines and the blue arrows. \nWe hope this text is large enough so it takes up a lot of space and will allow us to test also the transparent nametag texture.\nThank you, if you have any further questions do not hesitate to reach me.`
-      );
+      ]);
     };
 
     return new Promise(resolve => {
@@ -370,6 +416,13 @@ export default class VirtualAgent {
       logger.action = "dialog_system";
 
       const recordedQuestion = await RecordQuestion(savefile);
+
+      this.UpdateTextArray(this.SegmentText(output0));
+
+      return;
+
+      // this.DatasetCreate();
+      // return;
 
       if (testNav) {
         const randomInd = Math.floor(Math.random() * (roomPropertiesReader.navProps.targets.length - 1));
@@ -479,7 +532,7 @@ export default class VirtualAgent {
         this.successResult = false;
       }
 
-      this.UpdateText(output);
+      this.UpdateTextArray([output]);
     } catch (error) {
       console.log("error", error);
       this.UpdateWithRandomPhrase("error");
@@ -493,9 +546,15 @@ export default class VirtualAgent {
     }
   }
 
-  DatasetCreate(destination) {
-    const navigation = navSystem.GetInstructions(this.avatarPos, destination);
-    console.log(`{"destination": "${destination}", "intent":"navigation", "mozilla_input":${navigation.knowledge}},`);
+  DatasetCreate() {
+    const destNames = ["conference room", "business room", "social area", "booth 1", "booth 2", "booth 3", "booth 4"];
+    destNames.forEach(destination =>
+      console.log(
+        `{"destination": "${destination}", "intent":"navigation", "mozilla_input":${
+          navSystem.GetInstructions(this.avatarPos, destination).knowledge
+        }},`
+      )
+    );
   }
 
   async SnapActions() {
@@ -525,7 +584,7 @@ export default class VirtualAgent {
       phrases.push(availablePhrases[randomIndex]);
     });
 
-    this.UpdateText(phrases.length === 1 ? phrases[0] : phrases.join(" "));
+    this.UpdateTextArray(phrases.length === 1 ? [phrases[0]] : [phrases.join(" ")]);
     this.currentOccasion = occasion;
   }
 

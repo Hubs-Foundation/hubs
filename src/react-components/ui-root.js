@@ -106,6 +106,7 @@ import { MapSpawnButton } from "./room/MapSpawnButton";
 import { LanguagePopoverContainer } from "./room/LanguagePopoverContainer";
 import { TranslateButton } from "./room/TranslateButton";
 import { LanguageSetupModalContainer } from "./room/LanguageSetupModalContainer";
+import { HelpSpawnButton } from "./room/HelpSpawnButton";
 
 const avatarEditorDebug = qsTruthy("avatarEditorDebug");
 
@@ -1650,6 +1651,7 @@ class UIRoot extends Component {
                             <TranslateButton scene={this.props.scene} />
                             <LanguagePopoverContainer scene={this.props.scene} />
                             <MapSpawnButton scene={this.props.scene} />
+                            <HelpSpawnButton scene={this.props.scene} />
                           </>
                         )}
                         {this.props.hubChannel.can("spawn_emoji") && (

@@ -38,6 +38,7 @@ class FloorMapClass {
 
   constructor() {
     this.onToggle = this.onToggle.bind(this);
+    this.onClear = this.onClear.bind(this);
     this.Init = this.Init.bind(this);
   }
 
@@ -52,9 +53,8 @@ class FloorMapClass {
       return;
     }
 
-    console.log(`adding event listener for map`);
-
     APP.scene!.addEventListener("map-toggle", this.onToggle);
+    APP.scene!.addEventListener("clear-scene", this.onClear);
     this.allowed = true;
     this.userPov = (document.querySelector("#avatar-pov-node")! as AElement).object3D;
     this.userObj = (document.querySelector("#avatar-rig")! as AElement).object3D;
@@ -141,12 +141,16 @@ class FloorMapClass {
   onToggle() {
     console.log(`map toggle`);
     if ((APP.scene as AScene).is("map")) {
-      console.log(`map removing`);
       this.Remove();
     } else {
-      console.log(`map adding`);
       (APP.scene as AScene).emit("clear-scene");
       this.Instantiate();
+    }
+  }
+
+  onClear() {
+    if ((APP.scene as AScene).is("map")) {
+      this.Remove();
     }
   }
 }

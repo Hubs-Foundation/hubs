@@ -10,12 +10,8 @@ interface RoomProperties {
   navigation: NavigationProperties;
   map: MapProperties;
   tutorial: TutorialProperties;
+  help: HelpProperties;
   HubID?: string;
-}
-
-interface TypeProperty {
-  agent: Array<string>;
-  map: Array<string>;
 }
 
 interface TutorialProperties {
@@ -26,6 +22,12 @@ interface TutorialProperties {
   rotation?: ArrayVec3;
   ratio?: number;
   type?: "fixed" | "moving";
+}
+
+interface HelpProperties {
+  allow: Array<string>;
+  slides?: number;
+  ratio?: number;
 }
 
 export interface NavigationProperties {
@@ -76,6 +78,7 @@ class RoomPropertiesReader {
   transProps: TranslationProperties;
   mapProps: MapProperties;
   tutorialProps: TutorialProperties;
+  helpProps: HelpProperties;
   read: boolean;
   url: string;
   serverURL: string;
@@ -92,7 +95,8 @@ class RoomPropertiesReader {
       translation: { allow: [] },
       navigation: { allow: [] },
       map: { allow: [] },
-      tutorial: { allow: [] }
+      tutorial: { allow: [] },
+      help: { allow: [] }
     };
   }
 
@@ -136,6 +140,7 @@ class RoomPropertiesReader {
     this.transProps = roomProps.translation;
     this.mapProps = roomProps.map;
     this.tutorialProps = roomProps.tutorial;
+    this.helpProps = roomProps.help;
   }
 
   waitForProperties(): Promise<any> {
@@ -174,6 +179,13 @@ class RoomPropertiesReader {
   }
   get AllowsTutorial() {
     return this.AllowsProperty(this.tutorialProps.allow);
+  }
+  get AllowsHelp() {
+    return this.AllowsProperty(this.helpProps.allow);
+  }
+
+  get Room() {
+    return this.roomProps.room.replace(" ", "_").toLowerCase();
   }
 }
 

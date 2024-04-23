@@ -59,7 +59,6 @@ function findLocale(locale) {
 }
 
 export function setLocale(locale) {
-  console.log(`set lolacale`, locale);
   const resolvedLocale = findLocale(locale);
 
   if (resolvedLocale === DEFAULT_LOCALE) {

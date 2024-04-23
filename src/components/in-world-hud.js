@@ -14,8 +14,10 @@ AFRAME.registerComponent("in-world-hud", {
 
     this.agentBtn = this.el.querySelector(".agent-btn");
     this.mapBtn = this.el.querySelector(".map-btn");
+    this.helpBtn = this.el.querySelector(".help-btn");
     this.langBtn = this.el.querySelector(".lang-btn");
     this.transBtn = this.el.querySelector(".trans-btn");
+    this.taskBtn = this.el.querySelector(".task-btn");
     // this.inviteBtn = this.el.querySelector(".invite-btn");
     this.background = this.el.querySelector(".bg");
 
@@ -37,14 +39,20 @@ AFRAME.registerComponent("in-world-hud", {
       }
 
       roomPropertiesReader.waitForProperties().then(() => {
-        this.agentBtn.setAttribute("icon-button", "disabled", !roomPropertiesReader.roomProps.allow_agent);
-        this.mapBtn.setAttribute("icon-button", "disabled", !roomPropertiesReader.roomProps.map.allow);
-        this.transBtn.setAttribute("icon-button", "disabled", !roomPropertiesReader.roomProps.translation.allow);
-        if (roomPropertiesReader.roomProps.allow_agent)
+        this.agentBtn.setAttribute("icon-button", "disabled", !roomPropertiesReader.AllowsAgent);
+        this.mapBtn.setAttribute("icon-button", "disabled", !roomPropertiesReader.AllowsMap);
+        this.helpBtn.setAttribute("icon-button", "disabled", !roomPropertiesReader.AllowsHelp);
+        this.transBtn.setAttribute("icon-button", "disabled", !roomPropertiesReader.AllowTrans);
+
+        this.taskBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("task"));
+
+        if (roomPropertiesReader.AllowsAgent)
           this.agentBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("agent"));
-        if (roomPropertiesReader.roomProps.map.allow)
+        if (roomPropertiesReader.AllowsMap)
           this.mapBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("map"));
-        if (roomPropertiesReader.roomProps.translation.allow)
+        if (roomPropertiesReader.AllowsHelp)
+          this.helpBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("help"));
+        if (roomPropertiesReader.AllowTrans)
           this.transBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("translation"));
       });
     };
@@ -58,7 +66,9 @@ AFRAME.registerComponent("in-world-hud", {
           evt.detail === "agent" ||
           evt.detail === "map" ||
           evt.detail === "panel" ||
-          evt.detail === "translation"
+          evt.detail === "translation" ||
+          evt.detail === "help" ||
+          evt.detail === "task"
         )
       )
         return;
@@ -75,21 +85,29 @@ AFRAME.registerComponent("in-world-hud", {
     };
 
     this.onAgentClick = () => {
-      if (!roomPropertiesReader.roomProps.allow_agent) return;
+      if (!roomPropertiesReader.AllowsAgent) return;
       this.el.sceneEl.emit("agent-toggle");
     };
 
     this.onMapClick = () => {
-      if (!roomPropertiesReader.roomProps.map.allow) return;
+      if (!roomPropertiesReader.AllowsMap) return;
       this.el.emit("map-toggle");
     };
 
-    this.onLangClick = () => {
-      this.el.emit("lang-toggle");
+    this.onHelpClick = () => {
+      if (!roomPropertiesReader.AllowsHelp) return;
+      this.el.emit("help-toggle");
     };
+
+    // this.onLangClick = () => {
+    //   this.el.emit("lang-toggle");
+    // };
     this.onTransClick = () => {
-      if (!roomPropertiesReader.roomProps.translation.allow) return;
+      if (!roomPropertiesReader.AllowTrans) return;
       this.el.emit("toggle_translation");
+    };
+    this.onTaskClick = () => {
+      this.el.emit("task-toggle");
     };
 
     this.onPenClick = e => {
@@ -125,8 +143,10 @@ AFRAME.registerComponent("in-world-hud", {
     // this.cameraBtn.object3D.addEventListener("interact", this.onCameraClick);
     this.agentBtn.object3D.addEventListener("interact", this.onAgentClick);
     this.mapBtn.object3D.addEventListener("interact", this.onMapClick);
-    this.langBtn.object3D.addEventListener("interact", this.onLangClick);
+    this.helpBtn.object3D.addEventListener("interact", this.onHelpClick);
+    // this.langBtn.object3D.addEventListener("interact", this.onLangClick);
     this.transBtn.object3D.addEventListener("interact", this.onTransClick);
+    this.taskBtn.object3D.addEventListener("interact", this.onTaskClick);
     // this.inviteBtn.object3D.addEventListener("interact", this.onInviteClick);
   },
 
@@ -141,8 +161,10 @@ AFRAME.registerComponent("in-world-hud", {
     // this.cameraBtn.object3D.removeEventListener("interact", this.onCameraClick);
     this.agentBtn.object3D.removeEventListener("interact", this.onAgentClick);
     this.mapBtn.object3D.removeEventListener("interact", this.onMapClick);
+    this.helpBtn.object3D.removeEventListener("interact", this.onHelpClick);
     this.langBtn.object3D.removeEventListener("interact", this.onLangClick);
     this.transBtn.object3D.removeEventListener("interact", this.onTransClick);
+    this.taskBtn.object3D.removeEventListener("interact", this.onTaskClick);
     // this.inviteBtn.object3D.removeEventListener("interact", this.onInviteClick);
   }
 });

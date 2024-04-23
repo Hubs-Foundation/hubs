@@ -35,6 +35,7 @@ import { translationSystem } from "./bit-systems/translation-system";
 import { languagePanel } from "./bit-systems/language-panel";
 import { lobbySteps, tutorialManager } from "./bit-systems/tutorial-system";
 import { roomPropertiesReader } from "./utils/rooms-properties";
+import { helpButton } from "./bit-systems/help-system";
 const useNewLoader = qsTruthy("newLoader");
 
 export default class SceneEntryManager {
@@ -77,6 +78,7 @@ export default class SceneEntryManager {
     floorMap.Init(reset);
     navSystem.Init(reset);
     tutorialManager.Init(reset);
+    helpButton.Init(reset);
   };
 
   enterScene = async (enterInVR, muteOnEntry) => {

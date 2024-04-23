@@ -15,25 +15,51 @@ export const languageCodes = {
   german: "de"
 };
 
-const enData = {
-  "hud-panel.translate": "Translate",
-  "hud-panel.agent": "Agent",
-  "hud-panel.map": "Map",
-  "hud-panel.language": "Language",
-  "hud-panel.mic": "Mute Mic",
-  "hud-panel.mic.muted ": "Unmute mic",
-  "change-hub.message": "Visit room"
-};
+const translationIds = [
+  "hud-panel.translate",
+  "hud-panel.agent",
+  "hud-panel.map",
+  "hud-panel.language",
+  "hud-panel.help",
+  "hud-panel.task",
+  "hud-panel.mic",
+  "hud-panel.mic.muted ",
+  "change-hub.message"
+];
 
-const elData = {
-  "hud-panel.translate": "Μετάφραση",
-  "hud-panel.agent": "Βοηθός",
-  "hud-panel.map": "Χάρτης",
-  "hud-panel.language": "Γλώσσα",
-  "hud-panel.mic": "Σίγαση",
-  "hud-panel.mic.muted ": "Κατάργηση Σίγασης",
-  "change-hub.message": "Επίσκεψη στο Δωμάτιο"
-};
+function createLanguageData(translationValues) {
+  if (translationValues.length !== translationIds.length) throw new Error("invalid translation values length");
+  const returndict = {};
+
+  translationIds.forEach((id, index) => (returndict[id] = translationValues[index]));
+
+  return returndict;
+}
+
+const placeholderData = createLanguageData([
+  "Translate",
+  "Agent",
+  "Map",
+  "Language",
+  "Help",
+  "Task",
+  "Mute Mic",
+  "Unmute mic",
+  "Visit room"
+]);
+
+const enData = placeholderData;
+const elData = createLanguageData([
+  "Μετάφραση",
+  "Βοηθός",
+  "Χάρτης",
+  "Γλώσσα",
+  "Βοήθεια",
+  "Στόχος",
+  "Σίγαση",
+  "Κατάργηση Σίγασης",
+  "Επίσκεψη στο Δωμάτιο"
+]);
 
 export const hudPanelLanguages = {
   greek: {
@@ -41,42 +67,48 @@ export const hudPanelLanguages = {
     translate: "Μετάφραση",
     map: "Χάρτης",
     langugage: "Γλώσσα",
-    visit: "Επίσκεψη"
+    visit: "Επίσκεψη",
+    help: "Βοήθεια"
   },
   english: {
     agent: "Agent",
     translate: "Translate",
     map: "Map",
     language: "Language",
-    visit: "Visit Room"
+    visit: "Visit Room",
+    help: "Help"
   },
   spanish: {
     agent: "Agent",
     translate: "Translate",
     map: "Map",
     language: "Language",
-    visit: "Visit Room"
+    visit: "Visit Room",
+    help: "Help"
   },
   italian: {
     agent: "Agent",
     translate: "Translate",
     map: "Map",
     language: "Language",
-    visit: "Visit Room"
+    visit: "Visit Room",
+    help: "Help"
   },
   dutch: {
     agent: "Agent",
     translate: "Translate",
     map: "Map",
     language: "Language",
-    visit: "Visit Room"
+    visit: "Visit Room",
+    help: "Help"
   },
   german: {
     agent: "Agent",
     translate: "Translate",
     map: "Map",
     language: "Language",
-    visit: "Visit Room"
+    visit: "Visit Room",
+    help: "Help"
   }
 };
 
@@ -137,6 +169,9 @@ export class TranslationSystem {
   }
   get LanguageButtonText() {
     return this.textTranslations[this.mylanguage]["hud-panel.language"];
+  }
+  get HelpButtonText() {
+    return this.textTranslations[this.mylanguage]["hud-panel.help"];
   }
   get MicButtonText() {
     return this.textTranslations[this.mylanguage]["hud-panel.mic"];

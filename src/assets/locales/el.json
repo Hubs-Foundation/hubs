@@ -277,6 +277,8 @@
   "loading-screen.message.whats-new": "You can now set the default locale in your preferences. <a>Read More</a>",
   "map-toolbar-button": "Χάρτης",
   "map-tooltip.description": "Ενεργοποιήστε/ Απενεργοποιήστε τον χάρτη",
+  "help-tooltip.button": "Βοήθεια",
+  "help-tooltip.description": "Χρειάζεστε βοήθεια;",
   "media-browser.add_custom_avatar": "Avatar GLB URL",
   "media-browser.add_custom_object": "Custom URL or File",
   "media-browser.add_custom_scene": "Custom Scene",
@@ -727,7 +729,9 @@
   "hud-panel.agent": "Βοηθός",
   "hud-panel.map": "Χάρτης",
   "hud-panel.language": "Γλώσσα",
+  "hud-panel.help": "Βοήθεια",
   "hud-panel.mic": "Σίγαση",
+  "hud-panel.task": "Στόχος",
   "hud-panel.mic.muted ": "Κατάργηση Σίγασης",
   "change-hub.message": "Επίσκεψη στο Δωμάτιο"
 }

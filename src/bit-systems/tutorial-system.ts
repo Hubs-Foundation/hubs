@@ -6,10 +6,7 @@ import { ArrayVec3, renderAsEntity } from "../utils/jsx-entity";
 import { TutorialImagePanel, TutorialPanel } from "../prefabs/tutorial-panels";
 import { Text } from "troika-three-text";
 import { FloatingTextPanel, Interacted } from "../bit-components";
-import { GetTextSize, UpdatePanelSize } from "../utils/interactive-panels";
-import { updateSlice9Geometry } from "../update-slice9-geometry";
 import { defineQuery, enterQuery, entityExists, hasComponent, removeEntity } from "bitecs";
-import { degToRad } from "three/src/math/MathUtils";
 import { languageCodes, translationSystem } from "./translation-system";
 import { navSystem } from "./routing-system";
 import { virtualAgent } from "./agent-system";
@@ -17,13 +14,8 @@ import { changeHub } from "../change-hub";
 
 const CONGRATS_SLIDE_COUNT = 4;
 const DISTANCE_THRESH = 1.5;
-const PANEL_PADDING = 0.05;
-const PANEL_MIN_WIDTH = 1;
-const PANEL_MIN_HEIGHT = 0.5;
 const ANGLE_THRESH = 44;
-const waypointPos = new Vector3(-4.5, 0, -4.0);
 const floatingPanelQuery = defineQuery([FloatingTextPanel]);
-const floatingPanelEnterQuery = enterQuery(floatingPanelQuery);
 
 interface StepCategory {
   name: string;
@@ -35,12 +27,6 @@ interface StepObject {
   onceFunc?: Function;
   loopFunc?: Function;
   cleanUpFunc?: Function;
-}
-
-interface RoomTutorialObject {
-  navIndex: Array<number>;
-  noNavIndex: Array<number>;
-  steps: Array<StepObject>;
 }
 
 class TutorialManager {
@@ -72,13 +58,15 @@ class TutorialManager {
   nextObj: Object3D;
   testObj: Object3D;
 
-  room: "lobby" | "tradeshows" | "conference";
+  room: string;
   changeRoomID: string;
 
   constructor() {
     this.allowed = false;
     this.activeStepIndex = 0;
     this.activeCategoryIndex = 0;
+    this.onTaskToggle = this.onTaskToggle.bind(this);
+    this.onClearToggle = this.onClearToggle.bind(this);
   }
 
   Init(reset: boolean) {
@@ -88,41 +76,20 @@ class TutorialManager {
       }
     }
 
-    this.allowed = false;
-    return;
-
     if (!roomPropertiesReader.AllowsTutorial) {
       this.allowed = false;
       console.warn(`Tutorial is not allowed in this room`);
       return;
     }
 
-    let startingTime: number;
-
-    if (roomPropertiesReader.roomProps.room === "Lobby") {
-      this.room = "lobby";
-      startingTime = 1000;
-      this.roomTutorial = lobbySteps;
-    } else if (roomPropertiesReader.roomProps.room === "Tradeshows") {
-      this.room = "tradeshows";
-      startingTime = 1000;
-      this.roomTutorial = TradeshowSteps;
-    } else if (roomPropertiesReader.roomProps.room === "Conference Room") {
-      this.room = "conference";
-      this.roomTutorial = ConferenceSteps;
-      startingTime = 500;
-    } else startingTime = 1000;
+    this.roomTutorial = RoomSteps[roomPropertiesReader.Room as "conference_room" | "lobby" | "tradeshows"];
+    const navString = roomPropertiesReader.AllowsNav ? "nav" : "noNav";
 
     this.categoriesArray = [];
-    if (roomPropertiesReader.AllowsNav) {
-      this.roomTutorial.forEach(stepCategory => {
-        if (stepCategory.type === "both" || stepCategory.type === "nav") this.categoriesArray.push(stepCategory);
-      });
-    } else {
-      this.roomTutorial.forEach(stepCategory => {
-        if (stepCategory.type === "both" || stepCategory.type === "noNav") this.categoriesArray.push(stepCategory);
-      });
-    }
+
+    this.roomTutorial.forEach(stepCategory => {
+      if (stepCategory.type === "both" || stepCategory.type === navString) this.categoriesArray.push(stepCategory);
+    });
 
     const avatarheadElement = document.querySelector("#avatar-pov-node") as AElement;
     this.Ascene = document.querySelector("a-scene") as AScene;
@@ -130,14 +97,13 @@ class TutorialManager {
 
     setTimeout(() => {
       this.allowed = true;
-      // console.log(roomPropertiesReader.tutorialProps.slides);
       this.AddTutorialPanel(
         roomPropertiesReader.roomProps.tutorial.slides!,
         roomPropertiesReader.tutorialProps.position!,
         roomPropertiesReader.tutorialProps.rotation!,
         roomPropertiesReader.tutorialProps.ratio!
       );
-    }, startingTime);
+    }, 1000);
 
     this.onMicEvent = this.onMicEvent.bind(this);
   }
@@ -164,8 +130,7 @@ class TutorialManager {
     const slides: Array<string> = [];
     const cSlides: Array<string> = [];
     for (let i = 0; i < slidesCount; i++) {
-      slides.push(`${roomPropertiesReader.serverURL}/${this.room}/${languageCode}_tutorial_${i}.png`);
-      // console.log(`pushing ${roomPropertiesReader.serverURL}/${this.room}/${languageCode}_tutorial_${i}.png`);
+      slides.push(`${roomPropertiesReader.serverURL}/${roomPropertiesReader.Room}/${languageCode}_tutorial_${i}.png`);
     }
 
     for (let i = 0; i < CONGRATS_SLIDE_COUNT; i++)
@@ -197,8 +162,28 @@ class TutorialManager {
 
     this.activeCategory = this.categoriesArray[this.activeCategoryIndex];
     this.activeStep = this.activeCategory.steps[this.activeStepIndex];
+    this.Ascene.addState("task");
+    APP.scene!.addEventListener("task-toggle", this.onTaskToggle);
+    APP.scene!.addEventListener("clear-scene", this.onClearToggle);
     this.RenderSlide();
     this.OnceFunc();
+  }
+
+  onTaskToggle() {
+    if (this.Ascene.is("task")) {
+      this.panelObj.visible = false;
+      this.Ascene.removeState("task");
+    } else {
+      this.panelObj.visible = true;
+      this.Ascene.addState("task");
+    }
+  }
+
+  onClearToggle() {
+    if (this.Ascene.is("task")) {
+      this.panelObj.visible = false;
+      this.Ascene.removeState("task");
+    }
   }
 
   RemovePanel() {
@@ -222,8 +207,10 @@ class TutorialManager {
     this.nextObj.visible = true;
 
     this.slides[this.activeCategory.slides[this.activeStepIndex]].visible = true;
-
-    // console.log(this.activeCategoryIndex, this.activeStepIndex);
+    if (!this.Ascene.is("task")) {
+      this.Ascene.addState("task");
+      this.panelObj.visible = true;
+    }
   }
 
   Next(congratulate = false) {
@@ -231,7 +218,6 @@ class TutorialManager {
       this.NextCategory(congratulate);
     } else {
       this.AddStep(1);
-      this.RenderSlide();
     }
   }
 
@@ -239,7 +225,6 @@ class TutorialManager {
     if (this.activeStepIndex === 0) this.PrevCategory();
     else {
       this.AddStep(-1);
-      this.RenderSlide();
     }
   }
 
@@ -250,16 +235,22 @@ class TutorialManager {
   SetStep(number: number) {
     this.activeStepIndex = number;
     this.activeStep = this.activeCategory.steps[this.activeStepIndex];
+    this.RenderSlide();
+    this.OnceFunc();
   }
 
   ChangeCategory(category: StepCategory) {
     const cleanupFunc = this.activeStep["cleanUpFunc"];
     if (cleanupFunc) cleanupFunc();
-
     this.activeCategory = category;
     this.SetStep(0);
-    this.RenderSlide();
-    this.OnceFunc();
+  }
+
+  RunCleanupFunc() {
+    if (this.activeStep) {
+      const cleanupFunc = this.activeStep["cleanUpFunc"];
+      if (cleanupFunc) cleanupFunc();
+    }
   }
 
   ChangeCategoryByIndex(index: number) {
@@ -285,10 +276,6 @@ class TutorialManager {
     this.activeCategoryIndex -= 1;
     this.activeCategory = this.categoriesArray[this.activeCategoryIndex];
     this.SetStep(0);
-    this.RenderSlide();
-
-    const startingFunc = this.activeStep["onceFunc"];
-    if (startingFunc) startingFunc();
   }
 
   OnceFunc() {
@@ -298,6 +285,11 @@ class TutorialManager {
 
   onMicEvent() {
     this.NextCategory();
+  }
+
+  HidePanel() {
+    this.panelObj.visible = false;
+    this.Ascene.removeState("task");
   }
 }
 
@@ -324,18 +316,28 @@ const WellDoneCategory = (): StepCategory => {
   };
 };
 
-const onMuting = () => {
-  tutorialManager.Next(true);
+const MicUnMutedCategory = (): StepCategory => {
+  const onMuting = () => tutorialManager.Next(true);
+
+  return {
+    name: "mic_unmuted",
+    type: "nav",
+    slides: [7],
+    steps: [
+      {
+        onceFunc: () => tutorialManager.Ascene.addEventListener("action_disable_mic", onMuting, { once: true }),
+        cleanUpFunc: () => tutorialManager.Ascene.removeEventListener("action_disable_mic", onMuting)
+      }
+    ]
+  };
 };
-const onUnmuting = () => {
-  tutorialManager.RenderSlide(6);
-  tutorialManager.Ascene.addEventListener("action_disable_mic", onMuting);
-  tutorialManager.nextObj.visible = false;
-  tutorialManager.prevObj.visible = false;
-};
-const OnToggle = () => {
-  tutorialManager.Ascene.addEventListener(
-    "lang-toggle",
+
+const onUnmuting = () => tutorialManager.ChangeCategory(MicUnMutedCategory());
+
+const OnMapToggle = () => {
+  console.log(`map toggled once`);
+  APP.scene!.addEventListener(
+    "map-toggle",
     () => {
       tutorialManager.Next(true);
     },
@@ -352,7 +354,7 @@ function welcomeSteps(time: number): Array<StepObject> {
         tutorialManager.nextObj.visible = false;
         tutorialManager.prevObj.visible = false;
         setTimeout(() => {
-          tutorialManager.panelObj.visible = false;
+          tutorialManager.HidePanel();
         }, time);
 
         timeOut = setTimeout(() => {
@@ -378,7 +380,7 @@ const timeOutCategory: StepCategory = {
   steps: [
     {
       onceFunc: () => {
-        tutorialManager.panelObj.visible = false; //this need to be changed
+        tutorialManager.HidePanel(); //this need to be changed
         tutorialManager.nextObj.visible = false;
         tutorialManager.prevObj.visible = false;
         setTimeout(() => {
@@ -389,10 +391,22 @@ const timeOutCategory: StepCategory = {
   ]
 };
 
+const MapPanelSteps: Array<StepObject> = [
+  {},
+  {
+    onceFunc: () => {
+      console.log("event listener added for map toggle");
+      APP.scene!.addEventListener("map-toggle", OnMapToggle, { once: true });
+    },
+    cleanUpFunc: () => {
+      APP.scene!.removeEventListener("map-toggle", OnMapToggle);
+    }
+  }
+];
 let targetPos: Vector3;
 let timeOut: NodeJS.Timeout;
 
-const lobbySteps: Array<StepCategory> = [
+const LobbySteps: Array<StepCategory> = [
   {
     name: "welcome_1",
     type: "both",
@@ -487,12 +501,8 @@ const lobbySteps: Array<StepCategory> = [
     steps: [
       {},
       {
-        onceFunc: () => {
-          tutorialManager.Ascene.addEventListener("action_enable_mic", onUnmuting);
-        },
-        cleanUpFunc: () => {
-          tutorialManager.Ascene.removeEventListener("action_enable_mic", onUnmuting);
-        }
+        onceFunc: () => tutorialManager.Ascene.addEventListener("action_enable_mic", onUnmuting, { once: true }),
+        cleanUpFunc: () => tutorialManager.Ascene.removeEventListener("action_enable_mic", onUnmuting)
       }
     ]
   },
@@ -500,33 +510,13 @@ const lobbySteps: Array<StepCategory> = [
     name: "panel",
     type: "nav",
     slides: [8, 10],
-    steps: [
-      {},
-      {
-        onceFunc: () => {
-          tutorialManager.Ascene.addEventListener("lang-toggle", OnToggle, { once: true });
-        },
-        cleanUpFunc: () => {
-          tutorialManager.Ascene.removeEventListener("map-toggle", OnToggle);
-        }
-      }
-    ]
+    steps: MapPanelSteps
   },
   {
     name: "panel",
     type: "noNav",
     slides: [9, 11],
-    steps: [
-      {},
-      {
-        onceFunc: () => {
-          tutorialManager.Ascene.addEventListener("map-toggle", OnToggle, { once: true });
-        },
-        cleanUpFunc: () => {
-          tutorialManager.Ascene.removeEventListener("map-toggle", OnToggle);
-        }
-      }
-    ]
+    steps: MapPanelSteps
   },
   {
     name: "finish",
@@ -539,9 +529,7 @@ const lobbySteps: Array<StepCategory> = [
           const testText = tutorialManager.testObj.getObjectByName("Button Label") as Text;
           testText.text = "Reset";
         },
-        cleanUpFunc: () => {
-          tutorialManager.testObj.visible = false;
-        }
+        cleanUpFunc: () => (tutorialManager.testObj.visible = false)
       }
     ]
   }
@@ -572,7 +560,7 @@ const TradeshowSteps: Array<StepCategory> = [
           targetPos = navSystem.nodes[navSystem.GetDestIndex("conference room")].vector;
 
           setTimeout(() => {
-            tutorialManager.panelObj.visible = false;
+            tutorialManager.HidePanel();
           }, 5000);
         }
       }
@@ -591,10 +579,12 @@ const ConferenceSteps: Array<StepCategory> = [
           tutorialManager.nextObj.visible = false;
           tutorialManager.prevObj.visible = false;
           setTimeout(() => {
-            tutorialManager.panelObj.visible = false;
+            tutorialManager.HidePanel();
           }, 5000);
         }
       }
     ]
   }
 ];
+
+const RoomSteps = { conference_room: ConferenceSteps, lobby: LobbySteps, tradeshows: TradeshowSteps };

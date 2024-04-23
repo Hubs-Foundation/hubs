@@ -90,6 +90,7 @@ import { NavigatingSystem } from "../bit-systems/routing-system";
 import { translationSystem } from "../bit-systems/translation-system";
 import { FixedPanelSystem } from "../bit-systems/fixed-panel-system";
 import { tutorialManager } from "../bit-systems/tutorial-system";
+import { helpButton } from "../bit-systems/help-system";
 
 declare global {
   interface Window {
@@ -287,6 +288,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   NavigatingSystem(world);
   FixedPanelSystem(world);
   tutorialManager.Tick(world);
+  helpButton.Tick(world);
 
   HiddenSystem(world);
 

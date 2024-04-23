@@ -44,6 +44,9 @@ export interface ResponseData {
     descript?: any;
     transcriptions?: string[];
     translations?: string[];
+    destination?: string;
+    intent?: string;
+    response?: string;
   };
 }
 

@@ -15,7 +15,6 @@ const MapTooltipDescription = defineMessage({
 
 export function MapSpawnButton({ scene }) {
   if (roomPropertiesReader.AllowsMap) {
-    console.log(`button is working`);
     const [active, setActive] = useState(false);
     const intl = useIntl();
     const description = intl.formatMessage(MapTooltipDescription);
