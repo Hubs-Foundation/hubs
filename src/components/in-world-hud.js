@@ -1,3 +1,5 @@
+import { agentLogger } from "../bit-systems/agent-system";
+import { logger } from "../bit-systems/logging-system";
 import { SOUND_SPAWN_PEN } from "../systems/sound-effects-system";
 import { roomPropertiesReader } from "../utils/rooms-properties";
 /**

@@ -1,5 +1,5 @@
 import { addComponent, defineQuery, enterQuery, hasComponent, removeComponent, removeEntity } from "bitecs";
-import { Agent, Hidden, Interacted, LookAtUser } from "../bit-components";
+import { Agent, CursorRaycastable, Hidden, Interacted, LookAtUser } from "../bit-components";
 import { UpdateTextSystem, lowerIndex, raiseIndex } from "./agent-slideshow-system";
 import { PermissionStatus } from "../utils/media-devices-utils";
 import { stageUpdate } from "../systems/single-action-button-system";
@@ -18,25 +18,17 @@ import { SnapDepthPOV, SnapPOV } from "../utils/vlm-adapters";
 import { navSystem } from "./routing-system";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { languageCodes, translationSystem } from "./translation-system";
-import { UpdatePanelSize, GetTextSize } from "../utils/interactive-panels";
+import { UpdatePanelSize, GetTextSize, GetObjSize } from "../utils/interactive-panels";
 import { agentDialogs } from "../utils/localization";
 import { Logger } from "../utils/logging_systems";
 import { AxesHelper, Vector3 } from "three";
 import { roomPropertiesReader } from "../utils/rooms-properties";
+import { logger } from "./logging-system";
 
 const agentQuery = defineQuery([Agent]);
 const enterAgentQuery = enterQuery(agentQuery);
 const PANEL_PADDING = 0.05;
-const skipModule = false;
-const output0 = "Hello All. this is a test wihtout a new line";
-const output1 =
-  "To reach the social space, follow these steps:\n- Start by moving forward 4 meters.\n- Turn left and proceed for 11 meters.\n- Turn right and move 4 meters.\n- Turn left and go 3 meters.\n- Take the stairs up.\n- Move 12 meters.\n- Turn right again and move 4 meters.\n- Turn right once more and go 13 meters.\n- Finally, turn left and move forward 5 meters.\n\nYou should now be in the social space.";
-const output2 =
-  "To find the bathroom, follow these steps:\n- Start by turning right.\n- Move forward 2 meters.\n- Turn left and go 16 meters.\n- Turn right and proceed for 6 meters.\n- Turn left and move 1 meter.\n\nYou should now be at the bathroom.";
-const output3 =
-  "To reach the garden, follow these steps:\n- Start by turning right.\n- Move forward 1 meter.\n- Turn left and go 17 meters.\n- Turn left again and proceed for 6 meters.\n- Turn right and move forward.\n\nYou should now be at the garden.";
 
-const testOutputs = [output1, output2, output3];
 function clicked(eid) {
   return hasComponent(APP.world, Interacted, eid);
 }
@@ -94,7 +86,6 @@ export default class VirtualAgent {
     this.textArray = [];
     this.diplayedSenteceIndex = null;
 
-    this.refsList = [];
     this.currentOccasion = null;
     this.waitingForResponse = null;
 
@@ -118,18 +109,11 @@ export default class VirtualAgent {
     };
   }
 
-  SegmentText(text) {
-    const sentences = text.split("\n");
-
-    return sentences.filter(sentence => {
-      return sentence !== "" && sentence !== " ";
-    });
-  }
-
   Init(reset) {
     if (reset) {
       APP.scene.removeEventListener("agent-toggle", this.onToggle);
       APP.scene.removeEventListener("clear-scene", this.onClear);
+      this.Remove();
     }
 
     this.avatarPovObj = document.querySelector("#avatar-pov-node").object3D;
@@ -143,29 +127,54 @@ export default class VirtualAgent {
     this.allowed = true;
     APP.scene.addEventListener("agent-toggle", this.onToggle);
     APP.scene.addEventListener("clear-scene", this.onClear);
-    // APP.scene.emit("agent-toggle");
     this.navProperties = roomPropertiesReader.navProps;
+
+    this.Instantiate();
   }
 
-  Remove() {
+  Enable() {
+    this.displayedText.obj.addEventListener("synccomplete", this.OntextUpdate);
+    this.UpdateWithRandomPhrase("greetings");
+    APP.dialog.on("mic-state-changed", this.setMicStatus);
+    APP.scene.addEventListener("language_updated", this.onLanguageUpdated);
+    APP.scene.addState("agent");
+    this.ToggleRays(true);
+    this.agent.obj.position.copy(this.AgentInitialPosition);
+    this.agent.obj.rotation.set(0, 0, 0);
+  }
+
+  Disable() {
     this.displayedText.obj.removeEventListener("synccomplete", this.OntextUpdate);
     APP.scene.removeEventListener("language_updated", this.onLanguageUpdated);
     APP.dialog.off("mic-state-changed", this.setMicStatus);
+    APP.scene.removeState("agent");
+    this.agentParent.obj.visible = false;
+    this.ToggleRays(false);
+  }
 
+  ToggleRays(show) {
+    const action = show ? addComponent : removeComponent;
+    action(APP.world, CursorRaycastable, this.agent.eid);
+    action(APP.world, CursorRaycastable, this.clearButton.eid);
+    action(APP.world, CursorRaycastable, this.nextArrow.eid);
+    action(APP.world, CursorRaycastable, this.prevArrow.eid);
+    action(APP.world, CursorRaycastable, this.panel.eid);
+    action(APP.world, CursorRaycastable, this.displayedText.eid);
+    action(APP.world, CursorRaycastable, this.agentParent.eid);
+    action(APP.world, CursorRaycastable, this.infoPanel.eid);
+  }
+
+  Remove() {
+    if (APP.scene.is("agent")) this.Disable;
     removeEntity(APP.world, this.agentParent.eid);
     removeEntity(APP.world, this.agent.eid);
     APP.scene.removeState("agent");
-    // this.refsList.forEach(ref => {
-    //   removeEntity(APP.world, ref.eid);
-    // });
-
-    // APP.scene.remove(this.agent.obj);
+    APP.scene.remove(this.agentParent.obj);
   }
 
   Instantiate() {
-    APP.scene.addState("agent");
+    if (APP.scene.is("agent")) this.Remove();
     const eid = renderAsEntity(APP.world, AgentEntity());
-
     const obj = APP.world.eid2obj.get(eid);
     APP.world.scene.add(obj);
     this.agentParent.update(eid);
@@ -181,120 +190,69 @@ export default class VirtualAgent {
     this.displayedText.update(Agent.textRef[agentEid]);
     this.snapButton.update(Agent.snapRef[agentEid]);
 
-    this.refsList = [
-      this.nextArrow,
-      this.prevArrow,
-      this.infoPanel,
-      this.snapButton,
-      this.clearButton,
-      this.panel,
-      this.displayedText
-    ];
-
-    const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
-    physicsSystem.updateRigidBodyOptions(agentEid, {
-      type: "kinematic",
-      gravity: {
-        x: 0,
-        y: 0,
-        z: 0
-      }
-    });
-
-    //Do not delete this, these are for VLM. Try to not use them, but practice TODO: Migrate
-    this.scene = AFRAME.scenes[0];
-    this.camera = this.scene.camera;
-    this.renderer = this.scene.renderer;
-    //-----------------------------------------
-
     this.isProccessing = false;
     this.isListening = false;
     this.successResult = false;
-
-    // this.UpdateText("Hello I am your personal Agent");
-
-    this.infoPanel.obj.children[0].text = "";
-    const dotGeometry = new THREE.CircleBufferGeometry(0.02, 12);
-    this.loadingObj = new THREE.Group();
-    this.loadingObj.position.set(0, 0, 0.01);
-    for (let i = 0; i < 5; i++) {
-      const dot = new THREE.Mesh(
-        dotGeometry,
-        new THREE.MeshBasicMaterial({ transparent: true, color: 0x000000, depthWrite: false })
-      );
-      dot.position.x = i * 0.07 - 0.14;
-      this.loadingObj.add(dot);
-    }
-
-    this.infoPanel.obj.add(this.loadingObj);
-
-    this.displayedText.obj.addEventListener("synccomplete", this.OntextUpdate);
-
-    this.UpdateWithRandomPhrase("greetings");
     this.micStatus = false;
-    APP.dialog.on("mic-state-changed", this.setMicStatus);
     this.waitingForResponse = false;
     APP.mediaDevicesManager.micEnabled = false;
-    APP.scene.addEventListener("language_updated", this.onLanguageUpdated);
     this.agent.obj.visible = true;
     this.infoPanel.obj.visible = false;
-  }
+    this.agentParent.obj.visible = false;
 
-  Cleanup() {
-    this.agent.update(null);
-    this.nextArrow.update(null);
-    this.prevArrow.update(null);
-    this.infoPanel.update(null);
-    this.snapButton.update(null);
-    this.clearButton.update(null);
-    this.panel.update(null);
-    this.displayedText.update(null);
-    this.agentParent.update(null);
+    this.AgentInitialPosition = this.agent.obj.position.clone();
 
-    this.loadingObj = null;
-    this.isProccessing = false;
-    this.isListening = false;
-    this.successResult = false;
-
-    this.currentOccasion = null;
-    this.waitingForResponse = null;
-
-    this.refsList = [];
+    this.AddAnimationDots();
+    this.ToggleRays(false);
   }
 
   onClear() {
     if (APP.scene.is("agent")) {
-      this.Remove();
+      this.Disable();
     }
   }
 
   onToggle() {
     if (!APP.scene.is("agent")) {
       APP.scene.emit("clear-scene");
-      this.Instantiate();
+      this.Enable();
+      logger.AddUiInteraction("agent_toggle", "activate_agent");
     } else {
-      this.Remove();
+      this.Disable();
+      logger.AddUiInteraction("agent_toggle", "deactivate_agent");
     }
   }
 
-  onLanguageUpdated(event) {
+  onLanguageUpdated() {
     this.UpdateWithRandomPhrase(this.currentOccasion);
   }
 
   OntextUpdate() {
     const size = GetTextSize(this.displayedText.obj);
+    const arrowSize = GetObjSize(this.nextArrow.obj);
+    const clearSize = GetObjSize(this.clearButton.obj);
     size[0] += 2 * PANEL_PADDING;
     size[1] += 2 * PANEL_PADDING;
     UpdatePanelSize(this.panel.eid, size);
     this.panel.size = size;
 
     if (this.successResult) {
-      this.clearButton.obj.position.copy(new Vector3(0, -size[1] / 2 + PANEL_PADDING, 0.2));
+      this.clearButton.obj.position.copy(new Vector3(0, -((size[1] + clearSize[1]) / 2 + PANEL_PADDING), 0));
+
       this.clearButton.obj.updateMatrix();
+
       this.clearButton.obj.visible = true;
     } else {
       this.clearButton.obj.visible = false;
     }
+
+    this.nextArrow.obj.position.copy(new Vector3((size[0] + arrowSize[0]) / 2 + PANEL_PADDING, 0, 0));
+    this.prevArrow.obj.position.copy(new Vector3(-((size[0] + arrowSize[0]) / 2 + PANEL_PADDING), 0, 0));
+    this.nextArrow.obj.updateMatrix();
+    this.prevArrow.obj.updateMatrix();
+
+    this.agentParent.obj.visible = true;
+    this.panel.obj.visible = true;
   }
 
   UpdateTextArray(newTextArray) {
@@ -303,6 +261,12 @@ export default class VirtualAgent {
     this.RenderSlide();
   }
 
+  SegmentText(text) {
+    const sentences = text.split("\n");
+    return sentences.filter(sentence => {
+      return sentence !== "" && sentence !== " ";
+    });
+  }
   NextSentence() {
     this.slideIndex += 1;
     this.nextArrow.obj.visible = this.slideIndex !== this.textArray.length - 1;
@@ -327,7 +291,7 @@ export default class VirtualAgent {
     if (changedMicStatus) {
       this.micStatus = permissionsGranted && APP.mediaDevicesManager.isMicEnabled;
       if (this.micStatus && !this.waitingForResponse) {
-        this.AskAgent(false, false);
+        this.AskAgent();
       } else {
         stopRecording();
       }
@@ -347,6 +311,22 @@ export default class VirtualAgent {
     if (clicked(this.prevArrow.eid)) {
       this.PrevSentence();
     }
+  }
+
+  AddAnimationDots() {
+    this.infoPanel.obj.children[0].text = "";
+    const dotGeometry = new THREE.CircleBufferGeometry(0.02, 12);
+    this.loadingObj = new THREE.Group();
+    this.loadingObj.position.set(0, 0, 0.01);
+    for (let i = 0; i < 5; i++) {
+      const dot = new THREE.Mesh(
+        dotGeometry,
+        new THREE.MeshBasicMaterial({ transparent: true, color: 0x000000, depthWrite: false })
+      );
+      dot.position.x = i * 0.07 - 0.14;
+      this.loadingObj.add(dot);
+    }
+    this.infoPanel.obj.add(this.loadingObj);
   }
 
   Animations(t) {
@@ -377,151 +357,100 @@ export default class VirtualAgent {
     });
   }
 
-  async TestNavigationUI() {
-    const targets = this.navProperties.targets;
-    const avatarPosition = this.avatarPos;
-
-    const update = () => {
-      this.UpdateTextArray([
-        `This is a demo text that gives you guidance to reach the random destination with index \nYou will find your destination called  by following the green lines and the blue arrows. \nWe hope this text is large enough so it takes up a lot of space and will allow us to test also the transparent nametag texture.\nThank you, if you have any further questions do not hesitate to reach me.`
-      ]);
-    };
-
-    return new Promise(resolve => {
-      console.log("waiting");
-      setTimeout(function () {
-        // Your code to be executed after the delay (2 seconds in this case)
-        const randInt = getRandomInt(targets.length);
-
-        const navigation = navSystem.GetInstructions(avatarPosition, targets[randInt].name);
-
-        if (navigation.valid) {
-          navSystem.RenderCues(navigation);
-        }
-
-        update();
-
-        resolve();
-      }, 2000);
-    });
-  }
-
-  async AskAgent(savefile, testNav) {
+  async AskAgent() {
     this.panel.obj.visible = false;
     this.infoPanel.obj.visible = true;
     this.waitingForResponse = true;
     this.setMicStatus();
 
+    const agentDataObj = [];
+    let t1, t2;
+
     try {
-      logger.action = "dialog_system";
-
-      const recordedQuestion = await RecordQuestion(savefile);
-
-      this.UpdateTextArray(this.SegmentText(output0));
-
-      return;
-
-      // this.DatasetCreate();
-      // return;
-
-      if (testNav) {
-        const randomInd = Math.floor(Math.random() * (roomPropertiesReader.navProps.targets.length - 1));
-        const dest = roomPropertiesReader.navProps.targets[randomInd].name;
-        const navigation = navSystem.GetInstructions(this.avatarPos, dest);
-        navSystem.RenderCues(navigation);
-        console.log(navigation);
-        return;
-      }
-      // this.isProccessing = true;
-
-      // await this.TestNavigationUI();
-
-      // return;
+      t1 = Date.now();
+      const recordedQuestion = await RecordQuestion();
+      t2 = Date.now();
 
       this.isProccessing = true;
-      // UpdatePanelSize(this.panel.eid, [0.02, 0.01]);
-
       const sourceLang = translationSystem.mylanguage ? languageCodes[translationSystem.mylanguage] : "en";
       const nmtAudioParams = { source_language: sourceLang, target_language: "en", return_transcription: "true" };
 
-      logger.audioTranslation.start = new Date();
+      t1 = Date.now();
       const nmtResponse = await audioModules(
         COMPONENT_ENDPOINTS.TRANSLATE_AUDIO_FILES,
         recordedQuestion.data.file,
         nmtAudioParams
       );
+      t2 = Date.now();
+      agentDataObj.push({
+        start_time: t1.toString(),
+        stop_time: t2.toString(),
+        source_language: translationSystem.mylanguage,
+        target_language: "english",
+        transcription: nmtResponse.data.transcriptions[0],
+        translation: nmtResponse.data.translations[0]
+      });
 
-      logger.audioTranslation.finish = new Date();
-      logger.audioTranslation.input = {
-        file: "audiofile",
-        source_language: nmtAudioParams.source_language,
-        target_language: nmtAudioParams.target_language
-      };
-      logger.audioTranslation.output = {
-        translation: nmtResponse.data.transcriptions[0],
-        transcription: nmtResponse.data.translations[0]
-      };
-
-      logger.intent.start = new Date();
+      t1 = Date.now();
       const intentResponse = await intentionModule(nmtResponse.data.translations[0]);
+      t2 = Date.now();
+      agentDataObj.push({
+        start_time: t1.toString(),
+        stop_time: t2.toString(),
+        input: nmtResponse.data.translations[0],
+        intent: intentResponse.data.intent,
+        destination: intentResponse.data.destination
+      });
 
-      logger.intent.finish = new Date();
-      logger.intent.input = nmtResponse.data.translations[0];
-      logger.intent.output = { intent: intentResponse.data.intent, destination: intentResponse.data.destination };
-
+      t1 = Date.now();
       const navigation = navSystem.GetInstructions(this.avatarPos, intentResponse.data.destination);
-
-      logger.response.start = new Date();
+      agentLogger.response.start = new Date();
       const response = await dsResponseModule(
         nmtResponse.data.translations[0],
         intentResponse.data.intent,
         navigation.knowledge
       );
-      logger.response.finish = new Date();
-      logger.response.input = {
-        user_query: nmtResponse.data.translations[0],
-        intent: intentResponse.data.intent,
-        mozilla_input: navigation.knowledge
-      };
-      logger.response.output = response.data.response;
+      t2 = Date.now();
+      agentDataObj.push({
+        start_time: t1.toString(),
+        stop_time: t2.toString(),
+        instructions: navigation.instructions,
+        knowledge: navigation.knowledge,
+        ds_output: response.data.response
+      });
 
-      const targetLang = translationSystem.mylanguage ? languageCodes[translationSystem.mylanguage] : "en";
+      const targetLang = languageCodes[translationSystem.mylanguage];
       const nmtTextParams = { source_language: "en", target_language: targetLang };
-      let output;
-      if (nmtTextParams.source_language === nmtTextParams.target_language) {
-        output = response.data.response;
-        logger.textTranslation.total = 0;
-      } else {
-        const segmentedOutput = response.data.response.split("\n");
+      const outputArray = this.SegmentText(response.data.response);
 
+      if (nmtTextParams.source_language === nmtTextParams.target_language) this.UpdateTextArray(outputArray);
+      else {
+        t1 = Date.now();
         const translatePromises = [];
-        logger.textTranslation.start = new Date();
-        segmentedOutput.forEach(sentence => {
-          const translatePromise =
-            sentence.length === 0
-              ? new Promise(resolve => {
-                  resolve({ data: { translations: [""] } });
-                })
-              : textModule(COMPONENT_ENDPOINTS.TRANSLATE_TEXT, sentence, nmtTextParams);
-          translatePromises.push(translatePromise);
-        });
+        outputArray.forEach(sentence =>
+          translatePromises.push(textModule(COMPONENT_ENDPOINTS.TRANSLATE_TEXT, sentence, nmtTextParams))
+        );
 
         const translatedResponses = await Promise.all(translatePromises);
         console.log(translatePromises);
-        output = translatedResponses
-          .map(element => {
-            return element.data.translations[0];
-          })
-          .join("\n");
+        const TranslatedOutputArray = translatedResponses.map(element => {
+          return element.data.translations[0];
+        });
 
-        logger.textTranslation.finish = new Date();
-        logger.textTranslation.output = output;
-        logger.textTranslation.input = {
-          text: response.data.response,
-          source_language: nmtTextParams.source_language,
-          target_language: nmtTextParams.target_language
-        };
+        this.UpdateTextArray(TranslatedOutputArray);
+        t2 = Date.now();
+        agentDataObj.push({
+          start_time: t1.toString(),
+          stop_time: t2.toString(),
+          source_language: "english",
+          target_language: translationSystem.mylanguage,
+          translated_text: TranslatedOutputArray.join("\n")
+        });
       }
+
+      const stringData = JSON.stringify(agentDataObj);
+      const jsonDataBlob = new Blob([stringData], { type: "application/json" });
+      logger.AddAgentInteraction(recordedQuestion.data.file, jsonDataBlob);
 
       if (intentResponse.data.intent.includes("navigation") && navigation.valid) {
         this.successResult = true;
@@ -531,18 +460,15 @@ export default class VirtualAgent {
       } else {
         this.successResult = false;
       }
-
-      this.UpdateTextArray([output]);
     } catch (error) {
       console.log("error", error);
       this.UpdateWithRandomPhrase("error");
     } finally {
-      this.infoPanel.obj.visible = false;
       this.isProccessing = false;
-      this.panel.obj.visible = true;
+      this.infoPanel.obj.visible = false;
+
       this.setMicStatus();
       this.waitingForResponse = false;
-      logger.Log();
     }
   }
 
@@ -614,4 +540,4 @@ export default class VirtualAgent {
 }
 
 export const virtualAgent = new VirtualAgent();
-export const logger = new Logger();
+export const agentLogger = new Logger();

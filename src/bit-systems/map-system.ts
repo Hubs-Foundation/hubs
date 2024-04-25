@@ -1,5 +1,5 @@
-import { defineQuery, enterQuery, exitQuery, removeEntity } from "bitecs";
-import { FloorMap } from "../bit-components";
+import { addComponent, defineQuery, enterQuery, exitQuery, removeComponent, removeEntity } from "bitecs";
+import { CursorRaycastable, FloorMap } from "../bit-components";
 import { FloorMapPanel } from "../prefabs/floor-map";
 import { AxesHelper, Object3D, Vector2, Vector3 } from "three";
 import { renderAsEntity } from "../utils/jsx-entity";
@@ -8,6 +8,8 @@ import { AElement, AScene } from "aframe";
 import { languageCodes, translationSystem } from "./translation-system";
 import { HubsWorld } from "../app";
 import { radToDeg } from "three/src/math/MathUtils";
+import { logger } from "./logging-system";
+import { faSlash } from "@fortawesome/free-solid-svg-icons";
 
 const mapQuery = defineQuery([FloorMap]);
 const enterMapQuery = enterQuery(mapQuery);
@@ -20,7 +22,9 @@ class FloorMapClass {
   mapObj: Object3D;
   userPov: Object3D;
   userObj: Object3D;
+  mapParentObj: Object3D;
 
+  mapParentRef: number;
   entityRef: number;
   mapRef: number;
   pointerRef: number;
@@ -34,7 +38,7 @@ class FloorMapClass {
 
   allowed: boolean;
 
-  room: string;
+  AScene: AScene;
 
   constructor() {
     this.onToggle = this.onToggle.bind(this);
@@ -44,7 +48,9 @@ class FloorMapClass {
 
   Init(reset: boolean) {
     if (reset) {
-      APP.world.scene.removeEventListener("map-toggle", this.onToggle);
+      this.AScene.removeEventListener("map-toggle", this.onToggle);
+      this.AScene.addEventListener("clear-scene", this.onClear);
+      this.Remove();
     }
 
     if (!roomPropertiesReader.AllowsMap) {
@@ -53,8 +59,9 @@ class FloorMapClass {
       return;
     }
 
-    APP.scene!.addEventListener("map-toggle", this.onToggle);
-    APP.scene!.addEventListener("clear-scene", this.onClear);
+    this.AScene = APP.scene as AScene;
+    this.AScene.addEventListener("map-toggle", this.onToggle);
+    this.AScene.addEventListener("clear-scene", this.onClear);
     this.allowed = true;
     this.userPov = (document.querySelector("#avatar-pov-node")! as AElement).object3D;
     this.userObj = (document.querySelector("#avatar-rig")! as AElement).object3D;
@@ -64,39 +71,45 @@ class FloorMapClass {
     );
     this.imageRatio = roomPropertiesReader.mapProps.image_ratio!;
     this.scale = roomPropertiesReader.mapProps.scale!;
+
+    this.Instantiate();
   }
 
   Instantiate() {
-    (APP.scene as AScene).addState("map");
-
     const language = translationSystem.mylanguage as "english" | "spanish" | "german" | "dutch" | "greek" | "italian";
     const languageCode = languageCodes[language];
 
-    if (roomPropertiesReader.roomProps.room === "Lobby") this.room = "lobby";
-    else if (roomPropertiesReader.roomProps.room === "Conference Room") this.room = "conference";
-    else if (roomPropertiesReader.roomProps.room === "Tradeshows") this.room = "tradeshows";
-
-    const mapImage = `${roomPropertiesReader.serverURL}/${this.room}/${languageCode}_map.png`;
+    const mapImage = `${roomPropertiesReader.serverURL}/${roomPropertiesReader.Room}/${languageCode}_map.png`;
     this.entityRef = renderAsEntity(APP.world, FloorMapPanel(this.imageRatio, mapImage, this.scale));
     this.entityObj = APP.world.eid2obj.get(this.entityRef)!;
     this.imageSize = this.GetObjSize(this.entityObj);
     APP.world.scene.add(this.entityObj);
     this.mapDir = new Vector3(0, 0, -1);
     this.movingScalar = this.imageRatio <= 1 ? 1 / this.roomSize.x : 1 / this.roomSize.y;
+    this.entityObj.visible = false;
   }
 
-  Cleanup(world: HubsWorld) {
-    [this.entityRef, this.mapRef, this.pointerRef].forEach(ref => {
-      removeEntity(world, ref);
-    });
+  Enable() {
+    if (this.AScene.is("map")) return;
+    this.AScene.addState("map");
+    this.mapObj.position.copy(new Vector3(0, 0, 0));
+    this.mapObj.rotation.set(0, 0, 0);
+    this.mapObj.updateMatrix();
+    this.entityObj.visible = true;
+    addComponent(APP.world, CursorRaycastable, this.mapRef);
+  }
+
+  Disable() {
+    if (!this.AScene.is("map")) return;
+    this.AScene.removeState("map");
+    this.entityObj.visible = false;
+    removeComponent(APP.world, CursorRaycastable, this.mapRef);
   }
 
   Remove() {
+    this.Disable();
     APP.world.scene.remove(this.entityObj);
-    [this.entityRef, this.mapRef, this.pointerRef].forEach(ref => {
-      removeEntity(APP.world, ref);
-    });
-    (APP.scene as AScene).removeState("map");
+    removeEntity(APP.world, this.entityRef);
   }
 
   Setup(world: HubsWorld, mapRef: number) {
@@ -124,9 +137,9 @@ class FloorMapClass {
     this.pointerObj.rotation.set(0, 0, -dotAngle * sign);
     this.pointerObj.updateMatrix();
 
-    console.log(
-      `(${userPosition.x}, ${userPosition.z}, (${this.pointerObj.position.x}, ${this.pointerObj.position.y}))`
-    );
+    // console.log(
+    //   `(${userPosition.x}, ${userPosition.z}, (${this.pointerObj.position.x}, ${this.pointerObj.position.y}))`
+    // );
   }
 
   GetObjSize(obj: Object3D): Vector2 {
@@ -139,18 +152,19 @@ class FloorMapClass {
   }
 
   onToggle() {
-    console.log(`map toggle`);
-    if ((APP.scene as AScene).is("map")) {
-      this.Remove();
+    if (this.AScene.is("map")) {
+      this.Disable();
+      logger.AddUiInteraction("map_toggle", "deactivate_map");
     } else {
-      (APP.scene as AScene).emit("clear-scene");
-      this.Instantiate();
+      this.AScene.emit("clear-scene");
+      this.Enable();
+      logger.AddUiInteraction("map_toggle", "activate_map");
     }
   }
 
   onClear() {
-    if ((APP.scene as AScene).is("map")) {
-      this.Remove();
+    if (this.AScene.is("map")) {
+      this.Disable();
     }
   }
 }

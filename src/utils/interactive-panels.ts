@@ -12,7 +12,7 @@ export function UpdatePanelSize(panelEid: number, size: number[] | Float32Array)
   panelObj?.updateMatrix();
 }
 
-function GetObjSize(obj: Object3D) {
+export function GetObjSize(obj: Object3D) {
   const boundingBox = new THREE.Box3();
   boundingBox.setFromObject(obj);
   const rawSize = boundingBox.getSize(new THREE.Vector3());

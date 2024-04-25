@@ -43,7 +43,7 @@ export function HUDLangPanel() {
   ];
 
   return (
-    <entity followFov={{ offset: [0, 0, -1.5] }}>
+    <entity followFov={{ offset: [0, 0, -2] }}>
       <entity
         name="hud-lang-panel"
         position={[0, 0, 0.6]}

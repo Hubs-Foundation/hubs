@@ -218,7 +218,9 @@ preload(addToScene(LinkHoverMenuPrefab(), false));
 preload(loadWaypointPreviewModel().then(() => addToScene(WaypointPreview(), false)));
 
 const store = window.APP.store;
+
 store.update({ preferences: { shouldPromptForRefresh: false } }); // Clear flag that prompts for refresh from preference screen
+
 const mediaSearchStore = window.APP.mediaSearchStore;
 const OAUTH_FLOW_PERMS_TOKEN_KEY = "ret-oauth-flow-perms-token";
 const NOISY_OCCUPANT_COUNT = 30; // Above this # of occupants, we stop posting join/leaves/renames
@@ -271,6 +273,7 @@ import { exposeBitECSDebugHelpers } from "./bitecs-debug-helpers";
 import { loadLegacyRoomObjects } from "./utils/load-legacy-room-objects";
 import { loadSavedEntityStates } from "./utils/entity-state-utils";
 import { navSystem } from "./bit-systems/routing-system";
+import { translationSystem } from "./bit-systems/translation-system";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -776,6 +779,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const onSceneLoaded = () => {
     const physicsSystem = scene.systems["hubs-systems"].physicsSystem;
     physicsSystem.setDebug(isDebug || physicsSystem.debug);
+    translationSystem.updateMyLanguage("english");
   };
   if (scene.hasLoaded) {
     onSceneLoaded();

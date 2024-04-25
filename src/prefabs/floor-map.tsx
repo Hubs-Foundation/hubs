@@ -18,7 +18,7 @@ export function FloorMapPanel(imageRatio: number, mapImage: string, scale: numbe
   const panelRef = createRef();
   const pointRef = createRef();
   return (
-    <entity followFov={{ offset: [0, 0, -1.5] }} scale={[scale, scale, scale]}>
+    <entity followFov={{ offset: [0, 0, -2] }} scale={[scale, scale, scale]}>
       <entity
         name={"floor-map"}
         image={{
@@ -30,7 +30,6 @@ export function FloorMapPanel(imageRatio: number, mapImage: string, scale: numbe
         }}
         floorMap={{ planeRef: panelRef, pointRef: pointRef }}
         ref={panelRef}
-        cursorRaycastable
         remoteHoverTarget
         handCollisionTarget
         offersRemoteConstraint
@@ -39,7 +38,7 @@ export function FloorMapPanel(imageRatio: number, mapImage: string, scale: numbe
         holdable
         floatyObject
         rigidbody={{ collisionGroup: COLLISION_LAYERS.INTERACTABLES, collisionMask: COLLISION_LAYERS.HANDS }}
-        physicsShape={{ halfExtents: [0.22, 0.14, 0.1] }}
+        // physicsShape={{ halfExtents: [0.22, 0.14, 0.1] }}
       >
         <entity
           name="point"

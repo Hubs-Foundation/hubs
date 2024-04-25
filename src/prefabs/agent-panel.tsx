@@ -180,7 +180,7 @@ export function InteractivePanel({ panelRef, clearRef, dotsRef, nextRef, prevRef
           width={0.5}
           height={buttonHeight}
           type={BUTTON_TYPES.DEFAULT}
-          text={""}
+          text={"Reset"}
           visible={false}
         />
 
@@ -204,6 +204,7 @@ export function InteractivePanel({ panelRef, clearRef, dotsRef, nextRef, prevRef
           type={BUTTON_TYPES.DEFAULT}
           text={"<"}
         />
+
         <entity
           name={`text`}
           position={[0, 0, 0.01]}
@@ -219,6 +220,7 @@ export function InteractivePanel({ panelRef, clearRef, dotsRef, nextRef, prevRef
           }}
         />
       </entity>
+
       <Button3D
         name="dots"
         ref={dotsRef}

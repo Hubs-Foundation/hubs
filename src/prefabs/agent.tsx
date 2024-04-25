@@ -23,14 +23,14 @@ export function AgentEntity() {
   const navRef = createRef();
 
   return (
-    <entity followFov={{ offset: [0, 0, -1.5] }}>
+    <entity followFov={{ offset: [0, 0, -2] }}>
       <entity
         name="Agent"
         agent={{ panelRef, textRef, micRef, snapRef, nextRef, prevRef, navRef }}
         ref={agentRef}
         model={{ model: cloneModelFromCache(agentModelSrc).scene }}
+        position={[0, 0, 0]}
         visible={false}
-        cursorRaycastable
         remoteHoverTarget
         handCollisionTarget
         offersRemoteConstraint
@@ -44,11 +44,11 @@ export function AgentEntity() {
           collisionGroup: COLLISION_LAYERS.INTERACTABLES,
           collisionMask: COLLISION_LAYERS.HANDS
         }}
-        physicsShape={{
-          fit: Fit.MANUAL,
-          type: Shape.SPHERE,
-          halfExtents: [0.25, 0.5, 0.45]
-        }}
+        // physicsShape={{
+        //   fit: Fit.MANUAL,
+        //   type: Shape.SPHERE,
+        //   halfExtents: [0.25, 0.5, 0.45]
+        // }}
       >
         <InteractivePanel
           panelRef={panelRef}

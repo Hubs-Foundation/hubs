@@ -5,12 +5,21 @@ import { AElement, AScene } from "aframe";
 import { ArrayVec3, renderAsEntity } from "../utils/jsx-entity";
 import { TutorialImagePanel, TutorialPanel } from "../prefabs/tutorial-panels";
 import { Text } from "troika-three-text";
-import { FloatingTextPanel, Interacted } from "../bit-components";
-import { defineQuery, enterQuery, entityExists, hasComponent, removeEntity } from "bitecs";
+import { CursorRaycastable, FloatingTextPanel, Interacted } from "../bit-components";
+import {
+  addComponent,
+  defineQuery,
+  enterQuery,
+  entityExists,
+  hasComponent,
+  removeComponent,
+  removeEntity
+} from "bitecs";
 import { languageCodes, translationSystem } from "./translation-system";
 import { navSystem } from "./routing-system";
 import { virtualAgent } from "./agent-system";
 import { changeHub } from "../change-hub";
+import { logger } from "./logging-system";
 
 const CONGRATS_SLIDE_COUNT = 4;
 const DISTANCE_THRESH = 1.5;
@@ -33,6 +42,7 @@ class TutorialManager {
   Ascene: AScene;
   allowed: boolean;
   wellDoneStep: boolean;
+  showArrows: boolean;
 
   initPosition: Vector3;
   initDir: Vector3;
@@ -56,7 +66,8 @@ class TutorialManager {
   panelObj: Object3D;
   prevObj: Object3D;
   nextObj: Object3D;
-  testObj: Object3D;
+  centerButtonObj: Object3D;
+  centerButtonText: Text;
 
   room: string;
   changeRoomID: string;
@@ -70,6 +81,10 @@ class TutorialManager {
   }
 
   Init(reset: boolean) {
+    const avatarheadElement = document.querySelector("#avatar-pov-node") as AElement;
+    this.Ascene = document.querySelector("a-scene") as AScene;
+    this.avatarHead = avatarheadElement.object3D;
+
     if (reset) {
       if (this.panelRef && entityExists(APP.world, this.panelRef)) {
         this.RemovePanel();
@@ -83,17 +98,20 @@ class TutorialManager {
     }
 
     this.roomTutorial = RoomSteps[roomPropertiesReader.Room as "conference_room" | "lobby" | "tradeshows"];
-    const navString = roomPropertiesReader.AllowsNav ? "nav" : "noNav";
+    const navString =
+      roomPropertiesReader.Room === "lobby"
+        ? roomPropertiesReader.AllowsNav
+          ? "nav"
+          : "noNav"
+        : roomPropertiesReader.AllowsAgent
+        ? "nav"
+        : "noNav";
 
     this.categoriesArray = [];
 
     this.roomTutorial.forEach(stepCategory => {
       if (stepCategory.type === "both" || stepCategory.type === navString) this.categoriesArray.push(stepCategory);
     });
-
-    const avatarheadElement = document.querySelector("#avatar-pov-node") as AElement;
-    this.Ascene = document.querySelector("a-scene") as AScene;
-    this.avatarHead = avatarheadElement.object3D;
 
     setTimeout(() => {
       this.allowed = true;
@@ -115,8 +133,11 @@ class TutorialManager {
       if (hasComponent(world, Interacted, this.nextRef)) this.Next();
       if (hasComponent(world, Interacted, this.prevRef)) this.Prev();
       if (hasComponent(world, Interacted, this.testRef)) {
+        const button_result = this.activeCategoryIndex !== this.categoriesArray.length - 1 ? "test_trigger" : "reset";
+        logger.AddUiInteraction("tutorial_button", button_result);
+
         this.Next(this.activeCategoryIndex !== this.categoriesArray.length - 1);
-        this.testObj.visible = false;
+        this.centerButtonObj.visible = false;
       }
 
       if (this.activeStep["loopFunc"]) this.activeStep.loopFunc();
@@ -149,8 +170,9 @@ class TutorialManager {
 
     this.prevObj = APP.world.eid2obj.get(this.prevRef) as Object3D;
     this.nextObj = APP.world.eid2obj.get(this.nextRef) as Object3D;
-    this.testObj = APP.world.eid2obj.get(this.testRef) as Object3D;
-    this.testObj.visible = false;
+    this.centerButtonObj = APP.world.eid2obj.get(this.testRef) as Object3D;
+    this.centerButtonObj.visible = false;
+    this.centerButtonText = this.centerButtonObj.getObjectByName("Button Label") as Text;
     this.slides = [];
 
     slides.forEach((_, index) => {
@@ -162,6 +184,7 @@ class TutorialManager {
 
     this.activeCategory = this.categoriesArray[this.activeCategoryIndex];
     this.activeStep = this.activeCategory.steps[this.activeStepIndex];
+    this.showArrows = false;
     this.Ascene.addState("task");
     APP.scene!.addEventListener("task-toggle", this.onTaskToggle);
     APP.scene!.addEventListener("clear-scene", this.onClearToggle);
@@ -173,9 +196,12 @@ class TutorialManager {
     if (this.Ascene.is("task")) {
       this.panelObj.visible = false;
       this.Ascene.removeState("task");
+      logger.AddUiInteraction("task_toggle", "deactivate_task");
     } else {
+      APP.scene!.emit("clear-scene");
       this.panelObj.visible = true;
       this.Ascene.addState("task");
+      logger.AddUiInteraction("task_toggle", "activate_task");
     }
   }
 
@@ -203,14 +229,12 @@ class TutorialManager {
       return;
     }
 
-    this.prevObj.visible = true;
-    this.nextObj.visible = true;
+    this.ToggleArrowVisibility(this.showArrows);
 
     this.slides[this.activeCategory.slides[this.activeStepIndex]].visible = true;
-    if (!this.Ascene.is("task")) {
-      this.Ascene.addState("task");
-      this.panelObj.visible = true;
-    }
+    APP.scene!.emit("clear-scene");
+    this.Ascene.addState("task");
+    this.panelObj.visible = true;
   }
 
   Next(congratulate = false) {
@@ -291,6 +315,15 @@ class TutorialManager {
     this.panelObj.visible = false;
     this.Ascene.removeState("task");
   }
+
+  ToggleArrowVisibility(show: boolean = false) {
+    this.prevObj.visible = show;
+    this.nextObj.visible = show;
+    const action = show ? addComponent : removeComponent;
+
+    action(APP.world, CursorRaycastable, this.nextRef);
+    action(APP.world, CursorRaycastable, this.prevRef);
+  }
 }
 
 export const tutorialManager = new TutorialManager();
@@ -305,8 +338,6 @@ const WellDoneCategory = (): StepCategory => {
     steps: [
       {
         onceFunc: () => {
-          tutorialManager.prevObj.visible = false;
-          tutorialManager.nextObj.visible = false;
           setTimeout(() => {
             tutorialManager.Next();
           }, 1500);
@@ -345,14 +376,17 @@ const OnMapToggle = () => {
   );
 };
 
+function ChangeSlidein5() {
+  setTimeout(() => {
+    tutorialManager.Next();
+  }, 5000);
+}
+
 function welcomeSteps(time: number): Array<StepObject> {
   return [
     {
       onceFunc: () => {
         targetPos = navSystem.nodes[navSystem.GetDestIndex("social area")].vector;
-
-        tutorialManager.nextObj.visible = false;
-        tutorialManager.prevObj.visible = false;
         setTimeout(() => {
           tutorialManager.HidePanel();
         }, time);
@@ -362,7 +396,10 @@ function welcomeSteps(time: number): Array<StepObject> {
         }, 60000);
       },
       loopFunc: () => {
-        if (virtualAgent.avatarPos.distanceTo(targetPos) < 3) tutorialManager.Next(true);
+        if (virtualAgent.avatarPos.distanceTo(targetPos) < 3) {
+          tutorialManager.Next(true);
+          logger.AddAnnouncementInteraction("step_achieved", "navigation to social area");
+        }
       },
       cleanUpFunc: () => {
         setTimeout(() => {
@@ -380,11 +417,11 @@ const timeOutCategory: StepCategory = {
   steps: [
     {
       onceFunc: () => {
-        tutorialManager.HidePanel(); //this need to be changed
-        tutorialManager.nextObj.visible = false;
-        tutorialManager.prevObj.visible = false;
+        // tutorialManager.HidePanel(); //this need to be changed
         setTimeout(() => {
-          changeHub("AxFm4cE"); ///provide correct ID in prod
+          logger.AddAnnouncementInteraction("room redirection", "to conference room");
+
+          changeHub(roomPropertiesReader.devMode ? "" : "AxFm4cE"); ///provide correct ID in prod
         }, 5000);
       }
     }
@@ -392,10 +429,9 @@ const timeOutCategory: StepCategory = {
 };
 
 const MapPanelSteps: Array<StepObject> = [
-  {},
+  { onceFunc: ChangeSlidein5 },
   {
     onceFunc: () => {
-      console.log("event listener added for map toggle");
       APP.scene!.addEventListener("map-toggle", OnMapToggle, { once: true });
     },
     cleanUpFunc: () => {
@@ -413,14 +449,7 @@ const LobbySteps: Array<StepCategory> = [
     slides: [0],
     steps: [
       {
-        onceFunc: () => {
-          setTimeout(() => {
-            tutorialManager.Next();
-          }, 5000);
-
-          tutorialManager.nextObj.visible = false;
-          tutorialManager.prevObj.visible = false;
-        }
+        onceFunc: () => ChangeSlidein5()
       }
     ]
   },
@@ -430,14 +459,7 @@ const LobbySteps: Array<StepCategory> = [
     slides: [1],
     steps: [
       {
-        onceFunc: () => {
-          setTimeout(() => {
-            tutorialManager.Next();
-          }, 5000);
-
-          tutorialManager.nextObj.visible = false;
-          tutorialManager.prevObj.visible = false;
-        }
+        onceFunc: () => ChangeSlidein5()
       }
     ]
   },
@@ -448,13 +470,10 @@ const LobbySteps: Array<StepCategory> = [
     steps: [
       {
         onceFunc: () => {
-          tutorialManager.nextObj.visible = false;
-          tutorialManager.prevObj.visible = false;
           setTimeout(() => {
-            tutorialManager.testObj.visible = true;
-            const testText = tutorialManager.testObj.getObjectByName("Button Label") as Text;
-            testText.text = "Click me!";
-          }, 2000);
+            tutorialManager.centerButtonObj.visible = true;
+            tutorialManager.centerButtonText.text = "Click me!";
+          }, 1000);
         }
       }
     ]
@@ -499,9 +518,13 @@ const LobbySteps: Array<StepCategory> = [
     type: "nav",
     slides: [5, 6],
     steps: [
-      {},
       {
-        onceFunc: () => tutorialManager.Ascene.addEventListener("action_enable_mic", onUnmuting, { once: true }),
+        onceFunc: ChangeSlidein5
+      },
+      {
+        onceFunc: () => {
+          tutorialManager.Ascene.addEventListener("action_enable_mic", onUnmuting, { once: true });
+        },
         cleanUpFunc: () => tutorialManager.Ascene.removeEventListener("action_enable_mic", onUnmuting)
       }
     ]
@@ -525,11 +548,10 @@ const LobbySteps: Array<StepCategory> = [
     steps: [
       {
         onceFunc: () => {
-          tutorialManager.testObj.visible = true;
-          const testText = tutorialManager.testObj.getObjectByName("Button Label") as Text;
-          testText.text = "Reset";
+          tutorialManager.centerButtonText.text = "Reset";
+          tutorialManager.centerButtonObj.visible = true;
         },
-        cleanUpFunc: () => (tutorialManager.testObj.visible = false)
+        cleanUpFunc: () => (tutorialManager.centerButtonObj.visible = false)
       }
     ]
   }
@@ -555,13 +577,17 @@ const TradeshowSteps: Array<StepCategory> = [
     steps: [
       {
         onceFunc: () => {
-          tutorialManager.nextObj.visible = false;
-          tutorialManager.prevObj.visible = false;
           targetPos = navSystem.nodes[navSystem.GetDestIndex("conference room")].vector;
 
           setTimeout(() => {
             tutorialManager.HidePanel();
           }, 5000);
+        },
+        loopFunc: () => {
+          if (virtualAgent.avatarPos.distanceTo(targetPos) < 3) {
+            tutorialManager.Next(true);
+            logger.AddAnnouncementInteraction("step_achieved", "navigation to conference room");
+          }
         }
       }
     ]
@@ -576,8 +602,6 @@ const ConferenceSteps: Array<StepCategory> = [
     steps: [
       {
         onceFunc: () => {
-          tutorialManager.nextObj.visible = false;
-          tutorialManager.prevObj.visible = false;
           setTimeout(() => {
             tutorialManager.HidePanel();
           }, 5000);

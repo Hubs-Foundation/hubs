@@ -6,7 +6,7 @@ let mediaRecorder: MediaRecorder | null = null;
 let chunks: any[] = [];
 export let isRecording = false;
 
-export async function RecordQuestion(savefile: boolean): Promise<any> {
+export async function RecordQuestion(): Promise<any> {
   return new Promise((resolve, reject) => {
     const audioTrack = APP.mediaDevicesManager!.audioTrack;
     const recordingTrack = audioTrack.clone();
@@ -37,7 +37,6 @@ export async function RecordQuestion(savefile: boolean): Promise<any> {
       recordingStream.removeTrack(recordingTrack);
       recordingTrack.stop();
       soundAnalyzer.Stop();
-      if (savefile) saveAudio(recordingBlob);
 
       resolve({
         status: { code: COMPONENT_CODES.Successful, text: CODE_DESCRIPTIONS[COMPONENT_CODES.Successful] },
@@ -64,11 +63,12 @@ export function stopRecording() {
   isRecording = false;
 }
 
-function saveAudio(blob: Blob) {
+export function saveFile(blob: Blob, ext: string) {
   const blobUrl = URL.createObjectURL(blob);
   const downloadLink = document.createElement("a");
+
   downloadLink.href = blobUrl;
-  downloadLink.download = "recording.wav";
+  downloadLink.download = "file.".concat(ext);
   downloadLink.click();
   URL.revokeObjectURL(blobUrl);
 }

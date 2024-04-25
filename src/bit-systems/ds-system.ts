@@ -138,7 +138,7 @@ export default class DialogueAgent {
     this.panel.obj.visible = false;
     this.infoPanel.obj.visible = false;
     this.agentStatus = "listening";
-    const recordedQuestion = await RecordQuestion(false);
+    const recordedQuestion = await RecordQuestion();
 
     this.agentStatus = "proccessing";
 

@@ -36,6 +36,7 @@ import { languagePanel } from "./bit-systems/language-panel";
 import { lobbySteps, tutorialManager } from "./bit-systems/tutorial-system";
 import { roomPropertiesReader } from "./utils/rooms-properties";
 import { helpButton } from "./bit-systems/help-system";
+import { logger } from "./bit-systems/logging-system";
 const useNewLoader = qsTruthy("newLoader");
 
 export default class SceneEntryManager {
@@ -73,12 +74,16 @@ export default class SceneEntryManager {
     if (reset) this.scene.emit("clear-scene");
 
     await roomPropertiesReader.Read(getCurrentHubId(), reset);
+    logger.RegisterUser();
     translationSystem.Init(reset);
     virtualAgent.Init(reset);
     floorMap.Init(reset);
     navSystem.Init(reset);
     tutorialManager.Init(reset);
     helpButton.Init(reset);
+
+    logger.AddAnnouncementInteraction("language", translationSystem.mylanguage);
+    logger.AddAnnouncementInteraction("room_enter", roomPropertiesReader.roomProps.HubID);
   };
 
   enterScene = async (enterInVR, muteOnEntry) => {

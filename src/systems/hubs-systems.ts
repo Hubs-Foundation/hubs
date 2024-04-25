@@ -91,6 +91,7 @@ import { translationSystem } from "../bit-systems/translation-system";
 import { FixedPanelSystem } from "../bit-systems/fixed-panel-system";
 import { tutorialManager } from "../bit-systems/tutorial-system";
 import { helpButton } from "../bit-systems/help-system";
+import { logger } from "../bit-systems/logging-system";
 
 declare global {
   interface Window {
@@ -295,6 +296,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   // All systems that update text properties should run before this
   PanelIndexSystem(world);
   translationSystem.tick();
+  logger.Tick();
   textSystem(world);
 
   videoTextureSystem(world);

@@ -4,6 +4,8 @@ import { handleExitTo2DInterstitial } from "../utils/vr-interstitial";
 import { changeHub } from "../change-hub";
 import { translationSystem } from "../bit-systems/translation-system";
 import { tutorialManager } from "../bit-systems/tutorial-system";
+import { logger } from "../bit-systems/logging-system";
+import { roomPropertiesReader } from "../utils/rooms-properties";
 
 AFRAME.registerComponent("open-media-button", {
   schema: {
@@ -44,6 +46,8 @@ AFRAME.registerComponent("open-media-button", {
     };
 
     this.onClick = async () => {
+      if (this.label.getAttribute("text") === translationSystem.VisitButtonText)
+        logger.AddUiInteraction("visit_room", tutorialManager.changeRoomID);
       const mayChangeScene = this.el.sceneEl.systems.permissions.canOrWillIfCreator("update_hub");
 
       const exitImmersive = async () => await handleExitTo2DInterstitial(false, () => {}, true);
@@ -66,7 +70,8 @@ AFRAME.registerComponent("open-media-button", {
         } else if (isLocalHubsUrl(this.src)) {
           const waypoint = url.hash && url.hash.substring(1);
           // move to new room without page load or entry flow
-          changeHub(hubId, true, waypoint);
+          if (roomPropertiesReader.Room === "lobby") changeHub(roomPropertiesReader.redirectionHubId);
+          else changeHub(hubId, true, waypoint);
         } else {
           await exitImmersive();
           location.href = this.src;

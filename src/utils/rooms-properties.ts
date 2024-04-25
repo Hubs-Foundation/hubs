@@ -1,6 +1,13 @@
 import { string } from "prop-types";
 import { EventEmitter } from "eventemitter3";
 import { ArrayVec2, ArrayVec3 } from "./jsx-entity";
+import { keyboardDebuggingBindings } from "../systems/userinput/bindings/keyboard-debugging";
+
+interface RoomDescription {
+  room: string;
+  nav: Array<string>;
+  no_nav: Array<string>;
+}
 
 interface RoomProperties {
   room: string;
@@ -82,9 +89,13 @@ class RoomPropertiesReader {
   read: boolean;
   url: string;
   serverURL: string;
+  hubId: string;
+  redirectionHubId: string;
+  devMode: boolean;
 
   constructor() {
     this.read = false;
+
     this.serverURL = "https://kontopoulosdm.github.io";
     this.url = this.serverURL + "/properties.json";
 
@@ -106,6 +117,8 @@ class RoomPropertiesReader {
     if (this.read) return Promise.resolve(this.roomProps);
     else {
       try {
+        this.hubId = HubID;
+        console.log(`hubid`, this.hubId);
         const response = await fetch(this.url, { method: "GET" });
         if (!response.ok) throw new Error("Response not OK");
         const roomArray = (await response.json()) as RoomProperties[];
@@ -115,10 +128,12 @@ class RoomPropertiesReader {
             if (roomArray[i].id[j] === HubID) {
               this.setProps(roomArray[i], HubID);
               this.read = true;
+              this.redirectionHubId = await this.GetRedirectionHubId();
               break;
             }
           }
         }
+
         if (!this.read) {
           this.setProps(this.uknownRoom, HubID);
           this.read = true;
@@ -132,6 +147,52 @@ class RoomPropertiesReader {
         return this.roomProps;
       }
     }
+  }
+
+  async GetRedirectionHubId(): Promise<string> {
+    const response = await fetch(this.serverURL.concat("/rooms.json"), { method: "GET" });
+    if (!response.ok) throw new Error("Response not OK");
+
+    const roomArrays = (await response.json()) as RoomDescription[];
+
+    let myHubIndex: number = -1;
+    const hubIDsKeys = this.AllowsNav ? "nav" : "no_nav";
+    console.log(this.AllowsNav);
+
+    console.log(`hubkeys`, hubIDsKeys);
+
+    for (let i = 0; i < roomArrays.length; i++) {
+      console.log("searching for hubIndexNumber");
+      const room = roomArrays[i];
+      if (room.room === this.Room) {
+        console.log(`room is `, room.room, this.Room);
+        const hubIds = room[hubIDsKeys];
+        console.log(hubIds);
+        for (let j = 0; j < hubIds.length; j++) {
+          if (hubIds[j] === this.hubId) {
+            myHubIndex = j;
+            if (j === 0) this.devMode = true;
+            else this.devMode = false;
+            console.log(`myhubindex is `, myHubIndex);
+            break;
+          }
+        }
+        break;
+      }
+    }
+    let result: string[] = [];
+    if (myHubIndex >= 0)
+      roomArrays.forEach(room => {
+        const hubIds = room[hubIDsKeys];
+        if (room.room !== this.Room) result.push(hubIds[myHubIndex]);
+      });
+    else {
+      this.redirectionHubId = "";
+      this.devMode = false;
+    }
+
+    console.log(`results`, result);
+    return result[0];
   }
 
   setProps(roomProps: RoomProperties, HubID: string) {

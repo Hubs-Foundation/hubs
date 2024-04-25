@@ -7,6 +7,7 @@ import { roomPropertiesReader } from "../utils/rooms-properties";
 import { FloatingTextPanel, Interacted } from "../bit-components";
 import { hasComponent, removeEntity } from "bitecs";
 import { HubsWorld } from "../app";
+import { logger } from "./logging-system";
 
 class HelpButton {
   Ascene: AScene;
@@ -122,8 +123,10 @@ class HelpButton {
   onToggle() {
     if ((APP.scene as AScene).is("help")) {
       this.RemovePanel();
+      logger.AddUiInteraction("help_toggle", "deactivate_help");
     } else {
       (APP.scene as AScene).emit("clear-scene");
+      logger.AddUiInteraction("help_toggle", "activate_help");
       this.RenderPanel();
     }
   }
