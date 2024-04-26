@@ -83,8 +83,6 @@ export default class VirtualAgent {
     this.panel = new objElement();
     this.displayedText = new textElement();
 
-    this.avatarPovObj = null;
-
     this.textArray = [];
     this.diplayedSenteceIndex = null;
 
@@ -117,9 +115,6 @@ export default class VirtualAgent {
       APP.scene.removeEventListener("clear-scene", this.onClear);
       this.Remove();
     }
-
-    this.avatarPovObj = document.querySelector("#avatar-pov-node").object3D;
-    console.log(this.avatarPovObj);
 
     if (!roomPropertiesReader.AllowsAgent) {
       this.allowed = false;
@@ -342,7 +337,7 @@ export default class VirtualAgent {
   ProccessingAnimation(t) {
     let typingAnimTime = 0;
     typingAnimTime = t;
-    this.loadingObj.lookAt(this.avatarPovObj.getWorldPosition(new THREE.Vector3()));
+    this.loadingObj.lookAt(avatarPos());
     this.loadingObj.traverse(o => {
       if (o.material) {
         o.material.opacity = (Math.sin(typingAnimTime / 150) + 1) / 2;
@@ -354,7 +349,7 @@ export default class VirtualAgent {
   ListeningAnimation(t) {
     let typingAnimTime = 0;
     typingAnimTime = t * 0.8;
-    this.loadingObj.lookAt(this.avatarPovObj.getWorldPosition(new THREE.Vector3()));
+    this.loadingObj.lookAt(avatarPos());
     this.loadingObj.traverse(o => {
       if (o.material) o.material.opacity = (Math.sin(typingAnimTime / 150) + 1) / 2;
     });
@@ -406,7 +401,7 @@ export default class VirtualAgent {
       });
 
       t1 = Date.now();
-      const navigation = navSystem.GetInstructions(this.avatarPos, intentResponse.data.destination);
+      const navigation = navSystem.GetInstructions(avatarPos(), intentResponse.data.destination);
       agentLogger.response.start = new Date();
       const response = await dsResponseModule(
         nmtResponse.data.translations[0],
@@ -480,7 +475,7 @@ export default class VirtualAgent {
     destNames.forEach(destination =>
       console.log(
         `{"destination": "${destination}", "intent":"navigation", "mozilla_input":${
-          navSystem.GetInstructions(this.avatarPos, destination).knowledge
+          navSystem.GetInstructions(avatarPos(), destination).knowledge
         }},`
       )
     );
@@ -524,23 +519,21 @@ export default class VirtualAgent {
   get exists() {
     return !!this.agent.eid;
   }
-
-  get avatarDirection() {
-    const playerForward = new THREE.Vector3();
-    this.avatarPovObj.getWorldDirection(playerForward);
-    return playerForward.multiplyScalar(-1);
-  }
-
-  get avatarPos() {
-    const avatarPos = new THREE.Vector3();
-    this.avatarPovObj.getWorldPosition(avatarPos);
-    return avatarPos;
-  }
-
-  get flatAvatarDirection() {
-    return virtualAgent.avatarDirection.setY(0).normalize();
-  }
 }
 
 export const virtualAgent = new VirtualAgent();
 export const agentLogger = new Logger();
+
+export function avatarPos() {
+  const avatarPos = new THREE.Vector3();
+  const avatarPovObj = document.querySelector("#avatar-pov-node").object3D;
+  avatarPovObj.getWorldPosition(avatarPos);
+  return avatarPos;
+}
+
+export function avatarDirection() {
+  const avatarPovObj = document.querySelector("#avatar-pov-node").object3D;
+  const playerForward = new THREE.Vector3();
+  avatarPovObj.getWorldDirection(playerForward);
+  return playerForward.multiplyScalar(-1);
+}

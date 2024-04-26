@@ -1,5 +1,5 @@
 import { DiscreteInterpolant, Object3D, Vector2, Vector3 } from "three";
-import VirtualAgent, { virtualAgent } from "./agent-system";
+import VirtualAgent, { avatarDirection, avatarPos, virtualAgent } from "./agent-system";
 import { NavigationProperties, PropertyType, roomPropertiesReader } from "../utils/rooms-properties";
 import { node, object } from "prop-types";
 import { renderAsEntity } from "../utils/jsx-entity";
@@ -387,7 +387,7 @@ export class NavigationSystem {
     };
 
     const knowledgeArray: Array<Record<string, any>> = [{ action: "start" }];
-    const playerForward = virtualAgent.avatarDirection;
+    const playerForward = avatarDirection();
 
     let distanceSum = 0;
 
@@ -544,7 +544,7 @@ export class NavigationSystem {
   }
 
   ShouldFinish() {
-    if (virtualAgent.avatarPos.distanceTo(this.dest.pos!.vector) < 3) {
+    if (avatarPos().distanceTo(this.dest.pos!.vector) < 3) {
       this.StopNavigating();
       virtualAgent.UpdateWithRandomPhrase("success");
     }

@@ -17,7 +17,7 @@ import {
 } from "bitecs";
 import { languageCodes, translationSystem } from "./translation-system";
 import { navSystem } from "./routing-system";
-import { virtualAgent } from "./agent-system";
+import { avatarPos, virtualAgent } from "./agent-system";
 import { changeHub } from "../change-hub";
 import { logger } from "./logging-system";
 
@@ -88,6 +88,8 @@ class TutorialManager {
     if (reset) {
       if (this.panelRef && entityExists(APP.world, this.panelRef)) {
         this.RemovePanel();
+        this.activeStepIndex = 0;
+        this.activeCategoryIndex = 0;
       }
     }
 
@@ -414,7 +416,7 @@ function welcomeSteps(time: number): Array<StepObject> {
         }, 60000);
       },
       loopFunc: () => {
-        if (virtualAgent.avatarPos.distanceTo(targetPos) < 3) {
+        if (avatarPos().distanceTo(targetPos) < 3) {
           tutorialManager.Next(true);
           logger.AddAnnouncementInteraction("step_achieved", "navigation to social area");
         }
@@ -615,7 +617,7 @@ const TradeshowSteps: Array<StepCategory> = [
           }, 5000);
         },
         loopFunc: () => {
-          if (virtualAgent.avatarPos.distanceTo(targetPos) < 3) {
+          if (avatarPos().distanceTo(targetPos) < 3) {
             tutorialManager.ChangeCategory(WellDoneCategory());
             logger.AddAnnouncementInteraction("step_achieved", "navigation to conference room");
           }
