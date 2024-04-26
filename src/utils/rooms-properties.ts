@@ -18,6 +18,7 @@ interface RoomProperties {
   map: MapProperties;
   tutorial: TutorialProperties;
   help: HelpProperties;
+  labels: Array<LabelProperties>;
   HubID?: string;
 }
 
@@ -45,15 +46,6 @@ export interface NavigationProperties {
   obstacles?: Array<Array<[number, number]>>;
 }
 
-interface OldMapProperties {
-  allow: Array<string>;
-  file?: string;
-  ratio?: number;
-  mapToImage?: Array<number>;
-  center?: Array<number>;
-  centeroffset?: Array<number>;
-}
-
 interface MapProperties {
   allow: Array<string>;
   image_ratio?: number;
@@ -74,10 +66,19 @@ interface TranslationProperties {
   };
 }
 
+interface LabelProperties {
+  name: string;
+  position: ArrayVec3;
+  rotation: ArrayVec3;
+  scale: ArrayVec3;
+  ratio: number;
+}
+
 export enum PropertyType {
   ROOM = "https://kontopoulosdm.github.io/room_properties.json",
   MAP = "https://kontopoulosdm.github.io/maps.json"
 }
+
 class RoomPropertiesReader {
   roomProps: RoomProperties;
   uknownRoom: RoomProperties;
@@ -86,6 +87,7 @@ class RoomPropertiesReader {
   mapProps: MapProperties;
   tutorialProps: TutorialProperties;
   helpProps: HelpProperties;
+  labelProps: LabelProperties[];
   read: boolean;
   url: string;
   serverURL: string;
@@ -107,7 +109,8 @@ class RoomPropertiesReader {
       navigation: { allow: [] },
       map: { allow: [] },
       tutorial: { allow: [] },
-      help: { allow: [] }
+      help: { allow: [] },
+      labels: []
     };
   }
 
@@ -202,6 +205,7 @@ class RoomPropertiesReader {
     this.mapProps = roomProps.map;
     this.tutorialProps = roomProps.tutorial;
     this.helpProps = roomProps.help;
+    this.labelProps = roomProps.labels;
   }
 
   waitForProperties(): Promise<any> {

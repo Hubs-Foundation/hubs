@@ -37,6 +37,7 @@ import { lobbySteps, tutorialManager } from "./bit-systems/tutorial-system";
 import { roomPropertiesReader } from "./utils/rooms-properties";
 import { helpButton } from "./bit-systems/help-system";
 import { logger } from "./bit-systems/logging-system";
+import { labelOrganizer } from "./bit-systems/room-labels-system";
 const useNewLoader = qsTruthy("newLoader");
 
 export default class SceneEntryManager {
@@ -81,6 +82,7 @@ export default class SceneEntryManager {
     navSystem.Init(reset);
     tutorialManager.Init(reset);
     helpButton.Init(reset);
+    labelOrganizer.Init();
 
     logger.AddAnnouncementInteraction("language", translationSystem.mylanguage);
     logger.AddAnnouncementInteraction("room_enter", roomPropertiesReader.roomProps.HubID);

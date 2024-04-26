@@ -243,3 +243,28 @@ export function TutorialImagePanel(
     );
   }
 }
+
+export function SimpleImagePanel(
+  textureUrl: string,
+  name: string,
+  position: ArrayVec3,
+  rotation: ArrayVec3,
+  scale: ArrayVec3,
+  ratio: number
+) {
+  return (
+    <entity
+      name={`name`}
+      image={{
+        texture: textureLoader.load(textureUrl),
+        ratio: ratio,
+        projection: ProjectionMode.FLAT,
+        alphaMode: AlphaMode.Blend,
+        cacheKey: TextureCache.key(textureUrl, 1)
+      }}
+      position={position}
+      scale={scale}
+      rotation={rotation}
+    ></entity>
+  );
+}
