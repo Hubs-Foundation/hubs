@@ -249,7 +249,7 @@ export function SimpleImagePanel(
   name: string,
   position: ArrayVec3,
   rotation: ArrayVec3,
-  scale: ArrayVec3,
+  scale: number,
   ratio: number
 ) {
   return (
@@ -263,7 +263,7 @@ export function SimpleImagePanel(
         cacheKey: TextureCache.key(textureUrl, 1)
       }}
       position={position}
-      scale={scale}
+      scale={[scale, scale, 1]}
       rotation={rotation}
     ></entity>
   );

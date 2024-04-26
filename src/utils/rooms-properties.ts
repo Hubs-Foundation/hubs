@@ -70,7 +70,7 @@ interface LabelProperties {
   name: string;
   position: ArrayVec3;
   rotation: ArrayVec3;
-  scale: ArrayVec3;
+  scale: number;
   ratio: number;
 }
 
