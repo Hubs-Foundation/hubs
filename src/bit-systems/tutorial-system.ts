@@ -499,8 +499,21 @@ const LobbySteps: Array<StepCategory> = [
   {
     name: "move",
     type: "both",
-    slides: [3],
+    slides: [3, 4, 5],
     steps: [
+      {
+        onceFunc: () => ChangeSlidein5
+      },
+      {
+        onceFunc: () => {
+          tutorialManager.initPosition = tutorialManager.avatarHead.getWorldPosition(new Vector3());
+        },
+        loopFunc: () => {
+          const currentPos = tutorialManager.avatarHead.getWorldPosition(new Vector3());
+          const distance = tutorialManager.initPosition.distanceTo(currentPos.setY(tutorialManager.initPosition.y));
+          if (distance >= DISTANCE_THRESH) tutorialManager.Next(true);
+        }
+      },
       {
         onceFunc: () => {
           tutorialManager.initPosition = tutorialManager.avatarHead.getWorldPosition(new Vector3());
@@ -516,7 +529,7 @@ const LobbySteps: Array<StepCategory> = [
   {
     name: "turn",
     type: "both",
-    slides: [4],
+    slides: [6],
     steps: [
       {
         onceFunc: () => {
@@ -534,7 +547,7 @@ const LobbySteps: Array<StepCategory> = [
   {
     name: "speak",
     type: "nav",
-    slides: [5, 6],
+    slides: [7, 8],
     steps: [
       {
         onceFunc: ChangeSlidein5
@@ -550,19 +563,19 @@ const LobbySteps: Array<StepCategory> = [
   {
     name: "panel",
     type: "nav",
-    slides: [8, 10],
+    slides: [10, 12],
     steps: MapPanelSteps
   },
   {
     name: "panel",
     type: "noNav",
-    slides: [9, 11],
+    slides: [11, 13],
     steps: MapPanelSteps
   },
   {
     name: "finish",
     type: "nav",
-    slides: [12],
+    slides: [14],
     steps: [
       {
         onceFunc: () => {
