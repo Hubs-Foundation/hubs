@@ -9,7 +9,8 @@ import {
   hasComponent,
   addEntity,
   removeEntity,
-  addComponent
+  addComponent,
+  removeComponent
 } from "bitecs";
 import {
   AEntity,
@@ -19,13 +20,15 @@ import {
   MediaContentBounds,
   MediaFrame,
   MediaImage,
-  MediaLoaded,
   MediaPDF,
   MediaVideo,
   Networked,
   NetworkedMediaFrame,
   Owned,
-  Rigidbody
+  Rigidbody,
+  Capturable,
+  CapturableObject,
+  Holdable
 } from "../bit-components";
 import { MediaType } from "../utils/media-utils";
 import { cloneObject3D, disposeNode, setMatrixWorld } from "../utils/three-utils";
@@ -36,12 +39,13 @@ import { addObject3DComponent } from "../utils/jsx-entity";
 import { updateMaterials } from "../utils/material-utils";
 import { MEDIA_FRAME_FLAGS, AxisAlignType } from "../inflators/media-frame";
 import { Matrix4, NormalBlending, Quaternion, RGBAFormat, Vector3 } from "three";
+import { getBox } from "../utils/auto-box-collider";
 
 const EMPTY_COLOR = 0x6fc0fd;
 const HOVER_COLOR = 0x2f80ed;
 const FULL_COLOR = 0x808080;
 
-const mediaFramesQuery = defineQuery([MediaFrame]);
+const mediaFramesQuery = defineQuery([MediaFrame, NetworkedMediaFrame]);
 const enteredMediaFramesQuery = enterQuery(mediaFramesQuery);
 const exitedMediaFramesQuery = exitQuery(mediaFramesQuery);
 
@@ -54,11 +58,12 @@ function mediaTypeMaskFor(world, eid) {
     mediaTypeMask |= el.components["media-image"] && MediaType.IMAGE;
     mediaTypeMask |= el.components["media-pdf"] && MediaType.PDF;
   } else {
-    const mediaEid = findChildWithComponent(world, MediaLoaded, eid);
-    mediaTypeMask |= hasComponent(world, GLTFModel, mediaEid) && MediaType.MODEL;
-    mediaTypeMask |= hasComponent(world, MediaVideo, mediaEid) && MediaType.VIDEO;
-    mediaTypeMask |= hasComponent(world, MediaImage, mediaEid) && MediaType.IMAGE;
-    mediaTypeMask |= hasComponent(world, MediaPDF, mediaEid) && MediaType.PDF;
+    const capturable = findChildWithComponent(world, Capturable, eid);
+    mediaTypeMask |= hasComponent(world, GLTFModel, capturable) && MediaType.MODEL;
+    mediaTypeMask |= hasComponent(world, MediaVideo, capturable) && MediaType.VIDEO;
+    mediaTypeMask |= hasComponent(world, MediaImage, capturable) && MediaType.IMAGE;
+    mediaTypeMask |= hasComponent(world, MediaPDF, capturable) && MediaType.PDF;
+    mediaTypeMask |= hasComponent(world, CapturableObject, capturable) && MediaType.OBJECT;
   }
   return mediaTypeMask;
 }
@@ -276,10 +281,21 @@ export function cleanupMediaFrame(obj) {
   });
 }
 
+const tmpVector = new Vector3();
 const takeOwnershipOnTimeout = new Map();
 const heldQuery = defineQuery([Held]);
+const capturableQuery = defineQuery([Capturable, CapturableObject]);
+const capturableEnterQuery = enterQuery(capturableQuery);
 // const droppedQuery = exitQuery(heldQuery);
 export function mediaFramesSystem(world, physicsSystem) {
+  // Spawned media handles this in the media-loading system. We should probably unify this in a different system.
+  capturableEnterQuery(world).forEach(eid => {
+    const obj = world.eid2obj.get(eid);
+    const box = getBox(obj, obj);
+    box.getSize(tmpVector);
+    addComponent(world, MediaContentBounds, eid);
+    MediaContentBounds.bounds[eid].set(tmpVector.toArray());
+  });
   enteredMediaFramesQuery(world).forEach(eid => {
     if (Networked.owner[eid] === APP.getSid("reticulum")) {
       takeOwnershipOnTimeout.set(
@@ -314,46 +330,71 @@ export function mediaFramesSystem(world, physicsSystem) {
     const frame = mediaFrames[i];
 
     const capturedEid = world.nid2eid.get(MediaFrame.capturedNid[frame]) || 0;
+
+    if (MediaFrame.flags[frame] !== NetworkedMediaFrame.flags[frame]) {
+      MediaFrame.flags[frame] = NetworkedMediaFrame.flags[frame];
+    }
+
+    if (MediaFrame.mediaType[frame] !== NetworkedMediaFrame.mediaType[frame]) {
+      MediaFrame.mediaType[frame] = NetworkedMediaFrame.mediaType[frame];
+    }
+
+    // This currently only works for Capturables (not spawned media). Do we want to support that?
+    if (capturedEid) {
+      if (MediaFrame.flags[frame] & MEDIA_FRAME_FLAGS.LOCKED) {
+        removeComponent(world, Holdable, capturedEid);
+      } else {
+        addComponent(world, Holdable, capturedEid);
+      }
+    }
+
+    if ((MediaFrame.flags[frame] & MEDIA_FRAME_FLAGS.ACTIVE) === 0) {
+      NetworkedMediaFrame.capturedNid[frame] = 0;
+      NetworkedMediaFrame.scale[frame].set(zero);
+    }
+
     const isCapturedOwned = hasComponent(world, Owned, capturedEid);
     const isCapturedHeld = findChildWithComponent(world, Held, capturedEid);
     const isCapturedColliding = capturedEid && isEntityColliding(physicsSystem, frame, capturedEid);
     const isFrameDeleting = findAncestorWithComponent(world, Deleting, frame);
     const isFrameOwned = hasComponent(world, Owned, frame);
 
-    if (capturedEid && isCapturedOwned && !isCapturedHeld && !isFrameDeleting && isCapturedColliding) {
-      snapToFrame(world, frame, capturedEid);
-      physicsSystem.updateRigidBodyOptions(capturedEid, { type: "kinematic" });
-    } else if (
-      (isFrameOwned && MediaFrame.capturedNid[frame] && world.deletedNids.has(MediaFrame.capturedNid[frame])) ||
-      (capturedEid && isCapturedOwned && !isCapturedColliding) ||
-      isFrameDeleting
-    ) {
-      takeOwnership(world, frame);
-      NetworkedMediaFrame.capturedNid[frame] = 0;
-      NetworkedMediaFrame.scale[frame].set(zero);
-      // TODO BUG: If an entity I do not own is capturedEid by the media frame,
-      //           and then I take ownership of the entity (by grabbing it),
-      //           the physics system does not immediately notice the entity isCapturedColliding with the frame,
-      //           so I immediately think the frame should be emptied.
-    } else if (isFrameOwned && MediaFrame.capturedNid[frame] && !capturedEid) {
-      NetworkedMediaFrame.capturedNid[frame] = 0;
-      NetworkedMediaFrame.scale[frame].set(zero);
-    } else if (!NetworkedMediaFrame.capturedNid[frame]) {
-      const capturable = getCapturableEntity(world, physicsSystem, frame);
-      if (
-        capturable &&
-        (hasComponent(world, Owned, capturable) || (isOwnedByRet(world, capturable) && isFrameOwned)) &&
-        !findChildWithComponent(world, Held, capturable) &&
-        !inOtherFrame(world, frame, capturable)
+    if (MediaFrame.flags[frame] & MEDIA_FRAME_FLAGS.ACTIVE) {
+      if (capturedEid && isCapturedOwned && !isCapturedHeld && !isFrameDeleting && isCapturedColliding) {
+        snapToFrame(world, frame, capturedEid);
+        physicsSystem.updateRigidBody(capturedEid, { type: "kinematic" });
+      } else if (
+        (isFrameOwned && MediaFrame.capturedNid[frame] && world.deletedNids.has(MediaFrame.capturedNid[frame])) ||
+        (capturedEid && isCapturedOwned && !isCapturedColliding) ||
+        isFrameDeleting
       ) {
         takeOwnership(world, frame);
-        takeOwnership(world, capturable);
-        NetworkedMediaFrame.capturedNid[frame] = Networked.id[capturable];
-        const obj = world.eid2obj.get(capturable);
-        obj.updateMatrices();
-        tmpVec3.setFromMatrixScale(obj.matrixWorld).toArray(NetworkedMediaFrame.scale[frame]);
-        snapToFrame(world, frame, capturable);
-        physicsSystem.updateRigidBodyOptions(capturable, { type: "kinematic" });
+        NetworkedMediaFrame.capturedNid[frame] = 0;
+        NetworkedMediaFrame.scale[frame].set(zero);
+        // TODO BUG: If an entity I do not own is capturedEid by the media frame,
+        //           and then I take ownership of the entity (by grabbing it),
+        //           the physics system does not immediately notice the entity isCapturedColliding with the frame,
+        //           so I immediately think the frame should be emptied.
+      } else if (isFrameOwned && MediaFrame.capturedNid[frame] && !capturedEid) {
+        NetworkedMediaFrame.capturedNid[frame] = 0;
+        NetworkedMediaFrame.scale[frame].set(zero);
+      } else if (!NetworkedMediaFrame.capturedNid[frame]) {
+        const capturable = getCapturableEntity(world, physicsSystem, frame);
+        if (
+          capturable &&
+          (hasComponent(world, Owned, capturable) || (isOwnedByRet(world, capturable) && isFrameOwned)) &&
+          !findChildWithComponent(world, Held, capturable) &&
+          !inOtherFrame(world, frame, capturable)
+        ) {
+          takeOwnership(world, frame);
+          takeOwnership(world, capturable);
+          NetworkedMediaFrame.capturedNid[frame] = Networked.id[capturable];
+          const obj = world.eid2obj.get(capturable);
+          obj.updateMatrices();
+          tmpVec3.setFromMatrixScale(obj.matrixWorld).toArray(NetworkedMediaFrame.scale[frame]);
+          snapToFrame(world, frame, capturable);
+          physicsSystem.updateRigidBody(capturable, { type: "kinematic" });
+        }
       }
     }
 
@@ -366,12 +407,14 @@ export function mediaFramesSystem(world, physicsSystem) {
       // TODO: If you are resetting scale because you lost a race for the frame,
       //       you should probably also move the object away from the frame.
       setMatrixScale(world.eid2obj.get(capturedEid), MediaFrame.scale[frame]);
-      physicsSystem.updateRigidBodyOptions(capturedEid, { type: "dynamic" });
+      physicsSystem.updateRigidBody(capturedEid, { type: "dynamic" });
     }
 
     MediaFrame.capturedNid[frame] = NetworkedMediaFrame.capturedNid[frame];
     MediaFrame.scale[frame].set(NetworkedMediaFrame.scale[frame]);
 
-    display(world, physicsSystem, frame, capturedEid, heldMediaTypes);
+    if (MediaFrame.flags[frame] & MEDIA_FRAME_FLAGS.ACTIVE) {
+      display(world, physicsSystem, frame, capturedEid, heldMediaTypes);
+    }
   }
 }

@@ -25,8 +25,15 @@ export function hasAnyComponent(world: HubsWorld, components: Component[], eid: 
   return false;
 }
 
-export function findAncestorEntity(world: HubsWorld, eid: number, predicate: (eid: number) => boolean) {
-  const obj = findAncestor(world.eid2obj.get(eid)!, (o: Object3D) => !!(o.eid && predicate(o.eid))) as Object3D | null;
+export function findAncestorEntity(
+  world: HubsWorld,
+  eid: number,
+  predicate: (eid: number, world: HubsWorld) => boolean
+) {
+  const obj = findAncestor(
+    world.eid2obj.get(eid)!,
+    (o: Object3D) => !!(o.eid && predicate(o.eid, world))
+  ) as Object3D | null;
   return obj && obj.eid!;
 }
 
@@ -36,7 +43,7 @@ export function findAncestorEntities(world: HubsWorld, eid: number, predicate: (
 }
 
 export function findAncestorWithComponent(world: HubsWorld, component: Component, eid: number) {
-  return findAncestorEntity(world, eid, otherId => hasComponent(world, component, otherId));
+  return findAncestorEntity(world, eid, (otherId, world) => hasComponent(world, component, otherId));
 }
 
 export function findAncestorsWithComponent(world: HubsWorld, component: Component, eid: number): EntityID[] {

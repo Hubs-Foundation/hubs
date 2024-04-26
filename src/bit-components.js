@@ -21,7 +21,9 @@ export const Owned = defineComponent();
 export const EntityStateDirty = defineComponent();
 export const NetworkedMediaFrame = defineComponent({
   capturedNid: Types.ui32,
-  scale: [Types.f32, 3]
+  scale: [Types.f32, 3],
+  flags: Types.ui8,
+  mediaType: Types.ui8
 });
 NetworkedMediaFrame.capturedNid[$isStringType] = true;
 
@@ -36,6 +38,45 @@ export const MediaFrame = defineComponent({
   previewingNid: Types.eid,
   flags: Types.ui8
 });
+export const MediaRoot = defineComponent();
+export const Capturable = defineComponent();
+export const CapturableObject = defineComponent();
+export const NetworkedText = defineComponent({
+  text: Types.ui8,
+  anchorX: Types.ui8,
+  anchorY: Types.ui8,
+  color: Types.ui32,
+  curveRadius: Types.f32,
+  direction: Types.ui8,
+  fillOpacity: Types.f32,
+  fontUrl: Types.ui8,
+  fontSize: Types.f32,
+  letterSpacing: Types.f32,
+  lineHeight: Types.ui8,
+  textAlign: Types.ui8,
+  outlineWidth: Types.ui8,
+  outlineColor: Types.ui32,
+  outlineBlur: Types.ui8,
+  outlineOffsetX: Types.ui8,
+  outlineOffsetY: Types.ui8,
+  outlineOpacity: Types.f32,
+  strokeWidth: Types.ui8,
+  strokeColor: Types.ui32,
+  strokeOpacity: Types.ui32,
+  textIndent: Types.ui32,
+  whiteSpace: Types.ui8,
+  overflowWrap: Types.ui8,
+  opacity: Types.f32,
+  side: Types.ui8,
+  maxWidth: Types.f32
+});
+NetworkedText.text[$isStringType] = true;
+NetworkedText.lineHeight[$isStringType] = true;
+NetworkedText.outlineWidth[$isStringType] = true;
+NetworkedText.outlineBlur[$isStringType] = true;
+NetworkedText.outlineOffsetX[$isStringType] = true;
+NetworkedText.outlineOffsetY[$isStringType] = true;
+NetworkedText.strokeWidth[$isStringType] = true;
 export const TextTag = defineComponent();
 export const ReflectionProbe = defineComponent();
 export const Slice9 = defineComponent({
@@ -119,7 +160,11 @@ export const Rigidbody = defineComponent({
   activationState: Types.ui8,
   collisionFilterGroup: Types.ui32,
   collisionFilterMask: Types.ui32,
-  flags: Types.ui8
+  flags: Types.ui8,
+  prevType: Types.ui8
+});
+export const NetworkedRigidBody = defineComponent({
+  prevType: Types.ui8
 });
 export const PhysicsShape = defineComponent({
   bodyId: Types.ui16,
@@ -216,6 +261,7 @@ export const SceneRoot = defineComponent();
 export const NavMesh = defineComponent();
 export const SceneLoader = defineComponent({ src: Types.ui32 });
 SceneLoader.src[$isStringType] = true;
+export const SceneLoaded = defineComponent();
 
 export const MediaImage = defineComponent({
   cacheKey: Types.ui32,
@@ -270,9 +316,12 @@ export const LoopAnimation = defineComponent();
  */
 export const LoopAnimationData = new Map();
 export const NetworkedVideo = defineComponent({
+  src: Types.ui8,
   time: Types.f32,
-  flags: Types.ui8
+  flags: Types.ui8,
+  projection: Types.ui8
 });
+NetworkedVideo.src[$isStringType] = true;
 export const VideoMenuItem = defineComponent();
 export const VideoMenu = defineComponent({
   videoRef: Types.eid,
@@ -387,6 +436,7 @@ export const Billboard = defineComponent({
   onlyY: Types.ui8
 });
 export const MaterialTag = defineComponent();
+export const TextureTag = defineComponent();
 export const UVScroll = defineComponent({
   speed: [Types.f32, 2],
   increment: [Types.f32, 2],
@@ -454,3 +504,4 @@ export const ObjectMenuTransform = defineComponent({
   prevObjectRef: Types.eid,
   flags: Types.ui8
 });
+export const InteractableObject = defineComponent();

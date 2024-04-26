@@ -24,9 +24,17 @@ export const MediaType = {
   VIDEO: 1 << 2,
   PDF: 1 << 3,
   HTML: 1 << 4,
-  AUDIO: 1 << 5
+  AUDIO: 1 << 5,
+  OBJECT: 1 << 6
 };
-MediaType.ALL = MediaType.MODEL | MediaType.IMAGE | MediaType.VIDEO | MediaType.PDF | MediaType.HTML | MediaType.AUDIO;
+MediaType.ALL =
+  MediaType.MODEL |
+  MediaType.IMAGE |
+  MediaType.VIDEO |
+  MediaType.PDF |
+  MediaType.HTML |
+  MediaType.AUDIO |
+  MediaType.OBJECT;
 MediaType.ALL_2D = MediaType.IMAGE | MediaType.VIDEO | MediaType.PDF | MediaType.HTML;
 const MediaTypeName = new Map([
   [MediaType.MODEL, "model"],
@@ -34,7 +42,8 @@ const MediaTypeName = new Map([
   [MediaType.VIDEO, "video"],
   [MediaType.PDF, "pdf"],
   [MediaType.HTML, "html"],
-  [MediaType.AUDIO, "audio"]
+  [MediaType.AUDIO, "audio"],
+  [MediaType.OBJECT, "object"]
 ]);
 export function mediaTypeName(type) {
   return MediaTypeName.get(type) || "unknown";

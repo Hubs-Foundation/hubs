@@ -1,4 +1,5 @@
-import { App } from "./app";
+import { GLTFLoaderPlugin, GLTFParser } from "three/examples/jsm/loaders/GLTFLoader";
+import { App, HubsWorld } from "./app";
 import { prefabs } from "./prefabs/prefabs";
 
 import {
@@ -12,6 +13,10 @@ import {
 import configs from "./utils/configs";
 import { commonInflators, gltfInflators, jsxInflators } from "./utils/jsx-entity";
 import { networkableComponents, schemas } from "./utils/network-schemas";
+import { gltfPluginsExtra } from "./components/gltf-model-plus";
+import { GLTFLinkResolverFn, gltfLinkResolvers } from "./inflators/model";
+import { Object3D } from "three";
+import { extraSections } from "./react-components/debug-panel/ECSSidebar";
 
 function getNextIdx(slot: Array<SystemConfigT>, system: SystemConfigT) {
   return slot.findIndex(item => {
@@ -25,8 +30,10 @@ function registerSystem(system: SystemConfigT) {
     slot = APP.addon_systems.setup;
   } else if (system.order < SystemOrderE.PostPhysics) {
     slot = APP.addon_systems.prePhysics;
-  } else if (system.order < SystemOrderE.MatricesUpdate) {
+  } else if (system.order < SystemOrderE.PostPhysics) {
     slot = APP.addon_systems.postPhysics;
+  } else if (system.order < SystemOrderE.MatricesUpdate) {
+    slot = APP.addon_systems.matricesUpdate;
   } else if (system.order < SystemOrderE.BeforeRender) {
     slot = APP.addon_systems.beforeRender;
   } else if (system.order < SystemOrderE.AfterRender) {
@@ -99,6 +106,17 @@ export type AddonRegisterCallbackT = (app: App) => void;
 export function registerAddon(id: AddonIdT, config: AddonConfigT) {
   console.log(`Add-on ${id} registered`);
   pendingAddons.set(id, config);
+}
+
+export type GLTFParserCallbackFn = (parser: GLTFParser) => GLTFLoaderPlugin;
+export function registerGLTFLoaderPlugin(callback: GLTFParserCallbackFn): void {
+  gltfPluginsExtra.push(callback);
+}
+export function registerGLTFLinkResolver(resolver: GLTFLinkResolverFn): void {
+  gltfLinkResolvers.push(resolver);
+}
+export function registerECSSidebarSection(section: (world: HubsWorld, selectedObj: Object3D) => React.JSX.Element) {
+  extraSections.push(section);
 }
 
 export function onAddonsInit(app: App) {
