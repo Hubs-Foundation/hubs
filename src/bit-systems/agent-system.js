@@ -83,6 +83,8 @@ export default class VirtualAgent {
     this.panel = new objElement();
     this.displayedText = new textElement();
 
+    this.avatarPovObj = null;
+
     this.textArray = [];
     this.diplayedSenteceIndex = null;
 
@@ -110,13 +112,14 @@ export default class VirtualAgent {
   }
 
   Init(reset) {
-    if (reset) {
+    if (reset && this.allowed) {
       APP.scene.removeEventListener("agent-toggle", this.onToggle);
       APP.scene.removeEventListener("clear-scene", this.onClear);
       this.Remove();
     }
 
     this.avatarPovObj = document.querySelector("#avatar-pov-node").object3D;
+    console.log(this.avatarPovObj);
 
     if (!roomPropertiesReader.AllowsAgent) {
       this.allowed = false;

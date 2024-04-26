@@ -467,7 +467,7 @@ const LobbySteps: Array<StepCategory> = [
     slides: [0],
     steps: [
       {
-        onceFunc: () => ChangeSlidein5()
+        onceFunc: ChangeSlidein5
       }
     ]
   },
@@ -477,7 +477,7 @@ const LobbySteps: Array<StepCategory> = [
     slides: [1],
     steps: [
       {
-        onceFunc: () => ChangeSlidein5()
+        onceFunc: ChangeSlidein5
       }
     ]
   },
@@ -502,7 +502,7 @@ const LobbySteps: Array<StepCategory> = [
     slides: [3, 4, 5],
     steps: [
       {
-        onceFunc: () => ChangeSlidein5
+        onceFunc: ChangeSlidein5
       },
       {
         onceFunc: () => {
