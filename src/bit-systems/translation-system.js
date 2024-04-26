@@ -5,6 +5,7 @@ import { renderAsEntity } from "../utils/jsx-entity";
 import { FixedPanel } from "../prefabs/fixed-panel";
 import { setLocale } from "../utils/i18n";
 import { roomPropertiesReader } from "../utils/rooms-properties";
+import { degToRad } from "three/src/math/MathUtils";
 
 export const languageCodes = {
   greek: "el",
@@ -211,6 +212,9 @@ export class TranslationSystem {
     if (this.transProperties.spatiality.type === "borders") {
       this.borders = this.transProperties.spatiality.data;
       this.prevBorderState = false;
+    } else {
+      this.presenterBorders = this.transProperties.conversation.data;
+      this.prevPresenterState = false;
     }
 
     if (this.transProperties.panel.type === "fixed") {
@@ -218,13 +222,17 @@ export class TranslationSystem {
         if (!this.fixedPanelObj) {
           const pos = this.transProperties.panel.data;
           const eid = renderAsEntity(APP.world, FixedPanel({ pos }));
+
           this.fixedPanelObj = APP.world.eid2obj.get(eid);
+          this.fixedPanelObj.rotation.set(0, degToRad(180), 0);
+          console.log(this.fixedPanelObj);
           this.eid = eid;
           APP.world.scene.add(this.fixedPanelObj);
           APP.scene.addState("translation");
         } else {
           APP.world.scene.remove(this.fixedPanelObj);
           removeEntity(APP.world, this.eid);
+          console.log(`panel removed`);
           this.fixedPanelObj = null;
           this.eid = null;
           APP.scene.removeState("translation");
@@ -311,6 +319,8 @@ export class TranslationSystem {
     console.log(`Start monitoring audio of target ${target.id}`);
 
     const stream = await this.GetTargetStream(target.id);
+
+    console.log(`stream of presenter has been collected`);
     const chunks = [];
     const mediaRecorder = new MediaRecorder(stream);
 
@@ -456,26 +466,33 @@ export class TranslationSystem {
     }
   }
 
+  isInsideBorders() {
+    let withinBorders;
+    if (this.transProperties.spatiality.type === "borders") {
+      withinBorders =
+        this.borders[0] < selfPos.x &&
+        selfPos.x < this.borders[1] &&
+        this.borders[2] < selfPos.z &&
+        selfPos.z < this.borders[3];
+    } else withinBorders = true;
+
+    return withinBorders;
+  }
+
   tick() {
     if (!this.initialized || !APP.scene.is("entered")) return;
 
-    const selfPos = this.avatarPovObj.getWorldPosition(new THREE.Vector3());
-    if (this.transProperties.spatiality.type !== "borders") return;
+    if (this.transProperties.spatiality.type === "borders") {
+      const isWithinBorders = this.isInsideBorders();
+      if (isWithinBorders !== this.prevBorderState) {
+        APP.scene.emit("border_state_change", withinBorders);
+        this.prevBorderState = withinBorders;
 
-    const withinBorders =
-      this.borders[0] < selfPos.x &&
-      selfPos.x < this.borders[1] &&
-      this.borders[2] < selfPos.z &&
-      selfPos.z < this.borders[3]; //z borders are flipped NOTICE
-
-    if (withinBorders !== this.prevBorderState) {
-      APP.scene.emit("border_state_change", withinBorders);
-      this.prevBorderState = withinBorders;
-
-      if (!withinBorders) {
-        Object.keys(this.targets).forEach(key => {
-          this.onTranslationUpdatesAvailable({ detail: { type: "remove", id: key } });
-        });
+        if (!withinBorders) {
+          Object.keys(this.targets).forEach(key => {
+            this.onTranslationUpdatesAvailable({ detail: { type: "remove", id: key } });
+          });
+        }
       }
     }
   }

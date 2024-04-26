@@ -38,7 +38,7 @@ AFRAME.registerComponent("translate-badge", {
     this.translateIcon = this.el.querySelector(".translate_badge_icon").object3D;
     this.cancelIcon = this.el.querySelector(".cancel_translate_badge_icon").object3D;
 
-    console.log(this.translateIcon);
+    console.log(`translation badge`, this.translateIcon);
     NAF.utils
       .getNetworkedEntity(this.el)
       .then(networkedEl => {
