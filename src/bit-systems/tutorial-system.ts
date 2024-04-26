@@ -72,6 +72,9 @@ class TutorialManager {
   room: string;
   changeRoomID: string;
 
+  activeTimeout: NodeJS.Timeout;
+  redirectionTimeout: NodeJS.Timeout;
+
   constructor() {
     this.allowed = false;
     this.activeStepIndex = 0;
@@ -88,9 +91,10 @@ class TutorialManager {
     if (reset) {
       if (this.panelRef && entityExists(APP.world, this.panelRef)) {
         this.RemovePanel();
-        this.activeStepIndex = 0;
-        this.activeCategoryIndex = 0;
       }
+
+      if (this.activeTimeout) clearTimeout(this.activeTimeout);
+      if (this.redirectionTimeout) clearTimeout(this.redirectionTimeout);
     }
 
     if (!roomPropertiesReader.AllowsTutorial) {
@@ -115,7 +119,10 @@ class TutorialManager {
       if (stepCategory.type === "both" || stepCategory.type === navString) this.categoriesArray.push(stepCategory);
     });
 
-    setTimeout(() => {
+    this.activeStepIndex = 0;
+    this.activeCategoryIndex = 0;
+
+    this.activeTimeout = setTimeout(() => {
       this.allowed = true;
       this.AddTutorialPanel(
         roomPropertiesReader.roomProps.tutorial.slides!,
@@ -340,7 +347,7 @@ const WellDoneCategoryNext = (): StepCategory => {
     steps: [
       {
         onceFunc: () => {
-          setTimeout(() => {
+          tutorialManager.activeTimeout = setTimeout(() => {
             tutorialManager.Next();
           }, 1500);
         }
@@ -358,7 +365,7 @@ const WellDoneCategory = (): StepCategory => {
     steps: [
       {
         onceFunc: () => {
-          setTimeout(() => {
+          tutorialManager.activeTimeout = setTimeout(() => {
             tutorialManager.HidePanel();
           }, 1500);
         }
@@ -397,7 +404,7 @@ const OnMapToggle = () => {
 };
 
 function ChangeSlidein5() {
-  setTimeout(() => {
+  tutorialManager.activeTimeout = setTimeout(() => {
     tutorialManager.Next();
   }, 5000);
 }
@@ -407,11 +414,11 @@ function welcomeSteps(time: number): Array<StepObject> {
     {
       onceFunc: () => {
         targetPos = navSystem.nodes[navSystem.GetDestIndex("social area")].vector;
-        setTimeout(() => {
+        tutorialManager.activeTimeout = setTimeout(() => {
           tutorialManager.HidePanel();
         }, time);
 
-        timeOut = setTimeout(() => {
+        tutorialManager.redirectionTimeout = setTimeout(() => {
           tutorialManager.ChangeCategory(timeOutCategory);
         }, 60000);
       },
@@ -460,7 +467,6 @@ const MapPanelSteps: Array<StepObject> = [
   }
 ];
 let targetPos: Vector3;
-let timeOut: NodeJS.Timeout;
 
 const LobbySteps: Array<StepCategory> = [
   {
@@ -490,7 +496,7 @@ const LobbySteps: Array<StepCategory> = [
     steps: [
       {
         onceFunc: () => {
-          setTimeout(() => {
+          tutorialManager.activeTimeout = setTimeout(() => {
             tutorialManager.centerButtonObj.visible = true;
             tutorialManager.centerButtonText.text = "Click me!";
           }, 1000);
@@ -612,7 +618,7 @@ const TradeshowSteps: Array<StepCategory> = [
         onceFunc: () => {
           targetPos = navSystem.nodes[navSystem.GetDestIndex("conference room")].vector;
 
-          setTimeout(() => {
+          tutorialManager.activeTimeout = setTimeout(() => {
             tutorialManager.HidePanel();
           }, 5000);
         },
@@ -635,7 +641,7 @@ const ConferenceSteps: Array<StepCategory> = [
     steps: [
       {
         onceFunc: () => {
-          setTimeout(() => {
+          tutorialManager.activeTimeout = setTimeout(() => {
             tutorialManager.HidePanel();
           }, 5000);
         }
