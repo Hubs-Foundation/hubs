@@ -288,7 +288,7 @@ class TutorialManager {
     if (cleanupFunc) cleanupFunc();
 
     if (congratulate) {
-      this.ChangeCategory(WellDoneCategory());
+      this.ChangeCategory(WellDoneCategoryNext());
     } else {
       this.ChangeCategoryByIndex(this.activeCategoryIndex + 1);
     }
@@ -328,7 +328,7 @@ class TutorialManager {
 
 export const tutorialManager = new TutorialManager();
 
-const WellDoneCategory = (): StepCategory => {
+const WellDoneCategoryNext = (): StepCategory => {
   const slideNo = tutorialManager.slides.length - Math.floor(Math.random() * (CONGRATS_SLIDE_COUNT - 1) + 1);
 
   return {
@@ -340,6 +340,24 @@ const WellDoneCategory = (): StepCategory => {
         onceFunc: () => {
           setTimeout(() => {
             tutorialManager.Next();
+          }, 1500);
+        }
+      }
+    ]
+  };
+};
+const WellDoneCategory = (): StepCategory => {
+  const slideNo = tutorialManager.slides.length - Math.floor(Math.random() * (CONGRATS_SLIDE_COUNT - 1) + 1);
+
+  return {
+    name: "welldone",
+    type: "both",
+    slides: [slideNo],
+    steps: [
+      {
+        onceFunc: () => {
+          setTimeout(() => {
+            tutorialManager.HidePanel();
           }, 1500);
         }
       }
@@ -585,7 +603,7 @@ const TradeshowSteps: Array<StepCategory> = [
         },
         loopFunc: () => {
           if (virtualAgent.avatarPos.distanceTo(targetPos) < 3) {
-            tutorialManager.Next(true);
+            tutorialManager.ChangeCategory(WellDoneCategory());
             logger.AddAnnouncementInteraction("step_achieved", "navigation to conference room");
           }
         }

@@ -154,7 +154,7 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
   });
 
   APP.entryManager.setupVRConferece(true);
-  APP.mediaDevicesManager.isMicEnabled = false;
+  // APP.mediaDevicesManager.isMicEnabled = false;
 }
 window.changeHub = changeHub;
 

@@ -187,6 +187,7 @@ export class TranslationSystem {
   }
 
   async Init(reset) {
+    APP.mediaDevicesManager.isMicEnabled = false;
     if (reset) {
       this.targets = {};
       this.allowed = roomPropertiesReader.AllowTrans;
