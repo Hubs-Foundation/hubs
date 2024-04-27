@@ -5,7 +5,7 @@ import { tutorialManager } from "./tutorial-system";
 import { saveFile } from "../utils/ml-adapters";
 
 const loggerDomain = "https://vox-logger.dev.vr-conference.lab.synelixis.com";
-const dev = true;
+
 type trackArray = [number, number, number];
 
 interface SpatialData {
@@ -69,11 +69,6 @@ class Logger {
 
   async RegisterUser(reset: boolean = false) {
     if (reset) return;
-    if (dev) {
-      this.lastTrackTime = Date.now();
-      this.lastPostTime = Date.now();
-      return;
-    }
 
     const hasAgent = roomPropertiesReader.AllowsNav;
     const params: CreateUserParams = { has_agent: hasAgent };
@@ -90,7 +85,7 @@ class Logger {
 
   async AddSpatialInfo(spatialData: Blob) {
     try {
-      if (!(this.userId && dev)) await this.RegisterUser();
+      if (!this.userId) await this.RegisterUser();
       const formData = new FormData();
       formData.append("spatial_data", spatialData, "spatial_info.json");
       formData.append("user_id", this.userId.toString());
@@ -107,7 +102,7 @@ class Logger {
     try {
       // saveFile(audioData, "wav");
       // saveFile(interactionData, "json");
-      if (!(this.userId && dev)) await this.RegisterUser();
+      if (!this.userId) await this.RegisterUser();
       const formData = new FormData();
       formData.append("audio_data", audioData, "audio_data.wav");
       formData.append("interaction_data", interactionData, "agent_data.json");
@@ -122,7 +117,7 @@ class Logger {
   }
 
   async AddUiInteraction(buttonName: string, result: string) {
-    if (!(this.userId && dev)) await this.RegisterUser();
+    if (!this.userId) await this.RegisterUser();
     const params: CreateUiParams = {
       user_id: this.userId,
       button_name: buttonName,
@@ -138,7 +133,7 @@ class Logger {
     }
   }
   async AddAnnouncementInteraction(type: string, value: string) {
-    if (!(this.userId && dev)) await this.RegisterUser();
+    if (!this.userId) await this.RegisterUser();
     const params: CreateAnnouncementParams = {
       user_id: this.userId,
       type: type,
@@ -170,6 +165,7 @@ class Logger {
           const trackDataBlob = new Blob([trackStringData], { type: "application/json" });
           const response = await this.AddSpatialInfo(trackDataBlob);
           this.lastPostTime = Date.now();
+          this.spatialData = new Array<SpatialData>();
 
           console.log(response);
         } catch (error) {
