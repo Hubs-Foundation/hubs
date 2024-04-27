@@ -62,22 +62,48 @@ class HelpButton {
     if (reset) {
       APP.scene!.removeEventListener("help-toggle", this.onToggle);
       APP.scene!.removeEventListener("clear-scene", this.onClear);
+      return;
     }
+
+    const helpProps = roomPropertiesReader.helpProps;
     const language = translationSystem.mylanguage as "english" | "spanish" | "german" | "dutch" | "greek" | "italian";
     const languageCode = languageCodes[language];
 
-    this.slidesCount = roomPropertiesReader.helpProps.slides!;
+    this.slidesCount = helpProps.slides!;
     this.slideLinks = [];
     this.slidesObjs = [];
 
-    for (let i = 0; i < this.slidesCount; i++)
-      this.slideLinks.push(`${roomPropertiesReader.serverURL}/help/${languageCode}_help_${i}.png`);
+    for (let i = 0; i < this.slidesCount; i++) {
+      let navOnly = false;
+      let noNavOnly = false;
+      for (let j = 0; j < helpProps.nav!.length; j++) {
+        if (helpProps.nav![j] === i) {
+          navOnly = true;
+          break;
+        }
+      }
 
-    this.slideLinks.push(
-      `${roomPropertiesReader.serverURL}/help/${languageCode}_help_${
-        roomPropertiesReader.AllowsNav ? "nav" : "noNav"
-      }.png`
-    );
+      if (!navOnly) {
+        for (let j = 0; j < helpProps.no_nav!.length; j++) {
+          if (helpProps.no_nav![j] === i) {
+            noNavOnly = true;
+            break;
+          }
+        }
+      }
+
+      const contrain =
+        roomPropertiesReader.Room === "lobby"
+          ? roomPropertiesReader.AllowsNav
+          : roomPropertiesReader.Room === "tradeshows"
+          ? roomPropertiesReader.AllowsAgent
+          : false;
+
+      let shouldpush = contrain ? navOnly : noNavOnly;
+      shouldpush = shouldpush || !(navOnly || noNavOnly);
+
+      if (shouldpush) this.slideLinks.push(`${roomPropertiesReader.serverURL}/help/${languageCode}_help_${i}.png`);
+    }
 
     APP.scene!.addEventListener("help-toggle", this.onToggle);
     APP.scene!.addEventListener("clear-scene", this.onClear);

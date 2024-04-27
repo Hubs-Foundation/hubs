@@ -35,6 +35,8 @@ interface TutorialProperties {
 interface HelpProperties {
   allow: Array<string>;
   slides?: number;
+  nav?: Array<number>;
+  no_nav?: Array<number>;
   ratio?: number;
 }
 
