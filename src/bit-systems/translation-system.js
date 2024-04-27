@@ -61,6 +61,51 @@ const elData = createLanguageData([
   "Κατάργηση Σίγασης",
   "Επίσκεψη στο Δωμάτιο"
 ]);
+const esData = createLanguageData([
+  "Traducir",
+  "Agente",
+  "Mapa",
+  "Idioma",
+  "Ayuda",
+  "Tarea",
+  "Silenciar Micrófono",
+  "Activar Micrófono",
+  "Visitar Sala"
+]);
+const itData = createLanguageData([
+  "Tradurre",
+  "Assistente",
+  "Mappa",
+  "Lingua",
+  "Aiuto",
+  "Compito",
+  "Disattiva il microfono",
+  "Attiva il microfono",
+  "Visita la stanza"
+]);
+
+const nlData = createLanguageData([
+  "Vertalen",
+  "Assistent",
+  "Kaart",
+  "Taal",
+  "Hulp",
+  "Taak",
+  "Demp je microfoon",
+  "Zet de microfoon aan",
+  "Bezoek de kamer"
+]);
+const deData = createLanguageData([
+  "Übersetzung",
+  "Agent",
+  "Grundriss",
+  "Sprache",
+  "Hulp",
+  "Aufgabe",
+  "Mikrofon stummschalten",
+  "Mikrofon einschalten",
+  "Raum besuchen"
+]);
 
 export const hudPanelLanguages = {
   greek: {
@@ -127,10 +172,10 @@ export class TranslationSystem {
     this.availableLanguages = ["english", "dutch", "german", "greek", "italian", "spanish"];
     this.textTranslations = {
       english: enData,
-      dutch: enData,
-      german: enData,
-      italian: enData,
-      spanish: enData,
+      dutch: nlData,
+      german: deData,
+      italian: itData,
+      spanish: esData,
       greek: elData
     };
 
@@ -152,13 +197,6 @@ export class TranslationSystem {
     return { value: this.mylanguage, label: this.mylanguage.charAt(0).toUpperCase() + this.mylanguage.slice(1) };
   }
 
-  // "hud-panel.translate": "Translate",
-  // "hud-panel.agent": "Agent",
-  // "hud-panel.map": "Map",
-  // "hud-panel.lanugage": "Language",
-  // "hud-panel.mic": "Mute Mic",
-  // "hud-panel.mic.muted ": "Unmute mic",
-  // "change-hub.message": "Visit room"
   get AgentButtonText() {
     return this.textTranslations[this.mylanguage]["hud-panel.agent"];
   }

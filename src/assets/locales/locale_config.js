@@ -4,13 +4,15 @@ export const AVAILABLE_LOCALES = {
   "zh-cn": "简体中文",
   pt: "Portugês (Brasil)",
   ja: "日本語",
-  es: "Español",
   ru: "Pусский",
   fr: "Français",
   ko: "한국어",
-  de: "Deutsch",
   "zh-tw": "繁體中文",
-  el: "Greek"
+  es: "Español",
+  de: "Deutsch",
+  el: "Ελληνικά",
+  nl: "Nederlands",
+  it: "Italiano"
 };
 
 // Map from alternative primary language tags to those we support
