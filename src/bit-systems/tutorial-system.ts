@@ -114,6 +114,7 @@ class TutorialManager {
         : "noNav";
 
     this.categoriesArray = [];
+    console.log(navString);
 
     this.roomTutorial.forEach(stepCategory => {
       if (stepCategory.type === "both" || stepCategory.type === navString) this.categoriesArray.push(stepCategory);
@@ -507,7 +508,7 @@ const LobbySteps: Array<StepCategory> = [
   {
     name: "move",
     type: "both",
-    slides: [3, 4, 5],
+    slides: [3, 4],
     steps: [
       {
         onceFunc: ChangeSlidein5
@@ -521,7 +522,14 @@ const LobbySteps: Array<StepCategory> = [
           const distance = tutorialManager.initPosition.distanceTo(currentPos.setY(tutorialManager.initPosition.y));
           if (distance >= DISTANCE_THRESH) tutorialManager.Next(true);
         }
-      },
+      }
+    ]
+  },
+  {
+    name: "teleport",
+    type: "both",
+    slides: [5],
+    steps: [
       {
         onceFunc: () => {
           tutorialManager.initPosition = tutorialManager.avatarHead.getWorldPosition(new Vector3());
