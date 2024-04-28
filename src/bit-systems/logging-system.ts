@@ -84,7 +84,7 @@ class Logger {
   }
 
   async RegisterUser(reset: boolean = false) {
-    if (reset) return;
+    if (reset || this.registered) return;
 
     const hasAgent = roomPropertiesReader.AllowsNav;
     const params: CreateUserParams = { has_agent: hasAgent, name: APP.store.state.profile.displayName };
