@@ -120,6 +120,8 @@ class TutorialManager {
       if (stepCategory.type === "both" || stepCategory.type === navString) this.categoriesArray.push(stepCategory);
     });
 
+    console.log(this.categoriesArray);
+
     this.activeStepIndex = 0;
     this.activeCategoryIndex = 0;
 
@@ -216,6 +218,7 @@ class TutorialManager {
   }
 
   onClearToggle() {
+    if (roomPropertiesReader.Room === "lobby") return;
     if (this.Ascene.is("task")) {
       this.panelObj.visible = false;
       this.Ascene.removeState("task");
@@ -590,7 +593,7 @@ const LobbySteps: Array<StepCategory> = [
   },
   {
     name: "finish",
-    type: "nav",
+    type: "both",
     slides: [14],
     steps: [
       {
