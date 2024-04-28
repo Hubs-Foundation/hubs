@@ -230,8 +230,10 @@ export class TranslationSystem {
       this.targets = {};
       this.allowed = roomPropertiesReader.AllowTrans;
 
-      if (!this.allowed) console.warn("Translation is not enabled in this room");
-      return;
+      if (!this.allowed) {
+        console.warn("Translation is not enabled in this room");
+        return;
+      }
     }
 
     this.allowed = roomPropertiesReader.AllowTrans;
