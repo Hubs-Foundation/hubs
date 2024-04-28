@@ -477,7 +477,6 @@ export class TranslationSystem {
       APP.scene.emit("language_updated", { language: this.mylanguage });
       APP.store.update({ preferences: { locale: languageCodes[newLang] } });
       setLocale(languageCodes[newLang]);
-      console.log(languageCodes[newLang]);
     }
   }
 

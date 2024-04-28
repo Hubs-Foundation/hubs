@@ -420,7 +420,7 @@ function welcomeSteps(time: number): Array<StepObject> {
 
         tutorialManager.redirectionTimeout = setTimeout(() => {
           tutorialManager.ChangeCategory(timeOutCategory);
-        }, 60000);
+        }, 4 * 60000);
       },
       loopFunc: () => {
         if (avatarPos().distanceTo(targetPos) < 3) {

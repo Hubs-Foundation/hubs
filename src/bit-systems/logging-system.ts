@@ -5,7 +5,7 @@ import { tutorialManager } from "./tutorial-system";
 import { saveFile } from "../utils/ml-adapters";
 
 const loggerDomain = "https://vox-logger.dev.vr-conference.lab.synelixis.com";
-
+// const loggerDomain = "http://localhost:3000";
 type trackArray = [number, number, number];
 
 interface SpatialData {
@@ -28,6 +28,8 @@ interface CreateAnnouncementParams {
 
 interface CreateUserParams {
   has_agent: boolean;
+  name?: string;
+  role?: string;
 }
 
 interface CreateUserResponse {
@@ -53,6 +55,9 @@ class Logger {
   lastTrackTime: number;
   lastPostTime: number;
   spatialData: Array<SpatialData>;
+  backupSpatialData: Array<SpatialData>;
+  registered: boolean;
+  isProccesingRequest: boolean;
 
   constructor(domain: string) {
     this.loggerDomain = domain;
@@ -64,20 +69,42 @@ class Logger {
       CREATE_ANNOUNCEMENT: this.loggerDomain.concat("/add_announc_int")
     };
 
-    this.spatialData = [];
+    this.spatialData = new Array<SpatialData>();
+    this.backupSpatialData = new Array<SpatialData>();
+    this.registered = false;
+    this.isProccesingRequest = false;
+  }
+
+  WaitUserRegistration(): Promise<any> {
+    if (this.registered) return Promise.resolve(null);
+    else
+      return new Promise(resolve => {
+        APP.scene!.addEventListener("user_registered", resolve, { once: true });
+      });
   }
 
   async RegisterUser(reset: boolean = false) {
     if (reset) return;
 
     const hasAgent = roomPropertiesReader.AllowsNav;
-    const params: CreateUserParams = { has_agent: hasAgent };
+    const params: CreateUserParams = { has_agent: hasAgent, name: APP.store.state.profile.displayName };
 
     try {
-      const response = await fetch(this.endopoints.CREATE_USER, { method: "POST", body: JSON.stringify(params) });
+      const headers = {
+        Accept: "application/json",
+        "Content-Type": "application/json"
+      };
+      const response = await fetch(this.endopoints.CREATE_USER, {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(params)
+      });
       const data = (await response.json()) as CreateUserResponse;
-      console.log(data);
       this.userId = data.id;
+      this.registered = true;
+      this.lastPostTime = Date.now();
+      this.lastTrackTime = Date.now();
+      APP.scene!.emit("user_registered");
     } catch (e) {
       console.log(e);
     }
@@ -85,12 +112,12 @@ class Logger {
 
   async AddSpatialInfo(spatialData: Blob) {
     try {
-      if (!this.userId) await this.RegisterUser();
+      await this.WaitUserRegistration();
+      this.isProccesingRequest = true;
       const formData = new FormData();
       formData.append("spatial_data", spatialData, "spatial_info.json");
       formData.append("user_id", this.userId.toString());
-      const response = await fetch(this.endopoints.CREATE_SPATIAL, { body: formData });
-      console.log(formData);
+      const response = await fetch(this.endopoints.CREATE_SPATIAL, { body: formData, method: "POST" });
       if (response.ok) return `interaction  to : ${this.endopoints.CREATE_SPATIAL} registered`;
       else throw new Error("API response not ok");
     } catch (e) {
@@ -100,15 +127,15 @@ class Logger {
 
   async AddAgentInteraction(audioData: Blob, interactionData: Blob) {
     try {
+      await this.WaitUserRegistration();
       // saveFile(audioData, "wav");
       // saveFile(interactionData, "json");
-      if (!this.userId) await this.RegisterUser();
+      // if (!this.userId) await this.RegisterUser();
       const formData = new FormData();
       formData.append("audio_data", audioData, "audio_data.wav");
       formData.append("interaction_data", interactionData, "agent_data.json");
       formData.append("user_id", this.userId.toString());
-      console.log(formData);
-      const response = await fetch(this.endopoints.CREATE_AGENT, { body: formData });
+      const response = await fetch(this.endopoints.CREATE_AGENT, { method: "POST", body: formData });
       if (response.ok) return `interaction  to : ${this.endopoints.CREATE_AGENT} registered`;
       else throw new Error("API response not ok");
     } catch (e) {
@@ -117,7 +144,13 @@ class Logger {
   }
 
   async AddUiInteraction(buttonName: string, result: string) {
-    if (!this.userId) await this.RegisterUser();
+    // if (!this.userId) await this.RegisterUser();
+    console.log(`add ui`);
+    await this.WaitUserRegistration();
+    const headers = {
+      Accept: "application/json",
+      "Content-Type": "application/json"
+    };
     const params: CreateUiParams = {
       user_id: this.userId,
       button_name: buttonName,
@@ -125,7 +158,11 @@ class Logger {
     };
     console.log(params);
     try {
-      const response = await fetch(this.endopoints.CREATE_UI, { method: "POST", body: JSON.stringify(params) });
+      const response = await fetch(this.endopoints.CREATE_UI, {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(params)
+      });
       if (response.ok) return `interaction  to : ${this.endopoints.CREATE_UI} registered`;
       else throw new Error("Endoint response not ok");
     } catch (e) {
@@ -133,7 +170,12 @@ class Logger {
     }
   }
   async AddAnnouncementInteraction(type: string, value: string) {
-    if (!this.userId) await this.RegisterUser();
+    await this.WaitUserRegistration();
+    // if (!this.userId) await this.RegisterUser();
+    const headers = {
+      Accept: "application/json",
+      "Content-Type": "application/json"
+    };
     const params: CreateAnnouncementParams = {
       user_id: this.userId,
       type: type,
@@ -143,6 +185,7 @@ class Logger {
     try {
       const response = await fetch(this.endopoints.CREATE_ANNOUNCEMENT, {
         method: "POST",
+        headers: headers,
         body: JSON.stringify(params)
       });
       if (response.ok) return `interaction  to : ${this.endopoints.CREATE_UI} registered`;
@@ -159,18 +202,25 @@ class Logger {
       this.spatialData.push({ position: pos, direction: dir, timestamp: Date.now() });
       this.lastTrackTime = Date.now();
 
-      if (this.lastPostTime && Date.now() - this.lastPostTime > 30000)
+      if (
+        this.lastPostTime &&
+        !this.isProccesingRequest &&
+        Date.now() - this.lastPostTime > 30000 &&
+        this.spatialData.length > 0
+      ) {
         try {
           const trackStringData = JSON.stringify(this.spatialData);
           const trackDataBlob = new Blob([trackStringData], { type: "application/json" });
-          const response = await this.AddSpatialInfo(trackDataBlob);
-          this.lastPostTime = Date.now();
           this.spatialData = new Array<SpatialData>();
-
-          console.log(response);
+          this.AddSpatialInfo(trackDataBlob).then(response => {
+            this.lastPostTime = Date.now();
+            this.isProccesingRequest = false;
+            console.log(response);
+          });
         } catch (error) {
           console.log(error);
         }
+      }
     }
   }
 }
