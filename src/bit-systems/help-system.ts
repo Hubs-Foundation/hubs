@@ -62,7 +62,6 @@ class HelpButton {
     if (reset) {
       APP.scene!.removeEventListener("help-toggle", this.onToggle);
       APP.scene!.removeEventListener("clear-scene", this.onClear);
-      return;
     }
 
     const helpProps = roomPropertiesReader.helpProps;
