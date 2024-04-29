@@ -87,7 +87,11 @@ class Logger {
     if (reset || this.registered) return;
 
     const hasAgent = roomPropertiesReader.AllowsNav;
-    const params: CreateUserParams = { has_agent: hasAgent, name: APP.store.state.profile.displayName };
+    const params: CreateUserParams = {
+      has_agent: hasAgent,
+      name: APP.store.state.profile.displayName,
+      role: "mondayTest"
+    };
 
     try {
       const headers = {

@@ -73,6 +73,10 @@ export default class SceneEntryManager {
     languagePanel.Init(reset);
 
     if (reset) this.scene.emit("clear-scene");
+    else {
+      logger.AddAnnouncementInteraction("language", translationSystem.mylanguage);
+      logger.AddAnnouncementInteraction("room_enter", roomPropertiesReader.roomProps.HubID);
+    }
 
     await roomPropertiesReader.Read(getCurrentHubId(), reset);
     logger.RegisterUser();
@@ -83,9 +87,6 @@ export default class SceneEntryManager {
     tutorialManager.Init(reset);
     helpButton.Init(reset);
     labelOrganizer.Init();
-
-    logger.AddAnnouncementInteraction("language", translationSystem.mylanguage);
-    logger.AddAnnouncementInteraction("room_enter", roomPropertiesReader.roomProps.HubID);
   };
 
   enterScene = async (enterInVR, muteOnEntry) => {
