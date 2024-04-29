@@ -90,7 +90,7 @@ class Logger {
     const params: CreateUserParams = {
       has_agent: hasAgent,
       name: APP.store.state.profile.displayName,
-      role: "mondayTest"
+      role: "pilot-participant"
     };
 
     try {
