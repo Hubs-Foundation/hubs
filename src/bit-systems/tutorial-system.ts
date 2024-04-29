@@ -24,6 +24,7 @@ import { logger } from "./logging-system";
 const CONGRATS_SLIDE_COUNT = 4;
 const DISTANCE_THRESH = 1.5;
 const ANGLE_THRESH = 44;
+const changeTime = 10000;
 const floatingPanelQuery = defineQuery([FloatingTextPanel]);
 
 interface StepCategory {
@@ -410,7 +411,7 @@ const OnMapToggle = () => {
 function ChangeSlidein5() {
   tutorialManager.activeTimeout = setTimeout(() => {
     tutorialManager.Next();
-  }, 5000);
+  }, 10000);
 }
 
 function welcomeSteps(time: number): Array<StepObject> {
@@ -453,7 +454,7 @@ const timeOutCategory: StepCategory = {
           logger.AddAnnouncementInteraction("room redirection", "to conference room");
 
           changeHub(roomPropertiesReader.devMode ? "" : "AxFm4cE"); ///provide correct ID in prod
-        }, 5000);
+        }, changeTime);
       }
     }
   ]
@@ -618,7 +619,7 @@ const TradeshowSteps: Array<StepCategory> = [
     name: "welcome",
     type: "noNav",
     slides: [1],
-    steps: welcomeSteps(5000)
+    steps: welcomeSteps(changeTime)
   },
   {
     name: "nextStep",
@@ -631,7 +632,7 @@ const TradeshowSteps: Array<StepCategory> = [
 
           tutorialManager.activeTimeout = setTimeout(() => {
             tutorialManager.HidePanel();
-          }, 5000);
+          }, changeTime);
         },
         loopFunc: () => {
           if (avatarPos().distanceTo(targetPos) < 3) {
@@ -654,7 +655,7 @@ const ConferenceSteps: Array<StepCategory> = [
         onceFunc: () => {
           tutorialManager.activeTimeout = setTimeout(() => {
             tutorialManager.HidePanel();
-          }, 5000);
+          }, changeTime);
         }
       }
     ]
