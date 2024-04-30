@@ -1,10 +1,12 @@
 import { defineQuery, enterQuery, entityExists, exitQuery, hasComponent, Not } from "bitecs";
-import { Object3DTag, Rigidbody, PhysicsShape, AEntity } from "../bit-components";
+import { Object3DTag, Rigidbody, PhysicsShape, AEntity, Networked } from "../bit-components";
 import { getShapeFromPhysicsShape } from "../inflators/physics-shape";
 import { findAncestorWithComponent } from "../utils/bit-utils";
 import { getBodyFromRigidBody } from "../inflators/rigid-body";
 import { HubsWorld } from "../app";
 import { PhysicsSystem } from "./physics-system";
+import { EntityID } from "../utils/networking-types";
+import { takeSoftOwnership } from "../utils/take-soft-ownership";
 
 const rigidbodyQuery = defineQuery([Rigidbody, Object3DTag, Not(AEntity)]);
 const rigidbodyEnteredQuery = enterQuery(rigidbodyQuery);
@@ -16,20 +18,39 @@ const shapeExitQuery = exitQuery(shapeQuery);
 function addPhysicsShapes(world: HubsWorld, physicsSystem: PhysicsSystem, eid: number) {
   const bodyId = PhysicsShape.bodyId[eid];
   const obj = world.eid2obj.get(eid)!;
+
+  // We don't want to create shapes for meshes that already have shapes
+  // so we hide them before adding the root shape.
+  const hidden = new Array<EntityID>();
+  obj.traverse(child => {
+    if (child.eid! !== eid && hasComponent(world, PhysicsShape, child.eid!)) {
+      hidden.push(child.eid!);
+      child.visible = false;
+    }
+  });
+
   const shape = getShapeFromPhysicsShape(eid);
   const shapeId = physicsSystem.addShapes(bodyId, obj, shape);
   PhysicsShape.shapeId[eid] = shapeId;
+
+  hidden.forEach(eid => {
+    const obj = world.eid2obj.get(eid)!;
+    obj.visible = true;
+  });
 }
 
 export const physicsCompatSystem = (world: HubsWorld, physicsSystem: PhysicsSystem) => {
-  rigidbodyEnteredQuery(world).forEach(eid => {
+  rigidbodyEnteredQuery(world).forEach((eid: EntityID) => {
     const obj = world.eid2obj.get(eid);
     const body = getBodyFromRigidBody(eid);
     const bodyId = physicsSystem.addBody(obj, body);
     Rigidbody.bodyId[eid] = bodyId;
+    if (hasComponent(world, Networked, eid)) {
+      takeSoftOwnership(world, eid);
+    }
   });
 
-  shapeEnterQuery(world).forEach(eid => {
+  shapeEnterQuery(world).forEach((eid: EntityID) => {
     const bodyEid = findAncestorWithComponent(world, Rigidbody, eid);
     if (bodyEid) {
       PhysicsShape.bodyId[eid] = Rigidbody.bodyId[bodyEid];
@@ -39,9 +60,11 @@ export const physicsCompatSystem = (world: HubsWorld, physicsSystem: PhysicsSyst
     }
   });
 
-  shapeExitQuery(world).forEach(eid => physicsSystem.removeShapes(PhysicsShape.bodyId[eid], PhysicsShape.shapeId[eid]));
+  shapeExitQuery(world).forEach((eid: EntityID) =>
+    physicsSystem.removeShapes(PhysicsShape.bodyId[eid], PhysicsShape.shapeId[eid])
+  );
 
-  rigidbodyExitedQuery(world).forEach(eid => {
+  rigidbodyExitedQuery(world).forEach((eid: EntityID) => {
     if (entityExists(world, eid) && hasComponent(world, PhysicsShape, eid)) {
       physicsSystem.removeShapes(PhysicsShape.bodyId[eid], PhysicsShape.shapeId[eid]);
       // The PhysicsShape is still on this entity!

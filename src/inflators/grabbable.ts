@@ -4,6 +4,9 @@ import {
   CursorRaycastable,
   HandCollisionTarget,
   Holdable,
+  InteractableObject,
+  Networked,
+  NetworkedTransform,
   OffersHandConstraint,
   OffersRemoteConstraint,
   RemoteHoverTarget
@@ -23,4 +26,11 @@ export function inflateGrabbable(world: HubsWorld, eid: number, props: Grabbable
     addComponent(world, OffersRemoteConstraint, eid);
   }
   addComponent(world, Holdable, eid);
+}
+
+export function inflateGLTFGrabbable(world: HubsWorld, eid: number, props: GrabbableParams) {
+  inflateGrabbable(world, eid, props);
+  addComponent(world, InteractableObject, eid, true);
+  addComponent(world, Networked, eid, true);
+  addComponent(world, NetworkedTransform, eid, true);
 }

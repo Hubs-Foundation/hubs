@@ -44,7 +44,7 @@ import {
 } from "../bit-components";
 import { inflateMediaLoader } from "../inflators/media-loader";
 import { inflateMediaFrame } from "../inflators/media-frame";
-import { GrabbableParams, inflateGrabbable } from "../inflators/grabbable";
+import { GrabbableParams, inflateGLTFGrabbable, inflateGrabbable } from "../inflators/grabbable";
 import { ImageParams, inflateImage } from "../inflators/image";
 import { inflateVideo, VideoParams } from "../inflators/video";
 import { inflateModel, ModelParams } from "../inflators/model";
@@ -56,7 +56,7 @@ import { inflateLink, LinkParams } from "../inflators/link";
 import { inflateLinkLoader, LinkLoaderParams } from "../inflators/link-loader";
 import { inflateLoopAnimationInitialize, LoopAnimationParams } from "../inflators/loop-animation";
 import { inflateSlice9 } from "../inflators/slice9";
-import { TextParams, inflateText } from "../inflators/text";
+import { TextParams, inflateGLTFText, inflateText } from "../inflators/text";
 import {
   BackgroundParams,
   EnvironmentSettingsParams,
@@ -92,19 +92,19 @@ import { inflateAudioParams } from "../inflators/audio-params";
 import { AudioSourceParams, inflateAudioSource } from "../inflators/audio-source";
 import { AudioTargetParams, inflateAudioTarget } from "../inflators/audio-target";
 import { PhysicsShapeParams, inflatePhysicsShape } from "../inflators/physics-shape";
-import { inflateRigidBody, RigidBodyParams } from "../inflators/rigid-body";
+import { inflateGLTFRigidBody, inflateRigidBody, RigidBodyParams } from "../inflators/rigid-body";
 import { AmmoShapeParams, inflateAmmoShape } from "../inflators/ammo-shape";
 import { BoxColliderParams, inflateBoxCollider } from "../inflators/box-collider";
 import { inflateTrimesh } from "../inflators/trimesh";
 import { HeightFieldParams, inflateHeightField } from "../inflators/heightfield";
 import { inflateAudioSettings } from "../inflators/audio-settings";
-import { HubsVideoTexture } from "../textures/HubsVideoTexture";
 import { inflateMediaLink, MediaLinkParams } from "../inflators/media-link";
 import { inflateObjectMenuTarget, ObjectMenuTargetParams } from "../inflators/object-menu-target";
 import { inflateObjectMenuTransform, ObjectMenuTransformParams } from "../inflators/object-menu-transform";
 import { inflatePlane, PlaneParams } from "../inflators/plane";
 import { FollowInFovParams, inflateFollowInFov } from "../inflators/follow-in-fov";
 import { ComponentDataT } from "../types";
+import { inflateCapturable } from "../inflators/capturable";
 
 preload(
   new Promise(resolve => {
@@ -258,13 +258,11 @@ export interface ComponentData {
   hemisphereLight?: HemisphereLightParams;
   pointLight?: PointLightParams;
   spotLight?: SpotLightParams;
-  grabbable?: GrabbableParams;
   billboard?: { onlyY: boolean };
   mirror?: MirrorParams;
   audioZone?: AudioZoneParams;
   audioParams?: AudioSettings;
   mediaFrame?: any;
-  text?: TextParams;
 }
 
 type OptionalParams<T> = Partial<T> | true;
@@ -306,6 +304,7 @@ export interface JSXComponentData extends ComponentData {
   deletable?: true;
   makeKinematicOnRelease?: true;
   destroyAtExtremeDistance?: true;
+  grabbable?: GrabbableParams;
 
   // @TODO Define all the anys
   networked?: any;
@@ -377,6 +376,7 @@ export interface JSXComponentData extends ComponentData {
   objectMenuTransform?: OptionalParams<ObjectMenuTransformParams>;
   objectMenuTarget?: OptionalParams<ObjectMenuTargetParams>;
   plane?: PlaneParams;
+  text?: TextParams;
 }
 
 export interface GLTFComponentData extends ComponentData {
@@ -398,6 +398,13 @@ export interface GLTFComponentData extends ComponentData {
   audioTarget: AudioTargetParams;
   audioSettings: SceneAudioSettings;
   mediaLink: MediaLinkParams;
+  interactable: true;
+  rigidbody?: OptionalParams<RigidBodyParams>;
+  // TODO GLTFPhysicsShapeParams
+  physicsShape?: AmmoShapeParams;
+  text?: TextParams;
+  grabbable?: GrabbableParams;
+  capturable?: true;
 
   // deprecated
   spawnPoint?: true;
@@ -428,7 +435,6 @@ declare global {
 }
 
 export const commonInflators: Required<{ [K in keyof ComponentDataT]: InflatorFn }> = {
-  grabbable: inflateGrabbable,
   billboard: createDefaultInflator(Billboard),
 
   // inflators that create Object3Ds
@@ -440,12 +446,12 @@ export const commonInflators: Required<{ [K in keyof ComponentDataT]: InflatorFn
   mirror: inflateMirror,
   audioZone: inflateAudioZone,
   audioParams: inflateAudioParams,
-  mediaFrame: inflateMediaFrame,
-  text: inflateText
+  mediaFrame: inflateMediaFrame
 };
 
 export const jsxInflators: Required<{ [K in keyof ComponentDataT]: InflatorFn }> = {
   ...commonInflators,
+  grabbable: inflateGrabbable,
   cursorRaycastable: createDefaultInflator(CursorRaycastable),
   remoteHoverTarget: createDefaultInflator(RemoteHoverTarget),
   isNotRemoteHoverTarget: createDefaultInflator(NotRemoteHoverTarget),
@@ -485,6 +491,7 @@ export const jsxInflators: Required<{ [K in keyof ComponentDataT]: InflatorFn }>
   mediaLoader: inflateMediaLoader,
   mixerAnimatable: createDefaultInflator(MixerAnimatableInitialize),
   loopAnimation: inflateLoopAnimationInitialize,
+  text: inflateText,
   inspectable: createDefaultInflator(Inspectable),
   // inflators that create Object3Ds
   object3D: addObject3DComponent,
@@ -500,6 +507,7 @@ export const jsxInflators: Required<{ [K in keyof ComponentDataT]: InflatorFn }>
 
 export const gltfInflators: Required<{ [K in keyof ComponentDataT]: InflatorFn }> = {
   ...commonInflators,
+  grabbable: inflateGLTFGrabbable,
   pdf: inflatePDFLoader,
   // Temporarily reuse video loader for audio because of
   // their processings are similar.
@@ -531,7 +539,12 @@ export const gltfInflators: Required<{ [K in keyof ComponentDataT]: InflatorFn }
   trimesh: inflateTrimesh,
   heightfield: inflateHeightField,
   audioSettings: inflateAudioSettings,
-  mediaLink: inflateMediaLink
+  mediaLink: inflateMediaLink,
+  interactable: createDefaultInflator(SingleActionButton),
+  rigidbody: inflateGLTFRigidBody,
+  physicsShape: inflateAmmoShape,
+  text: inflateGLTFText,
+  capturable: inflateCapturable
 };
 
 function jsxInflatorExists(name: string) {

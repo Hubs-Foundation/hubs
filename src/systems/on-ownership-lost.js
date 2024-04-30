@@ -7,11 +7,13 @@ import {
   HeldRemoteLeft,
   HeldRemoteRight,
   Owned,
-  Rigidbody
+  Rigidbody,
+  OffersRemoteConstraint,
+  InteractableObject
 } from "../bit-components";
 
 // TODO this seems wrong, nothing sets it back unless its a floaty object
-const exitOwned = exitQuery(defineQuery([Owned]));
+const exitOwned = exitQuery(defineQuery([Owned, OffersRemoteConstraint]));
 const componentsToRemove = [Held, HeldHandRight, HeldHandLeft, HeldRemoteRight, HeldRemoteLeft];
 const kinematicOptions = { type: "kinematic", collisionFilterMask: COLLISION_LAYERS.UNOWNED_INTERACTABLE };
 export function onOwnershipLost(world) {
@@ -27,7 +29,15 @@ export function onOwnershipLost(world) {
     }
 
     if (hasComponent(world, Rigidbody, eid)) {
-      physicsSystem.updateRigidBodyOptions(eid, kinematicOptions);
+      // TODO: If this system should only act on FloatyObjects we should express that
+      // in the query instead of doing this.
+      if (hasComponent(world, InteractableObject, eid)) {
+        physicsSystem.updateRigidBody(eid, {
+          type: "kinematic"
+        });
+      } else {
+        physicsSystem.updateRigidBody(eid, kinematicOptions);
+      }
     }
   }
 }

@@ -9,7 +9,6 @@ export function* loadModel(world: HubsWorld, src: string, contentType: string, u
   const { scene, animations } = yield loadGLTFModel(src, contentType, useCache, null);
 
   scene.animations = animations;
-  scene.mixer = new THREE.AnimationMixer(scene);
 
   return renderAsEntity(world, <entity model={{ model: scene }} objectMenuTarget />);
 }

@@ -30,7 +30,9 @@ import {
   Rigidbody,
   MediaLoaderOffset,
   MediaVideo,
-  NetworkedTransform
+  NetworkedTransform,
+  MediaRoot,
+  Capturable
 } from "../bit-components";
 import { inflatePhysicsShape, Shape } from "../inflators/physics-shape";
 import { ErrorObject } from "../prefabs/error-object";
@@ -204,7 +206,7 @@ class UnsupportedMediaTypeError extends Error {
   }
 }
 
-type MediaInfo = {
+export type MediaInfo = {
   accessibleUrl: string;
   canonicalUrl: string;
   canonicalAudioUrl: string | null;
@@ -282,7 +284,10 @@ function* loadMedia(world: HubsWorld, eid: EntityID) {
   let media: EntityID;
   try {
     const urlData = (yield resolveMediaInfo(src)) as MediaInfo;
+    APP.getSid(urlData.accessibleUrl); // Register the sid as this is what we will get over the network for media.
     media = yield* loadByMediaType(world, eid, urlData);
+    addComponent(world, MediaRoot, media);
+    addComponent(world, Capturable, media);
     addComponent(world, MediaLoaded, media);
     addComponent(world, MediaInfo, media);
     MediaInfo.accessibleUrl[media] = APP.getSid(urlData.accessibleUrl);

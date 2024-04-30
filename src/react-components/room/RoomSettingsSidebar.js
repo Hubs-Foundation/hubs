@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import PropTypes from "prop-types";
 import { useForm } from "react-hook-form";
 import styles from "./RoomSettingsSidebar.scss";
@@ -16,7 +16,8 @@ import { BackButton } from "../input/BackButton";
 import { SceneInfo } from "./RoomSidebar";
 import { Column } from "../layout/Column";
 import { InviteLinkInputField } from "./InviteLinkInputField";
-import { addons } from "../../addons";
+import { addons, isAddonEnabled } from "../../addons";
+import { shouldUseNewLoader } from "../../hubs";
 
 export function RoomSettingsSidebar({
   showBackButton,
@@ -52,6 +53,13 @@ export function RoomSettingsSidebar({
       setValue("member_permissions.pin_objects", false, { shouldDirty: true });
     }
   }, [spawnAndMoveMedia, setValue]);
+
+  const handleAddonChange = useCallback(
+    evt => {
+      setValue(`user_data.addons.${evt.target.id}`, evt.target.checked);
+    },
+    [setValue]
+  );
 
   return (
     <Sidebar
@@ -217,12 +225,23 @@ export function RoomSettingsSidebar({
             {...register("user_data.hubs_use_bitecs_based_client")}
           />
         </InputField>
-        <InputField label={"Add-ons"} fullWidth>
+        <InputField label={<FormattedMessage id="room-settings-sidebar.add-ons" defaultMessage="Add-ons" />} fullWidth>
+          {!shouldUseNewLoader() && (
+            <label className={styles.label}>
+              <FormattedMessage
+                id="room-settings-sidebar.addons-disabled"
+                defaultMessage="Add-ons require that the new bitECS based client is enabled"
+              />
+            </label>
+          )}
           {[...addons.entries()].map(([id, addon]) => (
             <ToggleInput
               key={addon.name}
+              id={id}
               label={addon.name}
-              {...register(`user_data.addon_${id}`)}
+              disabled={!shouldUseNewLoader()}
+              defaultChecked={isAddonEnabled(APP, id)}
+              onChange={handleAddonChange}
               description={addon.description}
             />
           ))}
