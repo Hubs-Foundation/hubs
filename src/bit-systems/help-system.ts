@@ -148,10 +148,10 @@ class HelpButton {
   onToggle() {
     if ((APP.scene as AScene).is("help")) {
       this.RemovePanel();
-      logger.AddUiInteraction("help_toggle", "deactivate_help");
+      // logger.AddUiInteraction("help_toggle", "deactivate_help");
     } else {
       (APP.scene as AScene).emit("clear-scene");
-      logger.AddUiInteraction("help_toggle", "activate_help");
+      // logger.AddUiInteraction("help_toggle", "activate_help");
       this.RenderPanel();
     }
   }

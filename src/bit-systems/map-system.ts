@@ -154,11 +154,11 @@ class FloorMapClass {
   onToggle() {
     if (this.AScene.is("map")) {
       this.Disable();
-      logger.AddUiInteraction("map_toggle", "deactivate_map");
+      // logger.AddUiInteraction("map_toggle", "deactivate_map");
     } else {
       this.AScene.emit("clear-scene");
       this.Enable();
-      logger.AddUiInteraction("map_toggle", "activate_map");
+      // logger.AddUiInteraction("map_toggle", "activate_map");
     }
   }
 

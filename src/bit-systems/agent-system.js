@@ -214,10 +214,10 @@ export default class VirtualAgent {
     if (!APP.scene.is("agent")) {
       APP.scene.emit("clear-scene");
       this.Enable();
-      logger.AddUiInteraction("agent_toggle", "activate_agent");
+      // logger.AddUiInteraction("agent_toggle", "activate_agent");
     } else {
       this.Disable();
-      logger.AddUiInteraction("agent_toggle", "deactivate_agent");
+      // logger.AddUiInteraction("agent_toggle", "deactivate_agent");
     }
   }
 
@@ -448,7 +448,7 @@ export default class VirtualAgent {
 
       const stringData = JSON.stringify(agentDataObj);
       const jsonDataBlob = new Blob([stringData], { type: "application/json" });
-      logger.AddAgentInteraction(recordedQuestion.data.file, jsonDataBlob);
+      // logger.AddAgentInteraction(recordedQuestion.data.file, jsonDataBlob);
 
       if (intentResponse.data.intent.includes("navigation") && navigation.valid) {
         this.successResult = true;

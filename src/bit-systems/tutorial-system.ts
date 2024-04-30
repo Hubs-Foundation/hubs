@@ -19,7 +19,7 @@ import { languageCodes, translationSystem } from "./translation-system";
 import { navSystem } from "./routing-system";
 import { avatarPos, virtualAgent } from "./agent-system";
 import { changeHub } from "../change-hub";
-import { logger } from "./logging-system";
+// import { logger } from "./logging-system";
 
 const CONGRATS_SLIDE_COUNT = 4;
 const DISTANCE_THRESH = 1.5;
@@ -147,7 +147,7 @@ class TutorialManager {
       if (hasComponent(world, Interacted, this.prevRef)) this.Prev();
       if (hasComponent(world, Interacted, this.testRef)) {
         const button_result = this.activeCategoryIndex !== this.categoriesArray.length - 1 ? "test_trigger" : "reset";
-        logger.AddUiInteraction("tutorial_button", button_result);
+        // logger.AddUiInteraction("tutorial_button", button_result);
 
         this.Next(this.activeCategoryIndex !== this.categoriesArray.length - 1);
         this.centerButtonObj.visible = false;
@@ -209,12 +209,12 @@ class TutorialManager {
     if (this.Ascene.is("task")) {
       this.panelObj.visible = false;
       this.Ascene.removeState("task");
-      logger.AddUiInteraction("task_toggle", "deactivate_task");
+      // logger.AddUiInteraction("task_toggle", "deactivate_task");
     } else {
       APP.scene!.emit("clear-scene");
       this.panelObj.visible = true;
       this.Ascene.addState("task");
-      logger.AddUiInteraction("task_toggle", "activate_task");
+      // logger.AddUiInteraction("task_toggle", "activate_task");
     }
   }
 
@@ -430,7 +430,7 @@ function welcomeSteps(time: number): Array<StepObject> {
       loopFunc: () => {
         if (avatarPos().distanceTo(targetPos) < 3) {
           tutorialManager.Next(true);
-          logger.AddAnnouncementInteraction("step_achieved", "navigation to social area");
+          // logger.AddAnnouncementInteraction("step_achieved", "navigation to social area");
         }
       },
       cleanUpFunc: () => {
@@ -451,7 +451,7 @@ const timeOutCategory: StepCategory = {
       onceFunc: () => {
         // tutorialManager.HidePanel(); //this need to be changed
         setTimeout(() => {
-          logger.AddAnnouncementInteraction("room redirection", "to conference room");
+          // logger.AddAnnouncementInteraction("room redirection", "to conference room");
 
           changeHub(roomPropertiesReader.devMode ? "" : "AxFm4cE"); ///provide correct ID in prod
         }, changeTime);
@@ -637,7 +637,7 @@ const TradeshowSteps: Array<StepCategory> = [
         loopFunc: () => {
           if (avatarPos().distanceTo(targetPos) < 3) {
             tutorialManager.ChangeCategory(WellDoneCategory());
-            logger.AddAnnouncementInteraction("step_achieved", "navigation to conference room");
+            // logger.AddAnnouncementInteraction("step_achieved", "navigation to conference room");
           }
         }
       }

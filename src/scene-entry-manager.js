@@ -75,7 +75,7 @@ export default class SceneEntryManager {
     if (reset) this.scene.emit("clear-scene");
 
     await roomPropertiesReader.Read(getCurrentHubId(), reset);
-    logger.RegisterUser();
+    // logger.RegisterUser();
     translationSystem.Init(reset);
     virtualAgent.Init(reset);
     floorMap.Init(reset);
@@ -85,8 +85,8 @@ export default class SceneEntryManager {
     labelOrganizer.Init();
 
     if (!reset) {
-      logger.AddAnnouncementInteraction("language", translationSystem.mylanguage);
-      logger.AddAnnouncementInteraction("room_enter", roomPropertiesReader.roomProps.HubID);
+      // logger.AddAnnouncementInteraction("language", translationSystem.mylanguage);
+      // logger.AddAnnouncementInteraction("room_enter", roomPropertiesReader.roomProps.HubID);
     }
   };
 
