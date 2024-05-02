@@ -1,12 +1,24 @@
-import { addComponent, defineQuery, hasComponent } from "bitecs";
-import { LinearRotate, LinearScale, LinearTranslate, NetworkedTransform, Owned } from "../bit-components";
+import { addComponent, defineQuery, hasComponent, enterQuery } from "bitecs";
+import { LinearRotate, LinearScale, LinearTranslate, NetworkedTransform, Owned, Networked } from "../bit-components";
 import { millisecondsBetweenTicks } from "../bit-systems/networking";
 
 const query = defineQuery([NetworkedTransform]);
 
 const tmpVec = new THREE.Vector3();
 const tmpQuat = new THREE.Quaternion();
+
+const networkedTransformEnterQuery = enterQuery(query);
 export function networkedTransformSystem(world) {
+  networkedTransformEnterQuery(world).forEach(eid => {
+    // If it's a scene object that has not been owned yet,
+    // we initialize its networked transform to the initial object transform.
+    if (Networked.creator[eid] === APP.getSid("scene") && Networked.owner[eid] === APP.getSid("reticulum")) {
+      const obj = world.eid2obj.get(eid);
+      NetworkedTransform.position[eid].set(obj.position.toArray());
+      NetworkedTransform.rotation[eid].set(obj.quaternion.toArray());
+      NetworkedTransform.scale[eid].set(obj.scale.toArray());
+    }
+  });
   const ents = query(world);
   for (let i = 0; i < ents.length; i++) {
     const eid = ents[i];

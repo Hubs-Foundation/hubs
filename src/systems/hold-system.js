@@ -13,8 +13,7 @@ import {
   HeldHandLeft,
   AEntity,
   Networked,
-  MediaLoader,
-  Deletable
+  Rigidbody
 } from "../bit-components";
 import { canMove } from "../utils/permissions-utils";
 import { canMove as canMoveEntity } from "../utils/bit-permissions-utils";
@@ -75,12 +74,15 @@ export function isAEntityPinned(world, eid) {
 // Alternate solution: Simply recognize an entity as pinned if its any
 // ancestor is pinned (in hold-system) unless there is a case that
 // descendant entity under pinned entity wants to be grabbable.
+//
+// Update:  As now we are supporting grabbable scene objects, we look for the
+//          root holdable entity with a rigid body as the only rigid body
+//          in the hierarchy should be at the root of the grabbable object.
 function grab(world, userinput, queryHovered, held, grabPath) {
   const hovered = queryHovered(world)[0];
 
-  // Special path for Dropped/Pasted Media with new loader enabled. Check the comment above.
-  const mediaRoot = findAncestorWithComponents(world, [Deletable, MediaLoader, Holdable], hovered);
-  const target = mediaRoot ? mediaRoot : hovered;
+  const interactable = findAncestorWithComponents(world, [Holdable, Rigidbody], hovered);
+  const target = interactable ? interactable : hovered;
   const isEntityPinned = isPinned(target) || isAEntityPinned(world, target);
 
   if (

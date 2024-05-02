@@ -14,15 +14,7 @@ function camelCase(s: string) {
 export type ModelParams = { model: Object3D };
 
 // These components are all handled in some special way, not through inflators
-const ignoredComponents = [
-  "visible",
-  "frustum",
-  "frustrum",
-  "shadow",
-  "networked",
-  "animation-mixer",
-  "loop-animation"
-];
+const ignoredComponents = ["visible", "frustum", "frustrum", "shadow", "animation-mixer", "loop-animation"];
 
 function inflateComponents(
   world: HubsWorld,
