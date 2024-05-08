@@ -1,4 +1,5 @@
-import { App } from "./app";
+import { GLTFLoaderPlugin, GLTFParser } from "three/examples/jsm/loaders/GLTFLoader";
+import { App, HubsWorld } from "./app";
 import { prefabs } from "./prefabs/prefabs";
 
 import {
@@ -12,6 +13,11 @@ import {
 import configs from "./utils/configs";
 import { commonInflators, gltfInflators, jsxInflators } from "./utils/jsx-entity";
 import { networkableComponents, schemas } from "./utils/network-schemas";
+import { gltfPluginsExtra } from "./components/gltf-model-plus";
+import { GLTFLinkResolverFn, gltfLinkResolvers } from "./inflators/model";
+import { Object3D } from "three";
+import { extraSections } from "./react-components/debug-panel/ECSSidebar";
+import { shouldUseNewLoader } from "./hubs";
 
 function getNextIdx(slot: Array<SystemConfigT>, system: SystemConfigT) {
   return slot.findIndex(item => {
@@ -25,16 +31,14 @@ function registerSystem(system: SystemConfigT) {
     slot = APP.addon_systems.setup;
   } else if (system.order < SystemOrderE.PostPhysics) {
     slot = APP.addon_systems.prePhysics;
-  } else if (system.order < SystemOrderE.MatricesUpdate) {
+  } else if (system.order < SystemOrderE.BeforeMatricesUpdate) {
     slot = APP.addon_systems.postPhysics;
   } else if (system.order < SystemOrderE.BeforeRender) {
-    slot = APP.addon_systems.beforeRender;
+    slot = APP.addon_systems.postPhysics;
   } else if (system.order < SystemOrderE.AfterRender) {
-    slot = APP.addon_systems.afterRender;
-  } else if (system.order < SystemOrderE.PostProcessing) {
-    slot = APP.addon_systems.postProcessing;
+    slot = APP.addon_systems.beforeRender;
   } else {
-    slot = APP.addon_systems.tearDown;
+    slot = APP.addon_systems.afterRender;
   }
   const nextIdx = getNextIdx(slot, system);
   slot.splice(nextIdx, 0, system);
@@ -92,6 +96,10 @@ export interface InternalAddonConfigT {
   config?: JSON | undefined;
 }
 type AddonConfigT = Omit<InternalAddonConfigT, "enabled" | "config">;
+export type AdminAddonConfig = {
+  enabled: boolean;
+  config: JSON;
+};
 
 const pendingAddons = new Map<AddonIdT, InternalAddonConfigT>();
 export const addons = new Map<AddonIdT, AddonConfigT>();
@@ -99,6 +107,44 @@ export type AddonRegisterCallbackT = (app: App) => void;
 export function registerAddon(id: AddonIdT, config: AddonConfigT) {
   console.log(`Add-on ${id} registered`);
   pendingAddons.set(id, config);
+}
+
+export type GLTFParserCallbackFn = (parser: GLTFParser) => GLTFLoaderPlugin;
+export function registerGLTFLoaderPlugin(callback: GLTFParserCallbackFn): void {
+  gltfPluginsExtra.push(callback);
+}
+export function registerGLTFLinkResolver(resolver: GLTFLinkResolverFn): void {
+  gltfLinkResolvers.push(resolver);
+}
+export function registerECSSidebarSection(section: (world: HubsWorld, selectedObj: Object3D) => React.JSX.Element) {
+  extraSections.push(section);
+}
+
+export function getAddonConfig(id: string): AdminAddonConfig {
+  const adminAddonsConfig = configs.feature("addons_config");
+  let adminAddonConfig = {
+    enabled: false,
+    config: {} as JSON
+  };
+  if (adminAddonsConfig && id in adminAddonsConfig) {
+    adminAddonConfig = adminAddonsConfig[id];
+  }
+  return adminAddonConfig;
+}
+
+export function isAddonEnabled(app: App, id: string): boolean {
+  let enabled = false;
+  if (shouldUseNewLoader()) {
+    if (app.hub?.user_data && "addons" in app.hub?.user_data && id in app.hub.user_data["addons"]) {
+      enabled = app.hub.user_data.addons[id];
+    } else {
+      const adminAddonsConfig = getAddonConfig(id);
+      if (adminAddonsConfig) {
+        enabled = adminAddonsConfig.enabled;
+      }
+    }
+  }
+  return enabled;
 }
 
 export function onAddonsInit(app: App) {
@@ -110,13 +156,7 @@ export function onAddonsInit(app: App) {
         addons.set(id, addon);
       }
 
-      if (app.hub?.user_data && `addon_${id}` in app.hub.user_data) {
-        addon.enabled = app.hub.user_data[`addon_${id}`];
-      } else {
-        addon.enabled = false;
-      }
-
-      if (!addon.enabled) {
+      if (!isAddonEnabled(app, id)) {
         continue;
       }
 
@@ -171,12 +211,8 @@ export function onAddonsInit(app: App) {
       }
 
       if (addon.onReady) {
-        let config;
-        const addonsConfig = configs.feature("addons_config");
-        if (addonsConfig && id in addonsConfig) {
-          config = addonsConfig[id];
-        }
-        addon.onReady(app, config);
+        const adminAddonConfig = getAddonConfig(id);
+        addon.onReady(app, adminAddonConfig.config);
       }
     }
     pendingAddons.clear();

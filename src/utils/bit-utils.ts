@@ -76,6 +76,19 @@ export function findChildWithComponent(world: HubsWorld, component: Component, e
   }
 }
 
+export function findChildrenWithComponent(world: HubsWorld, component: Component, eid: number) {
+  const obj = world.eid2obj.get(eid);
+  if (obj) {
+    const childrenEids = new Array<EntityID>();
+    obj.traverse((otherObj: Object3D) => {
+      if (otherObj.eid && hasComponent(world, component, otherObj.eid)) {
+        childrenEids.push(otherObj.eid);
+      }
+    });
+    return childrenEids;
+  }
+}
+
 const forceNewLoader = qsTruthy("newLoader");
 export function shouldUseNewLoader() {
   return forceNewLoader || APP.hub?.user_data?.hubs_use_bitecs_based_client;

@@ -1399,7 +1399,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const displayName = (userInfo && userInfo.metas[0].profile.displayName) || "API";
 
     let showBitECSBasedClientRefreshPrompt = false;
-    if (!!hub.user_data?.hubs_use_bitecs_based_client !== !!window.APP.hub.user_data?.hubs_use_bitecs_based_client) {
+    if (!!hub.user_data?.hubs_use_bitecs_based_client !== !!APP.hub.user_data?.hubs_use_bitecs_based_client) {
       showBitECSBasedClientRefreshPrompt = true;
       setTimeout(() => {
         document.location.reload();
@@ -1407,9 +1407,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     let showAddonRefreshPrompt = false;
     [...addons.keys()].map(id => {
-      const key = `addon_${id}`;
-      const oldAddonState = !!window.APP.hub.user_data && window.APP.hub.user_data[key];
-      const newAddonState = !!hub.user_data && hub.user_data[key];
+      const oldAddonState = !!APP.hub.user_data && "addons" in APP.hub.user_data && APP.hub.user_data.addons[id];
+      const newAddonState = !!hub.user_data && "addons" in hub.user_data && hub.user_data.addons[id];
       if (newAddonState !== oldAddonState) {
         showAddonRefreshPrompt = true;
         setTimeout(() => {

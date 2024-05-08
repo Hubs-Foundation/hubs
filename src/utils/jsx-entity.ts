@@ -56,7 +56,7 @@ import { inflateLink, LinkParams } from "../inflators/link";
 import { inflateLinkLoader, LinkLoaderParams } from "../inflators/link-loader";
 import { inflateLoopAnimationInitialize, LoopAnimationParams } from "../inflators/loop-animation";
 import { inflateSlice9 } from "../inflators/slice9";
-import { TextParams, inflateText } from "../inflators/text";
+import { TextParams, inflateGLTFText, inflateText } from "../inflators/text";
 import {
   BackgroundParams,
   EnvironmentSettingsParams,
@@ -102,6 +102,7 @@ import { inflateObjectMenuTransform, ObjectMenuTransformParams } from "../inflat
 import { inflatePlane, PlaneParams } from "../inflators/plane";
 import { FollowInFovParams, inflateFollowInFov } from "../inflators/follow-in-fov";
 import { ComponentDataT } from "../types";
+import { HoldableParams, inflateHoldable } from "../inflators/holdable";
 
 preload(
   new Promise(resolve => {
@@ -301,7 +302,7 @@ export interface JSXComponentData extends ComponentData {
   offersHandConstraint?: true;
   singleActionButton?: true;
   holdableButton?: true;
-  holdable?: true;
+  holdable?: HoldableParams;
   deletable?: true;
   makeKinematicOnRelease?: true;
   destroyAtExtremeDistance?: true;
@@ -374,6 +375,7 @@ export interface JSXComponentData extends ComponentData {
   objectMenuTransform?: OptionalParams<ObjectMenuTransformParams>;
   objectMenuTarget?: OptionalParams<ObjectMenuTargetParams>;
   plane?: PlaneParams;
+  text?: TextParams;
 }
 
 export interface GLTFComponentData extends ComponentData {
@@ -398,6 +400,7 @@ export interface GLTFComponentData extends ComponentData {
   rigidbody?: OptionalParams<RigidBodyParams>;
   // TODO GLTFPhysicsShapeParams
   physicsShape?: AmmoShapeParams;
+  text?: TextParams;
   grabbable?: GrabbableParams;
 
   // deprecated
@@ -460,7 +463,7 @@ export const jsxInflators: Required<{ [K in keyof ComponentDataT]: InflatorFn }>
   textButton: createDefaultInflator(TextButton),
   hoverButton: createDefaultInflator(HoverButton),
   hoverableVisuals: createDefaultInflator(HoverableVisuals),
-  holdable: createDefaultInflator(Holdable),
+  holdable: inflateHoldable,
   deletable: createDefaultInflator(Deletable),
   rigidbody: inflateRigidBody,
   physicsShape: inflatePhysicsShape,
@@ -486,6 +489,7 @@ export const jsxInflators: Required<{ [K in keyof ComponentDataT]: InflatorFn }>
   mediaLoader: inflateMediaLoader,
   mixerAnimatable: createDefaultInflator(MixerAnimatableInitialize),
   loopAnimation: inflateLoopAnimationInitialize,
+  text: inflateText,
   inspectable: createDefaultInflator(Inspectable),
   // inflators that create Object3Ds
   object3D: addObject3DComponent,
@@ -534,7 +538,8 @@ export const gltfInflators: Required<{ [K in keyof ComponentDataT]: InflatorFn }
   audioSettings: inflateAudioSettings,
   mediaLink: inflateMediaLink,
   rigidbody: inflateGLTFRigidBody,
-  physicsShape: inflateAmmoShape
+  physicsShape: inflateAmmoShape,
+  text: inflateGLTFText
 };
 
 function jsxInflatorExists(name: string) {

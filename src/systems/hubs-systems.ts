@@ -225,11 +225,6 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   physicsCompatSystem(world, hubsSystems.physicsSystem);
   hubsSystems.physicsSystem.tick(dt);
   constraintsSystem(world, hubsSystems.physicsSystem);
-  floatyObjectSystem(world);
-
-  APP.addon_systems.postPhysics.forEach((systemConfig: SystemConfigT) => {
-    systemConfig.system(APP);
-  });
 
   hoverableVisualsSystem(world);
 
@@ -254,6 +249,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   hubsSystems.positionAtBorderSystem.tick();
   hubsSystems.twoPointStretchingSystem.tick();
   interactableSystem(world);
+  floatyObjectSystem(world);
 
   hubsSystems.holdableButtonSystem.tick();
   hubsSystems.hoverButtonSystem.tick();
@@ -316,6 +312,10 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   bitPenCompatSystem(world, aframeSystems["pen-tools"]);
   snapMediaSystem(world, aframeSystems["hubs-systems"].soundEffectsSystem);
 
+  APP.addon_systems.postPhysics.forEach((systemConfig: SystemConfigT) => {
+    systemConfig.system(APP);
+  });
+
   deleteEntitySystem(world, aframeSystems.userinput);
   destroyAtExtremeDistanceSystem(world);
   removeNetworkedObjectButtonSystem(world);
@@ -331,32 +331,28 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
     networkDebugSystem(world, scene);
   }
 
-  scene.updateMatrixWorld();
-
-  APP.addon_systems.matricesUpdate.forEach((systemConfig: SystemConfigT) => {
+  APP.addon_systems.beforeMatricesUpdate.forEach((systemConfig: SystemConfigT) => {
     systemConfig.system(APP);
   });
 
+  scene.updateMatrixWorld();
+
   renderer.info.reset();
+
+  APP.addon_systems.beforeRender.forEach((systemConfig: SystemConfigT) => {
+    systemConfig.system(APP);
+  });
+
   if (APP.fx.composer) {
-    APP.addon_systems.postProcessing.forEach((systemConfig: SystemConfigT) => {
-      systemConfig.system(APP);
-    });
     APP.fx.composer.render();
   } else {
-    APP.addon_systems.beforeRender.forEach((systemConfig: SystemConfigT) => {
-      systemConfig.system(APP);
-    });
     renderer.render(scene, camera);
-    APP.addon_systems.afterRender.forEach((systemConfig: SystemConfigT) => {
-      systemConfig.system(APP);
-    });
   }
+
+  APP.addon_systems.afterRender.forEach((systemConfig: SystemConfigT) => {
+    systemConfig.system(APP);
+  });
 
   // tock()s on components and system will fire here. (As well as any other time render() is called without unbinding onAfterRender)
   // TODO inline invoking tocks instead of using onAfterRender registered in a-scene
-
-  APP.addon_systems.tearDown.forEach((systemConfig: SystemConfigT) => {
-    systemConfig.system(APP);
-  });
 }

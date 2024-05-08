@@ -36,6 +36,8 @@ features.disable_room_creation = { category = "rooms", type = "boolean", name = 
 features.require_account_for_join = { category = "rooms", type = "boolean", name = "Require accounts for room access", description = "Require accounts for accessing rooms." }
 features.default_room_size = { category = "rooms", type = "number", name = "Default room size", description = "Default room size for new rooms. This does not include users in the lobby." }
 features.max_room_size = { category = "rooms", type = "number", name = "Maximum room size", description = "Maximum room size visitors can set." }
+features.bitecs_loader = { category = "features", type="boolean", name="Use BitECS loader", description="Use the BitECS based loader by default in all rooms" }
+features.addons_config = { category = "features", type="json", name="Add-ons config JSON", description="Add-ons config JSON file" }
 
 features.show_feature_panels = { category = "features", type = "boolean", internal = "true" }
 features.show_join_us_dialog = { category = "features", type = "boolean", internal = "true" }
@@ -48,8 +50,6 @@ features.show_cloud = { category = "features", type = "boolean", internal = "tru
 features.show_newsletter_signup = { category = "features", type = "boolean", internal = "true" }
 features.change_hub_near_room_links = { category = "features", type = "boolean", internal = "true" }
 features.is_locked_down_demo_room = { category = "features", type = "string", internal = "true", description = "A comma separated list of hubIds to be designated as demo rooms with simplified UI." }
-
-features.addons_config = { category = "features", type="longstring", name="Add-ons config JSON", description="Add-ons config JSON file" }
 
 images.logo = { category = "images", type = "file", name = "Hub Logo", description = "Appears throughout your hub including lobby and loading screens." }
 images.logo_dark = { category = "images", type = "file", name = "Hub logo for dark mode", description = "The hub logo which appears for visitors who have dark mode enabled." }

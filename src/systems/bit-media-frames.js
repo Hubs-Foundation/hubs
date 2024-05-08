@@ -31,12 +31,13 @@ import { MediaType } from "../utils/media-utils";
 import { cloneObject3D, disposeNode, setMatrixWorld } from "../utils/three-utils";
 import { takeOwnership } from "../utils/take-ownership";
 import { takeSoftOwnership } from "../utils/take-soft-ownership";
-import { findAncestorWithComponent, findChildWithComponent } from "../utils/bit-utils";
+import { findAncestorWithComponent, findChildWithComponent, findChildrenWithComponent } from "../utils/bit-utils";
 import { addObject3DComponent } from "../utils/jsx-entity";
 import { updateMaterials } from "../utils/material-utils";
 import { MEDIA_FRAME_FLAGS, AxisAlignType } from "../inflators/media-frame";
 import { Matrix4, NormalBlending, Quaternion, RGBAFormat, Vector3 } from "three";
 import { COLLISION_LAYERS } from "../constants";
+import { HOLDABLE_FLAGS } from "../inflators/holdable";
 
 const EMPTY_COLOR = 0x6fc0fd;
 const HOVER_COLOR = 0x2f80ed;
@@ -329,40 +330,68 @@ export function mediaFramesSystem(world, physicsSystem) {
     const isFrameDeleting = findAncestorWithComponent(world, Deleting, frame);
     const isFrameOwned = hasComponent(world, Owned, frame);
 
-    if (capturedEid && isCapturedOwned && !isCapturedHeld && !isFrameDeleting && isCapturedColliding) {
-      snapToFrame(world, frame, capturedEid);
-      physicsSystem.updateRigidBody(capturedEid, { type: "kinematic" });
-    } else if (
-      (isFrameOwned && MediaFrame.capturedNid[frame] && world.deletedNids.has(MediaFrame.capturedNid[frame])) ||
-      (capturedEid && isCapturedOwned && !isCapturedColliding) ||
-      isFrameDeleting
-    ) {
-      takeOwnership(world, frame);
+    if (!hasComponent(world, Owned, frame)) {
+      if (MediaFrame.flags[frame] !== NetworkedMediaFrame.flags[frame]) {
+        MediaFrame.flags[frame] = NetworkedMediaFrame.flags[frame];
+      }
+    }
+
+    if (!hasComponent(world, Owned, frame)) {
+      if (MediaFrame.mediaType[frame] !== NetworkedMediaFrame.mediaType[frame]) {
+        MediaFrame.mediaType[frame] = NetworkedMediaFrame.mediaType[frame];
+      }
+    }
+
+    if (capturedEid) {
+      const grabbables = findChildrenWithComponent(world, Holdable, capturedEid);
+      if (MediaFrame.flags[frame] & MEDIA_FRAME_FLAGS.LOCKED) {
+        grabbables.forEach(eid => (Holdable.flags[eid] &= ~HOLDABLE_FLAGS.ENABLED));
+      } else {
+        grabbables.forEach(eid => (Holdable.flags[eid] |= HOLDABLE_FLAGS.ENABLED));
+      }
+    }
+
+    if ((MediaFrame.flags[frame] & MEDIA_FRAME_FLAGS.ACTIVE) === 0) {
       NetworkedMediaFrame.capturedNid[frame] = 0;
       NetworkedMediaFrame.scale[frame].set(zero);
-      // TODO BUG: If an entity I do not own is capturedEid by the media frame,
-      //           and then I take ownership of the entity (by grabbing it),
-      //           the physics system does not immediately notice the entity isCapturedColliding with the frame,
-      //           so I immediately think the frame should be emptied.
-    } else if (isFrameOwned && MediaFrame.capturedNid[frame] && !capturedEid) {
-      NetworkedMediaFrame.capturedNid[frame] = 0;
-      NetworkedMediaFrame.scale[frame].set(zero);
-    } else if (!NetworkedMediaFrame.capturedNid[frame]) {
-      const capturable = getCapturableEntity(world, physicsSystem, frame);
-      if (
-        capturable &&
-        (hasComponent(world, Owned, capturable) || (isOwnedByRet(world, capturable) && isFrameOwned)) &&
-        !findChildWithComponent(world, Held, capturable) &&
-        !inOtherFrame(world, frame, capturable)
+    }
+
+    if (MediaFrame.flags[frame] & MEDIA_FRAME_FLAGS.ACTIVE) {
+      if (capturedEid && isCapturedOwned && !isCapturedHeld && !isFrameDeleting && isCapturedColliding) {
+        snapToFrame(world, frame, capturedEid);
+        physicsSystem.updateRigidBody(capturedEid, { type: "kinematic" });
+      } else if (
+        (isFrameOwned && MediaFrame.capturedNid[frame] && world.deletedNids.has(MediaFrame.capturedNid[frame])) ||
+        (capturedEid && isCapturedOwned && !isCapturedColliding) ||
+        isFrameDeleting
       ) {
         takeOwnership(world, frame);
-        takeOwnership(world, capturable);
-        NetworkedMediaFrame.capturedNid[frame] = Networked.id[capturable];
-        const obj = world.eid2obj.get(capturable);
-        obj.updateMatrices();
-        tmpVec3.setFromMatrixScale(obj.matrixWorld).toArray(NetworkedMediaFrame.scale[frame]);
-        snapToFrame(world, frame, capturable);
-        physicsSystem.updateRigidBody(capturable, { type: "kinematic" });
+        NetworkedMediaFrame.capturedNid[frame] = 0;
+        NetworkedMediaFrame.scale[frame].set(zero);
+        // TODO BUG: If an entity I do not own is capturedEid by the media frame,
+        //           and then I take ownership of the entity (by grabbing it),
+        //           the physics system does not immediately notice the entity isCapturedColliding with the frame,
+        //           so I immediately think the frame should be emptied.
+      } else if (isFrameOwned && MediaFrame.capturedNid[frame] && !capturedEid) {
+        NetworkedMediaFrame.capturedNid[frame] = 0;
+        NetworkedMediaFrame.scale[frame].set(zero);
+      } else if (!NetworkedMediaFrame.capturedNid[frame]) {
+        const capturable = getCapturableEntity(world, physicsSystem, frame);
+        if (
+          capturable &&
+          (hasComponent(world, Owned, capturable) || (isOwnedByRet(world, capturable) && isFrameOwned)) &&
+          !findChildWithComponent(world, Held, capturable) &&
+          !inOtherFrame(world, frame, capturable)
+        ) {
+          takeOwnership(world, frame);
+          takeOwnership(world, capturable);
+          NetworkedMediaFrame.capturedNid[frame] = Networked.id[capturable];
+          const obj = world.eid2obj.get(capturable);
+          obj.updateMatrices();
+          tmpVec3.setFromMatrixScale(obj.matrixWorld).toArray(NetworkedMediaFrame.scale[frame]);
+          snapToFrame(world, frame, capturable);
+          physicsSystem.updateRigidBody(capturable, { type: "kinematic" });
+        }
       }
     }
 
@@ -381,6 +410,8 @@ export function mediaFramesSystem(world, physicsSystem) {
     MediaFrame.capturedNid[frame] = NetworkedMediaFrame.capturedNid[frame];
     MediaFrame.scale[frame].set(NetworkedMediaFrame.scale[frame]);
 
-    display(world, physicsSystem, frame, capturedEid, heldMediaTypes);
+    if (MediaFrame.flags[frame] & MEDIA_FRAME_FLAGS.ACTIVE) {
+      display(world, physicsSystem, frame, capturedEid, heldMediaTypes);
+    }
   }
 }

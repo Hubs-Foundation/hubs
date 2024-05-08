@@ -48,9 +48,10 @@ export async function loadVideoTexture(src, contentType, loop, autoplay) {
       texture = new HubsVideoTexture(videoEl);
       videoEl.src = src;
       videoEl.onerror = failLoad;
-      videoEl.loop = loop;
-      videoEl.autoplay = autoplay;
     }
+
+    videoEl.loop = loop;
+    videoEl.autoplay = autoplay;
 
     texture.minFilter = LinearFilter;
     texture.encoding = sRGBEncoding;

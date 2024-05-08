@@ -38,6 +38,43 @@ export const MediaFrame = defineComponent({
   previewingNid: Types.eid,
   flags: Types.ui8
 });
+export const MediaRoot = defineComponent();
+export const NetworkedText = defineComponent({
+  text: Types.ui8,
+  anchorX: Types.ui8,
+  anchorY: Types.ui8,
+  color: Types.ui32,
+  curveRadius: Types.f32,
+  direction: Types.ui8,
+  fillOpacity: Types.f32,
+  fontUrl: Types.ui8,
+  fontSize: Types.f32,
+  letterSpacing: Types.f32,
+  lineHeight: Types.ui8,
+  textAlign: Types.ui8,
+  outlineWidth: Types.ui8,
+  outlineColor: Types.ui32,
+  outlineBlur: Types.ui8,
+  outlineOffsetX: Types.ui8,
+  outlineOffsetY: Types.ui8,
+  outlineOpacity: Types.f32,
+  strokeWidth: Types.ui8,
+  strokeColor: Types.ui32,
+  strokeOpacity: Types.ui32,
+  textIndent: Types.ui32,
+  whiteSpace: Types.ui8,
+  overflowWrap: Types.ui8,
+  opacity: Types.f32,
+  side: Types.ui8,
+  maxWidth: Types.f32
+});
+NetworkedText.text[$isStringType] = true;
+NetworkedText.lineHeight[$isStringType] = true;
+NetworkedText.outlineWidth[$isStringType] = true;
+NetworkedText.outlineBlur[$isStringType] = true;
+NetworkedText.outlineOffsetX[$isStringType] = true;
+NetworkedText.outlineOffsetY[$isStringType] = true;
+NetworkedText.strokeWidth[$isStringType] = true;
 export const TextTag = defineComponent();
 export const ReflectionProbe = defineComponent();
 export const Slice9 = defineComponent({
@@ -61,7 +98,9 @@ export const SpotLightTag = defineComponent();
 export const CursorRaycastable = defineComponent();
 export const RemoteHoverTarget = defineComponent();
 export const NotRemoteHoverTarget = defineComponent();
-export const Holdable = defineComponent();
+export const Holdable = defineComponent({
+  flags: Types.ui8
+});
 export const RemoveNetworkedEntityButton = defineComponent();
 export const Interacted = defineComponent();
 export const HandRight = defineComponent();
@@ -276,9 +315,12 @@ export const LoopAnimation = defineComponent();
  */
 export const LoopAnimationData = new Map();
 export const NetworkedVideo = defineComponent({
+  src: Types.ui8,
   time: Types.f32,
-  flags: Types.ui8
+  flags: Types.ui8,
+  projection: Types.ui8
 });
+NetworkedVideo.src[$isStringType] = true;
 export const VideoMenuItem = defineComponent();
 export const VideoMenu = defineComponent({
   videoRef: Types.eid,
@@ -393,6 +435,7 @@ export const Billboard = defineComponent({
   onlyY: Types.ui8
 });
 export const MaterialTag = defineComponent();
+export const TextureTag = defineComponent();
 export const UVScroll = defineComponent({
   speed: [Types.f32, 2],
   increment: [Types.f32, 2],

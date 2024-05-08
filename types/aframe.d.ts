@@ -8,7 +8,10 @@ declare module "aframe" {
       [name: string]: Object3D;
     };
     getObject3D(string): Object3D?;
-    components: { [s: string]: AComponent };
+    components: {
+      [s: string]: AComponent;
+      "player-info": PlayerInfo;
+    };
     eid: number;
     isPlaying: boolean;
   }
@@ -90,6 +93,10 @@ declare module "aframe" {
   interface PersonalSpaceInvader extends AComponent {
     enable(): void;
     disable(): void;
+  }
+
+  interface PlayerInfo extends AComponent {
+    playerSessionId: string;
   }
 
   interface PersonalSpaceBubbleSystem extends ASystem {

@@ -1,6 +1,7 @@
 {
   "addons": [
     "hubs-duck-addon",
-    "hubs-portals-addon"
+    "hubs-portals-addon",
+    "hubs-behavior-graphs-addon"
   ]
 }

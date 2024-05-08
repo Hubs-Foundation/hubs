@@ -10,11 +10,9 @@ export enum SystemOrderE {
   Setup = 0,
   PrePhysics = 100,
   PostPhysics = 200,
-  MatricesUpdate = 300,
+  BeforeMatricesUpdate = 300,
   BeforeRender = 400,
-  AfterRender = 500,
-  PostProcessing = 600,
-  TearDown = 700
+  AfterRender = 500
 }
 
 export type CoreSystemKeyT = keyof AScene["systems"];
