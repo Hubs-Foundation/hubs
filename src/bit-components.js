@@ -21,7 +21,9 @@ export const Owned = defineComponent();
 export const EntityStateDirty = defineComponent();
 export const NetworkedMediaFrame = defineComponent({
   capturedNid: Types.ui32,
-  scale: [Types.f32, 3]
+  scale: [Types.f32, 3],
+  flags: Types.ui8,
+  mediaType: Types.ui8
 });
 NetworkedMediaFrame.capturedNid[$isStringType] = true;
 
@@ -119,7 +121,11 @@ export const Rigidbody = defineComponent({
   activationState: Types.ui8,
   collisionFilterGroup: Types.ui32,
   collisionFilterMask: Types.ui32,
-  flags: Types.ui8
+  flags: Types.ui8,
+  initialCollisionFilterMask: Types.ui32
+});
+export const NetworkedRigidBody = defineComponent({
+  prevType: Types.ui8
 });
 export const PhysicsShape = defineComponent({
   bodyId: Types.ui16,

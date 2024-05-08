@@ -70,12 +70,12 @@ function SceneAttribution({ attribution }) {
 }
 
 SceneAttribution.propTypes = {
-  attribution: {
+  attribution: PropTypes.shape({
     name: PropTypes.string,
     title: PropTypes.string,
     author: PropTypes.string,
     url: PropTypes.string
-  }
+  })
 };
 
 // To assist with content control, we avoid displaying scene links to users who are not the scene
