@@ -29,9 +29,13 @@ export function interactableSystem(world: HubsWorld) {
     // If it has media frame collision mask, it needs to have content bounds
     if (hasMesh && Rigidbody.collisionFilterMask[eid] & COLLISION_LAYERS.MEDIA_FRAMES) {
       const box = getBox(obj, obj);
-      box.getSize(tmpVector);
-      addComponent(world, MediaContentBounds, eid);
-      MediaContentBounds.bounds[eid].set(tmpVector.toArray());
+      if (!box.isEmpty()) {
+        box.getSize(tmpVector);
+        addComponent(world, MediaContentBounds, eid);
+        MediaContentBounds.bounds[eid].set(tmpVector.toArray());
+      } else {
+        console.error(`Couldn't create content bounds for entity ${eid}. It seems to be empty or have negative scale.`);
+      }
     }
   });
 }
