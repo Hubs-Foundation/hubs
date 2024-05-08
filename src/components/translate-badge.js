@@ -38,7 +38,7 @@ AFRAME.registerComponent("translate-badge", {
     this.translateIcon = this.el.querySelector(".translate_badge_icon").object3D;
     this.cancelIcon = this.el.querySelector(".cancel_translate_badge_icon").object3D;
 
-    console.log(`translation badge`, this.translateIcon);
+    console.log(`translation badge registration`, this.translateIcon);
     NAF.utils
       .getNetworkedEntity(this.el)
       .then(networkedEl => {
@@ -55,6 +55,7 @@ AFRAME.registerComponent("translate-badge", {
       this.cameraEl = document.getElementById("viewing-camera");
     });
 
+    console.log(`waiting for properties to be read`);
     roomPropertiesReader.waitForProperties().then(() => {
       this.transProps = roomPropertiesReader.transProps;
       this.onPropertiesRead();
@@ -128,6 +129,7 @@ AFRAME.registerComponent("translate-badge", {
     // reads room properties. translate button needs to be visible only if translation
     // is allowed and the conversation type is bubble. check if there is need for border check
 
+    console.log(`properties have read`);
     const transProps = roomPropertiesReader.transProps;
     if (!roomPropertiesReader.AllowTrans) return;
 
