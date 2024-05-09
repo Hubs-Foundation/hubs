@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { useForm } from "react-hook-form";
 import styles from "./RoomSettingsSidebar.scss";
@@ -59,6 +59,20 @@ export function RoomSettingsSidebar({
       setValue(`user_data.addons.${evt.target.id}`, evt.target.checked);
     },
     [setValue]
+  );
+
+  const [bitECSLoaderEnabled, setBitECSLoaderEnabled] = useState(shouldUseNewLoader());
+  const handleBitECSChange = useCallback(
+    evt => {
+      setValue("user_data.hubs_use_bitecs_based_client", evt.target.checked);
+      setBitECSLoaderEnabled(evt.target.checked);
+      if (!evt.target.checked) {
+        [...addons.entries()].map(([id, _]) => {
+          setValue(`user_data.addons.${id}`, evt.target.checked);
+        });
+      }
+    },
+    [setValue, setBitECSLoaderEnabled]
   );
 
   return (
@@ -216,17 +230,18 @@ export function RoomSettingsSidebar({
                 defaultMessage="Enable bitECS based Client"
               />
             }
+            defaultChecked={shouldUseNewLoader()}
+            onChange={handleBitECSChange}
             description={
               <FormattedMessage
                 id="room-settings-sidebar.bitecs-client-activation-description"
                 defaultMessage="Enable or disable the new Client, which is implemented with bitECS for simplicity and extensibility."
               />
             }
-            {...register("user_data.hubs_use_bitecs_based_client")}
           />
         </InputField>
         <InputField label={<FormattedMessage id="room-settings-sidebar.add-ons" defaultMessage="Add-ons" />} fullWidth>
-          {!shouldUseNewLoader() && (
+          {!bitECSLoaderEnabled && (
             <label className={styles.label}>
               <FormattedMessage
                 id="room-settings-sidebar.addons-disabled"
@@ -239,7 +254,7 @@ export function RoomSettingsSidebar({
               key={addon.name}
               id={id}
               label={addon.name}
-              disabled={!shouldUseNewLoader()}
+              disabled={!bitECSLoaderEnabled}
               defaultChecked={isAddonEnabled(APP, id)}
               onChange={handleAddonChange}
               description={addon.description}

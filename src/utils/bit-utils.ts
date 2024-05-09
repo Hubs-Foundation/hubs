@@ -5,6 +5,7 @@ import { HubsWorld } from "../app";
 import { findAncestor, findAncestors, traverseSome } from "./three-utils";
 import { EntityID } from "./networking-types";
 import qsTruthy from "./qs_truthy";
+import configs from "./configs";
 
 export type ElOrEid = EntityID | AElement;
 
@@ -91,5 +92,12 @@ export function findChildrenWithComponent(world: HubsWorld, component: Component
 
 const forceNewLoader = qsTruthy("newLoader");
 export function shouldUseNewLoader() {
-  return forceNewLoader || APP.hub?.user_data?.hubs_use_bitecs_based_client;
+  let shouldUseNewLoader = forceNewLoader;
+  if (configs.feature("bitecs_loader") !== undefined) {
+    shouldUseNewLoader ||= configs.feature("bitecs_loader");
+  }
+  if (APP.hub?.user_data?.hubs_use_bitecs_based_client !== undefined) {
+    shouldUseNewLoader &&= APP.hub?.user_data?.hubs_use_bitecs_based_client;
+  }
+  return shouldUseNewLoader;
 }
