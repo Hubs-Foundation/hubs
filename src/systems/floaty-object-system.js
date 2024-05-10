@@ -83,7 +83,7 @@ export const floatyObjectSystem = world => {
     physicsSystem.updateRigidBody(eid, {
       gravity: { x: 0, y: 0, z: 0 },
       type: "dynamic",
-      collisionFilterMask: COLLISION_LAYERS.HANDS | COLLISION_LAYERS.MEDIA_FRAMES
+      collisionFilterMask: COLLISION_LAYERS.HANDS | COLLISION_LAYERS.MEDIA_FRAMES | COLLISION_LAYERS.TRIGGERS
     });
   });
 
@@ -101,7 +101,7 @@ export const floatyObjectSystem = world => {
           linearDamping: 0.95,
           linearSleepingThreshold: 0.1,
           angularSleepingThreshold: 0.1,
-          collisionFilterMask: COLLISION_LAYERS.HANDS | COLLISION_LAYERS.MEDIA_FRAMES
+          collisionFilterMask: COLLISION_LAYERS.HANDS | COLLISION_LAYERS.MEDIA_FRAMES | COLLISION_LAYERS.TRIGGERS
         });
         addComponent(world, MakeStaticWhenAtRest, eid);
       } else {
