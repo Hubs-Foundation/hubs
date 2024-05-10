@@ -67,7 +67,14 @@ if (window.APP_CONFIG) {
   }
 } else {
   configs.APP_CONFIG = {
-    features: {}
+    features: {
+      bitecs_loader: true,
+      addons_config: {
+        "hubs-behavior-graphs-addon": { enabled: true },
+        "hubs-portals-addon": { enabled: true },
+        "hubs-duck-addon": { enabled: true }
+      }
+    }
   };
 }
 
