@@ -67,6 +67,13 @@ if (window.APP_CONFIG) {
   }
 } else {
   configs.APP_CONFIG = {
+    features: {}
+  };
+}
+
+configs.APP_CONFIG = {
+  ...configs.APP_CONFIG,
+  ...{
     features: {
       bitecs_loader: true,
       addons_config: {
@@ -75,8 +82,8 @@ if (window.APP_CONFIG) {
         "hubs-duck-addon": { enabled: true }
       }
     }
-  };
-}
+  }
+};
 
 const isLocalDevelopment = process.env.NODE_ENV === "development";
 
