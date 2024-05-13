@@ -35,7 +35,9 @@ To configure your add-ons you need to update the add-on configuration JSON in th
 
 Update the add-ons JSON config with your add-ons configuration:
 
-![Room Config](img/addons-admin-config.png)
+<p align="center">
+<img src="img/addons-admin-config.png" width="420"/>
+</p>
 
 There are currently two properties supported in the add-ons configuration:
 
@@ -48,7 +50,9 @@ Once your configuration is saved, you can create or open a room in your instance
 
 Add-ons can also be enabled/disabled per room independently from the instance configuration. To override the instance configuration you can go to your room settings and change the add-ons enabled/disabled configuration there. The room add-ons configuration will take precedence over the instance configuration if it has been changed at least once.
 
-![Room Config](img/addons-room-config.png)
+<p align="center">
+<img src="img/addons-room-config.png" width="420"/>
+</p>
 
 ## Add-on development
 
