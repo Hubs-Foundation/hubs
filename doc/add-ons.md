@@ -50,7 +50,8 @@ Add-ons can also be enabled/disabled per room independently from the instance co
 
 ![Room Config](img/addons-room-config.png)
 
-## Add-on development
+## Add-on development
+
 You can develop Hubs add-ons using Javascript or Typescript.
 
 If you are developing using Typescript you can use the add-on template as a starting point. You can get the Add-on template from [here](https://github.com/MozillaReality/hubs-template-addon).
