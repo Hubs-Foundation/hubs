@@ -107,57 +107,6 @@ const deData = createLanguageData([
   "Raum besuchen"
 ]);
 
-export const hudPanelLanguages = {
-  greek: {
-    agent: "Βοηθός",
-    translate: "Μετάφραση",
-    map: "Χάρτης",
-    langugage: "Γλώσσα",
-    visit: "Επίσκεψη",
-    help: "Βοήθεια"
-  },
-  english: {
-    agent: "Agent",
-    translate: "Translate",
-    map: "Map",
-    language: "Language",
-    visit: "Visit Room",
-    help: "Help"
-  },
-  spanish: {
-    agent: "Agent",
-    translate: "Translate",
-    map: "Map",
-    language: "Language",
-    visit: "Visit Room",
-    help: "Help"
-  },
-  italian: {
-    agent: "Agent",
-    translate: "Translate",
-    map: "Map",
-    language: "Language",
-    visit: "Visit Room",
-    help: "Help"
-  },
-  dutch: {
-    agent: "Agent",
-    translate: "Translate",
-    map: "Map",
-    language: "Language",
-    visit: "Visit Room",
-    help: "Help"
-  },
-  german: {
-    agent: "Agent",
-    translate: "Translate",
-    map: "Map",
-    language: "Language",
-    visit: "Visit Room",
-    help: "Help"
-  }
-};
-
 export class TranslationSystem {
   constructor(language) {
     this.targets;
@@ -249,12 +198,12 @@ export class TranslationSystem {
       console.warn("Translation is not enabled in this room");
       return;
     }
+
     if (this.transProperties.spatiality.type === "borders") {
       this.borders = this.transProperties.spatiality.data;
       this.prevBorderState = false;
     } else {
-      this.presenterBorders = this.transProperties.conversation.data;
-      this.prevPresenterState = false;
+      this.prevBorderState = true;
     }
 
     if (this.transProperties.panel.type === "fixed") {

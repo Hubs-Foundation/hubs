@@ -11,8 +11,9 @@ import { getLastWorldPosition } from "../utils/three-utils";
 
 AFRAME.registerComponent("translate-badge", {
   init() {
+    console.log(`translation badge`, this.el);
     //bindings
-    this.onPropertiesRead = this.onPropertiesRead.bind(this);
+
     this.onPresenceUpdated = this.onPresenceUpdated.bind(this);
     this.updateFromPresenceMeta = this.updateFromPresenceMeta.bind(this);
     this.onTargetUpdate = this.onTargetUpdate.bind(this);
@@ -22,7 +23,6 @@ AFRAME.registerComponent("translate-badge", {
 
     this.el.object3D.visible = false;
     this.isTarget = false;
-    this.borderConstrained = false;
     this.withinBorder = false;
     this.withinPresenterBorders = false;
     this.badgeAllowed = false;
@@ -38,7 +38,6 @@ AFRAME.registerComponent("translate-badge", {
     this.translateIcon = this.el.querySelector(".translate_badge_icon").object3D;
     this.cancelIcon = this.el.querySelector(".cancel_translate_badge_icon").object3D;
 
-    console.log(`translation badge registration`, this.translateIcon);
     NAF.utils
       .getNetworkedEntity(this.el)
       .then(networkedEl => {
@@ -56,10 +55,7 @@ AFRAME.registerComponent("translate-badge", {
     });
 
     console.log(`waiting for properties to be read`);
-    roomPropertiesReader.waitForProperties().then(() => {
-      this.transProps = roomPropertiesReader.transProps;
-      this.onPropertiesRead();
-    });
+    roomPropertiesReader.waitForProperties().then(() => this.SetTranslationVariables());
 
     this.translateIcon.visible = true;
     this.cancelIcon.visible = false;
@@ -69,7 +65,7 @@ AFRAME.registerComponent("translate-badge", {
   tick() {
     // if translation is allowed it computes if the button should be visible based on distance and borders
     // if room is not border contstrained then variable expressing this, is set to true and does not ever change
-    if (!this.transProps || !this.cameraEl || !roomPropertiesReader.AllowTrans) return;
+    if (!this.cameraEl || !roomPropertiesReader.read || !roomPropertiesReader.AllowTrans) return;
 
     const worldPos = this.el.object3D.getWorldPosition(new THREE.Vector3());
 
@@ -82,9 +78,14 @@ AFRAME.registerComponent("translate-badge", {
           worldPos.x < this.borders[1] &&
           worldPos.z > this.borders[2] &&
           worldPos.z < this.borders[3];
+        this.withinBorder = this.withinBorder && translationSystem.prevBorderState;
+      } else {
+        this.withinBorder = true;
       }
-      this.withinBorder = this.withinBorder && translationSystem.prevBorderState;
+
       const shouldBeVisible = this.withinBorder && worldPos.distanceTo(this.camWorldPos) < 2;
+
+      console.log(isVisible, shouldBeVisible);
       if (isVisible !== shouldBeVisible) this.el.object3D.visible = shouldBeVisible;
     }
 
@@ -125,18 +126,15 @@ AFRAME.registerComponent("translate-badge", {
     if (this.badgeAllowed) this.el.sceneEl.removeEventListener("translation_updates_applied", this.onTargetUpdate);
   },
 
-  onPropertiesRead() {
+  SetTranslationVariables() {
     // reads room properties. translate button needs to be visible only if translation
     // is allowed and the conversation type is bubble. check if there is need for border check
 
-    console.log(`properties have read`);
     const transProps = roomPropertiesReader.transProps;
     if (!roomPropertiesReader.AllowTrans) return;
 
-    console.log(`translation is allowed`);
-
+    //when conversation is bubble based
     if (transProps.conversation.type === "bubble") {
-      console.log(`translation is bubble`);
       this.badgeAllowed = true;
       this.onClick = () => {
         const type = this.isTarget ? "remove" : "add";
@@ -144,12 +142,14 @@ AFRAME.registerComponent("translate-badge", {
         APP.scene.emit("translation_updates_available", eventDetails);
       };
 
+      // check if there are spatiality constrains
       if (transProps.spatiality.type === "borders") this.borders = transProps.spatiality.data;
       else this.withinBorder = true;
-    } else if (transProps.conversation.type === "presentation") {
-      console.log(`translation is presentation`);
+    }
+
+    // when conversation is with presenter
+    else if (transProps.conversation.type === "presentation") {
       this.presenterBoders = transProps.conversation.data;
-      console.log(`presenter borders exist`, this.presenterBoders);
     }
   },
 
@@ -158,6 +158,7 @@ AFRAME.registerComponent("translate-badge", {
       this.updateFromPresenceMeta(presenceMeta);
     }
   },
+
   updateFromPresenceMeta(presenceMeta) {
     this.language = presenceMeta.profile.language;
     console.log(`user ${this.playerSessionId} langugage updated to ${this.language}`);
@@ -166,6 +167,7 @@ AFRAME.registerComponent("translate-badge", {
       APP.scene.emit("translation_updates_available", eventDetails);
     }
   },
+
   onTargetUpdate({ detail: event }) {
     if (event.id !== this.owner) return;
 
@@ -177,6 +179,7 @@ AFRAME.registerComponent("translate-badge", {
       this.isTarget = _IsTarget;
     }
   },
+
   onBorderStateChange({ detail: currentState }) {
     this.withinBorder = currentState;
   }
