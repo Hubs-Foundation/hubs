@@ -117,7 +117,10 @@ class RoomPropertiesReader {
   }
 
   async Read(HubID: string, reset: boolean): Promise<RoomProperties> {
-    if (reset) this.read = false;
+    if (reset) {
+      APP.scene!.emit("room_properties_updated");
+      this.read = false;
+    }
 
     if (this.read) return Promise.resolve(this.roomProps);
     else {

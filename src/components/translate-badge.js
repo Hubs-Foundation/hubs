@@ -18,6 +18,7 @@ AFRAME.registerComponent("translate-badge", {
     this.updateFromPresenceMeta = this.updateFromPresenceMeta.bind(this);
     this.onTargetUpdate = this.onTargetUpdate.bind(this);
     this.onBorderStateChange = this.onBorderStateChange.bind(this);
+    this.UpdateRoomProperties = this.UpdateRoomProperties.bind(this);
     this.onClick = () => {};
     this.onClick = this.onClick.bind(this);
 
@@ -62,6 +63,7 @@ AFRAME.registerComponent("translate-badge", {
       .then(() => {
         this.SetTranslationVariables();
         this.el.object3D.addEventListener("interact", this.onClick);
+        this.el.sceneEl.addEventListener("room_properties_updated", this.UpdateRoomProperties);
       })
       .catch(error => {
         console.error(error);
@@ -70,6 +72,18 @@ AFRAME.registerComponent("translate-badge", {
     this.translateIcon.visible = true;
     this.cancelIcon.visible = false;
     this.el.object3D.visible = false;
+  },
+
+  UpdateRoomProperties() {
+    roomPropertiesReader
+      .waitForProperties()
+      .then(() => {
+        this.SetTranslationVariables();
+        console.log(`updating new properties of translation for badge`);
+      })
+      .catch(error => {
+        console.error(error);
+      });
   },
 
   tick() {
