@@ -18,7 +18,6 @@ AFRAME.registerComponent("translate-panel", {
     this.updateTextSize = this.updateTextSize.bind(this);
     this.fortmatLines = this.fortmatLines.bind(this);
     this.onTargetUpdate = this.onTargetUpdate.bind(this);
-    this.onLanguageUpdate = this.onLanguageUpdate.bind(this);
 
     NAF.utils
       .getNetworkedEntity(this.el)
@@ -51,13 +50,8 @@ AFRAME.registerComponent("translate-panel", {
     this.panelAllowed = roomPropertiesReader.AllowTrans && roomPropertiesReader.transProps.panel.type === "avatar";
     if (this.panelAllowed) {
       this.el.sceneEl.addEventListener("translation_updates_applied", this.onTargetUpdate);
-      this.el.sceneEl.addEventListener("language_updated", this.onLanguageUpdate);
     }
   },
-
-  play() {},
-
-  pause() {},
 
   UpdateText(text) {
     if (!text) return;
@@ -95,11 +89,6 @@ AFRAME.registerComponent("translate-panel", {
     } else if (!show) this.el.sceneEl.removeEventListener("translation_available", this.onAvailableTranslation);
 
     this.el.object3D.visible = show;
-  },
-
-  onLanguageUpdate({ detail: language }) {
-    console.log("new language", language);
-    this.UpdateText(GreetingPhrases[translationSystem.mylanguage]);
   }
 });
 

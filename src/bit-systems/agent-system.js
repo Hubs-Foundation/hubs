@@ -98,7 +98,6 @@ export default class VirtualAgent {
     this.onClear = this.onClear.bind(this);
     this.onToggle = this.onToggle.bind(this);
     this.setMicStatus = this.setMicStatus.bind(this);
-    this.onLanguageUpdated = this.onLanguageUpdated.bind(this);
     this.OntextUpdate = this.OntextUpdate.bind(this);
 
     this.occasions = {
@@ -134,7 +133,6 @@ export default class VirtualAgent {
     this.displayedText.obj.addEventListener("synccomplete", this.OntextUpdate);
     this.UpdateWithRandomPhrase("greetings");
     APP.dialog.on("mic-state-changed", this.setMicStatus);
-    APP.scene.addEventListener("language_updated", this.onLanguageUpdated);
     APP.scene.addState("agent");
     this.ToggleRays(true);
     this.agent.obj.position.copy(this.AgentInitialPosition);
@@ -143,7 +141,6 @@ export default class VirtualAgent {
 
   Disable() {
     this.displayedText.obj.removeEventListener("synccomplete", this.OntextUpdate);
-    APP.scene.removeEventListener("language_updated", this.onLanguageUpdated);
     APP.dialog.off("mic-state-changed", this.setMicStatus);
     APP.scene.removeState("agent");
     this.agentParent.obj.visible = false;
@@ -219,10 +216,6 @@ export default class VirtualAgent {
       this.Disable();
       // logger.AddUiInteraction("agent_toggle", "deactivate_agent");
     }
-  }
-
-  onLanguageUpdated() {
-    this.UpdateWithRandomPhrase(this.currentOccasion);
   }
 
   OntextUpdate() {

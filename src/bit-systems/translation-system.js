@@ -209,22 +209,9 @@ export class TranslationSystem {
     if (this.transProperties.panel.type === "fixed") {
       this.onToggleTranslate = () => {
         if (!this.fixedPanelObj) {
-          const pos = this.transProperties.panel.data;
-          const eid = renderAsEntity(APP.world, FixedPanel({ pos }));
-
-          this.fixedPanelObj = APP.world.eid2obj.get(eid);
-          this.fixedPanelObj.rotation.set(0, degToRad(180), 0);
-          console.log(this.fixedPanelObj);
-          this.eid = eid;
-          APP.world.scene.add(this.fixedPanelObj);
-          APP.scene.addState("translation");
+          this.showPresenterPanel();
         } else {
-          APP.world.scene.remove(this.fixedPanelObj);
-          removeEntity(APP.world, this.eid);
-          console.log(`panel removed`);
-          this.fixedPanelObj = null;
-          this.eid = null;
-          APP.scene.removeState("translation");
+          this.hidePresenterPanel();
         }
       };
       APP.scene.addEventListener("toggle_translation", this.onToggleTranslate);
@@ -286,7 +273,14 @@ export class TranslationSystem {
       console.log("removing target", targetKey);
     });
 
-    if (newTarget.action) await this.MonitorTargetAudio(newTarget);
+    if (newTarget.action) {
+      await this.MonitorTargetAudio(newTarget);
+      if (!this.fixedPanelObj) {
+        this.showPresenterPanel();
+      }
+    } else if (this.fixedPanelObj) {
+      this.hidePresenterPanel();
+    }
   }
 
   async AddTarget(newTarget) {
@@ -370,6 +364,26 @@ export class TranslationSystem {
     this.targets[target.id] = { language: target.language, mediaRecorder: mediaRecorder, interval: interval };
     console.log(`new target registered`);
     return;
+  }
+
+  showPresenterPanel() {
+    const pos = this.transProperties.panel.data;
+    const eid = renderAsEntity(APP.world, FixedPanel({ pos }));
+
+    this.fixedPanelObj = APP.world.eid2obj.get(eid);
+    this.fixedPanelObj.rotation.set(0, degToRad(180), 0);
+    console.log(this.fixedPanelObj);
+    this.eid = eid;
+    APP.world.scene.add(this.fixedPanelObj);
+    APP.scene.addState("translation");
+  }
+
+  hidePresenterPanel() {
+    APP.world.scene.remove(this.fixedPanelObj);
+    removeEntity(APP.world, this.eid);
+    this.fixedPanelObj = null;
+    this.eid = null;
+    APP.scene.removeState("translation");
   }
 
   async InferenceAudio(chunks, target) {

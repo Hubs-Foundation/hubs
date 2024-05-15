@@ -17,7 +17,7 @@ AFRAME.registerComponent("in-world-hud", {
     this.agentBtn = this.el.querySelector(".agent-btn");
     this.mapBtn = this.el.querySelector(".map-btn");
     this.helpBtn = this.el.querySelector(".help-btn");
-    this.langBtn = this.el.querySelector(".lang-btn");
+    // this.langBtn = this.el.querySelector(".lang-btn");
     this.transBtn = this.el.querySelector(".trans-btn");
     this.taskBtn = this.el.querySelector(".task-btn");
     // this.inviteBtn = this.el.querySelector(".invite-btn");
@@ -32,7 +32,7 @@ AFRAME.registerComponent("in-world-hud", {
       this.mic.setAttribute("mic-button", "active", APP.dialog.isMicEnabled);
       // this.pen.setAttribute("icon-button", "active", this.el.sceneEl.is("pen"));
       // this.cameraBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("camera"));
-      this.langBtn.setAttribute("flag-button", "active", this.el.sceneEl.is("panel"));
+      // this.langBtn.setAttribute("flag-button", "active", this.el.sceneEl.is("panel"));
 
       if (window.APP.hubChannel) {
         // this.spawn.setAttribute("icon-button", "disabled", !window.APP.hubChannel.can("spawn_and_move_media"));
@@ -164,7 +164,7 @@ AFRAME.registerComponent("in-world-hud", {
     this.agentBtn.object3D.removeEventListener("interact", this.onAgentClick);
     this.mapBtn.object3D.removeEventListener("interact", this.onMapClick);
     this.helpBtn.object3D.removeEventListener("interact", this.onHelpClick);
-    this.langBtn.object3D.removeEventListener("interact", this.onLangClick);
+    // this.langBtn.object3D.removeEventListener("interact", this.onLangClick);
     this.transBtn.object3D.removeEventListener("interact", this.onTransClick);
     this.taskBtn.object3D.removeEventListener("interact", this.onTaskClick);
     // this.inviteBtn.object3D.removeEventListener("interact", this.onInviteClick);

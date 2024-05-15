@@ -70,7 +70,7 @@ export default class SceneEntryManager {
   };
 
   setupVRConferece = async reset => {
-    languagePanel.Init(reset);
+    // languagePanel.Init(reset);
 
     if (reset) this.scene.emit("clear-scene");
 

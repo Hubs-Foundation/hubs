@@ -32,7 +32,6 @@ export function FixedPanelSystem(world: HubsWorld) {
   panelEnterQuery(world).forEach(fixedPanelEid => {
     if (fixedPanelRef !== fixedPanelEid) {
       APP.scene!.addEventListener("translation_available", onTranslationAvailable);
-      APP.scene!.addEventListener("language_updated", onLanguageUpdate);
       fixedPanelRef = fixedPanelEid;
       fixedPanelObj = world.eid2obj.get(fixedPanelEid)!;
       textRef = FixedTextPanel.textRef[fixedPanelEid];
@@ -45,7 +44,6 @@ export function FixedPanelSystem(world: HubsWorld) {
   });
   panelExitQuery(world).forEach(() => {
     APP.scene!.removeEventListener("translation_available", onTranslationAvailable);
-    APP.scene!.removeEventListener("language_updated", onTranslationAvailable);
     textObj!.removeEventListener("synccomplete", updateTextSize);
     fixedPanelRef = null;
     fixedPanelObj = null;
@@ -58,11 +56,6 @@ function onTranslationAvailable(event: any) {
   const details = event.detail as TranslateEventParams;
   if (!details.text) return;
   UpdateText(details.text);
-}
-
-function onLanguageUpdate() {
-  myLanguage = translationSystem.mylanguage;
-  UpdateText(GreetingPhrases[myLanguage]);
 }
 
 function UpdateText(text: string) {

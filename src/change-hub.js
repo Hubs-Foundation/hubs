@@ -6,6 +6,7 @@ import qsTruthy from "./utils/qs_truthy";
 import { localClientID, pendingMessages, pendingParts } from "./bit-systems/networking";
 import { storedUpdates } from "./bit-systems/network-receive-system";
 import { tutorialManager } from "./bit-systems/tutorial-system";
+import { roomPropertiesReader } from "./utils/rooms-properties";
 
 function unloadRoomObjects() {
   document.querySelectorAll("[pinnable]").forEach(el => {
@@ -38,6 +39,8 @@ export async function changeHub(hubId, addToHistory = true, waypoint = null) {
     console.log("Change hub called with the current hub id. This is a noop.");
     return;
   }
+
+  // roomPropertiesReader.read = false;
 
   // Suppress on-screen join and leave messages until we receive a sync.
   APP.hideHubPresenceEvents = true;

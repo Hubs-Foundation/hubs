@@ -1649,7 +1649,7 @@ class UIRoot extends Component {
                             />
                             <AgenSpawnButton scene={this.props.scene} />
                             <TranslateButton scene={this.props.scene} />
-                            <LanguagePopoverContainer scene={this.props.scene} />
+                            {/* <LanguagePopoverContainer scene={this.props.scene} /> */}
                             <MapSpawnButton scene={this.props.scene} />
                             <HelpSpawnButton scene={this.props.scene} />
                           </>
