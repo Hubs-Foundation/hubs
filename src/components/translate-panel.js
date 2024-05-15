@@ -6,11 +6,12 @@
 
 import { Vector3 } from "three";
 import { translationSystem } from "../bit-systems/translation-system";
+import { roomPropertiesReader } from "../utils/rooms-properties";
 
 const PANEL_PADDING = 0.05;
 
 AFRAME.registerComponent("translate-panel", {
-  init() {
+  async init() {
     this.translateText = this.el.querySelector(".translate-text").object3D;
     this.translateBackground = this.el.querySelector(".translate-background").object3D;
 
@@ -46,22 +47,17 @@ AFRAME.registerComponent("translate-panel", {
     };
 
     this.el.object3D.visible = false;
-    this.panelAllowed = translationSystem.allowed && translationSystem.transProperties.panel.type === "avatar";
-  },
-
-  play() {
+    await roomPropertiesReader.waitForProperties();
+    this.panelAllowed = roomPropertiesReader.AllowTrans && roomPropertiesReader.transProps.panel.type === "avatar";
     if (this.panelAllowed) {
       this.el.sceneEl.addEventListener("translation_updates_applied", this.onTargetUpdate);
       this.el.sceneEl.addEventListener("language_updated", this.onLanguageUpdate);
     }
   },
 
-  pause() {
-    if (this.panelAllowed) {
-      this.el.sceneEl.removeEventListener("translation_updates_applied", this.onTargetUpdated);
-      this.el.sceneEl.removeEventListener("language_updated", this.onLanguageUpdate);
-    }
-  },
+  play() {},
+
+  pause() {},
 
   UpdateText(text) {
     if (!text) return;

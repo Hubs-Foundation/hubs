@@ -18,6 +18,8 @@ AFRAME.registerComponent("translate-badge", {
     this.updateFromPresenceMeta = this.updateFromPresenceMeta.bind(this);
     this.onTargetUpdate = this.onTargetUpdate.bind(this);
     this.onBorderStateChange = this.onBorderStateChange.bind(this);
+    this.onClick = () => {};
+    this.onClick = this.onClick.bind(this);
 
     //status variables
 
@@ -55,7 +57,15 @@ AFRAME.registerComponent("translate-badge", {
     });
 
     console.log(`waiting for properties to be read`);
-    roomPropertiesReader.waitForProperties().then(() => this.SetTranslationVariables());
+    roomPropertiesReader
+      .waitForProperties()
+      .then(() => {
+        this.SetTranslationVariables();
+        this.el.object3D.addEventListener("interact", this.onClick);
+      })
+      .catch(error => {
+        console.error(error);
+      });
 
     this.translateIcon.visible = true;
     this.cancelIcon.visible = false;
@@ -85,7 +95,6 @@ AFRAME.registerComponent("translate-badge", {
 
       const shouldBeVisible = this.withinBorder && worldPos.distanceTo(this.camWorldPos) < 2;
 
-      console.log(isVisible, shouldBeVisible);
       if (isVisible !== shouldBeVisible) this.el.object3D.visible = shouldBeVisible;
     }
 
@@ -111,7 +120,7 @@ AFRAME.registerComponent("translate-badge", {
   },
 
   play() {
-    this.el.object3D.addEventListener("interact", this.onClick);
+    console.log(`play function called`);
     this.el.sceneEl.addEventListener("presence_updated", this.onPresenceUpdated);
     this.el.sceneEl.addEventListener("translation_updates_applied", this.onTargetUpdate);
     this.el.sceneEl.addEventListener("border_state_change", this.onTargetUpdate);
@@ -130,6 +139,7 @@ AFRAME.registerComponent("translate-badge", {
     // reads room properties. translate button needs to be visible only if translation
     // is allowed and the conversation type is bubble. check if there is need for border check
 
+    console.log(`setting translation varibles for trans badge`, roomPropertiesReader.transProps);
     const transProps = roomPropertiesReader.transProps;
     if (!roomPropertiesReader.AllowTrans) return;
 
