@@ -39,6 +39,7 @@ export function AgentEntity() {
         holdable
         grabbable={{ cursor: true, hand: true }}
         floatyObject
+        lookatuser
         rigidbody={{
           type: Type.KINEMATIC,
           collisionGroup: COLLISION_LAYERS.INTERACTABLES,
