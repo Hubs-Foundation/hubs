@@ -4,6 +4,7 @@ import { ReactComponent as TranslateIcon } from "../icons/Translate.svg";
 import { FormattedMessage, defineMessage, useIntl } from "react-intl";
 import { ToolTip } from "@mozilla/lilypad-ui";
 import { roomPropertiesReader } from "../../utils/rooms-properties";
+import { translationSystem } from "../../bit-systems/translation-system";
 
 const TranslateTooltipDescription = defineMessage({
   id: "translate-tooltip.description",
@@ -17,7 +18,7 @@ export function TranslateButton({ scene }) {
       roomPropertiesReader.transProps.conversation.type === "duo");
 
   if (shouldExist) {
-    const [active, setActive] = useState(false);
+    const [active, setActive] = useState(translationSystem.active);
     const intl = useIntl();
     const description = intl.formatMessage(TranslateTooltipDescription);
 

@@ -112,14 +112,14 @@ AFRAME.registerComponent("translate-badge", {
       if (isVisible !== shouldBeVisible) this.el.object3D.visible = shouldBeVisible;
     }
 
-    if (this.presenterBoders.length > 0) {
+    if (this.presenterBoders.length > 0 && APP.scene.is("translation")) {
       const _withinPresenterBorders =
         worldPos.x > this.presenterBoders[0] &&
         worldPos.x < this.presenterBoders[1] &&
         worldPos.z > this.presenterBoders[2] &&
         worldPos.z < this.presenterBoders[3];
 
-      if (this.withinPresenterBorders !== _withinPresenterBorders) {
+      if (translationSystem.IsTarget(this.owner) !== _withinPresenterBorders) {
         const eventDetails = {
           type: "presenter",
           id: this.owner,
@@ -130,11 +130,13 @@ AFRAME.registerComponent("translate-badge", {
       }
 
       this.withinPresenterBorders = _withinPresenterBorders;
+    } else {
+      console.log("system does not calculate presenter pos");
     }
   },
 
   play() {
-    console.log(`play function called`);
+    this.el.sceneEl.addEventListener("toggle_translation", this.onUpdatePresenterTranslation);
     this.el.sceneEl.addEventListener("presence_updated", this.onPresenceUpdated);
     this.el.sceneEl.addEventListener("translation_updates_applied", this.onTargetUpdate);
     this.el.sceneEl.addEventListener("border_state_change", this.onTargetUpdate);
@@ -143,11 +145,14 @@ AFRAME.registerComponent("translate-badge", {
 
   pause() {
     this.el.object3D.removeEventListener("interact", this.onClick);
+    this.el.sceneEl.removeEventListener("toggle_translation", this.onUpdatePresenterTranslation);
     this.el.sceneEl.removeEventListener("presence_updated", this.onPresenceUpdated);
     this.el.sceneEl.removeEventListener("translation_updates_applied", this.onTargetUpdate);
     this.el.sceneEl.removeEventListener("border_state_change", this.onTargetUpdate);
     if (this.badgeAllowed) this.el.sceneEl.removeEventListener("translation_updates_applied", this.onTargetUpdate);
   },
+
+  onUpdatePresenterTranslation() {},
 
   SetTranslationVariables() {
     // reads room properties. translate button needs to be visible only if translation

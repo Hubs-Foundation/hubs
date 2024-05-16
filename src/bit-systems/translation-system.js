@@ -134,6 +134,7 @@ export class TranslationSystem {
     this.onTranslationUpdatesAvailable = this.onTranslationUpdatesAvailable.bind(this);
     this.InferenceAudio = this.InferenceAudio.bind(this);
     this.UpdatePresenterTarget = this.UpdatePresenterTarget.bind(this);
+    this.togglePresenterTranslation = this.togglePresenterTranslation.bind(this);
   }
 
   get AvailableLanguage() {
@@ -207,14 +208,7 @@ export class TranslationSystem {
     }
 
     if (this.transProperties.panel.type === "fixed") {
-      this.onToggleTranslate = () => {
-        if (!this.fixedPanelObj) {
-          this.showPresenterPanel();
-        } else {
-          this.hidePresenterPanel();
-        }
-      };
-      APP.scene.addEventListener("toggle_translation", this.onToggleTranslate);
+      APP.scene.addEventListener("toggle_translation", this.togglePresenterTranslation);
     }
 
     this.recordingAverage = [];
@@ -226,6 +220,20 @@ export class TranslationSystem {
     APP.scene.addEventListener("translation_updates_available", this.onTranslationUpdatesAvailable);
 
     this.initialized = true;
+    this.active = false;
+
+    APP.scene.emit("toggle_translation");
+  }
+
+  togglePresenterTranslation() {
+    if (this.active) {
+      APP.scene.removeState("translation");
+      this.ClearTargets();
+      if (this.fixedPanelObj) this.hidePresenterPanel();
+    } else {
+      APP.scene.addState("translation");
+    }
+    this.active = APP.scene.is("translation");
   }
 
   ClearSilenceInterval() {
@@ -265,19 +273,21 @@ export class TranslationSystem {
     }
   }
 
-  async UpdatePresenterTarget(newTarget) {
-    console.log("updating presenter", newTarget);
-
+  ClearTargets() {
     Object.keys(this.targets).forEach(targetKey => {
       this.RemoveTarget({ id: targetKey });
       console.log("removing target", targetKey);
     });
+  }
+
+  async UpdatePresenterTarget(newTarget) {
+    if (!APP.scene.is("translation")) return;
+    this.ClearTargets();
 
     if (newTarget.action) {
+      console.log("updating presenter", newTarget);
       await this.MonitorTargetAudio(newTarget);
-      if (!this.fixedPanelObj) {
-        this.showPresenterPanel();
-      }
+      if (!this.fixedPanelObj) this.showPresenterPanel();
     } else if (this.fixedPanelObj) {
       this.hidePresenterPanel();
     }
@@ -286,6 +296,10 @@ export class TranslationSystem {
   async AddTarget(newTarget) {
     if (!this.targets[newTarget.id]) await this.MonitorTargetAudio(newTarget);
     else this.targets[newTarget.id].language = newTarget.language;
+  }
+
+  IsTarget(id) {
+    return id in this.targets;
   }
 
   async RemoveTarget(target) {
@@ -372,18 +386,19 @@ export class TranslationSystem {
 
     this.fixedPanelObj = APP.world.eid2obj.get(eid);
     this.fixedPanelObj.rotation.set(0, degToRad(180), 0);
-    console.log(this.fixedPanelObj);
+    console.log("rendering panel");
     this.eid = eid;
     APP.world.scene.add(this.fixedPanelObj);
-    APP.scene.addState("translation");
+    APP.scene.addState("presenter_panel");
   }
 
   hidePresenterPanel() {
     APP.world.scene.remove(this.fixedPanelObj);
     removeEntity(APP.world, this.eid);
+    console.log("hiding panel");
     this.fixedPanelObj = null;
     this.eid = null;
-    APP.scene.removeState("translation");
+    APP.scene.removeState("presenter_panel");
   }
 
   async InferenceAudio(chunks, target) {
