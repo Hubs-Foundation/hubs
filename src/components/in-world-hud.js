@@ -55,7 +55,13 @@ AFRAME.registerComponent("in-world-hud", {
         if (roomPropertiesReader.AllowsHelp)
           this.helpBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("help"));
         if (roomPropertiesReader.AllowTrans)
-          this.transBtn.setAttribute("icon-button", "active", this.el.sceneEl.is("translation"));
+          this.transBtn.setAttribute(
+            "icon-button",
+            "active",
+            this.el.sceneEl.is("translation") &&
+              roomPropertiesReader.read &&
+              roomPropertiesReader.transProps.conversation === "presentation"
+          );
       });
     };
 
@@ -135,6 +141,7 @@ AFRAME.registerComponent("in-world-hud", {
   play() {
     this.el.sceneEl.addEventListener("stateadded", this.onStateChange);
     this.el.sceneEl.addEventListener("stateremoved", this.onStateChange);
+    this.el.sceneEl.addEventListener("room_properties_updated", this.updateButtonStates);
     this.el.sceneEl.systems.permissions.onPermissionsUpdated(this.updateButtonStates);
     this.el.sceneEl.addEventListener("hub_updated", this.onHubUpdated);
     this.updateButtonStates();
@@ -155,6 +162,7 @@ AFRAME.registerComponent("in-world-hud", {
   pause() {
     this.el.sceneEl.removeEventListener("stateadded", this.onStateChange);
     this.el.sceneEl.removeEventListener("stateremoved", this.onStateChange);
+    this.el.sceneEl.removeEventListener("room_properties_updated", this.updateButtonStates);
     window.APP.hubChannel.removeEventListener("permissions_updated", this.updateButtonStates);
     this.el.sceneEl.removeEventListener("hub_updated", this.onHubUpdated);
     this.mic.object3D.removeEventListener("interact", this.onMicClick);
