@@ -197,7 +197,7 @@ class TutorialManager {
 
     this.activeCategory = this.categoriesArray[this.activeCategoryIndex];
     this.activeStep = this.activeCategory.steps[this.activeStepIndex];
-    this.showArrows = false;
+    this.showArrows = true;
     this.Ascene.addState("task");
     APP.scene!.addEventListener("task-toggle", this.onTaskToggle);
     APP.scene!.addEventListener("clear-scene", this.onClearToggle);
@@ -480,7 +480,7 @@ const LobbySteps: Array<StepCategory> = [
     slides: [0],
     steps: [
       {
-        onceFunc: ChangeSlidein5
+        onceFunc: () => {}
       }
     ]
   },
@@ -490,7 +490,7 @@ const LobbySteps: Array<StepCategory> = [
     slides: [1],
     steps: [
       {
-        onceFunc: ChangeSlidein5
+        onceFunc: () => {}
       }
     ]
   },
@@ -502,6 +502,7 @@ const LobbySteps: Array<StepCategory> = [
       {
         onceFunc: () => {
           tutorialManager.activeTimeout = setTimeout(() => {
+            tutorialManager.ToggleArrowVisibility(false);
             tutorialManager.centerButtonObj.visible = true;
             tutorialManager.centerButtonText.text = "Click me!";
           }, 1000);
@@ -515,10 +516,13 @@ const LobbySteps: Array<StepCategory> = [
     slides: [3, 4],
     steps: [
       {
-        onceFunc: ChangeSlidein5
+        onceFunc: () => {
+          tutorialManager.ToggleArrowVisibility(true);
+        }
       },
       {
         onceFunc: () => {
+          tutorialManager.ToggleArrowVisibility(false);
           tutorialManager.initPosition = tutorialManager.avatarHead.getWorldPosition(new Vector3());
         },
         loopFunc: () => {
@@ -570,10 +574,13 @@ const LobbySteps: Array<StepCategory> = [
     slides: [7, 8],
     steps: [
       {
-        onceFunc: ChangeSlidein5
+        onceFunc: () => {
+          tutorialManager.ToggleArrowVisibility(true);
+        }
       },
       {
         onceFunc: () => {
+          tutorialManager.ToggleArrowVisibility(false);
           tutorialManager.Ascene.addEventListener("action_enable_mic", onUnmuting, { once: true });
         },
         cleanUpFunc: () => tutorialManager.Ascene.removeEventListener("action_enable_mic", onUnmuting)
