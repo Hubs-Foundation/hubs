@@ -5,8 +5,9 @@ import markdownit from "markdown-it";
 import { FormattedMessage } from "react-intl";
 import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
 import { AuthContextProvider } from "./react-components/auth/AuthContext";
-import { store } from "./utils/store-instance";
+import { getStore } from "./utils/store-instance";
 
+const store = getStore();
 window.APP = { store };
 
 import registerTelemetry from "./telemetry";

@@ -10,7 +10,7 @@ import registerTelemetry from "./telemetry";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
 import { connectToReticulum, fetchReticulumAuthenticatedWithToken } from "./utils/phoenix-utils";
 import "./utils/theme";
-import { store } from "./utils/store-instance";
+import { getStore } from "./utils/store-instance";
 
 function mountUI(props = {}) {
   const container = document.getElementById("ui-root");
@@ -89,6 +89,7 @@ function onReady() {
 
   disableiOSZoom();
 
+  const store = getStore();
   const sceneId = parseSceneId(document.location);
   console.log(`Scene ID: ${sceneId}`);
   remountUI({ sceneId, store });

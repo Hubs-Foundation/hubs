@@ -183,6 +183,7 @@ import "./systems/audio-debug-system";
 import "./systems/audio-gain-system";
 import "./gltf-component-mappings";
 
+import { addons } from "./addons";
 import { App, getScene } from "./app";
 import MediaDevicesManager from "./utils/media-devices-manager";
 import PinningHelper from "./utils/pinning-helper";
@@ -219,8 +220,6 @@ preload(
   })
 );
 
-const store = window.APP.store;
-store.update({ preferences: { shouldPromptForRefresh: false } }); // Clear flag that prompts for refresh from preference screen
 const mediaSearchStore = window.APP.mediaSearchStore;
 const OAUTH_FLOW_PERMS_TOKEN_KEY = "ret-oauth-flow-perms-token";
 const NOISY_OCCUPANT_COUNT = 30; // Above this # of occupants, we stop posting join/leaves/renames
@@ -273,7 +272,7 @@ import { exposeBitECSDebugHelpers } from "./bitecs-debug-helpers";
 import { loadLegacyRoomObjects } from "./utils/load-legacy-room-objects";
 import { loadSavedEntityStates } from "./utils/entity-state-utils";
 import { shouldUseNewLoader } from "./utils/bit-utils";
-import { addons } from "./addons";
+import { getStore } from "./utils/store-instance";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -354,6 +353,7 @@ function mountUI(props = {}) {
     qsTruthy("allow_idle") || (process.env.NODE_ENV === "development" && !qs.get("idle_timeout"));
   const forcedVREntryType = qsVREntryType;
 
+  const store = getStore();
   root.render(
     <WrappedIntlProvider>
       <ThemeProvider store={store}>
@@ -607,7 +607,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
     onSendMessage: messageDispatch.dispatch,
     onLoaded: () => {
       audioSystem.setMediaGainOverride(1);
-      store.executeOnLoadActions(scene);
+      getStore().executeOnLoadActions(scene);
     },
     onMediaSearchResultEntrySelected: (entry, selectAction) =>
       scene.emit("action_selected_media_result_entry", { entry, selectAction }),
@@ -739,6 +739,9 @@ async function runBotMode(scene, entryManager) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  const store = getStore();
+  store.update({ preferences: { shouldPromptForRefresh: false } }); // Clear flag that prompts for refresh from preference screen
+
   if (!root) {
     const container = document.getElementById("ui-root");
     root = createRoot(container);

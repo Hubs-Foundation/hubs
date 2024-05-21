@@ -2,7 +2,6 @@ import { addEntity, createWorld, IWorld } from "bitecs";
 import "./aframe-to-bit-components";
 import { AEntity, Networked, Object3DTag, Owned } from "./bit-components";
 import MediaSearchStore from "./storage/media-search-store";
-import Store from "./storage/store";
 import qsTruthy from "./utils/qs_truthy";
 
 import type { AComponent, AScene } from "aframe";
@@ -28,7 +27,7 @@ import { DialogAdapter } from "./naf-dialog-adapter";
 import { mainTick } from "./systems/hubs-systems";
 import { waitForPreloads } from "./utils/preload";
 import SceneEntryManager from "./scene-entry-manager";
-import { store } from "./utils/store-instance";
+import { getStore } from "./utils/store-instance";
 import { addObject3DComponent } from "./utils/jsx-entity";
 import { ElOrEid } from "./utils/bit-utils";
 import { onAddonsInit } from "./addons";
@@ -79,7 +78,6 @@ export class App {
   mediaDevicesManager?: MediaDevicesManager;
   entryManager?: SceneEntryManager;
   messageDispatch?: any;
-  store: Store;
   componentRegistry: { [key: string]: AComponent[] };
 
   mediaSearchStore = new MediaSearchStore();
@@ -130,7 +128,6 @@ export class App {
   } = {};
 
   constructor() {
-    this.store = store;
     // TODO: Create accessor / update methods for these maps / set
     this.world.eid2obj = new Map();
     this.world.eid2mat = new Map();
@@ -175,6 +172,10 @@ export class App {
 
   notifyOnInit() {
     onAddonsInit(this);
+  }
+
+  get store() {
+    return getStore();
   }
 
   getSystem(id: SystemKeyT) {

@@ -8,7 +8,14 @@ import {
   SystemOrderE,
   PrefabConfigT,
   NetworkSchemaConfigT,
-  ChatCommandConfigT
+  ChatCommandConfigT,
+  PreferenceConfigT,
+  PreferencePrefsScreenItemT,
+  PreferencePrefsScreenCategory,
+  PreferenceScreenLabelT,
+  PreferenceScreenDefT,
+  PreferenceDefConfigT,
+  PostProcessOrderE
 } from "./types";
 import configs from "./utils/configs";
 import { commonInflators, gltfInflators, jsxInflators } from "./utils/jsx-entity";
@@ -18,6 +25,8 @@ import { GLTFLinkResolverFn, gltfLinkResolvers } from "./inflators/model";
 import { Object3D } from "three";
 import { extraSections } from "./react-components/debug-panel/ECSSidebar";
 import { shouldUseNewLoader } from "./hubs";
+import { SCHEMA } from "./storage/store";
+import { Pass } from "postprocessing";
 
 function getNextIdx(slot: Array<SystemConfigT>, system: SystemConfigT) {
   return slot.findIndex(item => {
@@ -81,17 +90,20 @@ function registerChatCommand(command: ChatCommandConfigT) {
 export type AddonIdT = string;
 export type AddonNameT = string;
 export type AddonDescriptionT = string;
+export type AddonOnLoadedFn = () => void;
 export type AddonOnReadyFn = (app: App, config?: JSON) => void;
 
 export interface InternalAddonConfigT {
   name: AddonNameT;
   description?: AddonDescriptionT;
+  onLoaded?: AddonOnLoadedFn;
   onReady?: AddonOnReadyFn;
   system?: SystemConfigT | SystemConfigT[];
   inflator?: InflatorConfigT | InflatorConfigT[];
   prefab?: PrefabConfigT | PrefabConfigT[];
   networkSchema?: NetworkSchemaConfigT | NetworkSchemaConfigT[];
   chatCommand?: ChatCommandConfigT | ChatCommandConfigT[];
+  preference?: PreferenceConfigT | PreferenceConfigT[];
   enabled?: boolean;
   config?: JSON | undefined;
 }
@@ -107,6 +119,10 @@ export type AddonRegisterCallbackT = (app: App) => void;
 export function registerAddon(id: AddonIdT, config: AddonConfigT) {
   console.log(`Add-on ${id} registered`);
   pendingAddons.set(id, config);
+  registerPreferences(id, config);
+  if (config.onLoaded) {
+    config.onLoaded();
+  }
 }
 
 export type GLTFParserCallbackFn = (parser: GLTFParser) => GLTFLoaderPlugin;
@@ -118,6 +134,146 @@ export function registerGLTFLinkResolver(resolver: GLTFLinkResolverFn): void {
 }
 export function registerECSSidebarSection(section: (world: HubsWorld, selectedObj: Object3D) => React.JSX.Element) {
   extraSections.push(section);
+}
+
+const screenPreferencesDefs = new Map<string, PreferenceDefConfigT>();
+export function getAddonsPreferencesDefs(): PreferenceScreenDefT {
+  return screenPreferencesDefs;
+}
+
+const screenPreferencesLabels = new Map<string, string>();
+export function getAddonsPreferencesLabels(): PreferenceScreenLabelT {
+  return screenPreferencesLabels;
+}
+
+let xFormedScreenPreferencesCategories: Map<string, PreferencePrefsScreenItemT[]>;
+const screenPreferencesCategories = new Map<string, PreferencePrefsScreenItemT[]>();
+export function getAddonsPreferencesCategories(app: App): PreferencePrefsScreenCategory {
+  // We need to transform on the spot as when the preferences are added we don't yet have the hub user_data
+  // to know what addons are enabled in the room
+  if (!xFormedScreenPreferencesCategories) {
+    xFormedScreenPreferencesCategories = new Map<string, PreferencePrefsScreenItemT[]>();
+    screenPreferencesCategories.forEach((categories, addonId) => {
+      if (isAddonEnabled(app, addonId)) {
+        const config = addons.get(addonId);
+        xFormedScreenPreferencesCategories.set(config?.name || addonId, categories);
+      }
+    });
+    return xFormedScreenPreferencesCategories;
+  } else {
+    return xFormedScreenPreferencesCategories;
+  }
+}
+
+function registerPreferences(addonId: string, addonConfig: AddonConfigT) {
+  const prefSchema = SCHEMA.definitions.preferences.properties;
+  function register(preference: PreferenceConfigT) {
+    for (const key in preference) {
+      if (!(key in prefSchema)) {
+        const prefDef = preference[key].prefDefinition;
+        if (key in prefSchema) {
+          throw new Error(`Preference ${key} already exists`);
+        }
+        (prefSchema as any)[key] = prefDef;
+        screenPreferencesDefs.set(key, prefDef);
+
+        const prefConfig = preference[key];
+        let categoryPrefs: PreferencePrefsScreenItemT[];
+        if (screenPreferencesCategories.has(addonId)) {
+          categoryPrefs = screenPreferencesCategories.get(addonId)!;
+        } else {
+          categoryPrefs = new Array<PreferencePrefsScreenItemT>();
+          screenPreferencesCategories.set(addonId, categoryPrefs);
+        }
+        categoryPrefs.push({ key, ...prefConfig.prefConfig });
+        screenPreferencesLabels.set(key, prefConfig.prefConfig.description);
+      } else {
+        throw new Error("Preference already exists");
+      }
+    }
+  }
+
+  if (addonConfig.preference) {
+    if (Array.isArray(addonConfig.preference)) {
+      addonConfig.preference.forEach(preference => {
+        register(preference);
+      });
+    } else {
+      register(addonConfig.preference);
+    }
+  }
+}
+
+const fxOrder2Passes = {
+  [PostProcessOrderE.AfterScene]: 0,
+  [PostProcessOrderE.AfterBloom]: 0,
+  [PostProcessOrderE.AfterUI]: 0,
+  [PostProcessOrderE.AfterAA]: 0
+};
+const fx2Order = new Map<Pass, PostProcessOrderE>();
+function afterSceneIdx() {
+  return 2 + fxOrder2Passes[PostProcessOrderE.AfterScene];
+}
+function afterBloomIdx(app: App) {
+  let idx = afterSceneIdx();
+  idx += fxOrder2Passes[PostProcessOrderE.AfterBloom];
+  if (app.fx.bloomAndTonemapPass) {
+    idx++;
+  }
+  return idx;
+}
+function afterUIIdx(app: App) {
+  let idx = afterBloomIdx(app);
+  idx += fxOrder2Passes[PostProcessOrderE.AfterUI];
+  return idx;
+}
+function afterAAIdx(app: App) {
+  let idx = afterUIIdx(app);
+  idx += fxOrder2Passes[PostProcessOrderE.AfterAA];
+  return idx;
+}
+function getPassIdx(app: App, order: PostProcessOrderE) {
+  switch (order) {
+    case PostProcessOrderE.AfterScene:
+      return afterSceneIdx();
+    case PostProcessOrderE.AfterBloom:
+      return afterBloomIdx(app);
+    case PostProcessOrderE.AfterUI:
+      return afterUIIdx(app);
+    case PostProcessOrderE.AfterAA:
+      return afterAAIdx(app);
+  }
+}
+export function registerPass(app: App, pass: Pass | Pass[], order: PostProcessOrderE) {
+  function register(pass: Pass) {
+    const nextIdx = getPassIdx(app, order) + 1;
+    fx2Order.set(pass, order);
+    fxOrder2Passes[order]++;
+    app.fx.composer?.addPass(pass, nextIdx);
+  }
+
+  if (Array.isArray(pass)) {
+    pass.every(pass => register(pass));
+  } else {
+    register(pass);
+  }
+}
+
+export function unregisterPass(app: App, pass: Pass | Pass[]) {
+  function unregister(pass: Pass) {
+    if (fx2Order.has(pass)) {
+      const order = fx2Order.get(pass)!;
+      fxOrder2Passes[order]--;
+      app.fx.composer?.removePass(pass);
+      fx2Order.delete(pass);
+    }
+  }
+
+  if (Array.isArray(pass)) {
+    pass.every(pass => unregister(pass));
+  } else {
+    unregister(pass);
+  }
 }
 
 export function getAddonConfig(id: string): AdminAddonConfig {

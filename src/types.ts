@@ -15,6 +15,13 @@ export enum SystemOrderE {
   AfterRender = 500
 }
 
+export enum PostProcessOrderE {
+  AfterScene = 0,
+  AfterBloom = 1,
+  AfterUI = 2,
+  AfterAA = 3
+}
+
 export type CoreSystemKeyT = keyof AScene["systems"];
 export type HubsSystemKeyT = keyof HubsSystems;
 export type SystemKeyT = CoreSystemKeyT | HubsSystemKeyT;
@@ -92,6 +99,84 @@ export interface ChatCommandConfigT {
   id: string;
   command: ChatCommandCallbackFn;
 }
+
+/**
+ * This has to be kept in sync with the preferences-screen PREFERENCE_LIST_ITEM_TYPE
+ */
+export enum PREFERENCE_LIST_ITEM_TYPE {
+  CHECK_BOX = 1,
+  SELECT = 2,
+  NUMBER_WITH_RANGE = 3,
+  MAX_RESOLUTION = 4,
+  MAP_COUNT = 5,
+  CUSTOM_COMPONENT = 6
+}
+
+export type PreferenceDefConfigT = {
+  type: "string" | "number" | "bool" | "object";
+  default: string | number | boolean | object | undefined;
+};
+
+export type PreferenceSelectT = {
+  value: string | number;
+  text: string;
+};
+
+export type PreferenceRangeT = {
+  min: number;
+  max: number;
+  step: number;
+  digits: number;
+};
+
+export type PreferenceUIConfigT =
+  | {
+      prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX;
+      description: string;
+      promptForRefresh?: boolean;
+      hidden?: () => boolean;
+      disableIfFalse?: string;
+    }
+  | {
+      prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE;
+      description: string;
+      promptForRefresh?: boolean;
+      hidden?: () => boolean;
+      disableIfFalse?: string;
+      min: number;
+      max: number;
+      step: number;
+      digits: number;
+    }
+  | {
+      prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT;
+      description: string;
+      promptForRefresh?: boolean;
+      hidden?: () => boolean;
+      disableIfFalse?: string;
+      options?: PreferenceSelectT[];
+    }
+  | {
+      prefType: PREFERENCE_LIST_ITEM_TYPE.MAP_COUNT;
+      description: string;
+      promptForRefresh?: boolean;
+      hidden?: () => boolean;
+      disableIfFalse?: string;
+      defaultValue?: number;
+      text?: string;
+    };
+
+export type PreferencePrefsScreenItemT = { key: string | PreferenceUIConfigT };
+export type PreferencePrefsScreenCategory = Map<string, PreferencePrefsScreenItemT[]>;
+export type PreferenceScreenLabelT = Map<string, string>;
+export type PreferenceScreenDefT = Map<string, PreferenceDefConfigT>;
+
+export type PreferenceConfigT = {
+  [key: string]: {
+    prefDefinition: PreferenceDefConfigT;
+    prefConfig: PreferenceUIConfigT;
+  };
+};
 
 export type SoundDefT = {
   id: number;

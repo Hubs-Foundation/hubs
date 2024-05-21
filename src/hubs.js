@@ -22,6 +22,7 @@ export * from "./utils/take-soft-ownership";
 export * from "./utils/component-utils";
 export * from "./utils/projection-mode";
 export * from "./utils/assign-network-ids";
+export * from "./utils/store-instance";
 export * from "./components/gltf-model-plus";
 export * from "./inflators/model";
 export * from "./inflators/physics-shape";

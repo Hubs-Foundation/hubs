@@ -341,6 +341,9 @@ module.exports = async (env, argv) => {
       filename: "assets/js/[name]-[chunkhash].js",
       publicPath: process.env.BASE_ASSETS_PATH || ""
     },
+    optimization: {
+      minimize: argv.mode === "production" ? true : false
+    },
     target: ["web", "es5"], // use es5 for webpack runtime to maximize compatibility
     devtool: argv.mode === "production" ? "source-map" : "inline-source-map",
     devServer: {
