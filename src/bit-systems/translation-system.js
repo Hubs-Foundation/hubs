@@ -127,8 +127,9 @@ export class TranslationSystem {
       spanish: esData,
       greek: elData
     };
+    this.linkAttempt = false;
 
-    this.mylanguage = language;
+    // this.mylanguage = language;
 
     this.onLanguageAvailable = this.onLanguageAvailable.bind(this);
     this.onTranslationUpdatesAvailable = this.onTranslationUpdatesAvailable.bind(this);
@@ -426,7 +427,7 @@ export class TranslationSystem {
         };
 
         const translateRespone = await audioModules(
-          COMPONENT_ENDPOINTS.TRANSLATE_AUDIO_FILES,
+          COMPONENT_ENDPOINTS.TRANSLATE_LOCAL_AUDIO_FILES,
           recordingBlob,
           inferenceParams,
           abortController.signal
@@ -515,4 +516,4 @@ export class TranslationSystem {
   }
 }
 
-export const translationSystem = new TranslationSystem("english");
+export const translationSystem = new TranslationSystem();
