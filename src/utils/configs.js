@@ -79,7 +79,8 @@ configs.APP_CONFIG = {
       addons_config: {
         "hubs-behavior-graphs-addon": { enabled: true },
         "hubs-portals-addon": { enabled: true },
-        "hubs-duck-addon": { enabled: true }
+        "hubs-duck-addon": { enabled: true },
+        "hubs-post-processing-addon": { enabled: true }
       }
     }
   }
