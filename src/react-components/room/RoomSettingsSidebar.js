@@ -66,11 +66,6 @@ export function RoomSettingsSidebar({
     evt => {
       setValue("user_data.hubs_use_bitecs_based_client", evt.target.checked);
       setBitECSLoaderEnabled(evt.target.checked);
-      if (!evt.target.checked) {
-        [...addons.entries()].map(([id, _]) => {
-          setValue(`user_data.addons.${id}`, evt.target.checked);
-        });
-      }
     },
     [setValue, setBitECSLoaderEnabled]
   );

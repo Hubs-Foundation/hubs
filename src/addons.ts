@@ -154,7 +154,7 @@ export function getAddonsPreferencesCategories(app: App): PreferencePrefsScreenC
   if (!xFormedScreenPreferencesCategories) {
     xFormedScreenPreferencesCategories = new Map<string, PreferencePrefsScreenItemT[]>();
     screenPreferencesCategories.forEach((categories, addonId) => {
-      if (isAddonEnabled(app, addonId)) {
+      if (isAddonActive(app, addonId)) {
         const config = addons.get(addonId);
         xFormedScreenPreferencesCategories.set(config?.name || addonId, categories);
       }
@@ -290,17 +290,22 @@ export function getAddonConfig(id: string): AdminAddonConfig {
 
 export function isAddonEnabled(app: App, id: string): boolean {
   let enabled = false;
-  if (shouldUseNewLoader()) {
-    if (app.hub?.user_data && "addons" in app.hub?.user_data && id in app.hub.user_data["addons"]) {
-      enabled = app.hub.user_data.addons[id];
-    } else {
-      const adminAddonsConfig = getAddonConfig(id);
-      if (adminAddonsConfig) {
-        enabled = adminAddonsConfig.enabled;
-      }
+  if (app.hub?.user_data && "addons" in app.hub?.user_data && id in app.hub.user_data["addons"]) {
+    enabled = app.hub.user_data.addons[id];
+  } else {
+    const adminAddonsConfig = getAddonConfig(id);
+    if (adminAddonsConfig) {
+      enabled = adminAddonsConfig.enabled;
     }
   }
   return enabled;
+}
+
+function isAddonActive(app: App, id: string): boolean {
+  if (shouldUseNewLoader()) {
+    return isAddonEnabled(app, id);
+  }
+  return false;
 }
 
 export function onAddonsInit(app: App) {
@@ -312,7 +317,7 @@ export function onAddonsInit(app: App) {
         addons.set(id, addon);
       }
 
-      if (!isAddonEnabled(app, id)) {
+      if (!isAddonActive(app, id)) {
         continue;
       }
 

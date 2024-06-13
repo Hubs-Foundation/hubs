@@ -92,12 +92,13 @@ export function findChildrenWithComponent(world: HubsWorld, component: Component
 
 const forceNewLoader = qsTruthy("newLoader");
 export function shouldUseNewLoader() {
-  let shouldUseNewLoader = forceNewLoader;
-  if (configs.feature("bitecs_loader") !== undefined) {
-    shouldUseNewLoader ||= configs.feature("bitecs_loader");
+  if (forceNewLoader === true) {
+    return true;
+  } else if (APP.hub?.user_data?.hubs_use_bitecs_based_client !== undefined) {
+    return APP.hub?.user_data?.hubs_use_bitecs_based_client;
+  } else if (configs.feature("bitecs_loader") !== undefined) {
+    return configs.feature("bitecs_loader");
+  } else {
+    return false;
   }
-  if (APP.hub?.user_data?.hubs_use_bitecs_based_client !== undefined) {
-    shouldUseNewLoader &&= APP.hub?.user_data?.hubs_use_bitecs_based_client;
-  }
-  return shouldUseNewLoader;
 }
