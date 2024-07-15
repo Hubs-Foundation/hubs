@@ -46,6 +46,7 @@ export interface NavigationProperties {
   dimensions?: [number, number, number, number];
   polygon?: Array<[number, number]>;
   obstacles?: Array<Array<[number, number]>>;
+  objects?: Array<{ name: string; position: [number, number] }>;
 }
 
 interface MapProperties {
