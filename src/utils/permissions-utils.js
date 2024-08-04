@@ -4,7 +4,7 @@ import { hasComponent } from "bitecs";
 import { HoldableButton } from "../bit-components";
 import { CAMERA_MODE_INSPECT } from "../systems/camera-system";
 
-// https://github.com/mozilla/hubs/wiki/Hubs-authorization
+// https://github.com/Hubs-Foundation/hubs/wiki/Hubs-authorization
 export function showHoverEffect(el) {
   const isFrozen = el.sceneEl.is("frozen");
   const isPinned = el.components.pinnable && el.components.pinnable.data.pinned;

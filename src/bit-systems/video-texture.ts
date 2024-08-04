@@ -163,7 +163,7 @@ export function videoTextureSystem(world: HubsWorld) {
     });
 
     // Since we are rendering directly to a texture we need to flip it vertically
-    // See https://github.com/mozilla/hubs/pull/4126#discussion_r610120237
+    // See https://github.com/Hubs-Foundation/hubs/pull/4126#discussion_r610120237
     renderTarget.texture.matrixAutoUpdate = false;
     renderTarget.texture.matrix.scale(1, -1);
     renderTarget.texture.matrix.translate(0, 1);

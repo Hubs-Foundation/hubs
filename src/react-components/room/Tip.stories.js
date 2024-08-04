@@ -15,7 +15,7 @@ export const Tips = ({ step }) => (
   <RoomLayout
     viewport={
       <Tip onDismiss={() => {}} dismissLabel="Skip" step={step}>
-        {"Welcome to Mozilla Hubs! Let's take a quick tour. 👋 Click and drag to look around."}
+        {"Welcome to Hubs! Let's take a quick tour. 👋 Click and drag to look around."}
       </Tip>
     }
   />

@@ -12,10 +12,6 @@ This script extracts all existing messages in the Hubs codebase to a temporary f
 
 This script extracts all existing messages in the Hubs codebase to a temporary file `en.json`. It does not contain any metadata, just the id and English translation. It can be used as a template for other locales.
 
-### Coming Soon
-
-Our goal is to integrate with [Mozilla Pontoon](https://pontoon.mozilla.org) in the near future.
-
 ## Adding Locales
 
 1. Add an entry to `AVAILABLE_LOCALES` in [locale_config.js](locale_config.js) with the appropriate locale code and in-language translation of the language.

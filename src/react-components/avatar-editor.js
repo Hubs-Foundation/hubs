@@ -587,7 +587,7 @@ class AvatarEditor extends Component {
                       values={{
                         a: chunks => (
                           <a
-                            href={configs.link("promotion", "https://github.com/mozilla/hubs/blob/master/PROMOTION.md")}
+                            href={configs.link("promotion", "https://github.com/Hubs-Foundation/hubs/blob/master/PROMOTION.md")}
                             target="_blank"
                             rel="noopener noreferrer"
                           >
@@ -611,7 +611,7 @@ class AvatarEditor extends Component {
                       values={{
                         a: chunks => (
                           <a
-                            href={configs.link("remixing", "https://github.com/mozilla/hubs/blob/master/REMIXING.md")}
+                            href={configs.link("remixing", "https://github.com/Hubs-Foundation/hubs/blob/master/REMIXING.md")}
                             target="_blank"
                             rel="noopener noreferrer"
                           >
@@ -682,7 +682,7 @@ class AvatarEditor extends Component {
                         <a
                           target="_blank"
                           rel="noopener noreferrer"
-                          href="https://github.com/MozillaReality/hubs-avatar-pipelines"
+                          href="https://github.com/Hubs-Foundation/hubs-avatar-pipelines"
                         >
                           {chunks}
                         </a>

@@ -95,7 +95,7 @@ const SystemEditorComponent = ({ classes }) => {
           <CardSection
             className="mb-20"
             ctaCallback={() => {
-              window.open(`https://hubs.mozilla.com/docs/hubs-cloud-asset-packs.html`);
+              window.open(`https://docs.hubsfoundation.org/hubs-cloud-asset-packs.html`);
             }}
             cta="get more avatars and scenes"
             body="Give your hub visitors more scenes to explore and a wider
@@ -150,7 +150,7 @@ const SystemEditorComponent = ({ classes }) => {
 
           <CardSection
             ctaCallback={() => {
-              window.open("https://hubs.mozilla.com/docs/hubs-cloud-limiting-user-access.html");
+              window.open("https://docs.hubsfoundation.org/hubs-cloud-limiting-user-access.html");
             }}
             cta="Limit access guide"
             body="Learn how to control who can enter your hub’s rooms."
@@ -179,7 +179,7 @@ const SystemEditorComponent = ({ classes }) => {
                   </a>{" "}
                   Follow instructions in{" "}
                   <a
-                    href="https://hubs.mozilla.com/docs/hubs-cloud-aws-troubleshooting.html#youre-in-the-aws-sandbox-and-people-dont-receive-magic-link-emails"
+                    href="https://docs.hubsfoundation.org/hubs-cloud-aws-troubleshooting.html#youre-in-the-aws-sandbox-and-people-dont-receive-magic-link-emails"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -187,7 +187,7 @@ const SystemEditorComponent = ({ classes }) => {
                   </a>
                   Solution #1, #2, #3, or{" "}
                   <a
-                    href="https://hubs.mozilla.com/docs/hubs-cloud-aws-existing-email-provider.html"
+                    href="https://docs.hubsfoundation.org/hubs-cloud-aws-existing-email-provider.html"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -288,7 +288,7 @@ const SystemEditorComponent = ({ classes }) => {
           <p className="body-md">
             The{" "}
             <a
-              href="https://hubs.mozilla.com/docs/welcome.html"
+              href="https://docs.hubsfoundation.org/welcome.html"
               target="_blank"
               rel="noopener noreferrer"
               className="link"
@@ -306,14 +306,14 @@ const SystemEditorComponent = ({ classes }) => {
           <p className="body-md">
             Visit{" "}
             <a
-              href="https://support.mozilla.org/en-US/products/hubs"
+              href="https://discord.gg/hubs-498741086295031808"
               target="_blank"
               rel="noopener noreferrer"
               className="link"
             >
-              Mozilla Support
+              Hubs Support
             </a>{" "}
-            to seek help with Hubs subscriptions.
+            to seek help with Hubs problems.
           </p>
         </div>
 
@@ -325,14 +325,14 @@ const SystemEditorComponent = ({ classes }) => {
             You can{" "}
             <a
               rel="noopener noreferrer"
-              href="https://github.com/mozilla/hubs/discussions"
+              href="https://github.com/Hubs-Foundation/hubs/discussions"
               target="_blank"
               className="link"
             >
               ask questions
             </a>{" "}
             or{" "}
-            <a className="link" href="https://github.com/mozilla/hubs" target="_blank" rel="noopener noreferrer">
+            <a className="link" href="https://github.com/Hubs-Foundation/hubs" target="_blank" rel="noopener noreferrer">
               file an issue
             </a>{" "}
             on GitHub.
@@ -341,7 +341,7 @@ const SystemEditorComponent = ({ classes }) => {
       </Card>
 
       <div className="flex-align-items-center ml-12">
-        <a href="https://hubs.mozilla.com/whats-new" target="_blank" rel="noopener noreferrer" className="link mr-24">
+        <a href="https://demo.hubsfoundation.org/whats-new" target="_blank" rel="noopener noreferrer" className="link mr-24">
           What's new
         </a>
         {!configs.IS_LOCAL_OR_CUSTOM_CLIENT && (
@@ -355,7 +355,7 @@ const SystemEditorComponent = ({ classes }) => {
           <p>{`Undeploy custom client to run build ${process.env.BUILD_VERSION || "?"}`}</p>
           <p>
             Remember to regularly pull in upstream changes from the "hubs-cloud" branch:{" "}
-            <a href="https://github.com/mozilla/hubs" target="_blank" rel="noopener noreferrer" className="link">
+            <a href="https://github.com/Hubs-Foundation/hubs" target="_blank" rel="noopener noreferrer" className="link">
               Github
             </a>
           </p>

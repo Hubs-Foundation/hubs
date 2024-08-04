@@ -169,7 +169,7 @@ export function waypointSystem(
   // In that case initialSpawnHappened will be set to true and then we can get the hash named point and move to that one,
   // this way we don't override the player position with the default spawn point position.
   // We use previousWaypointHash to make sure that if we have already moved to a named waypoint we don't move again.
-  // See https://github.com/mozilla/hubs/issues/2833 and https://github.com/mozilla/hubs/pull/2837/files#r468103137
+  // See https://github.com/Hubs-Foundation/hubs/issues/2833 and https://github.com/Hubs-Foundation/hubs/pull/2837/files#r468103137
   const hashUpdated = window.location.hash !== "" && previousWaypointHash !== window.location.hash;
   const waypointName = window.location.hash.replace("#", "");
   if (hashUpdated && initialSpawnHappened) {

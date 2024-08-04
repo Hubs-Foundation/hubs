@@ -42,7 +42,7 @@ AFRAME.registerComponent("video-texture-source", {
     const texture = this.renderTarget.texture;
 
     // Since we are rendering directly to a texture we need to flip it vertically
-    // See https://github.com/mozilla/hubs/pull/4126#discussion_r610120237
+    // See https://github.com/Hubs-Foundation/hubs/pull/4126#discussion_r610120237
     texture.matrixAutoUpdate = false;
     texture.matrix.scale(1, -1);
     texture.matrix.translate(0, 1);

@@ -261,7 +261,7 @@ function loadFromJson(hubChannel: HubChannel) {
 };
 
 const TEST_ASSET_STATE =
-  "https://raw.githubusercontent.com/mozilla/hubs-sample-assets/main/Hubs%20Components/test_json/__NAME__";
+  "https://raw.githubusercontent.com/Hubs-Foundation/hubs-sample-assets/main/Hubs%20Components/test_json/__NAME__";
 
 export async function loadState(hubChannel: HubChannel, world: HubsWorld, state: string) {
   clearState(world, hubChannel);
