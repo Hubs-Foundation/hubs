@@ -33,7 +33,11 @@ export const Base = () => (
 export const InviteLink = () => (
   <RoomLayout
     toolbarCenter={
-      <InvitePopoverButton inviteRequired initiallyVisible inviteUrl="https://demo.hubsfoundation.org/123?hub_invite_id=123" />
+      <InvitePopoverButton
+        inviteRequired
+        initiallyVisible
+        inviteUrl="https://demo.hubsfoundation.org/123?hub_invite_id=123"
+      />
     }
   />
 );
