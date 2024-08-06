@@ -13,7 +13,7 @@ import { store } from "./utils/store-instance";
 
 registerTelemetry("/discord", "Discord Landing Page");
 
-const inviteUrl = "https://forms.gle/GGPgarSuY5WaTNCT8";
+const inviteUrl = "https://github.com/Hubs-Foundation/hubs-discord-bot";
 
 class DiscordPage extends Component {
   componentDidMount() {}
