@@ -29,7 +29,7 @@ export function Footer({
               values={{
                 // eslint-disable-next-line react/display-name
                 a: chunks => (
-                  <a className={styles.link} href="https://demo.hubsfoundation.org">
+                  <a className={styles.link} href="https://hubsfoundation.org">
                     {chunks}
                   </a>
                 )
