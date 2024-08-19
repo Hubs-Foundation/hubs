@@ -1,7 +1,17 @@
 import { showHoverEffect } from "../utils/permissions-utils";
 
-const interactorOneTransform = [];
-const interactorTwoTransform = [];
+const interactorOneTransform = [
+  1, 0, 0, 0,
+  0, 1, 0, 0,
+  0, 0, 1, 0,
+  0, 0, 0, 1
+];
+const interactorTwoTransform = [
+  1, 0, 0, 0,
+  0, 1, 0, 0,
+  0, 0, 1, 0,
+  0, 0, 0, 1
+];
 
 export const validMaterials = ["MeshStandardMaterial", "MeshBasicMaterial", "MeshPhongMaterial"];
 /**
