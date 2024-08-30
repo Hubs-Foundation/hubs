@@ -63,7 +63,7 @@ const Banner = () => {
   };
 
   const onSubmit = useCallback(async data => {
-    const url = "https://basket.mozilla.org/news/subscribe/";
+    const url = "https://hubsfoundation.org/mailing-list-sign-up/";
     const body =
       "email=" +
       encodeURIComponent(data.email) +
@@ -105,8 +105,8 @@ const Banner = () => {
   const Label = () => {
     return (
       <>
-        I&apos;m okay with Mozilla handling my info as explained in this{" "}
-        <a href="https://www.mozilla.org/en-US/privacy/websites/" rel="noopener noreferrer" target="_blank">
+        I&apos;m okay with the Hubs Foundation handling my info as explained in this{" "}
+        <a href="https://hubsfoundation.org/privacy-policy/" rel="noopener noreferrer" target="_blank">
           Privacy Notice
         </a>
       </>

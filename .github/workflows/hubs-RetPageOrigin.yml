@@ -16,7 +16,7 @@ on:
           - "smoke05"
 jobs:
   turkeyGitops:
-    uses: mozilla/hubs-ops/.github/workflows/turkeyGitops.yml@master
+    uses: Hubs-Foundation/hubs-ops/.github/workflows/turkeyGitops.yml@master
     with:
       registry: mozillareality
       dockerfile: RetPageOriginDockerfile

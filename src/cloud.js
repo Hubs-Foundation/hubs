@@ -64,7 +64,7 @@ function HubsCloudPage() {
               </Button>
             </div>
             <div className={classNames(styles.getStarted, styles.center)}>
-              <Button as="a" preset="transparent" href="https://hubs.mozilla.com/docs/hubs-cloud-aws-quick-start.html">
+              <Button as="a" preset="transparent" href="https://hubsfoundation.org/hubs-cloud-aws-quick-start.html">
                 <FormattedMessage id="hubs-cloud-page.get-started" defaultMessage="Quick Start Guide" />
               </Button>
             </div>

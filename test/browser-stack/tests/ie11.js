@@ -14,7 +14,7 @@ async function runIE11UnsupportedTest() {
   });
 
   try {
-    await driver.get("https://hubs.mozilla.com/demo");
+    await driver.get("https://demo.hubsfoundation.org");
 
     const unsupportedNotice = await driver.wait(until.elementLocated(by.id("support-root")), 10000);
     const unsupportedNoticeText = await unsupportedNotice.getText();

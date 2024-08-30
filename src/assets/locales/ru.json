@@ -35,7 +35,7 @@
   "exited-room-screen.reason.left": "Вы покинули комнату.",
   "exited-room-screen.reason.scene-error": "Ошибка загрузки сцены.",
   "exited-room-screen.reason.version-mismatch": "Установленная версия пока недоступна. Эта страница перезагрузится через 5 секунд.",
-  "footer.powered-by": "Сделано на базе технологии <a>Mozilla Hubs</a>",
+  "footer.powered-by": "Сделано на базе технологии <a>Hubs</a>",
   "footer.privacy-notice": "Уведомление о конфиденциальности",
   "footer.terms-of-use": "Пользовательское соглашение",
   "footer.whats-new": "Что нового?",
