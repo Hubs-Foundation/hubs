@@ -4,16 +4,19 @@ on:
     branches:
     paths-ignore: ["README.md"]
   workflow_dispatch:
-    inputs:
-      smokeroom-choice:
-        type: choice
-        description: Select smoke instance
-        options:
-          - "smoke01"
-          - "smoke02"
-          - "smoke03"
-          - "smoke04"
-          - "smoke05"
+    # Smoke instances aren't currently set up as of 2024-09-08
+    # so commenting out the smoke stuff for now.
+    # inputs:
+    #   smokeroom-choice:
+    #     type: choice
+    #     description: Select smoke instance
+    #     options:
+    #       - "smoke01"
+    #       - "smoke02"
+    #       - "smoke03"
+    #       - "smoke04"
+    #       - "smoke05"
+
 jobs:
   turkeyGitops:
     uses: Hubs-Foundation/hubs-ops/.github/workflows/turkeyGitops.yml@master
