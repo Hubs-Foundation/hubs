@@ -284,7 +284,11 @@ export default class VirtualAgent {
       if (this.micStatus && !this.waitingForResponse) {
         this.AskAgent();
       } else {
-        stopRecording();
+        const randNumb = 1;
+        const randomDestinationName = Object.keys(navSystem.targetName)[randNumb];
+
+        const navigation = navSystem.GetInstructions(avatarPos(), randomDestinationName);
+        navSystem.RenderCues(navigation);
       }
     }
   }
@@ -353,111 +357,21 @@ export default class VirtualAgent {
     this.infoPanel.obj.visible = true;
     this.waitingForResponse = true;
     this.setMicStatus();
-
-    const agentDataObj = [];
-    let t1, t2;
-
     try {
-      t1 = Date.now();
-      const recordedQuestion = await RecordQuestion();
-      t2 = Date.now();
-
       this.isProccessing = true;
-      const sourceLang = translationSystem.mylanguage ? languageCodes[translationSystem.mylanguage] : "en";
-      const nmtAudioParams = { source_language: sourceLang, target_language: "en", return_transcription: "true" };
+      // const randNumb = Math.floor(Math.random() * Object.keys(navSystem.targetInfo).length);
+      const randNumb = 0;
+      const randomDestinationName = Object.keys(navSystem.targetName)[randNumb];
 
-      t1 = Date.now();
-      const nmtResponse = await audioModules(
-        COMPONENT_ENDPOINTS.TRANSLATE_AUDIO_FILES,
-        recordedQuestion.data.file,
-        nmtAudioParams
-      );
-      t2 = Date.now();
-      agentDataObj.push({
-        start_time: t1.toString(),
-        stop_time: t2.toString(),
-        source_language: translationSystem.mylanguage,
-        target_language: "english",
-        transcription: nmtResponse.data.transcriptions[0],
-        translation: nmtResponse.data.translations[0]
-      });
+      this.DatasetCreate();
 
-      t1 = Date.now();
-      const intentResponse = await intentionModule(nmtResponse.data.translations[0]);
-      t2 = Date.now();
-      agentDataObj.push({
-        start_time: t1.toString(),
-        stop_time: t2.toString(),
-        input: nmtResponse.data.translations[0],
-        intent: intentResponse.data.intent,
-        destination: intentResponse.data.destination
-      });
-
-      t1 = Date.now();
-      const navigation = navSystem.GetInstructions(avatarPos(), intentResponse.data.destination);
-      agentLogger.response.start = new Date();
-      const response = await dsResponseModule(
-        nmtResponse.data.translations[0],
-        intentResponse.data.intent,
-        navigation.knowledge
-      );
-      t2 = Date.now();
-      agentDataObj.push({
-        start_time: t1.toString(),
-        stop_time: t2.toString(),
-        instructions: navigation.instructions,
-        knowledge: navigation.knowledge,
-        ds_output: response.data.response
-      });
-
-      const targetLang = languageCodes[translationSystem.mylanguage];
-      const nmtTextParams = { source_language: "en", target_language: targetLang };
-      const outputArray = this.SegmentText(response.data.response);
-
-      if (nmtTextParams.source_language === nmtTextParams.target_language) this.UpdateTextArray(outputArray);
-      else {
-        t1 = Date.now();
-        const translatePromises = [];
-        outputArray.forEach(sentence =>
-          translatePromises.push(textModule(COMPONENT_ENDPOINTS.TRANSLATE_TEXT, sentence, nmtTextParams))
-        );
-
-        const translatedResponses = await Promise.all(translatePromises);
-        console.log(translatePromises);
-        const TranslatedOutputArray = translatedResponses.map(element => {
-          return element.data.translations[0];
-        });
-
-        this.UpdateTextArray(TranslatedOutputArray);
-        t2 = Date.now();
-        agentDataObj.push({
-          start_time: t1.toString(),
-          stop_time: t2.toString(),
-          source_language: "english",
-          target_language: translationSystem.mylanguage,
-          translated_text: TranslatedOutputArray.join("\n")
-        });
-      }
-
-      const stringData = JSON.stringify(agentDataObj);
-      const jsonDataBlob = new Blob([stringData], { type: "application/json" });
-      // logger.AddAgentInteraction(recordedQuestion.data.file, jsonDataBlob);
-
-      if (intentResponse.data.intent.includes("navigation") && navigation.valid) {
-        this.successResult = true;
-        navSystem.RenderCues(navigation);
-      } else if (intentResponse.data.intent.includes("program_info")) {
-        this.successResult = true;
-      } else {
-        this.successResult = false;
-      }
+      this.UpdateTextArray("Navigation Calculated. Check console");
     } catch (error) {
       console.log("error", error);
       this.UpdateWithRandomPhrase("error");
     } finally {
       this.isProccessing = false;
       this.infoPanel.obj.visible = false;
-
       this.setMicStatus();
       this.waitingForResponse = false;
     }
@@ -465,13 +379,10 @@ export default class VirtualAgent {
 
   DatasetCreate() {
     const destNames = ["conference room", "business room", "social area", "booth 1", "booth 2", "booth 3", "booth 4"];
-    destNames.forEach(destination =>
-      console.log(
-        `{"destination": "${destination}", "intent":"navigation", "mozilla_input":${
-          navSystem.GetInstructions(avatarPos(), destination).knowledge
-        }},`
-      )
-    );
+    destNames.forEach(destination => {
+      const navigation = navSystem.GetInstructions(avatarPos(), destination);
+      navSystem.RenderCues(navigation);
+    });
   }
 
   async SnapActions() {

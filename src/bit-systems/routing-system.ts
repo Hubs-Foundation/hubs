@@ -59,18 +59,6 @@ function GetVector2(vector: Vector3) {
   return new Vector2(vector.x, vector.z);
 }
 
-function GetVector3(vector: Vector2) {
-  return new Vector3(vector.x, 0, vector.y);
-}
-
-function V3toS(vector: Vector3) {
-  return vector.toArray().toString();
-}
-
-function V2toS(vector: Vector2) {
-  return vector.toArray().toString();
-}
-
 function GetSingedAngle(vector1: Vector3, vector2: Vector3) {
   const crossVector = new THREE.Vector3();
   crossVector.crossVectors(vector1, vector2).normalize();
@@ -202,6 +190,7 @@ function Orient(vector1: Vector3, vector2: Vector3): { action: string; direction
 
 export class Node {
   vector: Vector3;
+  vector2: Vector2;
   visited: boolean;
   path: Array<number>;
   distances: Array<number>;
@@ -215,6 +204,7 @@ export class Node {
 
   constructor(x: number, y: number, z: number) {
     this.vector = new THREE.Vector3(x, y, z);
+    this.vector2 = new Vector2(x, z);
     this.visited = false;
     this.path = [];
 
@@ -307,7 +297,6 @@ export class NavigationSystem {
         let startPoint = points[k];
         let endPoint = points[k + 1];
 
-        // if (endPoint - startPoint <= 3) {
         let stopOuterIndex = outerIndex;
 
         for (let i = outerIndex + 1; i < (isVertical ? lineCount : rowCount); i++) {
@@ -329,7 +318,6 @@ export class NavigationSystem {
             }
           }
         }
-        // }
       }
     }
   }
@@ -359,7 +347,6 @@ export class NavigationSystem {
       console.warn("Navigation is not allowed for this room");
       return;
     }
-    console.log("navigation is allowed");
 
     this.navProps = roomPropertiesReader.navProps;
     this.nodes = [];
@@ -427,7 +414,6 @@ export class NavigationSystem {
     });
 
     roomObjects.forEach(object => (this.objects[object.name] = new Vector3(object.position[0], 0, object.position[1])));
-    console.log(this.objects);
 
     const targetNodeArray = Object.values(this.targetName).map(index => this.nodes[index]);
 
@@ -588,7 +574,6 @@ export class NavigationSystem {
 
     for (let lineIndex = 0; lineIndex < nodeLines.length; lineIndex++) {
       const line = vectorLines[lineIndex];
-      console.log("line", lineIndex);
 
       // ------------------- get closest object of every point in line ------------------- //
 
@@ -679,7 +664,6 @@ export class NavigationSystem {
 
           if (pointIndex === line.length - 1) {
             inCorner = nodeLines[lineIndex][pointIndex].corner;
-            console.log(approachingCount, sameClosestObjCount, closestObjAngle, currentDistance);
 
             if (
               approachingCount > Math.min(0, sameClosestObjCount) &&
@@ -706,7 +690,6 @@ export class NavigationSystem {
           instructions.push(`crossing ${object[0]} ${object[1]}`);
         });
         let arriving;
-        console.log(location);
         if (inCorner) arriving = "corner";
         else if (location.length > 0) arriving = location;
         else arriving = "wall";
@@ -765,8 +748,6 @@ export class NavigationSystem {
         prevLine.copy(current.clone().sub(prev));
       }
 
-      // console.log(GetSingedAngle(prevLine.normalize(), nextLine.normalize()));
-
       let closestObject;
       let closestObjectIndex = GetClosestIndex(current, Object.values(this.objects));
       if (closestObjectIndex > 0) closestObject = Object.values(this.objects)[closestObjectIndex];
@@ -809,7 +790,6 @@ export class NavigationSystem {
 
     navigation.valid = true;
     this.dest.pos = this.nodes[stopIndex];
-    // console.log(`Destination has changed to:`, navigation);
     return navigation;
   }
 
@@ -855,7 +835,6 @@ export class NavigationSystem {
       APP.scene!.object3D.add(this.cuesObj);
       this.dest.active = true;
       this.dest.time = new Date();
-      // console.log("Destination is now active: ", this.dest);
     } catch (error) {
       console.log(error);
     }
