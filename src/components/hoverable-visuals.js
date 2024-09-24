@@ -1,11 +1,13 @@
 import { showHoverEffect } from "../utils/permissions-utils";
 
+// prettier-ignore
 const interactorOneTransform = [
   1, 0, 0, 0,
   0, 1, 0, 0,
   0, 0, 1, 0,
   0, 0, 0, 1
 ];
+// prettier-ignore
 const interactorTwoTransform = [
   1, 0, 0, 0,
   0, 1, 0, 0,
