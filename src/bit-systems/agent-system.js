@@ -284,11 +284,10 @@ export default class VirtualAgent {
       if (this.micStatus && !this.waitingForResponse) {
         this.AskAgent();
       } else {
-        const randNumb = 1;
-        const randomDestinationName = Object.keys(navSystem.targetName)[randNumb];
-
-        const navigation = navSystem.GetInstructions(avatarPos(), randomDestinationName);
-        navSystem.RenderCues(navigation);
+        // const randNumb = 1;
+        // const randomDestinationName = Object.keys(navSystem.targetName)[randNumb];
+        // const navigation = navSystem.GetInstructions(randomDestinationName);
+        // navSystem.RenderCues(navigation);
       }
     }
   }
@@ -359,13 +358,13 @@ export default class VirtualAgent {
     this.setMicStatus();
     try {
       this.isProccessing = true;
-      // const randNumb = Math.floor(Math.random() * Object.keys(navSystem.targetInfo).length);
-      const randNumb = 0;
-      const randomDestinationName = Object.keys(navSystem.targetName)[randNumb];
 
-      this.DatasetCreate();
+      const nav = this.DatasetCreate();
+      console.log(nav);
 
-      this.UpdateTextArray("Navigation Calculated. Check console");
+      this.UpdateTextArray([nav.knowledge]);
+      const dsResponse = await dsResponseModule(`How can I go to the ${nav.destination}?`, "navigation", nav.knowledge);
+      this.UpdateTextArray([dsResponse.data.response]);
     } catch (error) {
       console.log("error", error);
       this.UpdateWithRandomPhrase("error");
@@ -379,10 +378,11 @@ export default class VirtualAgent {
 
   DatasetCreate() {
     const destNames = ["conference room", "business room", "social area", "booth 1", "booth 2", "booth 3", "booth 4"];
-    destNames.forEach(destination => {
-      const navigation = navSystem.GetInstructions(avatarPos(), destination);
-      navSystem.RenderCues(navigation);
-    });
+    const randomInt = Math.floor(Math.random() * destNames.length);
+    const navigation = navSystem.GetInstructions("business room");
+    navigation.destination = destNames[randomInt];
+    navSystem.RenderCues(navigation);
+    return navigation;
   }
 
   async SnapActions() {
