@@ -13,7 +13,7 @@ import {
   HeldHandLeft,
   AEntity,
   Networked,
-  Rigidbody
+  Rigidbody, Deletable, MediaLoader
 } from "../bit-components";
 import { canMove } from "../utils/permissions-utils";
 import { canMove as canMoveEntity } from "../utils/bit-permissions-utils";
@@ -81,7 +81,7 @@ export function isAEntityPinned(world, eid) {
 function grab(world, userinput, queryHovered, held, grabPath) {
   const hovered = queryHovered(world)[0];
 
-  const interactable = findAncestorWithComponents(world, [Holdable, Rigidbody], hovered);
+  const interactable = findAncestorWithComponents(world, [Deletable, MediaLoader, Holdable, Rigidbody], hovered);
   const target = interactable ? interactable : hovered;
   const isEntityPinned = isPinned(target) || isAEntityPinned(world, target);
 
