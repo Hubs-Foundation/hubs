@@ -27,6 +27,7 @@ export function AvatarSettingsContent({
         label={<FormattedMessage id="avatar-settings-content.display-name-label" defaultMessage="Display Name" />}
         value={displayName}
         pattern={displayNamePattern}
+        placeholder="displayed over your avatar"
         spellCheck="false"
         required
         onChange={onChangeDisplayName}
@@ -42,6 +43,7 @@ export function AvatarSettingsContent({
         label={<FormattedMessage id="avatar-settings-content.pronouns-label" defaultMessage="Pronouns (optional)" />}
         value={pronouns}
         pattern={pronounsPattern}
+        placeholder="slash, comma or space separated"
         spellCheck="false"
         onChange={onChangePronouns}
         ref={pronounsInputRef}
