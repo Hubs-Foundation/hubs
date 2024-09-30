@@ -1,8 +1,32 @@
-const isMobileVR = AFRAME.utils.device.isMobileVR();
+
+export async function shareInviteUrl(intl, url, values = {}, event) {
+  try {
+    event.preventDefault();
+    event.stopPropagation();
+    const title = intl.formatMessage(
+      {
+        id: "invite-popover.share-title",
+        defaultMessage: "You're invited to join room “{name}” on {host}"
+      },
+      values
+    );
+    const text = intl.formatMessage(
+      {
+        id: "invite-popover.share-text",
+        defaultMessage: "{host} is an immersive 3D space you can access on any device. Meet and collaborate in real time using an avatar and add your own media!"
+      },
+      values
+    );
+    const data = { title, text, url};
+    console.info(`attempting to share:`, data);
+    await share(data);
+  } catch (error) {
+    console.error("unable to share:", error);
+  }
+}
 
 export function canShare() {
-  // TODO, fix up when OB/FxR support sharing
-  return navigator.share && !isMobileVR;
+  return 'function' === typeof navigator.share;
 }
 
 /**

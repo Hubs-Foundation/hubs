@@ -9,22 +9,40 @@ import { Column } from "../layout/Column";
 import { InviteLinkInputField } from "./InviteLinkInputField";
 import { FormattedMessage, defineMessage, useIntl } from "react-intl";
 import { ToolTip } from "@mozilla/lilypad-ui";
+import { Button } from "../input/Button";
+import styleUtils from "../styles/style-utils.scss";
+import isMobile from "../../utils/is-mobile";
+import { canShare } from "../../utils/share";
 
-function InvitePopoverContent({ url, embed, inviteRequired, fetchingInvite, inviteUrl, revokeInvite }) {
+function InvitePopoverContent({ url, embed, inviteRequired, fetchingInvite, inviteUrl, revokeInvite, shareUrlHandler }) {
   return (
     <Column center padding grow gap="lg" className={styles.invitePopover}>
       {inviteRequired ? (
         <>
+          {canShare() &&
+            <Button preset="primary" onClick={shareUrlHandler}>
+              <span>
+                <FormattedMessage id="invite-popover.share-invitation" defaultMessage="Share Invitation" />
+              </span>
+            </Button>
+          }
           <InviteLinkInputField fetchingInvite={fetchingInvite} inviteUrl={inviteUrl} onRevokeInvite={revokeInvite} />
         </>
       ) : (
         <>
+          {canShare() &&
+            <Button preset="primary" onClick={shareUrlHandler}>
+              <span>
+                <FormattedMessage id="invite-popover.share-room-link" defaultMessage="Share Room Link" />
+              </span>
+            </Button>
+          }
           <CopyableTextInputField
             label={<FormattedMessage id="invite-popover.room-link" defaultMessage="Room Link" />}
             value={url}
             buttonPreset="accent3"
           />
-          {embed && (
+          {!isMobile() && embed && (
             <CopyableTextInputField
               label={<FormattedMessage id="invite-popover.embed-code" defaultMessage="Embed Code" />}
               value={embed}
@@ -65,6 +83,7 @@ export function InvitePopoverButton({
   fetchingInvite,
   inviteUrl,
   revokeInvite,
+  shareUrlHandler,
   ...rest
 }) {
   const intl = useIntl();
@@ -82,6 +101,7 @@ export function InvitePopoverButton({
           fetchingInvite={fetchingInvite}
           inviteUrl={inviteUrl}
           revokeInvite={revokeInvite}
+          shareUrlHandler={shareUrlHandler}
         />
       )}
       placement="top-start"
