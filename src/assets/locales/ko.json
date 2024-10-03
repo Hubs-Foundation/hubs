@@ -456,7 +456,7 @@
   "invite-popover.share-invitation": "Share Invitation",
   "invite-popover.share-room-link": "Share Room Link",
   "invite-popover.share-text": "{host} is an immersive 3D space you can access on any device. Meet and collaborate in real time using an avatar and add your own media!",
-  "invite-popover.share-title": "You're invited to join {name} on {host}",
+  "invite-popover.share-title": "You're invited to join room “{name}” on {host}",
   "invite-popover.embed-code": "Embed Code",
   "user-profile-sidebar.promote-button": "관리자로 임명하기",
   "user-profile-sidebar.demote-button": "참가자로 변경하기",

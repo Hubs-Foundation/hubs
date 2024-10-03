@@ -216,7 +216,7 @@
   "invite-popover.share-invitation": "Share Invitation",
   "invite-popover.share-room-link": "Share Room Link",
   "invite-popover.share-text": "{host} is an immersive 3D space you can access on any device. Meet and collaborate in real time using an avatar and add your own media!",
-  "invite-popover.share-title": "You're invited to join {name} on {host}",
+  "invite-popover.share-title": "You're invited to join room “{name}” on {host}",
   "invite-popover.title": "邀請",
   "leave-room-modal.create-room.confirm": "離開並創造一個房間",
   "leave-room-modal.create-room.message": "創造一個新房間你將會離開此房間. 你確定嗎?",
