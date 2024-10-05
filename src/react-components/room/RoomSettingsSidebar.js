@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { useForm } from "react-hook-form";
 import styles from "./RoomSettingsSidebar.scss";
@@ -17,6 +17,9 @@ import { SceneInfo } from "./RoomSidebar";
 import { Column } from "../layout/Column";
 import { InviteLinkInputField } from "./InviteLinkInputField";
 import { canShare, shareInviteUrl } from "../../utils/share";
+import { ReactComponent as ShareIcon } from "../icons/Share.svg";
+import { Checkbox } from "@mozilla/lilypad-ui";
+import configs from "../../utils/configs";
 
 export function RoomSettingsSidebar({
   showBackButton,
@@ -52,6 +55,8 @@ export function RoomSettingsSidebar({
       setValue("member_permissions.pin_objects", false, { shouldDirty: true });
     }
   }, [spawnAndMoveMedia, setValue]);
+
+  const [isShareInEnglish, setIsShareInEnglish] = useState(false);
 
   return (
     <Sidebar
@@ -136,12 +141,19 @@ export function RoomSettingsSidebar({
         </RadioInputField>
         {entryMode === "invite" && (
           <>
-            {canShare() &&
-              <Button preset="primary" onClick={shareInviteUrl.bind(this, intl, inviteUrl, room)}>
-              <span>
+            {canShare() && <>
+              <Button preset="primary" onClick={shareInviteUrl.bind(this, intl, inviteUrl, {roomName: room.name, appName: configs.translation("app-name")}, isShareInEnglish)}>
+                <ShareIcon />
+                <span>
                 <FormattedMessage id="invite-popover.share-invitation" defaultMessage="Share Invitation" />
               </span>
               </Button>
+              <Checkbox
+                label={<FormattedMessage id="invite-popover.share-in-english" defaultMessage="Share in English" />}
+                checked={isShareInEnglish}
+                onChange={_event => setIsShareInEnglish(inEnglish => !inEnglish)}
+              />
+            </>
             }
             <InviteLinkInputField fetchingInvite={fetchingInvite} inviteUrl={inviteUrl} onRevokeInvite={onRevokeInvite} />
           </>

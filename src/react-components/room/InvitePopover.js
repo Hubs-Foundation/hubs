@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import styles from "./InvitePopover.scss";
 import { CopyableTextInputField } from "../input/CopyableTextInputField";
@@ -8,34 +8,51 @@ import { ReactComponent as InviteIcon } from "../icons/Invite.svg";
 import { Column } from "../layout/Column";
 import { InviteLinkInputField } from "./InviteLinkInputField";
 import { FormattedMessage, defineMessage, useIntl } from "react-intl";
-import { ToolTip } from "@mozilla/lilypad-ui";
+import { Checkbox, ToolTip } from "@mozilla/lilypad-ui";
 import { Button } from "../input/Button";
 import styleUtils from "../styles/style-utils.scss";
 import isMobile from "../../utils/is-mobile";
 import { canShare } from "../../utils/share";
+import { ReactComponent as ShareIcon } from "../icons/Share.svg";
+
 
 function InvitePopoverContent({ url, embed, inviteRequired, fetchingInvite, inviteUrl, revokeInvite, shareUrlHandler }) {
+  const [isShareInEnglish, setIsShareInEnglish] = useState(false);
   return (
     <Column center padding grow gap="lg" className={styles.invitePopover}>
       {inviteRequired ? (
         <>
-          {canShare() &&
-            <Button preset="primary" onClick={shareUrlHandler}>
+          {canShare() && <>
+            <Button preset="primary" onClick={shareUrlHandler.bind(this, isShareInEnglish)}>
+              <ShareIcon />
               <span>
                 <FormattedMessage id="invite-popover.share-invitation" defaultMessage="Share Invitation" />
               </span>
             </Button>
+            <Checkbox
+              label={<FormattedMessage id="invite-popover.share-in-english" defaultMessage="Share in English" />}
+              checked={isShareInEnglish}
+              onChange={_event => setIsShareInEnglish(inEnglish => !inEnglish)}
+            />
+          </>
           }
           <InviteLinkInputField fetchingInvite={fetchingInvite} inviteUrl={inviteUrl} onRevokeInvite={revokeInvite} />
         </>
       ) : (
         <>
-          {canShare() &&
-            <Button preset="primary" onClick={shareUrlHandler}>
+          {canShare() && <>
+            <Button preset="primary" onClick={shareUrlHandler.bind(this, isShareInEnglish)}>
+              <ShareIcon />
               <span>
                 <FormattedMessage id="invite-popover.share-room-link" defaultMessage="Share Room Link" />
               </span>
             </Button>
+            <Checkbox
+              label={<FormattedMessage id="invite-popover.share-in-english" defaultMessage="Share in English" />}
+              checked={isShareInEnglish}
+              onChange={_event => setIsShareInEnglish(inEnglish => !inEnglish)}
+            />
+          </>
           }
           <CopyableTextInputField
             label={<FormattedMessage id="invite-popover.room-link" defaultMessage="Room Link" />}

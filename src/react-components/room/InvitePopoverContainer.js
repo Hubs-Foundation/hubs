@@ -12,8 +12,7 @@ export function InvitePopoverContainer({ hub, hubChannel, scene, store, ...rest 
   const intl = useIntl();
 
   // TODO: Move to Hub class
-  const hubUrlObj = hubUrl(hub.hub_id, { });
-  const url = hubUrlObj.href;
+  const url = hubUrl(hub.hub_id, { }).href;
   // const shortUrl = `https://${configs.SHORTLINK_DOMAIN}`;
   // const url = `${shortUrl}/${hub.hub_id}`;
 
@@ -59,7 +58,7 @@ export function InvitePopoverContainer({ hub, hubChannel, scene, store, ...rest 
     fetchingInvite={fetchingInvite}
     inviteUrl={inviteUrl}
     revokeInvite={revokeInvite}
-    shareUrlHandler={shareInviteUrl.bind(this, intl, inviteRequired ? inviteUrl : url, {name: hub.name, host: hubUrlObj.hostname})}
+    shareUrlHandler={shareInviteUrl.bind(this, intl, inviteRequired ? inviteUrl : url, {roomName: hub.name, appName: configs.translation("app-name")})}
     url={url}
     embed={embedText}
     popoverApiRef={popoverApiRef}
