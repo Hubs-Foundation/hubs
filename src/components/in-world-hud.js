@@ -60,7 +60,9 @@ AFRAME.registerComponent("in-world-hud", {
 
     this.onInviteClick = async (event) => {
       try {
-        const extraParams = APP.hub.entry_mode === "invite" ? {hub_invite_id: APP.hubChannel.fetchInvite()} : {};
+        const extraParams = APP.hub.entry_mode === "invite" ?
+          {hub_invite_id: (await APP.hubChannel.fetchInvite()).hub_invite_id} :
+          {};
         const url = hubUrl(APP.hub.hub_id, extraParams).href;
         await shareInviteUrl(null, url, { roomName: APP.hub.name, appName: configs.translation("app-name") }, true, event);
         await handleExitTo2DInterstitial(true, () => {});
