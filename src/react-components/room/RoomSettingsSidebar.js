@@ -16,7 +16,7 @@ import { BackButton } from "../input/BackButton";
 import { SceneInfo } from "./RoomSidebar";
 import { Column } from "../layout/Column";
 import { InviteLinkInputField } from "./InviteLinkInputField";
-import { canShare, shareInviteUrl } from "../../utils/share";
+import { canShare, shareInviteUrlWCatch } from "../../utils/share";
 import { ReactComponent as ShareIcon } from "../icons/Share.svg";
 import { Checkbox } from "@mozilla/lilypad-ui";
 import configs from "../../utils/configs";
@@ -142,7 +142,7 @@ export function RoomSettingsSidebar({
         {entryMode === "invite" && (
           <>
             {canShare() && <>
-              <Button preset="primary" onClick={shareInviteUrl.bind(this, intl, inviteUrl, {roomName: room.name, appName: configs.translation("app-name")}, isShareInEnglish)}>
+              <Button preset="primary" onClick={shareInviteUrlWCatch.bind(this, intl, inviteUrl, {roomName: room.name, appName: configs.translation("app-name")}, isShareInEnglish)}>
                 <ShareIcon />
                 <span>
                 <FormattedMessage id="invite-popover.share-invitation" defaultMessage="Share Invitation" />

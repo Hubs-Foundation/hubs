@@ -6,7 +6,7 @@ import { InvitePopoverButton } from "./InvitePopover";
 import { handleExitTo2DInterstitial } from "../../utils/vr-interstitial";
 import { useInviteUrl } from "./hooks/useInviteUrl";
 import { useIntl } from "react-intl";
-import { shareInviteUrl } from "../../utils/share"
+import { shareInviteUrlWCatch } from "../../utils/share"
 
 export function InvitePopoverContainer({ hub, hubChannel, scene, store, ...rest }) {
   const intl = useIntl();
@@ -25,7 +25,7 @@ export function InvitePopoverContainer({ hub, hubChannel, scene, store, ...rest 
 
   const popoverApiRef = useRef();
 
-  // Handle clicking on the invite button while in VR.
+  // Handle clicking on the invite button in "More" menu.
   useEffect(() => {
     function onInviteButtonClicked() {
       handleExitTo2DInterstitial(true, () => {}).then(() => {
@@ -58,7 +58,7 @@ export function InvitePopoverContainer({ hub, hubChannel, scene, store, ...rest 
     fetchingInvite={fetchingInvite}
     inviteUrl={inviteUrl}
     revokeInvite={revokeInvite}
-    shareUrlHandler={shareInviteUrl.bind(this, intl, inviteRequired ? inviteUrl : url, {roomName: hub.name, appName: configs.translation("app-name")})}
+    shareUrlHandler={shareInviteUrlWCatch.bind(this, intl, inviteRequired ? inviteUrl : url, {roomName: hub.name, appName: configs.translation("app-name")})}
     url={url}
     embed={embedText}
     popoverApiRef={popoverApiRef}
