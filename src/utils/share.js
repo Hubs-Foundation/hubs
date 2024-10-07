@@ -28,8 +28,8 @@ export function share(opts) {
 
 export async function shareInviteUrl(intl, url, values = {}, inEnglish = false, event) {
   try {
-    event.preventDefault();
-    event.stopPropagation();
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
     if (inEnglish) {
       const cache = createIntlCache(); // prevents memory leak
       intl = createIntl({ locale: "en", messages: {} }, cache);
@@ -55,7 +55,9 @@ export async function shareInviteUrl(intl, url, values = {}, inEnglish = false, 
     const data = { title, text, url };
     console.info(`attempting to share:`, data);
     await share(data);
+    return true;
   } catch (error) {
     console.error("unable to share:", error);
+    return false;
   }
 }

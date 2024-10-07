@@ -25,7 +25,7 @@ export function InvitePopoverContainer({ hub, hubChannel, scene, store, ...rest 
 
   const popoverApiRef = useRef();
 
-  // Handle clicking on the invite button while in VR.
+  // Handle clicking on the invite button in "More" menu.
   useEffect(() => {
     function onInviteButtonClicked() {
       handleExitTo2DInterstitial(true, () => {}).then(() => {
