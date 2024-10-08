@@ -18,6 +18,7 @@ import { ReactComponent as ShareIcon } from "../icons/Share.svg";
 
 function InvitePopoverContent({ url, embed, inviteRequired, fetchingInvite, inviteUrl, revokeInvite, shareUrlHandler }) {
   const [isShareInEnglish, setIsShareInEnglish] = useState(false);
+  const intl = useIntl();
   return (
     <Column center padding grow gap="lg" className={styles.invitePopover}>
       {inviteRequired ? (
@@ -29,11 +30,13 @@ function InvitePopoverContent({ url, embed, inviteRequired, fetchingInvite, invi
                 <FormattedMessage id="invite-popover.share-invitation" defaultMessage="Share Invitation" />
               </span>
             </Button>
-            <Checkbox
-              label={<FormattedMessage id="invite-popover.share-in-english" defaultMessage="Share in English" />}
-              checked={isShareInEnglish}
-              onChange={_event => setIsShareInEnglish(inEnglish => !inEnglish)}
-            />
+            { ! intl?.locale?.startsWith?.('en') &&
+              <Checkbox
+                label={<FormattedMessage id="invite-popover.share-in-english" defaultMessage="Share in English" />}
+                checked={isShareInEnglish}
+                onChange={_event => setIsShareInEnglish(inEnglish => !inEnglish)}
+              />
+            }
           </>
           }
           <InviteLinkInputField fetchingInvite={fetchingInvite} inviteUrl={inviteUrl} onRevokeInvite={revokeInvite} />
@@ -47,11 +50,13 @@ function InvitePopoverContent({ url, embed, inviteRequired, fetchingInvite, invi
                 <FormattedMessage id="invite-popover.share-room-link" defaultMessage="Share Room Link" />
               </span>
             </Button>
-            <Checkbox
-              label={<FormattedMessage id="invite-popover.share-in-english" defaultMessage="Share in English" />}
-              checked={isShareInEnglish}
-              onChange={_event => setIsShareInEnglish(inEnglish => !inEnglish)}
-            />
+            { ! intl?.locale?.startsWith?.('en') &&
+              <Checkbox
+                label={<FormattedMessage id="invite-popover.share-in-english" defaultMessage="Share in English" />}
+                checked={isShareInEnglish}
+                onChange={_event => setIsShareInEnglish(inEnglish => !inEnglish)}
+              />
+            }
           </>
           }
           <CopyableTextInputField

@@ -148,11 +148,13 @@ export function RoomSettingsSidebar({
                 <FormattedMessage id="invite-popover.share-invitation" defaultMessage="Share Invitation" />
               </span>
               </Button>
-              <Checkbox
-                label={<FormattedMessage id="invite-popover.share-in-english" defaultMessage="Share in English" />}
-                checked={isShareInEnglish}
-                onChange={_event => setIsShareInEnglish(inEnglish => !inEnglish)}
-              />
+              { ! intl?.locale?.startsWith?.('en') &&
+                <Checkbox
+                  label={<FormattedMessage id="invite-popover.share-in-english" defaultMessage="Share in English" />}
+                  checked={isShareInEnglish}
+                  onChange={_event => setIsShareInEnglish(inEnglish => !inEnglish)}
+                />
+              }
             </>
             }
             <InviteLinkInputField fetchingInvite={fetchingInvite} inviteUrl={inviteUrl} onRevokeInvite={onRevokeInvite} />
