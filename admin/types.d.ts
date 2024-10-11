@@ -7,13 +7,14 @@ export type ReticulumMetaT = {
 };
 
 /**
- * p0 : FREE TIER
- * p1 : STANDARD TIER
+ * p0 : Starter
+ * p1 : Personal
+ * b0 : Professional
  * b1: BUSINESS TIER
  */
-export type TiersT = "p0" | "p1" | "b1";
+export type TiersT = "p0" | "p1" | "b0" | "b1";
 
-export type PaidTiers = "p1" | "b1";
+export type PaidTiers = "p1" | "b0" | "b1";
 
 export type ReticulumRepoT = {
   accounts: {
