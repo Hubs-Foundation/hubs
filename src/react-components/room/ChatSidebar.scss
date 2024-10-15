@@ -47,6 +47,9 @@
   padding: 10px 16px;
   max-width: 80%;
   width: max-content;
+  display: flex;
+  flex-direction: row;
+  justify-content: start;
   font-size: theme.$font-size-md;
   overflow-wrap: break-word;
   line-height: 1.25;
@@ -71,6 +74,8 @@
     background-color: theme.$chat-bubble-bg-color-sent;
     color: theme.$chat-bubble-text-color-sent;
     align-self: flex-end;
+    flex-direction: row-reverse;
+    justify-content: end;
 
     a {
       color: theme.$chat-bubble-text-color-sent;
@@ -131,6 +136,24 @@
 
   svg {
     color: theme.$input-icon-color;
+  }
+}
+
+:local(.icon-button) {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  flex-shrink: 0;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  border-radius: 18px;
+  background-color: transparent;
+
+  &:hover {
+    @media (pointer: fine) {
+      color: theme.$primary-color-hover;
+    }
   }
 }
 
