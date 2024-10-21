@@ -18,7 +18,8 @@ export const FloatingTextPanel = defineComponent({
   textRef: Types.eid,
   nextRef: Types.eid,
   prevRef: Types.eid,
-  testRef: Types.eid
+  resetRef: Types.eid,
+  clickRef: Types.eid
 });
 
 export const Agent = defineComponent({

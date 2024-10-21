@@ -1,7 +1,7 @@
 /** @jsx createElementEntity */
 import { Color } from "three";
 import { ArrayVec3, Attrs, createElementEntity, createRef } from "../utils/jsx-entity";
-import { Button3D, BUTTON_TYPES } from "./button3D";
+import { TextButton3D, BUTTON_TYPES } from "./button3D";
 import { Label } from "./camera-tool";
 
 const BUTTON_HEIGHT = 0.2;
@@ -14,7 +14,7 @@ interface PDFPageButtonProps extends Attrs {
 
 function PDFPageButton(props: PDFPageButtonProps) {
   return (
-    <Button3D
+    <TextButton3D
       name={props.name}
       scale={BUTTON_SCALE}
       width={BUTTON_WIDTH}

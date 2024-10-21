@@ -3,7 +3,7 @@ import { createElementEntity, renderAsEntity, Ref, createRef, EntityDef, ArrayVe
 import spotSrc from "../assets/images/pointer.png";
 import { textureLoader } from "../utils/media-utils";
 import nametagSrc from "../assets/hud/nametag.9.png";
-import { BUTTON_TYPES, Button3D } from "./button3D";
+import { BUTTON_TYPES, TextButton3D } from "./button3D";
 import { ProjectionMode } from "../utils/projection-mode";
 import { AlphaMode } from "../utils/create-image-mesh";
 import { TextureCache } from "../utils/texture-cache";
@@ -17,7 +17,8 @@ export function HelpImagePanel(slides: Array<string>, ratio: number) {
   const panelRef = createRef();
   const nextRef = createRef();
   const prevRef = createRef();
-  const testRef = createRef();
+  const resetRef = createRef();
+  const clickRef = createRef();
 
   const slideEntities = [] as Array<EntityDef>;
 
@@ -40,14 +41,20 @@ export function HelpImagePanel(slides: Array<string>, ratio: number) {
   return (
     <entity
       name="tutorialPanel"
-      floatingTextPanel={{ textRef: textRef, nextRef: nextRef, prevRef: prevRef, testRef: testRef }}
+      floatingTextPanel={{
+        textRef: textRef,
+        nextRef: nextRef,
+        prevRef: prevRef,
+        resetRef: resetRef,
+        clickRef: clickRef
+      }}
       ref={panelRef}
       followFov={{ offset: [0, 0, -2] }}
       scale={[1.5, 1.5, 1.5]}
     >
       {slideEntities}
 
-      <Button3D
+      <TextButton3D
         ref={nextRef}
         position={[0.5, 0, 0.3]}
         width={0.2}
@@ -57,7 +64,7 @@ export function HelpImagePanel(slides: Array<string>, ratio: number) {
         text={">"}
       />
 
-      <Button3D
+      <TextButton3D
         ref={prevRef}
         position={[-0.5, 0, 0.3]}
         scale={[0.5, 0.5, 0.5]}
@@ -67,8 +74,8 @@ export function HelpImagePanel(slides: Array<string>, ratio: number) {
         text={"<"}
       />
 
-      <Button3D
-        ref={testRef}
+      <TextButton3D
+        ref={resetRef}
         position={[0, -1, 0.3]}
         width={0.5}
         height={0.2}

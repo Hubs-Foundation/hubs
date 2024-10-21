@@ -15,7 +15,7 @@ class HelpButton {
   panelRef: number;
   prevRef: number;
   nextRef: number;
-  testRef: number;
+  clickRef: number;
   activeSlideIndex: number;
 
   panelObj: Object3D;
@@ -116,11 +116,11 @@ class HelpButton {
 
     this.prevRef = FloatingTextPanel.prevRef[this.panelRef];
     this.nextRef = FloatingTextPanel.nextRef[this.panelRef];
-    this.testRef = FloatingTextPanel.testRef[this.panelRef];
+    this.clickRef = FloatingTextPanel.clickRef[this.panelRef];
 
     this.prevObj = APP.world.eid2obj.get(this.prevRef)!;
     this.nextObj = APP.world.eid2obj.get(this.nextRef)!;
-    this.testObj = APP.world.eid2obj.get(this.testRef)!;
+    this.testObj = APP.world.eid2obj.get(this.clickRef)!;
 
     this.testObj.visible = false;
 

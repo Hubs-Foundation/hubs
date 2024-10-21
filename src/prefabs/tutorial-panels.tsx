@@ -1,38 +1,58 @@
 /** @jsx createElementEntity */
 import { createElementEntity, renderAsEntity, Ref, createRef, EntityDef, ArrayVec3 } from "../utils/jsx-entity";
 import spotSrc from "../assets/images/pointer.png";
-import { textureLoader } from "../utils/media-utils";
+import { resolveMediaInfo, textureLoader } from "../utils/media-utils";
 import nametagSrc from "../assets/hud/nametag.9.png";
-import { BUTTON_TYPES, Button3D } from "./button3D";
+import { BUTTON_TYPES, TextButton3D, StaticButton3D } from "./button3D";
 import { ProjectionMode } from "../utils/projection-mode";
 import { AlphaMode } from "../utils/create-image-mesh";
 import { TextureCache } from "../utils/texture-cache";
 import { degToRad, radToDeg } from "three/src/math/MathUtils";
 import { FollowFov } from "../bit-components";
+import { createTexture, loadTexture, loadTextureFromCache } from "../utils/load-texture";
+import { createKTX2Texture } from "../utils/create-basis-texture";
+import { preload } from "../utils/preload";
+import { roomPropertiesReader } from "../utils/rooms-properties";
 
 const tutorialSchema = "https://kontopoulosdm.github.io/tutorial_";
 
-export function TutorialPanel() {
+export async function MovingTutorialImagePanel(
+  slides: Array<string>,
+  cSlides: Array<string>,
+  gifSlides: Array<string>,
+  pos: ArrayVec3,
+  rot: ArrayVec3,
+  ratio: number,
+  scale: number
+) {
   const textRef = createRef();
   const panelRef = createRef();
   const nextRef = createRef();
   const prevRef = createRef();
-  const testRef = createRef();
-  const panelTexture = textureLoader.load(nametagSrc);
+  const resetRef = createRef();
+  const clickRef = createRef();
 
+  const [slideEntities, cSlideEntities] = await TutorialPanelInit(slides, cSlides, gifSlides, ratio, scale);
   return (
     <entity
       name="tutorialPanel"
-      floatingTextPanel={{ textRef: textRef, nextRef: nextRef, prevRef: prevRef, testRef: testRef }}
+      floatingTextPanel={{
+        textRef: textRef,
+        nextRef: nextRef,
+        prevRef: prevRef,
+        resetRef: resetRef,
+        clickRef: clickRef
+      }}
       ref={panelRef}
-      slice9={{ size: [0.5, 0.5], insets: [64, 66, 64, 66], texture: panelTexture }}
-      position={[-9.8, 2.0, -10]}
-      rotation={[0, 90, 0]}
-      scale={[1, 1, 1]}
+      position={pos}
+      rotation={rot}
+      followFov={{ offset: [0, 0, -2] }}
     >
+      {slideEntities}
+      {cSlideEntities}
       <entity
         name={`text`}
-        position={[0, 0, 0.01]}
+        position={[0, 0, -0.03]}
         ref={textRef}
         text={{
           value: "This is a test",
@@ -43,29 +63,30 @@ export function TutorialPanel() {
           fontSize: 0.05,
           maxWidth: 1
         }}
+        visible={false}
       />
-      <Button3D
+      <TextButton3D
         ref={nextRef}
-        scale={[0.5, 0.5, 0.5]}
-        position={[-0.8, 0, 0.3]}
+        position={[2, 0, 0.3]}
         width={0.2}
         height={0.2}
         type={BUTTON_TYPES.DEFAULT}
+        scale={[2, 2, 2]}
         text={">"}
       />
-      <Button3D
+
+      <TextButton3D
         ref={prevRef}
-        scale={[0.5, 0.5, 0.5]}
-        position={[0.8, 0, 0.3]}
+        position={[-2, 0, 0.3]}
+        scale={[2, 2, 2]}
         width={0.2}
         height={0.2}
         type={BUTTON_TYPES.DEFAULT}
         text={"<"}
       />
-      <Button3D
-        ref={testRef}
-        scale={[0.5, 0.5, 0.5]}
-        position={[0, -0.5, 0.3]}
+      <TextButton3D
+        ref={resetRef}
+        position={[0, -1, 0.3]}
         width={0.5}
         height={0.2}
         type={BUTTON_TYPES.DEFAULT}
@@ -74,46 +95,195 @@ export function TutorialPanel() {
     </entity>
   );
 }
-export function TutorialImagePanel(
+
+export async function StaticTutorialImagePanel(
   slides: Array<string>,
-  congratsSlides: Array<string>,
-  position: ArrayVec3,
-  rotation: ArrayVec3,
+  cSlides: Array<string>,
+  gifSlides: Array<string>,
+  pos: ArrayVec3,
+  rot: ArrayVec3,
   ratio: number,
-  followUser: boolean
+  scale: number
 ) {
   const textRef = createRef();
   const panelRef = createRef();
   const nextRef = createRef();
   const prevRef = createRef();
-  const testRef = createRef();
+  const resetRef = createRef();
+  const clickRef = createRef();
 
+  const [slideEntities, cSlideEntities] = await TutorialPanelInit(slides, cSlides, gifSlides, ratio, scale);
+
+  const prevIcon = `${roomPropertiesReader.serverURL}/assets/prev_icon.png`;
+  const nextIcon = `${roomPropertiesReader.serverURL}/assets/next_icon.png`;
+  const resetIcon = `${roomPropertiesReader.serverURL}/assets/reset_icon.png`;
+  const clickIcon = `${roomPropertiesReader.serverURL}/assets/click_icon.png`;
+
+  return (
+    <entity
+      name="tutorialPanel"
+      floatingTextPanel={{
+        textRef: textRef,
+        nextRef: nextRef,
+        prevRef: prevRef,
+        resetRef: resetRef,
+        clickRef: clickRef
+      }}
+      ref={panelRef}
+      position={pos}
+      rotation={rot}
+    >
+      {slideEntities}
+      {cSlideEntities}
+      <entity
+        name={`text`}
+        position={[0, 0, -0.03]}
+        ref={textRef}
+        text={{
+          value: "This should not be visible",
+          color: "#000000",
+          textAlign: "center",
+          anchorX: "center",
+          anchorY: "middle",
+          fontSize: 0.05,
+          maxWidth: 1
+        }}
+        visible={false}
+      />
+      <StaticButton3D
+        ref={nextRef}
+        position={[2.25, 0, 0]}
+        name={"next_button"}
+        width={0.2}
+        height={0.2}
+        type={BUTTON_TYPES.DEFAULT}
+        ratio={1}
+        image={nextIcon}
+      />
+      <StaticButton3D
+        ref={prevRef}
+        position={[-2.25, 0, 0]}
+        name={"prev_button"}
+        width={0.2}
+        height={0.2}
+        type={BUTTON_TYPES.DEFAULT}
+        ratio={1}
+        image={prevIcon}
+      />
+      <StaticButton3D
+        ref={resetRef}
+        position={[0, -1, 0.3]}
+        name={"reset_button"}
+        width={0.2}
+        height={0.2}
+        type={BUTTON_TYPES.DEFAULT}
+        ratio={1}
+        image={resetIcon}
+      />
+      <StaticButton3D
+        ref={clickRef}
+        position={[0, -1, 0.3]}
+        name={"click_button"}
+        width={0.2}
+        height={0.2}
+        type={BUTTON_TYPES.DEFAULT}
+        ratio={1}
+        image={clickIcon}
+      />
+    </entity>
+  );
+}
+
+async function TutorialPanelInit(
+  slides: Array<string>,
+  congratsSlides: Array<string>,
+  gifSlides: Array<string>,
+  ratio: number,
+  scale: number
+) {
   const slideEntities = [] as Array<EntityDef>;
   const cSlideEntities = [] as Array<EntityDef>;
 
-  const scale = followUser ? 2 : 4;
+  for (let index = 0; index < slides.length; index++) {
+    const slide = slides[index];
+    const gifSlide = gifSlides[index];
 
-  slides.forEach((slide, index) => {
-    slideEntities.push(
+    const contentType = slide.includes(".gif") ? "image/gif" : "image/png";
+    const texture = await createTexture(contentType, slide);
+
+    const slideEntity: EntityDef = (
       <entity
         name={`slide_${index}`}
         image={{
-          texture: textureLoader.load(slide),
+          texture: texture,
           ratio: ratio,
           projection: ProjectionMode.FLAT,
           alphaMode: AlphaMode.Blend,
-          cacheKey: TextureCache.key(slide, 1)
+          cacheKey: slide
         }}
         visible={false}
         scale={[scale, scale, scale]}
       ></entity>
     );
-  });
 
-  congratsSlides.forEach((cSlide, index) => {
-    const texture = textureLoader.load(cSlide, null, null, () => {
-      console.log(`error`);
-    });
+    if (gifSlide.length > 0) {
+      const gifContentType = gifSlide.includes(".gif") ? "image/gif" : "image/png";
+      const gifTexture = await createTexture(gifContentType, gifSlide);
+
+      slideEntity.children.push(
+        <entity
+          name={`gif_slide_slide_${index}`}
+          image={{
+            texture: gifTexture,
+            ratio: ratio,
+            projection: ProjectionMode.FLAT,
+            alphaMode: AlphaMode.Blend,
+            cacheKey: slide
+          }}
+          visible={true}
+          position={[0, 0, 0.001]}
+        ></entity>
+      );
+    }
+
+    slideEntities.push(slideEntity);
+
+    /*<entity
+        name={`slide_${index}`}
+        image={{
+          texture: texture,
+          ratio: ratio,
+          projection: ProjectionMode.FLAT,
+          alphaMode: AlphaMode.Blend,
+          cacheKey: slide
+        }}
+        visible={false}
+        scale={[scale, scale, scale]}
+      >
+        <entity
+          name={`gif_slide_slide_${index}`}
+          image={{
+            texture: gifTexture,
+            ratio: ratio,
+            projection: ProjectionMode.FLAT,
+            alphaMode: AlphaMode.Blend,
+            cacheKey: slide
+          }}
+          visible={true}
+          position={[0, 0, 0.001]}
+        ></entity>
+      </entity>*/
+  }
+
+  for (let index = 0; index < congratsSlides.length; index++) {
+    const cSlide = congratsSlides[index];
+    // const texture = textureLoader.load(cSlide, null, null, () => {
+    //   console.log(`error`);
+    // });
+
+    const contentType = cSlide.includes(".gif") ? "image/gif" : "image/png";
+    const texture = await createTexture(contentType, cSlide);
+    // const { texture, cacheKey } = loadTextureFromCache(cSlide, 1);
     cSlideEntities.push(
       <entity
         name={`congrats_slide_${index}`}
@@ -122,126 +292,15 @@ export function TutorialImagePanel(
           ratio: ratio,
           projection: ProjectionMode.FLAT,
           alphaMode: AlphaMode.Blend,
-          cacheKey: TextureCache.key(cSlide, 1)
+          cacheKey: cSlide
         }}
         visible={false}
         scale={[scale, scale, scale]}
       ></entity>
     );
-  });
-
-  if (!followUser) {
-    return (
-      <entity
-        name="tutorialPanel"
-        floatingTextPanel={{ textRef: textRef, nextRef: nextRef, prevRef: prevRef, testRef: testRef }}
-        ref={panelRef}
-        position={position}
-        rotation={rotation}
-      >
-        {slideEntities}
-        {cSlideEntities}
-        <entity
-          name={`text`}
-          position={[0, 0, -0.03]}
-          ref={textRef}
-          text={{
-            value: "This is a test",
-            color: "#000000",
-            textAlign: "center",
-            anchorX: "center",
-            anchorY: "middle",
-            fontSize: 0.05,
-            maxWidth: 1
-          }}
-          visible={false}
-        />
-        <Button3D
-          ref={nextRef}
-          position={[2, 0, 0.3]}
-          width={0.2}
-          height={0.2}
-          type={BUTTON_TYPES.DEFAULT}
-          scale={[2, 2, 2]}
-          text={">"}
-        />
-
-        <Button3D
-          ref={prevRef}
-          position={[-2, 0, 0.3]}
-          scale={[2, 2, 2]}
-          width={0.2}
-          height={0.2}
-          type={BUTTON_TYPES.DEFAULT}
-          text={"<"}
-        />
-        <Button3D
-          ref={testRef}
-          position={[0, -1, 0.3]}
-          width={0.5}
-          height={0.2}
-          type={BUTTON_TYPES.DEFAULT}
-          text={"Click me!"}
-        />
-      </entity>
-    );
-  } else {
-    return (
-      <entity
-        name="tutorialPanel"
-        floatingTextPanel={{ textRef: textRef, nextRef: nextRef, prevRef: prevRef, testRef: testRef }}
-        ref={panelRef}
-        position={position}
-        rotation={rotation}
-        followFov={{ offset: [0, 0, -2] }}
-      >
-        {slideEntities}
-        {cSlideEntities}
-        <entity
-          name={`text`}
-          position={[0, 0, -0.03]}
-          ref={textRef}
-          text={{
-            value: "This is a test",
-            color: "#000000",
-            textAlign: "center",
-            anchorX: "center",
-            anchorY: "middle",
-            fontSize: 0.05,
-            maxWidth: 1
-          }}
-          visible={false}
-        />
-        <Button3D
-          ref={nextRef}
-          position={[2, 0, 0.3]}
-          width={0.2}
-          height={0.2}
-          type={BUTTON_TYPES.DEFAULT}
-          scale={[2, 2, 2]}
-          text={">"}
-        />
-
-        <Button3D
-          ref={prevRef}
-          position={[-2, 0, 0.3]}
-          scale={[2, 2, 2]}
-          width={0.2}
-          height={0.2}
-          type={BUTTON_TYPES.DEFAULT}
-          text={"<"}
-        />
-        <Button3D
-          ref={testRef}
-          position={[0, -1, 0.3]}
-          width={0.5}
-          height={0.2}
-          type={BUTTON_TYPES.DEFAULT}
-          text={"Click me!"}
-        />
-      </entity>
-    );
   }
+
+  return [slideEntities, cSlideEntities];
 }
 
 export function SimpleImagePanel(

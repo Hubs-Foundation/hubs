@@ -1,6 +1,6 @@
 /** @jsx createElementEntity */
 import { ArrayVec3, Attrs, createElementEntity, createRef } from "../utils/jsx-entity";
-import { BUTTON_TYPES, Button3D } from "./button3D";
+import { BUTTON_TYPES, TextButton3D } from "./button3D";
 
 const BUTTON_HEIGHT = 0.2;
 const BUTTON_WIDTH = 0.6;
@@ -14,7 +14,7 @@ interface LinkButtonAttrs extends Attrs {
 
 function LinkButton(props: LinkButtonAttrs) {
   return (
-    <Button3D
+    <TextButton3D
       name="Link Button"
       height={BUTTON_HEIGHT}
       scale={BUTTON_SCALE}

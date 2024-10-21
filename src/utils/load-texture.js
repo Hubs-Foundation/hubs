@@ -17,7 +17,7 @@ textureCache.cache.set(TextureCache.key("error", 1), {
 });
 const inflightTextures = new Map();
 
-function createTexture(contentType, src) {
+export function createTexture(contentType, src) {
   if (contentType.includes("image/gif")) {
     return createGIFTexture(src);
   }

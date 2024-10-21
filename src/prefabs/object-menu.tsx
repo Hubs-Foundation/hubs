@@ -1,6 +1,6 @@
 /** @jsx createElementEntity */
 import { ArrayVec3, Attrs, createElementEntity, createRef } from "../utils/jsx-entity";
-import { Button3D, BUTTON_TYPES } from "./button3D";
+import { TextButton3D, BUTTON_TYPES } from "./button3D";
 
 const buttonHeight = 0.2;
 const buttonScale: ArrayVec3 = [0.4, 0.4, 0.4];
@@ -8,7 +8,7 @@ const uiZ = 0.25;
 
 function PinButton(props: Attrs) {
   return (
-    <Button3D
+    <TextButton3D
       name="Pin Button"
       scale={buttonScale}
       width={0.4}
@@ -22,7 +22,7 @@ function PinButton(props: Attrs) {
 
 function UnpinButton(props: Attrs) {
   return (
-    <Button3D
+    <TextButton3D
       name="Unpin Button"
       scale={buttonScale}
       width={0.4}
@@ -36,7 +36,7 @@ function UnpinButton(props: Attrs) {
 
 function CameraFocusButton(props: Attrs) {
   return (
-    <Button3D
+    <TextButton3D
       name="Camera Focus Button"
       scale={buttonScale}
       width={0.4}
@@ -50,7 +50,7 @@ function CameraFocusButton(props: Attrs) {
 
 function CameraTrackButton(props: Attrs) {
   return (
-    <Button3D
+    <TextButton3D
       name="Camera Track Button"
       scale={buttonScale}
       width={0.4}
@@ -64,7 +64,7 @@ function CameraTrackButton(props: Attrs) {
 
 function RemoveButton(props: Attrs) {
   return (
-    <Button3D
+    <TextButton3D
       name="Remove Button"
       scale={buttonScale}
       width={0.4}
@@ -78,7 +78,7 @@ function RemoveButton(props: Attrs) {
 
 function DropButton(props: Attrs) {
   return (
-    <Button3D
+    <TextButton3D
       name="Drop Button"
       scale={buttonScale}
       width={0.4}
@@ -92,7 +92,7 @@ function DropButton(props: Attrs) {
 
 function InspectButton(props: Attrs) {
   return (
-    <Button3D
+    <TextButton3D
       name="Inspect Button"
       scale={buttonScale}
       width={0.4}
@@ -106,7 +106,7 @@ function InspectButton(props: Attrs) {
 
 function DeserializeDrawingButton(props: Attrs) {
   return (
-    <Button3D
+    <TextButton3D
       name="Deserialize Drawing Button"
       scale={buttonScale}
       width={0.4}
@@ -120,7 +120,7 @@ function DeserializeDrawingButton(props: Attrs) {
 
 function OpenLinkButton(props: Attrs) {
   return (
-    <Button3D
+    <TextButton3D
       name="Open Link Button"
       scale={buttonScale}
       width={0.4}
@@ -134,7 +134,7 @@ function OpenLinkButton(props: Attrs) {
 
 function RefreshButton(props: Attrs) {
   return (
-    <Button3D
+    <TextButton3D
       name="Refresh Button"
       scale={buttonScale}
       width={0.4}
@@ -148,7 +148,7 @@ function RefreshButton(props: Attrs) {
 
 function CloneButton(props: Attrs) {
   return (
-    <Button3D
+    <TextButton3D
       name="Clone Button"
       scale={buttonScale}
       width={0.4}
@@ -162,7 +162,7 @@ function CloneButton(props: Attrs) {
 
 function RotateButton(props: Attrs) {
   return (
-    <Button3D
+    <TextButton3D
       name="Rotate Button"
       scale={buttonScale}
       width={0.4}
@@ -177,7 +177,7 @@ function RotateButton(props: Attrs) {
 
 function MirrorButton(props: Attrs) {
   return (
-    <Button3D
+    <TextButton3D
       name="Mirror Button"
       scale={buttonScale}
       width={0.4}
@@ -191,7 +191,7 @@ function MirrorButton(props: Attrs) {
 
 function ScaleButton(props: Attrs) {
   return (
-    <Button3D
+    <TextButton3D
       name="Scale Button"
       scale={buttonScale}
       width={0.4}

@@ -3,7 +3,7 @@
 import { createElementEntity, renderAsEntity, Ref, createRef, EntityDef } from "../utils/jsx-entity";
 import nametagSrc from "../assets/hud/nametag.9.png";
 import { textureLoader } from "../utils/media-utils";
-import { Button3D, BUTTON_TYPES } from "./button3D";
+import { TextButton3D, BUTTON_TYPES } from "./button3D";
 import { IconButton } from "./icon-button";
 
 const panelTexture = textureLoader.load(nametagSrc);
@@ -71,7 +71,7 @@ export function AgentPanel({ text, panelRef, nextRef, prevRef, micRef, snapRef, 
       >
         {slidesArray}
       </entity>
-      <Button3D
+      <TextButton3D
         ref={prevRef}
         scale={[buttonScale[0], buttonScale[1], buttonScale[2]]}
         type={BUTTON_TYPES.DEFAULT}
@@ -81,7 +81,7 @@ export function AgentPanel({ text, panelRef, nextRef, prevRef, micRef, snapRef, 
         text={"<"}
       />
 
-      <Button3D
+      <TextButton3D
         ref={nextRef}
         scale={[buttonScale[0], buttonScale[1], buttonScale[2]]}
         type={BUTTON_TYPES.DEFAULT}
@@ -137,7 +137,7 @@ export function SimplePanel({ panelRef, textRef, listenRef, navRef }: SimplePane
           }}
         />
 
-        <Button3D
+        <TextButton3D
           ref={navRef}
           scale={[buttonScale[0], buttonScale[1], buttonScale[2]]}
           width={0.5}
@@ -148,7 +148,7 @@ export function SimplePanel({ panelRef, textRef, listenRef, navRef }: SimplePane
         />
       </entity>
 
-      <Button3D
+      <TextButton3D
         ref={listenRef}
         scale={[buttonScale[0], buttonScale[1], buttonScale[2]]}
         position={[0, -0.3, 0.3]}
@@ -173,7 +173,7 @@ export function InteractivePanel({ panelRef, clearRef, dotsRef, nextRef, prevRef
         slice9={{ size: [0.8, 0.6], insets: [64, 66, 64, 66], texture: panelTexture }}
         position={[0, -0.3, 0.3]}
       >
-        <Button3D
+        <TextButton3D
           name="clear"
           ref={clearRef}
           scale={[buttonScale[0], buttonScale[1], buttonScale[2]]}
@@ -184,7 +184,7 @@ export function InteractivePanel({ panelRef, clearRef, dotsRef, nextRef, prevRef
           visible={false}
         />
 
-        <Button3D
+        <TextButton3D
           name="next"
           ref={nextRef}
           scale={[0.5, 0.5, 0.5]}
@@ -194,7 +194,7 @@ export function InteractivePanel({ panelRef, clearRef, dotsRef, nextRef, prevRef
           type={BUTTON_TYPES.DEFAULT}
           text={">"}
         />
-        <Button3D
+        <TextButton3D
           name="prev"
           ref={prevRef}
           scale={[0.5, 0.5, 0.5]}
@@ -221,7 +221,7 @@ export function InteractivePanel({ panelRef, clearRef, dotsRef, nextRef, prevRef
         />
       </entity>
 
-      <Button3D
+      <TextButton3D
         name="dots"
         ref={dotsRef}
         scale={[buttonScale[0], buttonScale[1], buttonScale[2]]}

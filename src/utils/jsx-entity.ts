@@ -406,7 +406,8 @@ export interface JSXComponentData extends ComponentData {
     textRef: Ref;
     prevRef: Ref;
     nextRef: Ref;
-    testRef: Ref;
+    resetRef: Ref;
+    clickRef: Ref;
   };
 }
 

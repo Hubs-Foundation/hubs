@@ -32,7 +32,20 @@ export interface Button3DParams extends Attrs {
   holdableButton?: true;
 }
 
-export function Button3D({
+export interface ImageButton3DParams extends Attrs {
+  width: number;
+  height: number;
+  ratio: number;
+  image: string;
+  texture?: Texture;
+  name: string;
+  type: ButtonType;
+  labelRef?: Ref;
+  holdable?: true;
+  holdableButton?: true;
+}
+
+export function TextButton3D({
   text = "",
   width,
   height,
@@ -62,6 +75,78 @@ export function Button3D({
         position={[0, 0, 0.01]}
         name={`${name} Label`}
         lookatuser
+      />
+    </entity>
+  );
+}
+export function StaticButton3D({
+  image,
+  ratio,
+  width,
+  height,
+  texture = buttonTexture,
+  name = "Button",
+  type,
+  ...props
+}: ImageButton3DParams) {
+  const labelRef = createRef();
+  const imageTexture = textureLoader.load(image, null, null, () => {
+    console.log(`error`);
+  });
+  return (
+    <entity
+      name={name}
+      slice9={{ size: [width, height], insets: [64, 66, 64, 66], texture: imageTexture }}
+      cursorRaycastable
+      remoteHoverTarget
+      hoverButton={{ type }}
+      singleActionButton
+      layers={1 << Layers.CAMERA_LAYER_UI}
+      {...props}
+    >
+      {/* <entity
+        name={`image_${name}`}
+        image={{
+          texture: imageTexture,
+          ratio: ratio,
+          projection: ProjectionMode.FLAT,
+          alphaMode: AlphaMode.Blend,
+          cacheKey: TextureCache.key(image, 1)
+        }}
+        visible={true}
+        scale={[1, 1, 1]}
+      ></entity> */}
+    </entity>
+  );
+}
+export function StaticImageButton3D({
+  text = "",
+  width,
+  height,
+  texture = buttonTexture,
+  name = "Button",
+  type,
+  ...props
+}: Button3DParams) {
+  const labelRef = createRef();
+  return (
+    <entity
+      name={name}
+      slice9={{ size: [width, height], insets: [64, 66, 64, 66], texture }}
+      cursorRaycastable
+      remoteHoverTarget
+      hoverButton={{ type }}
+      textButton={{ labelRef }}
+      singleActionButton
+      layers={1 << Layers.CAMERA_LAYER_UI}
+      {...props}
+    >
+      <entity
+        ref={labelRef}
+        layers={1 << Layers.CAMERA_LAYER_UI}
+        text={{ value: text, color: "#000000", textAlign: "center", anchorX: "center", anchorY: "middle" }}
+        position={[0, 0, 0.01]}
+        name={`${name} Label`}
       />
     </entity>
   );

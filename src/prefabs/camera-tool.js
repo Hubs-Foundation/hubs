@@ -8,7 +8,7 @@ import { COLLISION_LAYERS } from "../constants";
 import { Fit, Shape } from "../inflators/physics-shape";
 import { createElementEntity, createRef } from "../utils/jsx-entity";
 import { preload } from "../utils/preload";
-import { Button3D, BUTTON_TYPES } from "./button3D";
+import { TextButton3D, BUTTON_TYPES } from "./button3D";
 
 // eslint-disable-next-line react/prop-types
 export function Label({ text = {}, ...props }, ...children) {
@@ -104,7 +104,7 @@ export function CameraPrefab() {
         <Label ref={countdownLblRef} position={[0, 0, uiZ + 0.002]} />
         <Label ref={captureDurLblRef} position={[0, 0, uiZ + 0.002]} />
 
-        <Button3D
+        <TextButton3D
           ref={cancelRef}
           scale={buttonScale}
           position={[0, 0.1, uiZ]}
@@ -112,7 +112,7 @@ export function CameraPrefab() {
           height={buttonHeight}
           text={"Cancel"}
         />
-        <Button3D
+        <TextButton3D
           ref={snapRef}
           scale={buttonScale}
           position={[0, 0.1, uiZ]}
@@ -122,7 +122,7 @@ export function CameraPrefab() {
           text={"Photo"}
         />
 
-        <Button3D
+        <TextButton3D
           ref={prevButtonRef}
           scale={smallButtonScale}
           position={[-0.082, 0, uiZ]}
@@ -130,7 +130,7 @@ export function CameraPrefab() {
           height={buttonHeight}
           text={"<"}
         />
-        <Button3D
+        <TextButton3D
           ref={recVideoRef}
           scale={buttonScale}
           position={[0, -0.1, uiZ]}
@@ -139,7 +139,7 @@ export function CameraPrefab() {
           type={BUTTON_TYPES.ACTION}
           text={"Video"}
         />
-        <Button3D
+        <TextButton3D
           ref={nextButtonRef}
           scale={smallButtonScale}
           position={[0.082, 0, uiZ]}
@@ -148,7 +148,7 @@ export function CameraPrefab() {
           text={">"}
         />
 
-        <Button3D
+        <TextButton3D
           ref={sndToggleRef}
           scale={smallButtonScale}
           position={[0, -0.17, uiZ]}
