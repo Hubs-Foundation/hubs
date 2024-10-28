@@ -141,23 +141,37 @@ export function RoomSettingsSidebar({
         </RadioInputField>
         {entryMode === "invite" && (
           <>
-            {canShare() && <>
-              <Button preset="primary" onClick={shareInviteUrl.bind(this, intl, inviteUrl, {roomName: room.name, appName: configs.translation("app-name")}, isShareInEnglish)}>
-                <ShareIcon />
-                <span>
-                <FormattedMessage id="invite-popover.share-invitation" defaultMessage="Share Invitation" />
-              </span>
-              </Button>
-              { ! intl?.locale?.startsWith?.('en') &&
-                <Checkbox
-                  label={<FormattedMessage id="invite-popover.share-in-english" defaultMessage="Share in English" />}
-                  checked={isShareInEnglish}
-                  onChange={_event => setIsShareInEnglish(inEnglish => !inEnglish)}
-                />
-              }
-            </>
-            }
-            <InviteLinkInputField fetchingInvite={fetchingInvite} inviteUrl={inviteUrl} onRevokeInvite={onRevokeInvite} />
+            {canShare() && (
+              <>
+                <Button
+                  preset="primary"
+                  onClick={shareInviteUrl.bind(
+                    this,
+                    intl,
+                    inviteUrl,
+                    { roomName: room.name, appName: configs.translation("app-name") },
+                    isShareInEnglish
+                  )}
+                >
+                  <ShareIcon />
+                  <span>
+                    <FormattedMessage id="invite-popover.share-invitation" defaultMessage="Share Invitation" />
+                  </span>
+                </Button>
+                {!intl?.locale?.startsWith?.("en") && (
+                  <Checkbox
+                    label={<FormattedMessage id="invite-popover.share-in-english" defaultMessage="Share in English" />}
+                    checked={isShareInEnglish}
+                    onChange={() => setIsShareInEnglish(inEnglish => !inEnglish)}
+                  />
+                )}
+              </>
+            )}
+            <InviteLinkInputField
+              fetchingInvite={fetchingInvite}
+              inviteUrl={inviteUrl}
+              onRevokeInvite={onRevokeInvite}
+            />
           </>
         )}
         {showPublicRoomSetting && (
