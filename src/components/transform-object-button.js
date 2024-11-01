@@ -55,7 +55,7 @@ AFRAME.registerComponent("transform-button", {
       if (!NAF.utils.isMine(this.targetEl) && !NAF.utils.takeOwnership(this.targetEl)) {
         return;
       }
-      if (this.targetEl.body) {
+      if (this.targetEl.hasAttribute("body-helper")) {
         this.targetEl.setAttribute("body-helper", AMMO_BODY_ATTRIBUTES);
       }
       this.transformSystem = this.transformSystem || AFRAME.scenes[0].systems["transform-selected-object"];
