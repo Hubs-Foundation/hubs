@@ -51,7 +51,7 @@
   flex-direction: row;
   justify-content: start;
   font-size: theme.$font-size-md;
-  overflow-wrap: break-word;
+  overflow-wrap: anywhere;
   line-height: 1.25;
 
   img,
