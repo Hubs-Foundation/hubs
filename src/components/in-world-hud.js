@@ -1,4 +1,8 @@
 import { SOUND_SPAWN_PEN } from "../systems/sound-effects-system";
+import { shareInviteUrl } from "../utils/share";
+import { hubUrl } from "../utils/phoenix-utils";
+import configs from "../utils/configs";
+import { handleExitTo2DInterstitial } from "../utils/vr-interstitial";
 /**
  * HUD panel for muting, freezing, and other controls that don't necessarily have hardware buttons.
  * @namespace ui
@@ -54,12 +58,28 @@ AFRAME.registerComponent("in-world-hud", {
       this.el.emit("action_toggle_camera");
     };
 
-    this.onInviteClick = () => {
-      this.el.emit("action_invite");
+    this.onInviteClick = async event => {
+      try {
+        const extraParams =
+          APP.hub.entry_mode === "invite" ? { hub_invite_id: (await APP.hubChannel.fetchInvite()).hub_invite_id } : {};
+        const url = hubUrl(APP.hub.hub_id, extraParams).href;
+        const didShare = await shareInviteUrl(
+          null,
+          url,
+          { roomName: APP.hub.name, appName: configs.translation("app-name") },
+          true,
+          event
+        );
+        if (didShare) {
+          await handleExitTo2DInterstitial(false, () => {}, true);
+        }
+      } catch (error) {
+        console.error(`while inviting (using HUD):`, error);
+      }
     };
 
     this.onHubUpdated = e => {
-      this.inviteBtn.object3D.visible = e.detail.hub.entry_mode !== "invite";
+      this.inviteBtn.object3D.visible = e.detail.hub.entry_mode !== "invite" || APP.hubChannel.can("update_hub");
     };
   },
 

@@ -86,7 +86,7 @@ class Support extends React.Component {
     return (
       <div className={styles.supportMain}>
         <div className={styles.supportContent}>
-          <h1>Mozilla Hubs</h1>
+          <h1>Hubs</h1>
           <br />
           <p className={styles.unsupportedLangs}>
             · <span>Unsupported</span> · <span>No Soportado</span> · <span>Nicht Unterstützt</span>

@@ -5,11 +5,16 @@ import { hubUrl } from "../../utils/phoenix-utils";
 import { InvitePopoverButton } from "./InvitePopover";
 import { handleExitTo2DInterstitial } from "../../utils/vr-interstitial";
 import { useInviteUrl } from "./hooks/useInviteUrl";
+import { useIntl } from "react-intl";
+import { shareInviteUrl } from "../../utils/share";
 
 export function InvitePopoverContainer({ hub, hubChannel, scene, store, ...rest }) {
+  const intl = useIntl();
+
   // TODO: Move to Hub class
-  const shortUrl = `https://${configs.SHORTLINK_DOMAIN}`;
-  const url = `${shortUrl}/${hub.hub_id}`;
+  const url = hubUrl(hub.hub_id, {}).href;
+  // const shortUrl = `https://${configs.SHORTLINK_DOMAIN}`;
+  // const url = `${shortUrl}/${hub.hub_id}`;
 
   let embedText = null;
   const embedToken = hub.embed_token || store.getEmbedTokenForHub(hub);
@@ -20,7 +25,7 @@ export function InvitePopoverContainer({ hub, hubChannel, scene, store, ...rest 
 
   const popoverApiRef = useRef();
 
-  // Handle clicking on the invite button while in VR.
+  // Handle clicking on the invite button in "More" menu.
   useEffect(() => {
     function onInviteButtonClicked() {
       handleExitTo2DInterstitial(true, () => {}).then(() => {
@@ -53,6 +58,10 @@ export function InvitePopoverContainer({ hub, hubChannel, scene, store, ...rest 
       fetchingInvite={fetchingInvite}
       inviteUrl={inviteUrl}
       revokeInvite={revokeInvite}
+      shareUrlHandler={shareInviteUrl.bind(this, intl, inviteRequired ? inviteUrl : url, {
+        roomName: hub.name,
+        appName: configs.translation("app-name")
+      })}
       url={url}
       embed={embedText}
       popoverApiRef={popoverApiRef}

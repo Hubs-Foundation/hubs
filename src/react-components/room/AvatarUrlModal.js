@@ -21,7 +21,7 @@ export function AvatarUrlModal({ onSubmit, onClose }) {
             required: true
           })}
           description={
-            <a href="https://hubs.mozilla.com/docs/intro-avatars.html" target="_blank" rel="noopener noreferrer">
+            <a href="https://docs.hubsfoundation.org/intro-avatars.html" target="_blank" rel="noopener noreferrer">
               <FormattedMessage
                 id="avatar-url-modal.custom-avatar-docs-link"
                 defaultMessage="Learn more about custom avatars"

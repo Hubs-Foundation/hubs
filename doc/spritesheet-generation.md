@@ -3,7 +3,7 @@ We use texture atlassing to improve rendering and loading efficiency. This docum
 
 ## generating spritesheets
 
-After installing the project dependencies, spritesheets can be generated with the command `npm run spritesheet`. The exact parameters used by this script can be inspected in the `package.json` where it is defined. More information about the tool we use, `spritesheet-js`, can be found on the [github page](https://github.com/mozillareality/spritesheet.js/).
+After installing the project dependencies, spritesheets can be generated with the command `npm run spritesheet`. The exact parameters used by this script can be inspected in the `package.json` where it is defined. More information about the tool we use, `spritesheet-js`, can be found on the [github page](https://github.com/Hubs-Foundation/spritesheet.js/).
 
 The steps to generate a spritesheet are :
 

@@ -160,7 +160,7 @@ export function inflateModel(world: HubsWorld, rootEid: number, { model }: Model
   // bitECS LoopAnimation Component is set to root entity for simpler implementation.
   // TODO: Probably the Hubs loop-animation component should be defined at scene
   //       or root level. Revisit the specification.
-  // See https://github.com/mozilla/hubs/pull/5938#discussion_r1163410185
+  // See https://github.com/Hubs-Foundation/hubs/pull/5938#discussion_r1163410185
   if (model.animations !== undefined && model.animations.length > 0) {
     addComponent(world, MixerAnimatableInitialize, rootEid);
     inflateLoopAnimationInitialize(world, rootEid, loopAnimationParams);

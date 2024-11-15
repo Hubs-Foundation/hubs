@@ -23,7 +23,7 @@ function detectTouchScreen() {
 
 let hackyMobileSafariTestValue = null;
 
-// HACK for https://github.com/mozilla/hubs/issues/1813
+// HACK for https://github.com/Hubs-Foundation/hubs/issues/1813
 // Touchscreen controls depend on iPad and iPhone detection,
 // which recently regressed. For UA matching "Macintosh", enable
 // touchscreen controls if there exists a touchscreen.

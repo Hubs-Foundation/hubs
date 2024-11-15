@@ -75,7 +75,7 @@ function changeAvatar(avatarUrl: string) {
 }
 
 const TEST_ASSET_PREFIX =
-  "https://raw.githubusercontent.com/mozilla/hubs-sample-assets/main/Hubs%20Components/Exported%20GLB%20Models/";
+  "https://raw.githubusercontent.com/Hubs-Foundation/hubs-sample-assets/main/Hubs%20Components/Exported%20GLB%20Models/";
 const TEST_ASSET_SUFFIX = ".glb";
 const FLAG_SCENE = "--scene";
 const FLAG_AVATAR = "--avatar";

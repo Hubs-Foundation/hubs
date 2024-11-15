@@ -36,7 +36,7 @@ function getAABB(obj: Object3D, box: Box3, onlyVisible: boolean = false) {
   obj.updateMatrixWorld();
 }
 
-// Check https://github.com/mozilla/hubs/pull/6289#issuecomment-1739003555 for implementation details.
+// Check https://github.com/Hubs-Foundation/hubs/pull/6289#issuecomment-1739003555 for implementation details.
 function transformMenu(world: HubsWorld, menu: EntityID) {
   const targetEid = ObjectMenuTransform.targetObjectRef[menu];
   const targetObj = world.eid2obj.get(targetEid);

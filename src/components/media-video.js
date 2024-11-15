@@ -368,7 +368,7 @@ AFRAME.registerComponent("media-video", {
 
     // Make sure that the audio is initialized to the right place.
     // Its matrix may not update if this element is not visible.
-    // See https://github.com/mozilla/hubs/issues/2855
+    // See https://github.com/Hubs-Foundation/hubs/issues/2855
     this.audio.updateMatrixWorld();
 
     APP.audios.set(this.el, this.audio);
@@ -409,7 +409,7 @@ AFRAME.registerComponent("media-video", {
 
       this.mediaElementAudioSource = null;
       if (!src.startsWith("hubs://")) {
-        // iOS video audio is broken on ios safari < 13.1.2, see: https://github.com/mozilla/hubs/issues/1797
+        // iOS video audio is broken on ios safari < 13.1.2, see: https://github.com/Hubs-Foundation/hubs/issues/1797
         if (!isIOS || semver.satisfies(detect().version, ">=13.1.2")) {
           // TODO FF error here if binding mediastream: The captured HTMLMediaElement is playing a MediaStream. Applying volume or mute status is not currently supported -- not an issue since we have no audio atm in shared video.
           this.mediaElementAudioSource =

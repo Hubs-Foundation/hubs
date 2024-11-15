@@ -3,12 +3,13 @@ import { AVAILABLE_LOCALES, FALLBACK_LOCALES } from "../assets/locales/locale_co
 
 // These are set in the admin panel and are only included as fallbacks.
 const defaultLocaleData = {
-  "app-name": "App",
+  "app-name": location.hostname,
   "editor-name": "Scene Editor",
   "contact-email": "app@company.com",
   "company-name": "Company",
   "share-hashtag": "#app",
-  "app-description": "Gather share and collaborate together in a virtual, private and safe space",
+  // what you can do here
+  "app-description": "Gather, share, and collaborate together in a virtual, private, and safe space.",
   "app-tagline": "Private social VR in your web browser"
 };
 
@@ -46,7 +47,7 @@ function findLocale(locale) {
     // Also check the primary language subtag in case
     // we do not have an entry for full tag
     // See https://en.wikipedia.org/wiki/IETF_language_tag#Syntax_of_language_tags
-    // and https://github.com/mozilla/hubs/pull/3350/files#diff-70ef5717d3da03ef288e8d15c2fda32c5237d7f37074421496f22403e4475bf1R16
+    // and https://github.com/Hubs-Foundation/hubs/pull/3350/files#diff-70ef5717d3da03ef288e8d15c2fda32c5237d7f37074421496f22403e4475bf1R16
     const primaryLanguageSubtag = curLocale.split("-")[0].toLowerCase();
     if (Object.prototype.hasOwnProperty.call(AVAILABLE_LOCALES, primaryLanguageSubtag)) {
       return primaryLanguageSubtag;

@@ -19,7 +19,7 @@ export const TEXTURES_FLIP_Y = !HAS_IMAGE_BITMAP;
 // because huge textures resize + image bitmap can still even crash browsers.
 //
 // See
-//   - https://github.com/mozilla/hubs/issues/5295
+//   - https://github.com/Hubs-Foundation/hubs/issues/5295
 //   - https://bugs.webkit.org/show_bug.cgi?id=241478
 
 const IOS_TEXTURE_MAX_WIDTH = 2048;

@@ -263,7 +263,7 @@ class UIRoot extends Component {
               });
             } catch (e) {
               console.error(e);
-              this.props.exitScene(ExitReason.sceneError); // https://github.com/mozilla/hubs/issues/1950
+              this.props.exitScene(ExitReason.sceneError); // https://github.com/Hubs-Foundation/hubs/issues/1950
             }
           }
 
@@ -1203,7 +1203,7 @@ class UIRoot extends Component {
               id: "see-plans",
               label: <FormattedMessage id="more-menu.see-plans-cta" defaultMessage="See Plans" />,
               icon: { src: hubsLogo, alt: "Logo" },
-              href: "https://hubs.mozilla.com/#subscribe"
+              href: "https://hubsfoundation.org/getting-started"
             }
         ].filter(item => item)
       },
@@ -1294,7 +1294,7 @@ class UIRoot extends Component {
             id: "report-issue",
             label: <FormattedMessage id="more-menu.report-issue" defaultMessage="Report Issue" />,
             icon: WarningCircleIcon,
-            href: configs.link("issue_report", "https://hubs.mozilla.com/docs/help.html")
+            href: configs.link("issue_report", "https://docs.hubsfoundation.org/help.html")
           },
           entered && {
             id: "start-tour",
@@ -1306,13 +1306,13 @@ class UIRoot extends Component {
             id: "help",
             label: <FormattedMessage id="more-menu.help" defaultMessage="Help" />,
             icon: SupportIcon,
-            href: configs.link("docs", "https://hubs.mozilla.com/docs")
+            href: configs.link("docs", "https://docs.hubsfoundation.org")
           },
           configs.feature("show_controls_link") && {
             id: "controls",
             label: <FormattedMessage id="more-menu.controls" defaultMessage="Controls" />,
             icon: SupportIcon,
-            href: configs.link("controls", "https://hubs.mozilla.com/docs/hubs-controls.html")
+            href: configs.link("controls", "https://docs.hubsfoundation.org/hubs-controls.html")
           },
           configs.feature("show_whats_new_link") && {
             id: "whats-new",
