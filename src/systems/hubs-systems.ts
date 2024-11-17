@@ -92,6 +92,7 @@ import { linkedPDFSystem } from "../bit-systems/linked-pdf-system";
 import { inspectSystem } from "../bit-systems/inspect-system";
 import { snapMediaSystem } from "../bit-systems/snap-media-system";
 import { scaleWhenGrabbedSystem } from "../bit-systems/scale-when-grabbed-system";
+import { interactableSystem } from "../bit-systems/interactable-system";
 import { SystemConfigT } from "../types";
 
 declare global {
@@ -247,6 +248,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   hubsSystems.hoverMenuSystem.tick();
   hubsSystems.positionAtBorderSystem.tick();
   hubsSystems.twoPointStretchingSystem.tick();
+  interactableSystem(world);
   floatyObjectSystem(world);
 
   hubsSystems.holdableButtonSystem.tick();

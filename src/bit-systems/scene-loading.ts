@@ -7,7 +7,6 @@ import {
   HeightFieldTag,
   NavMesh,
   Networked,
-  PhysicsShape,
   SceneLoader,
   ScenePreviewCamera,
   SceneRoot,
