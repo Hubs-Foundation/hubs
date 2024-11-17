@@ -361,7 +361,7 @@ export function mediaLoadingSystem(world: HubsWorld) {
     jobs.add(eid, clearRollbacks => loadAndAnimateMedia(world, eid, clearRollbacks));
   });
 
-  mediaLoadingExitQuery(world).forEach(function (eid: EntityID) {
+  mediaLoadingExitQuery(world).forEach(function (eid) {
     jobs.stop(eid);
 
     if (MediaImageLoaderData.has(eid)) {
@@ -408,7 +408,7 @@ export function mediaLoadingSystem(world: HubsWorld) {
     }
   });
 
-  mediaLoadingQuery(world).forEach((eid: EntityID) => {
+  mediaLoadingQuery(world).forEach(eid => {
     const mediaLoaderObj = world.eid2obj.get(eid)!;
     transformPosition.fromArray(NetworkedTransform.position[eid]);
     if (mediaLoaderObj.position.near(transformPosition, 0.001)) {
@@ -419,7 +419,7 @@ export function mediaLoadingSystem(world: HubsWorld) {
   mediaLoadedEnterQuery(world).forEach(() => APP.scene?.emit("listed_media_changed"));
   mediaLoadedExitQuery(world).forEach(() => APP.scene?.emit("listed_media_changed"));
 
-  mediaRefreshEnterQuery(world).forEach((eid: EntityID) => {
+  mediaRefreshEnterQuery(world).forEach(eid => {
     if (!jobs.has(eid)) {
       jobs.add(eid, clearRollbacks => refreshMedia(world, eid, clearRollbacks));
     }

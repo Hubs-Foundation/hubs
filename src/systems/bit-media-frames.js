@@ -19,13 +19,13 @@ import {
   MediaContentBounds,
   MediaFrame,
   MediaImage,
+  MediaLoaded,
   MediaPDF,
   MediaVideo,
   Networked,
   NetworkedMediaFrame,
   Owned,
-  Rigidbody,
-  Holdable
+  Rigidbody
 } from "../bit-components";
 import { MediaType } from "../utils/media-utils";
 import { cloneObject3D, disposeNode, setMatrixWorld } from "../utils/three-utils";
@@ -36,14 +36,13 @@ import { addObject3DComponent } from "../utils/jsx-entity";
 import { updateMaterials } from "../utils/material-utils";
 import { MEDIA_FRAME_FLAGS, AxisAlignType } from "../inflators/media-frame";
 import { Matrix4, NormalBlending, Quaternion, RGBAFormat, Vector3 } from "three";
-import { COLLISION_LAYERS } from "../constants";
 import { HOLDABLE_FLAGS } from "../inflators/holdable";
 
 const EMPTY_COLOR = 0x6fc0fd;
 const HOVER_COLOR = 0x2f80ed;
 const FULL_COLOR = 0x808080;
 
-const mediaFramesQuery = defineQuery([MediaFrame, NetworkedMediaFrame]);
+const mediaFramesQuery = defineQuery([MediaFrame]);
 const enteredMediaFramesQuery = enterQuery(mediaFramesQuery);
 const exitedMediaFramesQuery = exitQuery(mediaFramesQuery);
 
@@ -56,19 +55,11 @@ function mediaTypeMaskFor(world, eid) {
     mediaTypeMask |= el.components["media-image"] && MediaType.IMAGE;
     mediaTypeMask |= el.components["media-pdf"] && MediaType.PDF;
   } else {
-    const rigidBody = findAncestorWithComponent(world, Rigidbody, eid);
-    if (rigidBody && Rigidbody.collisionFilterMask[rigidBody] & COLLISION_LAYERS.MEDIA_FRAMES) {
-      const interactable = findChildWithComponent(world, Holdable, eid);
-      if (interactable) {
-        mediaTypeMask |= hasComponent(world, GLTFModel, interactable) && MediaType.MODEL;
-        mediaTypeMask |= hasComponent(world, MediaVideo, interactable) && MediaType.VIDEO;
-        mediaTypeMask |= hasComponent(world, MediaImage, interactable) && MediaType.IMAGE;
-        mediaTypeMask |= hasComponent(world, MediaPDF, interactable) && MediaType.PDF;
-        if (mediaTypeMask === 0) {
-          mediaTypeMask |= MediaType.MODEL;
-        }
-      }
-    }
+    const mediaEid = findChildWithComponent(world, MediaLoaded, eid);
+    mediaTypeMask |= hasComponent(world, GLTFModel, mediaEid) && MediaType.MODEL;
+    mediaTypeMask |= hasComponent(world, MediaVideo, mediaEid) && MediaType.VIDEO;
+    mediaTypeMask |= hasComponent(world, MediaImage, mediaEid) && MediaType.IMAGE;
+    mediaTypeMask |= hasComponent(world, MediaPDF, mediaEid) && MediaType.PDF;
   }
   return mediaTypeMask;
 }
@@ -359,7 +350,7 @@ export function mediaFramesSystem(world, physicsSystem) {
     if (MediaFrame.flags[frame] & MEDIA_FRAME_FLAGS.ACTIVE) {
       if (capturedEid && isCapturedOwned && !isCapturedHeld && !isFrameDeleting && isCapturedColliding) {
         snapToFrame(world, frame, capturedEid);
-        physicsSystem.updateRigidBody(capturedEid, { type: "kinematic" });
+        physicsSystem.updateRigidBodyOptions(capturedEid, { type: "kinematic" });
       } else if (
         (isFrameOwned && MediaFrame.capturedNid[frame] && world.deletedNids.has(MediaFrame.capturedNid[frame])) ||
         (capturedEid && isCapturedOwned && !isCapturedColliding) ||
@@ -390,7 +381,7 @@ export function mediaFramesSystem(world, physicsSystem) {
           obj.updateMatrices();
           tmpVec3.setFromMatrixScale(obj.matrixWorld).toArray(NetworkedMediaFrame.scale[frame]);
           snapToFrame(world, frame, capturable);
-          physicsSystem.updateRigidBody(capturable, { type: "kinematic" });
+          physicsSystem.updateRigidBodyOptions(capturable, { type: "kinematic" });
         }
       }
     }
@@ -404,7 +395,7 @@ export function mediaFramesSystem(world, physicsSystem) {
       // TODO: If you are resetting scale because you lost a race for the frame,
       //       you should probably also move the object away from the frame.
       setMatrixScale(world.eid2obj.get(capturedEid), MediaFrame.scale[frame]);
-      physicsSystem.updateRigidBody(capturedEid, { type: "dynamic" });
+      physicsSystem.updateRigidBodyOptions(capturedEid, { type: "dynamic" });
     }
 
     MediaFrame.capturedNid[frame] = NetworkedMediaFrame.capturedNid[frame];

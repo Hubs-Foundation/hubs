@@ -21,7 +21,15 @@ export type GLTFLinkResolverFn = (
 ) => void;
 
 // These components are all handled in some special way, not through inflators
-const ignoredComponents = ["visible", "frustum", "frustrum", "shadow", "animation-mixer", "loop-animation"];
+const ignoredComponents = [
+  "visible",
+  "frustum",
+  "frustrum",
+  "shadow",
+  "networked",
+  "animation-mixer",
+  "loop-animation"
+];
 
 export function inflateComponents(
   world: HubsWorld,
