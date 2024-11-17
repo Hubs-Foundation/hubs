@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { useForm } from "react-hook-form";
 import styles from "./RoomSettingsSidebar.scss";
@@ -20,6 +20,8 @@ import { canShare, shareInviteUrl } from "../../utils/share";
 import { ReactComponent as ShareIcon } from "../icons/Share.svg";
 import { Checkbox } from "@mozilla/lilypad-ui";
 import configs from "../../utils/configs";
+import { addons, isAddonEnabled } from "../../addons";
+import { shouldUseNewLoader } from "../../hubs";
 
 export function RoomSettingsSidebar({
   showBackButton,
@@ -57,6 +59,22 @@ export function RoomSettingsSidebar({
   }, [spawnAndMoveMedia, setValue]);
 
   const [isShareInEnglish, setIsShareInEnglish] = useState(false);
+
+  const handleAddonChange = useCallback(
+    evt => {
+      setValue(`user_data.addons.${evt.target.id}`, evt.target.checked);
+    },
+    [setValue]
+  );
+
+  const [bitECSLoaderEnabled, setBitECSLoaderEnabled] = useState(shouldUseNewLoader());
+  const handleBitECSChange = useCallback(
+    evt => {
+      setValue("user_data.hubs_use_bitecs_based_client", evt.target.checked);
+      setBitECSLoaderEnabled(evt.target.checked);
+    },
+    [setValue, setBitECSLoaderEnabled]
+  );
 
   return (
     <Sidebar
@@ -245,14 +263,36 @@ export function RoomSettingsSidebar({
                 defaultMessage="Enable bitECS based Client"
               />
             }
+            defaultChecked={shouldUseNewLoader()}
+            onChange={handleBitECSChange}
             description={
               <FormattedMessage
                 id="room-settings-sidebar.bitecs-client-activation-description"
                 defaultMessage="Enable or disable the new Client, which is implemented with bitECS for simplicity and extensibility."
               />
             }
-            {...register("user_data.hubs_use_bitecs_based_client")}
           />
+        </InputField>
+        <InputField label={<FormattedMessage id="room-settings-sidebar.add-ons" defaultMessage="Add-ons" />} fullWidth>
+          {!bitECSLoaderEnabled && (
+            <label className={styles.label}>
+              <FormattedMessage
+                id="room-settings-sidebar.addons-disabled"
+                defaultMessage="Add-ons require that the new bitECS based client is enabled"
+              />
+            </label>
+          )}
+          {[...addons.entries()].map(([id, addon]) => (
+            <ToggleInput
+              key={addon.name}
+              id={id}
+              label={addon.name}
+              disabled={!bitECSLoaderEnabled}
+              defaultChecked={isAddonEnabled(APP, id)}
+              onChange={handleAddonChange}
+              description={addon.description}
+            />
+          ))}
         </InputField>
         <ApplyButton type="submit" />
       </Column>

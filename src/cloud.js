@@ -9,7 +9,7 @@ import { PageContainer } from "./react-components/layout/PageContainer";
 import { AuthContextProvider } from "./react-components/auth/AuthContext";
 import { Container } from "./react-components/layout/Container";
 import { Button } from "./react-components/input/Button";
-import { store } from "./utils/store-instance";
+import { getStore } from "./utils/store-instance";
 
 import registerTelemetry from "./telemetry";
 import { FormattedMessage } from "react-intl";
@@ -117,6 +117,7 @@ function HubsCloudPage() {
   );
 }
 
+const store = getStore();
 window.APP = { store };
 
 function CloudRoot() {

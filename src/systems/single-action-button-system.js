@@ -1,4 +1,4 @@
-import { addComponent, defineQuery, hasComponent, removeComponent } from "bitecs";
+import { addComponent, defineQuery, enterQuery, hasComponent, removeComponent } from "bitecs";
 import {
   HoverButton,
   HoveredHandLeft,
@@ -80,13 +80,16 @@ function applyTheme() {
     textHoverColor: new THREE.Color(0xffffff)
   };
 }
-onThemeChanged(applyTheme);
-applyTheme();
 
 const hoverComponents = [HoveredRemoteRight, HoveredRemoteLeft, HoveredHandRight, HoveredHandLeft];
 
 const hoverButtonsQuery = defineQuery([HoverButton]);
+const hoverButtonsEnterQuery = enterQuery(hoverButtonsQuery);
 function hoverButtonSystem(world) {
+  if (hoverButtonsEnterQuery(world).length > 0) {
+    onThemeChanged(applyTheme);
+    applyTheme();
+  }
   hoverButtonsQuery(world).forEach(function (eid) {
     const obj = world.eid2obj.get(eid);
     const isHovered = hasAnyComponent(world, hoverComponents, eid);

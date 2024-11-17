@@ -70,9 +70,28 @@ function MaterialItem(props) {
   );
 }
 
+function TextureItem(props) {
+  const { tex, setSelectedObj } = props;
+  const displayName = formatObjectName(tex);
+  return (
+    <div className="obj-item">
+      <div
+        className="obj-label"
+        onContextMenu={e => {
+          e.preventDefault();
+          setSelectedObj(tex);
+        }}
+      >
+        {displayName}
+        {` [${tex.eid}]`}
+      </div>
+    </div>
+  );
+}
+
 export function formatComponentProps(eid, component) {
   const formatted = Object.keys(component).reduce((str, k, i, arr) => {
-    const val = component[k][eid];
+    const val = component[k] instanceof Map ? component[k].get(eid) : component[k][eid];
     const isStr = component[k][bitComponents.$isStringType];
     str += `  ${k}: `;
     if (ArrayBuffer.isView(val)) {
@@ -144,8 +163,10 @@ function RefreshButton({ onClick }) {
   );
 }
 
+export const extraSections = new Array();
 const object3dQuery = defineQuery([bitComponents.Object3DTag]);
 const materialQuery = defineQuery([bitComponents.MaterialTag]);
+const textureQuery = defineQuery([bitComponents.TextureTag]);
 function ECSDebugSidebar({
   onClose,
   toggleObjExpand,
@@ -159,6 +180,8 @@ function ECSDebugSidebar({
     .map(eid => APP.world.eid2obj.get(eid))
     .filter(o => !o.parent);
   const materials = materialQuery(APP.world).map(eid => APP.world.eid2mat.get(eid));
+  const textures = textureQuery(APP.world).map(eid => APP.world.eid2tex.get(eid));
+  const envRoot = document.getElementById("environment-root").object3D;
   return (
     <Sidebar
       title="ECS Debug"
@@ -178,6 +201,15 @@ function ECSDebugSidebar({
             />
           </section>
           <section>
+            <Object3DItem
+              obj={envRoot}
+              toggleObjExpand={toggleObjExpand}
+              expanded={expandedIds.has(envRoot.uuid)}
+              expandedIds={expandedIds}
+              setSelectedObj={setSelectedObj}
+            />
+          </section>
+          <section>
             {orphaned.map(o => (
               <Object3DItem
                 obj={o}
@@ -190,10 +222,18 @@ function ECSDebugSidebar({
             ))}
           </section>
           <section>
-            {materials.map(m => (
-              <MaterialItem mat={m} key={m.eid} setSelectedObj={setSelectedObj} />
-            ))}
+            <span>
+              <FormattedMessage id="ecs-sidebar.materials-section" defaultMessage="Materials" />
+            </span>
+            {materials.map(m => m && <MaterialItem mat={m} key={m.eid} setSelectedObj={setSelectedObj} />)}
           </section>
+          <section>
+            <span>
+              <FormattedMessage id="ecs-sidebar.textures-section" defaultMessage="Textures" />
+            </span>
+            {textures.map(t => t && <TextureItem tex={t} key={t.eid} setSelectedObj={setSelectedObj} />)}
+          </section>
+          {extraSections.map(section => section(APP.world, setSelectedObj))}
         </div>
         <div className="object-properties">{selectedObj && <ObjectProperties obj={selectedObj} />}</div>
       </div>

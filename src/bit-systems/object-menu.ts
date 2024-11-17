@@ -105,7 +105,7 @@ function startRotation(world: HubsWorld, menuEid: EntityID, targetEid: EntityID)
   }
   const transformSystem = APP.scene!.systems["transform-selected-object"];
   const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
-  physicsSystem.updateRigidBodyOptions(Rigidbody.bodyId[targetEid], { type: "kinematic" });
+  physicsSystem.updateRigidBody(Rigidbody.bodyId[targetEid], { type: "kinematic" });
   const rightCursorEid = anyEntityWith(world, RemoteRight)!;
   transformSystem.startTransform(world.eid2obj.get(targetEid)!, world.eid2obj.get(rightCursorEid)!, {
     mode: TRANSFORM_MODE.CURSOR
@@ -137,7 +137,7 @@ function startScaling(world: HubsWorld, menuEid: EntityID, targetEid: EntityID) 
   // TODO: Remove the dependency with AFRAME
   const transformSystem = (AFRAME as any).scenes[0].systems["transform-selected-object"];
   const physicsSystem = AFRAME.scenes[0].systems["hubs-systems"].physicsSystem;
-  physicsSystem.updateRigidBodyOptions(Rigidbody.bodyId[targetEid], { type: "kinematic" });
+  physicsSystem.updateRigidBody(Rigidbody.bodyId[targetEid], { type: "kinematic" });
   const rightCursorEid = anyEntityWith(world, RemoteRight)!;
   scalingHandler = new ScalingHandler(world.eid2obj.get(targetEid), transformSystem);
   scalingHandler!.objectToScale = world.eid2obj.get(targetEid);
