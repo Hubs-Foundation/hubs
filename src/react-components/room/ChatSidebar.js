@@ -406,8 +406,10 @@ function getMessageComponent(message, intl) {
     }
     case "video":
       return (
-        <MessageBubble key={message.id} media>
-          <video controls src={message.body.src} />
+        <div className={styles.messageRow}>
+          <MessageBubble key={message.id} media>
+            <video controls src={message.body.src} />
+          </MessageBubble>
           <IconButton
             className={styles.iconButton}
             onClick={onShareClick}
@@ -415,13 +417,15 @@ function getMessageComponent(message, intl) {
           >
             <ShareIcon />
           </IconButton>
-        </MessageBubble>
+        </div>
       );
     case "image":
     case "photo":
       return (
-        <MessageBubble key={message.id} media>
-          <img src={message.body.src} />
+        <div className={styles.messageRow}>
+          <MessageBubble key={message.id} media>
+            <img src={message.body.src} />
+          </MessageBubble>
           <IconButton
             className={styles.iconButton}
             onClick={onShareClick}
@@ -429,7 +433,7 @@ function getMessageComponent(message, intl) {
           >
             <ShareIcon />
           </IconButton>
-        </MessageBubble>
+        </div>
       );
     case "permission":
       return (
