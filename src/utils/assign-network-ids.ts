@@ -2,6 +2,7 @@ import { hasComponent } from "bitecs";
 import { HubsWorld } from "../app";
 import { Networked } from "../bit-components";
 import { ClientID, EntityID, NetworkID } from "./networking-types";
+import { Material, Texture } from "three";
 
 export function setNetworkedDataWithRoot(world: HubsWorld, rootNid: NetworkID, eid: EntityID, creator: ClientID) {
   let i = 0;
@@ -11,6 +12,16 @@ export function setNetworkedDataWithRoot(world: HubsWorld, rootNid: NetworkID, e
       setInitialNetworkedData(o.eid, i === 0 ? rootNid : `${rootNid}.${i}`, i === 0 ? creator : rootNid);
       i += 1;
     }
+  });
+  i = 0;
+  world.eid2mat.forEach((mat: Material, matEid: EntityID) => {
+    setInitialNetworkedData(matEid, `${rootNid}.mat.${i}`, rootNid);
+    i += 1;
+  });
+  i = 0;
+  world.eid2tex.forEach((tex: Texture, texEid: EntityID) => {
+    setInitialNetworkedData(texEid, `${rootNid}.tex.${i}`, rootNid);
+    i += 1;
   });
 }
 

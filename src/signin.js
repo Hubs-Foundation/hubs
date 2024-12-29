@@ -10,10 +10,11 @@ import "./react-components/styles/global.scss";
 import "./assets/stylesheets/globals.scss";
 import { Center } from "./react-components/layout/Center";
 import { ThemeProvider } from "./react-components/styles/theme";
-import { store } from "./utils/store-instance";
+import { getStore } from "./utils/store-instance";
 
 registerTelemetry("/signin", "Hubs Sign In Page");
 
+const store = getStore();
 window.APP = { store };
 
 function SignInRoot() {

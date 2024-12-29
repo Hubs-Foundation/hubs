@@ -23,16 +23,66 @@ export function getLastWorldScale(src, target) {
 }
 
 export function disposeMaterial(mtrl) {
-  if (mtrl.map) mtrl.map.dispose();
-  if (mtrl.lightMap) mtrl.lightMap.dispose();
-  if (mtrl.bumpMap) mtrl.bumpMap.dispose();
-  if (mtrl.normalMap) mtrl.normalMap.dispose();
-  if (mtrl.specularMap) mtrl.specularMap.dispose();
-  if (mtrl.envMap) mtrl.envMap.dispose();
-  if (mtrl.aoMap) mtrl.aoMap.dispose();
-  if (mtrl.metalnessMap) mtrl.metalnessMap.dispose();
-  if (mtrl.roughnessMap) mtrl.roughnessMap.dispose();
-  if (mtrl.emissiveMap) mtrl.emissiveMap.dispose();
+  if (mtrl.map) {
+    mtrl.map.dispose();
+    if (mtrl.map.eid) {
+      removeEntity(APP.world, mtrl.map.eid);
+    }
+  }
+  if (mtrl.lightMap) {
+    mtrl.lightMap.dispose();
+    if (mtrl.lightMap.eid) {
+      removeEntity(APP.world, mtrl.lightMap.eid);
+    }
+  }
+  if (mtrl.bumpMap) {
+    mtrl.bumpMap.dispose();
+    if (mtrl.bumpMap.eid) {
+      removeEntity(APP.world, mtrl.bumpMap.eid);
+    }
+  }
+  if (mtrl.normalMap) {
+    mtrl.normalMap.dispose();
+    if (mtrl.normalMap.eid) {
+      removeEntity(APP.world, mtrl.normalMap.eid);
+    }
+  }
+  if (mtrl.specularMap) {
+    mtrl.specularMap.dispose();
+    if (mtrl.specularMap.eid) {
+      removeEntity(APP.world, mtrl.specularMap.eid);
+    }
+  }
+  if (mtrl.envMap) {
+    mtrl.envMap.dispose();
+    if (mtrl.envMap.eid) {
+      removeEntity(APP.world, mtrl.envMap.eid);
+    }
+  }
+  if (mtrl.aoMap) {
+    mtrl.aoMap.dispose();
+    if (mtrl.aoMap.eid) {
+      removeEntity(APP.world, mtrl.aoMap.eid);
+    }
+  }
+  if (mtrl.metalnessMap) {
+    mtrl.metalnessMap.dispose();
+    if (mtrl.metalnessMap.eid) {
+      removeEntity(APP.world, mtrl.metalnessMap.eid);
+    }
+  }
+  if (mtrl.roughnessMap) {
+    mtrl.roughnessMap.dispose();
+    if (mtrl.roughnessMap.eid) {
+      removeEntity(APP.world, mtrl.roughnessMap.eid);
+    }
+  }
+  if (mtrl.emissiveMap) {
+    mtrl.emissiveMap.dispose();
+    if (mtrl.emissiveMap.eid) {
+      removeEntity(APP.world, mtrl.emissiveMap.eid);
+    }
+  }
   mtrl.dispose();
   if (mtrl.eid) {
     removeEntity(APP.world, mtrl.eid);
