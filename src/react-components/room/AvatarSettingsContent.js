@@ -27,6 +27,7 @@ export function AvatarSettingsContent({
         label={<FormattedMessage id="avatar-settings-content.display-name-label" defaultMessage="Display Name" />}
         value={displayName}
         pattern={displayNamePattern}
+        placeholder="separated by slashes or commas"
         spellCheck="false"
         required
         onChange={onChangeDisplayName}
