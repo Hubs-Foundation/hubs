@@ -71,9 +71,9 @@ jobs:
           echo ::add-mask::$PASSWORD
           echo Registry_Password=$PASSWORD >> $GITHUB_ENV
 
-      - name: Add the repository name as an env variable
+      - name: Add the repository name as an env variable # Lowercase is forced to prevent errors.
         run: |
-          echo "repo_name=${GITHUB_REPOSITORY#*/}" >> "$GITHUB_ENV"
+          echo "repo_name=${GITHUB_REPOSITORY#*/}" | tr "[:upper:]" "[:lower:]" >> "$GITHUB_ENV"
 
       # Code
       - name: Checkout repository
