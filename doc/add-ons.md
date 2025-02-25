@@ -2,6 +2,9 @@
 
 Hubs client add-ons are pluggable libraries that are installed as part of the client and loaded at runtime. Add-ons allow functionality to the Hubs core and allow easy Hubs client extensibility while maintaining the Hubs client core lean and minimal.
 
+The currently installed addons are listed in the `addons` array in the `addons.json` file at the root of the Hubs client source.
+Several are included by default, see [Add-ons included in `addons` branch](#add-ons-included-in-addons-branch).
+
 ## Installation
 
 Installing an addon in your Hubs client is a two step process:
@@ -10,7 +13,7 @@ Installing an addon in your Hubs client is a two step process:
    For example if we would want to install the portals add-on we would need to do:
 
 ```
-npm i https://github.com/MozillaReality/hubs-portals-addon.git
+npm i https://github.com/Hubs-Foundation/hubs-portals-addon.git
 ```
 
 2. After the add-on is installed you'll need to add it to the addons array inside the `addons.json` file at the root of the Hubs client source.
@@ -58,7 +61,7 @@ Add-ons can also be enabled/disabled per room independently from the instance co
 
 You can develop Hubs add-ons using Javascript or Typescript.
 
-If you are developing using Typescript you can use the add-on template as a starting point. You can get the Add-on template from [here](https://github.com/MozillaReality/hubs-template-addon).
+If you are developing using Typescript you can use the add-on template as a starting point. You can get the Add-on template from [here](https://github.com/Hubs-Foundation/hubs-template-addon).
 
 The add-on template has the basic dependencies already configured to get started with development as fast as possible.
 
@@ -94,11 +97,17 @@ The easiest way of iterating over an add-on development is by linking the add-on
 
 Now you can build the client and the add-on should be bundled as part of the client code.
 
-There is a typings library available for Typescript development: [Hubs Client TS Types](https://github.com/MozillaReality/hubs-ts-types)
+There is a typings library available for Typescript development: [Hubs Client TS Types](https://github.com/Hubs-Foundation/hubs-ts-types)
 
 ## Currently available add-ons
 
-- [Template add-on](https://github.com/MozillaReality/hubs-template-addon). This add-on serves as a foundation for add-on development.
-- [Duck add-on](https://github.com/MozillaReality/hubs-duck-addon): Replaces the existing `/duck` chat command and refactors it into a Hubs add-on.
-- [Portals add-on](https://github.com/MozillaReality/hubs-portals-addon): Simple portals implementation as an add-on that lets you spawn portals using the `/portal`. It also show how to add key bindings.
-- [Behavior Graphs add-on](https://github.com/MozillaReality/hubs-behavior-graphs-addon/): Initial Behavior Graphs implementation as an add-on
+## Template
+
+- [Template add-on](https://github.com/Hubs-Foundation/hubs-template-addon). This add-on serves as a foundation for add-on development.
+
+## Add-ons included in `addons` branch
+
+- [Duck add-on](https://github.com/Hubs-Foundation/hubs-duck-addon): Replaces the existing `/duck` chat command and refactors it into a Hubs add-on.
+- [Portals add-on](https://github.com/Hubs-Foundation/hubs-portals-addon): Simple portals implementation as an add-on that lets you spawn portals using the `/portal`. It also show how to add key bindings.
+- [Behavior Graphs add-on](https://github.com/Hubs-Foundation/hubs-behavior-graphs-addon/): Initial Behavior Graphs implementation as an add-on
+- [Post-Processing add-on](https://github.com/Hubs-Foundation/hubs-postprocessing-addon): This add-on adds ThreeJs [post-processing](https://github.com/pmndrs/postprocessing) effects
