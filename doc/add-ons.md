@@ -105,7 +105,7 @@ There is a typings library available for Typescript development: [Hubs Client TS
 
 - [Template add-on](https://github.com/Hubs-Foundation/hubs-template-addon). This add-on serves as a foundation for add-on development.
 
-## Add-ons included in `addons` branch
+### Add-ons included in `addons` branch
 
 - [Duck add-on](https://github.com/Hubs-Foundation/hubs-duck-addon): Replaces the existing `/duck` chat command and refactors it into a Hubs add-on.
 - [Portals add-on](https://github.com/Hubs-Foundation/hubs-portals-addon): Simple portals implementation as an add-on that lets you spawn portals using the `/portal`. It also show how to add key bindings.
