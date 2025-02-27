@@ -101,7 +101,7 @@ There is a typings library available for Typescript development: [Hubs Client TS
 
 ## Currently available add-ons
 
-## Template
+### Template
 
 - [Template add-on](https://github.com/Hubs-Foundation/hubs-template-addon). This add-on serves as a foundation for add-on development.
 
