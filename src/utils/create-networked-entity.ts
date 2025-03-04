@@ -3,18 +3,19 @@ import { HubsWorld } from "../app";
 import { Networked } from "../bit-components";
 import { createMessageDatas } from "../bit-systems/networking";
 import { MediaLoaderParams } from "../inflators/media-loader";
-import { PrefabName, prefabs } from "../prefabs/prefabs";
+import { prefabs } from "../prefabs/prefabs";
 import { renderAsEntity } from "../utils/jsx-entity";
 import { hasPermissionToSpawn } from "../utils/permissions";
 import { takeOwnership } from "../utils/take-ownership";
 import { setNetworkedDataWithRoot } from "./assign-network-ids";
 import type { ClientID, InitialData, NetworkID } from "./networking-types";
+import { PrefabNameT } from "../types";
 
 export function createNetworkedMedia(world: HubsWorld, initialData: MediaLoaderParams) {
   return createNetworkedEntity(world, "media", initialData);
 }
 
-export function createNetworkedEntity(world: HubsWorld, prefabName: PrefabName, initialData: InitialData) {
+export function createNetworkedEntity(world: HubsWorld, prefabName: PrefabNameT, initialData: InitialData) {
   if (!hasPermissionToSpawn(NAF.clientId, prefabName))
     throw new Error(`You do not have permission to spawn ${prefabName}`);
   const nid = NAF.utils.createNetworkId();
@@ -25,7 +26,7 @@ export function createNetworkedEntity(world: HubsWorld, prefabName: PrefabName, 
 
 export function renderAsNetworkedEntity(
   world: HubsWorld,
-  prefabName: PrefabName,
+  prefabName: PrefabNameT,
   initialData: InitialData,
   nid: NetworkID,
   creator: ClientID

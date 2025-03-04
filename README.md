@@ -39,6 +39,12 @@ Then visit https://hubs.local:8080 (note: HTTPS is required, you'll need to acce
 
 > Note: When running the Hubs client locally, you will still connect to the development versions of the [reticulum](https://github.com/Hubs-Foundation/reticulum) server. This server does not allow being accessed outside of localhost. If you want to host your own Hubs servers, please check out [Hubs Community Edition](https://github.com/Hubs-Foundation/hubs-cloud/tree/master/community-edition).
 
+## Add-ons
+
+Hubs client add-ons are pluggable libraries that are installed as part of the client and loaded at runtime. Add-ons allow functionality to the Hubs core and allow easy Hubs client extensibility while maintaining the Hubs client core lean and minimal.
+
+You can read more about add-ons installation and development [here](doc/add-ons.md).
+
 ## Contributing
 
 Read our [contributor guide](./CONTRIBUTING.md) to learn how you can submit bug reports, feature requests, and pull requests.
@@ -49,11 +55,10 @@ Contributors are expected to abide by the project's [Code of Conduct](./CODE_OF_
 
 ## Additional Resources
 
-* [Reticulum](https://github.com/Hubs-Foundation/reticulum) - Phoenix-based backend for managing state and presence.
-* [Networked A-Frame](https://github.com/Hubs-Foundation/networked-aframe).
-* [Hubs-Ops](https://github.com/Hubs-Foundation/hubs-ops) - Infrastructure as code + management tools for running necessary backend services on AWS.
+- [Reticulum](https://github.com/Hubs-Foundation/reticulum) - Phoenix-based backend for managing state and presence.
+- [Networked A-Frame](https://github.com/Hubs-Foundation/networked-aframe).
+- [Hubs-Ops](https://github.com/Hubs-Foundation/hubs-ops) - Infrastructure as code + management tools for running necessary backend services on AWS.
 
 ## License
 
 Hubs is licensed with the [Mozilla Public License 2.0](./LICENSE)
-

@@ -153,6 +153,7 @@ class UIRoot extends Component {
     initialIsFavorited: PropTypes.bool,
     showSignInDialog: PropTypes.bool,
     showBitECSBasedClientRefreshPrompt: PropTypes.bool,
+    showAddonRefreshPrompt: PropTypes.bool,
     signInMessage: PropTypes.object,
     onContinueAfterSignIn: PropTypes.func,
     showSafariMicDialog: PropTypes.bool,
@@ -1702,6 +1703,14 @@ class UIRoot extends Component {
               <FormattedMessage
                 id="ui-root.bitecs-based-client-refresh-prompt"
                 defaultMessage="This page will be reloaded in five seconds because the room owner toggled the bitECS based client activation flag."
+              />
+            </div>
+          )}
+          {this.props.showAddonRefreshPrompt && (
+            <div className={styles.bitecsBasedClientRefreshPrompt}>
+              <FormattedMessage
+                id="ui-root.addons-state-changed-refresh-prompt"
+                defaultMessage="This page will be reloaded in five seconds because the room owner changed the room add-ons configuration."
               />
             </div>
           )}

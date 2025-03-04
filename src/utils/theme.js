@@ -1,5 +1,5 @@
 import { waitForDOMContentLoaded } from "./async-utils";
-import { store } from "./store-instance";
+import { getStore } from "./store-instance";
 
 // NOTE these should be synchronized with the top of shared.scss
 const DEFAULT_ACTION_COLOR = "#FF3464";
@@ -99,6 +99,7 @@ function tryGetTheme(themeId) {
 }
 
 function getCurrentTheme() {
+  const store = getStore();
   const preferredThemeId = store.state?.preferences?.theme;
   return tryGetTheme(preferredThemeId);
 }
@@ -153,6 +154,7 @@ function applyThemeToBody() {
 }
 
 function onThemeChanged(listener) {
+  const store = getStore();
   store.addEventListener("themechanged", listener);
   const [_darkModeQuery, removeDarkModeListener] = registerDarkModeQuery(listener);
 

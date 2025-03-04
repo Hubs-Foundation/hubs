@@ -15,14 +15,28 @@ export const AxisAlignType = {
 };
 
 export const MEDIA_FRAME_FLAGS = {
-  SCALE_TO_BOUNDS: 1 << 0
+  SCALE_TO_BOUNDS: 1 << 0,
+  ACTIVE: 1 << 1,
+  SNAP_TO_CENTER: 1 << 2,
+  LOCKED: 1 << 3
+};
+
+export const MediaTypes = {
+  all: MediaType.ALL,
+  "all-2d": MediaType.ALL_2D,
+  model: MediaType.MODEL,
+  image: MediaType.IMAGE,
+  video: MediaType.VIDEO,
+  pdf: MediaType.PDF
 };
 
 const DEFAULTS = {
   bounds: { x: 1, y: 1, z: 1 },
   mediaType: "all",
   scaleToBounds: true,
-  align: { x: "center", y: "center", z: "center" }
+  align: { x: "center", y: "center", z: "center" },
+  active: true,
+  locked: false
 };
 export function inflateMediaFrame(world, eid, componentProps) {
   componentProps = Object.assign({}, DEFAULTS, componentProps);
@@ -68,17 +82,16 @@ export function inflateMediaFrame(world, eid, componentProps) {
   addComponent(world, MediaFrame, eid, true);
   addComponent(world, NetworkedMediaFrame, eid, true);
 
+  NetworkedMediaFrame.flags[eid] |= MEDIA_FRAME_FLAGS.ACTIVE;
+  if (componentProps.snapToCenter) {
+    NetworkedMediaFrame.flags[eid] |= MEDIA_FRAME_FLAGS.SNAP_TO_CENTER;
+  }
+
   if (!hasComponent(world, Networked, eid)) addComponent(world, Networked, eid);
 
   // Media types accepted
-  MediaFrame.mediaType[eid] = {
-    all: MediaType.ALL,
-    "all-2d": MediaType.ALL_2D,
-    model: MediaType.MODEL,
-    image: MediaType.IMAGE,
-    video: MediaType.VIDEO,
-    pdf: MediaType.PDF
-  }[componentProps.mediaType];
+  MediaFrame.mediaType[eid] = MediaTypes[componentProps.mediaType];
+  NetworkedMediaFrame.mediaType[eid] = MediaFrame.mediaType[eid];
   // Bounds
   MediaFrame.bounds[eid].set([componentProps.bounds.x, componentProps.bounds.y, componentProps.bounds.z]);
   // Axis alignment
@@ -100,6 +113,15 @@ export function inflateMediaFrame(world, eid, componentProps) {
   let flags = 0;
   if (componentProps.scaleToBounds) flags |= MEDIA_FRAME_FLAGS.SCALE_TO_BOUNDS;
   MediaFrame.flags[eid] = flags;
+
+  if (componentProps.active) {
+    NetworkedMediaFrame.flags[eid] |= MEDIA_FRAME_FLAGS.ACTIVE;
+    MediaFrame.flags[eid] |= MEDIA_FRAME_FLAGS.ACTIVE;
+  }
+  if (componentProps.locked) {
+    NetworkedMediaFrame.flags[eid] |= MEDIA_FRAME_FLAGS.LOCKED;
+    MediaFrame.flags[eid] |= MEDIA_FRAME_FLAGS.LOCKED;
+  }
 
   inflateRigidBody(world, eid, {
     type: Type.KINEMATIC,
