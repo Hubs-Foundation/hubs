@@ -597,7 +597,7 @@ class GLTFHubsComponentsExtension {
             if (Object.prototype.hasOwnProperty.call(ext, "link")) {
             if (["image", "video", "model"].includes(componentName)) {
                 if (!ext.link || !ext.link.href) {
-            console.warn("Warning: Attempted to load a link but the href is missing!", ext);
+            console.warn("Warning: Attempted to load a link but the href is missing! Component : ${componentName}", ext);
             } else {
                 ext["media-link"] = {
             src: ext.link.href
