@@ -508,6 +508,18 @@ class GLTFHubsPlugin {
         }
       }
     }
+    const materials = parser.json.materials;
+    if (materials) {
+      for (let i = 0; i < materials.length; i++) {
+        const mat = materials[i];
+
+        if (!mat.extras) {
+          mat.extras = {};
+        }
+
+        mat.extras.gltfIndex = i;
+      }
+    }
   }
 
   afterRoot(gltf) {
@@ -583,15 +595,17 @@ class GLTFHubsComponentsExtension {
           // Note: For some reason this was not supported for PDFs. Not sure if it's random or if there is a reason.
           if (shouldUseNewLoader()) {
             if (Object.prototype.hasOwnProperty.call(ext, "link")) {
-              if (["image", "video", "model"].includes(componentName)) {
+            if (["image", "video", "model"].includes(componentName)) {
+                if (!ext.link || !ext.link.href) {
+            console.warn("Warning: Attempted to load a link but the href is missing! Component : ${componentName}", ext);
+            } else {
                 ext["media-link"] = {
-                  src: ext.link.href
-                };
-                delete ext.link;
-              }
-            }
-          }
-
+            src: ext.link.href
+           };
+           delete ext.link;
+                   }
+               }
+           }
           const value = props[propName];
           const type = value?.__mhc_link_type;
           if (type && value.index !== undefined) {
@@ -858,6 +872,7 @@ class GLTFHubsLoopAnimationComponent {
   }
 }
 
+export const gltfPluginsExtra = [];
 export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
   let gltfUrl = src;
   let fileMap;
@@ -933,6 +948,7 @@ export async function loadGLTF(src, contentType, onProgress, jsonPreprocessor) {
           }
         })
     );
+  gltfPluginsExtra.forEach(ext => gltfLoader.register(parser => ext(parser)));
 
   // TODO some models are loaded before the renderer exists. This is likely things like the camera tool and loading cube.
   // They don't currently use KTX textures but if they did this would be an issue. Fixing this is hard but is part of

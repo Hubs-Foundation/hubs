@@ -6,6 +6,7 @@ import { AudioType, SourceType } from "../components/audio-params";
 import { AudioSystem } from "../systems/audio-system";
 import { applySettings, getCurrentAudioSettings, updateAudioSettings } from "../update-audio-settings";
 import { addObject3DComponent, swapObject3DComponent } from "../utils/jsx-entity";
+import { EntityID } from "../utils/networking-types";
 
 export type AudioObject3D = StereoAudio | PositionalAudio;
 type AudioConstructor<T> = new (listener: ThreeAudioListener) => T;
@@ -53,6 +54,13 @@ function swapAudioType<T extends AudioObject3D>(
   audio.removeFromParent();
 
   swapObject3DComponent(world, eid, newAudio);
+}
+
+export function swapAudioSrc(world: HubsWorld, videoEid: EntityID, audioEid: EntityID) {
+  const audio = world.eid2obj.get(audioEid)! as AudioObject3D;
+  const video = MediaVideoData.get(videoEid)!;
+  audio.setMediaElementSource(video);
+  video.volume = 1;
 }
 
 export function makeAudioEntity(world: HubsWorld, source: number, sourceType: SourceType, audioSystem: AudioSystem) {

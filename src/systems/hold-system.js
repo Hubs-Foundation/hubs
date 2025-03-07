@@ -13,14 +13,15 @@ import {
   HeldHandLeft,
   AEntity,
   Networked,
-  MediaLoader,
-  Deletable
+  Rigidbody,
+  HoldableButton
 } from "../bit-components";
 import { canMove } from "../utils/permissions-utils";
 import { canMove as canMoveEntity } from "../utils/bit-permissions-utils";
 import { isPinned } from "../bit-systems/networking";
 import { takeOwnership } from "../utils/take-ownership";
-import { findAncestorWithComponents } from "../utils/bit-utils";
+import { findAncestorWithComponents, findAncestorWithComponent } from "../utils/bit-utils";
+import { HOLDABLE_FLAGS } from "../inflators/holdable";
 
 const GRAB_REMOTE_RIGHT = paths.actions.cursor.right.grab;
 const DROP_REMOTE_RIGHT = paths.actions.cursor.right.drop;
@@ -75,25 +76,31 @@ export function isAEntityPinned(world, eid) {
 // Alternate solution: Simply recognize an entity as pinned if its any
 // ancestor is pinned (in hold-system) unless there is a case that
 // descendant entity under pinned entity wants to be grabbable.
+//
+// Update:  As now we are supporting grabbable scene objects, we look for the
+//          root holdable entity with a rigid body as the only rigid body
+//          in the hierarchy should be at the root of the grabbable object.
 function grab(world, userinput, queryHovered, held, grabPath) {
   const hovered = queryHovered(world)[0];
 
-  // Special path for Dropped/Pasted Media with new loader enabled. Check the comment above.
-  const mediaRoot = findAncestorWithComponents(world, [Deletable, MediaLoader, Holdable], hovered);
-  const target = mediaRoot ? mediaRoot : hovered;
+  const holdablebutton = findAncestorWithComponent(world, HoldableButton, hovered);
+  const interactable = findAncestorWithComponents(world, [Holdable, Rigidbody], hovered);
+  const target = interactable ? interactable : hovered;
+  const holdtarget = holdablebutton ? holdablebutton : target;
   const isEntityPinned = isPinned(target) || isAEntityPinned(world, target);
 
   if (
     target &&
     userinput.get(grabPath) &&
     (!isEntityPinned || AFRAME.scenes[0].is("frozen")) &&
+    Holdable.flags[interactable] & HOLDABLE_FLAGS.ENABLED &&
     hasPermissionToGrab(world, target)
   ) {
     if (hasComponent(world, Networked, target)) {
       takeOwnership(world, target);
     }
-    addComponent(world, held, target);
-    addComponent(world, Held, target);
+    addComponent(world, held, holdtarget);
+    addComponent(world, Held, holdtarget);
   }
 }
 

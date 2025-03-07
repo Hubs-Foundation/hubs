@@ -54,6 +54,17 @@ function decodeAudioData(audioContext, arrayBuffer) {
   });
 }
 
+function load(system, url) {
+  let audioBufferPromise = system.loading.get(url);
+  if (!audioBufferPromise) {
+    audioBufferPromise = fetch(url)
+      .then(r => r.arrayBuffer())
+      .then(arrayBuffer => decodeAudioData(system.audioContext, arrayBuffer));
+    system.loading.set(url, audioBufferPromise);
+  }
+  return audioBufferPromise;
+}
+
 export class SoundEffectsSystem {
   constructor(scene) {
     this.pendingAudioSourceNodes = [];
@@ -92,20 +103,10 @@ export class SoundEffectsSystem {
       [SOUND_SPAWN_EMOJI, URL_SPAWN_EMOJI],
       [SOUND_SPEAKER_TONE, URL_SPEAKER_TONE]
     ];
-    const loading = new Map();
-    const load = url => {
-      let audioBufferPromise = loading.get(url);
-      if (!audioBufferPromise) {
-        audioBufferPromise = fetch(url)
-          .then(r => r.arrayBuffer())
-          .then(arrayBuffer => decodeAudioData(this.audioContext, arrayBuffer));
-        loading.set(url, audioBufferPromise);
-      }
-      return audioBufferPromise;
-    };
+    this.loading = new Map();
     this.sounds = new Map();
     soundsAndUrls.map(([sound, url]) => {
-      load(url).then(audioBuffer => {
+      load(this, url).then(audioBuffer => {
         this.sounds.set(sound, audioBuffer);
       });
     });
@@ -119,6 +120,20 @@ export class SoundEffectsSystem {
         // but we do not hold references to these and they're short-lived so I didn't bother.
       }
       this.isDisabled = shouldBeDisabled;
+    });
+  }
+
+  registerSound(url) {
+    return new Promise((resolve, reject) => {
+      load(this, url)
+        .then(audioBuffer => {
+          soundEnum++;
+          this.sounds.set(soundEnum, audioBuffer);
+          resolve({ id: soundEnum, url });
+        })
+        .catch(() => {
+          reject();
+        });
     });
   }
 
