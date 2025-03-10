@@ -603,8 +603,8 @@ class GLTFHubsComponentsExtension {
             src: ext.link.href
            };
            delete ext.link;
-                   }
-               }
+         }
+       }
            }
           const value = props[propName];
           const type = value?.__mhc_link_type;
