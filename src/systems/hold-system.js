@@ -13,13 +13,14 @@ import {
   HeldHandLeft,
   AEntity,
   Networked,
-  Rigidbody
+  Rigidbody,
+  HoldableButton
 } from "../bit-components";
 import { canMove } from "../utils/permissions-utils";
 import { canMove as canMoveEntity } from "../utils/bit-permissions-utils";
 import { isPinned } from "../bit-systems/networking";
 import { takeOwnership } from "../utils/take-ownership";
-import { findAncestorWithComponents } from "../utils/bit-utils";
+import { findAncestorWithComponents, findAncestorWithComponent } from "../utils/bit-utils";
 import { HOLDABLE_FLAGS } from "../inflators/holdable";
 
 const GRAB_REMOTE_RIGHT = paths.actions.cursor.right.grab;
@@ -82,8 +83,10 @@ export function isAEntityPinned(world, eid) {
 function grab(world, userinput, queryHovered, held, grabPath) {
   const hovered = queryHovered(world)[0];
 
+  const holdablebutton = findAncestorWithComponent(world, HoldableButton, hovered);
   const interactable = findAncestorWithComponents(world, [Holdable, Rigidbody], hovered);
   const target = interactable ? interactable : hovered;
+  const holdtarget = holdablebutton ? holdablebutton : target;
   const isEntityPinned = isPinned(target) || isAEntityPinned(world, target);
 
   if (
@@ -96,8 +99,8 @@ function grab(world, userinput, queryHovered, held, grabPath) {
     if (hasComponent(world, Networked, target)) {
       takeOwnership(world, target);
     }
-    addComponent(world, held, target);
-    addComponent(world, Held, target);
+    addComponent(world, held, holdtarget);
+    addComponent(world, Held, holdtarget);
   }
 }
 
