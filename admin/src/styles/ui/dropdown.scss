@@ -1,0 +1,22 @@
+@use '../core/boilerplate.scss' as *;
+
+.dropdown-hr {
+  border: 0;
+  height: 2px;
+  background: $color-border-3;
+  margin: 24px 0;
+}
+
+.dropdown-link {
+  @include body-md;
+  display: flex;
+  align-items: center;
+  color: $color-text-reverse;
+  background-color: transparent;
+  border: 0px;
+  padding: 0;
+
+  &:first-child {
+    margin-bottom: 24px;
+  }
+}

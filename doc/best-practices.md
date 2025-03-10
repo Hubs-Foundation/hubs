@@ -110,7 +110,7 @@ class Foo {
 
 ### Prefer calling functions to emitting events
 
-Events obfuscate code flow and coupling and should only be used when the emitter of the event is truly decoupled from things wishing ot subscribe to the event. Prefer direct function calls when the emitter and subscriber are inherently coupled.
+Events obfuscate code flow and coupling and should only be used when the emitter of the event is truly decoupled from things wishing to subscribe to the event. Prefer direct function calls when the emitter and subscriber are inherently coupled.
 
 Don't:
 ```js

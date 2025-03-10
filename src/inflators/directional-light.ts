@@ -1,6 +1,6 @@
 import { addComponent } from "bitecs";
 import { addObject3DComponent } from "../utils/jsx-entity";
-import { DirectionalLight } from "../bit-components";
+import { DirectionalLight, LightTag } from "../bit-components";
 import { DirectionalLight as DL } from "three";
 import { HubsWorld } from "../app";
 
@@ -24,12 +24,9 @@ export function inflateDirectionalLight(world: HubsWorld, eid: number, params: D
   light.shadow.bias = params.shadowBias;
   light.shadow.radius = params.shadowRadius;
   light.shadow.mapSize.set(params.shadowMapResolution[0], params.shadowMapResolution[1]);
-  if (light.shadow.map) {
-    light.shadow.map.dispose();
-    (light.shadow.map as any) = null; // TODO: Correct the Typescript definition in three. This /is/ nullable.
-  }
 
   addObject3DComponent(world, eid, light);
+  addComponent(world, LightTag, eid);
   addComponent(world, DirectionalLight, eid);
   return eid;
 }

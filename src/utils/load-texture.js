@@ -3,7 +3,7 @@ import { errorTexture } from "../utils/error-texture";
 import { createImageTexture } from "../utils/media-utils";
 import { createBasisTexture, createKTX2Texture } from "../utils/create-basis-texture";
 import { createGIFTexture } from "../utils/gif-texture";
-import { makeCancelable } from "./coroutine";
+import { withRollback } from "./coroutine-utils";
 
 const textureCache = new TextureCache();
 // Prime the cache with the error texture.
@@ -41,7 +41,7 @@ export function loadTextureFromCache(src, version) {
   return textureCache.retain(src, version);
 }
 
-async function loadTexture(src, version, contentType) {
+export async function loadTexture(src, version, contentType) {
   if (textureCache.has(src, version)) {
     return textureCache.retain(src, version);
   }
@@ -68,10 +68,10 @@ export async function releaseTextureByKey(cacheKey) {
 
 export function loadTextureCancellable(src, version, contentType) {
   const p = loadTexture(src, version, contentType);
-  return makeCancelable(() => {
+  return withRollback(p, () => {
     // TODO: Pass in an AbortSignal through to loadTexture so that we can cancel inflight requests.
     p.then(({ cacheKey }) => {
       releaseTextureByKey(cacheKey);
     });
-  }, p);
+  });
 }

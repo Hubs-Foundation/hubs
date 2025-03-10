@@ -2,7 +2,7 @@ import { Socket } from "phoenix";
 import { generateHubName } from "../utils/name-generation";
 import configs from "../utils/configs";
 import { sleep } from "../utils/async-utils";
-import { store } from "../utils/store-instance";
+import { getStore } from "../utils/store-instance";
 
 export function hasReticulumServer() {
   return !!configs.RETICULUM_SERVER;
@@ -198,10 +198,11 @@ export function fetchReticulumAuthenticatedWithToken(token, url, method = "GET",
   });
 }
 export function fetchReticulumAuthenticated(url, method = "GET", payload) {
+  const store = getStore();
   return fetchReticulumAuthenticatedWithToken(store.state.credentials.token, url, method, payload);
 }
 
-export async function createAndRedirectToNewHub(name, sceneId, replace) {
+export async function createAndRedirectToNewHub(name, sceneId, replace, qs) {
   const createUrl = getReticulumFetchUrl("/api/v1/hubs");
   const payload = { hub: { name: name || generateHubName() } };
 
@@ -210,6 +211,7 @@ export async function createAndRedirectToNewHub(name, sceneId, replace) {
   }
 
   const headers = { "content-type": "application/json" };
+  const store = getStore();
   if (store.state && store.state.credentials.token) {
     headers.authorization = `bearer ${store.state.credentials.token}`;
   }
@@ -251,6 +253,14 @@ export async function createAndRedirectToNewHub(name, sceneId, replace) {
 
   if (isLocalClient()) {
     url = `/hub.html?hub_id=${hub.hub_id}`;
+  }
+
+  if (qs) {
+    if (isLocalClient()) {
+      url = `${url}&${qs.toString()}`;
+    } else {
+      url = `${url}?${qs.toString()}`;
+    }
   }
 
   if (replace) {
@@ -426,4 +436,8 @@ export const tryGetMatchingMeta = async ({ ret_pool, ret_version }, shouldAbando
     attempt = attempt + 1;
   }
   return didMatchMeta;
+};
+
+window.$P = {
+  getReticulumFetchUrl
 };

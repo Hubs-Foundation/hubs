@@ -355,13 +355,13 @@ class ContentCDNComponent extends Component {
                     <li>
                       Verify your workers are working.{" "}
                       <a
-                        href={`https://${this.state.workerInstanceName}-cors-proxy.${this.state.workerDomain}/https://www.mozilla.org`}
+                        href={`https://${this.state.workerInstanceName}-cors-proxy.${this.state.workerDomain}/https://hubsfoundation.org`}
                         rel="noopener noreferrer"
                         target="_blank"
                       >
                         This link
                       </a>{" "}
-                      should show the Mozilla homepage, and&nbsp;
+                      should show the Hubs Foundation homepage, and&nbsp;
                       <a
                         href={`https://${this.state.workerInstanceName}-proxy.${this.state.workerDomain}/hubs/pages/latest/whats-new.html`}
                         rel="noopener noreferrer"
@@ -369,7 +369,7 @@ class ContentCDNComponent extends Component {
                       >
                         this link
                       </a>{" "}
-                      should should the Hubs &quot;What&apos;s New&quot; page.
+                      should show the Hubs &quot;What&apos;s New&quot; page.
                     </li>
                     <li>
                       Once <b>both</b> links above are working, enable the &apos;Use Cloudflare Worker&apos; setting

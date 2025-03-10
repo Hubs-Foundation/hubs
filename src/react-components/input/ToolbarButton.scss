@@ -1,4 +1,4 @@
-@use '../styles/theme';
+@use "../styles/theme";
 
 :local(.toolbar-button) {
   border: none;
@@ -43,11 +43,11 @@
   svg {
     color: theme.$toolbar-icon-color;
 
-    *[stroke=\#000] {
+    *[stroke="\#000"] {
       transition: stroke 0.1s ease-in-out;
     }
 
-    *[fill=\#000] {
+    *[fill="\#000"] {
       transition: fill 0.1s ease-in-out;
     }
   }
@@ -58,17 +58,18 @@
   height: 96px;
 }
 
-:local(.basic), :local(.transparent) {
+:local(.basic),
+:local(.transparent) {
   :local(.icon-container) {
     border-color: theme.$toolbar-basic-border-color;
-    background-color: theme.$transparent;;
+    background-color: theme.$background1-color;
     svg {
       color: theme.$toolbar-basic-icon-color;
     }
 
     &:disabled,
     &[disabled] {
-      border-color: theme.$transparent;
+      border-color: theme.$background1-color;
       background-color: theme.$disabled-bg-color;
       svg {
         color: theme.$disabled-icon-color;
@@ -113,7 +114,7 @@
         background-color: theme.$toolbar-basic-color-hover;
       }
     }
-  
+
     &:active {
       :local(.icon-container) {
         background-color: theme.$toolbar-basic-color-pressed;
@@ -186,7 +187,7 @@
         }
       }
     }
-  
+
     &:active {
       :local(.icon-container) {
         border-color: theme.$primary-color-pressed;
@@ -199,7 +200,6 @@
   }
 }
 
-
 :local(.accept) {
   :local(.icon-container) {
     background-color: theme.$accept-color;
@@ -211,7 +211,7 @@
         color: theme.$disabled-icon-color;
       }
     }
-  }  
+  }
 
   &:hover :local(.icon-container) {
     background-color: theme.$accept-color-hover;
@@ -251,7 +251,7 @@
         }
       }
     }
-  
+
     &:active {
       :local(.icon-container) {
         border-color: theme.$accept-color-pressed;
@@ -274,7 +274,7 @@
         color: theme.$disabled-icon-color;
       }
     }
-  }  
+  }
 
   &:hover :local(.icon-container) {
     background-color: theme.$cancel-color-hover;
@@ -314,7 +314,7 @@
         }
       }
     }
-  
+
     &:active {
       :local(.icon-container) {
         border-color: theme.$cancel-color-pressed;
@@ -338,7 +338,7 @@
         color: theme.$disabled-icon-color;
       }
     }
-  }  
+  }
 
   &:hover :local(.icon-container) {
     background-color: theme.$accent1-color-hover;
@@ -364,7 +364,7 @@
     }
 
     label {
-      color: theme.$toolbar-label-accent1;
+      color: theme.$accent1-color;
     }
 
     &:hover {
@@ -383,7 +383,7 @@
         }
       }
     }
-  
+
     &:active {
       :local(.icon-container) {
         border-color: theme.$accent1-color-pressed;
@@ -407,7 +407,7 @@
         color: theme.$disabled-icon-color;
       }
     }
-  }  
+  }
 
   &:hover :local(.icon-container) {
     background-color: theme.$accent2-color-hover;
@@ -435,7 +435,7 @@
     }
 
     label {
-      color: theme.$toolbar-label-accent2;
+      color: theme.$accent2-color;
     }
 
     &:hover {
@@ -447,7 +447,7 @@
         }
       }
     }
-  
+
     &:active {
       :local(.icon-container) {
         border-color: theme.$accent2-color-pressed;
@@ -471,7 +471,7 @@
         color: theme.$disabled-icon-color;
       }
     }
-  }  
+  }
 
   &:hover :local(.icon-container) {
     background-color: theme.$accent3-color-hover;
@@ -499,7 +499,7 @@
     }
 
     label {
-      color: theme.$toolbar-label-accent3;
+      color: theme.$accent3-color;
     }
 
     &:hover {
@@ -511,7 +511,7 @@
         }
       }
     }
-  
+
     &:active {
       :local(.icon-container) {
         border-color: theme.$accent3-color-pressed;
@@ -563,7 +563,7 @@
     }
 
     label {
-      color: theme.$toolbar-label-accent4;
+      color: theme.$accent4-color;
     }
 
     &:hover {
@@ -575,7 +575,7 @@
         }
       }
     }
-  
+
     &:active {
       :local(.icon-container) {
         border-color: theme.$accent4-color-pressed;
@@ -599,7 +599,7 @@
         color: theme.$disabled-icon-color;
       }
     }
-  }  
+  }
 
   &:hover :local(.icon-container) {
     background-color: theme.$accent5-color-hover;
@@ -627,7 +627,7 @@
     }
 
     label {
-      color: theme.$toolbar-label-accent5;   
+      color: theme.$accent5-color;
     }
 
     &:hover {
@@ -639,7 +639,7 @@
         }
       }
     }
-  
+
     &:active {
       :local(.icon-container) {
         border-color: theme.$accent5-color-pressed;
@@ -660,20 +660,19 @@
 }
 
 :local(.status-enabled) {
-  background-color: theme.$status-enabled-color;
+  background-color: theme.$accept-color;
 }
 
 :local(.status-disabled) {
-  background-color: theme.$status-disabled-color;
+  background-color: theme.$cancel-color;
 }
 
-
 :local(.status-unread) {
-  background-color: theme.$status-unread-color;
+  background-color: theme.$orange;
 }
 
 :local(.status-recording) {
-  background-color: theme.$status-recording-color;
+  background-color: theme.$red;
 }
 
 :local(.left) {
@@ -682,7 +681,7 @@
     border-radius: 0px;
     border-top-left-radius: 9999px;
     border-bottom-left-radius: 9999px;
-  } 
+  }
 }
 
 :local(.middle) {

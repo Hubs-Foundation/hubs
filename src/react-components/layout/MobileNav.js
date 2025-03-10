@@ -36,7 +36,7 @@ export function MobileNav({ isHmc, showDocsLink, docsUrl, showSourceLink, showCo
                 )}
                 {showSourceLink && (
                   <li>
-                    <a href="https://github.com/mozilla/hubs">
+                    <a href="https://github.com/Hubs-Foundation/hubs">
                       <FormattedMessage id="header.source" defaultMessage="Developers" />
                     </a>
                   </li>

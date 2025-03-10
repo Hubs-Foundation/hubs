@@ -8,6 +8,9 @@ import { EventTarget } from "event-target-shim";
 import { ExitReason } from "./react-components/room/ExitedRoomScreen";
 import { LogMessageType } from "./react-components/room/ChatSidebar";
 import { createNetworkedEntity } from "./utils/create-networked-entity";
+import { add, testAsset, respawn } from "./utils/chat-commands";
+import { isLockedDownDemoRoom } from "./utils/hub-utils";
+import { loadState, clearState } from "./utils/entity-state-utils";
 
 let uiRoot;
 // Handles user-entered messages
@@ -20,6 +23,15 @@ export default class MessageDispatch extends EventTarget {
     this.remountUI = remountUI;
     this.mediaSearchStore = mediaSearchStore;
     this.presenceLogEntries = [];
+    this.chatCommands = new Map();
+  }
+
+  registerChatCommand(name, callback) {
+    if (!this.chatCommands.has(name)) {
+      this.chatCommands.set(name, callback);
+    } else {
+      throw Error(`Error registering chat command ${name}: command already registered`);
+    }
   }
 
   addToPresenceLog(entry) {
@@ -54,6 +66,8 @@ export default class MessageDispatch extends EventTarget {
   }
 
   receive(message) {
+    if (isLockedDownDemoRoom()) return;
+
     this.addToPresenceLog(message);
     this.dispatchEvent(new CustomEvent("message", { detail: message }));
   }
@@ -125,7 +139,8 @@ export default class MessageDispatch extends EventTarget {
         this.entryManager.exitScene();
         this.remountUI({ roomUnavailableReason: ExitReason.left });
         break;
-      case "duck":
+
+      case "oldduck":
         spawnChatMessage(getAbsoluteHref(location.href, ducky));
         if (Math.random() < 0.01) {
           this.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SPECIAL_QUACK);
@@ -156,7 +171,7 @@ export default class MessageDispatch extends EventTarget {
               this.log(LogMessageType.unauthorizedSceneChange);
             }
           } else {
-            this.log(LogMessageType.inalidSceneUrl);
+            this.log(LogMessageType.invalidSceneUrl);
           }
         } else if (this.hubChannel.canOrWillIfCreator("update_hub")) {
           this.mediaSearchStore.sourceNavigateWithNoNav("scenes", "use");
@@ -212,6 +227,43 @@ export default class MessageDispatch extends EventTarget {
           }
         }
         break;
+      case "add":
+        {
+          const avatarPov = document.querySelector("#avatar-pov-node").object3D;
+          add(APP.world, avatarPov, args);
+        }
+        break;
+      case "respawn":
+        {
+          const sceneEl = AFRAME.scenes[0];
+          const characterController = this.scene.systems["hubs-systems"].characterController;
+          respawn(APP.world, sceneEl, characterController);
+        }
+        break;
+      case "test":
+        {
+          const avatarPov = document.querySelector("#avatar-pov-node").object3D;
+          testAsset(APP.world, avatarPov, args);
+        }
+        break;
+      case "load":
+        {
+          if (this.hubChannel.can("pin_objects") && this.hubChannel.signIn) {
+            loadState(this.hubChannel, APP.world, args);
+          }
+        }
+        break;
+      case "clear":
+        {
+          if (this.hubChannel.can("pin_objects") && this.hubChannel.signIn) {
+            clearState(this.hubChannel, APP.world);
+          }
+        }
+        break;
+    }
+
+    if (this.chatCommands.has(command)) {
+      this.chatCommands.get(command)(APP, args);
     }
   };
 }

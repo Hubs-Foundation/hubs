@@ -1,5 +1,5 @@
 import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
 import registerTelemetry from "./telemetry";
 import "./utils/theme";
@@ -10,13 +10,14 @@ import "./assets/stylesheets/globals.scss";
 import { PageContainer } from "./react-components/layout/PageContainer";
 import { Center } from "./react-components/layout/Center";
 import { ThemeProvider } from "./react-components/styles/theme";
-import { store } from "./utils/store-instance";
+import { getStore } from "./utils/store-instance";
 
 registerTelemetry("/verify", "Hubs Verify Email Page");
 
+const store = getStore();
 window.APP = { store };
 
-function Root() {
+function VerifyRoot() {
   return (
     <WrappedIntlProvider>
       <ThemeProvider store={store}>
@@ -32,4 +33,7 @@ function Root() {
   );
 }
 
-ReactDOM.render(<Root />, document.getElementById("ui-root"));
+const container = document.getElementById("ui-root");
+
+const root = createRoot(container);
+root.render(<VerifyRoot />);

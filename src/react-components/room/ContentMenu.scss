@@ -11,8 +11,9 @@
   border-radius: 12px;
   pointer-events: auto;
   padding: 4px;
+  color: theme.$text1-color;
 
-  @media(min-width: theme.$breakpoint-lg) {
+  @media (min-width: theme.$breakpoint-lg) {
     top: 24px;
     right: 24px;
   }
@@ -71,4 +72,9 @@
   width: 1px;
   margin: 0 8px;
   background-color: theme.$border1-color;
+}
+
+:local(.disabled) {
+  pointer-events: none;
+  background-color: theme.$transparent;
 }

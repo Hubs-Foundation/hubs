@@ -4,18 +4,33 @@ on:
     branches:
     paths-ignore: ["README.md"]
   workflow_dispatch:
+    # Smoke instances aren't currently set up as of 2024-09-08
+    # so commenting out the smoke stuff for now.
+    # inputs:
+    #   smokeroom-choice:
+    #     type: choice
+    #     description: Select smoke instance
+    #     options:
+    #       - "smoke01"
+    #       - "smoke02"
+    #       - "smoke03"
+    #       - "smoke04"
+    #       - "smoke05"
+
 jobs:
   turkeyGitops:
-    uses: mozilla/hubs-ops/.github/workflows/turkeyGitops.yml@master
+    uses: Hubs-Foundation/hubs-ops/.github/workflows/turkeyGitops.yml@master
     with:
-      registry: mozillareality
+      registry: hubsfoundation
       dockerfile: RetPageOriginDockerfile
-      personal_k8s_deployment: hubs
-      personal_k8s_deployment_container: hubs
+      k8s_deployment: hubs
+      k8s_deployment_container: hubs
       bio_script_path: scripts/hab-wrap-and-push.sh
+      smoke-instance: ${{inputs.smokeroom-choice}}
     secrets:
       DOCKER_HUB_PWD: ${{ secrets.DOCKER_HUB_PWD }}
       GCP_TURKEYGITOPS_SA_JSON: ${{ secrets.GCP_TURKEYGITOPS_SA_JSON  }}
       BLDR_HAB_TOKEN: ${{ secrets.BLDR_HAB_TOKEN }}
       BLDR_RET_TOKEN: ${{ secrets.BLDR_RET_TOKEN }}
       BLDR_RET_PUB_B64: ${{ secrets.BLDR_RET_PUB_B64 }}
+      BLDR_HAB_PVT_B64: ${{ secrets.BLDR_HAB_PVT_B64 }}

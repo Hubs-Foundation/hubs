@@ -22,7 +22,7 @@ export function patchWebGLRenderingContext() {
     // It appears that Galaxy S6 devices falsely report that they support
     // OES_texture_float in Firefox. This workaround disables float textures
     // for those devices.
-    // See https://github.com/mozilla/hubs/issues/32 and
+    // See https://github.com/Hubs-Foundation/hubs/issues/32 and
     // https://bugzilla.mozilla.org/show_bug.cgi?id=1338656
     const originalGetExtension = WebGLRenderingContext.prototype.getExtension;
     const supportsFloatTextures = checkFloatTextureSupport();

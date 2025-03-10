@@ -30,6 +30,7 @@
   align-self: center;
   position: relative;
   appearance: none;
+  cursor: pointer;
   -moz-appearance: none;
   -webkit-appearance: none;
 
@@ -77,10 +78,12 @@
 :local(.label) {
   font-size: theme.$font-size-sm;
   font-weight: theme.$font-weight-bold;
+  color: theme.$text1-color;
 }
 
 :local(.description) {
   margin-top: 4px;
   font-size: theme.$font-size-xs;
   font-weight: theme.$font-weight-regular;
+  color: theme.$text2-color;
 }

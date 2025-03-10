@@ -1,6 +1,6 @@
 import { paths } from "../systems/userinput/paths";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
-const COLLISION_LAYERS = require("../constants").COLLISION_LAYERS;
+import { COLLISION_LAYERS } from "../constants";
 const AMMO_BODY_ATTRIBUTES = { type: "kinematic", collisionFilterMask: COLLISION_LAYERS.HANDS };
 
 export const TRANSFORM_MODE = {
@@ -55,7 +55,7 @@ AFRAME.registerComponent("transform-button", {
       if (!NAF.utils.isMine(this.targetEl) && !NAF.utils.takeOwnership(this.targetEl)) {
         return;
       }
-      if (this.targetEl.body) {
+      if (this.targetEl.hasAttribute("body-helper")) {
         this.targetEl.setAttribute("body-helper", AMMO_BODY_ATTRIBUTES);
       }
       this.transformSystem = this.transformSystem || AFRAME.scenes[0].systems["transform-selected-object"];

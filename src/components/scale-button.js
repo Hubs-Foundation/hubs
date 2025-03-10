@@ -37,6 +37,7 @@ const planeForLeftCursor = new THREE.Mesh(
     opacity: 0.3
   })
 );
+
 const planeForRightCursor = new THREE.Mesh(
   new THREE.PlaneBufferGeometry(100000, 100000, 2, 2),
   new THREE.MeshBasicMaterial({
@@ -48,8 +49,16 @@ const planeForRightCursor = new THREE.Mesh(
   })
 );
 
-AFRAME.registerComponent("scale-button", {
-  init() {
+const camPosition = new THREE.Vector3();
+const objectPosition = new THREE.Vector3();
+const objectToCam = new THREE.Vector3();
+
+export class ScalingHandler {
+  objectToScale;
+
+  constructor(object3D, transformSelectedObjectSystem) {
+    this.object3D = object3D;
+    this.transformSelectedObjectSystem = transformSelectedObjectSystem;
     this.isScaling = false;
     this.planeRotation = new THREE.Matrix4();
     this.planeUp = new THREE.Vector3();
@@ -63,77 +72,62 @@ AFRAME.registerComponent("scale-button", {
     this.objectMatrix = new THREE.Matrix4();
     this.dragVector = new THREE.Vector3();
     this.currentObjectScale = new THREE.Vector3();
-    NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
-      this.networkedEl = networkedEl;
-      this.objectToScale = networkedEl.object3D;
-    });
-    const camPosition = new THREE.Vector3();
-    const objectPosition = new THREE.Vector3();
-    const objectToCam = new THREE.Vector3();
-    this.startScaling = e => {
-      if (this.isScaling || !this.objectToScale) {
-        return;
-      }
+  }
 
-      if (!(NAF.utils.isMine(this.networkedEl) || NAF.utils.takeOwnership(this.networkedEl))) {
-        return;
-      }
+  startScaling(object3D) {
+    if (this.isScaling || !this.objectToScale) {
+      return;
+    }
 
-      if (!this.didGetObjectReferences) {
-        this.didGetObjectReferences = true;
-        this.leftEventer = document.getElementById("left-cursor").object3D;
-        this.leftCursorController = document.getElementById("left-cursor-controller");
-        this.leftRaycaster = this.leftCursorController.components["cursor-controller"].raycaster;
-        this.rightCursorController = document.getElementById("right-cursor-controller");
-        this.rightRaycaster = this.rightCursorController.components["cursor-controller"].raycaster;
-        this.viewingCamera = document.getElementById("viewing-camera").object3DMap.camera;
-      }
-      this.plane = e.object3D === this.leftEventer ? planeForLeftCursor : planeForRightCursor;
-      setMatrixWorld(this.plane, calculatePlaneMatrix(this.viewingCamera, this.el.object3D));
-      this.planeRotation.extractRotation(this.plane.matrixWorld);
-      this.planeUp.set(0, 1, 0).applyMatrix4(this.planeRotation);
-      this.planeRight.set(1, 0, 0).applyMatrix4(this.planeRotation);
-      this.raycaster = e.object3D === this.leftEventer ? this.leftRaycaster : this.rightRaycaster;
-      const intersection = this.raycastOnPlane();
-      if (!intersection) return;
-      this.isScaling = true;
-      this.initialIntersectionPoint.copy(intersection.point);
-      this.objectToScale.updateMatrices();
-      this.initialObjectScale.setFromMatrixScale(this.objectToScale.matrixWorld);
-      this.initialDistanceToObject = objectToCam
-        .subVectors(
-          camPosition.setFromMatrixPosition(this.viewingCamera.matrixWorld),
-          objectPosition.setFromMatrixPosition(this.el.object3D.matrixWorld)
-        )
-        .length();
-      window.APP.store.update({ activity: { hasScaled: true } });
+    if (!this.didGetObjectReferences) {
+      this.didGetObjectReferences = true;
+      this.leftEventer = document.getElementById("left-cursor").object3D;
+      this.leftCursorController = document.getElementById("left-cursor-controller");
+      this.leftRaycaster = this.leftCursorController.components["cursor-controller"].raycaster;
+      this.rightCursorController = document.getElementById("right-cursor-controller");
+      this.rightRaycaster = this.rightCursorController.components["cursor-controller"].raycaster;
+      this.viewingCamera = document.getElementById("viewing-camera").object3DMap.camera;
+    }
+    this.plane = object3D === this.leftEventer ? planeForLeftCursor : planeForRightCursor;
+    setMatrixWorld(this.plane, calculatePlaneMatrix(this.viewingCamera, this.object3D));
+    this.planeRotation.extractRotation(this.plane.matrixWorld);
+    this.planeUp.set(0, 1, 0).applyMatrix4(this.planeRotation);
+    this.planeRight.set(1, 0, 0).applyMatrix4(this.planeRotation);
+    this.raycaster = object3D === this.leftEventer ? this.leftRaycaster : this.rightRaycaster;
+    const intersection = this.raycastOnPlane();
+    if (!intersection) return;
+    this.isScaling = true;
+    this.initialIntersectionPoint.copy(intersection.point);
+    this.objectToScale.updateMatrices();
+    this.initialObjectScale.setFromMatrixScale(this.objectToScale.matrixWorld);
+    this.initialDistanceToObject = objectToCam
+      .subVectors(
+        camPosition.setFromMatrixPosition(this.viewingCamera.matrixWorld),
+        objectPosition.setFromMatrixPosition(this.object3D.matrixWorld)
+      )
+      .length();
+    window.APP.store.update({ activity: { hasScaled: true } });
+    // TODO: Refactor transform-selected-object system so this isn't so awkward
+    this.transformSelectedObjectSystem.transforming = true;
+    this.transformSelectedObjectSystem.mode = TRANSFORM_MODE.SCALE;
+    this.transformSelectedObjectSystem.target = this.objectToScale;
+    this.transformSelectedObjectSystem.hand =
+      object3D === this.leftEventer ? this.leftCursorController.object3D : this.rightCursorController.object3D;
+  }
 
-      // TODO: Refactor transform-selected-object system so this isn't so awkward
-      this.transformSelectedObjectSystem =
-        this.transformSelectedObjectSystem || this.el.sceneEl.systems["transform-selected-object"];
-      this.transformSelectedObjectSystem.transforming = true;
-      this.transformSelectedObjectSystem.mode = TRANSFORM_MODE.SCALE;
-      this.transformSelectedObjectSystem.target = this.objectToScale;
-      this.transformSelectedObjectSystem.hand =
-        e.object3D === this.leftEventer ? this.leftCursorController.object3D : this.rightCursorController.object3D;
-    };
-    this.endScaling = e => {
-      if (!this.isScaling) {
-        return;
-      }
-      if (
-        (e.object3D === this.leftEventer && this.raycaster === this.leftRaycaster) ||
-        (e.object3D !== this.leftEventer && this.raycaster === this.rightRaycaster)
-      ) {
-        this.isScaling = false;
-        this.transformSelectedObjectSystem =
-          this.transformSelectedObjectSystem || this.el.sceneEl.systems["transform-selected-object"];
-        this.transformSelectedObjectSystem.transforming = false;
-      }
-    };
-    this.el.object3D.addEventListener("holdable-button-down", this.startScaling);
-    this.el.object3D.addEventListener("holdable-button-up", this.endScaling);
-  },
+  endScaling(object3D) {
+    if (!this.isScaling) {
+      return;
+    }
+    if (
+      (object3D === this.leftEventer && this.raycaster === this.leftRaycaster) ||
+      (object3D !== this.leftEventer && this.raycaster === this.rightRaycaster)
+    ) {
+      this.isScaling = false;
+      this.transformSelectedObjectSystem.transforming = false;
+    }
+  }
+
   raycastOnPlane() {
     this.intersections.length = 0;
     const far = this.raycaster.far;
@@ -141,7 +135,8 @@ AFRAME.registerComponent("scale-button", {
     this.plane.raycast(this.raycaster, this.intersections);
     this.raycaster.far = far;
     return this.intersections[0];
-  },
+  }
+
   tick() {
     if (!this.isScaling) return;
     const intersection = this.raycastOnPlane();
@@ -168,5 +163,31 @@ AFRAME.registerComponent("scale-button", {
     this.objectMatrix.copy(this.objectToScale.matrixWorld);
     this.objectMatrix.scale(this.deltaScale);
     setMatrixWorld(this.objectToScale, this.objectMatrix);
+  }
+}
+
+AFRAME.registerComponent("scale-button", {
+  init() {
+    this.handler = new ScalingHandler(this.el.object3D, this.el.sceneEl.systems["transform-selected-object"]);
+
+    NAF.utils.getNetworkedEntity(this.el).then(networkedEl => {
+      this.handler.networkedEl = networkedEl;
+      this.handler.objectToScale = networkedEl.object3D;
+    });
+
+    this.el.object3D.addEventListener("holdable-button-down", e => {
+      if (!(NAF.utils.isMine(this.handler.networkedEl) || NAF.utils.takeOwnership(this.handler.networkedEl))) {
+        return;
+      }
+
+      this.handler.startScaling(e.object3D);
+    });
+    this.el.object3D.addEventListener("holdable-button-up", e => {
+      this.handler.endScaling(e.object3D);
+    });
+  },
+
+  tick() {
+    this.handler.tick();
   }
 });

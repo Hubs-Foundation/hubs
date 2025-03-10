@@ -11,7 +11,7 @@ import ImageMessage from "./image-message";
 import { getPresenceContextForSession } from "../utils/phoenix-utils";
 import { useIntl } from "react-intl";
 import PermissionMessage from "./permission-message";
-import { useRole } from "./room/useRole";
+import { useRole } from "./room/hooks/useRole";
 
 export const presets = ["InRoom", "Notifications"];
 

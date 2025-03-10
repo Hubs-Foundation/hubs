@@ -1,3 +1,4 @@
+import { isCancelablePromise } from "./coroutine-utils";
 let timers;
 
 class CoroutineTimerError extends Error {
@@ -44,70 +45,16 @@ export function crInterval(fn, ms) {
   return handle;
 }
 
-function isCancelable(c) {
-  return !!c.onCancel;
-}
-
-// The thing that has an "onCancel" handler fn.
-export function makeCancelable(fn, obj = {}) {
-  obj.onCancel = fn;
-  return obj;
-}
-
-// The thing whose "cancel" function you can call
-export function cancelable(iter, signal) {
-  const cancelFns = [];
-  const rollback = () => {
-    for (let i = cancelFns.length - 1; i >= 0; i--) {
-      cancelFns[i]();
-    }
-  };
-
-  let canceled = false;
-  signal.onabort = () => {
-    rollback();
-    canceled = true;
-    signal.onabort = null;
-  };
-
-  let nextValue;
-  let throwing;
-  return (function* () {
-    while (true) {
-      if (canceled) {
-        return { canceled: true };
-      }
-      try {
-        const { value, done } = throwing ? iter.throw(nextValue) : iter.next(nextValue);
-        throwing = false;
-        if (done) {
-          signal.onabort = null;
-          return { value, canceled: false };
-        } else {
-          if (isCancelable(value)) {
-            cancelFns.push(value.onCancel);
-          }
-          nextValue = yield value;
-        }
-      } catch (e) {
-        if (throwing) {
-          // We already threw back into the iter, rollback and throw ourselves
-          rollback();
-          throw e;
-        } else {
-          throwing = true;
-          nextValue = e;
-        }
-      }
-    }
-  })();
+const nextFramePromise = Promise.resolve();
+export function crNextFrame() {
+  return nextFramePromise;
 }
 
 function isPromise(p) {
   return p.__proto__ === Promise.prototype;
 }
 
-export function coroutine(iter) {
+export function coroutine(iter, rollbacks) {
   let waiting = false;
   let doThrow = false;
   let nextValue;
@@ -134,11 +81,19 @@ export function coroutine(iter) {
         continue;
       }
       timers = _timers;
-      const { value, done } = doThrow ? iter.throw(nextValue) : iter.next(nextValue);
+      const v = doThrow ? iter.throw(nextValue) : iter.next(nextValue);
+      const done = v.done;
+      let value = v.value;
+
       doThrow = false;
       timers = null;
       if (done) {
         return value;
+      }
+
+      if (isCancelablePromise(value)) {
+        rollbacks.push(value.rollback);
+        value = value.promise;
       }
 
       if (isPromise(value)) {
@@ -153,8 +108,6 @@ export function coroutine(iter) {
             doThrow = true;
             nextValue = e;
           });
-      } else if (isCancelable(value)) {
-        nextValue = value;
       } else {
         console.error(`Coroutine yielded value that was not a promise or cancelable.`, value, iter);
         throw new Error(`Coroutine yielded value that was not a promise or cancelable.`);

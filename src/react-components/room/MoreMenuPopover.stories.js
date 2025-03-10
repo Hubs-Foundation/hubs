@@ -47,13 +47,13 @@ const menu = [
         id: "report-issue",
         label: "Report Issue",
         icon: WarningCircleIcon,
-        href: "https://github.com/mozilla/hubs/issues/new/choose"
+        href: "https://github.com/Hubs-Foundation/hubs/issues/new/choose"
       },
       {
         id: "help",
         label: "Help",
         icon: SupportIcon,
-        href: "https://hubs.mozilla.com/docs"
+        href: "https://docs.hubsfoundation.org"
       },
       {
         id: "tos",

@@ -1,0 +1,39 @@
+// FLEX QUICKIES
+.flex {
+  display: flex;
+}
+.flex-wrap {
+  flex-wrap: wrap;
+}
+.flex-align-start {
+  display: flex;
+  align-items: flex-start;
+}
+.flex-align-items-center {
+  display: flex;
+  align-items: center;
+}
+.flex-end {
+  display: flex;
+  justify-content: flex-end;
+}
+.flex-justify-start {
+  display: flex;
+  justify-content: flex-start;
+}
+.flex-justify-center {
+  display: flex;
+  justify-content: center;
+}
+.flex-justify-end {
+  display: flex;
+  justify-content: flex-end;
+}
+.flex-justify-between {
+  display: flex;
+  justify-content: space-between;
+}
+.flex-justify-around {
+  display: flex;
+  justify-content: space-around;
+}

@@ -20,8 +20,7 @@ const createShadow = (store, key) => {
 };
 
 // TODO this array encoding is silly, use a buffer once we are not sending JSON
-export function defineNetworkSchema(Component) {
-  const componentProps = Component[$storeFlattened];
+export function defineNetworkSchemaForProps(componentProps) {
   const shadowSymbols = componentProps.map((prop, i) => {
     return createShadow(prop, Symbol(`netshadow-${i}`));
   });
@@ -77,4 +76,8 @@ export function defineNetworkSchema(Component) {
       }
     }
   };
+}
+
+export function defineNetworkSchema(Component) {
+  return defineNetworkSchemaForProps(Component[$storeFlattened]);
 }

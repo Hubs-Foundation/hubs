@@ -1,12 +1,10 @@
-import * as bitecs from "bitecs";
 import { addEntity, createWorld, IWorld } from "bitecs";
 import "./aframe-to-bit-components";
 import { AEntity, Networked, Object3DTag, Owned } from "./bit-components";
 import MediaSearchStore from "./storage/media-search-store";
-import Store from "./storage/store";
 import qsTruthy from "./utils/qs_truthy";
 
-import type { AElement, AScene } from "aframe";
+import type { AComponent, AScene } from "aframe";
 import HubChannel from "./utils/hub-channel";
 import MediaDevicesManager from "./utils/media-devices-manager";
 
@@ -14,11 +12,13 @@ import { EffectComposer, EffectPass } from "postprocessing";
 import {
   Audio,
   AudioListener,
+  Material,
   Object3D,
   PerspectiveCamera,
   PositionalAudio,
   Scene,
   sRGBEncoding,
+  Texture,
   WebGLRenderer
 } from "three";
 import { AudioSettings, SourceType } from "./components/audio-params";
@@ -27,11 +27,14 @@ import { DialogAdapter } from "./naf-dialog-adapter";
 import { mainTick } from "./systems/hubs-systems";
 import { waitForPreloads } from "./utils/preload";
 import SceneEntryManager from "./scene-entry-manager";
-import { store } from "./utils/store-instance";
+import { getStore } from "./utils/store-instance";
+import { addObject3DComponent } from "./utils/jsx-entity";
+import { ElOrEid } from "./utils/bit-utils";
+import { onAddonsInit } from "./addons";
+import { CoreSystemKeyT, HubsSystemKeyT, SystemConfigT, SystemKeyT, SystemT } from "./types";
 
 declare global {
   interface Window {
-    $B: typeof bitecs;
     $O: (eid: number) => Object3D | undefined;
     APP: App;
   }
@@ -50,33 +53,48 @@ export interface HubsWorld extends IWorld {
   deletedNids: Set<number>;
   nid2eid: Map<number, number>;
   eid2obj: Map<number, Object3D>;
+  eid2mat: Map<number, Material>;
+  eid2tex: Map<number, Texture>;
   time: { delta: number; elapsed: number; tick: number };
 }
 
-window.$B = bitecs;
+let resolvePromiseToScene: (value: Scene) => void;
+const promiseToScene: Promise<Scene> = new Promise(resolve => {
+  resolvePromiseToScene = resolve;
+});
+export function getScene() {
+  return promiseToScene;
+}
+
+export interface HubDescription {
+  hub_id: string;
+  user_data?: any;
+}
 
 export class App {
   scene?: AScene;
   hubChannel?: HubChannel;
+  hub?: HubDescription;
   mediaDevicesManager?: MediaDevicesManager;
   entryManager?: SceneEntryManager;
   messageDispatch?: any;
-  store: Store;
+  componentRegistry: { [key: string]: AComponent[] };
 
   mediaSearchStore = new MediaSearchStore();
 
-  audios = new Map<AElement | number, PositionalAudio | Audio>();
-  sourceType = new Map<AElement | number, SourceType>();
-  audioOverrides = new Map<AElement | number, AudioSettings>();
-  zoneOverrides = new Map<AElement | number, AudioSettings>();
-  gainMultipliers = new Map<AElement | number, number>();
-  supplementaryAttenuation = new Map<AElement | number, number>();
-  clippingState = new Set<AElement | number>();
-  mutedState = new Set<AElement | number>();
-  isAudioPaused = new Set<AElement | number>();
-  audioDebugPanelOverrides = new Map<SourceType, AudioSettings>();
-  sceneAudioDefaults = new Map<SourceType, AudioSettings>();
-  moderatorAudioSource = new Set<AElement | number>();
+  audios = new Map<ElOrEid, PositionalAudio | Audio>();
+  sourceType = new Map<ElOrEid, SourceType>();
+  audioOverrides = new Map<ElOrEid, Partial<AudioSettings>>();
+  zoneOverrides = new Map<ElOrEid, Partial<AudioSettings>>();
+  gainMultipliers = new Map<ElOrEid, number>();
+  supplementaryAttenuation = new Map<ElOrEid, number>();
+  clippingState = new Set<ElOrEid>();
+  mutedState = new Set<ElOrEid>();
+  linkedMutedState = new Set<ElOrEid>();
+  isAudioPaused = new Set<ElOrEid>();
+  audioDebugPanelOverrides = new Map<SourceType, Partial<AudioSettings>>();
+  sceneAudioDefaults = new Map<SourceType, Partial<AudioSettings>>();
+  moderatorAudioSource = new Set<ElOrEid>();
 
   world: HubsWorld = createWorld();
 
@@ -87,6 +105,15 @@ export class App {
   audioListener: AudioListener;
 
   dialog = new DialogAdapter();
+
+  addon_systems = {
+    setup: new Array<{ order: number; system: SystemT }>(),
+    prePhysics: new Array<{ order: number; system: SystemT }>(),
+    postPhysics: new Array<{ order: number; system: SystemT }>(),
+    beforeMatricesUpdate: new Array<{ order: number; system: SystemT }>(),
+    beforeRender: new Array<{ order: number; system: SystemT }>(),
+    afterRender: new Array<{ order: number; system: SystemT }>()
+  };
 
   RENDER_ORDER = {
     HUD_BACKGROUND: 1,
@@ -101,9 +128,10 @@ export class App {
   } = {};
 
   constructor() {
-    this.store = store;
     // TODO: Create accessor / update methods for these maps / set
     this.world.eid2obj = new Map();
+    this.world.eid2mat = new Map();
+    this.world.eid2tex = new Map();
 
     this.world.nid2eid = new Map();
     this.world.deletedNids = new Set();
@@ -140,6 +168,23 @@ export class App {
 
   getString(sid: number) {
     return this.sid2str.get(sid);
+  }
+
+  notifyOnInit() {
+    onAddonsInit(this);
+  }
+
+  get store() {
+    return getStore();
+  }
+
+  getSystem(id: SystemKeyT) {
+    const systems = this.scene?.systems!;
+    if (id in systems) {
+      return systems[id as CoreSystemKeyT];
+    } else {
+      return systems["hubs-systems"][id as HubsSystemKeyT];
+    }
   }
 
   // This gets called by a-scene to setup the renderer, camera, and audio listener
@@ -184,6 +229,9 @@ export class App {
 
     const audioListener = new AudioListener();
     this.audioListener = audioListener;
+    const audioListenerEid = addEntity(this.world);
+    addObject3DComponent(this.world, audioListenerEid, this.audioListener);
+
     camera.add(audioListener);
 
     this.world.time = {
@@ -192,8 +240,10 @@ export class App {
       tick: 0
     };
 
-    this.world.scene = sceneEl.object3D;
+    this.scene = sceneEl;
     const scene = sceneEl.object3D;
+    this.world.scene = scene;
+    resolvePromiseToScene(scene);
 
     // We manually call scene.updateMatrixWolrd in mainTick
     scene.autoUpdate = false;

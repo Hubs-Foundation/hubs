@@ -100,7 +100,7 @@ export function ExitedRoomScreen({ reason, showTerms, termsUrl, showSourceLink }
               defaultMessage="If you'd like to run your own server, Hubs's source code is available on <a>GitHub</a>."
               values={{
                 // eslint-disable-next-line react/display-name
-                a: chunks => <a href="https://github.com/mozilla/hubs">{chunks}</a>
+                a: chunks => <a href="https://github.com/Hubs-Foundation/hubs">{chunks}</a>
               }}
             />
           </p>

@@ -51,3 +51,18 @@ body.vr-mode {
   z-index: 11;
   pointer-events: auto;
 }
+
+:local(.bitecs-based-client-refresh-prompt) {
+  @extend %default-font;
+  background: theme.$background1-color;
+  border: 3px solid theme.$border1-color;
+  border-radius: 16px;
+  color: theme.$text1-color;
+  left: 50%;
+  max-width: 70%;
+  padding: 20px;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 100;
+}

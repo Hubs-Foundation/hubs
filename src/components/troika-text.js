@@ -1,5 +1,5 @@
 // This is based largely on: @lojjic https://github.com/lojjic/aframe-troika-text/blob/master/src/aframe-troika-text-component.js
-// but has been made functional and restyled for Mozilla Hubs (hubs.mozilla.com)
+// but has been made functional and restyled for Hubs (hubsfoundation.org)
 // by @jamesckane at Paradowski Creative (paradowski.com)
 
 import { Text } from "troika-three-text";

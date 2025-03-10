@@ -14,7 +14,6 @@ import { FormattedMessage } from "react-intl";
 import cone from "../../assets/images/cone.png";
 
 const Banner = () => {
-  const [email, setEmail] = useState("");
   const [confirm, setConfirm] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [responseStatus, setResponseStatus] = useState(false);
@@ -64,7 +63,7 @@ const Banner = () => {
   };
 
   const onSubmit = useCallback(async data => {
-    const url = "https://basket.mozilla.org/news/subscribe/";
+    const url = "https://hubsfoundation.org/mailing-list-sign-up/";
     const body =
       "email=" +
       encodeURIComponent(data.email) +
@@ -93,16 +92,6 @@ const Banner = () => {
   }, []);
 
   /**
-   * Emain input change
-   */
-  const onChangeEmail = useCallback(
-    e => {
-      setEmail(e.target.value);
-    },
-    [setEmail]
-  );
-
-  /**
    * Checkbox Confirm
    */
   const onConfirm = useCallback(() => {
@@ -116,8 +105,8 @@ const Banner = () => {
   const Label = () => {
     return (
       <>
-        I&apos;m okay with Mozilla handling my info as explained in this{" "}
-        <a href="https://www.mozilla.org/en-US/privacy/websites/" rel="noopener noreferrer" target="_blank">
+        I&apos;m okay with the Hubs Foundation handling my info as explained in this{" "}
+        <a href="https://hubsfoundation.org/privacy-policy/" rel="noopener noreferrer" target="_blank">
           Privacy Notice
         </a>
       </>
@@ -310,13 +299,11 @@ const Banner = () => {
                   ) : (
                     <div className={styles.expand_form_fields}>
                       <TextInputField
-                        ref={register}
-                        name="email"
+                        {...register("email", {
+                          required: true
+                        })}
                         type="email"
                         label={<FormattedMessage id="banner.email-address" defaultMessage="Email Address" />}
-                        required
-                        value={email}
-                        onChange={onChangeEmail}
                         placeholder="name@email.com"
                         className={styles.expand_form_field}
                       />
@@ -327,17 +314,15 @@ const Banner = () => {
                       >
                         <RadioInputOption
                           className={styles.radio_override}
-                          name="email_format"
                           value="html"
                           label={<FormattedMessage id="banner.format-html" defaultMessage="HTML" />}
-                          ref={register}
+                          {...register("email_format")}
                         />
                         <RadioInputOption
                           className={styles.radio_override}
-                          name="email_format"
                           value="text"
                           label={<FormattedMessage id="banner.format-text" defaultMessage="Text" />}
-                          ref={register}
+                          {...register("email_format")}
                         />
                       </RadioInputField>
 

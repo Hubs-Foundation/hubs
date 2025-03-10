@@ -6,12 +6,13 @@ export enum COLLISION_LAYERS {
   AVATAR = 1 << 2,
   HANDS = 1 << 3,
   MEDIA_FRAMES = 1 << 4,
+  TRIGGERS = 1 << 5,
   // @TODO we should split these "sets" off into something other than COLLISION_LAYERS or at least name
   // them differently to indicate they are a combination of multiple bits
-  DEFAULT_INTERACTABLE = INTERACTABLES | ENVIRONMENT | AVATAR | HANDS | MEDIA_FRAMES,
+  DEFAULT_INTERACTABLE = INTERACTABLES | ENVIRONMENT | AVATAR | HANDS | MEDIA_FRAMES | TRIGGERS,
   UNOWNED_INTERACTABLE = INTERACTABLES | HANDS | MEDIA_FRAMES,
   DEFAULT_SPAWNER = INTERACTABLES | HANDS
-};
+}
 
 export enum AAModes {
   NONE = "NONE",
@@ -21,5 +22,5 @@ export enum AAModes {
   MSAA_8X = "MSAA_8X"
 }
 
-export const PRIVACY = "https://www.mozilla.org/en-US/privacy/hubs/";
-export const TERMS = "https://www.mozilla.org/en-US/about/legal/terms/hubs/";
+export const PRIVACY = "https://hubsfoundation.org/hubs-privacy-policy";
+export const TERMS = "https://hubsfoundation.org/hubs-terms-of-use";

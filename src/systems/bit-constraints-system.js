@@ -19,9 +19,10 @@ import {
   ConstraintHandLeft,
   ConstraintHandRight,
   ConstraintRemoteLeft,
-  ConstraintRemoteRight
+  ConstraintRemoteRight,
+  NetworkedRigidBody
 } from "../bit-components";
-import { takeOwnership } from "../utils/take-ownership";
+import { Type, getBodyFromRigidBody, getBodyTypeFromType } from "../inflators/rigid-body";
 
 const queryRemoteRight = defineQuery([HeldRemoteRight, OffersRemoteConstraint]);
 const queryEnterRemoteRight = enterQuery(queryRemoteRight);
@@ -45,8 +46,8 @@ const releaseBodyOptions = { activationState: ACTIVE_TAG };
 function add(world, physicsSystem, interactor, constraintComponent, entities) {
   for (let i = 0; i < entities.length; i++) {
     const eid = findAncestorEntity(world, entities[i], ancestor => hasComponent(world, Rigidbody, ancestor));
-    takeOwnership(world, eid);
-    physicsSystem.updateBodyOptions(Rigidbody.bodyId[eid], grabBodyOptions);
+    if (!entityExists(world, eid)) continue;
+    physicsSystem.updateRigidBody(eid, grabBodyOptions);
     physicsSystem.addConstraint(interactor, Rigidbody.bodyId[eid], Rigidbody.bodyId[interactor], {});
     addComponent(world, Constraint, eid);
     addComponent(world, constraintComponent, eid);
@@ -58,8 +59,16 @@ function remove(world, offersConstraint, constraintComponent, physicsSystem, int
     const eid = findAncestorEntity(world, entities[i], ancestor => hasComponent(world, Rigidbody, ancestor));
     if (!entityExists(world, eid)) continue;
     if (hasComponent(world, offersConstraint, entities[i]) && hasComponent(world, Rigidbody, eid)) {
-      physicsSystem.updateBodyOptions(Rigidbody.bodyId[eid], releaseBodyOptions);
+      physicsSystem.updateRigidBody(eid, {
+        type: getBodyTypeFromType(NetworkedRigidBody.prevType[eid]),
+        ...releaseBodyOptions
+      });
       physicsSystem.removeConstraint(interactor);
+      if (Rigidbody.type[eid] === Type.DYNAMIC) {
+        physicsSystem.activateBody(Rigidbody.bodyId[eid]);
+        // This shouldn't be necessary but for some reason it doesn't activate the body if we don't update the body afterwards
+        physicsSystem.updateRigidBody(eid, getBodyFromRigidBody(eid));
+      }
       removeComponent(world, constraintComponent, eid);
       if (
         !hasComponent(world, ConstraintHandLeft, eid) &&

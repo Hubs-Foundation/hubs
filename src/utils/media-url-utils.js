@@ -185,7 +185,8 @@ async function isHubsServer(url) {
 
 const hubsSceneRegex = /https?:\/\/[^/]+\/scenes\/[a-zA-Z0-9]{7}(?:\/|$)/;
 const hubsAvatarRegex = /https?:\/\/[^/]+\/avatars\/(?<id>[a-zA-Z0-9]{7})(?:\/|$)/;
-const hubsRoomRegex = /(https?:\/\/)?[^/]+\/(?<id>[a-zA-Z0-9]{7})(?:\/|$)/;
+export const hubsRoomRegex = /(https?:\/\/)?[^/]+\/(?<id>[a-zA-Z0-9]{7})(?:\/|$)/;
+export const localHubsRoomRegex = /https?:\/\/[^/]+\/hub\.html\?hub_id=(?<id>[a-zA-Z0-9]{7})/;
 
 export const isLocalHubsUrl = async url =>
   (await isHubsServer(url)) && new URL(url).origin === document.location.origin;
@@ -196,11 +197,10 @@ export const isLocalHubsSceneUrl = async url => (await isHubsSceneUrl(url)) && (
 export const isHubsAvatarUrl = async url => (await isHubsServer(url)) && hubsAvatarRegex.test(url);
 export const isLocalHubsAvatarUrl = async url => (await isHubsAvatarUrl(url)) && (await isLocalHubsUrl(url));
 
+export const hubIdFromUrl = url => url.match(hubsRoomRegex)?.groups.id || url.match(localHubsRoomRegex)?.groups.id;
+
 export const isHubsRoomUrl = async url =>
-  (await isHubsServer(url)) &&
-  !(await isHubsAvatarUrl(url)) &&
-  !(await isHubsSceneUrl(url)) &&
-  url.match(hubsRoomRegex)?.groups.id;
+  (await isHubsServer(url)) && !(await isHubsAvatarUrl(url)) && !(await isHubsSceneUrl(url)) && hubIdFromUrl(url);
 
 export const isHubsDestinationUrl = async url =>
   (await isHubsServer(url)) && ((await isHubsSceneUrl(url)) || (await isHubsRoomUrl(url)));

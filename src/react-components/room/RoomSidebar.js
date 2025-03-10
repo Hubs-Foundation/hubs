@@ -70,12 +70,12 @@ function SceneAttribution({ attribution }) {
 }
 
 SceneAttribution.propTypes = {
-  attribution: {
+  attribution: PropTypes.shape({
     name: PropTypes.string,
     title: PropTypes.string,
     author: PropTypes.string,
     url: PropTypes.string
-  }
+  })
 };
 
 // To assist with content control, we avoid displaying scene links to users who are not the scene
@@ -148,15 +148,15 @@ SceneInfo.propTypes = {
   showAttributions: PropTypes.bool,
   canChangeScene: PropTypes.bool,
   onChangeScene: PropTypes.func,
-  scene: {
-    attributions: {
-      content: PropTypes.string,
+  scene: PropTypes.shape({
+    attributions: PropTypes.shape({
+      content: PropTypes.array,
       creator: PropTypes.string
-    },
+    }),
     url: PropTypes.string,
     screenshot_url: PropTypes.string,
     name: PropTypes.string
-  }
+  })
 };
 
 export function RoomSidebar({ room, accountId, onClose, canEdit, onEdit, onChangeScene }) {

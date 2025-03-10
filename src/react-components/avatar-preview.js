@@ -207,10 +207,13 @@ class AvatarPreview extends Component {
     const newLoadId = ++this.loadId;
     const url = proxiedUrlFor(this.props.avatarGltfUrl);
     const gltf = await this.loadPreviewAvatar(url);
-    // If we had started loading another avatar while we were loading this one, throw this one away
-    if (!this.mounted || newLoadId !== this.loadId) return;
-    if (gltf && this.props.onGltfLoaded) this.props.onGltfLoaded(gltf);
-    this.setAvatar(gltf.scene);
+
+    if (gltf) {
+      // If we had started loading another avatar while we were loading this one, throw this one away
+      if (!this.mounted || newLoadId !== this.loadId) return;
+      if (gltf && this.props.onGltfLoaded) this.props.onGltfLoaded(gltf);
+      this.setAvatar(gltf.scene);
+    }
   }
 
   applyMaps(oldProps, newProps) {

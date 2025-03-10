@@ -2,7 +2,7 @@ import React, { useEffect, useMemo } from "react";
 import PropTypes from "prop-types";
 import { useIntl } from "react-intl";
 import { LoadingScreen } from "./LoadingScreen";
-import { useRoomLoadingState } from "./useRoomLoadingState";
+import { useRoomLoadingState } from "./hooks/useRoomLoadingState";
 
 export function LoadingScreenContainer({ onLoaded, scene }) {
   const intl = useIntl();

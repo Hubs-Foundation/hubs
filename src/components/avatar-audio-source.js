@@ -28,7 +28,7 @@ async function getOwnerId(el) {
   return networkedEl.components.networked.data.owner;
 }
 
-async function getMediaStream(el) {
+export async function getMediaStream(el) {
   const peerId = await getOwnerId(el);
   if (!peerId) {
     console.error(INFO_INIT_FAILED, INFO_NO_OWNER);

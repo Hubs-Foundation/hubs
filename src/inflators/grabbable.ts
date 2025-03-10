@@ -3,11 +3,11 @@ import { HubsWorld } from "../app";
 import {
   CursorRaycastable,
   HandCollisionTarget,
-  Holdable,
   OffersHandConstraint,
   OffersRemoteConstraint,
   RemoteHoverTarget
 } from "../bit-components";
+import { inflateHoldable } from "./holdable";
 
 export type GrabbableParams = { cursor: boolean; hand: boolean };
 const defaults: GrabbableParams = { cursor: true, hand: true };
@@ -22,5 +22,5 @@ export function inflateGrabbable(world: HubsWorld, eid: number, props: Grabbable
     addComponent(world, RemoteHoverTarget, eid);
     addComponent(world, OffersRemoteConstraint, eid);
   }
-  addComponent(world, Holdable, eid);
+  inflateHoldable(world, eid);
 }

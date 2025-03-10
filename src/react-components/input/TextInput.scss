@@ -11,7 +11,7 @@ $input-height: 40px;
   color: theme.$text1-color;
   overflow: hidden;
 
-  &:focus-within  {
+  &:focus-within {
     border-color: theme.$input-outline-color;
     box-shadow: 0 0 0 2px theme.$input-outline-color;
   }
@@ -22,7 +22,8 @@ $input-height: 40px;
   height: 100%;
 }
 
-:local(.before-input), :local(.after-input) {
+:local(.before-input),
+:local(.after-input) {
   display: flex;
   height: $input-height;
   align-items: center;
@@ -35,11 +36,10 @@ $input-height: 40px;
     border-width: 0;
     min-height: auto;
     border: none;
-    
+
     &:hover {
-      border:none;
+      border: none;
     }
-    
 
     :global(.keyboard-user) &:focus {
       border-width: 0;
@@ -50,7 +50,7 @@ $input-height: 40px;
         border-top-left-radius: theme.$border-radius-regular;
         border-bottom-left-radius: theme.$border-radius-regular;
       }
-  
+
       &:last-child {
         margin-left: 1px;
         box-shadow: inset 0 0 0 3px theme.$outline-color, 1px 0 0 2px theme.$outline-color;
@@ -58,13 +58,13 @@ $input-height: 40px;
         border-bottom-right-radius: theme.$border-radius-regular;
       }
     }
-    
   }
 
-  :local(.icon-button), & > svg  {
+  :local(.icon-button),
+  & > svg {
     padding: 0;
     margin-left: 8px;
-    
+
     &:last-child {
       margin-right: 8px;
     }
@@ -92,7 +92,7 @@ $input-height: 40px;
 :local(.invalid) {
   border-color: theme.$error-color !important;
 
-  &:focus-within  {
+  &:focus-within {
     box-shadow: 0 0 0 2px theme.$error-color;
   }
 }
@@ -107,6 +107,10 @@ $input-height: 40px;
 
   &:focus {
     box-shadow: none;
+  }
+
+  &::placeholder {
+    color: theme.$text3-color;
   }
 }
 

@@ -24,7 +24,10 @@ import { SOUND_ENTER_SCENE } from "./systems/sound-effects-system";
 import { MediaDevices, MediaDevicesEvents } from "./utils/media-devices-utils";
 import { addComponent, removeEntity } from "bitecs";
 import { MyCameraTool } from "./bit-components";
-import { anyEntityWith } from "./utils/bit-utils";
+import { anyEntityWith, shouldUseNewLoader } from "./utils/bit-utils";
+import { moveToSpawnPoint } from "./bit-systems/waypoint";
+import { spawnFromFileList, spawnFromUrl } from "./load-media-on-paste-or-drop";
+import { isLockedDownDemoRoom } from "./utils/hub-utils";
 
 export default class SceneEntryManager {
   constructor(hubChannel, authChannel, history) {
@@ -37,6 +40,9 @@ export default class SceneEntryManager {
     this.leftCursorController = document.getElementById("left-cursor-controller");
     this.avatarRig = document.getElementById("avatar-rig");
     this._entered = false;
+    /**
+     * @type {Function}
+     */
     this.performConditionalSignIn = () => {};
     this.history = history;
   }
@@ -75,8 +81,12 @@ export default class SceneEntryManager {
       await exit2DInterstitialAndEnterVR(true);
     }
 
-    const waypointSystem = this.scene.systems["hubs-systems"].waypointSystem;
-    waypointSystem.moveToSpawnPoint();
+    if (shouldUseNewLoader()) {
+      moveToSpawnPoint(APP.world, this.scene.systems["hubs-systems"].characterController);
+    } else {
+      const waypointSystem = this.scene.systems["hubs-systems"].waypointSystem;
+      waypointSystem.moveToSpawnPoint();
+    }
 
     if (isMobile || forceEnableTouchscreen || qsTruthy("force_enable_touchscreen")) {
       this.avatarRig.setAttribute("virtual-gamepad-controls", {});
@@ -155,13 +165,14 @@ export default class SceneEntryManager {
   };
 
   _setupPlayerRig = () => {
-    this._setPlayerInfoFromProfile();
-
     // Explict user action changed avatar or updated existing avatar.
     this.scene.addEventListener("avatar_updated", () => this._setPlayerInfoFromProfile(true));
 
     // Store updates can occur to avatar id in cases like error, auth reset, etc.
-    this.store.addEventListener("statechanged", () => this._setPlayerInfoFromProfile());
+    if (!isLockedDownDemoRoom()) {
+      this._setPlayerInfoFromProfile();
+      this.store.addEventListener("statechanged", () => this._setPlayerInfoFromProfile());
+    }
 
     const avatarScale = parseInt(qs.get("avatar_scale"), 10);
     if (avatarScale) {
@@ -210,9 +221,10 @@ export default class SceneEntryManager {
   };
 
   _setupMedia = () => {
-    const offset = { x: 0, y: 0, z: -1.5 };
-    const spawnMediaInfrontOfPlayer = (src, contentOrigin) => {
+    // HACK we only care about the return value in 1 spot, don't want to deal with that in the newLoader path
+    const spawnMediaInfrontOfPlayerAndReturn = (src, contentOrigin) => {
       if (!this.hubChannel.can("spawn_and_move_media")) return;
+      const offset = { x: 0, y: 0, z: -1.5 };
       const { entity, orientation } = addMedia(
         src,
         "#interactable-media",
@@ -230,6 +242,23 @@ export default class SceneEntryManager {
       });
 
       return entity;
+    };
+
+    const spawnMediaInfrontOfPlayer = (src, contentOrigin) => {
+      if (shouldUseNewLoader()) {
+        console.warn(
+          "Spawning newLoader object using `spawnMediaInFrontOfPlayer`. This codepath should likely be made more direct.",
+          src,
+          contentOrigin
+        );
+        if (typeof src === "string") {
+          spawnFromUrl(src);
+        } else {
+          spawnFromFileList([src]);
+        }
+      } else {
+        spawnMediaInfrontOfPlayerAndReturn(src, contentOrigin);
+      }
     };
 
     this.scene.addEventListener("add_media", e => {
@@ -265,8 +294,9 @@ export default class SceneEntryManager {
 
     this.scene.addEventListener("action_vr_notice_closed", () => forceExitFrom2DInterstitial());
 
-    if (!qsTruthy("newLoader")) {
+    {
       document.addEventListener("paste", e => {
+        if (shouldUseNewLoader()) return;
         if (
           (e.target.matches("input, textarea") || e.target.contentEditable === "true") &&
           document.activeElement === e.target
@@ -290,6 +320,7 @@ export default class SceneEntryManager {
 
       let lastDebugScene;
       document.addEventListener("drop", e => {
+        if (shouldUseNewLoader()) return;
         e.preventDefault();
 
         if (qsTruthy("debugLocalScene")) {
@@ -335,12 +366,14 @@ export default class SceneEntryManager {
         if (target === "avatar") {
           this.avatarRig.setAttribute("player-info", { isSharingAvatarCamera: true });
         } else {
-          currentVideoShareEntity = spawnMediaInfrontOfPlayer(this.mediaDevicesManager.mediaStream, undefined);
+          currentVideoShareEntity = spawnMediaInfrontOfPlayerAndReturn(this.mediaDevicesManager.mediaStream, undefined);
           // Wire up custom removal event which will stop the stream.
-          currentVideoShareEntity.setAttribute(
-            "emit-scene-event-on-remove",
-            `event:${MediaDevicesEvents.VIDEO_SHARE_ENDED}`
-          );
+          if (currentVideoShareEntity) {
+            currentVideoShareEntity.setAttribute(
+              "emit-scene-event-on-remove",
+              `event:${MediaDevicesEvents.VIDEO_SHARE_ENDED}`
+            );
+          }
         }
 
         this.scene.emit("share_video_enabled", { source: isDisplayMedia ? MediaDevices.SCREEN : MediaDevices.CAMERA });

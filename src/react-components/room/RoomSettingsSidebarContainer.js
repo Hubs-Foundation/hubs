@@ -2,7 +2,7 @@ import React, { useCallback } from "react";
 import PropTypes from "prop-types";
 import { RoomSettingsSidebar } from "./RoomSettingsSidebar";
 import configs from "../../utils/configs";
-import { useInviteUrl } from "./useInviteUrl";
+import { useInviteUrl } from "./hooks/useInviteUrl";
 
 const NotifiablePermissions = ["text_chat", "voice_chat"];
 

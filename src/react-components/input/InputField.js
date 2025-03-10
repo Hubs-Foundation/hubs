@@ -27,7 +27,7 @@ export const InputField = memo(
 InputField.propTypes = {
   id: PropTypes.string,
   htmlFor: PropTypes.string,
-  label: PropTypes.string,
+  label: PropTypes.node,
   className: PropTypes.string,
   children: PropTypes.node,
   error: PropTypes.node,

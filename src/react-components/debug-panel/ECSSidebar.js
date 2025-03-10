@@ -7,19 +7,24 @@ import { IconButton } from "../input/IconButton";
 import { FormattedMessage } from "react-intl";
 
 import * as bitComponents from "../../bit-components";
-import { defineQuery, getEntityComponents } from "bitecs";
+import { defineQuery, getEntityComponents, removeEntity } from "bitecs";
 
 const bitComponentNames = new Map();
 for (const [name, Component] of Object.entries(bitComponents)) {
   bitComponentNames.set(Component, name);
 }
 
+export function formatObjectName(obj) {
+  const name =
+    obj.name ||
+    (obj.el ? (obj.el?.id && `#${obj.el.id}`) || `.${obj.el?.className?.replaceAll(" ", ".") || "a-entity"}` : "");
+  return name ? `${name}(${obj.constructor.name})` : `${obj.constructor.name}`;
+}
+
 function Object3DItem(props) {
   const { obj, toggleObjExpand, setSelectedObj, expanded, expandedIds } = props;
 
-  const name =
-    obj.name || (obj.el?.id && `#${obj.el.id}`) || `.${obj.el?.className?.replaceAll(" ", ".") || "a-entity"}`;
-  const displayName = name ? `${name}(${obj.constructor.name})` : `${obj.constructor.name}`;
+  const displayName = formatObjectName(obj);
 
   return (
     <div className="obj-item">
@@ -46,15 +51,58 @@ function Object3DItem(props) {
   );
 }
 
-function formatComponentProps(eid, component) {
+function MaterialItem(props) {
+  const { mat, setSelectedObj } = props;
+  const displayName = formatObjectName(mat);
+  return (
+    <div className="obj-item">
+      <div
+        className="obj-label"
+        onContextMenu={e => {
+          e.preventDefault();
+          setSelectedObj(mat);
+        }}
+      >
+        {displayName}
+        {` [${mat.eid}]`}
+      </div>
+    </div>
+  );
+}
+
+function TextureItem(props) {
+  const { tex, setSelectedObj } = props;
+  const displayName = formatObjectName(tex);
+  return (
+    <div className="obj-item">
+      <div
+        className="obj-label"
+        onContextMenu={e => {
+          e.preventDefault();
+          setSelectedObj(tex);
+        }}
+      >
+        {displayName}
+        {` [${tex.eid}]`}
+      </div>
+    </div>
+  );
+}
+
+export function formatComponentProps(eid, component) {
   const formatted = Object.keys(component).reduce((str, k, i, arr) => {
-    const val = component[k][eid];
+    const val = component[k] instanceof Map ? component[k].get(eid) : component[k][eid];
     const isStr = component[k][bitComponents.$isStringType];
     str += `  ${k}: `;
     if (ArrayBuffer.isView(val)) {
       str += JSON.stringify(Array.from(val));
     } else if (isStr) {
-      str += `${val} "${APP.getString(val)}"`;
+      const strVal = APP.getString(val);
+      if (strVal === NAF.clientId) {
+        str += `${val} *You* "${strVal}"`;
+      } else {
+        str += `${val} "${strVal}"`;
+      }
     } else {
       str += val;
     }
@@ -98,6 +146,9 @@ function ObjectProperties({ obj }) {
         <button onClick={() => console.log(obj)}>
           <FormattedMessage id="ecs-sidebar.log-button" defaultMessage="log" />
         </button>
+        <button onClick={() => removeEntity(APP.world, obj.eid)}>
+          <FormattedMessage id="ecs-sidebar.remove-button" defaultMessage="remove" />
+        </button>
       </div>
       <div className="content">{obj.eid && <EntityInfo eid={obj.eid} />}</div>
     </div>
@@ -112,7 +163,10 @@ function RefreshButton({ onClick }) {
   );
 }
 
+export const extraSections = new Array();
 const object3dQuery = defineQuery([bitComponents.Object3DTag]);
+const materialQuery = defineQuery([bitComponents.MaterialTag]);
+const textureQuery = defineQuery([bitComponents.TextureTag]);
 function ECSDebugSidebar({
   onClose,
   toggleObjExpand,
@@ -125,6 +179,9 @@ function ECSDebugSidebar({
   const orphaned = object3dQuery(APP.world)
     .map(eid => APP.world.eid2obj.get(eid))
     .filter(o => !o.parent);
+  const materials = materialQuery(APP.world).map(eid => APP.world.eid2mat.get(eid));
+  const textures = textureQuery(APP.world).map(eid => APP.world.eid2tex.get(eid));
+  const envRoot = document.getElementById("environment-root").object3D;
   return (
     <Sidebar
       title="ECS Debug"
@@ -134,23 +191,49 @@ function ECSDebugSidebar({
     >
       <div className="content">
         <div className="object-list">
-          <Object3DItem
-            obj={rootObj}
-            toggleObjExpand={toggleObjExpand}
-            expanded={expandedIds.has(rootObj.uuid)}
-            expandedIds={expandedIds}
-            setSelectedObj={setSelectedObj}
-          />
-          {orphaned.map(o => (
+          <section>
             <Object3DItem
-              obj={o}
-              key={o.eid}
+              obj={rootObj}
               toggleObjExpand={toggleObjExpand}
-              expanded={expandedIds.has(o.uuid)}
+              expanded={expandedIds.has(rootObj.uuid)}
               expandedIds={expandedIds}
               setSelectedObj={setSelectedObj}
             />
-          ))}
+          </section>
+          <section>
+            <Object3DItem
+              obj={envRoot}
+              toggleObjExpand={toggleObjExpand}
+              expanded={expandedIds.has(envRoot.uuid)}
+              expandedIds={expandedIds}
+              setSelectedObj={setSelectedObj}
+            />
+          </section>
+          <section>
+            {orphaned.map(o => (
+              <Object3DItem
+                obj={o}
+                key={o.eid}
+                toggleObjExpand={toggleObjExpand}
+                expanded={expandedIds.has(o.uuid)}
+                expandedIds={expandedIds}
+                setSelectedObj={setSelectedObj}
+              />
+            ))}
+          </section>
+          <section>
+            <span>
+              <FormattedMessage id="ecs-sidebar.materials-section" defaultMessage="Materials" />
+            </span>
+            {materials.map(m => m && <MaterialItem mat={m} key={m.eid} setSelectedObj={setSelectedObj} />)}
+          </section>
+          <section>
+            <span>
+              <FormattedMessage id="ecs-sidebar.textures-section" defaultMessage="Textures" />
+            </span>
+            {textures.map(t => t && <TextureItem tex={t} key={t.eid} setSelectedObj={setSelectedObj} />)}
+          </section>
+          {extraSections.map(section => section(APP.world, setSelectedObj))}
         </div>
         <div className="object-properties">{selectedObj && <ObjectProperties obj={selectedObj} />}</div>
       </div>

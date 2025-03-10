@@ -72,7 +72,7 @@ pipeline {
           if (showQAPromoteCommand == "true") {
             def text = (
               "*<http://localhost:8080/job/${jobName}/${buildNumber}|#${buildNumber}>* *${jobName}* " +
-              "<https://github.com/mozilla/hubs/commit/$gitSha|$gitSha> ${hubsVersion} " +
+              "<https://github.com/Hubs-Foundation/hubs/commit/$gitSha|$gitSha> ${hubsVersion} " +
               "Hubs: ```${gitSha} ${gitMessage}```\n" +
               "${packageIdent} built and uploaded - to promote:\n" +
               "`/mr promote-hubs-qa ${packageIdent}`"
@@ -81,7 +81,7 @@ pipeline {
           } else {
             def text = (
               "*<http://localhost:8080/job/${jobName}/${buildNumber}|#${buildNumber}>* *${jobName}* " +
-              "<https://github.com/mozilla/hubs/commit/$gitSha|$gitSha> ${hubsVersion} " +
+              "<https://github.com/Hubs-Foundation/hubs/commit/$gitSha|$gitSha> ${hubsVersion} " +
               "Hubs: ```${gitSha} ${gitMessage}```\n" +
               "<${smokeURL}?required_version=${hubsVersion}|Smoke Test> - to push:\n" +
               "`/mr hubs deploy ${hubsVersion} s3://${targetS3Bucket}`"

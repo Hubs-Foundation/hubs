@@ -3,7 +3,7 @@
 :local(.person) {
   font-size: theme.$font-size-sm;
   color: theme.$text1-color;
-
+  position: relative;
   & > * {
     margin-right: 8px;
 
@@ -14,7 +14,7 @@
 }
 
 :local(.moderator-icon) {
-  color: theme.$admin-color;
+  color: theme.$accent1-color;
 }
 
 :local(.presence) {

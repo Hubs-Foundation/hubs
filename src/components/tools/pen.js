@@ -8,6 +8,9 @@ import {
 } from "../../systems/sound-effects-system";
 import { waitForDOMContentLoaded } from "../../utils/async-utils";
 import { convertStandardMaterial } from "../../utils/material-utils";
+import { addComponent } from "bitecs";
+import { PenUpdated } from "../../bit-components";
+import { shouldUseNewLoader } from "../../utils/bit-utils";
 
 const pathsMap = {
   "player-right-controller": {
@@ -479,11 +482,15 @@ AFRAME.registerComponent("pen", {
 
   populateEntities(targets) {
     targets.length = 0;
-    // TODO: Do not querySelectorAll on the entire scene every time anything changes!
-    const els = AFRAME.scenes[0].querySelectorAll(".collidable, .interactable, #environment-root");
-    for (let i = 0; i < els.length; i++) {
-      if (!els[i].classList.contains("pen") && els[i].object3D) {
-        targets.push(els[i].object3D);
+    if (shouldUseNewLoader()) {
+      addComponent(APP.world, PenUpdated, this.el.eid);
+    } else {
+      // TODO: Do not querySelectorAll on the entire scene every time anything changes!
+      const els = AFRAME.scenes[0].querySelectorAll(".collidable, .interactable, #environment-root");
+      for (let i = 0; i < els.length; i++) {
+        if (!els[i].classList.contains("pen") && els[i].object3D) {
+          targets.push(els[i].object3D);
+        }
       }
     }
   },

@@ -1,5 +1,4 @@
 import React from "react";
-import { withDesign } from "storybook-addon-designs";
 import { ReactComponent as AudioIcon } from "./Audio.svg";
 import { ReactComponent as AvatarIcon } from "./Avatar.svg";
 import { ReactComponent as CameraIcon } from "./Camera.svg";
@@ -48,7 +47,6 @@ import { ReactComponent as HmcLogo } from "./HmcLogo.svg";
 
 export default {
   title: "Icon",
-  decorators: [withDesign],
   argTypes: {
     color: { control: "color" }
   }

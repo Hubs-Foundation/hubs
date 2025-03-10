@@ -71,8 +71,8 @@ export const Base = args => (
             sender="John"
             timestamp={nextTimestamp()}
             messages={[
-              { type: "chat", body: "https://mozilla.org" },
-              { type: "chat", body: "Test message with url. https://hubs.mozilla.com Best site :point_up:" },
+              { type: "chat", body: "https://hubsfoundation.org" },
+              { type: "chat", body: "Test message with url. https://demo.hubsfoundation.org Best site :point_up:" },
               { type: "chat", body: ":thumbsup:" }
             ]}
           />
@@ -89,8 +89,8 @@ export const Base = args => (
             sender="Robert"
             timestamp={nextTimestamp()}
             messages={[
-              { type: "chat", body: "https://mozilla.org" },
-              { type: "chat", body: "Test message with url. https://hubs.mozilla.com" }
+              { type: "chat", body: "https://hubsfoundation.org" },
+              { type: "chat", body: "Test message with url. https://hubsfoundation.org" }
             ]}
           />
           <PermissionMessageGroup

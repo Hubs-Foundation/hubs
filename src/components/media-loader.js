@@ -13,7 +13,11 @@ import {
   proxiedUrlFor,
   isHubsRoomUrl,
   isLocalHubsSceneUrl,
-  isLocalHubsAvatarUrl
+  isLocalHubsAvatarUrl,
+  isHubsDestinationUrl,
+  isHubsAvatarUrl,
+  hubsRoomRegex,
+  localHubsRoomRegex
 } from "../utils/media-url-utils";
 import { addAnimationComponents } from "../utils/animation";
 
@@ -24,8 +28,8 @@ import { cloneObject3D, setMatrixWorld } from "../utils/three-utils";
 import { waitForDOMContentLoaded } from "../utils/async-utils";
 
 import { SHAPE } from "three-ammo/constants";
-import { addComponent, entityExists, removeComponent } from "bitecs";
-import { MediaLoading } from "../bit-components";
+import { addComponent } from "bitecs";
+import { MediaContentBounds } from "../bit-components";
 
 let loadingObject;
 
@@ -107,7 +111,7 @@ AFRAME.registerComponent("media-loader", {
         setMatrixWorld(mesh, originalMeshMatrix);
       } else {
         // Move the mesh such that the center of its bounding box is in the same position as the parent matrix position
-        const box = getBox(this.el, mesh);
+        const box = getBox(this.el.object3D, mesh);
         const scaleCoefficient = fitToBox ? getScaleCoefficient(0.5, box) : 1;
         const { min, max } = box;
         center.addVectors(min, max).multiplyScalar(0.5 * scaleCoefficient);
@@ -279,12 +283,13 @@ AFRAME.registerComponent("media-loader", {
       }
 
       // TODO this does duplicate work in some cases, but finish() is the only consistent place to do it
-      this.contentBounds = getBox(this.el, this.el.getObject3D("mesh")).getSize(new THREE.Vector3());
+      const contentBounds = getBox(this.el.object3D, this.el.getObject3D("mesh")).getSize(new THREE.Vector3());
+      if (el.eid) {
+        addComponent(APP.world, MediaContentBounds, el.eid);
+        MediaContentBounds.bounds[el.eid].set(contentBounds.toArray());
+      }
 
       el.emit("media-loaded");
-      if (el.eid && entityExists(APP.world, el.eid)) {
-        removeComponent(APP.world, MediaLoading, el.eid);
-      }
     };
 
     if (this.data.animate) {
@@ -343,7 +348,6 @@ AFRAME.registerComponent("media-loader", {
     try {
       if ((forceLocalRefresh || srcChanged) && !this.showLoaderTimeout) {
         this.showLoaderTimeout = setTimeout(this.showLoader, 100);
-        addComponent(APP.world, MediaLoading, this.el.eid);
       }
 
       //check if url is an anchor hash e.g. #Spawn_Point_1
@@ -361,10 +365,14 @@ AFRAME.registerComponent("media-loader", {
 
       // We want to resolve and proxy some hubs urls, like rooms and scene links,
       // but want to avoid proxying assets in order for this to work in dev environments
-      const isLocalModelAsset =
-        isNonCorsProxyDomain(parsedUrl.hostname) && (guessContentType(src) || "").startsWith("model/gltf");
+      const isLocalAsset =
+        isNonCorsProxyDomain(parsedUrl.hostname) &&
+        !(await isHubsDestinationUrl(src)) &&
+        !(await isHubsAvatarUrl(src)) &&
+        !src.match(hubsRoomRegex)?.groups.id &&
+        !src.match(localHubsRoomRegex)?.groups.id;
 
-      if (this.data.resolve && !src.startsWith("data:") && !src.startsWith("hubs:") && !isLocalModelAsset) {
+      if (this.data.resolve && !src.startsWith("data:") && !src.startsWith("hubs:") && !isLocalAsset) {
         const is360 = !!(this.data.mediaOptions.projection && this.data.mediaOptions.projection.startsWith("360"));
         const quality = getDefaultResolveQuality(is360);
         const result = await resolveUrl(src, quality, version, forceLocalRefresh);

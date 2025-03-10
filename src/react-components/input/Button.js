@@ -18,7 +18,8 @@ export const presets = [
   "accent5",
   "accent6",
   "landing",
-  "signin"
+  "signin",
+  "text"
 ];
 
 /* eslint-disable-next-line react/display-name */

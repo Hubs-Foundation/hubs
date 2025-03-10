@@ -1,6 +1,7 @@
 @use "../styles/theme.scss";
 
-:local(.room-permissions), :local(.permissions-group) {
+:local(.room-permissions),
+:local(.permissions-group) {
   margin-left: 20px;
 
   & > * {
@@ -15,4 +16,12 @@
 :local(.confirm-revoke-button) {
   display: inline;
   color: theme.$link-color;
+}
+
+:local(.label) {
+  margin-bottom: 8px;
+  color: theme.$red;
+  align-self: flex-start;
+  font-weight: theme.$font-weight-bold;
+  font-size: theme.$font-size-sm;
 }

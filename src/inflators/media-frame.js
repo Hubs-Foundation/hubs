@@ -1,22 +1,50 @@
 import { addObject3DComponent } from "../utils/jsx-entity";
-import { NetworkedMediaFrame, MediaFrame, Rigidbody, PhysicsShape, Networked } from "../bit-components";
-import { addComponent, hasComponent } from "bitecs";
+import { NetworkedMediaFrame, MediaFrame, Networked } from "../bit-components";
+import { addComponent, addEntity, hasComponent } from "bitecs";
 import { MediaType } from "../utils/media-utils";
 import { COLLISION_LAYERS } from "../constants";
-import { RIGIDBODY_FLAGS } from "../systems/bit-physics";
 import { Layers } from "../camera-layers";
+import { inflateRigidBody, Type } from "./rigid-body";
+import { Fit, inflatePhysicsShape, Shape } from "./physics-shape";
+import { Mesh, BoxBufferGeometry, ShaderMaterial, Color, DoubleSide } from "three";
+
+export const AxisAlignType = {
+  MIN: 1 << 0,
+  CENTER: 1 << 1,
+  MAX: 1 << 2
+};
+
+export const MEDIA_FRAME_FLAGS = {
+  SCALE_TO_BOUNDS: 1 << 0,
+  ACTIVE: 1 << 1,
+  SNAP_TO_CENTER: 1 << 2,
+  LOCKED: 1 << 3
+};
+
+export const MediaTypes = {
+  all: MediaType.ALL,
+  "all-2d": MediaType.ALL_2D,
+  model: MediaType.MODEL,
+  image: MediaType.IMAGE,
+  video: MediaType.VIDEO,
+  pdf: MediaType.PDF
+};
 
 const DEFAULTS = {
   bounds: { x: 1, y: 1, z: 1 },
-  mediaType: "all"
+  mediaType: "all",
+  scaleToBounds: true,
+  align: { x: "center", y: "center", z: "center" },
+  active: true,
+  locked: false
 };
 export function inflateMediaFrame(world, eid, componentProps) {
   componentProps = Object.assign({}, DEFAULTS, componentProps);
-  const guide = new THREE.Mesh(
-    new THREE.BoxBufferGeometry(componentProps.bounds.x, componentProps.bounds.y, componentProps.bounds.z),
-    new THREE.ShaderMaterial({
+  const guide = new Mesh(
+    new BoxBufferGeometry(componentProps.bounds.x, componentProps.bounds.y, componentProps.bounds.z),
+    new ShaderMaterial({
       uniforms: {
-        color: { value: new THREE.Color(0x2f80ed) }
+        color: { value: new Color(0x2f80ed) }
       },
       vertexShader: `
             varying vec2 vUv;
@@ -45,36 +73,65 @@ export function inflateMediaFrame(world, eid, componentProps) {
               gl_FragColor = vec4(color, 1.0);
             }
           `,
-      side: THREE.DoubleSide
+      side: DoubleSide
     })
   );
   guide.layers.set(Layers.CAMERA_LAYER_UI);
-  // TODO: This is a hack around the physics system addBody call requiring its body to have parent
-  guide.parent = new THREE.Group();
-  addObject3DComponent(world, eid, guide);
+  const guideEid = addEntity(world);
+  addObject3DComponent(world, guideEid, guide);
   addComponent(world, MediaFrame, eid, true);
   addComponent(world, NetworkedMediaFrame, eid, true);
 
+  NetworkedMediaFrame.flags[eid] |= MEDIA_FRAME_FLAGS.ACTIVE;
+  if (componentProps.snapToCenter) {
+    NetworkedMediaFrame.flags[eid] |= MEDIA_FRAME_FLAGS.SNAP_TO_CENTER;
+  }
+
   if (!hasComponent(world, Networked, eid)) addComponent(world, Networked, eid);
 
-  MediaFrame.mediaType[eid] = {
-    all: MediaType.ALL,
-    "all-2d": MediaType.ALL_2D,
-    model: MediaType.MODEL,
-    image: MediaType.IMAGE,
-    video: MediaType.VIDEO,
-    pdf: MediaType.PDF
-  }[componentProps.mediaType];
+  // Media types accepted
+  MediaFrame.mediaType[eid] = MediaTypes[componentProps.mediaType];
+  NetworkedMediaFrame.mediaType[eid] = MediaFrame.mediaType[eid];
+  // Bounds
   MediaFrame.bounds[eid].set([componentProps.bounds.x, componentProps.bounds.y, componentProps.bounds.z]);
-
-  addComponent(world, Rigidbody, eid);
-  Rigidbody.collisionGroup[eid] = COLLISION_LAYERS.MEDIA_FRAMES;
-  Rigidbody.collisionMask[eid] = COLLISION_LAYERS.INTERACTABLES;
-  Rigidbody.flags[eid] = RIGIDBODY_FLAGS.DISABLE_COLLISIONS;
-  addComponent(world, PhysicsShape, eid);
-  PhysicsShape.halfExtents[eid].set([
-    componentProps.bounds.x / 2,
-    componentProps.bounds.y / 2,
-    componentProps.bounds.z / 2
+  // Axis alignment
+  const mapAlignProp = alignPropValue => {
+    return {
+      min: AxisAlignType.MIN,
+      center: AxisAlignType.CENTER,
+      max: AxisAlignType.MAX
+    }[alignPropValue];
+  };
+  MediaFrame.align[eid].set([
+    mapAlignProp(componentProps.align.x),
+    mapAlignProp(componentProps.align.y),
+    mapAlignProp(componentProps.align.z)
   ]);
+  // Preview guide
+  MediaFrame.guide[eid] = guideEid;
+  // Flags: scaleToBounds
+  let flags = 0;
+  if (componentProps.scaleToBounds) flags |= MEDIA_FRAME_FLAGS.SCALE_TO_BOUNDS;
+  MediaFrame.flags[eid] = flags;
+
+  if (componentProps.active) {
+    NetworkedMediaFrame.flags[eid] |= MEDIA_FRAME_FLAGS.ACTIVE;
+    MediaFrame.flags[eid] |= MEDIA_FRAME_FLAGS.ACTIVE;
+  }
+  if (componentProps.locked) {
+    NetworkedMediaFrame.flags[eid] |= MEDIA_FRAME_FLAGS.LOCKED;
+    MediaFrame.flags[eid] |= MEDIA_FRAME_FLAGS.LOCKED;
+  }
+
+  inflateRigidBody(world, eid, {
+    type: Type.KINEMATIC,
+    collisionGroup: COLLISION_LAYERS.MEDIA_FRAMES,
+    collisionMask: COLLISION_LAYERS.INTERACTABLES,
+    disableCollision: true
+  });
+  inflatePhysicsShape(world, eid, {
+    type: Shape.BOX,
+    fit: Fit.MANUAL,
+    halfExtents: [componentProps.bounds.x / 2, componentProps.bounds.y / 2, componentProps.bounds.z / 2]
+  });
 }

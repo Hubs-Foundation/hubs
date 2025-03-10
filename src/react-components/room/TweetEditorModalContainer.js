@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState, useCallback } from "react";
 import PropTypes from "prop-types";
 import { TweetEditorModal } from "./TweetEditorModal";
 import { Modifier, EditorState } from "draft-js";
-import { createEditorStateWithText } from "draft-js-plugins-editor";
+import { createEditorStateWithText } from "@draft-js-plugins/editor";
 import { fetchReticulumAuthenticated } from "../../utils/phoenix-utils";
 
 // Taken from draft-js-emoji

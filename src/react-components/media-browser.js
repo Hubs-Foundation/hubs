@@ -385,8 +385,7 @@ class MediaBrowserContainer extends Component {
     const hasNext = !!(meta && meta.next_cursor);
     const hasPrevious = !!searchParams.get("cursor");
 
-    const customObjectType =
-      this.state.result && isSceneApiType ? "scene" : urlSource === "avatars" ? "avatar" : "object";
+    const customObjectType = isSceneApiType ? "scene" : urlSource === "avatars" ? "avatar" : "object";
 
     let searchDescription;
 
@@ -421,7 +420,7 @@ class MediaBrowserContainer extends Component {
             <a
               target="_blank"
               rel="noopener noreferrer"
-              href={configs.link("issue_report", "https://hubs.mozilla.com/docs/help.html")}
+              href={configs.link("issue_report", "https://docs.hubsfoundation.org/help.html")}
             >
               <FormattedMessage id="media-browser.report-issue" defaultMessage="Report Issue" />
             </a>

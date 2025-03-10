@@ -3,6 +3,7 @@ import { textureLoader } from "../utils/media-utils";
 import { resolveUrl } from "../utils/media-utils";
 import { proxiedUrlFor } from "../utils/media-url-utils";
 import defaultSrcImage from "../assets/images/warning_icon.png";
+import { disposeNode } from "../utils/three-utils";
 
 const defaultSrcUrl = new URL(defaultSrcImage, window.location.href).href;
 
@@ -67,6 +68,10 @@ AFRAME.registerComponent("particle-emitter", {
     this.particleEmitter.material.uniforms.map.value = texture;
     this.particleEmitter.visible = true;
     this.updateParticles = true;
+  },
+
+  remove() {
+    disposeNode(this.particleEmitter);
   },
 
   update(prevData) {

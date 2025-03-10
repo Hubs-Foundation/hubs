@@ -27,6 +27,21 @@ export enum PanningModelType {
   EqualPower = "equalpower"
 }
 
+export interface SceneAudioSettings {
+  avatarDistanceModel: DistanceModelType;
+  avatarRolloffFactor: number;
+  avatarRefDistance: number;
+  avatarMaxDistance: number;
+  mediaDistanceModel: DistanceModelType;
+  mediaRolloffFactor: number;
+  mediaRefDistance: number;
+  mediaMaxDistance: number;
+  mediaConeInnerAngle: number;
+  mediaConeOuterAngle: number;
+  mediaConeOuterGain: number;
+  mediaVolume: number;
+}
+
 export interface AudioSettings {
   audioType: AudioType;
   distanceModel: DistanceModelType;

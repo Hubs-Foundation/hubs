@@ -8,8 +8,26 @@ import { qsGet } from "../utils/qs_truthy";
 const customFOV = qsGet("fov");
 const enableThirdPersonMode = qsTruthy("thirdPerson");
 import { Layers } from "../camera-layers";
+import { HoveredRemoteRight, Inspectable, Inspected, LocalAvatar, RemoteAvatar } from "../bit-components";
+import {
+  anyEntityWith,
+  findAncestorWithAnyComponent,
+  findAncestorWithComponent,
+  shouldUseNewLoader
+} from "../utils/bit-utils";
+import { addComponent, defineQuery, removeComponent } from "bitecs";
+import { INSPECTABLE_FLAGS } from "../bit-systems/inspect-system";
 
-function getInspectableInHierarchy(el) {
+function getInspectableInHierarchy(eid) {
+  let inspectable = findAncestorWithComponent(APP.world, Inspectable, eid);
+  if (!inspectable) {
+    console.warn("could not find inspectable in hierarchy");
+    inspectable = eid;
+  }
+  return APP.world.eid2obj.get(inspectable);
+}
+
+function getInspectableInHierarchyAframe(el) {
   let inspectable = el;
   while (inspectable) {
     if (isTagged(inspectable, "inspectable")) {
@@ -36,8 +54,20 @@ function pivotFor(el) {
   return child.object3D;
 }
 
-export function getInspectableAndPivot(el) {
-  const inspectable = getInspectableInHierarchy(el);
+function getInspectableAndPivot(eid) {
+  const inspectable = getInspectableInHierarchy(eid);
+  let pivot;
+  if (findAncestorWithAnyComponent(APP.world, [RemoteAvatar, LocalAvatar], eid)) {
+    // TODO Until avatars are migrated we still handle pivot using the AFrame element
+    pivot = pivotFor(inspectable.el);
+  } else {
+    pivot = inspectable;
+  }
+  return { inspectable, pivot };
+}
+
+function getInspectableAndPivotAframe(el) {
+  const inspectable = getInspectableInHierarchyAframe(el);
   const pivot = pivotFor(inspectable.el);
   return { inspectable, pivot };
 }
@@ -50,6 +80,7 @@ const decompose = (function () {
 })();
 
 const IDENTITY = new THREE.Matrix4().identity();
+const V_ONE = new THREE.Vector3(1, 1, 1);
 const orbit = (function () {
   const owq = new THREE.Quaternion();
   const owp = new THREE.Vector3();
@@ -119,22 +150,16 @@ const moveRigSoCameraLooksAtPivot = (function () {
     decompose(camera.matrixWorld, cwp, cwq);
     rig.getWorldQuaternion(cwq);
 
-    const box = getBox(inspectable.el, inspectable.el.getObject3D("mesh") || inspectable, true);
+    const box = getBox(inspectable, inspectable, true);
     if (box.min.x === Infinity) {
       // fix edgecase where inspectable object has no mesh / dimensions
       box.min.subVectors(owp, defaultBoxMax);
       box.max.addVectors(owp, defaultBoxMax);
     }
     box.getCenter(center);
-    const vrMode = inspectable.el.sceneEl.is("vr-mode");
+    const vrMode = APP.scene.is("vr-mode");
     const dist =
-      calculateViewingDistance(
-        inspectable.el.sceneEl.camera.fov,
-        inspectable.el.sceneEl.camera.aspect,
-        box,
-        center,
-        vrMode
-      ) * distanceMod;
+      calculateViewingDistance(APP.scene.camera.fov, APP.scene.camera.aspect, box, center, vrMode) * distanceMod;
     target.position.addVectors(
       owp,
       oForw
@@ -252,15 +277,19 @@ export class CameraSystem {
     this.mode = NEXT_MODES[this.mode] || 0;
   }
 
-  inspect(el, distanceMod, fireChangeEvent = true) {
-    const { inspectable, pivot } = getInspectableAndPivot(el);
-
+  inspect(obj, distanceMod, fireChangeEvent = true) {
     this.verticalDelta = 0;
     this.horizontalDelta = 0;
     this.inspectZoom = 0;
+
     if (this.mode === CAMERA_MODE_INSPECT) {
       return;
     }
+
+    const { inspectable, pivot } = shouldUseNewLoader()
+      ? getInspectableAndPivot(obj.eid)
+      : getInspectableAndPivotAframe(obj.el);
+
     const scene = AFRAME.scenes[0];
     scene.object3D.traverse(ensureLightsAreSeenByCamera);
     scene.classList.add("hand-cursor");
@@ -282,7 +311,16 @@ export class CameraSystem {
     this.viewingCamera.updateMatrices();
     this.snapshot.matrixWorld.copy(this.viewingRig.object3D.matrixWorld);
 
-    this.snapshot.audio = !(inspectable.el && isTagged(inspectable.el, "preventAudioBoost")) && getAudio(inspectable);
+    let preventAudioBoost;
+
+    if (shouldUseNewLoader()) {
+      // TODO Add when avatar is migrated
+      preventAudioBoost = false;
+    } else {
+      preventAudioBoost = inspectable.el && isTagged(inspectable.el, "preventAudioBoost");
+    }
+
+    this.snapshot.audio = !preventAudioBoost && getAudio(inspectable);
     if (this.snapshot.audio) {
       this.snapshot.audio.updateMatrices();
       this.snapshot.audioTransform.copy(this.snapshot.audio.matrixWorld);
@@ -387,8 +425,12 @@ export class CameraSystem {
   }
 
   tick = (function () {
-    const translation = new THREE.Matrix4();
+    const tmpMat = new THREE.Matrix4();
+    const position = new THREE.Vector3();
+    const quat = new THREE.Quaternion();
+    const scale = new THREE.Vector3();
     let uiRoot;
+    const hoveredQuery = defineQuery([HoveredRemoteRight]);
     return function tick(scene, dt) {
       this.viewingCamera.matrixNeedsUpdate = true;
       this.viewingCamera.updateMatrix();
@@ -399,9 +441,6 @@ export class CameraSystem {
       const isGhost = !entered && uiRoot && uiRoot.firstChild && uiRoot.firstChild.classList.contains("isGhost");
       if (isGhost && this.mode !== CAMERA_MODE_FIRST_PERSON && this.mode !== CAMERA_MODE_INSPECT) {
         this.mode = CAMERA_MODE_FIRST_PERSON;
-        const position = new THREE.Vector3();
-        const quat = new THREE.Quaternion();
-        const scale = new THREE.Vector3();
         this.viewingRig.object3D.updateMatrices();
         this.viewingRig.object3D.matrixWorld.decompose(position, quat, scale);
         position.setFromMatrixPosition(this.viewingCamera.matrixWorld);
@@ -424,14 +463,29 @@ export class CameraSystem {
       this.interaction = this.interaction || scene.systems.interaction;
 
       if (this.userinput.get(paths.actions.startInspecting) && this.mode !== CAMERA_MODE_INSPECT) {
-        const hoverEl = this.interaction.state.rightRemote.hovered || this.interaction.state.leftRemote.hovered;
+        if (shouldUseNewLoader()) {
+          if (hoveredQuery(APP.world).length) {
+            const hovered = hoveredQuery(APP.world)[0];
+            addComponent(APP.world, Inspected, hovered);
+            Inspectable.flags[hovered] |= INSPECTABLE_FLAGS.TARGET_CHANGED;
+          }
+        } else {
+          const hoverEl = this.interaction.state.rightRemote.hovered || this.interaction.state.leftRemote.hovered;
 
-        if (hoverEl) {
-          this.inspect(hoverEl, 1.5);
+          if (hoverEl) {
+            this.inspect(hoverEl.object3D, 1.5);
+          }
         }
       } else if (this.mode === CAMERA_MODE_INSPECT && this.userinput.get(paths.actions.stopInspecting)) {
         scene.emit("uninspect");
-        this.uninspect();
+        if (shouldUseNewLoader()) {
+          const inspected = anyEntityWith(APP.world, Inspected);
+          if (inspected) {
+            removeComponent(APP.world, Inspected, inspected);
+          }
+        } else {
+          this.uninspect();
+        }
       }
 
       if (this.userinput.get(paths.actions.nextCameraMode)) {
@@ -449,16 +503,18 @@ export class CameraSystem {
           setMatrixWorld(this.avatarPOV.object3D, this.viewingCamera.matrixWorld);
         } else {
           this.avatarPOV.object3D.updateMatrices();
-          setMatrixWorld(this.viewingCamera, this.avatarPOV.object3D.matrixWorld);
+          this.avatarPOV.object3D.matrixWorld.decompose(position, quat, scale);
+          tmpMat.compose(position, quat, V_ONE);
+          setMatrixWorld(this.viewingCamera, tmpMat);
         }
       } else if (this.mode === CAMERA_MODE_THIRD_PERSON_NEAR || this.mode === CAMERA_MODE_THIRD_PERSON_FAR) {
         if (this.mode === CAMERA_MODE_THIRD_PERSON_NEAR) {
-          translation.makeTranslation(0, 1, 3);
+          tmpMat.makeTranslation(0, 1, 3);
         } else {
-          translation.makeTranslation(0, 2, 8);
+          tmpMat.makeTranslation(0, 2, 8);
         }
         this.avatarRig.object3D.updateMatrices();
-        this.viewingRig.object3D.matrixWorld.copy(this.avatarRig.object3D.matrixWorld).multiply(translation);
+        this.viewingRig.object3D.matrixWorld.copy(this.avatarRig.object3D.matrixWorld).multiply(tmpMat);
         setMatrixWorld(this.viewingRig.object3D, this.viewingRig.object3D.matrixWorld);
         this.avatarPOV.object3D.quaternion.copy(this.viewingCamera.quaternion);
         this.avatarPOV.object3D.matrixNeedsUpdate = true;

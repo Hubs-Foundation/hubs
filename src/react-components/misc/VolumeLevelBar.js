@@ -9,6 +9,7 @@ export const types = ["mic", "mixer"];
 
 export function VolumeLevelBar({ scene, type, className }) {
   const ref = useRef();
+
   const update = useCallback(level => {
     const node = ref.current;
     if (node) {
@@ -20,6 +21,7 @@ export function VolumeLevelBar({ scene, type, className }) {
       }
     }
   }, []);
+
   useVolumeMeter({
     analyser:
       type == "mic"
@@ -27,6 +29,7 @@ export function VolumeLevelBar({ scene, type, className }) {
         : scene.systems["hubs-systems"].audioSystem.mixerAnalyser,
     update
   });
+
   return <LevelBar ref={ref} className={classNames(styles.levelBarContainer, className)} />;
 }
 

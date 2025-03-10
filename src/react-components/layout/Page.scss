@@ -4,19 +4,24 @@
   box-sizing: border-box;
 }
 
-html, body, :global(#root), :global(#ui-root), :global(.home-root) {
+html,
+body,
+:global(#root),
+:global(#ui-root),
+:global(.home-root) {
   margin: 0;
-  height:100%;
+  height: 100%;
 }
 
 body {
   background: theme.$background1-color;
-  color: theme.$text1-color;
 }
 
-:global(#root), :global(#ui-root), :global(.home-root) {
-  display:flex; 
-  flex-direction:column;
+:global(#root),
+:global(#ui-root),
+:global(.home-root) {
+  display: flex;
+  flex-direction: column;
 }
 
 h1 {
@@ -32,7 +37,7 @@ main {
   order: -1;
   flex: 1;
 
-  @media(min-width: theme.$breakpoint-lg) {
+  @media (min-width: theme.$breakpoint-lg) {
     order: 0;
     display: flex;
     flex-direction: column;

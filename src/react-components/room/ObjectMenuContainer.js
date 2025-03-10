@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { ObjectMenu, ObjectMenuButton } from "./ObjectMenu";
-import { useObjectList } from "./useObjectList";
+import { useObjectList } from "./hooks/useObjectList";
 import {
   usePinObject,
   useRemoveObject,
@@ -35,7 +35,7 @@ MyMenuItems.propTypes = {
 };
 
 function PlayerMenuItems({ hubChannel, activeObject, deselectObject }) {
-  const hideAvatar = useHideAvatar(hubChannel, activeObject.el);
+  const hideAvatar = useHideAvatar(hubChannel, activeObject);
 
   return (
     <ObjectMenuButton
@@ -126,10 +126,12 @@ export function ObjectMenuContainer({ hubChannel, scene, onOpenProfile, onGoToOb
     useObjectList();
 
   let menuItems;
-
+  let isAvatar = false;
   if (isMe(activeObject)) {
+    isAvatar = true;
     menuItems = <MyMenuItems onOpenProfile={onOpenProfile} />;
   } else if (isPlayer(activeObject)) {
+    isAvatar = true;
     menuItems = <PlayerMenuItems hubChannel={hubChannel} activeObject={activeObject} deselectObject={deselectObject} />;
   } else {
     menuItems = (
@@ -154,6 +156,7 @@ export function ObjectMenuContainer({ hubChannel, scene, onOpenProfile, onGoToOb
       onPrevObject={selectPrevObject}
       onToggleLights={toggleLights}
       lightsEnabled={lightsEnabled}
+      isAvatar={isAvatar}
     >
       {menuItems}
     </ObjectMenu>

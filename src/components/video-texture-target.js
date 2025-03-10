@@ -20,12 +20,13 @@ AFRAME.registerComponent("video-texture-source", {
   init() {
     this.camera = findNode(this.el.object3D, n => n.isCamera);
 
-    this.camera.layers.enable(Layers.CAMERA_LAYER_THIRD_PERSON_ONLY);
-
     if (!this.camera) {
       console.warn("video-texture-source added to an entity without a camera");
       return;
     }
+
+    this.camera.layers.enable(Layers.CAMERA_LAYER_THIRD_PERSON_ONLY);
+    this.camera.layers.enable(Layers.CAMERA_LAYER_FX_MASK);
 
     this.camera.aspect = this.data.resolution[0] / this.data.resolution[1];
 
@@ -41,7 +42,7 @@ AFRAME.registerComponent("video-texture-source", {
     const texture = this.renderTarget.texture;
 
     // Since we are rendering directly to a texture we need to flip it vertically
-    // See https://github.com/mozilla/hubs/pull/4126#discussion_r610120237
+    // See https://github.com/Hubs-Foundation/hubs/pull/4126#discussion_r610120237
     texture.matrixAutoUpdate = false;
     texture.matrix.scale(1, -1);
     texture.matrix.translate(0, 1);

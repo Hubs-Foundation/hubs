@@ -34,7 +34,8 @@ export function ObjectMenu({
   currentObjectIndex,
   objectCount,
   onToggleLights,
-  lightsEnabled
+  lightsEnabled,
+  isAvatar
 }) {
   return (
     <>
@@ -69,17 +70,19 @@ export function ObjectMenu({
             ))}
           </div>
         </div>
-        <div className={styles.pagination}>
-          <IconButton onClick={onPrevObject}>
-            <ArrowBackIcon width={24} height={24} />
-          </IconButton>
-          <p>
-            {currentObjectIndex + 1}/{objectCount}
-          </p>
-          <IconButton onClick={onNextObject}>
-            <ArrowForwardIcon width={24} height={24} />
-          </IconButton>
-        </div>
+        {!isAvatar && (
+          <div className={styles.pagination}>
+            <IconButton onClick={onPrevObject}>
+              <ArrowBackIcon width={24} height={24} />
+            </IconButton>
+            <p>
+              {currentObjectIndex + 1}/{objectCount}
+            </p>
+            <IconButton onClick={onNextObject}>
+              <ArrowForwardIcon width={24} height={24} />
+            </IconButton>
+          </div>
+        )}
       </div>
     </>
   );
@@ -95,5 +98,6 @@ ObjectMenu.propTypes = {
   onClose: PropTypes.func,
   onBack: PropTypes.func,
   onToggleLights: PropTypes.func,
-  lightsEnabled: PropTypes.bool
+  lightsEnabled: PropTypes.bool,
+  isAvatar: PropTypes.bool
 };

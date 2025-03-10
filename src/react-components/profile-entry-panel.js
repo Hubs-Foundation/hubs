@@ -28,7 +28,8 @@ export default class ProfileEntryPanel extends Component {
   state = {
     avatarId: null,
     displayName: null,
-    avatar: null
+    avatar: null,
+    pronouns: null
   };
 
   constructor(props) {
@@ -42,8 +43,8 @@ export default class ProfileEntryPanel extends Component {
   }
 
   getStateFromProfile = () => {
-    const { displayName, avatarId } = this.props.store.state.profile;
-    return { displayName, avatarId };
+    const { displayName, avatarId, pronouns } = this.props.store.state.profile;
+    return { displayName, avatarId, pronouns };
   };
 
   storeUpdated = () => this.setState(this.getStateFromProfile());
@@ -51,18 +52,20 @@ export default class ProfileEntryPanel extends Component {
   saveStateAndFinish = e => {
     e && e.preventDefault();
 
-    const { displayName } = this.props.store.state.profile;
-    const { hasChangedName } = this.props.store.state.activity;
+    const { displayName, pronouns } = this.props.store.state.profile;
+    const { hasChangedNameOrPronouns } = this.props.store.state.activity;
 
-    const hasChangedNowOrPreviously = hasChangedName || this.state.displayName !== displayName;
+    const hasChangedNowOrPreviously =
+      hasChangedNameOrPronouns || this.state.displayName !== displayName || this.state.pronouns !== pronouns;
     this.props.store.update({
       activity: {
-        hasChangedName: hasChangedNowOrPreviously,
+        hasChangedNameOrPronouns: hasChangedNowOrPreviously,
         hasAcceptedProfile: true
       },
       profile: {
         displayName: this.state.displayName,
-        avatarId: this.state.avatarId
+        avatarId: this.state.avatarId,
+        pronouns: this.state.pronouns
       }
     });
     this.props.finished();
@@ -84,7 +87,7 @@ export default class ProfileEntryPanel extends Component {
   };
 
   componentDidMount() {
-    if (this.nameInput) {
+    if (this.nameInput || this.pronounsInput) {
       // stop propagation so that avatar doesn't move when wasd'ing during text input.
       this.nameInput.addEventListener("keydown", this.stopPropagation);
       this.nameInput.addEventListener("keypress", this.stopPropagation);
@@ -105,7 +108,7 @@ export default class ProfileEntryPanel extends Component {
 
   componentWillUnmount() {
     this.props.store.removeEventListener("statechanged", this.storeUpdated);
-    if (this.nameInput) {
+    if (this.nameInput || this.pronounsInput) {
       this.nameInput.removeEventListener("keydown", this.stopPropagation);
       this.nameInput.removeEventListener("keypress", this.stopPropagation);
       this.nameInput.removeEventListener("keyup", this.stopPropagation);
@@ -123,10 +126,14 @@ export default class ProfileEntryPanel extends Component {
   render() {
     const avatarSettingsProps = {
       displayNameInputRef: inp => (this.nameInput = inp),
+      pronounsInputRef: inp => (this.pronounsInput = inp),
       disableDisplayNameInput: !!this.props.displayNameOverride,
       displayName: this.props.displayNameOverride ? this.props.displayNameOverride : this.state.displayName,
+      pronouns: this.state.pronouns,
       displayNamePattern: this.props.store.schema.definitions.profile.properties.displayName.pattern,
+      pronounsPattern: this.props.store.schema.definitions.profile.properties.pronouns.pattern,
       onChangeDisplayName: e => this.setState({ displayName: e.target.value }),
+      onChangePronouns: e => this.setState({ pronouns: e.target.value }),
       avatarPreview: <AvatarPreview avatarGltfUrl={this.state.avatar && this.state.avatar.gltf_url} />,
       onChangeAvatar: e => {
         e.preventDefault();

@@ -22,10 +22,12 @@ import {
   setMaxResolution
 } from "../utils/screen-orientation-utils";
 import { AAModes } from "../constants";
+import { isLockedDownDemoRoom } from "../utils/hub-utils";
 
 import dropdownArrowUrl from "../assets/images/dropdown_arrow.png";
 import dropdownArrow2xUrl from "../assets/images/dropdown_arrow@2x.png";
 import { PermissionNotification } from "./room/PermissionNotifications";
+import { getAddonsPreferencesCategories, getAddonsPreferencesLabels } from "../addons";
 
 export const CLIPPING_THRESHOLD_MIN = 0.0;
 export const CLIPPING_THRESHOLD_MAX = 0.1;
@@ -516,10 +518,6 @@ const preferenceLabels = defineMessages({
     id: "preferences-screen.preference.theme",
     defaultMessage: "Theme"
   },
-  fastRoomSwitching: {
-    id: "preferences-screen.preference.fast-room-switching",
-    defaultMessage: "Enable Fast Room Switching"
-  },
   lazyLoadSceneMedia: {
     id: "preferences-screen.preference.lazy-load-scene-media",
     defaultMessage: "Enable Scene Media Lazy Loading"
@@ -585,12 +583,26 @@ class PreferenceListItem extends Component {
     const isCheckbox = this.props.itemProps.prefType === PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX;
     const isCustomComponent = this.props.itemProps.prefType === PREFERENCE_LIST_ITEM_TYPE.CUSTOM_COMPONENT;
     const isSmallScreen = window.innerWidth < 600;
-    const label = preferenceLabels[this.props.storeKey] && (
+    let labelText;
+    if (preferenceLabels[this.props.storeKey]) {
+      labelText = intl.formatMessage(preferenceLabels[this.props.storeKey]);
+    } else {
+      const addonLabels = getAddonsPreferencesLabels();
+      labelText = addonLabels.get(this.props.storeKey);
+    }
+    let labelTooltip;
+    if (this.props.itemProps.tooltipKey) {
+      labelTooltip = intl.formatMessage(preferenceLabels[this.props.itemProps.tooltipKey]);
+    } else {
+      const addonLabels = getAddonsPreferencesLabels();
+      labelTooltip = addonLabels.get(this.props.storeKey);
+    }
+    const label = (
       <span
         className={classNames(styles.preferenceLabel, { [styles.disabled]: this.props.disabled })}
-        title={this.props.itemProps.tooltipKey && intl.formatMessage(preferenceLabels[this.props.itemProps.tooltipKey])}
+        title={labelTooltip}
       >
-        {intl.formatMessage(preferenceLabels[this.props.storeKey])}
+        {labelText}
       </span>
     );
     const prefSchema = this.props.store.schema.definitions.preferences.properties;
@@ -698,7 +710,8 @@ const CATEGORY_MOVEMENT = 3;
 const CATEGORY_TOUCHSCREEN = 4;
 const CATEGORY_ACCESSIBILITY = 5;
 const CATEGORY_GRAPHICS = 6;
-const TOP_LEVEL_CATEGORIES = [CATEGORY_AUDIO, CATEGORY_CONTROLS, CATEGORY_MISC];
+const CATEGORY_ADDONS = 7;
+const TOP_LEVEL_CATEGORIES = [CATEGORY_AUDIO, CATEGORY_CONTROLS, CATEGORY_MISC, CATEGORY_ADDONS];
 const categoryNames = defineMessages({
   [CATEGORY_AUDIO]: { id: "preferences-screen.category.audio", defaultMessage: "Audio" },
   [CATEGORY_CONTROLS]: { id: "preferences-screen.category.controls", defaultMessage: "Controls" },
@@ -706,7 +719,8 @@ const categoryNames = defineMessages({
   [CATEGORY_MOVEMENT]: { id: "preferences-screen.category.movement", defaultMessage: "Movement" },
   [CATEGORY_TOUCHSCREEN]: { id: "preferences-screen.category.touchscreen", defaultMessage: "Touchscreen" },
   [CATEGORY_ACCESSIBILITY]: { id: "preferences-screen.category.accessibility", defaultMessage: "Accessibility" },
-  [CATEGORY_GRAPHICS]: { id: "preferences-screen.category.graphics", defaultMessage: "Graphics" }
+  [CATEGORY_GRAPHICS]: { id: "preferences-screen.category.graphics", defaultMessage: "Graphics" },
+  [CATEGORY_ADDONS]: { id: "preferences-screen.category.add-ons", defaultMessage: "Add-Ons" }
 });
 
 function NavItem({ ariaLabel, title, onClick, selected }) {
@@ -976,7 +990,7 @@ class PreferencesScreen extends Component {
     this.mediaDevicesManager.on(MediaDevicesEvents.DEVICE_CHANGE, this.onMediaDevicesUpdated);
     APP.hubChannel.addEventListener("permissions_updated", this.permissionsUpdated);
 
-    if (this.state.canVoiceChat) {
+    if (this.state.canVoiceChat && !isLockedDownDemoRoom()) {
       this.mediaDevicesManager.startMicShare({ updatePrefs: false }).then(this.updateMediaDevices);
     } else {
       this.updateMediaDevices();
@@ -1109,7 +1123,9 @@ class PreferencesScreen extends Component {
                 }
               ]
             : []),
-          ...(MediaDevicesManager.isAudioInputSelectEnabled ? [this.state.preferredMic] : []),
+          ...(MediaDevicesManager.isAudioInputSelectEnabled && !isLockedDownDemoRoom()
+            ? [this.state.preferredMic]
+            : []),
           ...(MediaDevicesManager.isAudioOutputSelectEnabled ? [this.state.preferredSpeakers] : []),
           {
             key: "globalVoiceVolume",
@@ -1214,55 +1230,59 @@ class PreferencesScreen extends Component {
             prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
             options: availableThemes
           },
-          {
-            key: "nametagVisibility",
-            prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
-            options: [
-              {
-                value: "showAll",
-                text: intl.formatMessage({
-                  id: "preferences-screen.nametag-visibility.show-all",
-                  defaultMessage: "Always"
-                })
-              },
-              {
-                value: "showNone",
-                text: intl.formatMessage({
-                  id: "preferences-screen.nametag-visibility.show-none",
-                  defaultMessage: "Never"
-                })
-              },
-              {
-                value: "showFrozen",
-                text: intl.formatMessage({
-                  id: "preferences-screen.nametag-visibility.show-frozen",
-                  defaultMessage: "Only in Frozen state"
-                })
-              },
-              {
-                value: "showSpeaking",
-                text: intl.formatMessage({
-                  id: "preferences-screen.nametag-visibility.show-speaking",
-                  defaultMessage: "Only speaking"
-                })
-              },
-              {
-                value: "showClose",
-                text: intl.formatMessage({
-                  id: "preferences-screen.nametag-visibility.show-close",
-                  defaultMessage: "Close to me"
-                })
-              }
-            ]
-          },
-          {
-            key: "nametagVisibilityDistance",
-            prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
-            min: 1,
-            max: 20,
-            step: 1,
-            digits: 2
-          },
+          ...(!isLockedDownDemoRoom()
+            ? [
+                {
+                  key: "nametagVisibility",
+                  prefType: PREFERENCE_LIST_ITEM_TYPE.SELECT,
+                  options: [
+                    {
+                      value: "showAll",
+                      text: intl.formatMessage({
+                        id: "preferences-screen.nametag-visibility.show-all",
+                        defaultMessage: "Always"
+                      })
+                    },
+                    {
+                      value: "showNone",
+                      text: intl.formatMessage({
+                        id: "preferences-screen.nametag-visibility.show-none",
+                        defaultMessage: "Never"
+                      })
+                    },
+                    {
+                      value: "showFrozen",
+                      text: intl.formatMessage({
+                        id: "preferences-screen.nametag-visibility.show-frozen",
+                        defaultMessage: "Only in Frozen state"
+                      })
+                    },
+                    {
+                      value: "showSpeaking",
+                      text: intl.formatMessage({
+                        id: "preferences-screen.nametag-visibility.show-speaking",
+                        defaultMessage: "Only speaking"
+                      })
+                    },
+                    {
+                      value: "showClose",
+                      text: intl.formatMessage({
+                        id: "preferences-screen.nametag-visibility.show-close",
+                        defaultMessage: "Close to me"
+                      })
+                    }
+                  ]
+                },
+                {
+                  key: "nametagVisibilityDistance",
+                  prefType: PREFERENCE_LIST_ITEM_TYPE.NUMBER_WITH_RANGE,
+                  min: 1,
+                  max: 20,
+                  step: 1,
+                  digits: 2
+                }
+              ]
+            : []),
           this.state.preferredCamera,
           {
             key: "allowMultipleHubsInstances",
@@ -1270,10 +1290,6 @@ class PreferencesScreen extends Component {
           },
           {
             key: "disableIdleDetection",
-            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
-          },
-          {
-            key: "fastRoomSwitching",
             prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
           },
           {
@@ -1428,6 +1444,11 @@ class PreferencesScreen extends Component {
       );
     }
 
+    const addOnCategories = [];
+    getAddonsPreferencesCategories(APP).forEach((prefItems, prefCatName) => {
+      addOnCategories.push({ name: prefCatName, items: prefItems.map(toItem).filter(item => !!item) });
+    });
+
     return new Map([
       [
         CATEGORY_AUDIO,
@@ -1461,7 +1482,8 @@ class PreferencesScreen extends Component {
             items: items.get(CATEGORY_GRAPHICS)
           }
         ]
-      ]
+      ],
+      [CATEGORY_ADDONS, addOnCategories]
     ]);
   }
 

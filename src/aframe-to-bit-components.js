@@ -7,7 +7,9 @@ import {
   RemoteHoverTarget,
   NotRemoteHoverTarget,
   RemoveNetworkedEntityButton,
-  DestroyAtExtremeDistance
+  DestroyAtExtremeDistance,
+  Billboard,
+  AvatarPOVNode
 } from "./bit-components";
 
 [
@@ -18,7 +20,9 @@ import {
   ["is-remote-hover-target", RemoteHoverTarget],
   ["is-not-remote-hover-target", NotRemoteHoverTarget],
   ["remove-networked-object-button", RemoveNetworkedEntityButton],
-  ["destroy-at-extreme-distances", DestroyAtExtremeDistance]
+  ["destroy-at-extreme-distances", DestroyAtExtremeDistance],
+  ["billboard", Billboard],
+  ["avatar-pov-node", AvatarPOVNode]
 ].forEach(([aframeComponentName, bitecsComponent]) => {
   AFRAME.registerComponent(aframeComponentName, {
     init: function () {

@@ -2,6 +2,8 @@ import { AmmoWorker, WorkerHelpers, CONSTANTS } from "three-ammo";
 import { AmmoDebugConstants, DefaultBufferSize } from "ammo-debug-drawer";
 import configs from "../utils/configs";
 import ammoWasmUrl from "ammo.js/builds/ammo.wasm.wasm";
+import { Rigidbody } from "../bit-components";
+import { updateBodyParams } from "../inflators/rigid-body";
 
 const MESSAGE_TYPES = CONSTANTS.MESSAGE_TYPES,
   TYPE = CONSTANTS.TYPE,
@@ -20,6 +22,7 @@ export class PhysicsSystem {
     this.workerHelpers = new WorkerHelpers(this.ammoWorker);
 
     this.bodyUuids = [];
+    this.bodiesToRemove = [];
     this.indexToUuid = {};
     this.bodyUuidToData = new Map();
 
@@ -144,7 +147,7 @@ export class PhysicsSystem {
          * 17     Angular Velocity (float)
          * 18-25  first 8 Collisions (ints)
          */
-
+        this.bodiesToRemove.length = 0;
         if (this.objectMatricesFloatArray.buffer.byteLength !== 0) {
           for (let i = 0; i < this.bodyUuids.length; i++) {
             const uuid = this.bodyUuids[i];
@@ -153,8 +156,8 @@ export class PhysicsSystem {
             const type = body.options.type ? body.options.type : TYPE.DYNAMIC;
             const object3D = body.object3D;
             if (!object3D.parent) {
-              // TODO: Fix me
-              console.error("Physics body exists but object3D has no parent.");
+              console.warn("Physics body exists but object3D had no parent; removing the body.");
+              this.bodiesToRemove.push(uuid);
               continue;
             }
             if (type === TYPE.DYNAMIC) {
@@ -206,6 +209,10 @@ export class PhysicsSystem {
           );
         }
 
+        for (let i = this.bodiesToRemove.length - 1; i >= 0; i--) {
+          this.removeBody(this.bodiesToRemove[i]);
+        }
+
         /* DEBUG RENDERING */
         if (this.debugEnabled) {
           const index = window.Atomics.load(this.debugIndex, 0);
@@ -224,6 +231,7 @@ export class PhysicsSystem {
     const bodyId = this.nextBodyUuid;
     this.nextBodyUuid += 1;
 
+    object3D.updateMatrices();
     this.workerHelpers.addBody(bodyId, object3D, options);
 
     this.bodyUuidToData.set(bodyId, {
@@ -241,24 +249,15 @@ export class PhysicsSystem {
     return bodyId;
   }
 
-  updateBody(uuid, options) {
-    if (this.bodyUuidToData.has(uuid)) {
-      this.bodyUuidToData.get(uuid).options = options;
-      this.workerHelpers.updateBody(uuid, options);
+  updateRigidBody(eid, options) {
+    const bodyId = Rigidbody.bodyId[eid];
+    updateBodyParams(eid, options);
+    if (this.bodyUuidToData.has(bodyId)) {
+      this.bodyUuidToData.get(bodyId).options = options;
+      this.workerHelpers.updateBody(bodyId, options);
     } else {
-      console.warn(`updateBody called for uuid: ${uuid} but body missing.`);
+      console.warn(`updateBody called for uuid: ${bodyId} but body missing.`);
     }
-  }
-
-  // TODO inline updateBody
-  updateBodyOptions(bodyId, options) {
-    const bodyData = this.bodyUuidToData.get(bodyId);
-    if (!bodyData) {
-      // TODO: Fix me.
-      console.warn("updateBodyOptions called for invalid bodyId");
-      return;
-    }
-    this.workerHelpers.updateBody(bodyId, Object.assign(this.bodyUuidToData.get(bodyId).options, options));
   }
 
   removeBody(uuid) {
@@ -275,8 +274,10 @@ export class PhysicsSystem {
     if (bodyData.isInitialized) {
       delete this.indexToUuid[bodyData.index];
       bodyData.collisions.forEach(otherId => {
-        const otherData = this.bodyUuidToData.get(otherId).collisions;
-        otherData.splice(otherData.indexOf(uuid), 1);
+        const collisions = this.bodyUuidToData.get(otherId)?.collisions;
+        // This can happen when removing multiple bodies in a frame
+        if (!collisions) return;
+        collisions.splice(collisions.indexOf(uuid), 1);
       });
       this.bodyUuids.splice(this.bodyUuids.indexOf(uuid), 1);
       this.bodyUuidToData.delete(uuid);

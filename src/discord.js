@@ -1,4 +1,4 @@
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import React, { Component } from "react";
 import "./utils/configs";
 import { FormattedMessage } from "react-intl";
@@ -6,21 +6,20 @@ import { WrappedIntlProvider } from "./react-components/wrapped-intl-provider";
 import "./react-components/styles/global.scss";
 import styles from "./assets/stylesheets/discord.scss";
 import discordBotLogo from "./assets/images/discord-bot-logo.png";
-import discordBotVideoMP4 from "./assets/video/discord.mp4";
-import discordBotVideoWebM from "./assets/video/discord.webm";
 
 import registerTelemetry from "./telemetry";
 import { ThemeProvider } from "./react-components/styles/theme";
-import { store } from "./utils/store-instance";
+import { getStore } from "./utils/store-instance";
 
 registerTelemetry("/discord", "Discord Landing Page");
 
-const inviteUrl = "https://forms.gle/GGPgarSuY5WaTNCT8";
+const inviteUrl = "https://github.com/Hubs-Foundation/hubs-discord-bot";
 
 class DiscordPage extends Component {
   componentDidMount() {}
 
   render() {
+    const store = getStore();
     return (
       <WrappedIntlProvider>
         <ThemeProvider store={store}>
@@ -63,10 +62,7 @@ class DiscordPage extends Component {
                   </div>
                 </div>
                 <div className={styles.heroSplash}>
-                  <video playsInline loop autoPlay muted>
-                    <source src={discordBotVideoMP4} type="video/mp4" />
-                    <source src={discordBotVideoWebM} type="video/webm" />
-                  </video>
+                  <img src={discordBotLogo} />
                   <div className={styles.splashTagline}>
                     <FormattedMessage id="discord-page.splash-tag" defaultMessage="Designed for serious businessing." />
                   </div>
@@ -82,5 +78,8 @@ class DiscordPage extends Component {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  ReactDOM.render(<DiscordPage />, document.getElementById("ui-root"));
+  const container = document.getElementById("ui-root");
+
+  const root = createRoot(container);
+  root.render(<DiscordPage />);
 });

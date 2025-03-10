@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import { RoomLayout } from "../layout/RoomLayout";
 import { TweetEditorModal } from "./TweetEditorModal";
-import { createEditorStateWithText } from "draft-js-plugins-editor";
+import { createEditorStateWithText } from "@draft-js-plugins/editor";
 import imgSrc from "../../assets/background.jpg";
 import videoSrc from "../../assets/video/home.mp4";
 

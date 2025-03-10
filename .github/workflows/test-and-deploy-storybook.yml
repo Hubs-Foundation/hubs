@@ -19,7 +19,7 @@ jobs:
       - run: npm ci
       - run: npm test
 
-      - run: cd admin && npm ci
+      - run: cd admin && npm ci --legacy-peer-deps
       - run: cd admin && npm test
 
       - if: ${{ github.ref == 'refs/heads/master' }}

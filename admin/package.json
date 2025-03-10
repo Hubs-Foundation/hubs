@@ -6,7 +6,7 @@
   "license": "MPL-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mozilla/hubs.git"
+    "url": "https://github.com/Hubs-Foundation/hubs.git"
   },
   "scripts": {
     "start": "webpack serve --mode=development --env hubsCloudDev=1",
@@ -21,15 +21,16 @@
   },
   "dependencies": {
     "@iarna/toml": "^2.2.3",
-    "aframe": "github:mozillareality/aframe#hubs/master",
-    "bitecs": "github:mozilla/bitECS#hubs-patches",
+    "@mozilla/lilypad-ui": "^1.8.2",
+    "aframe": "github:Hubs-Foundation/aframe#hubs/master",
+    "bitecs": "github:Hubs-Foundation/bitECS#hubs-patches",
     "classnames": "^2.2.5",
     "hubs": "file:..",
     "react": "^16.1.1",
     "react-admin": "^2.6.3",
     "react-dom": "^16.1.1",
     "react-intl": "^2.4.0",
-    "three": "github:mozillareality/three.js#hubs-patches-141"
+    "three": "github:Hubs-Foundation/three.js#hubs-patches-141"
   },
   "devDependencies": {
     "@babel/core": "^7.18.9",

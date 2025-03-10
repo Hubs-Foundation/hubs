@@ -1,6 +1,7 @@
 @use "../styles/theme.scss";
 
-:local(.back-button), :local(.lights-button) {
+:local(.back-button),
+:local(.lights-button) {
   position: absolute;
   top: 16px;
   pointer-events: auto;
@@ -9,7 +10,7 @@
     color: theme.$overlay-text-color;
   }
 
-  @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
+  @media (min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
     display: none;
   }
 }
@@ -51,7 +52,7 @@
   align-items: center;
   justify-content: center;
 
-  @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
+  @media (min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
     display: flex;
   }
 }
@@ -66,12 +67,11 @@
   right: 16px;
 }
 
-
 :local(.menu) {
   display: flex;
   padding: 16px;
 
-  @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
+  @media (min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
     padding-top: 0;
   }
 }
@@ -100,13 +100,14 @@
     color: theme.$overlay-text-color;
   }
 
-  @media(min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
+  @media (min-width: theme.$breakpoint-lg) and (min-height: theme.$breakpoint-vr) {
     display: none;
   }
 }
 
-:global(.keyboard-user)  {
-  :local(.back-button):focus, :local(.object-menu-container) :focus {
-    box-shadow: 0 0 0 3px theme.$overlay-outline-color;
+:global(.keyboard-user) {
+  :local(.back-button):focus,
+  :local(.object-menu-container) :focus {
+    box-shadow: 0 0 0 3px theme.$white;
   }
 }

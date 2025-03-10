@@ -30,6 +30,7 @@ export const AudioPopoverContent = ({
   permissionStatus
 }) => {
   const iconStyle = isMicrophoneEnabled ? styles.iconEnabled : styles.iconDisabled;
+
   return (
     <Column padding grow gap="lg" className={styles.audioToolbarPopover}>
       {(canVoiceChat && (

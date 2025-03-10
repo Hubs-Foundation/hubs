@@ -5,8 +5,7 @@ import { paths } from "../systems/userinput/paths";
 import { getBox, getScaleCoefficient } from "../utils/auto-box-collider";
 import { addComponent } from "bitecs";
 import { Held, HeldRemoteLeft, HeldRemoteRight } from "../bit-components";
-
-const COLLISION_LAYERS = require("../constants").COLLISION_LAYERS;
+import { COLLISION_LAYERS } from "../constants";
 
 function setNonNullVec3Components(target, values) {
   target.set(
@@ -112,7 +111,7 @@ AFRAME.registerComponent("super-spawner", {
         ? 1
         : 0.5;
 
-    const scaleCoefficient = getScaleCoefficient(boxSize, getBox(spawnedEntity, spawnedEntity.object3D));
+    const scaleCoefficient = getScaleCoefficient(boxSize, getBox(spawnedEntity.object3D, spawnedEntity.object3D));
     this.spawnedMediaScale.divideScalar(scaleCoefficient);
   },
 

@@ -36,6 +36,8 @@ features.disable_room_creation = { category = "rooms", type = "boolean", name = 
 features.require_account_for_join = { category = "rooms", type = "boolean", name = "Require accounts for room access", description = "Require accounts for accessing rooms." }
 features.default_room_size = { category = "rooms", type = "number", name = "Default room size", description = "Default room size for new rooms. This does not include users in the lobby." }
 features.max_room_size = { category = "rooms", type = "number", name = "Maximum room size", description = "Maximum room size visitors can set." }
+features.bitecs_loader = { category = "features", type="boolean", name="Use BitECS loader", description="Use the BitECS based loader by default in all rooms" }
+features.addons_config = { category = "features", type="json", name="Add-ons config JSON", description="Add-ons config JSON file" }
 
 features.show_feature_panels = { category = "features", type = "boolean", internal = "true" }
 features.show_join_us_dialog = { category = "features", type = "boolean", internal = "true" }
@@ -46,14 +48,20 @@ features.show_feedback_ui = { category = "features", type = "boolean", internal 
 features.show_issue_report_dialog = { category = "features", type = "boolean", internal = "true" }
 features.show_cloud = { category = "features", type = "boolean", internal = "true" }
 features.show_newsletter_signup = { category = "features", type = "boolean", internal = "true" }
+features.change_hub_near_room_links = { category = "features", type = "boolean", internal = "true" }
+features.is_locked_down_demo_room = { category = "features", type = "string", internal = "true", description = "A comma separated list of hubIds to be designated as demo rooms with simplified UI." }
 
-images.logo = { category = "images", type = "file", name = "App Logo", description = "Logo used across the app." }
-images.logo_dark = { category = "images", type = "file", name = "App Logo Dark", description = "Logo used across the app in dark mode." }
-images.favicon = { category = "images", type = "file", name = "Favicon", description = "Icon for the app." }
-images.app_icon = { category = "images", type = "file", name = "App Icon", description = "Icon for the app." }
-images.app_thumbnail = { category = "images", type = "file", name = "App Thumbnail", description = "Thumbnail for app." }
-images.company_logo = { category = "images", type = "file", name = "Company Logo", description = "Company logo used across the app." }
-images.home_background = { category = "images", type = "file", name = "Home background", description = "Background image on the home page." }
+images.logo = { category = "images", type = "file", name = "Hub Logo", description = "Appears throughout your hub including lobby and loading screens." }
+images.logo_dark = { category = "images", type = "file", name = "Hub logo for dark mode", description = "The hub logo which appears for visitors who have dark mode enabled." }
+images.favicon = { category = "images", type = "file", name = "Favicon", description = "The favicon is the small picture which appears in the web browser tab." }
+
+images.home_background = { category = "images", type = "file", name = "Homepage image", description = "The main image used to decorate your hub's home page." }
+images.company_logo = { category = "images", type = "file", name = "Company Logo", description = "An optional logo which appears in the footer of your hub's home page." }
+
+images.app_icon = { category = "images", type = "file", name = "Shortcut icon", description = "Used when a shortcut to your hub is added to a user's device." }
+images.app_thumbnail = { category = "images", type = "file", name = "Social media card", description = "Used when links to your hub are shared on social media." }
+
+
 
 images.editor_logo = { category = "images", type = "file", internal = "true" }
 images.landing_rooms_thumb = { category = "images", type = "file", internal = "true" }
@@ -71,9 +79,9 @@ theme.notice-background-color = { category = "theme", type = "color", name = "Se
 theme.notice-text-color = { category = "theme", type = "color", name = "Secondary Text Color", description = "[deprecated] Notice and indicator text color.", deprecated="true" }
 theme.notice-widget-color = { category = "theme", type = "color", name = "Secondary Widget Color", description = "[deprecated] Notice and indicator UI widget color.", deprecated="true" }
 theme.favorited-color = { category = "theme", type = "color", name = "Favorited Color", description = "[deprecated] Favorited Color", deprecated = "true" }
-theme.nametag-color = { category = "theme", type = "color", name = "Nametag Color", description = "Avatar nametag color." }
-theme.nametag-text-color = { category = "theme", type = "color", name = "Nametag Color", description = "Avatar nametag text color." }
-theme.themes = { category = "theme", type = "json", name = "Themes", description = "A json array describing custom client themes." }
+theme.nametag-color = { category = "theme", type = "color", name = "Background Color", description="The background color of nametags which float above each room guest." }
+theme.nametag-text-color = { category = "theme", type = "color", name = "Text Color", description="The text color of nametags which float above each room guest." }
+theme.themes = { category = "theme", type = "json", name = "Themes", description = "A json array describing custom client themes."}
 
 links.terms_of_use = { category = "links", type = "string", name = "Terms of Use", description = "Link to your terms of use page."}
 links.privacy_notice = { category = "links", type = "string", name = "Privacy Notice", description = "Link to your privacy page."}
@@ -86,5 +94,5 @@ links.promotion = { category = "links", type = "string", name = "Promotion Info"
 links.remixing = { category = "links", type = "string", name = "Remixing Info", description = "Link to info about remixing info and licensing."}
 links.model_collection = { category = "links", type = "string", name = "Model Collection", description = "Link to a collection of recommended models."}
 
-auth.login_subject = { category = "auth", type="string", name="Magic Link Email Subject", description="Customize the email subject line for users logging in" }
+login_subject = { category = "auth", type="string", name="Magic Link Email Subject", description="Customize the email subject line for users logging in" }
 auth.login_body = { category = "auth", type="longstring", name="Magic Link Email Body", description="Customize message. Add '{{ link }}' to insert the magic link, otherwise it will be appended at the end." }

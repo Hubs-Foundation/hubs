@@ -1,27 +1,42 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { removeNetworkedObject } from "../../utils/removeNetworkedObject";
+import { findAncestorWithComponent, shouldUseNewLoader } from "../../utils/bit-utils";
 import { rotateInPlaceAroundWorldUp, affixToWorldUp } from "../../utils/three-utils";
 import { getPromotionTokenForFile } from "../../utils/media-utils";
 import { hasComponent } from "bitecs";
-import { Pinnable, Pinned, Static } from "../../bit-components";
-
-function getPinnedState(el) {
-  return !!(hasComponent(APP.world, Pinnable, el.eid) && hasComponent(APP.world, Pinned, el.eid));
-}
+import { isPinned as getPinnedState } from "../../bit-systems/networking";
+import { deleteTheDeletableAncestor } from "../../bit-systems/delete-entity-system";
+import { isAEntityPinned } from "../../systems/hold-system";
+import { AEntity, LocalAvatar, MediaInfo, RemoteAvatar, Static, MediaLoader } from "../../bit-components";
+import { setPinned, canPin as canPinObject } from "../../utils/bit-pinning-helper";
+import { debounce } from "lodash";
 
 export function isMe(object) {
-  return object.el.id === "avatar-rig";
+  if (shouldUseNewLoader()) {
+    return hasComponent(APP.world, LocalAvatar, object.eid);
+  } else {
+    return object.id === "avatar-rig";
+  }
 }
 
 export function isPlayer(object) {
-  return !!object.el.components["networked-avatar"];
+  if (shouldUseNewLoader()) {
+    return hasComponent(APP.world, RemoteAvatar, object.eid);
+  } else {
+    return !!object.el.components["networked-avatar"];
+  }
 }
 
 export function getObjectUrl(object) {
-  const mediaLoader = object.el.components["media-loader"];
-
-  const url =
-    mediaLoader && ((mediaLoader.data.mediaOptions && mediaLoader.data.mediaOptions.href) || mediaLoader.data.src);
+  let url;
+  if (shouldUseNewLoader()) {
+    const urlSid = MediaInfo.accessibleUrl[object.eid];
+    url = APP.getString(urlSid);
+  } else {
+    const mediaLoader = object.el.components["media-loader"];
+    url =
+      mediaLoader && ((mediaLoader.data.mediaOptions && mediaLoader.data.mediaOptions.href) || mediaLoader.data.src);
+  }
 
   if (url && !url.startsWith("hubs://")) {
     return url;
@@ -30,22 +45,41 @@ export function getObjectUrl(object) {
   return null;
 }
 
+function isObjectPinned(world, eid) {
+  if (hasComponent(world, AEntity, eid)) {
+    return isAEntityPinned(APP.world, eid);
+  } else {
+    const mediaRootEid = findAncestorWithComponent(APP.world, MediaLoader, eid);
+    return getPinnedState(mediaRootEid);
+  }
+}
+
 export function usePinObject(hubChannel, scene, object) {
-  const [isPinned, setIsPinned] = useState(getPinnedState(object.el));
+  const [isPinned, setIsPinned] = useState(isObjectPinned(APP.world, object.eid));
 
   const pinObject = useCallback(() => {
-    const el = object.el;
-    if (!NAF.utils.isMine(el) && !NAF.utils.takeOwnership(el)) return;
-    window.APP.pinningHelper.setPinned(el, true);
-  }, [object]);
+    if (shouldUseNewLoader()) {
+      const mediaRootEid = findAncestorWithComponent(APP.world, MediaLoader, object.eid);
+      setPinned(hubChannel, APP.world, mediaRootEid, true);
+    } else {
+      const el = object.el;
+      if (!NAF.utils.isMine(el) && !NAF.utils.takeOwnership(el)) return;
+      window.APP.pinningHelper.setPinned(el, true);
+    }
+  }, [object, hubChannel]);
 
   const unpinObject = useCallback(() => {
-    const el = object.el;
-    if (!NAF.utils.isMine(el) && !NAF.utils.takeOwnership(el)) return;
-    window.APP.pinningHelper.setPinned(el, false);
-  }, [object]);
+    if (shouldUseNewLoader()) {
+      const mediaRootEid = findAncestorWithComponent(APP.world, MediaLoader, object.eid);
+      setPinned(hubChannel, APP.world, mediaRootEid, false);
+    } else {
+      const el = object.el;
+      if (!NAF.utils.isMine(el) && !NAF.utils.takeOwnership(el)) return;
+      window.APP.pinningHelper.setPinned(el, false);
+    }
+  }, [object, hubChannel]);
 
-  const togglePinned = useCallback(() => {
+  const _togglePinned = useCallback(() => {
     if (isPinned) {
       unpinObject();
     } else {
@@ -53,36 +87,63 @@ export function usePinObject(hubChannel, scene, object) {
     }
   }, [isPinned, pinObject, unpinObject]);
 
+  const togglePinned = useMemo(() => debounce(_togglePinned, 100), [_togglePinned]);
   useEffect(() => {
+    return () => {
+      togglePinned.cancel();
+    };
+  }, [togglePinned]);
+
+  useEffect(() => {
+    if (shouldUseNewLoader()) {
+      const handler = setInterval(() => {
+        setIsPinned(isObjectPinned(APP.world, object.eid));
+      }, 100);
+      return () => {
+        clearInterval(handler);
+      };
+    }
+
     const el = object.el;
 
     function onPinStateChanged() {
-      setIsPinned(getPinnedState(el));
+      setIsPinned(isObjectPinned(APP.world, object.eid));
     }
     el.addEventListener("pinned", onPinStateChanged);
     el.addEventListener("unpinned", onPinStateChanged);
-    setIsPinned(getPinnedState(el));
+    setIsPinned(isObjectPinned(APP.world, object.eid));
     return () => {
       el.removeEventListener("pinned", onPinStateChanged);
       el.removeEventListener("unpinned", onPinStateChanged);
     };
   }, [object]);
 
-  const el = object.el;
-
-  let userOwnsFile = false;
-
-  if (el.components["media-loader"]) {
-    const { fileIsOwned, fileId } = el.components["media-loader"].data;
-    userOwnsFile = fileIsOwned || (fileId && getPromotionTokenForFile(fileId));
+  let canBePinned = false;
+  if (shouldUseNewLoader()) {
+    const mediaRootEid = findAncestorWithComponent(APP.world, MediaLoader, object.eid);
+    canBePinned = canPinObject(APP.hubChannel, mediaRootEid);
+  } else {
+    const el = object.el;
+    if (el.components["media-loader"]) {
+      const { fileIsOwned, fileId } = el.components["media-loader"].data;
+      canBePinned = fileIsOwned || (fileId && getPromotionTokenForFile(fileId));
+    }
   }
+
+  let targetEid;
+  if (shouldUseNewLoader()) {
+    targetEid = findAncestorWithComponent(APP.world, MediaLoader, object.eid);
+  } else {
+    targetEid = object.el.eid;
+  }
+  const isStatic = hasComponent(APP.world, Static, targetEid);
 
   const canPin = !!(
     scene.is("entered") &&
     !isPlayer(object) &&
-    !hasComponent(APP.world, Static, el.eid) &&
+    !isStatic &&
     hubChannel.can("pin_objects") &&
-    userOwnsFile
+    canBePinned
   );
 
   return { canPin, isPinned, togglePinned, pinObject, unpinObject };
@@ -117,32 +178,57 @@ export function useGoToSelectedObject(scene, object) {
 
 export function useRemoveObject(hubChannel, scene, object) {
   const removeObject = useCallback(() => {
-    removeNetworkedObject(scene, object.el);
+    if (shouldUseNewLoader()) {
+      deleteTheDeletableAncestor(APP.world, object.eid);
+    } else {
+      removeNetworkedObject(scene, object.el);
+    }
   }, [scene, object]);
 
-  const el = object.el;
+  const eid = object.eid;
+
+  let canBePinned = false;
+  if (shouldUseNewLoader()) {
+    const mediaRootEid = findAncestorWithComponent(APP.world, MediaLoader, object.eid);
+    canBePinned = canPinObject(APP.hubChannel, mediaRootEid);
+  } else {
+    const el = object.el;
+    if (el.components["media-loader"]) {
+      const { fileIsOwned, fileId } = el.components["media-loader"].data;
+      canBePinned = fileIsOwned || (fileId && getPromotionTokenForFile(fileId));
+    }
+  }
 
   const canRemoveObject = !!(
     scene.is("entered") &&
     !isPlayer(object) &&
-    !getPinnedState(el) &&
-    !hasComponent(APP.world, Static, el.eid) &&
-    hubChannel.can("spawn_and_move_media")
+    !isObjectPinned(APP.world, eid) &&
+    !hasComponent(APP.world, Static, eid) &&
+    hubChannel.can("spawn_and_move_media") &&
+    canBePinned
   );
 
   return { removeObject, canRemoveObject };
 }
 
-export function useHideAvatar(hubChannel, avatarEl) {
+export function useHideAvatar(hubChannel, avatarObj) {
   const hideAvatar = useCallback(() => {
-    if (avatarEl.components.networked) {
+    let avatarEl;
+    if (shouldUseNewLoader()) {
+      // TODO This should be updated when we migrate avatars to bitECS
+      const avatarEid = avatarObj.eid;
+      avatarEl = APP.world.eid2obj.get(avatarEid).el;
+    } else {
+      avatarEl = avatarObj.el;
+    }
+    if (avatarEl && avatarEl.components.networked) {
       const clientId = avatarEl.components.networked.data.owner;
 
       if (clientId && clientId !== NAF.clientId) {
         hubChannel.hide(clientId);
       }
     }
-  }, [hubChannel, avatarEl]);
+  }, [hubChannel, avatarObj]);
 
   return hideAvatar;
 }

@@ -3,6 +3,35 @@
   width: 0;
   height: 0;
 }
-:local(.url-input) { 
-  max-width: 24px;
+
+:local(.text) {
+  text-align: left;
+}
+
+:local(.browse) {
+  color: white;
+  background-color: black;
+  height: 100%;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  width: 60px;
+}
+
+:local(.container) {
+  height: 100%;
+  margin: 0 !important;
+}
+
+:local(.input) {
+  &.after-input {
+    width: 90px;
+    min-width: 24px;
+  }
+}
+
+:local(.close) {
+  margin-right: 8px;
 }

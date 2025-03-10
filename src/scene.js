@@ -1,6 +1,6 @@
 import jwtDecode from "jwt-decode";
 import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import "./assets/stylesheets/scene.scss";
 import SceneUI from "./react-components/scene-ui";
 import "./react-components/styles/global.scss";
@@ -10,16 +10,18 @@ import registerTelemetry from "./telemetry";
 import { disableiOSZoom } from "./utils/disable-ios-zoom";
 import { connectToReticulum, fetchReticulumAuthenticatedWithToken } from "./utils/phoenix-utils";
 import "./utils/theme";
-import { store } from "./utils/store-instance";
+import { getStore } from "./utils/store-instance";
 
 function mountUI(props = {}) {
-  ReactDOM.render(
+  const container = document.getElementById("ui-root");
+
+  const root = createRoot(container);
+  root.render(
     <WrappedIntlProvider>
       <ThemeProvider store={props.store}>
         <SceneUI {...props} />
       </ThemeProvider>
-    </WrappedIntlProvider>,
-    document.getElementById("ui-root")
+    </WrappedIntlProvider>
   );
 }
 
@@ -87,6 +89,7 @@ function onReady() {
 
   disableiOSZoom();
 
+  const store = getStore();
   const sceneId = parseSceneId(document.location);
   console.log(`Scene ID: ${sceneId}`);
   remountUI({ sceneId, store });
