@@ -585,13 +585,12 @@ class GLTFHubsComponentsExtension {
             if (Object.prototype.hasOwnProperty.call(ext, "link")) {
               if (["image", "video", "model"].includes(componentName)) {
                 ext["media-link"] = {
-                  src: ext.link.href
-                };
-                delete ext.link;
-              }
-            }
-          }
-
+            src: ext.link.href
+           };
+           delete ext.link;
+         }
+       }
+           }
           const value = props[propName];
           const type = value?.__mhc_link_type;
           if (type && value.index !== undefined) {
