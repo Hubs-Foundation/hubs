@@ -19,9 +19,9 @@ const FINISH = 2;
 const LOCAL_STORAGE_KEY = "__hubs_finished_tips";
 
 const TIPS = {
-  desktop: ["welcome", "locomotion", "turning", "invite", "end", "menu"],
-  mobile: ["welcome", "locomotion", "turning", "end", "menu"],
-  standalone: []
+  desktop: ["welcome", "locomotion", "turning", "defense", "invite", "end", "menu"],
+  mobile: ["welcome", "locomotion", "turning", "defense", "invite", "end", "menu"],
+  standalone: ["welcome", "locomotion", "turning", "defense", "invite", "end", "menu"]
 };
 
 let localStorageCache = null;
@@ -72,6 +72,10 @@ const VALIDATORS = {
       isMobile ? paths.device.touchscreen.touchCameraDelta : paths.device.smartMouse.cameraDelta
     );
     return rotate || cameraDelta ? FINISH : VALID;
+  },
+  defense: function (userinput) {
+    const usedFreeze = userinput.get(paths.actions.toggleFreeze);
+    return usedFreeze ? FINISH : VALID;
   },
   invite: function (_userinput, scene, hub) {
     if (hub && hub.entry_mode === "invite") return INVALID;
