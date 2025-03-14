@@ -8,7 +8,7 @@ import { discordBridgesForPresences, hasEmbedPresences } from "../../utils/phoen
 import { Tooltip } from "./Tooltip";
 
 const isEndTooltipStep = step =>
-  ["tips.desktop.end", "tips.mobile.end", "tips.desktop.menu", "tips.mobile.menu"].includes(step);
+  ["tips.desktop.end", "tips.mobile.end", "tips.standalone.end", "tips.desktop.menu", "tips.mobile.menu", "tips.standalone.menu"].includes(step);
 
 function OkDismissLabel() {
   return <FormattedMessage id="tips.dismiss.ok" defaultMessage="Ok" />;
