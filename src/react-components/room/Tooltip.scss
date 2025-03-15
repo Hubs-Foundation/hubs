@@ -18,7 +18,7 @@
   border-radius: 24px;
   background-color: theme.$background1-color;
   border: 1px solid theme.$border1-color;
-  width: 360px;
+  //width: 360px;
   font-size: theme.$font-size-md;
   justify-content: center;
   align-items: center;
@@ -170,14 +170,6 @@
   background-color: theme.$disabled-bg-color;
   border-radius: 50%;
   display: inline-block;
-
-  &:first-child {
-    margin: 0px 12px 0px 0px;
-  }
-
-  &:last-child {
-    margin: 0px 0px 0px 12px;
-  }
 }
 
 :local(.dot-enabled) {
