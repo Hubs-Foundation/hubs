@@ -28,10 +28,10 @@ let localStorageCache = null;
 let finished = false; // Optimization, lets system skip altogether once finished.
 
 const isMobile = AFRAME.utils.device.isMobile();
-const isMobileVR = AFRAME.utils.device.isMobileVR();
+const isThisMobileVR = AFRAME.utils.device.isMobileVR();   // used every tick
 
 const tipPlatform = () => {
-  if (isMobileVR) return "standalone";
+  if (isThisMobileVR) return "standalone";
   return isMobile ? "mobile" : "desktop";
 };
 
@@ -133,8 +133,6 @@ AFRAME.registerSystem("tips", {
   },
 
   tick: function () {
-    if (isMobileVR) return; // Optimization for now, don't bother with this on mobile VR until we have real tips
-
     if (!this._userinput) {
       this._userinput = this.el.systems.userinput;
 

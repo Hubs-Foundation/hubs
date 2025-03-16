@@ -5,7 +5,7 @@ import { Billboard } from "../bit-components";
 
 const billboardQuery = defineQuery([Billboard]);
 
-const isMobileVR = AFRAME.utils.device.isMobileVR();
+const isThisMobileVR = AFRAME.utils.device.isMobileVR();
 
 const targetPos = new Vector3();
 const worldPos = new Vector3();
@@ -66,7 +66,7 @@ let nextBillboard = 0;
 export function billboardSystem(world: HubsWorld, camera: Camera) {
   const billboards = billboardQuery(world);
   if (!billboards.length) return;
-  if (isMobileVR) {
+  if (isThisMobileVR) {
     if (nextBillboard >= billboards.length) {
       nextBillboard = 0;
     }
