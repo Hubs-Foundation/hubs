@@ -40,8 +40,8 @@ const hoverableVisualsQuery = defineQuery([HoverableVisuals]);
 const hoverableVisualsEnterQuery = enterQuery(hoverableVisualsQuery);
 const hoverableVisualsExitQuery = exitQuery(hoverableVisualsQuery);
 const isMobile = AFRAME.utils.device.isMobile();
-const isMobileVR = AFRAME.utils.device.isMobileVR();
-const isTouchscreen = isMobile && !isMobileVR;
+const isThisMobileVR = AFRAME.utils.device.isMobileVR();
+const isTouchscreen = isMobile && !isThisMobileVR;
 export function hoverableVisualsSystem(world: HubsWorld) {
   hoverableVisualsExitQuery(world).forEach(eid => HoverableVisualsUniforms.delete(eid));
   hoverableVisualsEnterQuery(world).forEach(eid => updateHoverableVisuals(world, eid));

@@ -47,12 +47,12 @@ const mediaAPIEndpoint = getReticulumFetchUrl("/api/v1/media");
 const getDirectMediaAPIEndpoint = () => getDirectReticulumFetchUrl("/api/v1/media");
 
 const isMobile = AFRAME.utils.device.isMobile();
-const isMobileVR = AFRAME.utils.device.isMobile();
+const isThisMobileVR = AFRAME.utils.device.isMobileVR();
 
 // Map<String, Promise<Object>
 const resolveUrlCache = new Map();
 export const getDefaultResolveQuality = (is360 = false) => {
-  const useLowerQuality = isMobile || isMobileVR;
+  const useLowerQuality = isMobile || isThisMobileVR;
   return !is360 ? (useLowerQuality ? "low" : "high") : useLowerQuality ? "low_360" : "high_360";
 };
 

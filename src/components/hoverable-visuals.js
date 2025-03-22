@@ -37,8 +37,8 @@ AFRAME.registerComponent("hoverable-visuals", {
     this.boundingBox = null;
 
     const isMobile = AFRAME.utils.device.isMobile();
-    const isMobileVR = AFRAME.utils.device.isMobileVR();
-    this.isTouchscreen = isMobile && !isMobileVR;
+    const isThisMobileVR = AFRAME.utils.device.isMobileVR();
+    this.isTouchscreen = isMobile && !isThisMobileVR;
   },
   tick(time) {
     if (!this.uniforms || !this.uniforms.length) return;
