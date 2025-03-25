@@ -19,19 +19,19 @@ const FINISH = 2;
 const LOCAL_STORAGE_KEY = "__hubs_finished_tips";
 
 const TIPS = {
-  desktop: ["welcome", "locomotion", "turning", "invite", "end", "menu"],
-  mobile: ["welcome", "locomotion", "turning", "end", "menu"],
-  standalone: []
+  desktop: ["welcome", "locomotion", "turning", "defense", "invite", "end", "menu"],
+  mobile: ["welcome", "locomotion", "turning", "defense", "invite", "end", "menu"],
+  standalone: ["welcome", "locomotion", "turning", "defense", "invite", "end", "menu"]
 };
 
 let localStorageCache = null;
 let finished = false; // Optimization, lets system skip altogether once finished.
 
 const isMobile = AFRAME.utils.device.isMobile();
-const isMobileVR = AFRAME.utils.device.isMobileVR();
+const isThisMobileVR = AFRAME.utils.device.isMobileVR();   // used every tick
 
 const tipPlatform = () => {
-  if (isMobileVR) return "standalone";
+  if (isThisMobileVR) return "standalone";
   return isMobile ? "mobile" : "desktop";
 };
 
@@ -72,6 +72,10 @@ const VALIDATORS = {
       isMobile ? paths.device.touchscreen.touchCameraDelta : paths.device.smartMouse.cameraDelta
     );
     return rotate || cameraDelta ? FINISH : VALID;
+  },
+  defense: function (userinput) {
+    const usedFreeze = userinput.get(paths.actions.toggleFreeze);
+    return usedFreeze ? FINISH : VALID;
   },
   invite: function (_userinput, scene, hub) {
     if (hub && hub.entry_mode === "invite") return INVALID;
@@ -133,8 +137,6 @@ AFRAME.registerSystem("tips", {
   },
 
   tick: function () {
-    if (isMobileVR) return; // Optimization for now, don't bother with this on mobile VR until we have real tips
-
     if (!this._userinput) {
       this._userinput = this.el.systems.userinput;
 

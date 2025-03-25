@@ -47,7 +47,7 @@ export async function getAvailableVREntryTypes() {
   const ua = navigator.userAgent;
   const isSamsungBrowser = browser.name === "chrome" && /SamsungBrowser/.test(ua);
   const isMobile = AFRAME.utils.device.isMobile();
-  const isMobileVR = AFRAME.utils.device.isMobileVR();
+  const isThisMobileVR = AFRAME.utils.device.isMobileVR();
 
   // This needs to be kept up-to-date with the latest browsers that can support VR and Hubs.
   // Checking for navigator.getVRDisplays always passes b/c of polyfill.
@@ -81,7 +81,7 @@ export async function getAvailableVREntryTypes() {
 
   const isOculusBrowser = /Oculus/.test(ua);
 
-  const screen = isMobileVR
+  const screen = isThisMobileVR
     ? VR_DEVICE_AVAILABILITY.no
     : isIDevice && isUIWebView
     ? VR_DEVICE_AVAILABILITY.maybe
@@ -107,7 +107,7 @@ export async function getAvailableVREntryTypes() {
   // For daydream detection, we first check if they are on an Android compatible device, and assume they
   // may support daydream *unless* this browser has WebVR capabilities, in which case we can do better.
   let daydream =
-    isMaybeDaydreamCompatibleDevice(ua) && !isMobileVR ? VR_DEVICE_AVAILABILITY.maybe : VR_DEVICE_AVAILABILITY.no;
+    isMaybeDaydreamCompatibleDevice(ua) && !isThisMobileVR ? VR_DEVICE_AVAILABILITY.maybe : VR_DEVICE_AVAILABILITY.no;
 
   cardboard =
     isCardboardCapableBrowser && displays.find(d => d.capabilities.canPresent && /cardboard/i.test(d.displayName))
