@@ -330,6 +330,7 @@
   "chat-sidebar-container.input-placeholder.empty-room-bot": "{discordChannels} 로 메시지를 전송합니다.",
   "chat-sidebar-container.input-placeholder.occupants": "{occupantCount, plural, one {Send message to one other...} other {Send message to {occupantCount} others...} }",
   "chat-sidebar-container.input-placeholder.occupants-and-bot": "{occupantCount, plural, one {Send message to one other and {discordChannels}...} other {Send message to {occupantCount} others and {discordChannels}...} }",
+  "chat-sidebar-container.input-send-button.disabled": "텍스트 채팅 끄기",
   "room-sidebar.scene-attribution-with-source": "by {author} on {source}",
   "room-sidebar.scene-attribution": "by {author}",
   "room-sidebar.scene-info.change-scene-button": "Scene 변경하기",
