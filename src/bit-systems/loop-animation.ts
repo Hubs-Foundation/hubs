@@ -1,5 +1,5 @@
 import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent } from "bitecs";
-import { AnimationAction, AnimationClip, AnimationMixer, LoopRepeat } from "three";
+import { AnimationClip, LoopRepeat } from "three";
 import {
   MixerAnimatable,
   MixerAnimatableData,
@@ -47,12 +47,16 @@ const getActiveClips = (
 
 export function loopAnimationSystem(world: HubsWorld): void {
   loopAnimationInitializeEnterQuery(world).forEach((eid: number): void => {
+    const params = LoopAnimationInitializeData.get(eid)!;
+    if (!params.length) {
+      return;
+    }
+
     const object = world.eid2obj.get(eid)!;
     const mixer = MixerAnimatableData.get(eid)!;
 
     addComponent(world, LoopAnimation, eid);
 
-    const params = LoopAnimationInitializeData.get(eid)!;
     const activeAnimations = [];
 
     for (let i = 0; i < params.length; i++) {

@@ -9,7 +9,7 @@ import discordBotLogo from "./assets/images/discord-bot-logo.png";
 
 import registerTelemetry from "./telemetry";
 import { ThemeProvider } from "./react-components/styles/theme";
-import { store } from "./utils/store-instance";
+import { getStore } from "./utils/store-instance";
 
 registerTelemetry("/discord", "Discord Landing Page");
 
@@ -19,6 +19,7 @@ class DiscordPage extends Component {
   componentDidMount() {}
 
   render() {
+    const store = getStore();
     return (
       <WrappedIntlProvider>
         <ThemeProvider store={store}>
