@@ -133,7 +133,7 @@
     "resize-observer-polyfill": "^1.5.1",
     "screenfull": "^4.0.1",
     "sdp-transform": "^2.14.1",
-    "semver": "^7.3.2",
+    "semver": "^7.5.2",
     "stream-browserify": "^3.0.0",
     "three": "github:hubs-foundation/three.js#65b5105908f5f135cad25fed07e25f15f3876777",
     "three-ammo": "github:hubs-foundation/three-ammo",
