@@ -596,14 +596,17 @@ class GLTFHubsComponentsExtension {
           if (shouldUseNewLoader()) {
             if (Object.prototype.hasOwnProperty.call(ext, "link")) {
               if (["image", "video", "model"].includes(componentName)) {
-                ext["media-link"] = {
-                  src: ext.link.href
-                };
-                delete ext.link;
+                if (!ext.link || !ext.link.href) {
+                  console.warn("Warning: Attempted to load a link but the href is missing! Component : ${componentName}", ext);
+                } else {
+                  ext["media-link"] = {
+                    src: ext.link.href
+                  };
+                  delete ext.link;
+                }
               }
             }
           }
-
           const value = props[propName];
           const type = value?.__mhc_link_type;
           if (type && value.index !== undefined) {
