@@ -3,6 +3,8 @@
 # the result container should serve reticulum as "hubs_page_origin" and "admin_page_origin" on (path) "/hubs/pages"
 ###
 from node:16.16 as builder
+env QT_QPA_PLATFORM offscreen
+run apt update && apt -y install phantomjs
 run mkdir -p /hubs/admin/ && cd /hubs
 copy package.json ./
 copy package-lock.json ./
