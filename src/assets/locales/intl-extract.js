@@ -1,15 +1,14 @@
 const path = require("path");
 const { extract } = require("@formatjs/cli-lib");
-const glob = require("glob");
-const promisify = require("util").promisify;
-const asyncGlob = promisify(glob);
+const { glob } = require("glob"); // In glob v10+, use named import
 const fs = require("fs");
+const promisify = require("util").promisify;
 const asyncWriteFile = promisify(fs.writeFile);
 
 async function main(argv) {
   const command = argv[2];
   const basePath = path.resolve(__dirname, "..", "..", "..");
-  const files = await asyncGlob("../../../src/**/*.js", { cwd: __dirname, absolute: true });
+  const files = await glob("../../../src/**/*.js", { cwd: __dirname, absolute: true });
 
   if (command === "en") {
     const outPath = path.join(__dirname, "en.json");

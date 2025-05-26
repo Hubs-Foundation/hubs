@@ -3,7 +3,9 @@ import PropTypes from "prop-types";
 import classNames from "classnames";
 import styles from "./NotificationsContainer.scss";
 
-const isMobile = AFRAME.utils.device.isMobile();
+// In Storybook/testing environments, AFRAME may not be available
+// Default to desktop behavior for component previews
+const isMobile = (typeof AFRAME !== "undefined" && AFRAME.utils?.device?.isMobile?.()) || false;
 
 export function NotificationsContainer({ className, children, ...rest }) {
   return (

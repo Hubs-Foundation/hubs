@@ -9,9 +9,9 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 const TOML = require("@iarna/toml");
-const fetch = require("node-fetch");
+// Note: using axios instead of node-fetch for consistency
 const packageLock = require("./package-lock.json");
-const request = require("request");
+const axios = require("axios");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 
 function createHTTPSConfig() {
@@ -158,13 +158,13 @@ async function fetchAppConfigAndEnvironmentVars() {
   };
 
   // Load the Hubs Cloud instance's app config in development
-  const appConfigsResponse = await fetch(`https://${host}/api/v1/app_configs`, { headers });
+  const appConfigsResponse = await axios.get(`https://${host}/api/v1/app_configs`, { headers });
 
-  if (!appConfigsResponse.ok) {
+  if (appConfigsResponse.status !== 200) {
     throw new Error(`Error fetching Hubs Cloud config "${appConfigsResponse.statusText}"`);
   }
 
-  const appConfig = await appConfigsResponse.json();
+  const appConfig = appConfigsResponse.data;
   if (appConfig.theme?.themes) {
     appConfig.theme.themes = JSON.parse(appConfig.theme.themes);
   }
@@ -174,11 +174,11 @@ async function fetchAppConfigAndEnvironmentVars() {
     return appConfig;
   }
 
-  const hubsConfigsResponse = await fetch(`https://${host}/api/ita/configs/hubs`, { headers });
+  const hubsConfigsResponse = await axios.get(`https://${host}/api/ita/configs/hubs`, { headers });
 
-  const hubsConfigs = await hubsConfigsResponse.json();
+  const hubsConfigs = hubsConfigsResponse.data;
 
-  if (!hubsConfigsResponse.ok) {
+  if (hubsConfigsResponse.status !== 200) {
     throw new Error(`Error fetching Hubs Cloud config "${hubsConfigsResponse.statusText}"`);
   }
 
@@ -279,17 +279,31 @@ module.exports = async (env, argv) => {
 
   // Behind and environment var for now pending further testing
   if (process.env.DEV_CSP_SOURCE) {
-    const CSPResp = await fetch(`https://${process.env.DEV_CSP_SOURCE}/`);
-    const remoteCSP = CSPResp.headers.get("content-security-policy");
+    const CSPResp = await axios.get(`https://${process.env.DEV_CSP_SOURCE}/`);
+    const remoteCSP = CSPResp.headers["content-security-policy"];
     devServerHeaders["content-security-policy"] = remoteCSP;
     // .replaceAll("connect-src", "connect-src https://example.com");
   }
 
   const internalHostname = process.env.INTERNAL_HOSTNAME || "hubs.local";
   return {
-    cache: {
-      type: "filesystem"
-    },
+    cache:
+      argv.mode === "development"
+        ? {
+            type: "memory",
+            maxGenerations: 1
+          }
+        : {
+            type: "filesystem",
+            buildDependencies: {
+              config: [__filename]
+            },
+            compression: "gzip",
+            cacheDirectory: path.resolve(__dirname, "node_modules/.cache/webpack"),
+            store: "pack",
+            maxMemoryGenerations: 1,
+            hashAlgorithm: "xxhash64"
+          },
     resolve: {
       alias: {
         // aframe and networked-aframe are still using commonjs modules. three and bitecs are peer dependanciees
@@ -334,9 +348,21 @@ module.exports = async (env, argv) => {
     },
     output: {
       filename: "assets/js/[name]-[chunkhash].js",
-      publicPath: process.env.BASE_ASSETS_PATH || ""
+      publicPath: process.env.BASE_ASSETS_PATH || "",
+      environment: {
+        // Enable modern features for ES2022 targets
+        arrowFunction: true,
+        bigIntLiteral: true,
+        const: true,
+        destructuring: true,
+        dynamicImport: true,
+        forOf: true,
+        module: true,
+        optionalChaining: true,
+        templateLiteral: true
+      }
     },
-    target: ["web", "es5"], // use es5 for webpack runtime to maximize compatibility
+    target: ["web", "es2021"], // ES2021 for Safari 15+ (macOS 10.15, iOS 15.8), Chrome 91+, Firefox 91+
     devtool: argv.mode === "production" ? "source-map" : "inline-source-map",
     devServer: {
       client: {
@@ -391,12 +417,14 @@ module.exports = async (env, argv) => {
             res.send();
           } else {
             const url = req.originalUrl.replace("/cors-proxy/", "");
-            request({ url, method: req.method }, error => {
-              if (error) {
+            axios({ url, method: req.method, responseType: "stream" })
+              .then(response => {
+                response.data.pipe(res);
+              })
+              .catch(error => {
                 console.error(`cors-proxy: error fetching "${url}"\n`, error);
-                return;
-              }
-            }).pipe(res);
+                res.status(500).send("Proxy error");
+              });
           }
         });
 
@@ -438,8 +466,7 @@ module.exports = async (env, argv) => {
             }
           }
         },
-        // On legacy browsers we want to show a "unsupported browser" page. That page needs to run on older browsers so w set the targeet to ie11.
-        // Note: We do not actually include any polyfills so the code in these files just needs to be written with bare minimum browser APIs
+        // Support utility files can use Safari 15+ compatible syntax
         {
           test: [
             path.resolve(__dirname, "src", "utils", "configs.js"),
@@ -448,7 +475,7 @@ module.exports = async (env, argv) => {
           ],
           loader: "babel-loader",
           options: {
-            presets: ["@babel/react", ["@babel/env", { targets: { ie: 11 } }]],
+            presets: ["@babel/react", "@babel/env"], // Use browserslist for modern target
             plugins: require("./babel.config").plugins
           }
         },
@@ -512,7 +539,15 @@ module.exports = async (env, argv) => {
                 }
               }
             },
-            "sass-loader"
+            {
+              loader: "sass-loader",
+              options: {
+                api: "modern-compiler",
+                sassOptions: {
+                  silenceDeprecations: ["legacy-js-api", "import", "global-builtin", "mixed-decls"]
+                }
+              }
+            }
           ]
         },
         {
@@ -585,6 +620,8 @@ module.exports = async (env, argv) => {
       ]
     },
     optimization: {
+      moduleIds: "deterministic",
+      chunkIds: "deterministic",
       splitChunks: {
         maxAsyncRequests: 10,
         maxInitialRequests: 10,
@@ -625,7 +662,10 @@ module.exports = async (env, argv) => {
             priority: 10
           }
         }
-      }
+      },
+      // Improve performance and reduce warnings
+      mangleExports: "deterministic",
+      sideEffects: false
     },
     plugins: [
       new ForkTsCheckerWebpackPlugin({
@@ -732,6 +772,12 @@ module.exports = async (env, argv) => {
           APP_CONFIG: appConfig
         })
       })
-    ]
+    ],
+    stats: {
+      // Reduce noise in webpack output
+      modules: false,
+      modulesSpace: 0,
+      assetsSort: "size"
+    }
   };
 };

@@ -41,6 +41,10 @@ const TOOLTIP_STEPS = {
 
 export const Tooltips = ({ step }) => <RoomLayout viewport={<Tooltip step={step} />} />;
 
+Tooltips.args = {
+  step: Object.keys(TOOLTIP_STEPS)[0]
+};
+
 Tooltips.argTypes = {
   step: {
     name: "Onboarding tips step",
@@ -48,8 +52,7 @@ Tooltips.argTypes = {
     control: {
       type: "select",
       labels: TOOLTIP_STEPS
-    },
-    defaultValue: Object.keys(TOOLTIP_STEPS)[0]
+    }
   }
 };
 

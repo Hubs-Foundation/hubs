@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import configs from "../../utils/configs";
 
 // TODO: We really shouldn't include these dependencies on every page. A dynamic import would work better.
-import jwtDecode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import AuthChannel from "../../utils/auth-channel";
 import { connectToReticulum } from "../../utils/phoenix-utils";
 
