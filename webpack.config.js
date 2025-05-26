@@ -682,7 +682,8 @@ module.exports = async (env, argv) => {
         THREE: "three"
       }),
       new BundleAnalyzerPlugin({
-        analyzerMode: env && env.bundleAnalyzer ? "server" : "disabled"
+        analyzerMode: env && env.bundleAnalyzer ? "server" : "disabled",
+        analyzerPort: "auto" // Automatically find an available port
       }),
       // Each output page needs a HTMLWebpackPlugin entry
       htmlPagePlugin({
