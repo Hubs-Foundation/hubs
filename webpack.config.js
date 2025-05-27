@@ -302,7 +302,10 @@ module.exports = async (env, argv) => {
             cacheDirectory: path.resolve(__dirname, "node_modules/.cache/webpack"),
             store: "pack",
             maxMemoryGenerations: 1,
-            hashAlgorithm: "xxhash64"
+            hashAlgorithm: "xxhash64",
+            maxAge: 2592000000, // 30 days
+            allowCollectingMemory: true,
+            memoryCacheUnaffected: true
           },
     resolve: {
       alias: {
@@ -652,6 +655,27 @@ module.exports = async (env, argv) => {
             chunks: "initial",
             priority: 30
           },
+          // Separate PDF.js into its own chunk since it's large
+          pdfjs: {
+            test: deepModuleDependencyTest(["pdfjs-dist"]),
+            name: "pdfjs",
+            chunks: "all",
+            priority: 35,
+            enforce: true
+          },
+          // Separate large media processing libraries
+          media: {
+            test: deepModuleDependencyTest([
+              "three-mesh-bvh",
+              "postprocessing",
+              "troika-three-text",
+              "html2canvas"
+            ]),
+            name: "media",
+            chunks: "all",
+            priority: 25,
+            enforce: true
+          },
           store: {
             test: deepModuleDependencyTest(["phoenix", "jsonschema", "event-target-shim", "jwt-decode", "js-cookie"]),
             name: "store",
@@ -668,7 +692,11 @@ module.exports = async (env, argv) => {
       },
       // Improve performance and reduce warnings
       mangleExports: "deterministic",
-      sideEffects: false
+      sideEffects: false,
+      // Add concatenation for better minification
+      concatenateModules: argv.mode === "production",
+      // Minimize the size of large assets
+      realContentHash: true
     },
     plugins: [
       new ForkTsCheckerWebpackPlugin({

@@ -23,7 +23,7 @@
     "local": "webpack serve --mode=development --env localDev=1",
     "check": "tsc",
     "build": "npm run check && rimraf ./dist && webpack --mode=production",
-    "bundle-analyzer": "webpack serve --mode=production --env dev=1 --env bundleAnalyzer=1",
+    "bundle-analyzer": "webpack serve --mode=production --env dev=1 --env bundleAnalyzer=1 --port 8081",
     "doc": "node ./scripts/doc/build.js",
     "prettier": "prettier --write '*.js' 'src/**/*.js' 'scripts/**/*.js'",
     "lint:js": "eslint '*.js' 'scripts/**/*.js' 'src/**/*.js'",
