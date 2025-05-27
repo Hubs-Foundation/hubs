@@ -266,8 +266,8 @@ export class CharacterControllerSystem {
             (preferences.disableMovement
               ? 0
               : preferences.disableBackwardsMovement
-              ? Math.min(0, zCharacterAcceleration)
-              : zCharacterAcceleration)
+                ? Math.min(0, zCharacterAcceleration)
+                : zCharacterAcceleration)
         );
       }
       const lerpC = vrMode ? 0 : 0.85; // TODO: To support drifting ("ice skating"), motion needs to keep initial direction

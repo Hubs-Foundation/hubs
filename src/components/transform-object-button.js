@@ -64,8 +64,8 @@ AFRAME.registerComponent("transform-button", {
         e.object3D.el.id === "right-cursor"
           ? rightHand.object3D
           : e.object3D.el.id === "left-cursor"
-          ? leftHand.object3D
-          : e.object3D,
+            ? leftHand.object3D
+            : e.object3D,
         this.data
       );
     };
