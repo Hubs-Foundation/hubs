@@ -30,7 +30,7 @@ function shouldCreateNewMessageGroup(messageGroups: NewMessageT[], newMessage: N
 
   const lastMessageGroup = messageGroups[messageGroups.length - 1];
 
-  if (lastMessageGroup.senderSessionId !== newMessage.sessionId) {
+  if (lastMessageGroup.senderSessionId !== newMessage.sessionId || lastMessageGroup.sender !== newMessage.name) {
     return true;
   }
   if (lastMessageGroup.type !== newMessage.type) {
