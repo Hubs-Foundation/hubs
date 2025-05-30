@@ -23,7 +23,10 @@ module.exports = {
               localIdentName: "[name]__[local]__[hash:base64:5]",
               exportLocalsConvention: "camelCase",
               // TODO we ideally would be able to get rid of this but we have some global styles and many :local's that would become superfluous
-              mode: "global"
+              mode: "global",
+              // Restore default export behavior for css-loader 7 compatibility
+              namedExport: false,
+              exportOnlyLocals: false
             }
           }
         },

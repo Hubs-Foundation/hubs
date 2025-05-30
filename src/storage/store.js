@@ -1,7 +1,7 @@
 import { Validator } from "jsonschema";
 import merge from "deepmerge";
 import Cookies from "js-cookie";
-import jwtDecode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import { qsGet } from "../utils/qs_truthy.js";
 import detectMobile, { isAndroid, isMobileVR } from "../utils/is-mobile";
 
@@ -278,11 +278,17 @@ export default class Store extends EventTarget {
 
     this._shouldResetAvatarOnInit = false;
 
-    const oauthFlowCredentials = Cookies.getJSON(OAUTH_FLOW_CREDENTIALS_KEY);
-    if (oauthFlowCredentials) {
-      this.update({ credentials: oauthFlowCredentials });
-      this._shouldResetAvatarOnInit = true;
-      Cookies.remove(OAUTH_FLOW_CREDENTIALS_KEY);
+    const oauthFlowCredentialsString = Cookies.get(OAUTH_FLOW_CREDENTIALS_KEY);
+    if (oauthFlowCredentialsString) {
+      try {
+        const oauthFlowCredentials = JSON.parse(oauthFlowCredentialsString);
+        this.update({ credentials: oauthFlowCredentials });
+        this._shouldResetAvatarOnInit = true;
+        Cookies.remove(OAUTH_FLOW_CREDENTIALS_KEY);
+      } catch (e) {
+        console.warn("Failed to parse OAuth flow credentials from cookie:", e);
+        Cookies.remove(OAUTH_FLOW_CREDENTIALS_KEY);
+      }
     }
 
     this._signOutOnExpiredAuthToken();

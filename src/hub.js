@@ -9,8 +9,7 @@ import "./utils/debug-log";
 import configs from "./utils/configs";
 import "./utils/theme";
 
-import "core-js/stable";
-import "regenerator-runtime/runtime";
+// Removed polyfill imports - modern browsers (Safari 15+, Chrome 91+, Firefox 91+) have native support
 
 console.log(
   `App version: ${
