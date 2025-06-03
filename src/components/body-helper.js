@@ -1,6 +1,7 @@
 import { addComponent, removeComponent } from "bitecs";
 import { CONSTANTS } from "three-ammo";
 import { Rigidbody } from "../bit-components";
+import { validatePhysicsParams } from "../utils/validatePhysicsParams";
 
 const ACTIVATION_STATE = CONSTANTS.ACTIVATION_STATE,
   TYPE = CONSTANTS.TYPE;
@@ -60,6 +61,7 @@ AFRAME.registerComponent("body-helper", {
     this.alive = true;
     this.el.object3D.updateMatrices();
     this.uuid = this.system.addBody(this.el.object3D, this.data);
+    this.data = validatePhysicsParams(this.data);
 
     const eid = this.el.object3D.eid;
     addComponent(APP.world, Rigidbody, eid);
