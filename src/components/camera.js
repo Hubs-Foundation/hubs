@@ -1,21 +1,24 @@
 AFRAME.registerComponent("stabilize-camera", {
-  init() {
-    if (!this.el.hasAttribute("networked")) return;
-
-    const checkOwnership = () => NAF && NAF.utils.isMine(this.el);
-
-    this.el.addEventListener("grab-start", () => {
-      if (!checkOwnership()) {
-        // Prevent others from manipulating the camera
-        console.warn("[Camera] Grab blocked - not owned by this user.");
-        this.el.setAttribute("body", "type: static"); // Or disable interactivity
+  init: function () {
+    this.el.addEventListener("grab-start", (evt) => {
+      if (!NAF.utils.isMine(this.el)) {
+        console.warn("Cannot interact: you do not own this camera.");
+        evt.stopImmediatePropagation();
+        evt.preventDefault();
       }
     });
 
-    this.el.addEventListener("grab-end", () => {
-      if (!checkOwnership()) {
-        // Restore original behavior if needed
-        this.el.setAttribute("body", "type: dynamic");
+    this.el.addEventListener("grab-move", (evt) => {
+      if (!NAF.utils.isMine(this.el)) {
+        evt.stopImmediatePropagation();
+        evt.preventDefault();
+      }
+    });
+
+    this.el.addEventListener("grab-end", (evt) => {
+      if (!NAF.utils.isMine(this.el)) {
+        evt.stopImmediatePropagation();
+        evt.preventDefault();
       }
     });
   }
