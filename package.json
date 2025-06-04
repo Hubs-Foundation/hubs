@@ -233,5 +233,8 @@
   },
   "optionalDependencies": {
     "fsevents": "^2.2.1"
+  },
+  "overrides": {
+    "phantomjs-prebuilt": "npm:empty-npm-package@1.0.0"
   }
 }
