@@ -42,7 +42,6 @@ export function inflateSpawner(world: HubsWorld, eid: number, props: SpawnerPara
 
   inflateRigidBody(world, eid, {
     mass: 0,
-    type: Type.STATIC,
     collisionGroup: COLLISION_LAYERS.INTERACTABLES,
     collisionMask: COLLISION_LAYERS.DEFAULT_SPAWNER
   });

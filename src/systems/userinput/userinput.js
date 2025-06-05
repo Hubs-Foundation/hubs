@@ -44,6 +44,9 @@ import { gamepadBindings } from "./bindings/generic-gamepad";
 import { getAvailableVREntryTypes, VR_DEVICE_AVAILABILITY } from "../../utils/vr-caps-detect";
 import { hackyMobileSafariTest } from "../../utils/detect-touchscreen";
 import { ArrayBackedSet } from "./array-backed-set";
+import { addSetsToBindings } from "./bindings/utils";
+import { InputDeviceE } from "../../types";
+import deepmerge from "deepmerge";
 
 function arrayContentsDiffer(a, b) {
   if (a.length !== b.length) return true;
@@ -190,6 +193,25 @@ function computeExecutionStrategy(sortedBindings, masks, activeSets) {
 
   return { actives, masked };
 }
+
+const DeviceToBindingsMapping = {
+  [InputDeviceE.Cardboard]: cardboardUserBindings,
+  [InputDeviceE.Daydream]: daydreamUserBindings,
+  [InputDeviceE.Gamepad]: gamepadBindings,
+  [InputDeviceE.KeyboardMouse]: keyboardMouseUserBindings,
+  [InputDeviceE.OculusGo]: oculusGoUserBindings,
+  [InputDeviceE.OculusTouch]: oculusTouchUserBindings,
+  [InputDeviceE.TouchScreen]: touchscreenUserBindings,
+  [InputDeviceE.Vive]: viveUserBindings,
+  [InputDeviceE.WebXR]: webXRUserBindings,
+  [InputDeviceE.WindowsMixedReality]: wmrUserBindings,
+  [InputDeviceE.XboxController]: xboxControllerUserBindings,
+  [InputDeviceE.GearVR]: gearVRControllerUserBindings,
+  [InputDeviceE.ViveCosmos]: viveCosmosUserBindings,
+  [InputDeviceE.ViveFocusPlus]: viveFocusPlusUserBindings,
+  [InputDeviceE.ViveWand]: viveWandUserBindings,
+  [InputDeviceE.ValveIndex]: indexUserBindings
+};
 
 AFRAME.registerSystem("userinput", {
   get(path) {
@@ -560,5 +582,20 @@ AFRAME.registerSystem("userinput", {
     this.prevSortedBindings = this.sortedBindings;
 
     this.maybeToggleXboxMapping();
+  },
+  registerPaths(newPaths) {
+    for (const path of newPaths) {
+      if (path.value in paths[path.type]) {
+        throw Error(`Path ${path.key} already registered`);
+      }
+      paths[path.type][path.value] = `/${path.type}/${path.value}`;
+    }
+  },
+  registerBindings(device, bindings) {
+    bindings = addSetsToBindings(bindings);
+    for (const key in bindings) {
+      DeviceToBindingsMapping[device][key] = deepmerge(DeviceToBindingsMapping[device][key], bindings[key]);
+    }
+    this.registeredMappingsChanged = true;
   }
 });
