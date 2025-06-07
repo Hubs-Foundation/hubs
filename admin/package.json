@@ -71,5 +71,8 @@
     "webpack-cli": "^5.1.0",
     "webpack-dev-server": "^4.15.0",
     "worker-loader": "^3.0.8"
+  },
+  "overrides": {
+    "phantomjs-prebuilt": "npm:empty-npm-package@1.0.0"
   }
 }
