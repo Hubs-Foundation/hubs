@@ -2,9 +2,18 @@
 # this dockerfile produces image/container that serves customly packaged hubs and admin static files
 # the result container should serve reticulum as "hubs_page_origin" and "admin_page_origin" on (path) "/hubs/pages"
 ###
-from node:16.16 as builder
+from node:22 as builder
 env QT_QPA_PLATFORM offscreen
-run apt update && apt -y install phantomjs
+# Detect architecture and install PhantomJS manually from Ubuntu archive
+run apt update && apt -y install wget && \
+    ARCH=$(dpkg --print-architecture) && \
+    if [ "$ARCH" = "arm64" ]; then \
+        wget https://launchpad.net/ubuntu/+archive/primary/+files/phantomjs_2.1.1+dfsg-2ubuntu1_arm64.deb; \
+    elif [ "$ARCH" = "amd64" ]; then \
+        wget https://launchpad.net/ubuntu/+archive/primary/+files/phantomjs_2.1.1+dfsg-2ubuntu1_amd64.deb; \
+    fi && \
+    apt install -y ./phantomjs_2.1.1+dfsg-2ubuntu1_*.deb || true && \
+    apt install -y -f
 run mkdir -p /hubs/admin/ && cd /hubs
 copy package.json ./
 copy package-lock.json ./
