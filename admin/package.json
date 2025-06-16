@@ -24,16 +24,23 @@
     "test": "npm run lint"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
     "@iarna/toml": "^2.2.3",
     "@mozilla/lilypad-ui": "^1.8.2",
+    "@mui/icons-material": "^5.17.1",
+    "@mui/material": "^5.17.1",
+    "@mui/styles": "^5.17.1",
     "aframe": "github:hubs-foundation/aframe#hubs/master",
     "bitecs": "github:hubs-foundation/bitECS#hubs-patches",
     "classnames": "^2.2.5",
     "hubs": "file:..",
+    "inflection": "^1.13.4",
     "react": "^18.2.0",
     "react-admin": "^4.16.1",
     "react-dom": "^18.2.0",
     "react-intl": "^6.4.0",
+    "react-redux": "^8.1.3",
     "three": "github:hubs-foundation/three.js#hubs-patches-141"
   },
   "devDependencies": {
@@ -69,6 +76,7 @@
     "sass-loader": "^13.0.2",
     "selfsigned": "^2.0.1",
     "shelljs": "^0.8.5",
+    "source-map-support": "^0.5.21",
     "style-loader": "^3.3.1",
     "url-loader": "^4.1.1",
     "webpack": "^5.89.0",

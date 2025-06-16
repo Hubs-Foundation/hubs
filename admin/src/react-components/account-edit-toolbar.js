@@ -2,9 +2,9 @@
 
 import React, { useState } from "react";
 import { Toolbar, SaveButton } from "react-admin";
-import { withStyles } from "@material-ui/core/styles";
-import Button from "@material-ui/core/Button";
-import { Dialog, DialogContent, DialogContentText, DialogActions } from "@material-ui/core";
+import { withStyles } from "@mui/styles";
+import Button from "@mui/material/Button";
+import { Dialog, DialogContent, DialogContentText, DialogActions } from "@mui/material";
 
 const accountEditToolbarStyles = {
   spaceBetween: { justifyContent: "space-between" },

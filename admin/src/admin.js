@@ -5,7 +5,7 @@ import { createRoot } from "react-dom/client";
 import React, { Component } from "react";
 import { Route } from "react-router-dom";
 import PropTypes from "prop-types";
-import toml from "@iarna/toml";
+import toml from "./utils/simple-toml-parser";
 import {
   schemaByCategories,
   schemaCategories,
@@ -34,7 +34,8 @@ import { ContentCDN } from "./react-components/content-cdn";
 import { ImportContent } from "./react-components/import-content";
 import { AutoEndSessionDialog } from "./react-components/auto-end-session-dialog";
 import registerTelemetry from "hubs/src/telemetry";
-import { createMuiTheme, withStyles } from "@material-ui/core/styles";
+import { withStyles } from "@mui/styles";
+import { createTheme } from "@mui/material/styles";
 import { UnauthorizedPage } from "./react-components/unauthorized";
 import { store } from "hubs/src/utils/store-instance";
 
@@ -46,7 +47,7 @@ registerTelemetry("/admin", "Hubs Admin");
 
 let itaSchemas;
 
-const theme = createMuiTheme({
+const theme = createTheme({
   overrides: {
     MuiDrawer: {
       docked: {

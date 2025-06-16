@@ -677,7 +677,7 @@ module.exports = async (env, argv) => {
             enforce: true
           },
           store: {
-            test: deepModuleDependencyTest(["phoenix", "jsonschema", "event-target-shim", "jwt-decode", "js-cookie"]),
+            test: deepModuleDependencyTest(["phoenix", "ajv", "event-target-shim", "jwt-decode", "js-cookie"]),
             name: "store",
             chunks: "initial",
             priority: 20
@@ -710,7 +710,8 @@ module.exports = async (env, argv) => {
       new webpack.ProvidePlugin({
         process: "process/browser",
         // TODO we should bee direclty importing THREE stuff when we need it
-        THREE: "three"
+        THREE: "three",
+        global: "globalThis"
       }),
       new BundleAnalyzerPlugin({
         analyzerMode: env && env.bundleAnalyzer ? "server" : "disabled",
