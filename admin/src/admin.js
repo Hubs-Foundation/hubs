@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import "./webxr-bypass-hacks";
 import configs from "./utils/configs";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import React, { Component } from "react";
 import { Route } from "react-router-dom";
 import PropTypes from "prop-types";
@@ -207,7 +207,8 @@ const mountUI = async (retPhxChannel, customRoutes, layout) => {
     retPhxChannel.socket.disconnect();
   };
 
-  ReactDOM.render(
+  const root = createRoot(document.getElementById("ui-root"));
+  root.render(
     <IntlProvider locale={lang} messages={messages}>
       <AdminUI
         dataProvider={dataProvider}
@@ -216,8 +217,7 @@ const mountUI = async (retPhxChannel, customRoutes, layout) => {
         layout={layout}
         onEndSession={onEndSession}
       />
-    </IntlProvider>,
-    document.getElementById("ui-root")
+    </IntlProvider>
   );
 };
 const HiddenAppBar = withStyles({
