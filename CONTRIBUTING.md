@@ -74,7 +74,7 @@ Getting set up to work on the Hubs client main fork is a little different than w
 
 ### 0. Dependencies
 
-[Install NodeJS](https://nodejs.org) if you haven't already. We use version 16.16.0 on our build servers. If you work on multiple javascript projects it may be useful to use something like [NVM](https://github.com/nvm-sh/nvm) to manage multiple versions of node for you.
+[Install NodeJS](https://nodejs.org) if you haven't already. We require Node.js 22 or higher. If you work on multiple javascript projects it may be useful to use something like [NVM](https://github.com/nvm-sh/nvm) to manage multiple versions of node for you.
 
 ### 1. Setting up the Repository
 
@@ -83,7 +83,7 @@ Clone the Hubs repository and install the npm dependencies.
 ```bash
 git clone https://github.com/Hubs-Foundation/hubs.git
 cd hubs
-# nvm use v16.16.0 # if using NVM
+# nvm use v22 # if using NVM
 npm ci
 ```
 
