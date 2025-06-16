@@ -1,8 +1,8 @@
 /* eslint-disable @calm/react-intl/missing-formatted-message*/
 import React from "react";
 import PropTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
-import LaunchIcon from "@material-ui/icons/Launch";
+import { withStyles } from "@mui/styles";
+import LaunchIcon from "@mui/icons-material/Launch";
 import { getReticulumFetchUrl, getUploadsUrl } from "hubs/src/utils/phoenix-utils";
 import { ReferenceField } from "react-admin";
 

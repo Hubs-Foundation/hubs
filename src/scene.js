@@ -1,4 +1,4 @@
-import jwtDecode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import "./assets/stylesheets/scene.scss";

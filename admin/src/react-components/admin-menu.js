@@ -2,28 +2,35 @@
 import React, { Component } from "react";
 import classNames from "classnames";
 import inflection from "inflection";
-import { connect } from "react-redux";
-import { getResources } from "react-admin";
-import { withRouter, NavLink } from "react-router-dom";
-import { withStyles } from "@material-ui/core/styles";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import ListItemText from "@material-ui/core/ListItemText";
-import HomeIcon from "@material-ui/icons/Home";
-import LibraryBooksIcon from "@material-ui/icons/LibraryBooks";
-import BackupIcon from "@material-ui/icons/Backup";
-import ViewIcon from "@material-ui/icons/ViewList";
-import SettingsIcon from "@material-ui/icons/Settings";
-import Collapse from "@material-ui/core/Collapse";
+import { useResourceDefinitions } from "react-admin";
+import { NavLink } from "react-router-dom";
+import { withRouter } from "./withRouter";
+import { withStyles } from "@mui/styles";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import HomeIcon from "@mui/icons-material/Home";
+import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
+import BackupIcon from "@mui/icons-material/Backup";
+import ViewIcon from "@mui/icons-material/ViewList";
+import SettingsIcon from "@mui/icons-material/Settings";
+import Collapse from "@mui/material/Collapse";
 import { getServiceDisplayName } from "../utils/ita";
 import configs from "../utils/configs";
 import { hasPaidFeature, isBrandingDisabled } from "../utils/feature_flags";
 import HubsLogo from "../assets/images/hubs_logo.png";
 
-const mapStateToProps = state => ({
-  resources: getResources(state)
-});
+// Use the modern react-admin hook to get resources
+const ResourcesProvider = props => {
+  const resources = useResourceDefinitions();
+  // Convert resources object to array format expected by the Menu component
+  const resourcesArray = Object.keys(resources).map(key => ({
+    ...resources[key],
+    name: key
+  }));
+  return <props.component {...props} resources={resourcesArray} />;
+};
 
 const styles = () => ({
   root: {
@@ -346,4 +353,4 @@ class Menu extends Component {
   }
 }
 
-export const AdminMenu = withRouter(connect(mapStateToProps)(withStyles(styles)(Menu)));
+export const AdminMenu = withRouter(withStyles(styles)(props => <ResourcesProvider {...props} component={Menu} />));

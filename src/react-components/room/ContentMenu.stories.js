@@ -15,7 +15,7 @@ export const Base = () => (
     viewport={
       <ContentMenu>
         <ObjectsMenuButton />
-        <PeopleMenuButton />
+        <PeopleMenuButton presencecount={3} />
       </ContentMenu>
     }
   />
@@ -26,7 +26,7 @@ export const Active = () => (
     viewport={
       <ContentMenu>
         <ObjectsMenuButton active />
-        <PeopleMenuButton />
+        <PeopleMenuButton presencecount={3} />
       </ContentMenu>
     }
   />
@@ -36,7 +36,7 @@ export const OnlyPeople = () => (
   <RoomLayout
     viewport={
       <ContentMenu>
-        <PeopleMenuButton />
+        <PeopleMenuButton presencecount={5} />
       </ContentMenu>
     }
   />

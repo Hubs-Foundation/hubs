@@ -15,13 +15,21 @@ function getSelectedItem(value, options) {
   const selectedItemValue = getItemValue(value);
 
   if (options.length > 0 && typeof options[0] === "object") {
-    return options.find(item => item.value === selectedItemValue);
+    return options.find(item => item.value === selectedItemValue) || null;
   }
 
-  return selectedItemValue;
+  // For primitive options, only return the value if it exists in options
+  if (options.includes(selectedItemValue)) {
+    return selectedItemValue;
+  }
+
+  return null;
 }
 
 function getItemLabel(item) {
+  if (item === null || item === undefined) {
+    return undefined;
+  }
   return typeof item === "object" ? item.label || item.value : item;
 }
 

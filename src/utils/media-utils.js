@@ -7,11 +7,14 @@ import HubsTextureLoader from "../loaders/HubsTextureLoader";
 import { validMaterials } from "../components/hoverable-visuals";
 import { isNonCorsProxyDomain, proxiedUrlFor, guessContentType } from "../utils/media-url-utils";
 import { isIOS as detectIOS } from "./is-mobile";
-import Linkify from "linkify-it";
+import * as linkifyItModule from "linkify-it";
+const linkifyIt = linkifyItModule.default || linkifyItModule;
 import tlds from "tlds";
 import { mediaTypeFor } from "./media-type";
-import { MediaPlayer } from "dashjs";
-import { buildAbsoluteURL } from "url-toolkit";
+import * as dashjsModule from "dashjs";
+const dashjs = dashjsModule.default || dashjsModule;
+import * as urlToolkitModule from "url-toolkit";
+const urlToolkit = urlToolkitModule.default || urlToolkitModule;
 import HLS from "hls.js";
 import configs from "../utils/configs";
 import qsTruthy from "../utils/qs_truthy";
@@ -40,7 +43,7 @@ export function mediaTypeName(type) {
   return MediaTypeName.get(type) || "unknown";
 }
 
-const linkify = Linkify();
+const linkify = linkifyIt();
 linkify.tlds(tlds);
 
 const mediaAPIEndpoint = getReticulumFetchUrl("/api/v1/media");
@@ -668,11 +671,11 @@ export async function resolveMediaInfo(urlString) {
 }
 
 export function createDashPlayer(url, videoEl, failLoad) {
-  const player = MediaPlayer().create();
+  const player = dashjs.MediaPlayer().create();
   player.extend("RequestModifier", function () {
     return { modifyRequestHeader: xhr => xhr, modifyRequestURL: proxiedUrlFor };
   });
-  player.on(MediaPlayer.events.ERROR, failLoad);
+  player.on(dashjs.MediaPlayer.events.ERROR, failLoad);
   player.initialize(videoEl, url);
   player.setTextDefaultEnabled(false);
 
@@ -697,7 +700,7 @@ export function createHLSPlayer(url, videoEl, failLoad) {
       // HACK HLS.js resolves relative urls internally, but our CORS proxying screws it up. Resolve relative to the original unproxied url.
       // TODO extend HLS.js to allow overriding of its internal resolving instead
       if (!u.startsWith("http")) {
-        u = buildAbsoluteURL(baseUrl, u.startsWith("/") ? u : `/${u}`);
+        u = urlToolkit.buildAbsoluteURL(baseUrl, u.startsWith("/") ? u : `/${u}`);
       }
 
       xhr.open("GET", proxiedUrlFor(u), true);

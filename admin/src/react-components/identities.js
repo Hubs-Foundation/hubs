@@ -1,6 +1,6 @@
 /* eslint-disable @calm/react-intl/missing-formatted-message */
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
+import { withStyles } from "@mui/styles";
 import {
   Create,
   Datagrid,

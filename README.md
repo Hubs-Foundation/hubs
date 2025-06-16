@@ -16,14 +16,14 @@ If you just want to check out how Hubs works and make your own modifications con
 
 ### Quick Start
 
-[Install NodeJS](https://nodejs.org) if you haven't already. We use 16.16.0 on our build servers. If you work on multiple javascript projects it may be useful to use something like [NVM](https://github.com/nvm-sh/nvm) to manage multiple versions of node for you.
+[Install NodeJS](https://nodejs.org) if you haven't already. We require Node.js 22 or higher. If you work on multiple javascript projects it may be useful to use something like [NVM](https://github.com/nvm-sh/nvm) to manage multiple versions of node for you.
 
 Run the following commands:
 
 ```bash
 git clone https://github.com/Hubs-Foundation/hubs.git
 cd hubs
-# nvm use v16.16.0 # if using NVM
+# nvm use v22 # if using NVM
 npm ci
 npm run dev
 ```

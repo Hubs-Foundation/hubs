@@ -19,7 +19,7 @@ import {
   BooleanField,
   Filter
 } from "react-admin";
-import { withStyles } from "@material-ui/core/styles";
+import { withStyles } from "@mui/styles";
 
 // Quite ugly but simplest way to have AvatarPreview work is to import aframe.
 // We can technically untangle the dependencies for this, but doesn't seem worth it for admin.

@@ -1,5 +1,5 @@
-import { queryParameters } from "ra-core/lib/util/fetch";
-import HttpError from "ra-core/lib/util/HttpError";
+import { fetchUtils } from "react-admin";
+const { queryParameters, HttpError } = fetchUtils;
 import { GET_LIST, GET_ONE, GET_MANY, GET_MANY_REFERENCE, CREATE, UPDATE, DELETE, DELETE_MANY } from "react-admin";
 import { AUTH_LOGIN, AUTH_LOGOUT, AUTH_ERROR } from "react-admin";
 import json2ParseBigint from "./json_parse_bigint";

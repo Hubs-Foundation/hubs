@@ -1,12 +1,12 @@
 /* eslint-disable @calm/react-intl/missing-formatted-message*/
 /* eslint-disable react/prop-types */
 import React, { Component } from "react";
-import { withStyles } from "@material-ui/core/styles";
+import { withStyles } from "@mui/styles";
 import withCommonStyles from "../utils/with-common-styles";
-import Typography from "@material-ui/core/Typography";
-import Button from "@material-ui/core/Button";
-import Dialog from "@material-ui/core/Dialog";
-import DialogContent from "@material-ui/core/DialogContent";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import DialogContent from "@mui/material/DialogContent";
 
 const TIMER_SECONDS = 30;
 
