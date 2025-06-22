@@ -422,7 +422,7 @@ export default class Store extends EventTarget {
         console.error(`Removing invalid preference from store: ${error.message}`);
         // Navigate to the property that has the error
         let obj = finalState;
-        const path = error.instancePath.split('/').filter(p => p !== '');
+        const path = error.instancePath.split("/").filter(p => p !== "");
         for (let i = 0; i < path.length - 1; i++) {
           obj = obj[path[i]];
         }

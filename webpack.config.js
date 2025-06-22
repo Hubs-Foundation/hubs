@@ -665,12 +665,7 @@ module.exports = async (env, argv) => {
           },
           // Separate large media processing libraries
           media: {
-            test: deepModuleDependencyTest([
-              "three-mesh-bvh",
-              "postprocessing",
-              "troika-three-text",
-              "html2canvas"
-            ]),
+            test: deepModuleDependencyTest(["three-mesh-bvh", "postprocessing", "troika-three-text", "html2canvas"]),
             name: "media",
             chunks: "all",
             priority: 25,

@@ -126,8 +126,7 @@ module.exports = (env, argv) => {
       // Include comments in the output for better debugging
       pathinfo: argv.mode !== "production",
       // Generate full source maps
-      devtoolModuleFilenameTemplate: info =>
-        path.relative(__dirname, info.absoluteResourcePath).replace(/\\/g, '/')
+      devtoolModuleFilenameTemplate: info => path.relative(__dirname, info.absoluteResourcePath).replace(/\\/g, "/")
     },
     // Use inline-source-map for development for immediate source map availability
     devtool: argv.mode === "production" ? "source-map" : "inline-source-map",
@@ -153,19 +152,19 @@ module.exports = (env, argv) => {
       setupMiddlewares: (middlewares, { app }) => {
         // be flexible with people accessing via a local reticulum on another port
         app.use(cors({ origin: /hubs\.local(:\d*)?$/ }));
-        
+
         // Serve source maps with proper content type
-        app.get('*.map', (req, res, next) => {
-          res.type('application/json');
+        app.get("*.map", (req, res, next) => {
+          res.type("application/json");
           next();
         });
-        
+
         return middlewares;
       },
       // Enable source map support
       devMiddleware: {
-        publicPath: '/',
-        writeToDisk: (filePath) => {
+        publicPath: "/",
+        writeToDisk: filePath => {
           // Write source maps to disk for better debugging
           return /\.map$/.test(filePath);
         }
@@ -207,7 +206,7 @@ module.exports = (env, argv) => {
           options: {
             ...require("./babel.config"),
             sourceMaps: true,
-            inputSourceMap: true,
+            inputSourceMap: true
           },
           exclude: function (modulePath) {
             // Exclude all node_modules except hubs, but include core-js for proper handling
@@ -225,7 +224,7 @@ module.exports = (env, argv) => {
           options: {
             ...require("./babel.config"),
             sourceMaps: true,
-            inputSourceMap: true,
+            inputSourceMap: true
           },
           exclude: function (modulePath) {
             // Exclude all node_modules except hubs, but include core-js for proper handling
@@ -318,42 +317,45 @@ module.exports = (env, argv) => {
     optimization: {
       // Ensure source maps are generated even in production
       minimize: argv.mode === "production",
-      minimizer: argv.mode === "production" ? [
-        new (require("terser-webpack-plugin"))({
-          parallel: true,
-          terserOptions: {
-            sourceMap: true, // Enable source maps
-            compress: {
-              drop_console: false, // Keep console logs for debugging
-              drop_debugger: false, // Keep debugger statements
-            },
-            mangle: {
-              keep_fnames: true, // Keep function names for better stack traces
-              keep_classnames: true, // Keep class names
-            },
-            format: {
-              comments: false,
-            },
-            // Keep original names for better debugging
-            keep_fnames: true,
-          },
-          extractComments: false,
-        }),
-      ] : [],
+      minimizer:
+        argv.mode === "production"
+          ? [
+              new (require("terser-webpack-plugin"))({
+                parallel: true,
+                terserOptions: {
+                  sourceMap: true, // Enable source maps
+                  compress: {
+                    drop_console: false, // Keep console logs for debugging
+                    drop_debugger: false // Keep debugger statements
+                  },
+                  mangle: {
+                    keep_fnames: true, // Keep function names for better stack traces
+                    keep_classnames: true // Keep class names
+                  },
+                  format: {
+                    comments: false
+                  },
+                  // Keep original names for better debugging
+                  keep_fnames: true
+                },
+                extractComments: false
+              })
+            ]
+          : [],
       // Better debugging with readable module names
       moduleIds: "named",
       chunkIds: "named",
       // Don't concatenate modules for better stack traces
-      concatenateModules: false,
+      concatenateModules: false
     },
     plugins: [
       // Add banner to help identify chunks
       new webpack.BannerPlugin({
-        banner: (file) => {
-          return `Source: ${file.filename}\nChunk: ${file.chunk.name || 'unnamed'}\nBuild: ${new Date().toISOString()}`;
+        banner: file => {
+          return `Source: ${file.filename}\nChunk: ${file.chunk.name || "unnamed"}\nBuild: ${new Date().toISOString()}`;
         },
         raw: false,
-        entryOnly: false,
+        entryOnly: false
       }),
       new webpack.ProvidePlugin({
         // TODO we should bee direclty importing THREE stuff when we need it
