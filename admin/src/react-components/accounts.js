@@ -165,8 +165,8 @@ const AccountListBase = withStyles(styles)(
           createStatus: isAllSuccess
             ? "Success adding all accounts"
             : hasOneSuccess
-            ? "Success adding some accounts, Errors adding some accounts"
-            : "Errors adding all accounts",
+              ? "Success adding some accounts, Errors adding some accounts"
+              : "Errors adding all accounts",
           createResults: results
         });
       }
