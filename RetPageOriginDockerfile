@@ -4,6 +4,8 @@
 ###
 from node:22 as builder
 env QT_QPA_PLATFORM offscreen
+# Enable webpack detailed stats
+env WEBPACK_STATS=verbose
 # Detect architecture and install PhantomJS manually from Ubuntu archive
 run apt update && apt -y install wget && \
     ARCH=$(dpkg --print-architecture) && \
@@ -23,8 +25,34 @@ copy admin/package-lock.json admin/
 run cd admin && npm ci --legacy-peer-deps && cd ..
 copy . .
 env BASE_ASSETS_PATH="{{rawhubs-base-assets-path}}"
-run npm run build 1> /dev/null
-run cd admin && npm run build 1> /dev/null && cp -R dist/* ../dist && cd ..
+# Print diagnostic information
+run echo "Node version: $(node --version)" && \
+    echo "NPM version: $(npm --version)" && \
+    echo "Memory info:" && cat /proc/meminfo | grep -E "MemTotal|MemFree|MemAvailable" && \
+    echo "Disk space:" && df -h /
+# Build with verbose output and capture errors
+# Note: The Babel deoptimization warning about pdf.js exceeding 500KB is expected and not the actual error
+run echo "Starting main build..." && \
+    npm run build -- --stats=detailed 2>&1 | tee /build-main.log || \
+    (echo "==== BUILD FAILED ====" && \
+     echo "Last 100 lines of build output:" && \
+     tail -100 /build-main.log && \
+     echo "==== Package versions ====" && \
+     npm list --depth=0 && \
+     echo "==== Webpack config check ====" && \
+     npx webpack configtest && \
+     exit 1)
+# Build admin with verbose output  
+run echo "Starting admin build..." && \
+    cd admin && \
+    npm run build 2>&1 | tee /build-admin.log || \
+    (echo "==== ADMIN BUILD FAILED ====" && \
+     echo "Last 100 lines of admin build output:" && \
+     tail -100 /build-admin.log && \
+     echo "==== Admin package versions ====" && \
+     npm list --depth=0 && \
+     exit 1) && \
+    cp -R dist/* ../dist && cd ..
 run mkdir -p dist/pages && mv dist/*.html dist/pages && mv dist/hub.service.js dist/pages && mv dist/schema.toml dist/pages          
 run mkdir /hubs/rawhubs && mv dist/pages /hubs/rawhubs && mv dist/assets /hubs/rawhubs && mv dist/favicon.ico /hubs/rawhubs/pages
 
