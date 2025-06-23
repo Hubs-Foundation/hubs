@@ -33,7 +33,7 @@ run echo "Node version: $(node --version)" && \
 # Build with verbose output and capture errors
 # Note: The Babel deoptimization warning about pdf.js exceeding 500KB is expected and not the actual error
 run echo "Starting main build..." && \
-    npm run build -- --stats=detailed 2>&1 | tee /build-main.log || \
+    npm run build -- --stats=detailed --stats-children --stats-error-details 2>&1 | tee /build-main.log || \
     (echo "==== BUILD FAILED ====" && \
      echo "Last 100 lines of build output:" && \
      tail -100 /build-main.log && \
@@ -45,7 +45,7 @@ run echo "Starting main build..." && \
 # Build admin with verbose output  
 run echo "Starting admin build..." && \
     cd admin && \
-    npm run build 2>&1 | tee /build-admin.log || \
+    npm run build -- --stats-children --stats-error-details 2>&1 | tee /build-admin.log || \
     (echo "==== ADMIN BUILD FAILED ====" && \
      echo "Last 100 lines of admin build output:" && \
      tail -100 /build-admin.log && \

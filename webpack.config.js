@@ -709,7 +709,8 @@ module.exports = async (env, argv) => {
         process: "process/browser",
         // TODO we should bee direclty importing THREE stuff when we need it
         THREE: "three",
-        global: "globalThis"
+        globalThis: path.resolve(__dirname, "./src/utils/globalThis-shim.js"),
+        global: path.resolve(__dirname, "./src/utils/globalThis-shim.js")
       }),
       new BundleAnalyzerPlugin({
         analyzerMode: env && env.bundleAnalyzer ? "server" : "disabled",
