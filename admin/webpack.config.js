@@ -94,9 +94,6 @@ module.exports = (env, argv) => {
     },
     resolve: {
       alias: {
-        // Handle libraries that try to import globalThis as a module
-        globalThis$: path.resolve(__dirname, "./src/utils/globalThis-shim.js"),
-
         // aframe and networked-aframe are still using commonjs modules. three and bitecs are peer dependanciees
         // but they are "smart" and have builds for both ESM and CJS depending on if import or require is used.
         // This forces the ESM version to be used otherwise we end up with multiple instances of the libraries,
@@ -130,6 +127,9 @@ module.exports = (env, argv) => {
       pathinfo: argv.mode !== "production",
       // Generate full source maps
       devtoolModuleFilenameTemplate: info => path.relative(__dirname, info.absoluteResourcePath).replace(/\\/g, "/")
+    },
+    externals: {
+      // Removed globalThis external as it causes ES module errors
     },
     // Use inline-source-map for development for immediate source map availability
     devtool: argv.mode === "production" ? "source-map" : "inline-source-map",
@@ -364,9 +364,7 @@ module.exports = (env, argv) => {
         // TODO we should bee direclty importing THREE stuff when we need it
         process: "process/browser",
         THREE: "three",
-        Buffer: ["buffer", "Buffer"],
-        globalThis: path.resolve(__dirname, "./src/utils/globalThis-shim.js"),
-        global: path.resolve(__dirname, "./src/utils/globalThis-shim.js")
+        Buffer: ["buffer", "Buffer"]
       }),
       new HTMLWebpackPlugin({
         filename: "admin.html",

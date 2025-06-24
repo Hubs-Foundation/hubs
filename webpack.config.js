@@ -309,9 +309,6 @@ module.exports = async (env, argv) => {
           },
     resolve: {
       alias: {
-        // Handle libraries that try to import globalThis as a module
-        globalThis$: path.resolve(__dirname, "./src/utils/globalThis-shim.js"),
-
         // aframe and networked-aframe are still using commonjs modules. three and bitecs are peer dependanciees
         // but they are "smart" and have builds for both ESM and CJS depending on if import or require is used.
         // This forces the ESM version to be used otherwise we end up with multiple instances of the libraries,
@@ -369,6 +366,9 @@ module.exports = async (env, argv) => {
       }
     },
     target: ["web", "es2021"], // ES2021 for Safari 15+ (macOS 10.15, iOS 15.8), Chrome 91+, Firefox 91+
+    externals: {
+      // Removed globalThis external as it causes ES module errors
+    },
     devtool: argv.mode === "production" ? "source-map" : "inline-source-map",
     devServer: {
       client: {
@@ -458,6 +458,12 @@ module.exports = async (env, argv) => {
     module: {
       rules: [
         {
+          test: /core-js.*\.js$/,
+          resolve: {
+            fullySpecified: false
+          }
+        },
+        {
           test: /\.html$/,
           loader: "html-loader",
           options: {
@@ -509,7 +515,13 @@ module.exports = async (env, argv) => {
           test: /\.js$/,
           include: [path.resolve(__dirname, "src")],
           // Exclude JS assets in node_modules because they are already transformed and often big.
-          exclude: [path.resolve(__dirname, "node_modules")],
+          exclude: function (modulePath) {
+            // Exclude all node_modules except hubs, but include core-js for proper handling
+            if (/node_modules\/core-js/.test(modulePath)) {
+              return true; // Don't process core-js through babel
+            }
+            return /node_modules/.test(modulePath) && !/node_modules\/hubs/.test(modulePath);
+          },
           loader: "babel-loader"
         },
         // pdfjs uses features that break in IOS14, so we want to run it through babel https://github.com/mozilla/pdf.js/issues/14327
@@ -525,7 +537,13 @@ module.exports = async (env, argv) => {
           // and concurrently at dev time with ForkTsCheckerWebpackPlugin
           test: /\.tsx?$/,
           include: [path.resolve(__dirname, "src")],
-          exclude: [path.resolve(__dirname, "node_modules")],
+          exclude: function (modulePath) {
+            // Exclude all node_modules except hubs, but include core-js for proper handling
+            if (/node_modules\/core-js/.test(modulePath)) {
+              return true; // Don't process core-js through babel
+            }
+            return /node_modules/.test(modulePath) && !/node_modules\/hubs/.test(modulePath);
+          },
           loader: "babel-loader"
         },
         {
@@ -708,9 +726,7 @@ module.exports = async (env, argv) => {
       new webpack.ProvidePlugin({
         process: "process/browser",
         // TODO we should bee direclty importing THREE stuff when we need it
-        THREE: "three",
-        globalThis: path.resolve(__dirname, "./src/utils/globalThis-shim.js"),
-        global: path.resolve(__dirname, "./src/utils/globalThis-shim.js")
+        THREE: "three"
       }),
       new BundleAnalyzerPlugin({
         analyzerMode: env && env.bundleAnalyzer ? "server" : "disabled",

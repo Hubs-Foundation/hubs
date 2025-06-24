@@ -32,8 +32,9 @@
     "logout": "node ./scripts/logout.mjs",
     "deploy": "node ./scripts/deploy.mjs",
     "undeploy": "node ./scripts/undeploy.mjs",
-    "test": "npm run lint && npm run test:unit",
-    "test:unit": "ava",
+    "test": "npm run lint && npm run test:unit && npm run test:integration",
+    "test:unit": "ava test/unit/**/*.test.js",
+    "test:integration": "ava test/integration/**/*.test.js --timeout=2m",
     "stats": "rimraf ./dist && webpack --mode=production --json",
     "spritesheet": "npm run spritesheet:system-action && npm run spritesheet:system-notice",
     "spritesheet:system-action": "node scripts/generate-spritesheets.js action",
@@ -60,7 +61,8 @@
   },
   "ava": {
     "files": [
-      "./test/unit/**"
+      "./test/unit/**",
+      "./test/integration/**"
     ],
     "require": [
       "@babel/register"
@@ -229,13 +231,16 @@
     "prettier": "^3.5.3",
     "process": "^0.11.10",
     "protoo-client": "^4.0.6",
+    "puppeteer": "^24.10.2",
     "raw-loader": "^4.0.2",
     "react-is": "^18.2.0",
     "rimraf": "^6.0.1",
     "sass": "^1.89.0",
     "sass-loader": "^14.1.0",
     "selfsigned": "^2.0.1",
+    "serve-handler": "^6.1.6",
     "shelljs": "^0.8.5",
+    "source-map": "^0.7.4",
     "storybook": "^7.6.0",
     "style-loader": "^4.0.0",
     "stylelint": "^14.9.1",

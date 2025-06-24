@@ -1,5 +1,5 @@
 /** @jsx createElementEntity */
-const pdfjsLib = require("pdfjs-dist/webpack");
+import { getPDFLib } from "./pdf-lib";
 import type { PDFDocumentProxy } from "pdfjs-dist";
 import { CanvasTexture, DoubleSide, LinearFilter, MeshBasicMaterial, sRGBEncoding } from "three";
 import { HubsWorld } from "../app";
@@ -12,6 +12,7 @@ import { ObjectMenuTargetFlags } from "../inflators/object-menu-target";
 import { addComponent } from "bitecs";
 
 function* createPDFResources(url: string): Generator<any, PDFResources, any> {
+  const pdfjsLib = yield getPDFLib();
   const pdf = (yield pdfjsLib.getDocument(url).promise) as PDFDocumentProxy;
   const canvas = document.createElement("canvas");
   const canvasContext = canvas.getContext("2d")!;
