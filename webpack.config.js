@@ -281,8 +281,28 @@ module.exports = async (env, argv) => {
   if (process.env.DEV_CSP_SOURCE) {
     const CSPResp = await axios.get(`https://${process.env.DEV_CSP_SOURCE}/`);
     const remoteCSP = CSPResp.headers["content-security-policy"];
-    devServerHeaders["content-security-policy"] = remoteCSP;
-    // .replaceAll("connect-src", "connect-src https://example.com");
+    let csp = remoteCSP;
+
+    // Add the required script hash to script-src
+    const scriptHash = "'sha256-1OX1cqGDXGZOzQijoLpHf88OwS4EEX61lCMqICZfrGQ='";
+    if (csp.includes("script-src")) {
+      if (!csp.includes(scriptHash)) { // Avoid duplicates
+        csp = csp.replace(/script-src[^;]+/, `$& ${scriptHash}`);
+      }
+    } else {
+      csp += `; script-src ${scriptHash}`;
+    }
+
+    // Add the new connect-src directive for cdn.jsdelivr.net
+    const connectSrcDomain = "https://cdn.jsdelivr.net";
+    if (csp.includes("connect-src")) {
+      if (!csp.includes(connectSrcDomain)) { // Avoid duplicates
+        csp = csp.replace(/connect-src[^;]+/, `$& ${connectSrcDomain}`);
+      }
+    } else {
+      csp += `; connect-src ${connectSrcDomain}`;
+    }
+    devServerHeaders["content-security-policy"] = csp.trim().replace(/;;/g, ';'); // Clean up
   }
 
   const internalHostname = process.env.INTERNAL_HOSTNAME || "hubs.local";
@@ -829,3 +849,4 @@ module.exports = async (env, argv) => {
     }
   };
 };
+
