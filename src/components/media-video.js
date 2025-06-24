@@ -56,14 +56,14 @@ const MAX_GAIN_MULTIPLIER = 2;
 
 AFRAME.registerComponent("media-video", {
   schema: {
-    src: { type: "string" },
-    audioSrc: { type: "string" }, // set only if audio track is separated from video track (eg. 360 video)
-    contentType: { type: "string" },
+    src: { type: "string", default: "" },
+    audioSrc: { type: "string", default: "" }, // set only if audio track is separated from video track (eg. 360 video)
+    contentType: { type: "string", default: "" },
     loop: { type: "boolean", default: true },
     hidePlaybackControls: { type: "boolean", default: false },
-    videoPaused: { type: "boolean" },
+    videoPaused: { type: "boolean", default: false },
     projection: { type: "string", default: "flat" },
-    time: { type: "number" },
+    time: { type: "number", default: 0 },
     tickRate: { default: 1000 }, // ms interval to send time interval updates
     syncTolerance: { default: 2 },
     linkedVideoTexture: { default: null },

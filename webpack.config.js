@@ -286,7 +286,8 @@ module.exports = async (env, argv) => {
     // Add the required script hash to script-src
     const scriptHash = "'sha256-1OX1cqGDXGZOzQijoLpHf88OwS4EEX61lCMqICZfrGQ='";
     if (csp.includes("script-src")) {
-      if (!csp.includes(scriptHash)) { // Avoid duplicates
+      if (!csp.includes(scriptHash)) {
+        // Avoid duplicates
         csp = csp.replace(/script-src[^;]+/, `$& ${scriptHash}`);
       }
     } else {
@@ -296,13 +297,14 @@ module.exports = async (env, argv) => {
     // Add the new connect-src directive for cdn.jsdelivr.net
     const connectSrcDomain = "https://cdn.jsdelivr.net";
     if (csp.includes("connect-src")) {
-      if (!csp.includes(connectSrcDomain)) { // Avoid duplicates
+      if (!csp.includes(connectSrcDomain)) {
+        // Avoid duplicates
         csp = csp.replace(/connect-src[^;]+/, `$& ${connectSrcDomain}`);
       }
     } else {
       csp += `; connect-src ${connectSrcDomain}`;
     }
-    devServerHeaders["content-security-policy"] = csp.trim().replace(/;;/g, ';'); // Clean up
+    devServerHeaders["content-security-policy"] = csp.trim().replace(/;;/g, ";"); // Clean up
   }
 
   const internalHostname = process.env.INTERNAL_HOSTNAME || "hubs.local";
@@ -849,4 +851,3 @@ module.exports = async (env, argv) => {
     }
   };
 };
-

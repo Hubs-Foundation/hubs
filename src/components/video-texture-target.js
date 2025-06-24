@@ -13,7 +13,7 @@ import { Layers } from "../camera-layers";
  */
 AFRAME.registerComponent("video-texture-source", {
   schema: {
-    resolution: { type: "vec2", default: [1280, 720] },
+    resolution: { type: "vec2", default: { x: 1280, y: 720 } },
     fps: { default: 15 }
   },
 

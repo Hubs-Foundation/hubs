@@ -1,6 +1,6 @@
 AFRAME.registerComponent("emit-scene-event-on-remove", {
   schema: {
-    event: { default: null }
+    event: { type: "string", default: "" }
   },
 
   remove() {

@@ -14,12 +14,12 @@ const errorCacheItem = { texture: errorTexture, ratio: 1400 / 1200 };
 
 AFRAME.registerComponent("media-image", {
   schema: {
-    src: { type: "string" },
-    version: { type: "number" },
+    src: { type: "string", default: "" },
+    version: { type: "number", default: 0 },
     projection: { type: "string", default: "flat" },
-    contentType: { type: "string" },
+    contentType: { type: "string", default: "" },
     alphaMode: { type: "string", default: undefined },
-    alphaCutoff: { type: "number" }
+    alphaCutoff: { type: "number", default: 0.5 }
   },
 
   play() {
