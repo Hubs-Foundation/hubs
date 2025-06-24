@@ -45,6 +45,13 @@ Read our [contributor guide](./CONTRIBUTING.md) to learn how you can submit bug 
 
 We're also looking for help with localization. The Hubs redesign has a lot of new text and we need help from people like you to translate it. Follow the [localization docs](./src/assets/locales/README.md) to get started.
 
+A Git hook will run before each commit, to lint and test the code.
+Fix the issues it complains about, then the hook will allow your commit.
+The checks are also run in Continuous Integration, so you'll be requested to fix a Pull Request that fails these checks — the Git hook just gives you faster feedback.
+In unusual situations, you can suppress the checks by adding the flag `-n` to your commit command.
+
+To run the checks *before* you commit, run `npm run test`.
+
 Contributors are expected to abide by the project's [Code of Conduct](./CODE_OF_CONDUCT.md) and to be respectful of the project and people working on it.
 
 ## Additional Resources

@@ -14,6 +14,7 @@
   },
   "scripts": {
     "info": "npm-scripts-info",
+    "dependencies": "git config --local core.hooksPath .githooks/ || true",
     "start": "webpack serve --mode=development --env loadAppConfig=1",
     "dev": "webpack serve --mode=development --env remoteDev=1 --progress",
     "local": "webpack serve --mode=development --env localDev=1",
