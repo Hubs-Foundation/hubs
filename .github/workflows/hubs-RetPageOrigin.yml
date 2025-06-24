@@ -19,7 +19,7 @@ on:
 
 jobs:
   turkeyGitops:
-    uses: Hubs-Foundation/hubs-ops/.github/workflows/turkeyGitops.yml@master
+    uses: DougReeder/hubs-ops/.github/workflows/turkeyGitops.yml@split-build-push
     with:
       registry: hubsfoundation
       dockerfile: RetPageOriginDockerfile
