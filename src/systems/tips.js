@@ -28,7 +28,7 @@ let localStorageCache = null;
 let finished = false; // Optimization, lets system skip altogether once finished.
 
 const isMobile = AFRAME.utils.device.isMobile();
-const isThisMobileVR = AFRAME.utils.device.isMobileVR();   // used every tick
+const isThisMobileVR = AFRAME.utils.device.isMobileVR(); // used every tick
 
 const tipPlatform = () => {
   if (isThisMobileVR) return "standalone";
