@@ -57,7 +57,7 @@ const isFirefoxReality = window.AFRAME?.utils.device.isMobileVR() && navigator.u
 // Durable (via local-storage) schema-enforced state that is meant to be consumed via forward data flow.
 // (Think flux but with way less incidental complexity, at least for now :))
 export const SCHEMA = {
-  id: "/HubsStore",
+  $id: "/HubsStore",
 
   definitions: {
     profile: {

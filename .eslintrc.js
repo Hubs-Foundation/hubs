@@ -62,5 +62,5 @@ module.exports = {
     ],
     "@calm/react-intl/missing-values": "error"
   },
-  extends: ["prettier", "plugin:react/recommended", "eslint:recommended", "plugin:storybook/recommended"]
+  extends: ["prettier", "plugin:react/recommended", "eslint:recommended"]
 };

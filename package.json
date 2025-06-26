@@ -102,7 +102,7 @@
     "@mozillareality/easing-functions": "^0.1.1",
     "@popperjs/core": "^2.11.0",
     "aframe": "github:hubs-foundation/aframe#hubs/master",
-    "ajv": "^6.12.6",
+    "ajv": "^8.17.1",
     "ammo-debug-drawer": "github:infinitelee/ammo-debug-drawer",
     "ammo.js": "github:hubs-foundation/ammo.js#hubs/master",
     "animejs": "github:hubs-foundation/anime#hubs/master",
@@ -174,7 +174,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.23.0",
-    "@babel/eslint-parser": "^7.23.0",
+    "@babel/eslint-parser": "^7.26.0",
     "@babel/plugin-transform-class-properties": "^7.23.0",
     "@babel/plugin-transform-object-rest-spread": "^7.23.0",
     "@babel/plugin-transform-optional-chaining": "^7.23.0",
@@ -188,12 +188,6 @@
     "@formatjs/cli": "^6.2.0",
     "@formatjs/cli-lib": "^6.3.0",
     "@iarna/toml": "^2.2.5",
-    "@storybook/addon-actions": "^7.6.0",
-    "@storybook/addon-essentials": "^7.6.0",
-    "@storybook/addon-links": "^7.6.0",
-    "@storybook/react": "^7.6.0",
-    "@storybook/react-webpack5": "^7.6.0",
-    "@storybook/storybook-deployer": "^2.8.16",
     "@svgr/webpack": "^6.3.1",
     "@types/three": "^0.141.0",
     "@types/webxr": "^0.5.0",
@@ -206,12 +200,11 @@
     "cors": "^2.8.5",
     "css-loader": "^7.1.2",
     "dotenv": "^16.0.1",
-    "eslint": "^8.56.0",
+    "eslint": "^8.57.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-prettier": "^5.4.0",
     "eslint-plugin-react": "^7.30.1",
     "eslint-plugin-react-hooks": "^5.2.0",
-    "eslint-plugin-storybook": "^0.12.0",
     "fast-plural-rules": "1.0.2",
     "file-loader": "^6.2.0",
     "fork-ts-checker-webpack-plugin": "^9.1.0",
@@ -262,6 +255,16 @@
   "overrides": {
     "phantomjs-prebuilt": {
       ".": " "
+    },
+    "ajv": "^8.17.1",
+    "ajv-keywords": "^5.1.0",
+    "ajv-formats": "^2.1.1",
+    "schema-utils": "^4.3.2",
+    "eslint": {
+      "ajv": "^6.12.6"
+    },
+    "@eslint/eslintrc": {
+      "ajv": "^6.12.6"
     }
   }
 }

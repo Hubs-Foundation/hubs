@@ -53,11 +53,11 @@
     "@babel/preset-env": "^7.23.0",
     "@babel/preset-react": "^7.23.0",
     "@babel/register": "^7.18.9",
-    "babel-loader": "^8.2.5",
+    "babel-loader": "^10.0.0",
     "babel-plugin-formatjs": "^10.5.0",
     "babel-plugin-transform-react-jsx-img-import": "^0.1.4",
     "buffer": "^6.0.3",
-    "copy-webpack-plugin": "^11.0.0",
+    "copy-webpack-plugin": "^13.0.0",
     "cors": "^2.8.5",
     "css-loader": "^6.7.1",
     "dotenv": "^16.0.1",
@@ -89,6 +89,10 @@
   "overrides": {
     "phantomjs-prebuilt": {
       ".": " "
-    }
+    },
+    "ajv": "^8.17.1",
+    "ajv-keywords": "^5.1.0",
+    "ajv-formats": "^2.1.1",
+    "schema-utils": "^4.3.2"
   }
 }
