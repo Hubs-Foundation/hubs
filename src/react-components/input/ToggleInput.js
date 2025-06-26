@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 import classNames from "classnames";
 import styles from "./ToggleInput.scss";
 
-/* eslint-disable-next-line react/display-name */
 export const ToggleInput = memo(
   forwardRef(({ className, label, description, disabled, ...rest }, ref) => {
     return (

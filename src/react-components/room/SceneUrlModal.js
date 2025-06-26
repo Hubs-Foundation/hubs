@@ -32,7 +32,7 @@ export function SceneUrlModal({ enableSpoke, editorName, onValidateUrl, onSubmit
                     {editorName}
                   </a>
                 ),
-                // eslint-disable-next-line react/display-name
+
                 glblink: chunks => (
                   <a href="https://en.wikipedia.org/wiki/GlTF#GLB" target="_blank" rel="noopener noreferrer">
                     {chunks}
@@ -45,7 +45,6 @@ export function SceneUrlModal({ enableSpoke, editorName, onValidateUrl, onSubmit
               id="scene-url-modal.message"
               defaultMessage="Paste a URL to a scene or a URL to a <glblink>GLB</glblink>."
               values={{
-                // eslint-disable-next-line react/display-name
                 glblink: chunks => (
                   <a href="https://en.wikipedia.org/wiki/GlTF#GLB" target="_blank" rel="noopener noreferrer">
                     {chunks}

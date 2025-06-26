@@ -70,7 +70,7 @@ export const resolveUrl = async (url, quality = null, version = 1, bustCache) =>
       try {
         const body = await response.text();
         throw new Error(message + " " + body);
-      } catch (e) {
+      } catch {
         throw new Error(message + " " + response.statusText);
       }
     }
@@ -593,10 +593,11 @@ export function parseURL(text) {
   let url;
   try {
     url = new URL(text);
-  } catch (e) {
+  } catch {
     try {
       url = new URL(`https://${text}`);
     } catch (e) {
+      console.warn("invalid URL ", e);
       return null;
     }
   }

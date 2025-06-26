@@ -78,7 +78,7 @@ function log(...objs) {
           log("Interaction error", e.message);
           if (retryCount-- < 0) {
             // If retries failed, throw and restart navigation.
-            throw new Error("Retries failed");
+            throw new Error(e);
           }
           log("Retrying...");
           backoff *= 2;
@@ -100,6 +100,7 @@ function log(...objs) {
           log(JSON.stringify(avatarCounts));
         } catch (e) {
           // Ignore errors. This usually happens when the page is shutting down.
+          console.warn("errors on shutdown usually safe to ignore ", e);
         }
         // Check for more than two connections to allow for a margin where we have a connection but the a-frame
         // entity has not initialized yet.

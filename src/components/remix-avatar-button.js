@@ -28,6 +28,7 @@ AFRAME.registerComponent("remix-avatar-button", {
 
         this.label.setAttribute("text", "value", "Saved!");
       } catch (e) {
+        console.warn(e);
         this.label.setAttribute("text", "value", "Error");
       }
 

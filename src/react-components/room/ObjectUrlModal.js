@@ -45,7 +45,6 @@ export function ObjectUrlModal({ showModelCollectionLink, modelCollectionUrl, on
               id="object-url-modal.message-with-collection"
               defaultMessage="Upload or paste a link to an image, video, model, or scene. Models can be found on <sketchfablink>Sketchfab</sketchfablink> or in our <collectionlink>collection</collectionlink>."
               values={{
-                // eslint-disable-next-line react/display-name
                 sketchfablink: chunks => (
                   <a
                     href="https://sketchfab.com/search?features=downloadable&type=models"
@@ -55,7 +54,7 @@ export function ObjectUrlModal({ showModelCollectionLink, modelCollectionUrl, on
                     {chunks}
                   </a>
                 ),
-                // eslint-disable-next-line react/display-name
+
                 collectionlink: chunks => (
                   <a href={modelCollectionUrl} target="_blank" rel="noopener noreferrer">
                     {chunks}
@@ -68,7 +67,6 @@ export function ObjectUrlModal({ showModelCollectionLink, modelCollectionUrl, on
               id="object-url-modal.message"
               defaultMessage="Upload or paste a link to an image, video, model, or scene. Models can be found on <sketchfablink>Sketchfab</sketchfablink>."
               values={{
-                // eslint-disable-next-line react/display-name
                 sketchfablink: chunks => (
                   <a
                     href="https://sketchfab.com/search?features=downloadable&type=models"

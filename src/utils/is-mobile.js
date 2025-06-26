@@ -43,7 +43,6 @@ export function isMobileVR() {
 const isMobile = (function () {
   let _isMobile = false;
   (function (a) {
-    // eslint-disable-next-line no-useless-escape
     if (MOBILE_RE.test(a) || TABLET_RE.test(a.substr(0, 4))) {
       _isMobile = true;
     }

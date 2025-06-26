@@ -4,7 +4,6 @@ import classNames from "classnames";
 import styles from "./NumericInput.scss";
 import { TextInput } from "./TextInput";
 
-/* eslint-disable-next-line react/display-name */
 export const NumericInput = memo(
   forwardRef(({ className, afterInput, ...rest }, ref) => {
     return (

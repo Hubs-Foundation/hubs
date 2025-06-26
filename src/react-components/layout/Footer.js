@@ -27,7 +27,6 @@ export function Footer({
               id="footer.powered-by"
               defaultMessage="Powered by <a>Hubs</a>"
               values={{
-                // eslint-disable-next-line react/display-name
                 a: chunks => (
                   <a className={styles.link} href="https://hubsfoundation.org">
                     {chunks}

@@ -168,6 +168,7 @@ class ContentCDNComponent extends Component {
           return;
         }
       } catch (e) {
+        console.error(e);
         abort();
         return;
       }
