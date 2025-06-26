@@ -1,14 +1,25 @@
-import js from "@eslint/js";
-import globals from "globals";
-import prettier from "eslint-plugin-prettier";
-import react from "eslint-plugin-react";
-import reactHooks from "eslint-plugin-react-hooks";
-import reactIntl from "@calm/eslint-plugin-react-intl";
-import prettierConfig from "eslint-config-prettier";
+const js = require("@eslint/js");
+const globals = require("globals");
+const prettier = require("eslint-plugin-prettier");
+const react = require("eslint-plugin-react");
+const reactHooks = require("eslint-plugin-react-hooks");
+const reactIntl = require("@calm/eslint-plugin-react-intl");
+const prettierConfig = require("eslint-config-prettier");
 
-export default [
+module.exports = [
   js.configs.recommended,
   prettierConfig,
+  {
+    ignores: [
+      "src/vendor/*",
+      "src/loaders/basis_transcoder.worker.js",
+      "scripts/bot/node_modules/",
+      "scripts/docker/turkey-swaps/",
+      "**/node_modules/",
+      "dist/",
+      "*.min.js"
+    ]
+  },
   {
     files: ["**/*.js", "**/*.jsx"],
     languageOptions: {
