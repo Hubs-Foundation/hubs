@@ -4,7 +4,7 @@
  */
 
 const fs = require("fs");
-const glob = require("glob");
+const { glob } = require("glob");
 
 function lintFile(filename, spaces) {
   const file = fs.readFileSync(filename, { encoding: "utf8" });
@@ -44,12 +44,18 @@ function lintFile(filename, spaces) {
   return errors.length;
 }
 
-glob(process.argv[2], (err, files) => {
-  console.log("");
-  const spaces = parseInt(process.argv[3] || "4", 10);
+(async () => {
+  try {
+    const files = await glob(process.argv[2]);
+    console.log("");
+    const spaces = parseInt(process.argv[3] || "4", 10);
 
-  const errorCount = files.map(file => lintFile(file, spaces)).reduce((a, c) => a + c, 0);
+    const errorCount = files.map(file => lintFile(file, spaces)).reduce((a, c) => a + c, 0);
 
-  console.log(`${errorCount} total indentation error(s).\n`);
-  process.exit(errorCount > 0 ? 1 : 0);
-});
+    console.log(`${errorCount} total indentation error(s).\n`);
+    process.exit(errorCount > 0 ? 1 : 0);
+  } catch (err) {
+    console.error(err);
+    process.exit(1);
+  }
+})();

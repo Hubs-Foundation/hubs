@@ -8,6 +8,41 @@ import { themes } from "../src/utils/theme";
 import { useTheme } from "../src/react-components/styles/theme";
 import "../src/react-components/styles/global.scss";
 
+// Add debug styles for storybook to help visualize components
+const debugStyles = `
+  /* Make room layout container visible */
+  [class*="roomLayout"] {
+    background: #f5f5f5;
+    min-height: 500px;
+  }
+  
+  /* Make viewport areas visible */
+  [class*="viewport"] {
+    background: rgba(200, 220, 255, 0.1);
+    border: 1px dashed #ccc;
+    min-height: 400px;
+  }
+  
+  /* Ensure absolutely positioned elements are visible */
+  [class*="contentMenu"] {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border: 2px solid #333 !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+  }
+  
+  [class*="spectatingLabel"] {
+    background: rgba(0, 0, 0, 0.8) !important;
+    padding: 8px !important;
+    border-radius: 4px !important;
+  }
+`;
+
+if (typeof document !== 'undefined') {
+  const style = document.createElement('style');
+  style.textContent = debugStyles;
+  document.head.appendChild(style);
+}
+
 const Layout = ({ children, locale, theme }) => {
   useTheme(theme);
 

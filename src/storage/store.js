@@ -1,14 +1,15 @@
-import { Validator } from "jsonschema";
-import merge from "deepmerge";
+import * as Ajv from "ajv";
+import * as deepmerge from "deepmerge";
+const merge = deepmerge.default || deepmerge;
 import Cookies from "js-cookie";
-import jwtDecode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import { qsGet } from "../utils/qs_truthy.js";
 import detectMobile, { isAndroid, isMobileVR } from "../utils/is-mobile";
 
 const LOCAL_STORE_KEY = "___hubs_store";
 const STORE_STATE_CACHE_KEY = Symbol();
 const OAUTH_FLOW_CREDENTIALS_KEY = "ret-oauth-flow-account-credentials";
-const validator = new Validator();
+const ajv = new Ajv({ allErrors: true, removeAdditional: "failing" });
 import { EventTarget } from "event-target-shim";
 import { fetchRandomDefaultAvatarId, generateRandomName } from "../utils/identity.js";
 import { NO_DEVICE_ID } from "../utils/media-devices-utils.js";
@@ -56,7 +57,7 @@ const isFirefoxReality = window.AFRAME?.utils.device.isMobileVR() && navigator.u
 // Durable (via local-storage) schema-enforced state that is meant to be consumed via forward data flow.
 // (Think flux but with way less incidental complexity, at least for now :))
 export const SCHEMA = {
-  id: "/HubsStore",
+  $id: "/HubsStore",
 
   definitions: {
     profile: {
@@ -103,7 +104,7 @@ export const SCHEMA = {
       additionalProperties: false,
       properties: {
         lastUsedMicDeviceId: { type: "string" },
-        micMuted: { type: "bool" }
+        micMuted: { type: "boolean" }
       }
     },
 
@@ -111,25 +112,25 @@ export const SCHEMA = {
       type: "object",
       additionalProperties: false,
       properties: {
-        shouldPromptForRefresh: { type: "bool", default: false },
+        shouldPromptForRefresh: { type: "boolean", default: false },
         // Preferred media will be set dynamically
         preferredMic: { type: "string", default: NO_DEVICE_ID },
         preferredSpeakers: { type: "string", default: NO_DEVICE_ID },
         preferredCamera: { type: "string", default: NO_DEVICE_ID },
-        muteMicOnEntry: { type: "bool", default: false },
-        disableLeftRightPanning: { type: "bool", default: false },
-        audioNormalization: { type: "bool", default: 0.0 },
-        invertTouchscreenCameraMove: { type: "bool", default: true },
-        enableOnScreenJoystickLeft: { type: "bool", default: detectMobile() },
-        enableOnScreenJoystickRight: { type: "bool", default: detectMobile() },
-        enableGyro: { type: "bool", default: true },
-        animateWaypointTransitions: { type: "bool", default: true },
-        showFPSCounter: { type: "bool", default: false },
-        allowMultipleHubsInstances: { type: "bool", default: false },
-        disableIdleDetection: { type: "bool", default: false },
-        fastRoomSwitching: { type: "bool", default: false }, // No longer used. TODO How to remove this safely?
-        lazyLoadSceneMedia: { type: "bool", default: false },
-        preferMobileObjectInfoPanel: { type: "bool", default: false },
+        muteMicOnEntry: { type: "boolean", default: false },
+        disableLeftRightPanning: { type: "boolean", default: false },
+        audioNormalization: { type: "boolean", default: 0.0 },
+        invertTouchscreenCameraMove: { type: "boolean", default: true },
+        enableOnScreenJoystickLeft: { type: "boolean", default: detectMobile() },
+        enableOnScreenJoystickRight: { type: "boolean", default: detectMobile() },
+        enableGyro: { type: "boolean", default: true },
+        animateWaypointTransitions: { type: "boolean", default: true },
+        showFPSCounter: { type: "boolean", default: false },
+        allowMultipleHubsInstances: { type: "boolean", default: false },
+        disableIdleDetection: { type: "boolean", default: false },
+        fastRoomSwitching: { type: "boolean", default: false }, // No longer used. TODO How to remove this safely?
+        lazyLoadSceneMedia: { type: "boolean", default: false },
+        preferMobileObjectInfoPanel: { type: "boolean", default: false },
         // if unset, maxResolution = screen resolution
         maxResolutionWidth: { type: "number", default: undefined },
         maxResolutionHeight: { type: "number", default: undefined },
@@ -138,21 +139,21 @@ export const SCHEMA = {
         globalSFXVolume: { type: "number", default: 100 },
         snapRotationDegrees: { type: "number", default: 45 },
         materialQualitySetting: { type: "string", default: defaultMaterialQuality },
-        enableDynamicShadows: { type: "bool", default: false },
-        disableSoundEffects: { type: "bool", default: false },
-        disableMovement: { type: "bool", default: false },
-        disableBackwardsMovement: { type: "bool", default: false },
-        disableStrafing: { type: "bool", default: false },
-        disableTeleporter: { type: "bool", default: false },
-        disableAutoPixelRatio: { type: "bool", default: false },
+        enableDynamicShadows: { type: "boolean", default: false },
+        disableSoundEffects: { type: "boolean", default: false },
+        disableMovement: { type: "boolean", default: false },
+        disableBackwardsMovement: { type: "boolean", default: false },
+        disableStrafing: { type: "boolean", default: false },
+        disableTeleporter: { type: "boolean", default: false },
+        disableAutoPixelRatio: { type: "boolean", default: false },
         movementSpeedModifier: { type: "number", default: 1 },
-        disableEchoCancellation: { type: "bool", default: isFirefoxReality },
-        disableNoiseSuppression: { type: "bool", default: isFirefoxReality },
-        disableAutoGainControl: { type: "bool", default: isFirefoxReality },
+        disableEchoCancellation: { type: "boolean", default: isFirefoxReality },
+        disableNoiseSuppression: { type: "boolean", default: isFirefoxReality },
+        disableAutoGainControl: { type: "boolean", default: isFirefoxReality },
         locale: { type: "string", default: "browser" },
-        showRtcDebugPanel: { type: "bool", default: false },
-        showAudioDebugPanel: { type: "bool", default: false },
-        enableAudioClipping: { type: "bool", default: false },
+        showRtcDebugPanel: { type: "boolean", default: false },
+        showAudioDebugPanel: { type: "boolean", default: false },
+        enableAudioClipping: { type: "boolean", default: false },
         audioClippingThreshold: { type: "number", default: 0.015 },
         audioPanningQuality: { type: "string", default: defaultAudioPanningQuality() },
         theme: { type: "string", default: undefined },
@@ -160,8 +161,8 @@ export const SCHEMA = {
         nametagVisibility: { type: "string", default: "showAll" },
         nametagVisibilityDistance: { type: "number", default: 5 },
         avatarVoiceLevels: { type: "object" },
-        enablePostEffects: { type: "bool", default: false },
-        enableBloom: { type: "bool", default: true }, // only applies if post effects are enabled
+        enablePostEffects: { type: "boolean", default: false },
+        enableBloom: { type: "boolean", default: true }, // only applies if post effects are enabled
         aaMode: { type: "string", default: AAModes.MSAA_4X } // only applies if post effects are enabled
       }
     },
@@ -245,6 +246,9 @@ export const SCHEMA = {
   additionalProperties: false
 };
 
+// Compile the schema with ajv
+const validateStore = ajv.compile(SCHEMA);
+
 export default class Store extends EventTarget {
   constructor() {
     super();
@@ -278,11 +282,17 @@ export default class Store extends EventTarget {
 
     this._shouldResetAvatarOnInit = false;
 
-    const oauthFlowCredentials = Cookies.getJSON(OAUTH_FLOW_CREDENTIALS_KEY);
-    if (oauthFlowCredentials) {
-      this.update({ credentials: oauthFlowCredentials });
-      this._shouldResetAvatarOnInit = true;
-      Cookies.remove(OAUTH_FLOW_CREDENTIALS_KEY);
+    const oauthFlowCredentialsString = Cookies.get(OAUTH_FLOW_CREDENTIALS_KEY);
+    if (oauthFlowCredentialsString) {
+      try {
+        const oauthFlowCredentials = JSON.parse(oauthFlowCredentialsString);
+        this.update({ credentials: oauthFlowCredentials });
+        this._shouldResetAvatarOnInit = true;
+        Cookies.remove(OAUTH_FLOW_CREDENTIALS_KEY);
+      } catch (e) {
+        console.warn("Failed to parse OAuth flow credentials from cookie:", e);
+        Cookies.remove(OAUTH_FLOW_CREDENTIALS_KEY);
+      }
     }
 
     this._signOutOnExpiredAuthToken();
@@ -404,13 +414,21 @@ export default class Store extends EventTarget {
 
   update(newState, mergeOpts) {
     const finalState = merge({ ...this.state, preferences: this._preferences }, newState, mergeOpts);
-    const { valid, errors } = validator.validate(finalState, SCHEMA);
+    const valid = validateStore(finalState);
 
     // Cleanup unsupported properties
     if (!valid) {
-      errors.forEach(error => {
+      validateStore.errors.forEach(error => {
         console.error(`Removing invalid preference from store: ${error.message}`);
-        delete error.instance[error.argument];
+        // Navigate to the property that has the error
+        let obj = finalState;
+        const path = error.instancePath.split("/").filter(p => p !== "");
+        for (let i = 0; i < path.length - 1; i++) {
+          obj = obj[path[i]];
+        }
+        if (path.length > 0) {
+          delete obj[path[path.length - 1]];
+        }
       });
     }
 

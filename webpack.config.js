@@ -9,9 +9,9 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 const TOML = require("@iarna/toml");
-const fetch = require("node-fetch");
+// Note: using axios instead of node-fetch for consistency
 const packageLock = require("./package-lock.json");
-const request = require("request");
+const axios = require("axios");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 
 function createHTTPSConfig() {
@@ -158,13 +158,13 @@ async function fetchAppConfigAndEnvironmentVars() {
   };
 
   // Load the Hubs Cloud instance's app config in development
-  const appConfigsResponse = await fetch(`https://${host}/api/v1/app_configs`, { headers });
+  const appConfigsResponse = await axios.get(`https://${host}/api/v1/app_configs`, { headers });
 
-  if (!appConfigsResponse.ok) {
+  if (appConfigsResponse.status !== 200) {
     throw new Error(`Error fetching Hubs Cloud config "${appConfigsResponse.statusText}"`);
   }
 
-  const appConfig = await appConfigsResponse.json();
+  const appConfig = appConfigsResponse.data;
   if (appConfig.theme?.themes) {
     appConfig.theme.themes = JSON.parse(appConfig.theme.themes);
   }
@@ -174,11 +174,11 @@ async function fetchAppConfigAndEnvironmentVars() {
     return appConfig;
   }
 
-  const hubsConfigsResponse = await fetch(`https://${host}/api/ita/configs/hubs`, { headers });
+  const hubsConfigsResponse = await axios.get(`https://${host}/api/ita/configs/hubs`, { headers });
 
-  const hubsConfigs = await hubsConfigsResponse.json();
+  const hubsConfigs = hubsConfigsResponse.data;
 
-  if (!hubsConfigsResponse.ok) {
+  if (hubsConfigsResponse.status !== 200) {
     throw new Error(`Error fetching Hubs Cloud config "${hubsConfigsResponse.statusText}"`);
   }
 
@@ -279,17 +279,56 @@ module.exports = async (env, argv) => {
 
   // Behind and environment var for now pending further testing
   if (process.env.DEV_CSP_SOURCE) {
-    const CSPResp = await fetch(`https://${process.env.DEV_CSP_SOURCE}/`);
-    const remoteCSP = CSPResp.headers.get("content-security-policy");
-    devServerHeaders["content-security-policy"] = remoteCSP;
-    // .replaceAll("connect-src", "connect-src https://example.com");
+    const CSPResp = await axios.get(`https://${process.env.DEV_CSP_SOURCE}/`);
+    const remoteCSP = CSPResp.headers["content-security-policy"];
+    let csp = remoteCSP;
+
+    // Add the required script hash to script-src
+    const scriptHash = "'sha256-1OX1cqGDXGZOzQijoLpHf88OwS4EEX61lCMqICZfrGQ='";
+    if (csp.includes("script-src")) {
+      if (!csp.includes(scriptHash)) {
+        // Avoid duplicates
+        csp = csp.replace(/script-src[^;]+/, `$& ${scriptHash}`);
+      }
+    } else {
+      csp += `; script-src ${scriptHash}`;
+    }
+
+    // Add the new connect-src directive for cdn.jsdelivr.net
+    const connectSrcDomain = "https://cdn.jsdelivr.net";
+    if (csp.includes("connect-src")) {
+      if (!csp.includes(connectSrcDomain)) {
+        // Avoid duplicates
+        csp = csp.replace(/connect-src[^;]+/, `$& ${connectSrcDomain}`);
+      }
+    } else {
+      csp += `; connect-src ${connectSrcDomain}`;
+    }
+    devServerHeaders["content-security-policy"] = csp.trim().replace(/;;/g, ";"); // Clean up
   }
 
   const internalHostname = process.env.INTERNAL_HOSTNAME || "hubs.local";
   return {
-    cache: {
-      type: "filesystem"
-    },
+    cache:
+      argv.mode === "development"
+        ? {
+            type: "memory",
+            maxGenerations: 1
+          }
+        : {
+            type: "filesystem",
+            buildDependencies: {
+              config: [__filename]
+            },
+            compression: "gzip",
+            cacheDirectory: path.resolve(__dirname, "node_modules/.cache/webpack"),
+            store: "pack",
+            maxMemoryGenerations: 1,
+            hashAlgorithm: "xxhash64",
+            maxAge: 2592000000, // 30 days
+            allowCollectingMemory: true,
+            memoryCacheUnaffected: true
+          },
     resolve: {
       alias: {
         // aframe and networked-aframe are still using commonjs modules. three and bitecs are peer dependanciees
@@ -334,9 +373,24 @@ module.exports = async (env, argv) => {
     },
     output: {
       filename: "assets/js/[name]-[chunkhash].js",
-      publicPath: process.env.BASE_ASSETS_PATH || ""
+      publicPath: process.env.BASE_ASSETS_PATH || "",
+      environment: {
+        // Enable modern features for ES2022 targets
+        arrowFunction: true,
+        bigIntLiteral: true,
+        const: true,
+        destructuring: true,
+        dynamicImport: true,
+        forOf: true,
+        module: true,
+        optionalChaining: true,
+        templateLiteral: true
+      }
     },
-    target: ["web", "es5"], // use es5 for webpack runtime to maximize compatibility
+    target: ["web", "es2021"], // ES2021 for Safari 15+ (macOS 10.15, iOS 15.8), Chrome 91+, Firefox 91+
+    externals: {
+      // Removed globalThis external as it causes ES module errors
+    },
     devtool: argv.mode === "production" ? "source-map" : "inline-source-map",
     devServer: {
       client: {
@@ -391,12 +445,14 @@ module.exports = async (env, argv) => {
             res.send();
           } else {
             const url = req.originalUrl.replace("/cors-proxy/", "");
-            request({ url, method: req.method }, error => {
-              if (error) {
+            axios({ url, method: req.method, responseType: "stream" })
+              .then(response => {
+                response.data.pipe(res);
+              })
+              .catch(error => {
                 console.error(`cors-proxy: error fetching "${url}"\n`, error);
-                return;
-              }
-            }).pipe(res);
+                res.status(500).send("Proxy error");
+              });
           }
         });
 
@@ -424,6 +480,12 @@ module.exports = async (env, argv) => {
     module: {
       rules: [
         {
+          test: /core-js.*\.js$/,
+          resolve: {
+            fullySpecified: false
+          }
+        },
+        {
           test: /\.html$/,
           loader: "html-loader",
           options: {
@@ -438,8 +500,7 @@ module.exports = async (env, argv) => {
             }
           }
         },
-        // On legacy browsers we want to show a "unsupported browser" page. That page needs to run on older browsers so w set the targeet to ie11.
-        // Note: We do not actually include any polyfills so the code in these files just needs to be written with bare minimum browser APIs
+        // Support utility files can use Safari 15+ compatible syntax
         {
           test: [
             path.resolve(__dirname, "src", "utils", "configs.js"),
@@ -448,7 +509,7 @@ module.exports = async (env, argv) => {
           ],
           loader: "babel-loader",
           options: {
-            presets: ["@babel/react", ["@babel/env", { targets: { ie: 11 } }]],
+            presets: ["@babel/react", "@babel/env"], // Use browserslist for modern target
             plugins: require("./babel.config").plugins
           }
         },
@@ -476,7 +537,13 @@ module.exports = async (env, argv) => {
           test: /\.js$/,
           include: [path.resolve(__dirname, "src")],
           // Exclude JS assets in node_modules because they are already transformed and often big.
-          exclude: [path.resolve(__dirname, "node_modules")],
+          exclude: function (modulePath) {
+            // Exclude all node_modules except hubs, but include core-js for proper handling
+            if (/node_modules\/core-js/.test(modulePath)) {
+              return true; // Don't process core-js through babel
+            }
+            return /node_modules/.test(modulePath) && !/node_modules\/hubs/.test(modulePath);
+          },
           loader: "babel-loader"
         },
         // pdfjs uses features that break in IOS14, so we want to run it through babel https://github.com/mozilla/pdf.js/issues/14327
@@ -492,7 +559,13 @@ module.exports = async (env, argv) => {
           // and concurrently at dev time with ForkTsCheckerWebpackPlugin
           test: /\.tsx?$/,
           include: [path.resolve(__dirname, "src")],
-          exclude: [path.resolve(__dirname, "node_modules")],
+          exclude: function (modulePath) {
+            // Exclude all node_modules except hubs, but include core-js for proper handling
+            if (/node_modules\/core-js/.test(modulePath)) {
+              return true; // Don't process core-js through babel
+            }
+            return /node_modules/.test(modulePath) && !/node_modules\/hubs/.test(modulePath);
+          },
           loader: "babel-loader"
         },
         {
@@ -508,11 +581,22 @@ module.exports = async (env, argv) => {
                   localIdentName: "[name]__[local]__[hash:base64:5]",
                   exportLocalsConvention: "camelCase",
                   // TODO we ideally would be able to get rid of this but we have some global styles and many :local's that would become superfluous
-                  mode: "global"
+                  mode: "global",
+                  // Restore default export behavior for css-loader 7 compatibility
+                  namedExport: false,
+                  exportOnlyLocals: false
                 }
               }
             },
-            "sass-loader"
+            {
+              loader: "sass-loader",
+              options: {
+                api: "modern-compiler",
+                sassOptions: {
+                  silenceDeprecations: ["legacy-js-api", "import", "global-builtin", "mixed-decls"]
+                }
+              }
+            }
           ]
         },
         {
@@ -585,6 +669,8 @@ module.exports = async (env, argv) => {
       ]
     },
     optimization: {
+      moduleIds: "deterministic",
+      chunkIds: "deterministic",
       splitChunks: {
         maxAsyncRequests: 10,
         maxInitialRequests: 10,
@@ -612,8 +698,24 @@ module.exports = async (env, argv) => {
             chunks: "initial",
             priority: 30
           },
+          // Separate PDF.js into its own chunk since it's large
+          pdfjs: {
+            test: deepModuleDependencyTest(["pdfjs-dist"]),
+            name: "pdfjs",
+            chunks: "all",
+            priority: 35,
+            enforce: true
+          },
+          // Separate large media processing libraries
+          media: {
+            test: deepModuleDependencyTest(["three-mesh-bvh", "postprocessing", "troika-three-text", "html2canvas"]),
+            name: "media",
+            chunks: "all",
+            priority: 25,
+            enforce: true
+          },
           store: {
-            test: deepModuleDependencyTest(["phoenix", "jsonschema", "event-target-shim", "jwt-decode", "js-cookie"]),
+            test: deepModuleDependencyTest(["phoenix", "ajv", "event-target-shim", "jwt-decode", "js-cookie"]),
             name: "store",
             chunks: "initial",
             priority: 20
@@ -625,7 +727,14 @@ module.exports = async (env, argv) => {
             priority: 10
           }
         }
-      }
+      },
+      // Improve performance and reduce warnings
+      mangleExports: "deterministic",
+      sideEffects: false,
+      // Add concatenation for better minification
+      concatenateModules: argv.mode === "production",
+      // Minimize the size of large assets
+      realContentHash: true
     },
     plugins: [
       new ForkTsCheckerWebpackPlugin({
@@ -642,7 +751,8 @@ module.exports = async (env, argv) => {
         THREE: "three"
       }),
       new BundleAnalyzerPlugin({
-        analyzerMode: env && env.bundleAnalyzer ? "server" : "disabled"
+        analyzerMode: env && env.bundleAnalyzer ? "server" : "disabled",
+        analyzerPort: "auto" // Automatically find an available port
       }),
       // Each output page needs a HTMLWebpackPlugin entry
       htmlPagePlugin({
@@ -732,6 +842,12 @@ module.exports = async (env, argv) => {
           APP_CONFIG: appConfig
         })
       })
-    ]
+    ],
+    stats: {
+      // Reduce noise in webpack output
+      modules: false,
+      modulesSpace: 0,
+      assetsSort: "size"
+    }
   };
 };

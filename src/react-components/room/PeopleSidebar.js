@@ -118,10 +118,16 @@ export function PeopleSidebar({
       return a.hand_raised ? -1 : 1;
     });
   me && filteredPeople.unshift(me);
-  const store = window.APP.store;
+  const store = window.APP?.store;
 
   function getToolTipDescription(isMuted) {
     return intl.formatMessage(toolTipDescription, { mutedState: isMuted ? "muted" : "not muted" });
+  }
+
+  function getPersonMuteState(person) {
+    // In Storybook/testing environments, store may not be available
+    // Default to not muted for component previews
+    return store?._preferences?.avatarVoiceLevels?.[person.profile.displayName]?.muted || false;
   }
 
   return (
@@ -164,15 +170,9 @@ export function PeopleSidebar({
                   <ToolTip
                     classProp="tooltip"
                     location="bottom"
-                    description={getToolTipDescription(
-                      store._preferences?.avatarVoiceLevels?.[person.profile.displayName]?.muted
-                    )}
+                    description={getToolTipDescription(getPersonMuteState(person))}
                   >
-                    {store._preferences?.avatarVoiceLevels?.[person.profile.displayName]?.muted ? (
-                      <UserSoundOffIcon />
-                    ) : (
-                      <UserSoundOnIcon />
-                    )}
+                    {getPersonMuteState(person) ? <UserSoundOffIcon /> : <UserSoundOnIcon />}
                   </ToolTip>
                 )}
                 <p>{getPersonName(person, intl)}</p>

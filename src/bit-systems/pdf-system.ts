@@ -1,5 +1,6 @@
 import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent } from "bitecs";
-import { GlobalWorkerOptions, PDFPageProxy } from "pdfjs-dist";
+import { getPDFLib, getPDFLibSync } from "../utils/pdf-lib";
+import type { PDFPageProxy } from "pdfjs-dist";
 import { Object3D } from "three";
 import { HubsWorld } from "../app";
 import { MediaPDF, MediaPDFUpdated, NetworkedPDF, Owned } from "../bit-components";
@@ -23,8 +24,7 @@ export const PDFResourcesMap = (MediaPDF as any).map as Map<EntityID, PDFResourc
  * name -> how to name the file
  * Then the path to the worker script
  */
-GlobalWorkerOptions.workerSrc =
-  require("!!file-loader?outputPath=assets/js&name=[name]-[hash].js!pdfjs-dist/build/pdf.worker.min.js").default;
+// PDF.js initialization is handled in pdf-lib.js
 
 type Aspect = { width: number; height: number };
 

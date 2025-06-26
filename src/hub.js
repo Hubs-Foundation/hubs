@@ -9,8 +9,7 @@ import "./utils/debug-log";
 import configs from "./utils/configs";
 import "./utils/theme";
 
-import "core-js/stable";
-import "regenerator-runtime/runtime";
+// Removed polyfill imports - modern browsers (Safari 15+, Chrome 91+, Firefox 91+) have native support
 
 console.log(
   `App version: ${
@@ -201,8 +200,8 @@ import { preload } from "./utils/preload";
 window.APP = new App();
 function addToScene(entityDef, visible) {
   return getScene().then(scene => {
-    const eid = renderAsEntity(APP.world, entityDef);
-    const obj = APP.world.eid2obj.get(eid);
+    const eid = renderAsEntity(window.APP.world, entityDef);
+    const obj = window.APP.world.eid2obj.get(eid);
     scene.add(obj);
     obj.visible = !!visible;
   });
@@ -434,7 +433,7 @@ export async function updateEnvironmentForHub(hub, entryManager) {
 
   if (shouldUseNewLoader()) {
     console.log("Using new loading path for scenes.");
-    swapActiveScene(APP.world, sceneUrl);
+    swapActiveScene(window.APP.world, sceneUrl);
     return;
   }
 
@@ -627,7 +626,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
     "didConnectToNetworkedScene",
     () => {
       if (shouldUseNewLoader()) {
-        loadSavedEntityStates(APP.hubChannel);
+        loadSavedEntityStates(window.APP.hubChannel);
         loadLegacyRoomObjects(hub.hub_id);
       } else {
         // Append objects once we are in the NAF room since ownership may be taken.
@@ -660,8 +659,8 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
       updateEnvironmentForHub(hub, entryManager);
 
       // Disconnect in case this is a re-entry
-      APP.dialog.disconnect();
-      APP.dialog.connect({
+      window.APP.dialog.disconnect();
+      window.APP.dialog.connect({
         serverUrl: `wss://${hub.host}:${hub.port}`,
         roomId: hub.hub_id,
         serverParams: { host: hub.host, port: hub.port, turn: hub.turn },
@@ -775,7 +774,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const subscriptions = new Subscriptions(hubId);
-  APP.subscriptions = subscriptions;
+  window.APP.subscriptions = subscriptions;
   subscriptions.register();
 
   const scene = document.querySelector("a-scene");
@@ -803,7 +802,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const entryManager = new SceneEntryManager(hubChannel, authChannel, history);
   window.APP.entryManager = entryManager;
 
-  APP.dialog.on(DIALOG_CONNECTION_CONNECTED, () => {
+  window.APP.dialog.on(DIALOG_CONNECTION_CONNECTED, () => {
     scene.emit("didConnectToDialog");
   });
   APP.dialog.on(DIALOG_CONNECTION_ERROR_FATAL, () => {

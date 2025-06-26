@@ -6,7 +6,7 @@ const tmpPos = new THREE.Vector3();
 AFRAME.registerComponent("camera-focus-button", {
   schema: {
     track: { default: false },
-    selector: { default: null }
+    selector: { type: "string", default: "" }
   },
 
   init() {

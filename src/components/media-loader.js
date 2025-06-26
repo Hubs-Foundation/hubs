@@ -42,15 +42,15 @@ waitForDOMContentLoaded().then(() => {
 AFRAME.registerComponent("media-loader", {
   schema: {
     playSoundEffect: { default: true },
-    fileId: { type: "string" },
-    fileIsOwned: { type: "boolean" },
-    src: { type: "string" },
+    fileId: { type: "string", default: "" },
+    fileIsOwned: { type: "boolean", default: false },
+    src: { type: "string", default: "" },
     version: { type: "number", default: 1 }, // Used to force a re-resolution
     fitToBox: { default: false },
     moveTheParentNotTheMesh: { default: false },
     resolve: { default: false },
-    contentType: { default: null },
-    contentSubtype: { default: null },
+    contentType: { type: "string", default: "" },
+    contentSubtype: { type: "string", default: "" },
     animate: { default: true },
     linkedEl: { default: null }, // This is the element of which this is a linked derivative. See linked-media.js
     mediaOptions: {

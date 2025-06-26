@@ -122,8 +122,16 @@ module.exports = (env, argv) => {
     },
     output: {
       filename: "assets/js/[name]-[chunkhash].js",
-      publicPath: process.env.BASE_ASSETS_PATH || ""
+      publicPath: process.env.BASE_ASSETS_PATH || "",
+      // Include comments in the output for better debugging
+      pathinfo: argv.mode !== "production",
+      // Generate full source maps
+      devtoolModuleFilenameTemplate: info => path.relative(__dirname, info.absoluteResourcePath).replace(/\\/g, "/")
     },
+    externals: {
+      // Removed globalThis external as it causes ES module errors
+    },
+    // Use inline-source-map for development for immediate source map availability
     devtool: argv.mode === "production" ? "source-map" : "inline-source-map",
     devServer: {
       client: {
@@ -140,12 +148,29 @@ module.exports = (env, argv) => {
       port: process.env.PORT || "8989",
       allowedHosts: [host, internalHostname],
       headers: {
-        "Access-Control-Allow-Origin": "*"
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+        "Access-Control-Allow-Headers": "X-Requested-With, content-type, Authorization"
       },
       setupMiddlewares: (middlewares, { app }) => {
         // be flexible with people accessing via a local reticulum on another port
         app.use(cors({ origin: /hubs\.local(:\d*)?$/ }));
+
+        // Serve source maps with proper content type
+        app.get("*.map", (req, res, next) => {
+          res.type("application/json");
+          next();
+        });
+
         return middlewares;
+      },
+      // Enable source map support
+      devMiddleware: {
+        publicPath: "/",
+        writeToDisk: filePath => {
+          // Write source maps to disk for better debugging
+          return /\.map$/.test(filePath);
+        }
       }
     },
     performance: {
@@ -156,6 +181,12 @@ module.exports = (env, argv) => {
     },
     module: {
       rules: [
+        {
+          test: /core-js.*\.js$/,
+          resolve: {
+            fullySpecified: false
+          }
+        },
         {
           test: /\.html$/,
           loader: "html-loader",
@@ -175,8 +206,16 @@ module.exports = (env, argv) => {
         {
           test: /\.js$/,
           loader: "babel-loader",
-          options: require("../babel.config"),
+          options: {
+            ...require("./babel.config"),
+            sourceMaps: true,
+            inputSourceMap: true
+          },
           exclude: function (modulePath) {
+            // Exclude all node_modules except hubs, but include core-js for proper handling
+            if (/node_modules\/core-js/.test(modulePath)) {
+              return true; // Don't process core-js through babel
+            }
             return /node_modules/.test(modulePath) && !/node_modules\/hubs/.test(modulePath);
           }
         },
@@ -185,8 +224,16 @@ module.exports = (env, argv) => {
           // a good deeal faster since it just strips out types. It does NOT typecheck. Typechecking is only done at build and (ideally) in your editor.
           test: /\.tsx?$/,
           loader: "babel-loader",
-          options: require("../babel.config"),
+          options: {
+            ...require("./babel.config"),
+            sourceMaps: true,
+            inputSourceMap: true
+          },
           exclude: function (modulePath) {
+            // Exclude all node_modules except hubs, but include core-js for proper handling
+            if (/node_modules\/core-js/.test(modulePath)) {
+              return true; // Don't process core-js through babel
+            }
             return /node_modules/.test(modulePath) && !/node_modules\/hubs/.test(modulePath);
           }
         },
@@ -210,6 +257,7 @@ module.exports = (env, argv) => {
             {
               loader: "css-loader",
               options: {
+                sourceMap: true,
                 modules: {
                   localIdentName: "[name]__[local]__[hash:base64:5]",
                   exportLocalsConvention: "camelCase",
@@ -218,7 +266,12 @@ module.exports = (env, argv) => {
                 }
               }
             },
-            "sass-loader"
+            {
+              loader: "sass-loader",
+              options: {
+                sourceMap: true
+              }
+            }
           ]
         },
         {
@@ -264,7 +317,49 @@ module.exports = (env, argv) => {
         }
       ]
     },
+    optimization: {
+      // Ensure source maps are generated even in production
+      minimize: argv.mode === "production",
+      minimizer:
+        argv.mode === "production"
+          ? [
+              new (require("terser-webpack-plugin"))({
+                parallel: true,
+                terserOptions: {
+                  sourceMap: true, // Enable source maps
+                  compress: {
+                    drop_console: false, // Keep console logs for debugging
+                    drop_debugger: false // Keep debugger statements
+                  },
+                  mangle: {
+                    keep_fnames: true, // Keep function names for better stack traces
+                    keep_classnames: true // Keep class names
+                  },
+                  format: {
+                    comments: false
+                  },
+                  // Keep original names for better debugging
+                  keep_fnames: true
+                },
+                extractComments: false
+              })
+            ]
+          : [],
+      // Better debugging with readable module names
+      moduleIds: "named",
+      chunkIds: "named",
+      // Don't concatenate modules for better stack traces
+      concatenateModules: false
+    },
     plugins: [
+      // Add banner to help identify chunks
+      new webpack.BannerPlugin({
+        banner: file => {
+          return `Source: ${file.filename}\nChunk: ${file.chunk.name || "unnamed"}\nBuild: ${new Date().toISOString()}`;
+        },
+        raw: false,
+        entryOnly: false
+      }),
       new webpack.ProvidePlugin({
         // TODO we should bee direclty importing THREE stuff when we need it
         process: "process/browser",

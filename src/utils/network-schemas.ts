@@ -51,7 +51,7 @@ export const networkableComponents = Array.from(schemas.keys());
 
 export function read(prop: any, eid: EntityID) {
   if (ArrayBuffer.isView(prop[eid])) {
-    return Array.from(prop[eid]);
+    return Array.from(prop[eid] as Uint8Array);
   } else {
     return prop[$isStringType] ? APP.getString(prop[eid]) : prop[eid];
   }
@@ -59,7 +59,7 @@ export function read(prop: any, eid: EntityID) {
 
 export function write(prop: any, eid: EntityID, value: any) {
   if (ArrayBuffer.isView(prop[eid])) {
-    prop[eid].set(value);
+    (prop[eid] as Uint8Array).set(value);
   } else {
     prop[eid] = prop[$isStringType] ? APP.getString(value) : value;
   }

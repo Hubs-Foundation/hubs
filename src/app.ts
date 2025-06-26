@@ -77,6 +77,7 @@ export class App {
   messageDispatch?: any;
   store: Store;
   componentRegistry: { [key: string]: AComponent[] };
+  world: HubsWorld;
 
   mediaSearchStore = new MediaSearchStore();
 
@@ -94,7 +95,6 @@ export class App {
   sceneAudioDefaults = new Map<SourceType, Partial<AudioSettings>>();
   moderatorAudioSource = new Set<ElOrEid>();
 
-  world: HubsWorld = createWorld();
 
   str2sid: Map<string | null, number>;
   sid2str: Map<number, string | null>;
@@ -118,6 +118,7 @@ export class App {
 
   constructor() {
     this.store = store;
+    this.world = createWorld() as HubsWorld;
     // TODO: Create accessor / update methods for these maps / set
     this.world.eid2obj = new Map();
     this.world.eid2mat = new Map();
