@@ -21,15 +21,19 @@
   },
   "dependencies": {
     "@iarna/toml": "^2.2.3",
+    "@material-ui/core": "^1.5.1",
+    "@material-ui/icons": "^1.1.1",
     "@mozilla/lilypad-ui": "^1.8.2",
     "aframe": "github:hubs-foundation/aframe#hubs/master",
     "bitecs": "github:hubs-foundation/bitECS#hubs-patches",
     "classnames": "^2.2.5",
     "hubs": "file:..",
-    "react": "^18.2.0",
+    "ra-core": "^2.9.9",
+    "react": "^16.14.0",
     "react-admin": "^2.6.3",
     "react-dom": "^16.1.1",
     "react-intl": "^2.4.0",
+    "react-redux": "^5.1.2",
     "three": "github:hubs-foundation/three.js#hubs-patches-141"
   },
   "devDependencies": {
