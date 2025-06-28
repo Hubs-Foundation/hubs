@@ -26,8 +26,8 @@ const ask = q => new Promise(res => rl.question(q, res));
     if (!meta.phx_host) {
       throw new Error();
     }
-  } catch (e) {
-    console.log("Sorry, that doesn't look like a Hubs Cloud server.");
+  } catch {
+    console.log("Sorry, that doesn't look like a Hubs Cloud server: ", url);
     process.exit(0);
   }
 

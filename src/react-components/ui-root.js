@@ -1130,7 +1130,8 @@ class UIRoot extends Component {
 
     const canCreateRoom = !configs.feature("disable_room_creation") || configs.isAdmin();
     const canCloseRoom = this.props.hubChannel && !!this.props.hubChannel.canOrWillIfCreator("close_hub");
-    const isModerator = this.props.hubChannel && this.props.hubChannel.canOrWillIfCreator("kick_users") && !isThisMobileVR;
+    const isModerator =
+      this.props.hubChannel && this.props.hubChannel.canOrWillIfCreator("kick_users") && !isThisMobileVR;
 
     const moreMenu = [
       {

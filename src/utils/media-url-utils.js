@@ -48,6 +48,7 @@ export const scaledThumbnailUrlFor = (url, width, height) => {
       }
     }
   } catch (e) {
+    console.warn("couldn't determine thumbnail media type, falling back to png. ", e);
     extension = ".png";
   }
 
@@ -64,6 +65,7 @@ export const scaledThumbnailUrlFor = (url, width, height) => {
       if (retHostname === urlHostname) return url;
     }
   } catch (e) {
+    console.warn("couldn't parse server URL ", e);
     return thumbnailUrl;
   }
 
@@ -81,7 +83,7 @@ export const proxiedUrlFor = url => {
   try {
     const parsedUrl = new URL(url);
     if (isNonCorsProxyDomain(parsedUrl.hostname)) return url;
-  } catch (e) {
+  } catch {
     // Ignore
   }
 
@@ -177,6 +179,7 @@ async function isHubsServer(url) {
   try {
     isHubsServer = (await fetch(proxiedUrlFor(origin), { method: "HEAD" })).headers.has("hub-name");
   } catch (e) {
+    console.warn("couldn't fetch hubs server ", e);
     isHubsServer = false;
   }
   originIsHubsServer.set(origin, isHubsServer);

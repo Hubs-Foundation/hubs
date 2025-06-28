@@ -755,6 +755,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
     } catch (e) {
+      console.warn("standard API for microphone didn't work, falling back to another approach ", e);
       remountUI({ showSafariMicDialog: true });
       return;
     }

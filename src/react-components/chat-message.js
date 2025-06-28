@@ -170,7 +170,7 @@ export async function spawnChatMessage(body, from) {
       document.querySelector("a-scene").emit("add_media", body);
       return;
     }
-  } catch (e) {
+  } catch {
     // Ignore parse error
   }
 

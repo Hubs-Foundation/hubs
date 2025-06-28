@@ -88,7 +88,6 @@ export const RevokeTokenModalPage = () => (
   </TokenListPage>
 );
 
-// eslint-disable-next-line react/prop-types
 export function ModalRevokeToken() {
   return <RevokeTokenModal onClose={noop} revoke={noop} />;
 }

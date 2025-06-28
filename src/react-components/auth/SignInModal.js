@@ -142,7 +142,6 @@ export function WaitForVerification({ email, onCancel, showNewsletterSignup }) {
       <FormattedMessage
         id="sign-in-modal.wait-for-verification"
         defaultMessage="<p>Email sent to {email}!</p><p>To continue, click on the link in the email using your phone, tablet, or PC.</p><p>No email? You may not be able to create an account.</p>"
-        // eslint-disable-next-line react/display-name
         values={{ email, p: chunks => <p>{chunks}</p> }}
       />
       {showNewsletterSignup && (

@@ -36,7 +36,6 @@ export function WebVRUnsupportedModal({ onClose }) {
               id="webvr-unsupported-modal.webvr-rocks-link"
               defaultMessage="For a list of browsers with experimental VR support, visit <a>WebVR Rocks</a>."
               values={{
-                // eslint-disable-next-line react/display-name
                 a: chunks => (
                   <a href="https://webvr.rocks" target="_blank" rel="noopener noreferrer">
                     {chunks}
