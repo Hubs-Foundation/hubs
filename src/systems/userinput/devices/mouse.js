@@ -51,9 +51,10 @@ export class MouseDevice {
       },
       { passive: false }
     );
+    this.lockedInPos = [0, 0];
   }
 
-  process(event) {
+  process(/** @type {MouseEvent & {target: HTMLElement}} */ event) {
     if (event.type === "wheel") {
       this.wheel += (event.deltaX + event.deltaY) / modeMod[event.deltaMode];
       return true;
@@ -62,36 +63,90 @@ export class MouseDevice {
     const left = event.button === 0;
     const middle = event.button === 1;
     const right = event.button === 2;
-    // Note: This assumes the canvas always starts in the top left.
-    // This works with the current sidebar and toolbar layout.
-    this.coords[0] = (event.clientX / this.canvas.clientWidth) * 2 - 1;
-    this.coords[1] = -(event.clientY / this.canvas.clientHeight) * 2 + 1;
-    this.movementXY[0] += event.movementX;
-    this.movementXY[1] += event.movementY;
-    if (event.type === "mousedown" && left) {
-      this.mouseDownLeftThisFrame = true;
-      this.buttonLeft = true;
-    } else if (event.type === "mousedown" && right) {
-      this.mouseDownRightThisFrame = true;
-      this.buttonRight = true;
-    } else if (event.type === "mousedown" && middle) {
-      this.mouseDownMiddleThisFrame = true;
-      this.buttonMiddle = true;
-    } else if (event.type === "mouseup" && left) {
-      if (this.mouseDownLeftThisFrame) {
-        return false;
+
+    // not interested in other buttons like back/forward or 3rd, 4rd... side buttons
+    if (event.button > 2) {
+      return true;
+    }
+
+    if (event.type === "mousemove") {
+      this.movementXY[0] += event.movementX;
+      this.movementXY[1] += event.movementY;
+
+      if (document.pointerLockElement) {
+        // Note: This assumes the canvas always starts in the top left.
+        // This works with the current sidebar and toolbar layout.
+        this.coords[0] = (this.lockedInPos[0] / this.canvas.clientWidth) * 2 - 1;
+        this.coords[1] = -(this.lockedInPos[1] / this.canvas.clientHeight) * 2 + 1;
+
+        this.lockedInPos[0] += event.movementX;
+        this.lockedInPos[1] += event.movementY;
+      } else {
+        this.coords[0] = (event.clientX / this.canvas.clientWidth) * 2 - 1;
+        this.coords[1] = -(event.clientY / this.canvas.clientHeight) * 2 + 1;
       }
-      this.buttonLeft = false;
-    } else if (event.type === "mouseup" && right) {
-      if (this.mouseDownRightThisFrame) {
-        return false;
+    }
+
+    if (event.type === "mousedown") {
+      if (middle) {
+        this.mouseDownMiddleThisFrame = true;
+        this.buttonMiddle = true;
+      } else {
+        let setMouseDown = true;
+        if (window.APP.store.state.preferences.enablePointerlock) {
+          if (!document.pointerLockElement) {
+            const promise = event.target.requestPointerLock({
+              unadjustedMovement: window.APP.store.state.preferences.enablePointerlockRawInput
+            });
+            if (!promise) {
+              console.log("disabling mouse acceleration is not supported");
+            }
+
+            event.target.addEventListener(
+              "pointerlockchange",
+              () => {
+                if (!document.pointerLockElement) {
+                  this[left ? "buttonLeft" : "buttonRight"] = false;
+                }
+              },
+              {
+                once: true
+              }
+            );
+
+            this.lockedInPos = [event.clientX, event.clientY];
+          } else {
+            setMouseDown = false;
+          }
+        }
+
+        if (setMouseDown) {
+          this[left ? "mouseDownLeftThisFrame" : "mouseDownRightThisFrame"] = true;
+          this[left ? "buttonLeft" : "buttonRight"] = true;
+        }
       }
-      this.buttonRight = false;
-    } else if (event.type === "mouseup" && middle) {
-      if (this.mouseDownMiddleThisFrame) {
-        return false;
+    }
+
+    if (event.type === "mouseup") {
+      if (document.pointerLockElement) {
+        document.exitPointerLock();
       }
-      this.buttonMiddle = false;
+      if (left) {
+        if (this.mouseDownLeftThisFrame) {
+          return false;
+        }
+        this.buttonLeft = false;
+      } else if (right) {
+        if (this.mouseDownRightThisFrame) {
+          return false;
+        }
+        this.buttonRight = false;
+      } else if (middle) {
+        if (this.mouseDownMiddleThisFrame) {
+          return false;
+        }
+        this.buttonMiddle = false;
+      }
     }
     return true;
   }
