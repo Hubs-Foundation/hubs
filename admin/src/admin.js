@@ -15,7 +15,7 @@ import {
 } from "./utils/ita";
 import { detectIdle } from "./utils/idle-detector";
 import { connectToReticulum } from "hubs/src/utils/phoenix-utils";
-import { AppBar, Admin, Layout, Resource } from "react-admin";
+import { AppBar, Admin, Layout, Resource, Notification } from "react-admin";
 import { postgrestClient, postgrestAuthenticatior } from "./utils/postgrest-data-provider";
 import { AdminMenu } from "./react-components/admin-menu";
 import { SceneList, SceneEdit } from "./react-components/scenes";
@@ -43,6 +43,32 @@ const qs = new URLSearchParams(location.hash.split("?")[1]);
 window.APP = { store };
 
 registerTelemetry("/admin", "Hubs Admin");
+
+// Global error handler for JavaScript errors
+window.addEventListener('error', (event) => {
+  console.error("Global JavaScript Error:", {
+    message: event.message,
+    filename: event.filename,
+    lineno: event.lineno,
+    colno: event.colno,
+    error: event.error,
+    stack: event.error?.stack
+  });
+});
+
+// Global error handler for unhandled promise rejections
+window.addEventListener('unhandledrejection', (event) => {
+  console.error("Unhandled Promise Rejection:", {
+    reason: event.reason,
+    promise: event.promise,
+    stack: event.reason?.stack
+  });
+});
+
+// Custom notification component with extended duration for errors
+const CustomNotification = (props) => {
+  return <Notification {...props} autoHideDuration={10000} />;
+};
 
 let itaSchemas;
 
@@ -118,6 +144,7 @@ class AdminUI extends Component {
               loginPage={false}
               logoutButton={() => <span />}
               theme={theme}
+              notification={CustomNotification}
             >
               <Resource name="pending_scenes" list={PendingSceneList} />
               <Resource
