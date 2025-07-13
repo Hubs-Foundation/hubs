@@ -31,7 +31,7 @@
     "ra-core": "^2.9.9",
     "react": "^18.3.0",
     "react-admin": "^2.6.3",
-    "react-dom": "^16.1.1",
+    "react-dom": "^18.3.0",
     "react-intl": "^2.4.0",
     "react-redux": "^5.1.2",
     "three": "github:hubs-foundation/three.js#hubs-patches-141"
@@ -83,6 +83,7 @@
     "phantomjs-prebuilt": {
       ".": " "
     },
-    "react": "^18.3.0"
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0"
   }
 }
