@@ -45,7 +45,7 @@ window.APP = { store };
 registerTelemetry("/admin", "Hubs Admin");
 
 // Global error handler for JavaScript errors
-window.addEventListener('error', (event) => {
+window.addEventListener("error", event => {
   console.error("Global JavaScript Error:", {
     message: event.message,
     filename: event.filename,
@@ -57,7 +57,7 @@ window.addEventListener('error', (event) => {
 });
 
 // Global error handler for unhandled promise rejections
-window.addEventListener('unhandledrejection', (event) => {
+window.addEventListener("unhandledrejection", event => {
   console.error("Unhandled Promise Rejection:", {
     reason: event.reason,
     promise: event.promise,
@@ -66,7 +66,7 @@ window.addEventListener('unhandledrejection', (event) => {
 });
 
 // Custom notification component with extended duration for errors
-const CustomNotification = (props) => {
+const CustomNotification = props => {
   return <Notification {...props} autoHideDuration={10000} />;
 };
 
