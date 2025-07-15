@@ -268,7 +268,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       itaSchemas = schemaByCategories(await getItaSchemas());
     } catch (e) {
       // Let the admin console run but skip showing configs.
-      console.warn(e);
+      console.warn(
+        "Warning: Couldn't get ita schema (this is expected for Community Edition and can be safely ignored):",
+        e
+      );
     }
   }
 
