@@ -45,7 +45,7 @@ const fetchJson = (url, options) => {
           statusText,
           message: (json && json.message) || statusText,
           response: json,
-          error,
+          errorMessage: error.message || error.toString(),
           stack: error.stack
         });
         throw error;

@@ -51,7 +51,7 @@ window.addEventListener("error", event => {
     filename: event.filename,
     lineno: event.lineno,
     colno: event.colno,
-    error: event.error,
+    errorMessage: event.error?.message || event.error?.toString(),
     stack: event.error?.stack
   });
 });
@@ -59,8 +59,7 @@ window.addEventListener("error", event => {
 // Global error handler for unhandled promise rejections
 window.addEventListener("unhandledrejection", event => {
   console.error("Unhandled Promise Rejection:", {
-    reason: event.reason,
-    promise: event.promise,
+    reasonMessage: event.reason?.message || event.reason?.toString() || String(event.reason),
     stack: event.reason?.stack
   });
 });
@@ -270,7 +269,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Let the admin console run but skip showing configs.
       console.warn(
         "Warning: Couldn't get ita schema (this is expected for Community Edition and can be safely ignored):",
-        e
+        e.message || e.toString()
       );
     }
   }
