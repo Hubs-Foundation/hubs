@@ -90,7 +90,7 @@ export function ExitedRoomScreen({ reason, showTerms, termsUrl, showSourceLink }
           <FormattedMessage
             id="exited-room-screen.contact-us"
             defaultMessage="If you have questions, contact us at {contactEmail}."
-            values={{ contactEmail: <a href={`mailto:${contactEmail}`}>{contactEmail}</a> }}
+            values={{ contactEmail: <a href={encodeURI(`mailto:${contactEmail}?subject=Room closed: ${document.title}`)}>{contactEmail}</a> }}
           />
         </p>
         {showSourceLink && (

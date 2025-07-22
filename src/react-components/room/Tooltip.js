@@ -16,6 +16,7 @@ let moveKeyBack = "S";
 let moveKeyRight = "D";
 let turnLeftKey = "Q";
 let turnRightKey = "E";
+let tabKey = "Tab";
 
 // TODO The API to map from physical key to character is experimental. Depending on prospects of this getting wider
 // implementation we may want to cook up our own polyfill based on observing key inputs
@@ -40,35 +41,63 @@ const onboardingMessages = defineMessages({
   "tips.welcome": {
     id: "tips.welcome",
     defaultMessage:
-      "<h2>Welcome to {appName}</h2><p>Let's take a quick look to get comfortable</p><p2>with the controls</p2>"
+      "<h2>Welcome to {appName}</h2><p>Let's take a quick look to get comfortable with the controls</p>"
   },
   "tips.mobile.locomotion": {
-    id: "tips.mobile.locomotion2",
-    defaultMessage: "<p>Move around by pinching with two fingers</p><p2>or with the on-screen joysticks</p2>"
+    id: "tips.mobile.locomotion",
+    defaultMessage: "<p>Move around by spreading or pinching with two fingers, or with the left on-screen joystick.</p>"
   },
   "tips.mobile.turning": {
     id: "tips.mobile.turning",
-    defaultMessage: "Tap and drag to look around"
+    defaultMessage: "<p>To look around, tap and drag, or use the right on-screen joystick.</p>"
+  },
+  "tips.mobile.defense": {
+    id: "tips.mobile.defense",
+    defaultMessage: "<p>If you find an avatar being a nuisance</p><p>or too loud or soft,</p><ol><li>do a two-finger tap to open the menu on their avatar,</li><li>then tap the {hide} button or the volume buttons on their avatar.</li></ol>"
+  },
+  "tips.mobile.invite": {
+    id: "tips.mobile.invite",
+    defaultMessage: "<p>No one else is here.</p><p>Tap the {invite} button in the lower left or select Invite from the {menu} menu to share this room.</p>"
   },
   "tips.desktop.locomotion": {
-    id: "tips.desktop.locomotion2",
-    defaultMessage: "<p>Move around with</p> {wasd} or {arrows}"
+    id: "tips.desktop.locomotion",
+    defaultMessage: "<p>Move around with</p>{wasd} or {arrows}<p>Hold Shift to run.</p>"
   },
   "tips.desktop.turning": {
-    id: "tips.desktop.turning2",
-    defaultMessage: "Use {left} or {right} or click and drag to look around"
+    id: "tips.desktop.turning",
+    defaultMessage: "<p>Use {turnLeftKey} or {turnRightKey} or click and drag to look around.</p>"
+  },
+  "tips.desktop.defense": {
+    id: "tips.desktop.defense",
+    defaultMessage: "<p>If you find an avatar being a nuisance</p><p>or too loud or soft,</p><ol><li>press {tab} to open the menu on their avatar,</li><li>then click the {hide} button or the volume buttons on their avatar.</li></ol>"
   },
   "tips.desktop.invite": {
-    id: "tips.desktop.invite2",
-    defaultMessage: "<p>Use the {invite} button to share</p><p2>this room</p2>"
+    id: "tips.desktop.invite",
+    defaultMessage: "<p>No one else is here.</p><p>Use the {invite} button in the lower left to share this room</p>"
+  },
+  "tips.standalone.locomotion": {
+    id: "tips.standalone.locomotion",
+    defaultMessage: "<p>Move around with the left joystick.</p><p>Hold down {B} or {Y} on a controller to run.</p>"
+  },
+  "tips.standalone.turning": {
+    id: "tips.standalone.turning",
+    defaultMessage: "Look around using your head or the right joystick."
+  },
+  "tips.standalone.defense": {
+    id: "tips.standalone.defense",
+    defaultMessage: "<p>If you find an avatar being a nuisance</p><p>or too loud or soft,</p><ol><li>hold down {A} or {X} on a controller to open the menu on their avatar,</li><li>then tap the {hide} button or the volume buttons on their avatar.</li></ol>"
+  },
+  "tips.standalone.invite": {
+    id: "tips.standalone.invite",
+    defaultMessage: "<p>No one else is here.</p><p>To share this room, exit VR then click the {invite} button in the lower left.</p>"
   },
   "tips.end": {
     id: "tips.end",
-    defaultMessage: "Tutorial completed! Have fun exploring"
+    defaultMessage: "<p>Tutorial completed! Have fun exploring</p>"
   },
   "tips.menu": {
     id: "tips.menu",
-    defaultMessage: "Access the tour from the {menu} menu"
+    defaultMessage: "<p>Access the tour from the {menu} menu</p>"
   },
   "tips.buttons.get-started": {
     id: "tips.buttons.get-started",
@@ -82,12 +111,16 @@ const onboardingMessages = defineMessages({
     id: "tips.buttons.done",
     defaultMessage: "Done"
   },
-  "tips.text.more": {
-    id: "tips.text.more",
+  "more-menu-popover.title": {
+    id: "more-menu-popover.title",
     defaultMessage: "More"
   },
-  "tips.text.invite": {
-    id: "tips.text.invite",
+  "object-menu.hide-avatar-button": {
+    id: "object-menu.hide-avatar-button",
+    defaultMessage: "Hide"
+  },
+  "invite-popover.title": {
+    id: "invite-popover.title",
     defaultMessage: "Invite"
   }
 });
@@ -97,7 +130,7 @@ function isStep(step, item) {
 }
 
 function maxSteps(step) {
-  return isStep(step, "desktop") ? 3 : 2;
+  return isStep(step, "desktop") ? 4 : (isStep(step, "mobile") ? 4 : 4);
 }
 
 function Key({ children }) {
@@ -191,7 +224,7 @@ function StepNavigationBar({ step, onPrev, onNext, params }) {
       <IconButton as={"span"} className={classNames(styles.arrows, !leftArrow && styles.arrowsHidden)} onClick={onPrev}>
         {"<"}
       </IconButton>
-      <div style={{ display: "flex" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", width: "75px" }}>
         {[...Array(maxSteps(step))].map((v, i) => {
           return <span key={i} className={classNames(styles.dot, i === currentStep && styles.dotEnabled)}></span>;
         })}
@@ -220,6 +253,7 @@ function onboardingSteps({ intl, step }) {
   switch (step) {
     case "tips.desktop.welcome":
     case "tips.mobile.welcome":
+    case "tips.standalone.welcome":
       return {
         control: {
           type: Step,
@@ -257,8 +291,9 @@ function onboardingSteps({ intl, step }) {
         control: {
           type: Step,
           params: {
-            left: <Key>{turnLeftKey}</Key>,
-            right: <Key>{turnRightKey}</Key>
+            p: chunks => <p style={{ width: "100%" }}>{chunks}</p>,
+            turnLeftKey: <Key>{turnLeftKey}</Key>,
+            turnRightKey: <Key>{turnRightKey}</Key>
           }
         },
         navigationBar: {
@@ -268,16 +303,22 @@ function onboardingSteps({ intl, step }) {
           }
         }
       };
-    case "tips.desktop.invite":
+    case "tips.desktop.defense":
+    case "tips.mobile.defense":
+    case "tips.standalone.defense":
       return {
         control: {
           type: Step,
           params: {
-            invite: (
-              <InlineButton icon={<InviteIcon />} text={intl.formatMessage(onboardingMessages["tips.text.invite"])} />
-            ),
             p: chunks => <p style={{ width: "100%" }}>{chunks}</p>,
-            p2: chunks => <p style={{ width: "100%" }}>{chunks}</p>
+            ol: chunks => <ol style={{ width: "100%" }}>{chunks}</ol>,
+            li: chunks => <li style={{ width: "100%" }}>{chunks}</li>,
+            tab: <Key>{tabKey}</Key>,
+            hide: (
+              <InlineButton text={intl.formatMessage(onboardingMessages["object-menu.hide-avatar-button"])} />
+            ),
+            A: (<InlineButton text="A" />),
+            X: (<InlineButton text="X" />)
           }
         },
         navigationBar: {
@@ -287,23 +328,50 @@ function onboardingSteps({ intl, step }) {
           }
         }
       };
-    case "tips.desktop.menu":
+    case "tips.desktop.invite":
+    case "tips.mobile.invite":
+    case "tips.standalone.invite":
       return {
         control: {
           type: Step,
           params: {
-            menu: <InlineButton icon={<MoreIcon />} text={intl.formatMessage(onboardingMessages["tips.text.more"])} />
-          },
-          messageId: "tips.menu"
+            invite: (
+              <InlineButton icon={<InviteIcon />} text={intl.formatMessage(onboardingMessages["invite-popover.title"])} />
+            ),
+            menu: <InlineButton icon={<MoreIcon />} />,
+            p: chunks => <p style={{ width: "100%" }}>{chunks}</p>,
+            p2: chunks => <p style={{ width: "100%" }}>{chunks}</p>
+          }
+        },
+        navigationBar: {
+          type: StepNavigationBar,
+          params: {
+            currentStep: 3
+          }
         }
       };
-    case "tips.mobile.locomotion":
+    case "tips.desktop.menu":
+    case "tips.standalone.menu":
       return {
         control: {
           type: Step,
           params: {
             p: chunks => <p style={{ width: "100%" }}>{chunks}</p>,
-            p2: chunks => <p style={{ width: "100%" }}>{chunks}</p>
+            menu: <InlineButton icon={<MoreIcon />} text={intl.formatMessage(onboardingMessages["more-menu-popover.title"])} />
+          },
+          messageId: "tips.menu"
+        }
+      };
+    case "tips.mobile.locomotion":
+    case "tips.standalone.locomotion":
+      return {
+        control: {
+          type: Step,
+          params: {
+            p: chunks => <p style={{ width: "100%" }}>{chunks}</p>,
+            p2: chunks => <p style={{ width: "100%" }}>{chunks}</p>,
+            B: (<InlineButton text="B" />),
+            Y: (<InlineButton text="Y" />),
           }
         },
         navigationBar: {
@@ -314,9 +382,13 @@ function onboardingSteps({ intl, step }) {
         }
       };
     case "tips.mobile.turning":
+    case "tips.standalone.turning":
       return {
         control: {
-          type: Step
+          type: Step,
+          params: {
+            p: chunks => <p style={{ width: "100%" }}>{chunks}</p>,
+          }
         },
         navigationBar: {
           type: StepNavigationBar,
@@ -330,6 +402,7 @@ function onboardingSteps({ intl, step }) {
         control: {
           type: Step,
           params: {
+            p: chunks => <p style={{ width: "100%" }}>{chunks}</p>,
             menu: <InlineIcon icon={<MoreIcon />} />
           },
           messageId: "tips.menu"
@@ -337,9 +410,13 @@ function onboardingSteps({ intl, step }) {
       };
     case "tips.desktop.end":
     case "tips.mobile.end":
+    case "tips.standalone.end":
       return {
         control: {
           type: Step,
+          params: {
+            p: chunks => <p style={{ width: "100%" }}>{chunks}</p>,
+          },
           messageId: "tips.end"
         }
       };
