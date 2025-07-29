@@ -7,7 +7,7 @@ import traverseFilteredSubtrees from "../utils/traverseFilteredSubtrees";
 const invaderPos = new THREE.Vector3();
 const bubblePos = new THREE.Vector3();
 const isDebug = qsTruthy("debug");
-const isMobileVR = AFRAME.utils.device.isMobileVR();
+const isThisMobileVR = AFRAME.utils.device.isMobileVR();
 
 /**
  * Updates invaders every tick, doing one per frame on mobile VR.
@@ -124,7 +124,7 @@ AFRAME.registerSystem("personal-space-bubble", {
         bubble.el.object3D.updateMatrices();
         bubblePos.setFromMatrixPosition(bubble.el.object3D.matrixWorld);
 
-        if (!isMobileVR) {
+        if (!isThisMobileVR) {
           for (let j = 0; j < this.invaders.length; j++) {
             setInvaderFlag(j, this.invaders, bubble);
           }
@@ -134,7 +134,7 @@ AFRAME.registerSystem("personal-space-bubble", {
         }
       }
 
-      if (!isMobileVR) {
+      if (!isThisMobileVR) {
         for (let i = 0; i < this.invaders.length; i++) {
           flushInvadingFlagsForIndex(i, this.invaders);
         }

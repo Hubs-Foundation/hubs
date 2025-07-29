@@ -31,11 +31,11 @@ const allowVideo = !!videoMimeType && hasWebGL2;
 const RENDER_WIDTH = 1280;
 const RENDER_HEIGHT = 720;
 
-const isMobileVR = AFRAME.utils.device.isMobileVR();
+const isThisMobileVR = AFRAME.utils.device.isMobileVR();
 const isOculusBrowser = navigator.userAgent.match(/Oculus/);
 // TODO ported from old camera system. Do we still want these restrictions?
-const CAPTURE_WIDTH = isMobileVR && !isOculusBrowser ? 640 : 1280;
-const CAPTURE_HEIGHT = isMobileVR && !isOculusBrowser ? 360 : 720;
+const CAPTURE_WIDTH = isThisMobileVR && !isOculusBrowser ? 640 : 1280;
+const CAPTURE_HEIGHT = isThisMobileVR && !isOculusBrowser ? 360 : 720;
 
 const VIDEO_FPS = 25;
 const VIEWFINDER_UPDATE_RATE = 1000 / 6;

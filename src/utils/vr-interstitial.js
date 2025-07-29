@@ -4,7 +4,7 @@ import screenfull from "screenfull";
 let _isIn2DInterstitial = false;
 let _exitAction = null;
 
-const isMobileVR = AFRAME.utils.device.isMobileVR();
+const isThisMobileVR = AFRAME.utils.device.isMobileVR();
 
 const getUserGesture = () => {
   return new Promise(resolve => {
@@ -17,7 +17,7 @@ const getUserGesture = () => {
 export async function handleExitTo2DInterstitial(isLower, exitAction, nonFullscreen) {
   const scene = document.querySelector("a-scene");
   if (!scene.is("vr-mode")) {
-    if (isMobileVR && willRequireUserGesture()) {
+    if (isThisMobileVR && willRequireUserGesture()) {
       await getUserGesture();
       await showFullScreenIfAvailable();
     }
@@ -28,7 +28,7 @@ export async function handleExitTo2DInterstitial(isLower, exitAction, nonFullscr
   _isIn2DInterstitial = true;
   _exitAction = exitAction;
 
-  if (isMobileVR) {
+  if (isThisMobileVR) {
     await scene.exitVR();
 
     if (!nonFullscreen) {
@@ -56,7 +56,7 @@ export async function exit2DInterstitialAndEnterVR(force) {
 
   const scene = document.querySelector("a-scene");
 
-  if (isMobileVR) {
+  if (isThisMobileVR) {
     if (screenfull.isFullscreen) {
       await screenfull.exit();
       await getUserGesture();
