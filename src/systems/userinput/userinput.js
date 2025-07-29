@@ -263,21 +263,21 @@ AFRAME.registerSystem("userinput", {
     this.activeDevices = new ArrayBackedSet([new HudDevice()]);
 
     const isMobile = AFRAME.utils.device.isMobile();
-    const isMobileVR = AFRAME.utils.device.isMobileVR();
+    const isThisMobileVR = AFRAME.utils.device.isMobileVR();
     const forceEnableTouchscreen = hackyMobileSafariTest();
 
-    if (!(isMobile || isMobileVR || forceEnableTouchscreen)) {
+    if (!(isMobile || isThisMobileVR || forceEnableTouchscreen)) {
       this.activeDevices.add(new MouseDevice());
       this.activeDevices.add(new AppAwareMouseDevice());
       this.activeDevices.add(new KeyboardDevice());
-    } else if (!isMobileVR || forceEnableTouchscreen) {
+    } else if (!isThisMobileVR || forceEnableTouchscreen) {
       this.activeDevices.add(new AppAwareTouchscreenDevice());
       this.activeDevices.add(new KeyboardDevice());
       this.activeDevices.add(new GyroDevice());
     }
 
     this.isMobile = isMobile;
-    this.isMobileVR = isMobileVR;
+    this.isThisMobileVR = isThisMobileVR;
 
     this.registeredMappings = new Set([keyboardDebuggingBindings]);
     this.registeredMappingsChanged = true;
@@ -471,7 +471,7 @@ AFRAME.registerSystem("userinput", {
   },
 
   maybeToggleXboxMapping() {
-    if (hackyMobileSafariTest() || this.isMobile || this.isMobileVR) return;
+    if (hackyMobileSafariTest() || this.isMobile || this.isThisMobileVR) return;
 
     const vrAxesSum =
       (this.get(paths.device.vive.left.axesSum) || 0) +
