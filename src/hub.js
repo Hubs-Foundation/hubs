@@ -183,6 +183,7 @@ import "./systems/audio-debug-system";
 import "./systems/audio-gain-system";
 import "./gltf-component-mappings";
 
+import { addons } from "./addons";
 import { App, getScene } from "./app";
 import MediaDevicesManager from "./utils/media-devices-manager";
 import PinningHelper from "./utils/pinning-helper";
@@ -219,8 +220,6 @@ preload(
   })
 );
 
-const store = window.APP.store;
-store.update({ preferences: { shouldPromptForRefresh: false } }); // Clear flag that prompts for refresh from preference screen
 const mediaSearchStore = window.APP.mediaSearchStore;
 const OAUTH_FLOW_PERMS_TOKEN_KEY = "ret-oauth-flow-perms-token";
 const NOISY_OCCUPANT_COUNT = 30; // Above this # of occupants, we stop posting join/leaves/renames
@@ -273,6 +272,7 @@ import { exposeBitECSDebugHelpers } from "./bitecs-debug-helpers";
 import { loadLegacyRoomObjects } from "./utils/load-legacy-room-objects";
 import { loadSavedEntityStates } from "./utils/entity-state-utils";
 import { shouldUseNewLoader } from "./utils/bit-utils";
+import { getStore } from "./utils/store-instance";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -353,6 +353,7 @@ function mountUI(props = {}) {
     qsTruthy("allow_idle") || (process.env.NODE_ENV === "development" && !qs.get("idle_timeout"));
   const forcedVREntryType = qsVREntryType;
 
+  const store = getStore();
   root.render(
     <WrappedIntlProvider>
       <ThemeProvider store={store}>
@@ -543,8 +544,18 @@ export async function updateEnvironmentForHub(hub, entryManager) {
   }
 }
 
-export async function updateUIForHub(hub, hubChannel, showBitECSBasedClientRefreshPrompt = false) {
-  remountUI({ hub, entryDisallowed: !hubChannel.canEnterRoom(hub), showBitECSBasedClientRefreshPrompt });
+export async function updateUIForHub(
+  hub,
+  hubChannel,
+  showBitECSBasedClientRefreshPrompt = false,
+  showAddonRefreshPrompt = false
+) {
+  remountUI({
+    hub,
+    entryDisallowed: !hubChannel.canEnterRoom(hub),
+    showBitECSBasedClientRefreshPrompt,
+    showAddonRefreshPrompt
+  });
 }
 
 function onConnectionError(entryManager, connectError) {
@@ -596,7 +607,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
     onSendMessage: messageDispatch.dispatch,
     onLoaded: () => {
       audioSystem.setMediaGainOverride(1);
-      store.executeOnLoadActions(scene);
+      getStore().executeOnLoadActions(scene);
     },
     onMediaSearchResultEntrySelected: (entry, selectAction) =>
       scene.emit("action_selected_media_result_entry", { entry, selectAction }),
@@ -728,6 +739,9 @@ async function runBotMode(scene, entryManager) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  const store = getStore();
+  store.update({ preferences: { shouldPromptForRefresh: false } }); // Clear flag that prompts for refresh from preference screen
+
   if (!root) {
     const container = document.getElementById("ui-root");
     root = createRoot(container);
@@ -1388,16 +1402,26 @@ document.addEventListener("DOMContentLoaded", async () => {
     const displayName = (userInfo && userInfo.metas[0].profile.displayName) || "API";
 
     let showBitECSBasedClientRefreshPrompt = false;
-
-    if (!!hub.user_data?.hubs_use_bitecs_based_client !== !!window.APP.hub.user_data?.hubs_use_bitecs_based_client) {
+    if (!!hub.user_data?.hubs_use_bitecs_based_client !== !!APP.hub.user_data?.hubs_use_bitecs_based_client) {
       showBitECSBasedClientRefreshPrompt = true;
       setTimeout(() => {
         document.location.reload();
       }, 5000);
     }
+    let showAddonRefreshPrompt = false;
+    [...addons.keys()].map(id => {
+      const oldAddonState = !!APP.hub.user_data && "addons" in APP.hub.user_data && APP.hub.user_data.addons[id];
+      const newAddonState = !!hub.user_data && "addons" in hub.user_data && hub.user_data.addons[id];
+      if (newAddonState !== oldAddonState) {
+        showAddonRefreshPrompt = true;
+        setTimeout(() => {
+          document.location.reload();
+        }, 5000);
+      }
+    });
 
     window.APP.hub = hub;
-    updateUIForHub(hub, hubChannel, showBitECSBasedClientRefreshPrompt);
+    updateUIForHub(hub, hubChannel, showBitECSBasedClientRefreshPrompt, showAddonRefreshPrompt);
 
     if (
       stale_fields.includes("scene") ||
@@ -1484,4 +1508,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   authChannel.setSocket(socket);
   linkChannel.setSocket(socket);
+
+  APP.notifyOnInit();
 });

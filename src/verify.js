@@ -10,10 +10,11 @@ import "./assets/stylesheets/globals.scss";
 import { PageContainer } from "./react-components/layout/PageContainer";
 import { Center } from "./react-components/layout/Center";
 import { ThemeProvider } from "./react-components/styles/theme";
-import { store } from "./utils/store-instance";
+import { getStore } from "./utils/store-instance";
 
 registerTelemetry("/verify", "Hubs Verify Email Page");
 
+const store = getStore();
 window.APP = { store };
 
 function VerifyRoot() {

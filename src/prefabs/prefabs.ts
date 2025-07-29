@@ -1,14 +1,8 @@
-import { MediaLoaderParams } from "../inflators/media-loader";
 import { CameraPrefab, CubeMediaFramePrefab } from "../prefabs/camera-tool";
 import { MediaPrefab } from "../prefabs/media";
-import { EntityDef } from "../utils/jsx-entity";
-import { DuckPrefab } from "./duck";
+import { PrefabDefinitionT, PrefabNameT } from "../types";
 
-type CameraPrefabT = () => EntityDef;
-type CubeMediaPrefabT = () => EntityDef;
-type MediaPrefabT = (params: MediaLoaderParams) => EntityDef;
-
-type Permission =
+export type Permission =
   | "spawn_camera"
   | "spawn_and_move_media"
   | "update_hub"
@@ -22,15 +16,7 @@ type Permission =
   | "kick_users"
   | "mute_users";
 
-export type PrefabDefinition = {
-  permission: Permission;
-  template: CameraPrefabT | CubeMediaPrefabT | MediaPrefabT;
-};
-
-export type PrefabName = "camera" | "cube" | "media" | "duck";
-
-export const prefabs = new Map<PrefabName, PrefabDefinition>();
+export const prefabs = new Map<PrefabNameT, PrefabDefinitionT>();
 prefabs.set("camera", { permission: "spawn_camera", template: CameraPrefab });
 prefabs.set("cube", { permission: "spawn_and_move_media", template: CubeMediaFramePrefab });
 prefabs.set("media", { permission: "spawn_and_move_media", template: MediaPrefab });
-prefabs.set("duck", { permission: "spawn_and_move_media", template: DuckPrefab });

@@ -7,24 +7,23 @@ import { mapMaterials } from "../utils/material-utils";
 import { EntityID } from "../utils/networking-types";
 import { inflateLoopAnimationInitialize, LoopAnimationParams } from "./loop-animation";
 
-function camelCase(s: string) {
+export function camelCase(s: string) {
   return s.replace(/-(\w)/g, (_, m) => m.toUpperCase());
 }
 
 export type ModelParams = { model: Object3D };
 
-// These components are all handled in some special way, not through inflators
-const ignoredComponents = [
-  "visible",
-  "frustum",
-  "frustrum",
-  "shadow",
-  "networked",
-  "animation-mixer",
-  "loop-animation"
-];
+export type GLTFLinkResolverFn = (
+  world: HubsWorld,
+  model: Object3D,
+  rootEid: EntityID,
+  idx2eid: Map<number, EntityID>
+) => void;
 
-function inflateComponents(
+// These components are all handled in some special way, not through inflators
+const ignoredComponents = ["visible", "frustum", "frustrum", "shadow", "animation-mixer", "loop-animation"];
+
+export function inflateComponents(
   world: HubsWorld,
   eid: number,
   components: { [componentName: string]: any },
@@ -59,6 +58,7 @@ function inflateComponents(
   });
 }
 
+export const gltfLinkResolvers = new Array<GLTFLinkResolverFn>();
 export function inflateModel(world: HubsWorld, rootEid: number, { model }: ModelParams) {
   const swap: [old: Object3D, replacement: Object3D][] = [];
   const idx2eid = new Map<number, number>();
@@ -165,6 +165,8 @@ export function inflateModel(world: HubsWorld, rootEid: number, { model }: Model
     addComponent(world, MixerAnimatableInitialize, rootEid);
     inflateLoopAnimationInitialize(world, rootEid, loopAnimationParams);
   }
+
+  gltfLinkResolvers.forEach(resolved => resolved(world, model, rootEid, idx2eid));
 
   addComponent(world, GLTFModel, rootEid);
 }

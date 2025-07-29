@@ -27,6 +27,7 @@ import { isLockedDownDemoRoom } from "../utils/hub-utils";
 import dropdownArrowUrl from "../assets/images/dropdown_arrow.png";
 import dropdownArrow2xUrl from "../assets/images/dropdown_arrow@2x.png";
 import { PermissionNotification } from "./room/PermissionNotifications";
+import { getAddonsPreferencesCategories, getAddonsPreferencesLabels } from "../addons";
 
 export const CLIPPING_THRESHOLD_MIN = 0.0;
 export const CLIPPING_THRESHOLD_MAX = 0.1;
@@ -582,12 +583,26 @@ class PreferenceListItem extends Component {
     const isCheckbox = this.props.itemProps.prefType === PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX;
     const isCustomComponent = this.props.itemProps.prefType === PREFERENCE_LIST_ITEM_TYPE.CUSTOM_COMPONENT;
     const isSmallScreen = window.innerWidth < 600;
-    const label = preferenceLabels[this.props.storeKey] && (
+    let labelText;
+    if (preferenceLabels[this.props.storeKey]) {
+      labelText = intl.formatMessage(preferenceLabels[this.props.storeKey]);
+    } else {
+      const addonLabels = getAddonsPreferencesLabels();
+      labelText = addonLabels.get(this.props.storeKey);
+    }
+    let labelTooltip;
+    if (this.props.itemProps.tooltipKey) {
+      labelTooltip = intl.formatMessage(preferenceLabels[this.props.itemProps.tooltipKey]);
+    } else {
+      const addonLabels = getAddonsPreferencesLabels();
+      labelTooltip = addonLabels.get(this.props.storeKey);
+    }
+    const label = (
       <span
         className={classNames(styles.preferenceLabel, { [styles.disabled]: this.props.disabled })}
-        title={this.props.itemProps.tooltipKey && intl.formatMessage(preferenceLabels[this.props.itemProps.tooltipKey])}
+        title={labelTooltip}
       >
-        {intl.formatMessage(preferenceLabels[this.props.storeKey])}
+        {labelText}
       </span>
     );
     const prefSchema = this.props.store.schema.definitions.preferences.properties;
@@ -695,7 +710,8 @@ const CATEGORY_MOVEMENT = 3;
 const CATEGORY_TOUCHSCREEN = 4;
 const CATEGORY_ACCESSIBILITY = 5;
 const CATEGORY_GRAPHICS = 6;
-const TOP_LEVEL_CATEGORIES = [CATEGORY_AUDIO, CATEGORY_CONTROLS, CATEGORY_MISC];
+const CATEGORY_ADDONS = 7;
+const TOP_LEVEL_CATEGORIES = [CATEGORY_AUDIO, CATEGORY_CONTROLS, CATEGORY_MISC, CATEGORY_ADDONS];
 const categoryNames = defineMessages({
   [CATEGORY_AUDIO]: { id: "preferences-screen.category.audio", defaultMessage: "Audio" },
   [CATEGORY_CONTROLS]: { id: "preferences-screen.category.controls", defaultMessage: "Controls" },
@@ -703,7 +719,8 @@ const categoryNames = defineMessages({
   [CATEGORY_MOVEMENT]: { id: "preferences-screen.category.movement", defaultMessage: "Movement" },
   [CATEGORY_TOUCHSCREEN]: { id: "preferences-screen.category.touchscreen", defaultMessage: "Touchscreen" },
   [CATEGORY_ACCESSIBILITY]: { id: "preferences-screen.category.accessibility", defaultMessage: "Accessibility" },
-  [CATEGORY_GRAPHICS]: { id: "preferences-screen.category.graphics", defaultMessage: "Graphics" }
+  [CATEGORY_GRAPHICS]: { id: "preferences-screen.category.graphics", defaultMessage: "Graphics" },
+  [CATEGORY_ADDONS]: { id: "preferences-screen.category.add-ons", defaultMessage: "Add-Ons" }
 });
 
 function NavItem({ ariaLabel, title, onClick, selected }) {
@@ -1427,6 +1444,11 @@ class PreferencesScreen extends Component {
       );
     }
 
+    const addOnCategories = [];
+    getAddonsPreferencesCategories(APP).forEach((prefItems, prefCatName) => {
+      addOnCategories.push({ name: prefCatName, items: prefItems.map(toItem).filter(item => !!item) });
+    });
+
     return new Map([
       [
         CATEGORY_AUDIO,
@@ -1460,7 +1482,8 @@ class PreferencesScreen extends Component {
             items: items.get(CATEGORY_GRAPHICS)
           }
         ]
-      ]
+      ],
+      [CATEGORY_ADDONS, addOnCategories]
     ]);
   }
 

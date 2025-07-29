@@ -285,6 +285,9 @@ module.exports = async (env, argv) => {
     // .replaceAll("connect-src", "connect-src https://example.com");
   }
 
+  const addonsConfigFilePath = "./addons.json";
+  const addonsConfig = JSON.parse(fs.readFileSync(addonsConfigFilePath, "utf-8"));
+
   const internalHostname = process.env.INTERNAL_HOSTNAME || "hubs.local";
   return {
     cache: {
@@ -303,7 +306,9 @@ module.exports = async (env, argv) => {
         "three/examples/js/libs/basis/basis_transcoder.js": basisTranscoderPath,
         "three/examples/js/libs/draco/gltf/draco_wasm_wrapper.js": dracoWasmWrapperPath,
         "three/examples/js/libs/basis/basis_transcoder.wasm": basisWasmPath,
-        "three/examples/js/libs/draco/gltf/draco_decoder.wasm": dracoWasmPath
+        "three/examples/js/libs/draco/gltf/draco_decoder.wasm": dracoWasmPath,
+
+        hubs$: path.resolve(__dirname, "./src/hubs.js")
       },
       // Allows using symlinks in node_modules
       symlinks: false,
@@ -320,7 +325,7 @@ module.exports = async (env, argv) => {
     entry: {
       support: path.join(__dirname, "src", "support.js"),
       index: path.join(__dirname, "src", "index.js"),
-      hub: path.join(__dirname, "src", "hub.js"),
+      hub: [path.join(__dirname, "src", "hub.js"), ...addonsConfig.addons],
       scene: path.join(__dirname, "src", "scene.js"),
       avatar: path.join(__dirname, "src", "avatar.js"),
       link: path.join(__dirname, "src", "link.js"),
@@ -335,6 +340,9 @@ module.exports = async (env, argv) => {
     output: {
       filename: "assets/js/[name]-[chunkhash].js",
       publicPath: process.env.BASE_ASSETS_PATH || ""
+    },
+    optimization: {
+      minimize: argv.mode === "production" ? true : false
     },
     target: ["web", "es5"], // use es5 for webpack runtime to maximize compatibility
     devtool: argv.mode === "production" ? "source-map" : "inline-source-map",

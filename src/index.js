@@ -7,10 +7,11 @@ import { HomePage } from "./react-components/home/HomePage";
 import { AuthContextProvider } from "./react-components/auth/AuthContext";
 import "./react-components/styles/global.scss";
 import { ThemeProvider } from "./react-components/styles/theme";
-import { store } from "./utils/store-instance";
+import { getStore } from "./utils/store-instance";
 
 registerTelemetry("/home", "Hubs Home Page");
 
+const store = getStore();
 window.APP = { store };
 
 function HomeRoot() {

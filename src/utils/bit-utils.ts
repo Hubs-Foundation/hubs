@@ -5,6 +5,7 @@ import { HubsWorld } from "../app";
 import { findAncestor, findAncestors, traverseSome } from "./three-utils";
 import { EntityID } from "./networking-types";
 import qsTruthy from "./qs_truthy";
+import configs from "./configs";
 
 export type ElOrEid = EntityID | AElement;
 
@@ -25,8 +26,15 @@ export function hasAnyComponent(world: HubsWorld, components: Component[], eid: 
   return false;
 }
 
-export function findAncestorEntity(world: HubsWorld, eid: number, predicate: (eid: number) => boolean) {
-  const obj = findAncestor(world.eid2obj.get(eid)!, (o: Object3D) => !!(o.eid && predicate(o.eid))) as Object3D | null;
+export function findAncestorEntity(
+  world: HubsWorld,
+  eid: number,
+  predicate: (eid: number, world: HubsWorld) => boolean
+) {
+  const obj = findAncestor(
+    world.eid2obj.get(eid)!,
+    (o: Object3D) => !!(o.eid && predicate(o.eid, world))
+  ) as Object3D | null;
   return obj && obj.eid!;
 }
 
@@ -36,7 +44,7 @@ export function findAncestorEntities(world: HubsWorld, eid: number, predicate: (
 }
 
 export function findAncestorWithComponent(world: HubsWorld, component: Component, eid: number) {
-  return findAncestorEntity(world, eid, otherId => hasComponent(world, component, otherId));
+  return findAncestorEntity(world, eid, (otherId, world) => hasComponent(world, component, otherId));
 }
 
 export function findAncestorsWithComponent(world: HubsWorld, component: Component, eid: number): EntityID[] {
@@ -69,7 +77,28 @@ export function findChildWithComponent(world: HubsWorld, component: Component, e
   }
 }
 
+export function findChildrenWithComponent(world: HubsWorld, component: Component, eid: number) {
+  const obj = world.eid2obj.get(eid);
+  if (obj) {
+    const childrenEids = new Array<EntityID>();
+    obj.traverse((otherObj: Object3D) => {
+      if (otherObj.eid && hasComponent(world, component, otherObj.eid)) {
+        childrenEids.push(otherObj.eid);
+      }
+    });
+    return childrenEids;
+  }
+}
+
 const forceNewLoader = qsTruthy("newLoader");
 export function shouldUseNewLoader() {
-  return forceNewLoader || APP.hub?.user_data?.hubs_use_bitecs_based_client;
+  if (forceNewLoader === true) {
+    return true;
+  } else if (APP.hub?.user_data?.hubs_use_bitecs_based_client !== undefined) {
+    return APP.hub?.user_data?.hubs_use_bitecs_based_client;
+  } else if (configs.feature("bitecs_loader") !== undefined) {
+    return configs.feature("bitecs_loader");
+  } else {
+    return false;
+  }
 }

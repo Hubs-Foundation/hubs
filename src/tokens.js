@@ -10,10 +10,11 @@ import "./react-components/styles/global.scss";
 import { TokenPageLayout } from "./react-components/tokens/TokenPageLayout";
 import configs from "./utils/configs";
 import { ThemeProvider } from "./react-components/styles/theme";
-import { store } from "./utils/store-instance";
+import { getStore } from "./utils/store-instance";
 
 registerTelemetry("/tokens", "Backend API Tokens Page");
 
+const store = getStore();
 window.APP = { store };
 
 function TokensRoot() {

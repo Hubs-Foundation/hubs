@@ -3,7 +3,7 @@ import { AmmoDebugConstants, DefaultBufferSize } from "ammo-debug-drawer";
 import configs from "../utils/configs";
 import ammoWasmUrl from "ammo.js/builds/ammo.wasm.wasm";
 import { Rigidbody } from "../bit-components";
-import { updateRigiBodyParams } from "../inflators/rigid-body";
+import { updateBodyParams } from "../inflators/rigid-body";
 
 const MESSAGE_TYPES = CONSTANTS.MESSAGE_TYPES,
   TYPE = CONSTANTS.TYPE,
@@ -231,6 +231,7 @@ export class PhysicsSystem {
     const bodyId = this.nextBodyUuid;
     this.nextBodyUuid += 1;
 
+    object3D.updateMatrices();
     this.workerHelpers.addBody(bodyId, object3D, options);
 
     this.bodyUuidToData.set(bodyId, {
@@ -250,25 +251,13 @@ export class PhysicsSystem {
 
   updateRigidBody(eid, options) {
     const bodyId = Rigidbody.bodyId[eid];
-    updateRigiBodyParams(eid, options);
+    updateBodyParams(eid, options);
     if (this.bodyUuidToData.has(bodyId)) {
       this.bodyUuidToData.get(bodyId).options = options;
       this.workerHelpers.updateBody(bodyId, options);
     } else {
       console.warn(`updateBody called for uuid: ${bodyId} but body missing.`);
     }
-  }
-
-  updateRigidBodyOptions(eid, options) {
-    const bodyId = Rigidbody.bodyId[eid];
-    updateRigiBodyParams(eid, options);
-    const bodyData = this.bodyUuidToData.get(bodyId);
-    if (!bodyData) {
-      // TODO: Fix me.
-      console.warn("updateBodyOptions called for invalid bodyId");
-      return;
-    }
-    this.workerHelpers.updateBody(bodyId, Object.assign(this.bodyUuidToData.get(bodyId).options, options));
   }
 
   removeBody(uuid) {
@@ -285,8 +274,10 @@ export class PhysicsSystem {
     if (bodyData.isInitialized) {
       delete this.indexToUuid[bodyData.index];
       bodyData.collisions.forEach(otherId => {
-        const otherData = this.bodyUuidToData.get(otherId).collisions;
-        otherData.splice(otherData.indexOf(uuid), 1);
+        const collisions = this.bodyUuidToData.get(otherId)?.collisions;
+        // This can happen when removing multiple bodies in a frame
+        if (!collisions) return;
+        collisions.splice(collisions.indexOf(uuid), 1);
       });
       this.bodyUuids.splice(this.bodyUuids.indexOf(uuid), 1);
       this.bodyUuidToData.delete(uuid);

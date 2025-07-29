@@ -5,6 +5,7 @@ import { createElementEntity } from "../utils/jsx-entity";
 import { loadModel } from "../components/gltf-model-plus";
 import loadingObjectSrc from "../assets/models/LoadingObject_Atom.glb";
 import { cloneObject3D, disposeNode } from "../utils/three-utils";
+import { LOOP_ANIMATION_DEFAULTS } from "../inflators/loop-animation";
 
 // TODO We should have an explicit "preload assets" step
 let loadingObject = new Mesh(new BoxGeometry(), new MeshBasicMaterial());
@@ -16,5 +17,12 @@ loadModel(loadingObjectSrc, null, true).then(gltf => {
 // TODO: Do we really need to clone the loadingObject every time?
 //       Should we use a pool?
 export function LoadingObject() {
-  return <entity name="Loading Object" object3D={cloneObject3D(loadingObject)} mixerAnimatable loopAnimation={[]} />;
+  return (
+    <entity
+      name="Loading Object"
+      object3D={cloneObject3D(loadingObject)}
+      mixerAnimatable
+      loopAnimation={[LOOP_ANIMATION_DEFAULTS]}
+    />
+  );
 }

@@ -11,7 +11,6 @@ import { createNetworkedEntity } from "./utils/create-networked-entity";
 import { add, testAsset, respawn } from "./utils/chat-commands";
 import { isLockedDownDemoRoom } from "./utils/hub-utils";
 import { loadState, clearState } from "./utils/entity-state-utils";
-import { shouldUseNewLoader } from "./utils/bit-utils";
 
 let uiRoot;
 // Handles user-entered messages
@@ -24,6 +23,15 @@ export default class MessageDispatch extends EventTarget {
     this.remountUI = remountUI;
     this.mediaSearchStore = mediaSearchStore;
     this.presenceLogEntries = [];
+    this.chatCommands = new Map();
+  }
+
+  registerChatCommand(name, callback) {
+    if (!this.chatCommands.has(name)) {
+      this.chatCommands.set(name, callback);
+    } else {
+      throw Error(`Error registering chat command ${name}: command already registered`);
+    }
   }
 
   addToPresenceLog(entry) {
@@ -134,22 +142,6 @@ export default class MessageDispatch extends EventTarget {
 
       case "oldduck":
         spawnChatMessage(getAbsoluteHref(location.href, ducky));
-        if (Math.random() < 0.01) {
-          this.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SPECIAL_QUACK);
-        } else {
-          this.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_QUACK);
-        }
-        break;
-      case "duck":
-        if (shouldUseNewLoader()) {
-          const avatarPov = document.querySelector("#avatar-pov-node").object3D;
-          const eid = createNetworkedEntity(APP.world, "duck");
-          const obj = APP.world.eid2obj.get(eid);
-          obj.position.copy(avatarPov.localToWorld(new THREE.Vector3(0, 0, -1.5)));
-          obj.lookAt(avatarPov.getWorldPosition(new THREE.Vector3()));
-        } else {
-          spawnChatMessage(getAbsoluteHref(location.href, ducky));
-        }
         if (Math.random() < 0.01) {
           this.scene.systems["hubs-systems"].soundEffectsSystem.playSoundOneShot(SOUND_SPECIAL_QUACK);
         } else {
@@ -268,6 +260,10 @@ export default class MessageDispatch extends EventTarget {
           }
         }
         break;
+    }
+
+    if (this.chatCommands.has(command)) {
+      this.chatCommands.get(command)(APP, args);
     }
   };
 }
