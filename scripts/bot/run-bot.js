@@ -78,7 +78,7 @@ function log(...objs) {
           log("Interaction error", e.message);
           if (retryCount-- < 0) {
             // If retries failed, throw and restart navigation.
-            throw new Error(e);
+            throw new Error("too many re-tries interacting with page so audio can play", { cause: e });
           }
           log("Retrying...");
           backoff *= 2;
