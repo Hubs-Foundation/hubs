@@ -1,5 +1,5 @@
+import { HttpError } from "ra-core";
 import { queryParameters } from "ra-core/lib/util/fetch";
-import HttpError from "ra-core/lib/util/HttpError";
 import { GET_LIST, GET_ONE, GET_MANY, GET_MANY_REFERENCE, CREATE, UPDATE, DELETE, DELETE_MANY } from "react-admin";
 import { AUTH_LOGIN, AUTH_LOGOUT, AUTH_ERROR } from "react-admin";
 import json2ParseBigint from "./json_parse_bigint";
@@ -39,7 +39,16 @@ const fetchJson = (url, options) => {
       }
 
       if (status < 200 || status >= 300) {
-        throw new HttpError((json && json.message) || statusText, status, json);
+        const error = new HttpError((json && json.message) || statusText, status, json);
+        console.error("HTTP Error in data provider:", {
+          status,
+          statusText,
+          message: (json && json.message) || statusText,
+          response: json,
+          errorMessage: error.message || error.toString(),
+          stack: error.stack
+        });
+        throw error;
       }
 
       return { status, headers, body, json };

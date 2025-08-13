@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import "./webxr-bypass-hacks";
 import configs from "./utils/configs";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import React, { Component } from "react";
 import { Route } from "react-router-dom";
 import PropTypes from "prop-types";
@@ -15,7 +15,7 @@ import {
 } from "./utils/ita";
 import { detectIdle } from "./utils/idle-detector";
 import { connectToReticulum } from "hubs/src/utils/phoenix-utils";
-import { AppBar, Admin, Layout, Resource } from "react-admin";
+import { AppBar, Admin, Layout, Resource, Notification } from "react-admin";
 import { postgrestClient, postgrestAuthenticatior } from "./utils/postgrest-data-provider";
 import { AdminMenu } from "./react-components/admin-menu";
 import { SceneList, SceneEdit } from "./react-components/scenes";
@@ -43,6 +43,31 @@ const qs = new URLSearchParams(location.hash.split("?")[1]);
 window.APP = { store };
 
 registerTelemetry("/admin", "Hubs Admin");
+
+// Global error handler for JavaScript errors
+window.addEventListener("error", event => {
+  console.error("Global JavaScript Error:", {
+    message: event.message,
+    filename: event.filename,
+    lineno: event.lineno,
+    colno: event.colno,
+    errorMessage: event.error?.message || event.error?.toString(),
+    stack: event.error?.stack
+  });
+});
+
+// Global error handler for unhandled promise rejections
+window.addEventListener("unhandledrejection", event => {
+  console.error("Unhandled Promise Rejection:", {
+    reasonMessage: event.reason?.message || event.reason?.toString() || String(event.reason),
+    stack: event.reason?.stack
+  });
+});
+
+// Custom notification component with extended duration for errors
+const CustomNotification = props => {
+  return <Notification {...props} autoHideDuration={10000} />;
+};
 
 let itaSchemas;
 
@@ -118,6 +143,7 @@ class AdminUI extends Component {
               loginPage={false}
               logoutButton={() => <span />}
               theme={theme}
+              notification={CustomNotification}
             >
               <Resource name="pending_scenes" list={PendingSceneList} />
               <Resource
@@ -207,7 +233,9 @@ const mountUI = async (retPhxChannel, customRoutes, layout) => {
     retPhxChannel.socket.disconnect();
   };
 
-  ReactDOM.render(
+  const container = document.getElementById("ui-root");
+  const root = createRoot(container);
+  root.render(
     <IntlProvider locale={lang} messages={messages}>
       <AdminUI
         dataProvider={dataProvider}
@@ -216,8 +244,7 @@ const mountUI = async (retPhxChannel, customRoutes, layout) => {
         layout={layout}
         onEndSession={onEndSession}
       />
-    </IntlProvider>,
-    document.getElementById("ui-root")
+    </IntlProvider>
   );
 };
 const HiddenAppBar = withStyles({
@@ -240,6 +267,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       itaSchemas = schemaByCategories(await getItaSchemas());
     } catch (e) {
       // Let the admin console run but skip showing configs.
+      console.warn(
+        "Warning: Couldn't get ita schema (this is expected for Community Edition and can be safely ignored):",
+        e.message || e.toString()
+      );
     }
   }
 

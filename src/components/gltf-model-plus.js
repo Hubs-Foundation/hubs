@@ -80,7 +80,6 @@ function defaultInflator(el, componentName, componentData) {
 }
 
 AFRAME.GLTFModelPlus = {
-  // eslint-disable-next-line no-unused-vars
   components: {},
   registerComponent(componentKey, componentName, inflator) {
     inflator = inflator || defaultInflator;

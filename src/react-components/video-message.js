@@ -33,7 +33,7 @@ export default function VideoMessage({ name, body: { src: url }, className, mayS
           defaultMessage="{name} took a <a>video</a>."
           values={{
             name: <b>{name}</b>,
-            // eslint-disable-next-line react/display-name
+
             a: chunks => (
               <b>
                 <a href={url} target="_blank" rel="noopener noreferrer">

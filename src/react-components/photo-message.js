@@ -37,7 +37,7 @@ export default function PhotoMessage({ name, body: { src: url }, className, mayS
           defaultMessage="{name} took a <a>photo</a>."
           values={{
             name: <b>{name}</b>,
-            // eslint-disable-next-line react/display-name
+
             a: chunks => (
               <b>
                 <a href={landingPageUrl} target="_blank" rel="noopener noreferrer">

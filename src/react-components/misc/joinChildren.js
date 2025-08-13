@@ -1,4 +1,3 @@
-// eslint-disable-next-line no-unused-vars
 import React, { Children } from "react";
 
 export function joinChildren(children, renderSeparator) {

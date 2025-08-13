@@ -78,6 +78,7 @@ class ImportContentComponent extends Component {
       const type = isScene ? "scenes" : "avatars";
       return { url: `${parsedUrl.origin}/api/v1/${type}/${pathParts[2]}`, isScene };
     } catch (e) {
+      console.error("in apiInfoForSubmittedUrl:", e);
       return null;
     }
   }
@@ -215,6 +216,7 @@ class ImportContentComponent extends Component {
       try {
         res = await fetchReticulumAuthenticated(`/api/v1/${type}`, "POST", { url: importUrl });
       } catch (e) {
+        console.error("onImport:", e);
         this.setImportResult(url, RESULTS.failed);
         continue;
       }
