@@ -168,7 +168,7 @@ class ContentCDNComponent extends Component {
           return;
         }
       } catch (e) {
-        console.error(e);
+        console.error(`while fetching "whats-new.html":`, e);
         abort();
         return;
       }

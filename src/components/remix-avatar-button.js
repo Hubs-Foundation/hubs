@@ -28,7 +28,7 @@ AFRAME.registerComponent("remix-avatar-button", {
 
         this.label.setAttribute("text", "value", "Saved!");
       } catch (e) {
-        console.warn(e);
+        console.warn(`while saving remixed avatar ${this.avatar?.name} ${this.avatar?.avatar_id}:`, e);
         this.label.setAttribute("text", "value", "Error");
       }
 
