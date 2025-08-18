@@ -1,7 +1,8 @@
 import { addComponent, removeComponent } from "bitecs";
 import { CONSTANTS } from "three-ammo";
 import { Rigidbody } from "../bit-components";
-import { updateBodyParams } from "../inflators/rigid-body";
+import { validatePhysicsParams } from "../utils/validatePhysicsParams";
+
 const ACTIVATION_STATE = CONSTANTS.ACTIVATION_STATE,
   TYPE = CONSTANTS.TYPE;
 
@@ -30,24 +31,46 @@ AFRAME.registerComponent("body-helper", {
     type: { default: "dynamic", oneOf: [TYPE.STATIC, TYPE.DYNAMIC, TYPE.KINEMATIC] },
     emitCollisionEvents: { default: false },
     disableCollision: { default: false },
-    collisionFilterGroup: { default: 1 }, //32-bit mask,
-    collisionFilterMask: { default: 1 }, //32-bit mask
+    collisionFilterGroup: { default: 1 },
+    collisionFilterMask: { default: 1 },
     scaleAutoUpdate: { default: true }
   },
 
+  validateConfig(data) {
+    if (typeof data.mass !== "number" || isNaN(data.mass)) {
+      console.warn(`[body-helper] Invalid mass: ${data.mass}. Defaulting to 1.`);
+      data.mass = 1;
+    }
+
+    const validTypes = [TYPE.STATIC, TYPE.DYNAMIC, TYPE.KINEMATIC];
+    if (!validTypes.includes(data.type)) {
+      console.warn(`[body-helper] Invalid type: ${data.type}. Defaulting to dynamic.`);
+      data.type = TYPE.DYNAMIC;
+    }
+
+    if (!data.gravity || typeof data.gravity !== "object") {
+      console.warn("[body-helper] Invalid gravity vector. Using default gravity.");
+      data.gravity = { x: 0, y: -9.8, z: 0 };
+    }
+  },
+
   init: function () {
+    this.validateConfig(this.data);
+
     this.system = this.el.sceneEl.systems["hubs-systems"].physicsSystem;
     this.alive = true;
     this.el.object3D.updateMatrices();
     this.uuid = this.system.addBody(this.el.object3D, this.data);
+    this.data = validatePhysicsParams(this.data);
+
     const eid = this.el.object3D.eid;
     addComponent(APP.world, Rigidbody, eid);
-    updateBodyParams(eid, this.data);
-    Rigidbody.bodyId[eid] = this.uuid; //uuid is a lie, it's actually an int
+    Rigidbody.bodyId[eid] = this.uuid;
   },
 
   update: function (prevData) {
     if (prevData) {
+      this.validateConfig(this.data);
       const eid = this.el.object3D.eid;
       this.system.updateRigidBody(eid, this.data);
     }
@@ -60,3 +83,4 @@ AFRAME.registerComponent("body-helper", {
     this.alive = false;
   }
 });
+
