@@ -12,10 +12,12 @@ export default {
 export const Base = () => (
   <RoomLayout
     viewport={
-      <ContentMenu>
-        <ObjectsMenuButton />
-        <PeopleMenuButton />
-      </ContentMenu>
+      <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
+        <ContentMenu>
+          <ObjectsMenuButton />
+          <PeopleMenuButton />
+        </ContentMenu>
+      </div>
     }
   />
 );
@@ -23,10 +25,12 @@ export const Base = () => (
 export const Active = () => (
   <RoomLayout
     viewport={
-      <ContentMenu>
-        <ObjectsMenuButton active />
-        <PeopleMenuButton />
-      </ContentMenu>
+      <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
+        <ContentMenu>
+          <ObjectsMenuButton active />
+          <PeopleMenuButton />
+        </ContentMenu>
+      </div>
     }
   />
 );
@@ -34,9 +38,11 @@ export const Active = () => (
 export const OnlyPeople = () => (
   <RoomLayout
     viewport={
-      <ContentMenu>
-        <PeopleMenuButton />
-      </ContentMenu>
+      <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
+        <ContentMenu>
+          <PeopleMenuButton />
+        </ContentMenu>
+      </div>
     }
   />
 );

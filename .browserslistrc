@@ -1,11 +1,11 @@
-last 2 major versions
-not <= 0.5%
-not dead
-# No WebRTC support (including datachannel
-not ios_saf < 11
-not safari < 11
+# Modern browsers - macOS 10.15 (Safari 15.6, 2012 MacBook compat) and iOS 10 (Safari 10.1 iPhone 6 compat) minimum
+chrome >= 91 # This was the version of Chrome on Oculus Go devices when their support was sunset
+safari >= 10
+ios >= 10
+firefox >= 91  # Lowered to align with Safari 15 capabilities, bump to 115 (Wolvic on HTC) when possible
+edge >= 91
+# Exclude legacy browsers
 not ie >= 0
-not edge >= 0
 not ie_mob >= 0
 not and_uc >= 0
 # No WebGL or WebRTC support

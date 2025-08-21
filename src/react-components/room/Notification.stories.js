@@ -54,24 +54,26 @@ const entries = [
 export const Base = () => (
   <RoomLayout
     viewport={
-      <NotificationsContainer>
-        <div
-          style={{ alignItems: "center" }}
-          className={classNames(styles.presenceLog, styles["presenceLogPermission"])}
-        >
-          {entries.map(entry => {
-            return (
-              <PermissionMessage
-                key={entry.key}
-                permission={entry.permission}
-                className={classNames(entryClasses, styles.permission)}
-                body={entry.body}
-                isMod={false}
-              />
-            );
-          })}
-        </div>
-      </NotificationsContainer>
+      <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
+        <NotificationsContainer>
+          <div
+            style={{ alignItems: "center" }}
+            className={classNames(styles.presenceLog, styles["presenceLogPermission"])}
+          >
+            {entries.map(entry => {
+              return (
+                <PermissionMessage
+                  key={entry.key}
+                  permission={entry.permission}
+                  className={classNames(entryClasses, styles.permission)}
+                  body={entry.body}
+                  isMod={false}
+                />
+              );
+            })}
+          </div>
+        </NotificationsContainer>
+      </div>
     }
   />
 );

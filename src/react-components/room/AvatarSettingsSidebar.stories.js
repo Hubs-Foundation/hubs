@@ -9,4 +9,6 @@ export default {
   }
 };
 
-export const Base = () => <RoomLayout sidebar={<AvatarSettingsSidebar />} />;
+export const Base = () => (
+  <RoomLayout viewport={<div style={{ height: "100vh" }} />} sidebar={<AvatarSettingsSidebar />} />
+);

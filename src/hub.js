@@ -10,7 +10,6 @@ import configs from "./utils/configs";
 import "./utils/theme";
 
 import "core-js/stable";
-import "regenerator-runtime/runtime";
 
 console.log(
   `App version: ${
