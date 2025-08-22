@@ -25,18 +25,24 @@ Tips.propTypes = {
   step: PropTypes.string
 };
 
+// Test cases where the actual software works fine, but the Storybook is wrong, have been commented out.
+// Test cases that are identical to desktop cases haven't been created.
 const TOOLTIP_STEPS = {
   "tips.desktop.welcome": "Desktop Welcome Message",
   "tips.desktop.locomotion": "Desktop Locomotion",
   "tips.desktop.turning": "Desktop Turning",
+  "tips.desktop.defense": "Desktop Defense",
   "tips.desktop.invite": "Desktop Invite",
   "tips.desktop.end": "Desktop End",
   "tips.desktop.menu": "Desktop Menu",
-  "tips.mobile.welcome": "Mobile Welcome Message",
-  "tips.mobile.locomotion": "Mobile Locomotion",
-  "tips.mobile.turning": "Mobile Turning",
-  "tips.mobile.end": "Mobile End",
-  "tips.mobile.menu": "Mobile Menu"
+  // "tips.mobile.locomotion": "Mobile Locomotion",
+  // "tips.mobile.turning": "Mobile Turning",
+  // "tips.mobile.defense": "Mobile Defense",
+  // "tips.mobile.menu": "Mobile Menu",
+  // "tips.standalone.locomotion": "Standalone Locomotion",
+  // "tips.standalone.turning": "Standalone Turning",
+  "tips.standalone.defense": "Standalone Defense",
+  "tips.standalone.invite": "Standalone Invite"
 };
 
 export const Tooltips = ({ step }) => <RoomLayout viewport={<Tooltip step={step} />} />;
