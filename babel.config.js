@@ -32,12 +32,12 @@ module.exports = {
           "es.object.keys", // Native in all browsers since IE9
           "es.object.values", // Native in Chrome 54+, Safari 10.1+
           "es.object.entries", // Native in Chrome 54+, Safari 10.1+
-          // "es.array.flat", // Native in Chrome 69+, Safari 12+
-          // "es.array.flat-map", // Native in Chrome 69+, Safari 12+
+          "es.array.flat", // Native in Chrome 69+, Safari 12+
+          "es.array.flat-map", // Native in Chrome 69+, Safari 12+
           "es.string.pad-start", // Native in Chrome 57+, Safari 10+
           "es.string.pad-end", // Native in Chrome 57+, Safari 10+
-          // "es.string.trim-start", // Native in Chrome 66+, Safari 12+
-          // "es.string.trim-end", // Native in Chrome 66+, Safari 12+
+          "es.string.trim-start", // Native in Chrome 66+, Safari 12+
+          "es.string.trim-end", // Native in Chrome 66+, Safari 12+
           "es.map", // Native in Chrome 38+, Safari 9+
           "es.set", // Native in Chrome 38+, Safari 9+
           "es.weak-map", // Native in Chrome 36+, Safari 9+
@@ -46,10 +46,10 @@ module.exports = {
           "es.symbol.iterator", // Native in Chrome 38+, Safari 9+
           "es.regexp.flags", // Native in Chrome 62+, Safari 12+
           "es.regexp.to-string", // Native in Chrome 50+, Safari 10+
-          // "es.string.match-all", // Native in Chrome 73+, Safari 13+
-          // "es.string.replace-all", // Native in Chrome 85+, Safari 13.1+
-          // "es.promise.finally", // Native in Chrome 63+, Safari 11.1+
-          // "es.promise.all-settled", // Native in Chrome 76+, Safari 13+
+          "es.string.match-all", // Native in Chrome 73+, Safari 13+
+          "es.string.replace-all", // Native in Chrome 85+, Safari 13.1+
+          "es.promise.finally", // Native in Chrome 63+, Safari 11.1+
+          "es.promise.all-settled", // Native in Chrome 76+, Safari 13+
           "es.array.fill", // Native in Chrome 45+, Safari 9+
           "es.array.copy-within", // Native in Chrome 45+, Safari 9+
           "es.math.trunc", // Native in Chrome 38+, Safari 8+
@@ -58,9 +58,9 @@ module.exports = {
           "es.object.get-own-property-descriptors", // Native in Chrome 54+, Safari 10+
           "es.date.to-iso-string", // Native in all modern browsers
           "web.dom-collections.for-each", // Native in Chrome 58+, Safari 10+
-          "web.dom-collections.iterator" // Native in Chrome 38+, Safari 9+
-          // "web.url", // Native in Chrome 32+, Safari 14+
-          // "web.url-search-params" // Native in Chrome 49+, Safari 14+
+          "web.dom-collections.iterator", // Native in Chrome 38+, Safari 9+
+          "web.url", // Native in Chrome 32+, Safari 14+
+          "web.url-search-params" // Native in Chrome 49+, Safari 14+
         ],
         // Enable to see resolved targets and polyfills being used
         debug: false

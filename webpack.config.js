@@ -306,6 +306,9 @@ module.exports = async (env, argv) => {
         "linkify-it": path.resolve(__dirname, "./node_modules/linkify-it/index.js"),
         "hls.js": path.resolve(__dirname, "./node_modules/hls.js/dist/hls.js"),
         "url-toolkit": path.resolve(__dirname, "./node_modules/url-toolkit/src/url-toolkit.js"),
+        
+        // Fix for pdfjs-dist v4 ES module imports
+        "process/browser": path.resolve(__dirname, "./node_modules/process/browser.js"),
 
         // TODO these aliases are reequired because `three` only "exports" stuff in examples/jsm
         "three/examples/js/libs/basis/basis_transcoder.js": basisTranscoderPath,
@@ -324,7 +327,7 @@ module.exports = async (env, argv) => {
         stream: false,
         path: false
       },
-      extensions: [".ts", ".tsx", ".js", ".jsx"]
+      extensions: [".mjs", ".ts", ".tsx", ".js", ".jsx"]
     },
     entry: {
       support: path.join(__dirname, "src", "support.js"),
@@ -463,7 +466,7 @@ module.exports = async (env, argv) => {
             }
           }
         },
-        // On legacy browsers we want to show a "unsupported browser" page. That page needs to run on older browsers so w set the targeet to ie11.
+        // On legacy browsers we want to show a "unsupported browser" page. That page needs to run on older browsers so w set the target to ie11.
         // Note: We do not actually include any polyfills so the code in these files just needs to be written with bare minimum browser APIs
         {
           test: [
@@ -505,11 +508,15 @@ module.exports = async (env, argv) => {
           loader: "babel-loader"
         },
         // pdfjs uses features that break in IOS14, so we want to run it through babel https://github.com/mozilla/pdf.js/issues/14327
-        // TODO remove when iOS 16 is out as we support last 2 major versions in our .browserslistrc so this will become a noop in terms of fixing that error
+        // Also handle .mjs files from pdfjs-dist v4
         {
-          test: /\.js$/,
+          test: /\.(js|mjs)$/,
           include: [path.resolve(__dirname, "node_modules", "pdfjs-dist")],
-          loader: "babel-loader"
+          loader: "babel-loader",
+          type: "javascript/auto",
+          resolve: {
+            fullySpecified: false
+          }
         },
         {
           // We use babel to handle typescript so that features are correctly polyfilled for our targeted browsers. It also ends up being

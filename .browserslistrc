@@ -1,9 +1,9 @@
-# Modern browsers - macOS 10.15 (Safari 15.6, 2012 MacBook compat) and iOS 10 (Safari 10.1 iPhone 6 compat) minimum
-chrome >= 91 # This was the version of Chrome on Oculus Go devices when their support was sunset
-safari >= 10
-ios >= 10
+# Modern browsers - macOS 10.15 (Safari 15.6: 2012 MacBook compat) and iOS 14 (Safari 14.1: iPhone 6S, iPad Air 2 compat) minimum
+chrome >= 105 # Pico XR 4 device browser is 105, Meta Quest 1 is Chrome 112, HTC Vive (XRE|Focus Vision) is 121
+safari >= 14.1
+ios >= 14.5
 firefox >= 91  # Lowered to align with Safari 15 capabilities, bump to 115 (Wolvic on HTC) when possible
-edge >= 91
+edge >= 105 # last HoloLens 2 Chromium Edge build with working WebXR
 # Exclude legacy browsers
 not ie >= 0
 not ie_mob >= 0

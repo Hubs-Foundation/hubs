@@ -4,21 +4,22 @@
     "noImplicitAny": true,
     "strictNullChecks": true,
     "moduleResolution": "node",
-    "module": "es6",
-    "target": "es6",
+    "moduleDetection": "auto",
+    "module": "es2020",
+    "target": "es2020",
     "jsx": "react",
+    "allowSyntheticDefaultImports": true,
+    // TODO: enable and work through the many trivial issues
+    // "importsNotUsedAsValues": "error",
+    // "preserveValueImports": true,
+    // "strict": false,
     "allowJs": true,
     "noEmit": true,
     "isolatedModules": true,
     "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    "typeRoots": [
-      "./node_modules/@types",
-      "./types"
-    ]
+    "typeRoots": ["./node_modules/@types", "./types"]
   },
-  "include": [
-    "types/",
-    "src/"
-  ]
+  "include": ["types/", "src/"]
 }
