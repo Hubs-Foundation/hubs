@@ -292,6 +292,8 @@ module.exports = async (env, argv) => {
     },
     resolve: {
       alias: {
+        // Use troika-three-text ESM build to align with typings and modern bundling
+        "troika-three-text$": path.resolve(__dirname, "./node_modules/troika-three-text/dist/troika-three-text.esm.js"),
         // aframe and networked-aframe are still using commonjs modules. three and bitecs are peer dependanciees
         // but they are "smart" and have builds for both ESM and CJS depending on if import or require is used.
         // This forces the ESM version to be used otherwise we end up with multiple instances of the libraries,
@@ -381,6 +383,15 @@ module.exports = async (env, argv) => {
         ]
       },
       setupMiddlewares: (middlewares, { app }) => {
+        // Serve selected development assets directly from the source tree
+        app.get("/dev-assets/*", (req, res) => {
+          const rel = req.params[0];
+          const p = path.resolve(__dirname, "src", "assets", rel);
+          res.sendFile(p, err => {
+            if (err) res.status(404).send("Not found");
+          });
+        });
+
         // Local CORS proxy
         app.all("/cors-proxy/*", (req, res) => {
           res.header("Access-Control-Allow-Origin", "*");

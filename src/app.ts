@@ -76,7 +76,7 @@ export class App {
   entryManager?: SceneEntryManager;
   messageDispatch?: any;
   store: Store;
-  componentRegistry: { [key: string]: AComponent[] };
+  componentRegistry: Record<string, AComponent[]> = {};
 
   mediaSearchStore = new MediaSearchStore();
 
@@ -100,7 +100,7 @@ export class App {
   sid2str: Map<number, string | null>;
   nextSid = 1;
 
-  audioListener: AudioListener;
+  audioListener!: AudioListener;
 
   dialog = new DialogAdapter();
 
@@ -111,10 +111,10 @@ export class App {
   };
 
   fx: {
-    composer?: EffectComposer;
-    bloomAndTonemapPass?: EffectPass;
-    tonemapOnlyPass?: EffectPass;
-  } = {};
+    composer: EffectComposer | undefined;
+    bloomAndTonemapPass: EffectPass | undefined;
+    tonemapOnlyPass: EffectPass | undefined;
+  } = { composer: undefined, bloomAndTonemapPass: undefined, tonemapOnlyPass: undefined };
 
   constructor() {
     this.store = store;

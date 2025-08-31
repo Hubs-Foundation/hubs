@@ -1,43 +1,49 @@
 declare module "troika-three-text" {
-  import { Color, Material, Mesh } from "three";
+  import type { Mesh, Material, BufferGeometry } from "three";
 
-  export class Text extends Mesh {
-    text: string;
-    anchorX: number | `${number}%` | 'left' | 'center' | 'right';
-    anchorY: number | `${number}%` | 'top' | 'top-baseline' | 'top-cap' | 'top-ex' | 'middle' | 'bottom-baseline' | 'bottom';
-    clipRect: [number, number, number, number] | null;
-    color: string | number | Color | null;
-    curveRadius: number;
-    depthOffset: number;
-    direction: string;
-    fillOpacity: number;
-    font: string | null;
-    fontSize: number;
-    glyphGeometryDetail: number;
-    gpuAccelerateSDF: boolean;
-    letterSpacing: number;
-    lineHeight: number | 'normal';
-    material: Material | null;
-    maxWidth: number;
-    outlineBlur: number | `${number}%`;
-    outlineColor: string | number | Color;
-    outlineOffsetX: number | `${number}%`;
-    outlineOffsetY: number | `${number}%`;
-    outlineOpacity: number;
-    outlineWidth: number | `${number}%`;
-    overflowWrap: 'normal' | 'break-word';
-    sdfGlyphSize: number | null;
-    strokeColor: string | number | Color;
-    strokeOpacity: number;
-    strokeWidth: number | `${number}%`;
-    textAlign: 'left' | 'right' | 'center' | 'justify';
-    textIndent: number;
-    whiteSpace: 'normal' | 'nowrap';
-    sync(callback?: () => void): void;
+  export type FontSource = string | ArrayBuffer | ArrayBufferView;
+  export interface PreloadFontOptions {
+    font?: FontSource;
+    characters?: string;
+    sdfGlyphSize?: number;
   }
 
-  export const preloadFont: (
-    options: { font?: string; characters: string | string[]; sdfGlyphSize?: number },
-    callback: () => void
-  ) => void;
+  export function preloadFont(options: PreloadFontOptions | FontSource): Promise<void>;
+
+  export class Text extends Mesh<BufferGeometry, Material> {
+    text: string;
+    anchorX?: number | "left" | "center" | "right";
+    anchorY?: number | "top" | "top-baseline" | "top-cap" | "top-ex" | "middle" | "bottom-baseline" | "bottom";
+    font?: string | null;
+    fontSize?: number;
+    maxWidth?: number;
+    lineHeight?: number | "normal";
+    letterSpacing?: number;
+    textAlign?: "left" | "right" | "center" | "justify";
+    color?: number | string;
+    material: Material;
+    clipRect?: [number, number, number, number] | null;
+    curveRadius?: number;
+    depthOffset?: number;
+    direction?: "auto" | "ltr" | "trl";
+    fillOpacity?: number;
+    glyphGeometryDetail?: number;
+    gpuAccelerateSDF?: boolean;
+    opacity?: number;
+    outlineBlur?: number | `${number}%`;
+    outlineColor?: string;
+    outlineOffsetX?: number | `${number}%`;
+    outlineOffsetY?: number | `${number}%`;
+    outlineOpacity?: number;
+    outlineWidth?: number | `${number}%`;
+    overflowWrap?: "normal" | "break-word";
+    sdfGlyphSize?: number | null;
+    strokeColor?: string;
+    strokeOpacity?: number;
+    strokeWidth?: number | `${number}%`;
+    textIndent?: number;
+    whiteSpace?: "normal" | "nowrap";
+    sync(): void;
+  }
 }
+

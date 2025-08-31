@@ -78,7 +78,7 @@ interface VolumeButtonProps extends Attrs {
 function VolumeButton(props: VolumeButtonProps) {
   return (
     <Button3D
-      name={props.name}
+      name={props.name!}
       scale={SMALL_BUTTON_SCALE}
       width={BUTTON_WIDTH}
       height={BUTTON_HEIGHT}

@@ -76,7 +76,8 @@ module.exports = (env, argv) => {
       RETICULUM_SOCKET_SERVER: "hubs.local",
       CORS_PROXY_SERVER: "hubs-proxy.local:4000",
       NON_CORS_PROXY_DOMAINS: "hubs.local,dev.reticulum.io",
-      BASE_ASSETS_PATH: "https://hubs.local:8989/",
+      // Use relative publicPath so assets resolve on whichever host you open (localhost or hubs.local)
+      BASE_ASSETS_PATH: "",
       RETICULUM_SERVER: "hubs.local:4000",
       POSTGREST_SERVER: "",
       ITA_SERVER: "turkey",
@@ -151,7 +152,7 @@ module.exports = (env, argv) => {
       },
       host: process.env.HOST_IP || "0.0.0.0",
       port: process.env.PORT || "8989",
-      allowedHosts: [host, internalHostname],
+      allowedHosts: [host, internalHostname, "localhost"],
       headers: {
         "Access-Control-Allow-Origin": "*"
       },

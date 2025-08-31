@@ -17,6 +17,18 @@ import { NetworkedVideoSchema } from "./networked-video-schema";
 import { NetworkedWaypointSchema } from "./networked-waypoint-schema";
 import type { CursorBuffer, EntityID } from "./networking-types";
 
+function isNumberTypedArray(
+  value: unknown
+): value is ArrayLike<number> & { set(src: ArrayLike<number>): void } {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    ArrayBuffer.isView(value as any) &&
+    typeof (value as any).set === "function" &&
+    typeof (value as any).length === "number"
+  );
+}
+
 export interface StoredComponent {
   version: number;
   data: any;
@@ -50,16 +62,18 @@ schemas.set(NetworkedPDF, NetworkedPDFSchema);
 export const networkableComponents = Array.from(schemas.keys());
 
 export function read(prop: any, eid: EntityID) {
-  if (ArrayBuffer.isView(prop[eid])) {
-    return Array.from(prop[eid]);
+  const v = prop[eid];
+  if (isNumberTypedArray(v)) {
+    return Array.from(v);
   } else {
     return prop[$isStringType] ? APP.getString(prop[eid]) : prop[eid];
   }
 }
 
 export function write(prop: any, eid: EntityID, value: any) {
-  if (ArrayBuffer.isView(prop[eid])) {
-    prop[eid].set(value);
+  const v = prop[eid];
+  if (isNumberTypedArray(v)) {
+    v.set(value);
   } else {
     prop[eid] = prop[$isStringType] ? APP.getString(value) : value;
   }

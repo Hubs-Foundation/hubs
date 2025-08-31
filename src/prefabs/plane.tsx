@@ -18,5 +18,10 @@ export interface MeshBasicMaterialParams extends Attrs {
 }
 
 export function Plane({ width, height, material, name = "Plane", renderOrder, ...props }: PlaneParams) {
-  return <entity name={name} cursorRaycastable plane={{ width, height, material, renderOrder }} {...props} />;
+  const planeProps: any = {};
+  if (width !== undefined) planeProps.width = width;
+  if (height !== undefined) planeProps.height = height;
+  if (material !== undefined) planeProps.material = material;
+  if (renderOrder !== undefined) planeProps.renderOrder = renderOrder;
+  return <entity name={name} cursorRaycastable plane={planeProps} {...props} />;
 }

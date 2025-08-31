@@ -1,4 +1,4 @@
-import { AElement } from "aframe";
+import type { AComponent, AElement } from "aframe";
 import { Object3D, Vector3 } from "three";
 import { changeHub } from "../change-hub";
 import configs from "../utils/configs";
@@ -69,38 +69,45 @@ if (configs.feature("change_hub_near_room_links")) {
   console.log("Enabling automatic fast room switching when near room links.");
   AFRAME.registerComponent("change-hub-when-near", {
     init() {
-      this.state = State.notReady;
+      const self = this as unknown as Partial<AComponent> & {
+        state: State;
+        targetHubId: string;
+        avatarPov?: Object3D;
+        timer: number;
+      };
+      self.state = State.notReady;
 
-      tryGetHubId(this.el).then(hubId => {
+      tryGetHubId((this as any).el).then(hubId => {
         if (!hubId) {
           console.error("Failed to find target hub id for portal.");
           return;
         }
 
-        this.targetHubId = hubId;
-        this.avatarPov = (document.getElementById("avatar-pov-node") as AElement)?.object3D;
-        this.timer = 0;
-        this.state = State.idle;
+        self.targetHubId = hubId;
+        self.avatarPov = (document.getElementById("avatar-pov-node") as AElement)?.object3D;
+        self.timer = 0;
+        self.state = State.idle;
       });
     },
 
     tick(now) {
-      if (this.state === State.notReady || this.state === State.traveling) return;
+      const self = this as unknown as { state: State; avatarPov?: Object3D; timer: number; targetHubId: string; el: AElement };
+      if (self.state === State.notReady || self.state === State.traveling) return;
 
-      if (this.state === State.idle) {
-        if (isNearby(this.el.object3D, this.avatarPov)) {
-          this.state = State.nearby;
-          this.timer = now + DELAY_MS;
+      if (self.state === State.idle) {
+        if (self.avatarPov && isNearby(self.el.object3D, self.avatarPov)) {
+          self.state = State.nearby;
+          self.timer = now + DELAY_MS;
         }
-      } else if (this.state === State.nearby) {
-        if (now > this.timer) {
-          if (isNearby(this.el.object3D, this.avatarPov)) {
-            this.state = State.traveling;
-            changeHub(this.targetHubId).finally(() => {
-              this.state = State.idle;
+      } else if (self.state === State.nearby) {
+        if (now > self.timer) {
+          if (self.avatarPov && isNearby(self.el.object3D, self.avatarPov)) {
+            self.state = State.traveling;
+            changeHub(self.targetHubId).finally(() => {
+              self.state = State.idle;
             });
           } else {
-            this.state = State.idle;
+            self.state = State.idle;
           }
         }
       }
