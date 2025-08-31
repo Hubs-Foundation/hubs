@@ -157,21 +157,24 @@ const updateEmitter = (() => {
   ) => {
     setRay(ray, listenerPosition, emitterPosition);
 
-    // TODO: Reimplement the desired sorting of zones
-    const inOutParams = Array.from(emitterZones)
-      .filter(zoneEid => AudioZone.flags[zoneEid] & AUDIO_ZONE_FLAGS.IN_OUT)
-      .filter(exclude(listenerZones))
-      .filter(hasIntersection(ray))
-      .map(zone => getEmitterParams(zone))
-      .reduce(paramsReducer, null);
+    // Merge params in a single pass without creating intermediate arrays
+    let inOutParams: Partial<AudioSettings> | undefined = undefined;
+    for (const zoneEid of emitterZones) {
+      if (!(AudioZone.flags[zoneEid] & AUDIO_ZONE_FLAGS.IN_OUT)) continue;
+      if (listenerZones.has(zoneEid)) continue;
+      if (!hasIntersection(ray)(zoneEid)) continue;
+      const p = getEmitterParams(zoneEid);
+      if (p) inOutParams = paramsReducer(inOutParams, p);
+    }
 
-    // TODO: Reimplement the desired sorting of zones
-    const outInParams = Array.from(listenerZones)
-      .filter(zoneEid => AudioZone.flags[zoneEid] & AUDIO_ZONE_FLAGS.OUT_IN)
-      .filter(exclude(emitterZones))
-      .filter(hasIntersection(ray))
-      .map(zone => getEmitterParams(zone))
-      .reduce(paramsReducer, null);
+    let outInParams: Partial<AudioSettings> | undefined = undefined;
+    for (const zoneEid of listenerZones) {
+      if (!(AudioZone.flags[zoneEid] & AUDIO_ZONE_FLAGS.OUT_IN)) continue;
+      if (emitterZones.has(zoneEid)) continue;
+      if (!hasIntersection(ray)(zoneEid)) continue;
+      const p = getEmitterParams(zoneEid);
+      if (p) outInParams = paramsReducer(outInParams, p);
+    }
 
     if (!outInParams && !inOutParams) {
       restoreEmitterParams(emitterId);
@@ -182,22 +185,12 @@ const updateEmitter = (() => {
     } else {
       // In this case two zones ar acting over the same emitter simultaneously.
       // We apply the closest zone params with the lowest gain
-      applyEmitterParams(
-        emitterId,
-        Object.assign(
-          {},
-          inOutParams,
-          outInParams,
-          paramsReducer(
-            {
-              gain: outInParams?.gain
-            },
-            {
-              gain: inOutParams?.gain
-            }
-          )
-        )
-      );
+      const gains: Partial<AudioSettings> = {};
+      if (outInParams?.gain !== undefined) gains.gain = outInParams.gain;
+      if (inOutParams?.gain !== undefined) {
+        gains.gain = gains.gain !== undefined ? Math.min(gains.gain, inOutParams.gain) : inOutParams.gain;
+      }
+      applyEmitterParams(emitterId, Object.assign({}, inOutParams, outInParams, gains));
     }
   };
 })();
@@ -215,19 +208,22 @@ type ReducedAudioSettingsKeys = typeof REDUCED_KEYS[number];
 type ReducedAudioSettings = Pick<Partial<AudioSettings>, ReducedAudioSettingsKeys>;
 
 // We apply the most restrictive audio parameters
-const paramsReducer = (acc: Partial<AudioSettings>, curr: Partial<AudioSettings>): Partial<AudioSettings> => {
-  if (!curr && !acc) return {} as AudioSettings;
+const paramsReducer = (
+  acc: Partial<AudioSettings> | undefined,
+  curr: Partial<AudioSettings> | undefined
+): Partial<AudioSettings> | undefined => {
+  if (!curr && !acc) return undefined;
   else if (curr && !acc) return curr;
   else if (!curr && acc) return acc;
   else
     return REDUCED_KEYS.reduce(
       (result: ReducedAudioSettings, key: ReducedAudioSettingsKeys): Partial<AudioSettings> => {
-        if (curr[key] !== undefined && acc[key] !== undefined) {
-          result[key] = Math.min(acc[key]!, curr[key]!);
-        } else if (curr[key] !== undefined && acc[key] === undefined) {
-          result[key] = curr[key];
-        } else if (curr[key] === undefined && acc[key] !== undefined) {
-          result[key] = acc[key];
+        if (curr![key] !== undefined && acc![key] !== undefined) {
+          result[key] = Math.min(acc![key]!, curr![key]!);
+        } else if (curr![key] !== undefined && acc![key] === undefined) {
+          result[key] = curr![key]!;
+        } else if (curr![key] === undefined && acc![key] !== undefined) {
+          result[key] = acc![key]!;
         }
         return result;
       },
