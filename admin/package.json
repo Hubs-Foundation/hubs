@@ -25,6 +25,7 @@
     "check": "tsc",
     "storybook": "storybook dev -p 6007",
     "build-storybook": "storybook build"
+    "check": "tsc"
   },
   "dependencies": {
     "@iarna/toml": "^2.2.3",
