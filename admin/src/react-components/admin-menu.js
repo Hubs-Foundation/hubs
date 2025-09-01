@@ -29,17 +29,21 @@ const styles = () => ({
   root: {
     width: "100%",
     paddingTop: 0,
+    backgroundColor: "#222222",
+    minHeight: "100vh",
+    position: "sticky",
+    top: 0,
 
     "& .active": {
-      background: "#1700c7!important"
+      backgroundColor: "#1700c7 !important"
     },
 
     "& .active div span": {
-      color: "#ffffff!important"
+      color: "#ffffff !important"
     },
 
     "& .active svg": {
-      color: "#FFFFFF"
+      color: "#FFFFFF !important"
     },
 
     active: {
@@ -52,7 +56,10 @@ const styles = () => ({
   logo: {
     margin: 0,
     padding: 0,
-    background: "#222222;!important",
+    backgroundColor: "#222222 !important",
+    position: "sticky",
+    top: 0,
+    zIndex: 10,
 
     "& img": {
       padding: "0 12px 8px 12px",

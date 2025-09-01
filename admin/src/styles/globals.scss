@@ -33,3 +33,37 @@ button[type="button"] {
 * {
   box-sizing: border-box;
 }
+
+// Fix Material-UI v5 sidebar and layout issues
+.MuiDrawer-root {
+  .MuiDrawer-paper {
+    background-color: #222222 !important;
+    min-height: 100vh !important;
+    position: sticky !important;
+    top: 0 !important;
+    overflow-x: hidden !important;
+  }
+}
+
+// Ensure consistent layout
+.RaLayout-root {
+  display: flex !important;
+  min-height: 100vh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+// Fix main content area
+.RaLayout-content {
+  flex: 1 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+// Override any problematic Material-UI margins/padding
+.MuiBox-root {
+  &:first-child {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+}

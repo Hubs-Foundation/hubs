@@ -10,6 +10,20 @@
 .global_background {
   // need to override material
   background-color: $color-neutral-1 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  
+  // Fix Material-UI v5 layout issues
+  & .MuiBox-root {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+  
+  // Ensure main content area starts properly
+  & main {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
 }
 
 .card_section {
