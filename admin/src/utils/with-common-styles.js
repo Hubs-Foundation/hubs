@@ -4,9 +4,9 @@ const getCommon = theme => ({
   container: {
     paddingLeft: theme.spacing(2),
     paddingRight: theme.spacing(2),
-    [theme.breakpoints.up('sm')]: {
+    [theme.breakpoints.up("sm")]: {
       paddingLeft: theme.spacing(3),
-      paddingRight: theme.spacing(3),
+      paddingRight: theme.spacing(3)
     },
     ...theme.typography,
     display: "flex",
