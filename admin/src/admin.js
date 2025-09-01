@@ -72,11 +72,25 @@ const CustomNotification = props => {
 let itaSchemas;
 
 const theme = createTheme({
-  overrides: {
+  components: {
     MuiDrawer: {
-      docked: {
-        background: "#222222",
-        minHeight: "100vh"
+      styleOverrides: {
+        paper: {
+          backgroundColor: "#222222",
+          minHeight: "100vh",
+          position: "sticky",
+          top: 0,
+          overflowX: "hidden"
+        }
+      }
+    },
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          position: "sticky",
+          top: 0,
+          zIndex: 1100
+        }
       }
     }
   },
@@ -252,10 +266,15 @@ const HiddenAppBar = withStyles({
     "@media (min-width: 768px) and (min-height: 480px)": {
       display: "none"
     }
+  },
+  root: {
+    position: "sticky",
+    top: 0,
+    zIndex: 1100
   }
 })(props => {
   const { classes, ...other } = props;
-  return <AppBar {...other} className={classes.hideOnDesktop} />;
+  return <AppBar {...other} className={`${classes.hideOnDesktop} ${classes.root}`} />;
 });
 
 document.addEventListener("DOMContentLoaded", async () => {
