@@ -7,7 +7,7 @@ import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
 const styles = () => ({
   scrollWrapper: {
     position: "relative",
-    height: "100vh",
+    flex: 1,
     overflow: "hidden"
   },
   scrollContent: {

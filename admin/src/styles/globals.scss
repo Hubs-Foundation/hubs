@@ -97,21 +97,7 @@ button[type="button"] {
   }
 }
 
-// Ensure sidebar has proper scrolling with indicators
+// Ensure sidebar has proper styling without conflicting scrolling
 .MuiDrawer-paper {
   overflow: hidden !important;
-  
-  .MuiList-root {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    
-    // Hide scrollbars but keep functionality in ScrollableMenuWrapper
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    
-    &::-webkit-scrollbar {
-      display: none;
-    }
-  }
 }
