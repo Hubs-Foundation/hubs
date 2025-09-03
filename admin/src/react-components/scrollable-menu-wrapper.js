@@ -7,7 +7,7 @@ import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
 const styles = () => ({
   scrollWrapper: {
     position: "relative",
-    flex: 1,
+    height: "100vh",
     overflow: "hidden"
   },
   scrollContent: {
@@ -65,8 +65,18 @@ class ScrollableMenuWrapper extends Component {
   }
 
   componentDidMount() {
-    this.checkScrollIndicators();
+    // Use setTimeout to ensure DOM is fully rendered
+    setTimeout(() => {
+      this.checkScrollIndicators();
+    }, 100);
     window.addEventListener("resize", this.checkScrollIndicators);
+  }
+
+  componentDidUpdate() {
+    // Check again after any updates
+    setTimeout(() => {
+      this.checkScrollIndicators();
+    }, 100);
   }
 
   componentWillUnmount() {
@@ -78,8 +88,16 @@ class ScrollableMenuWrapper extends Component {
     if (!element) return;
 
     const { scrollTop, scrollHeight, clientHeight } = element;
-    const showTopIndicator = scrollTop > 10;
-    const showBottomIndicator = scrollTop + clientHeight < scrollHeight - 10;
+
+    // More precise detection - show indicators if there's content to scroll to
+    const canScrollUp = scrollTop > 5;
+    const canScrollDown = scrollTop + clientHeight < scrollHeight - 5;
+
+    // Only show indicators if content actually overflows
+    const hasOverflow = scrollHeight > clientHeight;
+
+    const showTopIndicator = hasOverflow && canScrollUp;
+    const showBottomIndicator = hasOverflow && canScrollDown;
 
     this.setState({
       showTopIndicator,
