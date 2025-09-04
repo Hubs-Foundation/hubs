@@ -19,7 +19,8 @@ import Collapse from "@material-ui/core/Collapse";
 import { getServiceDisplayName } from "../utils/ita";
 import configs from "../utils/configs";
 import { hasPaidFeature, isBrandingDisabled } from "../utils/feature_flags";
-import HubsLogo from "../assets/images/hubs_logo.png";
+// Use static asset path instead of import to avoid webpack processing
+const HubsLogo = "/images/hubs_logo.png";
 import ScrollableMenuWrapper from "./scrollable-menu-wrapper";
 
 const mapStateToProps = state => ({
@@ -60,7 +61,9 @@ const styles = () => ({
 
     "& img": {
       padding: "12px 12px 8px 12px",
-      width: "200px"
+      width: "200px",
+      maxWidth: "100%",
+      height: "auto"
     }
   },
   icon: {
