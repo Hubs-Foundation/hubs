@@ -19,10 +19,10 @@ const styles = () => ({
     }
   },
   bottomIndicator: {
-    position: "fixed",  // Fixed to viewport
+    position: "fixed",
     bottom: 0,
     left: 0,
-    width: "240px",  // Match inner sidebar container width
+    width: "240px",
     height: "40px",
     display: "flex",
     alignItems: "center",
@@ -30,7 +30,7 @@ const styles = () => ({
     background: "linear-gradient(to top, rgba(34, 34, 34, 0.9) 0%, rgba(34, 34, 34, 0.7) 70%, transparent 100%)",
     color: "#aaaaaa",
     pointerEvents: "none",
-    zIndex: 9999,  // Very high to ensure it's on top
+    zIndex: 9999,
     transition: "opacity 0.5s ease",
     opacity: 1
   },
