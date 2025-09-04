@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
-import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
 
 const styles = () => ({
@@ -19,33 +18,24 @@ const styles = () => ({
       display: "none"
     }
   },
-  scrollIndicator: {
-    position: "absolute",
+  bottomIndicator: {
+    position: "fixed",  // Fixed to viewport
+    bottom: 0,
     left: 0,
-    right: 0,
+    width: "240px",  // Match inner sidebar container width
     height: "40px",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    background: "linear-gradient(to transparent, rgba(34, 34, 34, 0.8))",
+    background: "linear-gradient(to top, rgba(34, 34, 34, 0.9) 0%, rgba(34, 34, 34, 0.7) 70%, transparent 100%)",
     color: "#aaaaaa",
     pointerEvents: "none",
-    zIndex: 10,
-    transition: "opacity 0.3s ease"
-  },
-  topIndicator: {
-    top: 0,
-    background: "linear-gradient(to bottom, rgba(34, 34, 34, 0.9) 0%, rgba(34, 34, 34, 0.7) 70%, transparent 100%)"
-  },
-  bottomIndicator: {
-    bottom: 0,
-    background: "linear-gradient(to top, rgba(34, 34, 34, 0.9) 0%, rgba(34, 34, 34, 0.7) 70%, transparent 100%)"
+    zIndex: 9999,  // Very high to ensure it's on top
+    transition: "opacity 0.5s ease",
+    opacity: 1
   },
   hidden: {
     opacity: 0
-  },
-  visible: {
-    opacity: 1
   }
 });
 
@@ -58,72 +48,64 @@ class ScrollableMenuWrapper extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      showTopIndicator: false,
-      showBottomIndicator: false
+      showBottomIndicator: true,
+      hasScrolled: false
     };
     this.scrollRef = React.createRef();
   }
 
   componentDidMount() {
-    // Use setTimeout to ensure DOM is fully rendered
-    setTimeout(() => {
-      this.checkScrollIndicators();
-    }, 100);
-    window.addEventListener("resize", this.checkScrollIndicators);
-  }
-
-  componentDidUpdate() {
-    // Check again after any updates
-    setTimeout(() => {
-      this.checkScrollIndicators();
-    }, 100);
+    // Check if we have overflow content
+    this.checkOverflow();
+    
+    // Listen for window resize
+    window.addEventListener('resize', this.checkOverflow);
   }
 
   componentWillUnmount() {
-    window.removeEventListener("resize", this.checkScrollIndicators);
+    window.removeEventListener('resize', this.checkOverflow);
   }
 
-  checkScrollIndicators = () => {
+  checkOverflow = () => {
     const element = this.scrollRef.current;
-    if (!element) return;
+    if (element) {
+      const hasOverflow = element.scrollHeight > element.clientHeight;
+      if (!hasOverflow || this.state.hasScrolled) {
+        // No overflow or already scrolled, hide the indicator
+        this.setState({ showBottomIndicator: false });
+      } else {
+        // Has overflow and hasn't scrolled yet
+        this.setState({ showBottomIndicator: true });
+      }
+    }
+  }
 
-    const { scrollTop, scrollHeight, clientHeight } = element;
-
-    // More precise detection - show indicators if there's content to scroll to
-    const canScrollUp = scrollTop > 5;
-    const canScrollDown = scrollTop + clientHeight < scrollHeight - 5;
-
-    // Only show indicators if content actually overflows
-    const hasOverflow = scrollHeight > clientHeight;
-
-    const showTopIndicator = hasOverflow && canScrollUp;
-    const showBottomIndicator = hasOverflow && canScrollDown;
-
-    this.setState({
-      showTopIndicator,
-      showBottomIndicator
-    });
+  handleScroll = () => {
+    // Hide the indicator on first scroll
+    if (!this.state.hasScrolled) {
+      this.setState({ 
+        showBottomIndicator: false,
+        hasScrolled: true 
+      });
+    }
   };
 
   render() {
     const { classes, children } = this.props;
-    const { showTopIndicator, showBottomIndicator } = this.state;
+    const { showBottomIndicator } = this.state;
 
     return (
       <div className={classes.scrollWrapper}>
-        <div ref={this.scrollRef} className={classes.scrollContent} onScroll={this.checkScrollIndicators}>
+        <div 
+          ref={this.scrollRef} 
+          className={classes.scrollContent}
+          onScroll={this.handleScroll}
+        >
           {children}
         </div>
         <div
-          className={`${classes.scrollIndicator} ${classes.topIndicator} ${
-            showTopIndicator ? classes.visible : classes.hidden
-          }`}
-        >
-          <KeyboardArrowUpIcon />
-        </div>
-        <div
-          className={`${classes.scrollIndicator} ${classes.bottomIndicator} ${
-            showBottomIndicator ? classes.visible : classes.hidden
+          className={`${classes.bottomIndicator} ${
+            !showBottomIndicator ? classes.hidden : ''
           }`}
         >
           <KeyboardArrowDownIcon />

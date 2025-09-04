@@ -34,38 +34,49 @@ button[type="button"] {
   box-sizing: border-box;
 }
 
-// Fix Material-UI v5 sidebar and layout issues
+// Basic Material-UI v4 layout fixes
+body {
+  margin: 0;
+  padding: 0;
+}
+
+#ui-root {
+  margin: 0;
+  padding: 0;
+}
+
+// Sidebar styles
 .MuiDrawer-root {
   .MuiDrawer-paper {
-    background-color: #222222 !important;
-    min-height: 100vh !important;
-    position: sticky !important;
-    top: 0 !important;
-    overflow-x: hidden !important;
+    background-color: #222222;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    overflow: hidden;
   }
 }
 
-// Ensure consistent layout
+// Ensure the layout doesn't interfere with sidebar height
 .RaLayout-root {
-  display: flex !important;
-  min-height: 100vh !important;
-  margin: 0 !important;
-  padding: 0 !important;
+  display: flex;
+  min-height: 100vh;
 }
 
-// Fix main content area
 .RaLayout-content {
-  flex: 1 !important;
-  padding: 0 !important;
-  margin: 0 !important;
+  flex: 1;
 }
 
-// Override any problematic Material-UI margins/padding
-.MuiBox-root {
-  &:first-child {
-    padding-top: 0 !important;
-    margin-top: 0 !important;
-  }
+// Fix for React Admin's appFrame that can affect sidebar initial render
+.RaLayout-appFrame {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.RaLayout-contentWithSidebar {
+  display: flex;
+  flex-grow: 1;
+  height: 100%;
 }
 
 // Content area scrolling for lists (Avatars, Scenes, etc)

@@ -15,7 +15,7 @@ import {
 } from "./utils/ita";
 import { detectIdle } from "./utils/idle-detector";
 import { connectToReticulum } from "hubs/src/utils/phoenix-utils";
-import { AppBar, Admin, Layout, Resource, Notification } from "react-admin";
+import { Admin, Layout, Resource, Notification } from "react-admin";
 import { postgrestClient, postgrestAuthenticatior } from "./utils/postgrest-data-provider";
 import { AdminMenu } from "./react-components/admin-menu";
 import { SceneList, SceneEdit } from "./react-components/scenes";
@@ -261,21 +261,6 @@ const mountUI = async (retPhxChannel, customRoutes, layout) => {
     </IntlProvider>
   );
 };
-const HiddenAppBar = withStyles({
-  hideOnDesktop: {
-    "@media (min-width: 768px) and (min-height: 480px)": {
-      display: "none"
-    }
-  },
-  root: {
-    position: "sticky",
-    top: 0,
-    zIndex: 1100
-  }
-})(props => {
-  const { classes, ...other } = props;
-  return <AppBar {...other} className={`${classes.hideOnDesktop} ${classes.root}`} />;
-});
 
 document.addEventListener("DOMContentLoaded", async () => {
   const socket = await connectToReticulum();
@@ -343,11 +328,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
   }
 
+  // Use standard React Admin Layout - will revisit gap issue in v4 upgrade
   const layout = props => (
     <Layout
       {...props}
       className="global_background"
-      appBar={HiddenAppBar}
+      appBar={() => null}
       menu={props => <AdminMenu {...props} services={schemaCategories} />}
     />
   );
