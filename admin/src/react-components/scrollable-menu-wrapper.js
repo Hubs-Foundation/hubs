@@ -57,13 +57,13 @@ class ScrollableMenuWrapper extends Component {
   componentDidMount() {
     // Check if we have overflow content
     this.checkOverflow();
-    
+
     // Listen for window resize
-    window.addEventListener('resize', this.checkOverflow);
+    window.addEventListener("resize", this.checkOverflow);
   }
 
   componentWillUnmount() {
-    window.removeEventListener('resize', this.checkOverflow);
+    window.removeEventListener("resize", this.checkOverflow);
   }
 
   checkOverflow = () => {
@@ -78,14 +78,14 @@ class ScrollableMenuWrapper extends Component {
         this.setState({ showBottomIndicator: true });
       }
     }
-  }
+  };
 
   handleScroll = () => {
     // Hide the indicator on first scroll
     if (!this.state.hasScrolled) {
-      this.setState({ 
+      this.setState({
         showBottomIndicator: false,
-        hasScrolled: true 
+        hasScrolled: true
       });
     }
   };
@@ -96,18 +96,10 @@ class ScrollableMenuWrapper extends Component {
 
     return (
       <div className={classes.scrollWrapper}>
-        <div 
-          ref={this.scrollRef} 
-          className={classes.scrollContent}
-          onScroll={this.handleScroll}
-        >
+        <div ref={this.scrollRef} className={classes.scrollContent} onScroll={this.handleScroll}>
           {children}
         </div>
-        <div
-          className={`${classes.bottomIndicator} ${
-            !showBottomIndicator ? classes.hidden : ''
-          }`}
-        >
+        <div className={`${classes.bottomIndicator} ${!showBottomIndicator ? classes.hidden : ""}`}>
           <KeyboardArrowDownIcon />
         </div>
       </div>

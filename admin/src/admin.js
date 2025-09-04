@@ -34,7 +34,7 @@ import { ContentCDN } from "./react-components/content-cdn";
 import { ImportContent } from "./react-components/import-content";
 import { AutoEndSessionDialog } from "./react-components/auto-end-session-dialog";
 import registerTelemetry from "hubs/src/telemetry";
-import { createTheme, withStyles } from "@material-ui/core/styles";
+import { createTheme } from "@material-ui/core/styles";
 import { UnauthorizedPage } from "./react-components/unauthorized";
 import { store } from "hubs/src/utils/store-instance";
 
