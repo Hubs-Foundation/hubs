@@ -12,7 +12,7 @@ const POSES = {
   pinch: "pinch"
 };
 
-const NETWORK_POSES = ["allOpen", "thumbDown", "indexDown", "mrpDown", "thumbsUp", "point", "allGrip", "pinch"];
+export const NETWORK_POSES = ["allOpen", "thumbDown", "indexDown", "mrpDown", "thumbsUp", "point", "allGrip", "pinch"];
 
 /**
  * Animates between poses based on networked pose state using an animation mixer.
