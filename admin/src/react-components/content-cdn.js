@@ -308,7 +308,7 @@ class ContentCDNComponent extends Component {
                   <b>WARNING - Do not &quot;add site&quot; to Cloudflare</b>, you only need to create workers)
                 </li>
                 <li>
-                  In <b>Home</b> tab, click on <b>Workers</b> panel. You&apos;ll be asked to create a workers subdomain.
+                  In the <b>Home</b> tab, click on the <b>Workers</b> side panel. You&apos;ll be asked to create a workers subdomain.
                 </li>
                 <li>
                   Enter your workers subdomain here:
@@ -324,14 +324,14 @@ class ContentCDNComponent extends Component {
                 {hasValidWorkerDomain && (
                   <>
                     <li>
-                      In the Workers Dashboard click <b>Create Worker</b>.
+                      In the Workers Dashboard click <b>Create a Service</b>.
                     </li>
                     <li>
-                      Enter the name for the worker (at the top, above the script) as:
+                      Enter the name for the service (at the top, above the script) as:
                       <div className={this.props.classes.command}>{this.state.workerInstanceName}-proxy</div>
                     </li>
                     <li>
-                      Paste, save, and deploy the following worker script for the worker.
+                      Paste, save, and deploy the following worker script for the worker using the <b>Quick edit Button</b>.
                       <br />
                       <textarea
                         className={this.props.classes.worker}
@@ -346,12 +346,12 @@ class ContentCDNComponent extends Component {
                       <br />
                     </li>
                     <li>
-                      Repeat the steps above and create and deploy a new worker with the same script. Name this new
-                      worker:
+                      Repeat the steps above and create and deploy a new service with the same script. Name this new
+                      service:
                       <div className={this.props.classes.command}>{this.state.workerInstanceName}-cors-proxy</div>
                     </li>
                     <li>
-                      Don&apos;t forget to save and <b>deploy</b> both scripts.
+                      Don&apos;t forget to <b>Save and Deploy</b> both scripts.
                     </li>
                     <li>
                       Verify your workers are working.{" "}
