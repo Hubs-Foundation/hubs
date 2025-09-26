@@ -35,7 +35,12 @@ The backend dev server is configured with CORS to only accept connections from "
 127.0.0.1	hubs-proxy.local
 ```
 
-Then visit https://hubs.local:8080 (note: HTTPS is required, you'll need to accept the warning for the self-signed SSL certificate)
+Then visit https://hubs.local:8080 (Note: HTTPS is required)
+
+To pass the HTTPS warning in your browser, you'll need to either:
+* accept the warning for the self-signed SSL certificate;
+* or, the root certificates, `RootCA.pem` and `RootCA.key` in the `certs` folder, can be used to generate a self-signed certificate for `hubs.local`; the root certificates are generated on first `npm run`; and, OpenSSL can be used to generate `crt` files. 
+
 
 > Note: When running the Hubs client locally, you will still connect to the development versions of the [reticulum](https://github.com/Hubs-Foundation/reticulum) server. This server does not allow being accessed outside of localhost. If you want to host your own Hubs servers, please check out [Hubs Community Edition](https://github.com/Hubs-Foundation/hubs-cloud/tree/master/community-edition).
 
