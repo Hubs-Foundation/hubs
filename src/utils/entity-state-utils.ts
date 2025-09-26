@@ -264,10 +264,10 @@ const TEST_ASSET_STATE =
   "https://raw.githubusercontent.com/Hubs-Foundation/hubs-sample-assets/main/Hubs%20Components/test_json/__NAME__";
 
 export async function loadState(hubChannel: HubChannel, world: HubsWorld, state: string) {
-  clearState(world, hubChannel);
+  clearState(world);
 
   const stateUrl = TEST_ASSET_STATE.replace("__NAME__", state);
-  console.log(stateUrl);
+
   const resp = await fetch(stateUrl);
   const entityStates: EntityStateList = await resp.json();
   entityStates.data.forEach(entityState => {
@@ -276,7 +276,7 @@ export async function loadState(hubChannel: HubChannel, world: HubsWorld, state:
   });
 }
 
-export function clearState(world: HubsWorld, hubChannel: HubChannel) {
+export function clearState(world: HubsWorld) {
   networkedQuery(world).forEach(eid => {
     if (isNetworkInstantiated(eid) && isPinned(eid)) {
       deleteTheDeletableAncestor(world, eid);
