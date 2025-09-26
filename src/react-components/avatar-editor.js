@@ -15,7 +15,9 @@ import { ensureAvatarMaterial } from "../utils/avatar-utils";
 import AvatarPreview from "./avatar-preview";
 import styles from "../assets/stylesheets/avatar-editor.scss";
 
+import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { getCustomGLTFParserURLResolver } from "../utils/media-url-utils";
 
 import dropdownArrowUrl from "../assets/images/dropdown_arrow.png";
 import dropdownArrow2xUrl from "../assets/images/dropdown_arrow@2x.png";
@@ -150,9 +152,18 @@ class AvatarEditor extends Component {
     e.preventDefault();
 
     if (this.inputFiles.glb && this.inputFiles.glb instanceof File) {
-      const gltfLoader = new GLTFLoader().register(parser => new GLTFBinarySplitterPlugin(parser));
       const gltfUrl = URL.createObjectURL(this.inputFiles.glb);
+      const loadingManager = new THREE.LoadingManager();
+      loadingManager.setURLModifier(getCustomGLTFParserURLResolver(gltfUrl));
+
+      const gltfLoader = new GLTFLoader(loadingManager).register(parser => new GLTFBinarySplitterPlugin(parser));
       const onProgress = console.log;
+
+      const dracoLoader = new DRACOLoader(loadingManager);
+
+      if (dracoLoader) {
+        gltfLoader.setDRACOLoader(dracoLoader);
+      }
 
       await new Promise((resolve, reject) => {
         // GLTFBinarySplitterPlugin saves gltf and bin in gltf.files
