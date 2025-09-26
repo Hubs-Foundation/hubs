@@ -429,6 +429,14 @@ const preferenceLabels = defineMessages({
     id: "preferences-screen.preference.disable-strafing",
     defaultMessage: "Disable strafing"
   },
+  enablePointerlock: {
+    id: "preferences-screen.preference.enable-pointerlock",
+    defaultMessage: "Enable locking mouse, which allows you to move camera infinitely"
+  },
+  enablePointerlockRawInput: {
+    id: "preferences-screen.preference.enable-pointerlock-raw-input",
+    defaultMessage: "When locking mouse is enabled, disable acceleration"
+  },
   disableTeleporter: {
     id: "preferences-screen.preference.disable-teleporter",
     defaultMessage: "Disable teleporter"
@@ -1081,6 +1089,14 @@ class PreferencesScreen extends Component {
           },
           {
             key: "disableTeleporter",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
+          },
+          {
+            key: "enablePointerlock",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
+          },
+          {
+            key: "enablePointerlockRawInput",
             prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
           },
           {
