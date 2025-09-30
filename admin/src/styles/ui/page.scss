@@ -10,20 +10,17 @@
 .global_background {
   // need to override material
   background-color: $color-neutral-1 !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  
-  // Fix Material-UI v5 layout issues
-  & .MuiBox-root {
-    padding-top: 0 !important;
-    margin-top: 0 !important;
-  }
-  
-  // Ensure main content area starts properly
-  & main {
-    padding-top: 0 !important;
-    margin-top: 0 !important;
-  }
+}
+
+.global_background main {
+  // Ensures the whole sidebar is the same color.
+  background-color: #222222;
+}
+
+// Ensure the scrolling indicators/scrollable area remains above the horizontal scroll bar, when the horizontal scroll barr is present.
+// Note: this doesn't seem to affect MacOS, but this is deemed acceptable because MacOS hides the horizontal scroll bar until you interact with it.
+.adminSidebar > .MuiDrawer-paper > div {
+  height: calc(100% - 3em);
 }
 
 .card_section {
