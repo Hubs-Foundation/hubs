@@ -24,7 +24,7 @@
     "test": "npm run lint",
     "check": "tsc",
     "storybook": "storybook dev -p 6007",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
     "check": "tsc"
   },
   "dependencies": {
