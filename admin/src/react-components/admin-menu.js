@@ -87,6 +87,15 @@ function getResourceDisplayName(resource) {
 }
 
 class Menu extends Component {
+  constructor(props) {
+    super(props);
+    this.sidebarScrollArea = null;
+    this.containerRef = React.createRef();
+    this.rafId = null;
+    this.attachAttemptsLeft = 5;
+    this.handleSidebarScrolling = this.handleSidebarScrolling.bind(this);
+  }
+
   renderService(service) {
     return (
       <ListItem
@@ -121,42 +130,68 @@ class Menu extends Component {
   }
 
   handleSidebarScrolling() {
-    const element = document.querySelector(".adminSidebar > div > div");
-    if (!element) {
-      return;
-    }
+    const element = this.sidebarScrollArea;
+    if (!element) return;
+
+    const topIndicator = document.querySelector(".adminSidebar .adminSidebarTopIndicator");
+    const bottomIndicator = document.querySelector(".adminSidebar .adminSidebarBottomIndicator");
+
     const elementScrollBottom = element.scrollHeight - element.clientHeight - element.scrollTop;
-    const adminSidebarTopIndicator = document.querySelector(".adminSidebar .adminSidebarTopIndicator");
-    const adminSidebarBottomIndicator = document.querySelector(".adminSidebar .adminSidebarBottomIndicator");
-    if (element.scrollTop < 22) {
-      adminSidebarTopIndicator.style.display = "none";
-    } else {
-      adminSidebarTopIndicator.style.display = "flex";
-    }
-    if (elementScrollBottom < 22) {
-      adminSidebarBottomIndicator.style.display = "none";
-    } else {
-      adminSidebarBottomIndicator.style.display = "flex";
-    }
+
+    if (topIndicator) topIndicator.style.display = element.scrollTop < 22 ? "none" : "flex";
+    if (bottomIndicator) bottomIndicator.style.display = elementScrollBottom < 22 ? "none" : "flex";
   }
 
   componentDidMount() {
-    const sidebarScrollArea = document.querySelector(".adminSidebar > .MuiDrawer-paper > div");
-    sidebarScrollArea.addEventListener("scroll", this.handleSidebarScrolling);
+    const getScrollableAncestor = node => {
+      let el = node?.parentElement || null;
+      while (el) {
+        const style = window.getComputedStyle(el);
+        const overflowY = style.overflowY;
+        const isScrollableY = overflowY === "auto" || overflowY === "scroll" || el.scrollHeight > el.clientHeight + 1;
+        if (isScrollableY) return el;
+        el = el.parentElement;
+      }
+      return null;
+    };
+
+    const tryAttach = () => {
+      if (this.sidebarScrollArea) return; // already attached
+      const container = this.containerRef.current;
+      const el = container ? getScrollableAncestor(container) : null;
+      if (el) {
+        this.sidebarScrollArea = el;
+        if (this.sidebarScrollArea.addEventListener) {
+          this.sidebarScrollArea.addEventListener("scroll", this.handleSidebarScrolling, { passive: true });
+        }
+        this.handleSidebarScrolling();
+        return;
+      }
+      if (this.attachAttemptsLeft > 0) {
+        this.attachAttemptsLeft -= 1;
+        this.rafId = requestAnimationFrame(tryAttach);
+      }
+    };
+
+    this.attachAttemptsLeft = 5;
+    tryAttach();
     window.addEventListener("resize", this.handleSidebarScrolling);
-    this.handleSidebarScrolling();
+    // Defer initial compute to ensure layout stabilized
+    this.rafId = requestAnimationFrame(this.handleSidebarScrolling);
   }
 
   componentWillUnmount() {
-    const sidebarScrollArea = document.querySelector(".adminSidebar > .MuiDrawer-paper > div");
-    sidebarScrollArea.removeEventListener("scroll", this.handleSidebarScrolling);
+    if (this.rafId) cancelAnimationFrame(this.rafId);
+    if (this.sidebarScrollArea && this.sidebarScrollArea.removeEventListener) {
+      this.sidebarScrollArea.removeEventListener("scroll", this.handleSidebarScrolling);
+    }
     window.removeEventListener("resize", this.handleSidebarScrolling);
   }
 
   render() {
     if (configs.ITA_SERVER == "turkey") {
       return (
-        <List className={this.props.classes.root}>
+        <List className={this.props.classes.root} ref={this.containerRef}>
           <ListItem className={this.props.classes.logo}>
             <img className={this.props.classes.logo} src={HubsLogo} />
           </ListItem>
@@ -249,7 +284,7 @@ class Menu extends Component {
       );
     } else {
       return (
-        <List className={this.props.classes.root}>
+        <List className={this.props.classes.root} ref={this.containerRef}>
           <ListItem className={this.props.classes.logo}>
             <img className={this.props.classes.logo} src={HubsLogo} />
           </ListItem>
