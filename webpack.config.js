@@ -350,7 +350,7 @@ module.exports = async (env, argv) => {
       filename: "assets/js/[name]-[chunkhash].js",
       publicPath: process.env.BASE_ASSETS_PATH || ""
     },
-    target: ["web", "es2020"], // use es2020 for modern browsers as defined in browserslistrc
+    target: ["web", "browserslist"], // defer to .browserslistrc for output targets
     devtool: argv.mode === "production" ? "source-map" : "inline-source-map",
     devServer: {
       client: {
@@ -477,8 +477,9 @@ module.exports = async (env, argv) => {
             }
           }
         },
-        // On legacy browsers we want to show a "unsupported browser" page. That page needs to run on older browsers so w set the target to ie11.
-        // Note: We do not actually include any polyfills so the code in these files just needs to be written with bare minimum browser APIs
+        // Unsupported browser page: compile to IE11-compatible syntax for legacy browsers
+        // TODO: Statically render the unsupported browser page, needs deeper thought given the localization maybe?
+        // Note: We do not include polyfills here, so these files should only use minimal browser APIs
         {
           test: [
             path.resolve(__dirname, "src", "utils", "configs.js"),
@@ -487,7 +488,8 @@ module.exports = async (env, argv) => {
           ],
           loader: "babel-loader",
           options: {
-            presets: ["@babel/react", ["@babel/env", { targets: { ie: 11 } }]],
+            // Target IE11 for this small set of files only
+            presets: ["@babel/preset-react", ["@babel/preset-env", { targets: { ie: 11 }, loose: true }]],
             plugins: require("./babel.config").plugins
           }
         },

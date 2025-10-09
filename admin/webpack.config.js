@@ -137,7 +137,7 @@ module.exports = (env, argv) => {
       filename: "assets/js/[name]-[chunkhash].js",
       publicPath: process.env.BASE_ASSETS_PATH || ""
     },
-    target: ["web", "es2020"], // use es2020 for modern browsers as defined in browserslistrc
+    target: ["web", "browserslist"], // defer to .browserslistrc for output targets
     devtool: argv.mode === "production" ? "source-map" : "inline-source-map",
     devServer: {
       client: {
