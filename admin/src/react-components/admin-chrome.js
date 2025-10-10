@@ -1,4 +1,4 @@
-import React from "react";
+import React from "react"; // Required by eslint react/react-in-jsx-scope
 import classNames from "classnames";
 import { withStyles } from "@material-ui/core/styles";
 import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp";
@@ -12,8 +12,8 @@ export const HiddenAppBar = withStyles({
     }
   }
 })(props => {
-  const { classes, ...other } = props;
-  return <AppBar {...other} className={classes.hideOnDesktop} />;
+  const { classes, className, ...appBarProps } = props;
+  return <AppBar {...appBarProps} className={classNames(classes.hideOnDesktop, className)} />;
 });
 
 export const AdminSidebar = withStyles({
@@ -37,13 +37,13 @@ export const AdminSidebar = withStyles({
     background: "linear-gradient(to top, rgba(0, 0, 0, 1.0) 0%, rgba(34, 34, 34, 0.7) 70%, transparent 100%)"
   }
 })(props => {
-  const { classes, ...other } = props;
+  const { classes, className, children, ...sidebarProps } = props;
   return (
-    <Sidebar className="adminSidebar">
+    <Sidebar {...sidebarProps} className={classNames("adminSidebar", className)}>
       <div className={classNames("adminSidebarTopIndicator", classes.sidebarScrollingIndicator, classes.topIndicator)}>
         <KeyboardArrowUpIcon />
       </div>
-      {other.children}
+      {children}
       <div
         className={classNames(
           "adminSidebarBottomIndicator",
