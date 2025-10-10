@@ -2,7 +2,12 @@ import { blue, green, amber } from "@material-ui/core/colors";
 
 const getCommon = theme => ({
   container: {
-    ...theme.mixins.gutters(),
+    paddingLeft: theme.spacing(2),
+    paddingRight: theme.spacing(2),
+    [theme.breakpoints.up("sm")]: {
+      paddingLeft: theme.spacing(3),
+      paddingRight: theme.spacing(3)
+    },
     ...theme.typography,
     display: "flex",
     flexWrap: "wrap",

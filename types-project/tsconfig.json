@@ -1,0 +1,14 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "allowJs": false,
+    "outDir": "../dist-types",
+    "rootDir": "../"
+  },
+  "include": ["../types/**/*.d.ts"],
+  "exclude": ["../admin", "../node_modules", "../dist"]
+}

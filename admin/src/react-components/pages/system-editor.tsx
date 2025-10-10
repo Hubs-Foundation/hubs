@@ -14,7 +14,8 @@ import { hasPaidFeature, isBrandingDisabled } from "../../utils/feature_flags";
 
 const styles = withCommonStyles(() => ({}));
 
-const SystemEditorComponent = ({ classes }) => {
+type Classes = Record<string, string>;
+const SystemEditorComponent: React.FC<{ classes: Classes }> = ({ classes }) => {
   const [adminInfo, setAdminInfo] = useState<AdminInfoT | null>(null);
   const [retConfig, setRetConfig] = useState<RetConfigT>({} as RetConfigT);
   const [reticulumMeta, setReticulumMeta] = useState<ReticulumMetaT>({} as ReticulumMetaT);

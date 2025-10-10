@@ -13,7 +13,57 @@ export type ReticulumMetaT = {
  */
 export type TiersT = "p0" | "p1" | "b1";
 
-export type PaidTiers = "p1" | "b1";
+export type PaidTiers = "p1" | "b1" | "b0";
+
+// Minimal shims for asset imports used in admin
+
+declare module "*.png" {
+  const src: string;
+  export default src;
+}
+declare module "*.frag" {
+  const src: string;
+  export default src;
+}
+declare module "*.vert" {
+  const src: string;
+  export default src;
+}
+
+// Global from networked-aframe; we don't consume its shape here
+declare const NAF: unknown;
+
+// Strong typing for admin runtime configs module imports
+declare module "../utils/configs" {
+  export type AdminConfigs = {
+    ITA_SERVER?: string;
+    DISABLE_BRANDING?: string;
+    TIER?: "p0" | "p1" | "b1" | "b0";
+    IS_LOCAL_OR_CUSTOM_CLIENT?: boolean;
+  } & Record<string, string | boolean | undefined>;
+  const configs: AdminConfigs;
+  export default configs;
+}
+declare module "../../utils/configs" {
+  export type AdminConfigs = {
+    ITA_SERVER?: string;
+    DISABLE_BRANDING?: string;
+    TIER?: "p0" | "p1" | "b1" | "b0";
+    IS_LOCAL_OR_CUSTOM_CLIENT?: boolean;
+  } & Record<string, string | boolean | undefined>;
+  const configs: AdminConfigs;
+  export default configs;
+}
+
+// Typed surface for specific cross-package imports used by admin TSX
+declare module "hubs/src/utils/phoenix-utils" {
+  export function fetchReticulumAuthenticated<T = unknown>(
+    url: string,
+    method?: "GET" | "POST" | "PUT" | "DELETE",
+    payload?: unknown
+  ): Promise<T>;
+  export function getReticulumFetchUrl(path: string, absolute?: boolean, host?: string | null, port?: string | null): string;
+}
 
 export type ReticulumRepoT = {
   accounts: {
@@ -55,3 +105,11 @@ export type ErrorT = {
   error: boolean;
   code: number;
 };
+/**
+ * Admin Type Declarations
+ *
+ * This file contains source-owned type declarations used by the admin app.
+ * It is not generated and should be versioned in git. Generated declarations
+ * (e.g., generated .d.ts under the src tree or in dist-types/) are ignored
+ * via .gitignore and should not be committed.
+ */

@@ -10,6 +10,7 @@ export default {
 
 export const Base = () => (
   <RoomLayout
+    viewport={<div style={{ height: "100vh" }} />}
     sidebar={
       <Sidebar title="Sidebar">
         <Column padding>Test</Column>

@@ -24,7 +24,8 @@ function* animateThenRemoveEntity(world: HubsWorld, eid: number): Coroutine {
     properties: [[obj.scale.clone(), END_SCALE]],
     durationMS: 400,
     easing: easeOutQuadratic,
-    fn: ([scale]: [Vector3]) => {
+    fn: values => {
+      const scale = values[0] as Vector3;
       obj.scale.copy(scale);
       obj.matrixNeedsUpdate = true;
     }

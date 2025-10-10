@@ -14,8 +14,8 @@ const frustumMatrix = new Matrix4();
 const box = new Box3();
 const boxTemp = new Box3();
 
-const expandBox = (child: Mesh) => {
-  if (child.geometry) {
+const expandBox = (child: Object3D) => {
+  if (child instanceof Mesh && child.geometry) {
     child.updateMatrices();
     child.geometry.computeBoundingBox();
     boxTemp.copy(child.geometry.boundingBox!).applyMatrix4(child.matrixWorld);

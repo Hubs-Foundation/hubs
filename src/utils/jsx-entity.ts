@@ -106,14 +106,7 @@ import { inflateObjectMenuTransform, ObjectMenuTransformParams } from "../inflat
 import { inflatePlane, PlaneParams } from "../inflators/plane";
 import { FollowInFovParams, inflateFollowInFov } from "../inflators/follow-in-fov";
 
-preload(
-  new Promise(resolve => {
-    preloadFont(
-      { characters: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_<()>[]|0123456789" },
-      resolve as () => void
-    );
-  })
-);
+preload(preloadFont({ characters: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_<()>[]|0123456789" }));
 
 const reservedAttrs = ["position", "rotation", "scale", "visible", "name", "layers"];
 
@@ -167,27 +160,33 @@ export function createElementEntity(
     return tag(attrs, children);
   } else if (tag === "entity") {
     const outputAttrs: Attrs = {};
-    const components: JSXComponentData & Attrs = {};
-    let ref = undefined;
+    const components: Partial<JSXComponentData> = {};
+    let ref: Ref | undefined = undefined;
 
     for (const attr in attrs) {
       if (isReservedAttr(attr)) {
-        outputAttrs[attr] = attrs[attr] as any;
+        if (attr === "position" && attrs.position !== undefined) outputAttrs.position = attrs.position;
+        else if (attr === "rotation" && attrs.rotation !== undefined) outputAttrs.rotation = attrs.rotation;
+        else if (attr === "scale" && attrs.scale !== undefined) outputAttrs.scale = attrs.scale;
+        else if (attr === "visible" && attrs.visible !== undefined) outputAttrs.visible = attrs.visible;
+        else if (attr === "name" && attrs.name !== undefined) outputAttrs.name = attrs.name;
+        else if (attr === "layers" && attrs.layers !== undefined) outputAttrs.layers = attrs.layers;
       } else if (attr === "ref") {
         ref = attrs[attr];
       } else {
         // if jsx transformed the attr into attr: true, change it to attr: {}.
         const c = attr as keyof JSXComponentData;
-        components[c] = attrs[c] === true ? {} : attrs[c];
+        (components as any)[c] = (attrs as any)[c] === true ? {} : (attrs as any)[c];
       }
     }
 
-    return {
+    const result = {
       attrs: outputAttrs,
-      components,
-      children: children.flat(),
-      ref
-    };
+      components: components as JSXComponentData,
+      children: children.flat()
+    } as EntityDef;
+    if (ref !== undefined) result.ref = ref;
+    return result;
   } else {
     throw new Error(`invalid tag "${tag}"`);
   }

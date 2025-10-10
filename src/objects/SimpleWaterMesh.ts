@@ -273,14 +273,14 @@ export class SimpleWaterMesh extends Mesh {
     this.waterUniforms.time.value = time;
   }
 
-  clone(recursive: boolean = true): this {
+  override clone(recursive: boolean = true): this {
     return new (<any>this.constructor)(this.waterMaterial.normalMap, this.resolution, this.lowQuality).copy(
       this,
       recursive
     );
   }
 
-  copy(source: this, recursive: boolean = true) {
+  override copy(source: this, recursive: boolean = true) {
     super.copy(source, recursive);
 
     this.opacity = source.opacity;

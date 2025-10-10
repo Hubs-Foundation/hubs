@@ -29,17 +29,18 @@ const styles = () => ({
   root: {
     width: "100%",
     paddingTop: 0,
+    backgroundColor: "#222222",
 
     "& .active": {
-      background: "#1700c7!important"
+      backgroundColor: "#1700c7 !important"
     },
 
     "& .active div span": {
-      color: "#ffffff!important"
+      color: "#ffffff !important"
     },
 
     "& .active svg": {
-      color: "#FFFFFF"
+      color: "#FFFFFF !important"
     },
 
     active: {
@@ -52,7 +53,7 @@ const styles = () => ({
   logo: {
     margin: 0,
     padding: 0,
-    background: "#222222;!important",
+    backgroundColor: "#222222 !important",
 
     "& img": {
       padding: "0 12px 8px 12px",
@@ -70,13 +71,6 @@ const styles = () => ({
       // Used to override typography
       color: "#eeeeee",
       fontSize: 14
-    },
-
-    "@media (max-width: 599.95px) and (min-width: 0px)": {
-      // Used to override typography on mobile
-      "& span ": {
-        color: "#333333"
-      }
     }
   },
   nested: {
@@ -93,6 +87,15 @@ function getResourceDisplayName(resource) {
 }
 
 class Menu extends Component {
+  constructor(props) {
+    super(props);
+    this.sidebarScrollArea = null;
+    this.containerRef = React.createRef();
+    this.rafId = null;
+    this.attachAttemptsLeft = 5;
+    this.handleSidebarScrolling = this.handleSidebarScrolling.bind(this);
+  }
+
   renderService(service) {
     return (
       <ListItem
@@ -126,10 +129,69 @@ class Menu extends Component {
     );
   }
 
+  handleSidebarScrolling() {
+    const element = this.sidebarScrollArea;
+    if (!element) return;
+
+    const topIndicator = document.querySelector(".adminSidebar .adminSidebarTopIndicator");
+    const bottomIndicator = document.querySelector(".adminSidebar .adminSidebarBottomIndicator");
+
+    const elementScrollBottom = element.scrollHeight - element.clientHeight - element.scrollTop;
+
+    if (topIndicator) topIndicator.style.display = element.scrollTop < 22 ? "none" : "flex";
+    if (bottomIndicator) bottomIndicator.style.display = elementScrollBottom < 22 ? "none" : "flex";
+  }
+
+  componentDidMount() {
+    const getScrollableAncestor = node => {
+      let el = node?.parentElement || null;
+      while (el) {
+        const style = window.getComputedStyle(el);
+        const overflowY = style.overflowY;
+        const isScrollableY = overflowY === "auto" || overflowY === "scroll" || el.scrollHeight > el.clientHeight + 1;
+        if (isScrollableY) return el;
+        el = el.parentElement;
+      }
+      return null;
+    };
+
+    const tryAttach = () => {
+      if (this.sidebarScrollArea) return; // already attached
+      const container = this.containerRef.current;
+      const el = container ? getScrollableAncestor(container) : null;
+      if (el) {
+        this.sidebarScrollArea = el;
+        if (this.sidebarScrollArea.addEventListener) {
+          this.sidebarScrollArea.addEventListener("scroll", this.handleSidebarScrolling, { passive: true });
+        }
+        this.handleSidebarScrolling();
+        return;
+      }
+      if (this.attachAttemptsLeft > 0) {
+        this.attachAttemptsLeft -= 1;
+        this.rafId = requestAnimationFrame(tryAttach);
+      }
+    };
+
+    this.attachAttemptsLeft = 5;
+    tryAttach();
+    window.addEventListener("resize", this.handleSidebarScrolling);
+    // Defer initial compute to ensure layout stabilized
+    this.rafId = requestAnimationFrame(this.handleSidebarScrolling);
+  }
+
+  componentWillUnmount() {
+    if (this.rafId) cancelAnimationFrame(this.rafId);
+    if (this.sidebarScrollArea && this.sidebarScrollArea.removeEventListener) {
+      this.sidebarScrollArea.removeEventListener("scroll", this.handleSidebarScrolling);
+    }
+    window.removeEventListener("resize", this.handleSidebarScrolling);
+  }
+
   render() {
     if (configs.ITA_SERVER == "turkey") {
       return (
-        <List className={this.props.classes.root}>
+        <List className={this.props.classes.root} ref={this.containerRef}>
           <ListItem className={this.props.classes.logo}>
             <img className={this.props.classes.logo} src={HubsLogo} />
           </ListItem>
@@ -222,7 +284,7 @@ class Menu extends Component {
       );
     } else {
       return (
-        <List className={this.props.classes.root}>
+        <List className={this.props.classes.root} ref={this.containerRef}>
           <ListItem className={this.props.classes.logo}>
             <img className={this.props.classes.logo} src={HubsLogo} />
           </ListItem>

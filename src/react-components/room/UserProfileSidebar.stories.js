@@ -11,6 +11,7 @@ export default {
 
 export const AllPermissions = () => (
   <RoomLayout
+    viewport={<div style={{ height: "100vh" }} />}
     sidebar={
       <UserProfileSidebar
         displayName="Robert"
@@ -28,6 +29,7 @@ export const AllPermissions = () => (
 
 export const CanDemote = () => (
   <RoomLayout
+    viewport={<div style={{ height: "100vh" }} />}
     sidebar={
       <UserProfileSidebar
         displayName="Robert"
@@ -45,12 +47,14 @@ export const CanDemote = () => (
 
 export const CanUnhide = () => (
   <RoomLayout
+    viewport={<div style={{ height: "100vh" }} />}
     sidebar={<UserProfileSidebar displayName="Robert" pronouns="he/him" volume={4} isSignedIn canHide isHidden />}
   />
 );
 
 export const NotSignedIn = () => (
   <RoomLayout
+    viewport={<div style={{ height: "100vh" }} />}
     sidebar={
       <UserProfileSidebar
         displayName="Robert"
@@ -68,20 +72,28 @@ export const NotSignedIn = () => (
 
 export const NotSignedInCanDemote = () => (
   <RoomLayout
+    viewport={<div style={{ height: "100vh" }} />}
     sidebar={<UserProfileSidebar displayName="Robert" pronouns="he/him" volume={4} canHide canKick canMute canDemote />}
   />
 );
 
 export const NotSignedInCanUnhide = () => (
-  <RoomLayout sidebar={<UserProfileSidebar displayName="Robert" pronouns="he/him" volume={4} canHide isHidden />} />
+  <RoomLayout
+    viewport={<div style={{ height: "100vh" }} />}
+    sidebar={<UserProfileSidebar displayName="Robert" pronouns="he/him" volume={4} canHide isHidden />}
+  />
 );
 
 export const NoPermissions = () => (
-  <RoomLayout sidebar={<UserProfileSidebar displayName="Robert" pronouns="he/him" volume={4} />} />
+  <RoomLayout
+    viewport={<div style={{ height: "100vh" }} />}
+    sidebar={<UserProfileSidebar displayName="Robert" pronouns="he/him" volume={4} />}
+  />
 );
 
 export const NetworkMuted = () => (
   <RoomLayout
+    viewport={<div style={{ height: "100vh" }} />}
     sidebar={
       <UserProfileSidebar
         displayName="Robert"
@@ -99,6 +111,7 @@ export const NetworkMuted = () => (
 
 export const LocalMuted = () => (
   <RoomLayout
+    viewport={<div style={{ height: "100vh" }} />}
     sidebar={
       <UserProfileSidebar
         displayName="Robert"
@@ -116,6 +129,7 @@ export const LocalMuted = () => (
 
 export const ShowBackButton = () => (
   <RoomLayout
+    viewport={<div style={{ height: "100vh" }} />}
     sidebar={
       <UserProfileSidebar
         displayName="Robert"

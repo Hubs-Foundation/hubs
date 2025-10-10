@@ -175,6 +175,66 @@ export function getLandingPageForPhoto(photoUrl) {
   return getReticulumFetchUrl(parsedUrl.pathname.replace(".png", ".html") + parsedUrl.search, true);
 }
 
+// (reserved) small data URL helper kept for future placeholders
+
+function assetUrl(relPath) {
+  // served by devServer middleware added in webpack.config.js
+  return `${location.origin}/dev-assets/${relPath}`;
+}
+
+function buildFallbackMediaEntries(source) {
+  const previewImage = {
+    type: "image",
+    url: assetUrl("background.jpg"),
+    width: 1280,
+    height: 720
+  };
+  const previewVideo = {
+    type: "mp4",
+    url: assetUrl("video/home.mp4"),
+    width: 1280,
+    height: 720
+  };
+
+  if (source === "rooms") {
+    return Array.from({ length: 6 }).map((_, i) => ({
+      type: "room",
+      id: `local-room-${i + 1}`,
+      name: `Local Demo Room ${i + 1}`,
+      url: `/hub.html?hub_id=local-demo-${i + 1}`,
+      member_count: Math.floor(Math.random() * 5),
+      images: { preview: i % 2 ? previewVideo : previewImage }
+    }));
+  }
+
+  if (source === "scene_listings" || source === "scenes") {
+    return Array.from({ length: 4 }).map((_, i) => ({
+      type: "scene_listing",
+      id: `local-scene-${i + 1}`,
+      name: `Local Demo Scene ${i + 1}`,
+      url: `#`,
+      allow_remixing: false,
+      images: { preview: previewImage }
+    }));
+  }
+
+  if (source === "avatar_listings" || source === "avatars") {
+    return Array.from({ length: 4 }).map((_, i) => ({
+      type: source === "avatars" ? "avatar" : "avatar_listing",
+      id: `local-avatar-${i + 1}`,
+      name: `Local Demo Avatar ${i + 1}`,
+      url: `#`,
+      images: { preview: { ...previewImage, height: 1024, width: 768 } },
+      gltfs: {
+        base: assetUrl("models/DefaultAvatar.glb"),
+        avatar: assetUrl("models/DefaultAvatar.glb")
+      }
+    }));
+  }
+
+  return [];
+}
+
 export function fetchReticulumAuthenticatedWithToken(token, url, method = "GET", payload) {
   const retUrl = getReticulumFetchUrl(url);
   const params = {
@@ -187,15 +247,94 @@ export function fetchReticulumAuthenticatedWithToken(token, url, method = "GET",
   if (payload) {
     params.body = JSON.stringify(payload);
   }
-  return fetch(retUrl, params).then(async r => {
-    const result = await r.text();
+
+  const tryParse = async text => {
     try {
-      return JSON.parse(result);
+      return JSON.parse(text);
     } catch {
-      // Some reticulum responses, particularly DELETE requests, don't return json.
-      return result;
+      return text;
     }
-  });
+  };
+
+  // Local-dev short-circuit: provide stubs without issuing a network request
+  try {
+    if (process.env.RETICULUM_SERVER) {
+      const u = new URL(url, location.origin);
+      // Media search stubs (rooms, scenes, avatars)
+      if (u.pathname === "/api/v1/media/search") {
+        const source = u.searchParams.get("source") || "";
+        return Promise.resolve({
+          entries: buildFallbackMediaEntries(source),
+          meta: { next_cursor: null },
+          suggestions: []
+        });
+      }
+      // Meta stub used by admin for initial page load
+      if (u.pathname === "/api/v1/meta") {
+        return Promise.resolve({
+          version: "local-stub",
+          pool: "dev",
+          phx_host: "hubs.local",
+          phx_port: "4000",
+          repo: {
+            accounts: { any: true, admin: true },
+            storage: { in_quota: true },
+            scene_listings: { any: true, default: true, featured: false },
+            avatar_listings: { any: true, base: true, default: true, featured: false }
+          }
+        });
+      }
+      // Avatar details stub
+      if (u.pathname.startsWith("/api/v1/avatars")) {
+        if (method === "GET") {
+          const parts = u.pathname.split("/");
+          const id = parts[parts.length - 1] || "local-avatar";
+          const thumb = assetUrl("background.jpg");
+          const gltf = assetUrl("models/DefaultAvatar.glb");
+          return Promise.resolve({
+            avatars: [
+              {
+                avatar_id: id,
+                name: `Local Avatar ${id}`,
+                files: { thumbnail: thumb },
+                base_gltf_url: gltf,
+                gltf_url: gltf,
+                attributions: { creator: "Local" }
+              }
+            ]
+          });
+        } else if (method === "POST") {
+          return Promise.resolve({ ok: true });
+        }
+      }
+    }
+  } catch {
+    // ignore URL parse issues in dev stub check
+  }
+
+  return fetch(retUrl, params)
+    .then(async r => {
+      const result = await r.text();
+      return tryParse(result);
+    })
+    .catch(err => {
+      // In local development, if the configured server is unreachable or CORS fails,
+      // provide minimal stub responses so the UI can render for visual inspection.
+      if (process.env.RETICULUM_SERVER) {
+        const u = new URL(url, location.origin);
+        if (u.pathname === "/api/v1/media/search") {
+          const source = u.searchParams.get("source") || "";
+          return {
+            entries: buildFallbackMediaEntries(source),
+            meta: { next_cursor: null },
+            suggestions: []
+          };
+        }
+      }
+      console.warn("fetchReticulumAuthenticated fallback due to error:", err);
+      // Generic empty fallback
+      return { entries: [], meta: { next_cursor: null }, suggestions: [] };
+    });
 }
 export function fetchReticulumAuthenticated(url, method = "GET", payload) {
   return fetchReticulumAuthenticatedWithToken(store.state.credentials.token, url, method, payload);

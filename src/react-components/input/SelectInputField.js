@@ -22,6 +22,9 @@ function getSelectedItem(value, options) {
 }
 
 function getItemLabel(item) {
+  if (item === null || item === undefined) {
+    return "";
+  }
   return typeof item === "object" ? item.label || item.value : item;
 }
 
@@ -34,7 +37,7 @@ export function SelectInputField({
   label,
   onChange,
   value,
-  options,
+  options = [],
   fullWidth,
   ...rest
 }) {
@@ -117,8 +120,4 @@ SelectInputField.propTypes = {
   ).isRequired,
   onChange: PropTypes.func,
   fullWidth: PropTypes.bool
-};
-
-SelectInputField.defaultProps = {
-  options: []
 };

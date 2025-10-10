@@ -22,7 +22,7 @@ interface PDFPageButtonProps extends Attrs {
 function PDFPageButton(props: PDFPageButtonProps) {
   return (
     <Button3D
-      name={props.name}
+      name={props.name!}
       scale={BIG_BUTTON_SCALE}
       width={BUTTON_WIDTH}
       height={BUTTON_HEIGHT}

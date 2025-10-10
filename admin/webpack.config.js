@@ -76,7 +76,8 @@ module.exports = (env, argv) => {
       RETICULUM_SOCKET_SERVER: "hubs.local",
       CORS_PROXY_SERVER: "hubs-proxy.local:4000",
       NON_CORS_PROXY_DOMAINS: "hubs.local,dev.reticulum.io",
-      BASE_ASSETS_PATH: "https://hubs.local:8989/",
+      // Use relative publicPath so assets resolve on whichever host you open (localhost or hubs.local)
+      BASE_ASSETS_PATH: "",
       RETICULUM_SERVER: "hubs.local:4000",
       POSTGREST_SERVER: "",
       ITA_SERVER: "turkey",
@@ -101,6 +102,15 @@ module.exports = (env, argv) => {
         three$: path.resolve(__dirname, "./node_modules/three/build/three.module.js"),
         bitecs$: path.resolve(__dirname, "./node_modules/bitecs/dist/index.mjs"),
 
+        // UMD libraries that need explicit module resolution to work with ES6 imports
+        // These are resolved relative to the parent hubs directory since admin imports from hubs
+        "js-cookie": path.resolve(__dirname, "../node_modules/js-cookie/src/js.cookie.js"),
+        "jwt-decode": path.resolve(__dirname, "../node_modules/jwt-decode/lib/index.js"),
+        "event-target-shim": path.resolve(__dirname, "../node_modules/event-target-shim/dist/event-target-shim.mjs"),
+        "linkify-it": path.resolve(__dirname, "../node_modules/linkify-it/index.js"),
+        "hls.js": path.resolve(__dirname, "../node_modules/hls.js/dist/hls.js"),
+        "url-toolkit": path.resolve(__dirname, "../node_modules/url-toolkit/src/url-toolkit.js"),
+
         // TODO these aliases are reequired because `three` only "exports" stuff in examples/jsm
         "three/examples/js/libs/basis/basis_transcoder.js": basisTranscoderPath,
         "three/examples/js/libs/draco/gltf/draco_wasm_wrapper.js": dracoWasmWrapperPath,
@@ -109,11 +119,14 @@ module.exports = (env, argv) => {
       },
       // Allows using symlinks in node_modules
       symlinks: false,
+      // Add modules resolution paths to prefer parent node_modules
+      modules: [path.resolve(__dirname, "node_modules"), path.resolve(__dirname, "../node_modules"), "node_modules"],
       fallback: {
         fs: false,
         buffer: require.resolve("buffer/"),
-        stream: require.resolve("stream-browserify"),
-        path: require.resolve("path-browserify")
+        // Modern browsers have these APIs natively, no need for polyfills
+        stream: false,
+        path: false
       },
       extensions: [".ts", ".tsx", ".js", ".jsx"]
     },
@@ -124,6 +137,7 @@ module.exports = (env, argv) => {
       filename: "assets/js/[name]-[chunkhash].js",
       publicPath: process.env.BASE_ASSETS_PATH || ""
     },
+    target: ["web", "browserslist"], // defer to .browserslistrc for output targets
     devtool: argv.mode === "production" ? "source-map" : "inline-source-map",
     devServer: {
       client: {
@@ -138,7 +152,7 @@ module.exports = (env, argv) => {
       },
       host: process.env.HOST_IP || "0.0.0.0",
       port: process.env.PORT || "8989",
-      allowedHosts: [host, internalHostname],
+      allowedHosts: [host, internalHostname, "localhost"],
       headers: {
         "Access-Control-Allow-Origin": "*"
       },
@@ -177,7 +191,10 @@ module.exports = (env, argv) => {
           loader: "babel-loader",
           options: require("../babel.config"),
           exclude: function (modulePath) {
-            return /node_modules/.test(modulePath) && !/node_modules\/hubs/.test(modulePath);
+            return (
+              (/node_modules/.test(modulePath) && !/node_modules\/hubs/.test(modulePath)) ||
+              /node_modules\/hubs\/node_modules\/core-js/.test(modulePath)
+            );
           }
         },
         {
@@ -187,7 +204,10 @@ module.exports = (env, argv) => {
           loader: "babel-loader",
           options: require("../babel.config"),
           exclude: function (modulePath) {
-            return /node_modules/.test(modulePath) && !/node_modules\/hubs/.test(modulePath);
+            return (
+              (/node_modules/.test(modulePath) && !/node_modules\/hubs/.test(modulePath)) ||
+              /node_modules\/hubs\/node_modules\/core-js/.test(modulePath)
+            );
           }
         },
         // TODO worker-loader has been deprecated, but we need "inline" support which is not available yet

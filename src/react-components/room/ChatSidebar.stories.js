@@ -40,6 +40,7 @@ const nextTimestamp = (function () {
 
 export const Base = args => (
   <RoomLayout
+    viewport={<div style={{ height: "100vh" }} />}
     sidebar={
       <ChatSidebar>
         <ChatMessageList>
@@ -49,9 +50,9 @@ export const Base = args => (
             sender="Dom"
             timestamp={nextTimestamp()}
             messages={[
-              { type: "chat", body: "Hello!" },
-              { type: "chat", body: "This is a really long message that should cause a new line." },
-              { type: "image", body: { src: imgSrc } }
+              { id: "1", key: "1", type: "chat", body: "Hello!" },
+              { id: "2", key: "2", type: "chat", body: "This is a really long message that should cause a new line." },
+              { id: "3", key: "3", type: "image", body: { src: imgSrc } }
             ]}
           />
           <ChatMessageGroup
@@ -59,11 +60,11 @@ export const Base = args => (
             sender="Robert"
             timestamp={nextTimestamp()}
             messages={[
-              { type: "chat", body: "Hello!" },
-              { type: "chat", body: "This is a really long message that should cause a new line." },
-              { type: "video", body: { src: videoSrc } },
-              { type: "chat", body: "Another message" },
-              { type: "chat", body: "One last message" }
+              { id: "4", key: "4", type: "chat", body: "Hello!" },
+              { id: "5", key: "5", type: "chat", body: "This is a really long message that should cause a new line." },
+              { id: "6", key: "6", type: "video", body: { src: videoSrc } },
+              { id: "7", key: "7", type: "chat", body: "Another message" },
+              { id: "8", key: "8", type: "chat", body: "One last message" }
             ]}
           />
           <SystemMessage type="join" presence="room" name="John" timestamp={nextTimestamp()} />
@@ -71,40 +72,60 @@ export const Base = args => (
             sender="John"
             timestamp={nextTimestamp()}
             messages={[
-              { type: "chat", body: "https://hubsfoundation.org" },
-              { type: "chat", body: "Test message with url. https://demo.hubsfoundation.org Best site :point_up:" },
-              { type: "chat", body: ":thumbsup:" }
+              {
+                id: "9",
+                key: "9",
+                type: "chat",
+                body: "https://hubsfoundation.org"
+              },
+              {
+                id: "10",
+                key: "10",
+                type: "chat",
+                body: "Test message with url. https://demo.hubsfoundation.org Best site :point_up:"
+              },
+              {
+                id: "11",
+                key: "11",
+                type: "chat",
+                body: ":thumbsup:"
+              }
             ]}
           />
           <SystemMessage type="join" presence="room" name="Liv" timestamp={nextTimestamp()} />
           <SystemMessage type="join" presence="room" name="Robin" timestamp={nextTimestamp()} />
-          <ChatMessageGroup sender="Liv" timestamp={nextTimestamp()} messages={[{ type: "chat", body: ":clap:" }]} />
+          <ChatMessageGroup
+            sender="Liv"
+            timestamp={nextTimestamp()}
+            messages={[{ id: "12", key: "12", type: "chat", body: ":clap:" }]}
+          />
           <ChatMessageGroup
             sender="Robin"
             timestamp={nextTimestamp()}
-            messages={[{ type: "chat", body: '`console.log("Hello World")`' }]}
+            messages={[{ id: "13", key: "13", type: "chat", body: '`console.log("Hello World")`' }]}
           />
           <ChatMessageGroup
             sent
             sender="Robert"
             timestamp={nextTimestamp()}
             messages={[
-              { type: "chat", body: "https://hubsfoundation.org" },
-              { type: "chat", body: "Test message with url. https://hubsfoundation.org" }
+              { id: "14", key: "14", type: "chat", body: "https://hubsfoundation.org" },
+              { id: "15", key: "15", type: "chat", body: "Test message with url. https://hubsfoundation.org" }
             ]}
           />
           <PermissionMessageGroup
             sent
             timestamp={nextTimestamp()}
             messages={[
-              { type: "permission", body: { permission: "voice_chat", status: false } },
-              { type: "permission", body: { permission: "text_chat", status: true } }
+              { key: "16", id: "16", type: "permission", body: { permission: "voice_chat", status: false } },
+              { key: "17", id: "17", type: "permission", body: { permission: "text_chat", status: true } }
             ]}
             permissionMessage
           />
         </ChatMessageList>
         {!!args.textChatEnabled && <PermissionNotification permission={"text_chat"} isMod={false} />}
         <ChatInput
+          id="chat-input"
           afterInput={
             <>
               <EmojiPickerPopoverButton onSelectEmoji={emoji => console.log(emoji)} />

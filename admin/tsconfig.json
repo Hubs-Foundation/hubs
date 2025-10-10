@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "target": "es2020",
+    "module": "es2020",
+    "moduleResolution": "node",
+    "jsx": "react-jsx",
+    "allowJs": true,
+    "checkJs": false,
+    "noEmit": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "useUnknownInCatchVariables": true,
+    "noImplicitOverride": true,
+    "exactOptionalPropertyTypes": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": [
+    "src/react-components/shared/Card.tsx",
+    "src/react-components/shared/CardSection.tsx",
+    "src/react-components/pages/system-editor.tsx",
+    "types.d.ts",
+    "../types/**/*.d.ts"
+  ],
+  "references": [{ "path": "../types-project" }],
+  "exclude": ["dist", "node_modules"]
+}

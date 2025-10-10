@@ -202,7 +202,7 @@ const avatar = {
   images: {
     preview: {
       height: 1280,
-      url: "https://hubs-upload-cdn.com/files/deba29fc-f238-4df6-ae04-7eb460133f94.png",
+      url: backgroundUrl,
       width: 720
     }
   },

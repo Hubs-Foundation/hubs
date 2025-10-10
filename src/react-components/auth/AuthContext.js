@@ -64,8 +64,7 @@ export function StorybookAuthContextProvider({ children }) {
 }
 
 StorybookAuthContextProvider.propTypes = {
-  children: PropTypes.node,
-  store: PropTypes.object.isRequired
+  children: PropTypes.node
 };
 
 export function AuthContextProvider({ children, store }) {

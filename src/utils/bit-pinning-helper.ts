@@ -14,8 +14,8 @@ const _pinElement = async (hubChannel: HubChannel, world: HubsWorld, eid: Entity
   try {
     await createEntityState(hubChannel, world, eid);
     takeOwnership(world, eid);
-  } catch (e) {
-    if (e.reason === "invalid_token") {
+  } catch (e: any) {
+    if (e?.reason === "invalid_token") {
       // TODO: Sign out and sign in again
       console.log("PinningHelper: Pin failed due to invalid token, signing out and trying again", e);
     } else {

@@ -118,7 +118,7 @@ export function PeopleSidebar({
       return a.hand_raised ? -1 : 1;
     });
   me && filteredPeople.unshift(me);
-  const store = window.APP.store;
+  const store = window.APP?.store || { _preferences: { avatarVoiceLevels: {} } };
 
   function getToolTipDescription(isMuted) {
     return intl.formatMessage(toolTipDescription, { mutedState: isMuted ? "muted" : "not muted" });
