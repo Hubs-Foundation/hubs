@@ -9,4 +9,12 @@ export default {
   }
 };
 
-export const Base = () => <RoomLayout modal={<SpectatingLabel name="Robert Long" />} />;
+export const Base = () => (
+  <RoomLayout
+    viewport={
+      <div style={{ position: "relative", width: "100%", height: "100vh", background: "#020202" }}>
+        <SpectatingLabel name="Robert Long" />
+      </div>
+    }
+  />
+);
