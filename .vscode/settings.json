@@ -1,0 +1,21 @@
+{
+  // Format on save for Prettier
+  "editor.formatOnSave": true,
+  // Using the prettier-vscode plugin as the old eslint integration has been deprecated. More here: https://github.com/prettier/prettier-vscode/issues/870
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[html]": {
+    "editor.defaultFormatter": "vscode.html-language-features" // Set to esbenp.prettier-vscode when we are ready to reformat all HTML files
+  }
+}
