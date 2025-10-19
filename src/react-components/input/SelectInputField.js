@@ -23,6 +23,9 @@ function getSelectedItem(value, options) {
 
 function getItemLabel(item) {
   if (item === null || item === undefined) {
+    console.warn(
+      "Cannot get the label for the selected item for this SelectInputField because there is no selected item.  This probably indicates a bug somewhere, unless you're rendering one of the Storybook stories for the SelectInputField control that contains controls with no default selected item."
+    );
     return "";
   }
   return typeof item === "object" ? item.label || item.value : item;
