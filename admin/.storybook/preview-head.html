@@ -1,0 +1,25 @@
+<!-- Admin Storybook Preview Head -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link
+  rel="preconnect"
+  href="https://fonts.gstatic.com"
+  crossorigin="true"
+/>
+<link
+  href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap"
+  rel="stylesheet"
+/>
+<style>
+  /* Remove default Storybook padding for admin layout stories */
+  .sb-show-main {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  /* Ensure full height for layout testing */
+  body, html, #storybook-root {
+    margin: 0 !important;
+    padding: 0 !important;
+    height: 100vh !important;
+  }
+</style>

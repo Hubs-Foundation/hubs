@@ -15,7 +15,7 @@ import {
 } from "./utils/ita";
 import { detectIdle } from "./utils/idle-detector";
 import { connectToReticulum } from "hubs/src/utils/phoenix-utils";
-import { AppBar, Admin, Layout, Resource, Notification } from "react-admin";
+import { Admin, Layout, Resource, Notification } from "react-admin";
 import { postgrestClient, postgrestAuthenticatior } from "./utils/postgrest-data-provider";
 import { AdminMenu } from "./react-components/admin-menu";
 import { SceneList, SceneEdit } from "./react-components/scenes";
@@ -34,9 +34,10 @@ import { ContentCDN } from "./react-components/content-cdn";
 import { ImportContent } from "./react-components/import-content";
 import { AutoEndSessionDialog } from "./react-components/auto-end-session-dialog";
 import registerTelemetry from "hubs/src/telemetry";
-import { createMuiTheme, withStyles } from "@material-ui/core/styles";
 import { UnauthorizedPage } from "./react-components/unauthorized";
 import { store } from "hubs/src/utils/store-instance";
+import { HiddenAppBar, AdminSidebar } from "./react-components/admin-chrome";
+import { adminTheme } from "./admin-theme";
 
 const qs = new URLSearchParams(location.hash.split("?")[1]);
 
@@ -71,27 +72,7 @@ const CustomNotification = props => {
 
 let itaSchemas;
 
-const theme = createMuiTheme({
-  overrides: {
-    MuiDrawer: {
-      docked: {
-        background: "#222222",
-        minHeight: "100vh"
-      }
-    }
-  },
-  palette: {
-    primary: {
-      main: "#1700c7"
-    },
-    secondary: {
-      main: "#000000"
-    }
-  },
-  typography: {
-    fontFamily: "Inter,Arial"
-  }
-});
+const theme = adminTheme;
 
 class AdminUI extends Component {
   static propTypes = {
@@ -247,16 +228,7 @@ const mountUI = async (retPhxChannel, customRoutes, layout) => {
     </IntlProvider>
   );
 };
-const HiddenAppBar = withStyles({
-  hideOnDesktop: {
-    "@media (min-width: 768px) and (min-height: 480px)": {
-      display: "none"
-    }
-  }
-})(props => {
-  const { classes, ...other } = props;
-  return <AppBar {...other} className={classes.hideOnDesktop} />;
-});
+// HiddenAppBar and AdminSidebar imported from ./react-components/admin-chrome
 
 document.addEventListener("DOMContentLoaded", async () => {
   const socket = await connectToReticulum();
@@ -330,6 +302,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       className="global_background"
       appBar={HiddenAppBar}
       menu={props => <AdminMenu {...props} services={schemaCategories} />}
+      sidebar={AdminSidebar}
     />
   );
 

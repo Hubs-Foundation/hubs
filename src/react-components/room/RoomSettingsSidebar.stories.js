@@ -43,5 +43,8 @@ const room = {
 };
 
 export const Base = () => (
-  <RoomLayout sidebar={<RoomSettingsSidebar room={room} onSubmit={e => console.log(e)} canChangeScene />} />
+  <RoomLayout
+    viewport={<div style={{ height: "100vh" }} />}
+    sidebar={<RoomSettingsSidebar room={room} onSubmit={e => console.log(e)} canChangeScene />}
+  />
 );

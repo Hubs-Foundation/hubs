@@ -48,9 +48,12 @@ Tooltips.argTypes = {
     control: {
       type: "select",
       labels: TOOLTIP_STEPS
-    },
-    defaultValue: Object.keys(TOOLTIP_STEPS)[0]
+    }
   }
+};
+
+Tooltips.args = {
+  step: Object.keys(TOOLTIP_STEPS)[0]
 };
 
 Tooltips.propTypes = {

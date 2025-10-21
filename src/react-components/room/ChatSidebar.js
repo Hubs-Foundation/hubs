@@ -453,7 +453,11 @@ export function ChatMessageGroup({ sent, sender, timestamp, messages }) {
       <p className={styles.messageGroupLabel}>
         {sender} | <FormattedRelativeTime updateIntervalInSeconds={10} value={(timestamp - Date.now()) / 1000} />
       </p>
-      <ul className={styles.messageGroupMessages}>{messages.map(message => getMessageComponent(message, intl))}</ul>
+      <ul className={styles.messageGroupMessages}>
+        {messages.map(message => (
+          <li key={message.id}>{getMessageComponent(message, intl)}</li>
+        ))}
+      </ul>
     </li>
   );
 }
@@ -474,15 +478,17 @@ export function PermissionMessageGroup({ sent, timestamp, messages }) {
       </p>
       <ul className={styles.messageGroupMessages}>
         {messages.map(message => (
-          <MessageBubble key={message.id} permission>
-            {permissionMessage(
-              {
-                permission: message.body.permission,
-                status: message.body.status
-              },
-              intl
-            )}
-          </MessageBubble>
+          <li key={message.id}>
+            <MessageBubble permission>
+              {permissionMessage(
+                {
+                  permission: message.body.permission,
+                  status: message.body.status
+                },
+                intl
+              )}
+            </MessageBubble>
+          </li>
         ))}
       </ul>
     </li>
