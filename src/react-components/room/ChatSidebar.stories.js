@@ -51,7 +51,7 @@ export const Base = args => (
             timestamp={nextTimestamp()}
             messages={[
               { id: "1", key: "1", type: "chat", body: "Hello!" },
-              { id: "2", key: "2", type: "chat", body: "This is a really long message that should cause a new line." },
+              { id: "2", key: "2", type: "chat", body: "This is a really long message that should cause a new line, so it needs to contain a lot of verbiage." },
               { id: "3", key: "3", type: "image", body: { src: imgSrc } }
             ]}
           />
@@ -61,7 +61,7 @@ export const Base = args => (
             timestamp={nextTimestamp()}
             messages={[
               { id: "4", key: "4", type: "chat", body: "Hello!" },
-              { id: "5", key: "5", type: "chat", body: "This is a really long message that should cause a new line." },
+              { id: "5", key: "5", type: "chat", body: "This is a really long message that should cause a new line, so it needs to contain a lot of verbiage." },
               { id: "6", key: "6", type: "video", body: { src: videoSrc } },
               { id: "7", key: "7", type: "chat", body: "Another message" },
               { id: "8", key: "8", type: "chat", body: "One last message" }
@@ -89,7 +89,13 @@ export const Base = args => (
                 key: "11",
                 type: "chat",
                 body: ":thumbsup:"
-              }
+              },
+              {
+                id: "10",
+                key: "10",
+                type: "chat",
+                body: "Really long test message with url, to test line breaking. https://demo.hubsfoundation.org Woo!"
+              },
             ]}
           />
           <SystemMessage type="join" presence="room" name="Liv" timestamp={nextTimestamp()} />
@@ -110,7 +116,12 @@ export const Base = args => (
             timestamp={nextTimestamp()}
             messages={[
               { id: "14", key: "14", type: "chat", body: "https://hubsfoundation.org" },
-              { id: "15", key: "15", type: "chat", body: "Test message with url. https://hubsfoundation.org" }
+              {
+                id: "21",
+                key: "21",
+                type: "chat",
+                body: "Another really long test message with url. https://hubsfoundation.org So where does the line break?"
+              }
             ]}
           />
           <PermissionMessageGroup
