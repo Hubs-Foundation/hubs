@@ -24,8 +24,7 @@
     "test": "npm run lint",
     "check": "tsc",
     "storybook": "storybook dev -p 6007",
-    "build-storybook": "storybook build",
-    "check": "tsc"
+    "build-storybook": "storybook build"
   },
   "dependencies": {
     "@iarna/toml": "^2.2.3",

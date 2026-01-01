@@ -57,7 +57,9 @@ jspm_packages/
 # Ignore dist folder with webpack build output
 dist/
 dist-types/
+# local storybook files
 storybook-static/
+admin/storybook-static/
 webpack-stats.json
 spritesheet.json
 spritesheet.png
@@ -66,6 +68,13 @@ spritesheet.png
 # Generated type declarations from local builds (source types live under /types)
 src/**/*.d.ts
 
+# Admin
+admin/node_modules/
+admin/dist/
+admin/build_output.log
+
+# Reticulum
+reticulum/
 .DS_Store
 
 certs/

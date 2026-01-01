@@ -14,6 +14,7 @@
   },
   "scripts": {
     "info": "npm-scripts-info",
+    "dependencies": "git config --local core.hooksPath .githooks/ || true",
     "start": "webpack serve --mode=development --env loadAppConfig=1",
     "dev": "webpack serve --mode=development --env remoteDev=1 --progress",
     "local": "webpack serve --mode=development --env localDev=1",
@@ -113,7 +114,7 @@
     "node-ensure": "0.0.0",
     "normalize.css": "^8.0.1",
     "path-browserify": "^1.0.1",
-    "pdfjs-dist": "4.1.392",
+    "pdfjs-dist": "5.4.394",
     "phoenix": "github:gfodor/phoenix-js#master",
     "postprocessing": "^6.28.7",
     "prop-types": "^15.7.2",

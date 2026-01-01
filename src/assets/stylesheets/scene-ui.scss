@@ -49,7 +49,7 @@
   width: clamp(200px, 100%, 17vw);
   display: block;
   filter: drop-shadow(0 0 4px theme.$text-inverted-color);
-  
+
   img {
     width: 100%;
   }
@@ -68,6 +68,7 @@
   align-items: center;
   align-self: center;
   text-align: center;
+  z-index: 0;
   @media (min-width: theme.$breakpoint-lg) {
     align-items: flex-start;
     align-self: left;
@@ -132,7 +133,7 @@
   display: flex;
   flex-direction: row;
   border: 1px solid #007AB8;
-  background-color: #007AB8; 
+  background-color: #007AB8;
   color: theme.$text5-color;
   box-sizing: border-box;
   border-radius: 13px;

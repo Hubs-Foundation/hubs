@@ -155,6 +155,9 @@ class Menu extends Component {
       return null;
     };
 
+    // The Drawer that wraps <Sidebar> defers attaching the scrollable `<div>` that actually receives the
+    // overflow styles until after the first paint. On the initial frame the ancestor walk returns `null`,
+    // so we retry a handful of times via rAF to ensure we subscribe once Material-UI finishes mounting.
     const tryAttach = () => {
       if (this.sidebarScrollArea) return; // already attached
       const container = this.containerRef.current;

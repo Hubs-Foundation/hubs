@@ -36,7 +36,7 @@ export function* loadPageJob(
   const viewport = page!.getViewport({ scale: 3 });
   (material.map!.image as HTMLCanvasElement).width = viewport.width;
   (material.map!.image as HTMLCanvasElement).height = viewport.height;
-  const renderTask = page!.render({ canvasContext, viewport, intent: "print" });
+  const renderTask = page!.render({ canvasContext, viewport, intent: "print", canvas: (material.map!.image as HTMLCanvasElement) });
   yield renderTask.promise;
   material.map!.needsUpdate = true;
   material.needsUpdate = true;
