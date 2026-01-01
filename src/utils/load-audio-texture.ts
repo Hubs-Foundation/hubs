@@ -27,7 +27,7 @@ export async function loadAudioTexture(
 
   return new Promise((resolve, reject) => {
     let pollTimeout: ReturnType<typeof setTimeout>;
-    const failLoad = function (e: Event) {
+    const failLoad = function (e: Event | string) {
       videoEl.onerror = null;
       clearTimeout(pollTimeout);
       reject(e);

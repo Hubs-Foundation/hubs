@@ -2,8 +2,8 @@ import { LinearFilter, Texture } from "three";
 import { Mapping, TextureDataType, TextureFilter, PixelFormat, Wrapping } from "three";
 
 export class HubsVideoTexture extends Texture {
-  isVideoTexture: boolean;
-  wasPaused: boolean;
+  isVideoTexture!: boolean;
+  wasPaused: boolean = false;
   video: HTMLVideoElement;
 
   constructor(
@@ -42,7 +42,7 @@ export class HubsVideoTexture extends Texture {
     }
   }
 
-  clone(): any {
+  override clone(): any {
     return new HubsVideoTexture(this.video, !this.isVideoTexture && this.image.data).copy(this);
   }
 

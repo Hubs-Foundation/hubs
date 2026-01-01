@@ -36,9 +36,6 @@ build/Release
 node_modules/
 jspm_packages/
 
-# Typescript v1 declaration files
-typings/
-
 # Optional npm cache directory
 .npm
 
@@ -60,11 +57,24 @@ typings/
 # Ignore dist folder with webpack build output
 dist/
 dist-types/
-
 # local storybook files
 storybook-static/
 admin/storybook-static/
+webpack-stats.json
+spritesheet.json
+spritesheet.png
+/.github/workflows/*.disabled
 
+# Generated type declarations from local builds (source types live under /types)
+src/**/*.d.ts
+
+# Admin
+admin/node_modules/
+admin/dist/
+admin/build_output.log
+
+# Reticulum
+reticulum/
 .DS_Store
 
 certs/

@@ -24,7 +24,7 @@ export function inflateMirror(world: HubsWorld, eid: number, params: MirrorParam
   params = Object.assign({}, DEFAULTS, params);
   const geometry = DEFAULT_MIRROR_GEOMETRY;
   const reflector = new Reflector(geometry, {
-    color: params.color,
+    color: params.color!,
     textureWidth: DEFAULT_TEXTURE_WIDTH,
     textureHeight: DEFAULT_TEXTURE_HEIGHT
   });
@@ -50,4 +50,3 @@ export function inflateMirror(world: HubsWorld, eid: number, params: MirrorParam
   addComponent(world, Mirror, eid);
   return eid;
 }
-

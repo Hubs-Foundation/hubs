@@ -37,7 +37,7 @@ export class DashVideoTexture extends VideoTexture {
     this.player = null; // Set by user later
   }
 
-  dispose() {
+  override dispose() {
     super.dispose();
     if (this.player !== null) {
       this.player.reset();

@@ -56,13 +56,13 @@ export function inflateFog(world: HubsWorld, eid: number, props: FogParams) {
   console.warn(
     "The `fog` component is deprecated. Use the `fogX` properties on the `environment-settings` component instead."
   );
-  inflateEnvironmentSettings(world, eid, {
-    fogType: props.type,
-    fogColor: new Color(props.color),
-    fogNear: props.near,
-    fogFar: props.far,
-    fogDensity: props.density
-  });
+  const env: EnvironmentSettingsParams = {};
+  if (props.type !== undefined) env.fogType = props.type;
+  if (props.color !== undefined) env.fogColor = new Color(props.color);
+  if (props.near !== undefined) env.fogNear = props.near;
+  if (props.far !== undefined) env.fogFar = props.far;
+  if (props.density !== undefined) env.fogDensity = props.density;
+  inflateEnvironmentSettings(world, eid, env);
 }
 
 export interface BackgroundParams {

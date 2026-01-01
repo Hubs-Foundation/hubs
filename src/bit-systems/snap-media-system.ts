@@ -86,7 +86,8 @@ export function* snapMedia(world: HubsWorld, eid: EntityID) {
       sourceObj.getWorldQuaternion(tmpQuat);
       snappedObj.quaternion.copy(tmpQuat);
 
-      const onAnimate = ([pos]: [Vector3]) => {
+      const onAnimate = (values: (Vector3 | number)[]) => {
+        const pos = values[0] as Vector3;
         snappedObj.position.copy(pos);
         snappedObj.matrixNeedsUpdate = true;
       };

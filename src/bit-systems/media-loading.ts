@@ -149,7 +149,8 @@ function resizeAndRecenter(world: HubsWorld, mediaLoaderEid: EntityID, box: Box3
 export function* animateScale(world: HubsWorld, mediaLoaderEid: EntityID) {
   const mediaLoaderObj = world.eid2obj.get(mediaLoaderEid)!;
   const transformObj = mediaLoaderObj.children.at(0)!;
-  const onAnimate = ([scale]: [Vector3]) => {
+  const onAnimate = (values: (Vector3 | number)[]) => {
+    const scale = values[0] as Vector3;
     transformObj.scale.copy(scale);
     transformObj.matrixNeedsUpdate = true;
   };

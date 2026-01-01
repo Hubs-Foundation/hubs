@@ -114,47 +114,49 @@ const enableNetworkDebug = qsTruthy("networkDebug");
 // naturally burn down as we migrate things, so it is not worth going through and changing all of them.
 AFRAME.registerSystem("hubs-systems", {
   init() {
+    const self = this as unknown as HubsSystems;
     waitForDOMContentLoaded().then(() => {
-      this.DOMContentDidLoad = true;
+      self.DOMContentDidLoad = true;
     });
-    this.cursorTogglingSystem = new CursorTogglingSystem();
-    this.interactionSfxSystem = new InteractionSfxSystem();
-    this.superSpawnerSystem = new SuperSpawnerSystem();
-    this.cursorTargettingSystem = new CursorTargettingSystem();
-    this.positionAtBorderSystem = new PositionAtBorderSystem();
-    this.physicsSystem = new PhysicsSystem(this.el.object3D);
-    this.twoPointStretchingSystem = new TwoPointStretchingSystem();
-    this.holdableButtonSystem = new HoldableButtonSystem();
-    this.hoverButtonSystem = new HoverButtonSystem();
-    this.hoverMenuSystem = new HoverMenuSystem();
-    this.hapticFeedbackSystem = new HapticFeedbackSystem();
-    this.audioSystem = new AudioSystem(this.el);
-    this.soundEffectsSystem = new SoundEffectsSystem(this.el);
-    this.scenePreviewCameraSystem = new ScenePreviewCameraSystem();
-    this.spriteSystem = new SpriteSystem(this.el);
-    this.cameraSystem = new CameraSystem(this.el.camera, this.el.renderer);
-    this.drawingMenuSystem = new DrawingMenuSystem(this.el);
-    this.characterController = new CharacterControllerSystem(this.el);
-    this.waypointSystem = new WaypointSystem(this.el, this.characterController);
-    this.cursorPoseTrackingSystem = new CursorPoseTrackingSystem();
-    this.menuAnimationSystem = new MenuAnimationSystem();
-    this.audioSettingsSystem = new AudioSettingsSystem(this.el);
-    this.animationMixerSystem = new AnimationMixerSystem();
-    this.boneVisibilitySystem = new BoneVisibilitySystem();
-    this.uvScrollSystem = new UVScrollSystem();
-    this.shadowSystem = new ShadowSystem(this.el);
-    this.inspectYourselfSystem = new InspectYourselfSystem();
-    this.emojiSystem = new EmojiSystem(this.el);
-    this.audioZonesSystem = new AudioZonesSystem();
-    this.gainSystem = new GainSystem();
-    this.environmentSystem = new EnvironmentSystem(this.el);
-    this.nameTagSystem = new NameTagVisibilitySystem(this.el);
+    self.cursorTogglingSystem = new CursorTogglingSystem();
+    self.interactionSfxSystem = new InteractionSfxSystem();
+    self.superSpawnerSystem = new SuperSpawnerSystem();
+    self.cursorTargettingSystem = new CursorTargettingSystem();
+    self.positionAtBorderSystem = new PositionAtBorderSystem();
+    self.physicsSystem = new PhysicsSystem(self.el.object3D);
+    self.twoPointStretchingSystem = new TwoPointStretchingSystem();
+    self.holdableButtonSystem = new HoldableButtonSystem();
+    self.hoverButtonSystem = new HoverButtonSystem();
+    self.hoverMenuSystem = new HoverMenuSystem();
+    self.hapticFeedbackSystem = new HapticFeedbackSystem();
+    self.audioSystem = new AudioSystem(self.el);
+    self.soundEffectsSystem = new SoundEffectsSystem(self.el);
+    self.scenePreviewCameraSystem = new ScenePreviewCameraSystem();
+    self.spriteSystem = new SpriteSystem(self.el);
+    self.cameraSystem = new CameraSystem(self.el.camera, self.el.renderer);
+    self.drawingMenuSystem = new DrawingMenuSystem(self.el);
+    self.characterController = new CharacterControllerSystem(self.el);
+    self.waypointSystem = new WaypointSystem(self.el, self.characterController);
+    self.cursorPoseTrackingSystem = new CursorPoseTrackingSystem();
+    self.menuAnimationSystem = new MenuAnimationSystem();
+    self.audioSettingsSystem = new AudioSettingsSystem(self.el);
+    self.animationMixerSystem = new AnimationMixerSystem();
+    self.boneVisibilitySystem = new BoneVisibilitySystem();
+    self.uvScrollSystem = new UVScrollSystem();
+    self.shadowSystem = new ShadowSystem(self.el);
+    self.inspectYourselfSystem = new InspectYourselfSystem();
+    self.emojiSystem = new EmojiSystem(self.el);
+    self.audioZonesSystem = new AudioZonesSystem();
+    self.gainSystem = new GainSystem();
+    self.environmentSystem = new EnvironmentSystem(self.el);
+    self.nameTagSystem = new NameTagVisibilitySystem(self.el);
 
-    window.$S = this;
+    window.$S = self;
   },
 
   remove() {
-    this.cursorTargettingSystem.remove();
+    const self = this as unknown as HubsSystems;
+    self.cursorTargettingSystem.remove();
   }
 });
 
@@ -162,7 +164,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   const world = APP.world;
   const sceneEl = AFRAME.scenes[0];
   const aframeSystems = sceneEl.systems;
-  const hubsSystems = aframeSystems["hubs-systems"];
+  const hubsSystems = aframeSystems["hubs-systems"] as HubsSystems;
 
   // TODO does anything actually ever pause the scene?
   if (!sceneEl.isPlaying && !hubsSystems.DOMContentDidLoad) return;
