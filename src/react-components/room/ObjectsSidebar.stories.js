@@ -43,6 +43,7 @@ const objects = [
 
 export const Base = () => (
   <RoomLayout
+    viewport={<div style={{ height: "100vh" }} />}
     sidebar={
       <ObjectsSidebar objectCount={objects.length}>
         {objects.map(object => (
@@ -55,6 +56,7 @@ export const Base = () => (
 
 export const Empty = () => (
   <RoomLayout
+    viewport={<div style={{ height: "100vh" }} />}
     sidebar={
       <ObjectsSidebar objectCount={0}>
         <NoObjects />
@@ -65,6 +67,7 @@ export const Empty = () => (
 
 export const EmptyWithAddObjectsPerms = () => (
   <RoomLayout
+    viewport={<div style={{ height: "100vh" }} />}
     sidebar={
       <ObjectsSidebar objectCount={0}>
         <NoObjects canAddObjects />

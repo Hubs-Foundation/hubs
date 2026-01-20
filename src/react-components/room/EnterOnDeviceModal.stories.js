@@ -19,4 +19,4 @@ export const VrNotSupported = () => (
   <RoomLayout viewport={<EnterOnDeviceModal unsupportedBrowser shortUrl="hub.link" code="IDEB" headsetConnected />} />
 );
 
-export const LoadingCode = () => <RoomLayout viewport={<EnterOnDeviceModal loadingCode />} />;
+export const LoadingCode = () => <RoomLayout viewport={<EnterOnDeviceModal shortUrl="hub.link" loadingCode />} />;

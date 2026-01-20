@@ -22,7 +22,6 @@ export const presets = [
   "text"
 ];
 
-/* eslint-disable-next-line react/display-name */
 export const Button = memo(
   forwardRef(({ as, sm, lg, xl, thin, thick, preset, className, children, ...rest }, ref) => {
     const ButtonComponent = as;

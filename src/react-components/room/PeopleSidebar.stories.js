@@ -70,7 +70,10 @@ const people = [
 ];
 
 export const Base = args => (
-  <RoomLayout sidebar={<PeopleSidebar people={people} canVoiceChat={args.voiceChatEnabled} />} />
+  <RoomLayout
+    viewport={<div style={{ height: "100vh" }} />}
+    sidebar={<PeopleSidebar people={people} canVoiceChat={args.voiceChatEnabled} />}
+  />
 );
 
 Base.args = {

@@ -1,4 +1,3 @@
-/* eslint-disable @calm/react-intl/missing-formatted-message */
 import React from "react";
 import { TextAreaInput } from "./TextAreaInput";
 import { ReactComponent as WandIcon } from "../icons/Wand.svg";
@@ -14,13 +13,14 @@ Text`;
 
 export const All = () => (
   <Column padding>
-    <TextAreaInput />
-    <TextAreaInput placeholder="Placeholder Text" />
-    <TextAreaInput value="Example Text" />
-    <TextAreaInput value={multilineText} />
-    <TextAreaInput value="Invalid Text" invalid />
-    <TextAreaInput value="Disabled Text" disabled />
+    <TextAreaInput id="textarea-1" />
+    <TextAreaInput id="textarea-2" placeholder="Placeholder Text" />
+    <TextAreaInput id="textarea-3" value="Example Text" />
+    <TextAreaInput id="textarea-4" value={multilineText} />
+    <TextAreaInput id="textarea-5" value="Invalid Text" invalid />
+    <TextAreaInput id="textarea-6" value="Disabled Text" disabled />
     <TextAreaInput
+      id="textarea-7"
       placeholder="Search..."
       afterInput={
         <IconButton>
@@ -29,6 +29,7 @@ export const All = () => (
       }
     />
     <TextAreaInput
+      id="textarea-8"
       value={multilineText}
       invalid
       afterInput={
@@ -38,6 +39,7 @@ export const All = () => (
       }
     />
     <TextAreaInput
+      id="textarea-9"
       value={multilineText}
       invalid
       beforeInput={

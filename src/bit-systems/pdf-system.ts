@@ -1,5 +1,5 @@
 import { addComponent, defineQuery, enterQuery, exitQuery, hasComponent, removeComponent } from "bitecs";
-import { GlobalWorkerOptions, PDFPageProxy } from "pdfjs-dist";
+import { getDocument, GlobalWorkerOptions, PDFPageProxy } from "pdfjs-dist";
 import { Object3D } from "three";
 import { HubsWorld } from "../app";
 import { MediaPDF, MediaPDFUpdated, NetworkedPDF, Owned } from "../bit-components";
@@ -24,7 +24,7 @@ export const PDFResourcesMap = (MediaPDF as any).map as Map<EntityID, PDFResourc
  * Then the path to the worker script
  */
 GlobalWorkerOptions.workerSrc =
-  require("!!file-loader?outputPath=assets/js&name=[name]-[hash].js!pdfjs-dist/build/pdf.worker.min.js").default;
+  require("!!file-loader?outputPath=assets/js&name=[name]-[hash].js!pdfjs-dist/build/pdf.worker.min.mjs").default;
 
 type Aspect = { width: number; height: number };
 
@@ -36,7 +36,7 @@ export function* loadPageJob(
   const viewport = page!.getViewport({ scale: 3 });
   (material.map!.image as HTMLCanvasElement).width = viewport.width;
   (material.map!.image as HTMLCanvasElement).height = viewport.height;
-  const renderTask = page!.render({ canvasContext, viewport, intent: "print" });
+  const renderTask = page!.render({ canvasContext, viewport, intent: "print", canvas: (material.map!.image as HTMLCanvasElement) });
   yield renderTask.promise;
   material.map!.needsUpdate = true;
   material.needsUpdate = true;

@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useAccessibleOutlineStyle } from "../src/react-components/input/useAccessibleOutlineStyle";
 import { WrappedIntlProvider } from "../src/react-components/wrapped-intl-provider";
-import { MINIMAL_VIEWPORTS } from "@storybook/addon-viewport";
+import { MINIMAL_VIEWPORTS } from "storybook/viewport";
 import { AVAILABLE_LOCALES } from "../src/assets/locales/locale_config";
 import { setLocale } from "../src/utils/i18n";
 import { themes } from "../src/utils/theme";
@@ -13,12 +13,9 @@ const Layout = ({ children, locale, theme }) => {
 
   useAccessibleOutlineStyle();
 
-  useEffect(
-    () => {
-      setLocale(locale);
-    },
-    [locale]
-  );
+  useEffect(() => {
+    setLocale(locale);
+  }, [locale]);
 
   return <WrappedIntlProvider>{children}</WrappedIntlProvider>;
 };

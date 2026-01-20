@@ -6,7 +6,19 @@ import styles from "./Column.scss";
 /* eslint-disable-next-line react/display-name */
 export const Column = forwardRef(
   (
-    { as: Component, lastChildMargin, className, gap, padding, center, centerMd, grow, overflow, children, ...rest },
+    {
+      as: Component = "div",
+      lastChildMargin = true,
+      className,
+      gap = "md",
+      padding = false,
+      center = false,
+      centerMd = false,
+      grow = false,
+      overflow = false,
+      children,
+      ...rest
+    },
     ref
   ) => {
     const gapClass = gap === true ? styles.mdGap : styles[`${gap}Gap`];
@@ -49,15 +61,4 @@ Column.propTypes = {
   grow: PropTypes.bool,
   lastChildMargin: PropTypes.bool,
   overflow: PropTypes.bool
-};
-
-Column.defaultProps = {
-  as: "div",
-  gap: "md",
-  center: false,
-  centerMd: false,
-  padding: false,
-  grow: false,
-  overflow: false,
-  lastChildMargin: true
 };

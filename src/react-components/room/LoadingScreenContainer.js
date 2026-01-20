@@ -33,7 +33,6 @@ export function LoadingScreenContainer({ onLoaded, scene }) {
             defaultMessage: "You can now set the default locale in your preferences. <a>Read More</a>"
           },
           {
-            // eslint-disable-next-line react/display-name
             a: chunks => (
               <a href="/whats-new" target="_blank">
                 {chunks}

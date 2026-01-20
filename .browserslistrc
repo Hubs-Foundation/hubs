@@ -1,11 +1,11 @@
-last 2 major versions
-not <= 0.5%
-not dead
-# No WebRTC support (including datachannel
-not ios_saf < 11
-not safari < 11
+# Modern browsers - macOS 10.15 (Safari 15.6: 2012 MacBook compat) and iOS 14 (Safari 14.1: iPhone 6S, iPad Air 2 compat) minimum
+chrome >= 105 # Pico XR 4 device browser is 105, Meta Quest 1 is Chrome 112, HTC Vive (XRE|Focus Vision) is 121
+safari >= 14.1
+ios >= 14.5
+firefox >= 91  # Lowered to align with Safari 15 capabilities, bump to 115 (Wolvic on HTC) when possible
+edge >= 105 # last HoloLens 2 Chromium Edge build with working WebXR
+# Exclude legacy browsers
 not ie >= 0
-not edge >= 0
 not ie_mob >= 0
 not and_uc >= 0
 # No WebGL or WebRTC support

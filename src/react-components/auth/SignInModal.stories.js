@@ -44,7 +44,7 @@ export const RoomSubmit = () => (
   <RoomLayout
     modal={
       <SignInModal closeable>
-        <SubmitEmail termsUrl={TERMS} privacyUrl={PRIVACY} />
+        <SubmitEmail termsUrl={TERMS} privacyUrl={PRIVACY} onSubmitEmail={() => console.log("submit email pressed")} />
       </SignInModal>
     }
   />
@@ -54,7 +54,7 @@ export const RoomSubmitNoTOS = () => (
   <RoomLayout
     modal={
       <SignInModal closeable>
-        <SubmitEmail privacyUrl={PRIVACY} />
+        <SubmitEmail privacyUrl={PRIVACY} onSubmitEmail={() => console.log("submit email pressed")} />
       </SignInModal>
     }
   />
@@ -64,7 +64,7 @@ export const RoomSubmitNoPrivacyPolicy = () => (
   <RoomLayout
     modal={
       <SignInModal closeable>
-        <SubmitEmail termsUrl={TERMS} />
+        <SubmitEmail termsUrl={TERMS} onSubmitEmail={() => console.log("submit email pressed")} />
       </SignInModal>
     }
   />
@@ -74,7 +74,7 @@ export const RoomSubmitNoTOSOrPrivacyPolicy = () => (
   <RoomLayout
     modal={
       <SignInModal closeable>
-        <SubmitEmail />
+        <SubmitEmail onSubmitEmail={() => console.log("submit email pressed")} />
       </SignInModal>
     }
   />
@@ -84,7 +84,11 @@ export const RoomWaitForVerification = () => (
   <RoomLayout
     modal={
       <SignInModal closeable>
-        <WaitForVerification email="example@example.com" showNewsletterSignup />
+        <WaitForVerification
+          email="example@example.com"
+          showNewsletterSignup
+          onCancel={() => console.log("cancel pressed")}
+        />
       </SignInModal>
     }
   />
@@ -94,7 +98,7 @@ export const RoomWaitForVerificationNoNewsletterSignup = () => (
   <RoomLayout
     modal={
       <SignInModal closeable>
-        <WaitForVerification email="example@example.com" />
+        <WaitForVerification email="example@example.com" onCancel={() => console.log("cancel pressed")} />
       </SignInModal>
     }
   />

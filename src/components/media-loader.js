@@ -78,6 +78,7 @@ AFRAME.registerComponent("media-loader", {
         .catch(() => {}); //ignore exception, entity might not be networked
     } catch (e) {
       // NAF may not exist on scene landing page
+      console.warn("Networked AFrame not found, but this may be okay depending on the page: ", e);
     }
   },
 

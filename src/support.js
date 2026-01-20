@@ -24,6 +24,7 @@ function syntaxSupported(syntax) {
     eval(syntax);
     return true;
   } catch (e) {
+    console.warn("syntax unsupported: ", e);
     return false;
   }
 }

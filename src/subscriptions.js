@@ -89,6 +89,7 @@ export default class Subscriptions {
       )
         return null;
     } catch (e) {
+      console.warn("failed to set push notification manager permissions state ", e);
       return null; // Chrome can throw here complaining about userVisible if push is not right
     }
     const sub = await this.registration.pushManager.getSubscription();

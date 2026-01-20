@@ -20,11 +20,11 @@ export const Base = () => (
   <RoomLayout
     toolbarCenter={
       <InvitePopoverButton
-        shortUrl="https://hubs.link"
         url={room.url}
         code={room.code}
         embed={room.embed}
         initiallyVisible
+        shareUrlHandler={() => console.log("room URL shared")}
       />
     }
   />
@@ -34,9 +34,12 @@ export const InviteLink = () => (
   <RoomLayout
     toolbarCenter={
       <InvitePopoverButton
+        url={room.url}
         inviteRequired
         initiallyVisible
         inviteUrl="https://demo.hubsfoundation.org/123?hub_invite_id=123"
+        revokeInvite={() => console.log("revoke invite pressed")}
+        shareUrlHandler={() => console.log("room URL shared")}
       />
     }
   />

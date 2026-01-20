@@ -28,7 +28,10 @@ const calculateIconTransform = (function () {
     } else {
       scale = 0.1 + 0.05 * distance;
     }
-    forward.copy(camToWaypoint).projectOnPlane(up.set(0, 1, 0)).normalize();
+    forward
+      .copy(camToWaypoint)
+      .projectOnPlane(up.set(0, 1, 0))
+      .normalize();
 
     return outMat4
       .makeBasis(

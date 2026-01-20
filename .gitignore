@@ -59,6 +59,11 @@ typings/
 
 # Ignore dist folder with webpack build output
 dist/
+dist-types/
+
+# local storybook files
+storybook-static/
+admin/storybook-static/
 
 .DS_Store
 

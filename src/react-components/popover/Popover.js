@@ -34,11 +34,11 @@ export function Popover({
   content: Content,
   children,
   title,
-  showHeader,
-  placement,
-  offsetSkidding,
-  offsetDistance,
-  initiallyVisible,
+  showHeader = true,
+  placement = "auto",
+  offsetSkidding = 0,
+  offsetDistance = 8,
+  initiallyVisible = false,
   disableFullscreen,
   isVisible,
   onChangeVisible,
@@ -178,12 +178,4 @@ Popover.propTypes = {
   isVisible: PropTypes.bool,
   onChangeVisible: PropTypes.func,
   arrowClass: PropTypes.string
-};
-
-Popover.defaultProps = {
-  initiallyVisible: false,
-  placement: "auto",
-  offsetSkidding: 0,
-  offsetDistance: 8,
-  showHeader: true
 };

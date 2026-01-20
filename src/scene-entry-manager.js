@@ -337,7 +337,7 @@ export default class SceneEntryManager {
           // Sometimes dataTransfer text contains a valid URL, so try for that.
           try {
             url = new URL(e.dataTransfer.getData("text")).href;
-          } catch (e) {
+          } catch {
             // Nope, not this time.
           }
         }
@@ -541,8 +541,8 @@ export default class SceneEntryManager {
     const audioStream = audioEl.captureStream
       ? audioEl.captureStream()
       : audioEl.mozCaptureStream
-      ? audioEl.mozCaptureStream()
-      : null;
+        ? audioEl.mozCaptureStream()
+        : null;
 
     if (audioStream) {
       let audioVolume = Number(qs.get("audio_volume") || "1.0");

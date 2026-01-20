@@ -1,7 +1,7 @@
 import React from "react";
 import { Column } from "../layout/Column";
 import { SocialBar } from "../home/SocialBar.js";
-import { INITIAL_VIEWPORTS } from "@storybook/addon-viewport";
+import { INITIAL_VIEWPORTS } from "storybook/viewport";
 
 export default {
   title: "SocialBar",

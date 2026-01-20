@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import "./webxr-bypass-hacks";
 import configs from "./utils/configs";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import React, { Component } from "react";
 import { Route } from "react-router-dom";
 import PropTypes from "prop-types";
@@ -15,7 +15,7 @@ import {
 } from "./utils/ita";
 import { detectIdle } from "./utils/idle-detector";
 import { connectToReticulum } from "hubs/src/utils/phoenix-utils";
-import { AppBar, Admin, Layout, Resource } from "react-admin";
+import { Admin, Layout, Resource, Notification } from "react-admin";
 import { postgrestClient, postgrestAuthenticatior } from "./utils/postgrest-data-provider";
 import { AdminMenu } from "./react-components/admin-menu";
 import { SceneList, SceneEdit } from "./react-components/scenes";
@@ -34,9 +34,10 @@ import { ContentCDN } from "./react-components/content-cdn";
 import { ImportContent } from "./react-components/import-content";
 import { AutoEndSessionDialog } from "./react-components/auto-end-session-dialog";
 import registerTelemetry from "hubs/src/telemetry";
-import { createMuiTheme, withStyles } from "@material-ui/core/styles";
 import { UnauthorizedPage } from "./react-components/unauthorized";
-import { getStore } from "hubs/src/utils/store-instance";
+import { store } from "hubs/src/utils/store-instance";
+import { HiddenAppBar, AdminSidebar } from "./react-components/admin-chrome";
+import { adminTheme } from "./admin-theme";
 
 const qs = new URLSearchParams(location.hash.split("?")[1]);
 
@@ -44,29 +45,34 @@ window.APP = { store: getStore() };
 
 registerTelemetry("/admin", "Hubs Admin");
 
+// Global error handler for JavaScript errors
+window.addEventListener("error", event => {
+  console.error("Global JavaScript Error:", {
+    message: event.message,
+    filename: event.filename,
+    lineno: event.lineno,
+    colno: event.colno,
+    errorMessage: event.error?.message || event.error?.toString(),
+    stack: event.error?.stack
+  });
+});
+
+// Global error handler for unhandled promise rejections
+window.addEventListener("unhandledrejection", event => {
+  console.error("Unhandled Promise Rejection:", {
+    reasonMessage: event.reason?.message || event.reason?.toString() || String(event.reason),
+    stack: event.reason?.stack
+  });
+});
+
+// Custom notification component with extended duration for errors
+const CustomNotification = props => {
+  return <Notification {...props} autoHideDuration={10000} />;
+};
+
 let itaSchemas;
 
-const theme = createMuiTheme({
-  overrides: {
-    MuiDrawer: {
-      docked: {
-        background: "#222222",
-        minHeight: "100vh"
-      }
-    }
-  },
-  palette: {
-    primary: {
-      main: "#1700c7"
-    },
-    secondary: {
-      main: "#000000"
-    }
-  },
-  typography: {
-    fontFamily: "Inter,Arial"
-  }
-});
+const theme = adminTheme;
 
 class AdminUI extends Component {
   static propTypes = {
@@ -118,6 +124,7 @@ class AdminUI extends Component {
               loginPage={false}
               logoutButton={() => <span />}
               theme={theme}
+              notification={CustomNotification}
             >
               <Resource name="pending_scenes" list={PendingSceneList} />
               <Resource
@@ -208,7 +215,9 @@ const mountUI = async (retPhxChannel, customRoutes, layout) => {
     retPhxChannel.socket.disconnect();
   };
 
-  ReactDOM.render(
+  const container = document.getElementById("ui-root");
+  const root = createRoot(container);
+  root.render(
     <IntlProvider locale={lang} messages={messages}>
       <AdminUI
         dataProvider={dataProvider}
@@ -217,20 +226,10 @@ const mountUI = async (retPhxChannel, customRoutes, layout) => {
         layout={layout}
         onEndSession={onEndSession}
       />
-    </IntlProvider>,
-    document.getElementById("ui-root")
+    </IntlProvider>
   );
 };
-const HiddenAppBar = withStyles({
-  hideOnDesktop: {
-    "@media (min-width: 768px) and (min-height: 480px)": {
-      display: "none"
-    }
-  }
-})(props => {
-  const { classes, ...other } = props;
-  return <AppBar {...other} className={classes.hideOnDesktop} />;
-});
+// HiddenAppBar and AdminSidebar imported from ./react-components/admin-chrome
 
 document.addEventListener("DOMContentLoaded", async () => {
   const socket = await connectToReticulum();
@@ -242,6 +241,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       itaSchemas = schemaByCategories(await getItaSchemas());
     } catch (e) {
       // Let the admin console run but skip showing configs.
+      console.warn(
+        "Warning: Couldn't get ita schema (this is expected for Community Edition and can be safely ignored):",
+        e.message || e.toString()
+      );
     }
   }
 
@@ -301,6 +304,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       className="global_background"
       appBar={HiddenAppBar}
       menu={props => <AdminMenu {...props} services={schemaCategories} />}
+      sidebar={AdminSidebar}
     />
   );
 

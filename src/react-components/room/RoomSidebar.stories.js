@@ -42,10 +42,21 @@ const room = {
   }
 };
 
-export const SceneOwner = () => <RoomLayout sidebar={<RoomSidebar accountId="123" room={room} />} />;
+export const SceneOwner = () => (
+  <RoomLayout viewport={<div style={{ height: "100vh" }} />} sidebar={<RoomSidebar accountId="123" room={room} />} />
+);
 
-export const NotSceneOwner = () => <RoomLayout sidebar={<RoomSidebar accountId="456" room={room} />} />;
+export const NotSceneOwner = () => (
+  <RoomLayout viewport={<div style={{ height: "100vh" }} />} sidebar={<RoomSidebar accountId="456" room={room} />} />
+);
 
-export const CanEdit = () => <RoomLayout sidebar={<RoomSidebar accountId="123" room={room} canEdit />} />;
+export const CanEdit = () => (
+  <RoomLayout
+    viewport={<div style={{ height: "100vh" }} />}
+    sidebar={<RoomSidebar accountId="123" room={room} canEdit />}
+  />
+);
 
-export const NotLoggedIn = () => <RoomLayout sidebar={<RoomSidebar room={room} />} />;
+export const NotLoggedIn = () => (
+  <RoomLayout viewport={<div style={{ height: "100vh" }} />} sidebar={<RoomSidebar room={room} />} />
+);

@@ -1,5 +1,6 @@
 /* eslint-disable @calm/react-intl/missing-formatted-message */
 import React from "react";
+import { Column } from "../layout/Column";
 import { RoomLayout } from "../layout/RoomLayout";
 import { ReactComponent as PinIcon } from "../icons/Pin.svg";
 import { ReactComponent as LinkIcon } from "../icons/Link.svg";
@@ -16,24 +17,26 @@ export const Base = () => (
   <RoomLayout
     objectFocused
     viewport={
-      <ObjectMenu title="Object" currentObjectIndex={1} objectCount={12}>
-        <ObjectMenuButton>
-          <PinIcon />
-          <span>Pin</span>
-        </ObjectMenuButton>
-        <ObjectMenuButton>
-          <LinkIcon />
-          <span>Link</span>
-        </ObjectMenuButton>
-        <ObjectMenuButton>
-          <GoToIcon />
-          <span>View</span>
-        </ObjectMenuButton>
-        <ObjectMenuButton>
-          <DeleteIcon />
-          <span>Delete</span>
-        </ObjectMenuButton>
-      </ObjectMenu>
+      <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
+        <ObjectMenu title="Object" currentObjectIndex={1} objectCount={12}>
+          <ObjectMenuButton>
+            <PinIcon />
+            <span>Pin</span>
+          </ObjectMenuButton>
+          <ObjectMenuButton>
+            <LinkIcon />
+            <span>Link</span>
+          </ObjectMenuButton>
+          <ObjectMenuButton>
+            <GoToIcon />
+            <span>View</span>
+          </ObjectMenuButton>
+          <ObjectMenuButton>
+            <DeleteIcon />
+            <span>Delete</span>
+          </ObjectMenuButton>
+        </ObjectMenu>
+      </div>
     }
   />
 );
@@ -42,25 +45,31 @@ export const WithSidebarOpen = () => (
   <RoomLayout
     objectFocused
     viewport={
-      <ObjectMenu title="Object" currentObjectIndex={1} objectCount={12}>
-        <ObjectMenuButton>
-          <PinIcon />
-          <span>Pin</span>
-        </ObjectMenuButton>
-        <ObjectMenuButton>
-          <LinkIcon />
-          <span>Link</span>
-        </ObjectMenuButton>
-        <ObjectMenuButton>
-          <GoToIcon />
-          <span>View</span>
-        </ObjectMenuButton>
-        <ObjectMenuButton>
-          <DeleteIcon />
-          <span>Delete</span>
-        </ObjectMenuButton>
-      </ObjectMenu>
+      <div style={{ position: "relative", width: "100vw", height: "100vh" }}>
+        <ObjectMenu title="Object" currentObjectIndex={1} objectCount={12}>
+          <ObjectMenuButton>
+            <PinIcon />
+            <span>Pin</span>
+          </ObjectMenuButton>
+          <ObjectMenuButton>
+            <LinkIcon />
+            <span>Link</span>
+          </ObjectMenuButton>
+          <ObjectMenuButton>
+            <GoToIcon />
+            <span>View</span>
+          </ObjectMenuButton>
+          <ObjectMenuButton>
+            <DeleteIcon />
+            <span>Delete</span>
+          </ObjectMenuButton>
+        </ObjectMenu>
+      </div>
     }
-    sidebar={<Sidebar title="Sidebar" />}
+    sidebar={
+      <Sidebar title="Sidebar">
+        <Column padding>Test</Column>
+      </Sidebar>
+    }
   />
 );
