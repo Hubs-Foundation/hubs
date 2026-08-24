@@ -1,0 +1,8 @@
+on:
+  schedule:
+   - cron: "0 0 1 * *"
+  workflow_dispatch:
+
+jobs:
+  release_note:
+    uses: mozilla/hubs-ops/.github/workflows/changelog.yml@feature/changelog
