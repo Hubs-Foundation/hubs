@@ -145,6 +145,8 @@ export const SCHEMA = {
         disableStrafing: { type: "bool", default: false },
         disableTeleporter: { type: "bool", default: false },
         disableAutoPixelRatio: { type: "bool", default: false },
+        enablePointerlock: { type: "bool", default: false },
+        enablePointerlockRawInput: { type: "bool", default: false },
         movementSpeedModifier: { type: "number", default: 1 },
         disableEchoCancellation: { type: "bool", default: isFirefoxReality },
         disableNoiseSuppression: { type: "bool", default: isFirefoxReality },
