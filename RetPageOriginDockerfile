@@ -2,7 +2,7 @@
 # this dockerfile produces image/container that serves customly packaged hubs and admin static files
 # the result container should serve reticulum as "hubs_page_origin" and "admin_page_origin" on (path) "/hubs/pages"
 ###
-from node:22 as builder
+from node:24 as builder
 env QT_QPA_PLATFORM offscreen
 # Detect architecture and install PhantomJS manually from Ubuntu archive
 run apt update && apt -y install wget && \
@@ -23,9 +23,9 @@ copy admin/package-lock.json admin/
 run cd admin && npm ci --legacy-peer-deps && cd ..
 copy . .
 env BASE_ASSETS_PATH="{{rawhubs-base-assets-path}}"
-run npm run build 
+run npm run build
 run cd admin && npm run build && cp -R dist/* ../dist && cd ..
-run mkdir -p dist/pages && mv dist/*.html dist/pages && mv dist/hub.service.js dist/pages && mv dist/schema.toml dist/pages          
+run mkdir -p dist/pages && mv dist/*.html dist/pages && mv dist/hub.service.js dist/pages && mv dist/schema.toml dist/pages
 run mkdir /hubs/rawhubs && mv dist/pages /hubs/rawhubs && mv dist/assets /hubs/rawhubs && mv dist/favicon.ico /hubs/rawhubs/pages
 
 from alpine/openssl as ssl

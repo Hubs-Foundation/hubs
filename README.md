@@ -52,6 +52,9 @@ In unusual situations, you can suppress the checks by adding the flag `-n` to yo
 
 To run the checks *before* you commit, run `npm run test`.
 
+Note that we've set *one week* as the minimum amount of time that must have passed since a dependency has been released, before it may be pulled in.
+This helps to guard against supply-chain attacks.
+
 Contributors are expected to abide by the project's [Code of Conduct](./CODE_OF_CONDUCT.md) and to be respectful of the project and people working on it.
 
 ## Additional Resources

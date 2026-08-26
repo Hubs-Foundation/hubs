@@ -9,8 +9,8 @@
     "url": "https://github.com/Hubs-Foundation/hubs.git"
   },
   "engines": {
-    "node": ">=22.0.1",
-    "npm": ">=10.0.1"
+    "node": ">=24.0.2",
+    "npm": ">=11.10.0"
   },
   "scripts": {
     "start": "webpack serve --mode=development --env hubsCloudDev=1",

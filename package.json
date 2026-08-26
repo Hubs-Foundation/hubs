@@ -9,6 +9,10 @@
     "type": "git",
     "url": "https://github.com/Hubs-Foundation/hubs.git"
   },
+  "engines": {
+    "node": ">=24.0.2",
+    "npm": ">=11.10.0"
+  },
   "bugs": {
     "url": "https://github.com/Hubs-Foundation/hubs/issues"
   },
