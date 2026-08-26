@@ -177,17 +177,23 @@ AvatarLink.propTypes = {
   classes: PropTypes.object
 };
 
-export const IdentityEditLink = withStyles(styles)(({ record = {}, classes }) => (
-  <a href={`#/identities/${record.id}`} className={classes.fieldLink}>
-    Edit Identity
-  </a>
-));
+export const IdentityCreateLink = withStyles(styles)(({ record, classes }) => {
+  if (!record || !record.id) {i
+    console.warn("Missing record.id in IdentityCreateLink");
+    return (
+      <span className={classes.fieldLink} style={{ opacity: 0.5 }}>
+        Create Identity
+      </span>
+    );
+  }
 
-export const IdentityCreateLink = withStyles(styles)(({ record, classes }) => (
-  <a href={`#/identities/create?account_id=${record.id}`} className={classes.fieldLink}>
-    Create Identity
-  </a>
-));
+  return (
+    <a href={`#/identities/create?account_id=${record.id}`} className={classes.fieldLink}>
+      Create Identity
+    </a>
+  );
+});
+
 
 SceneLink.propTypes = {
   source: PropTypes.string.isRequired,
