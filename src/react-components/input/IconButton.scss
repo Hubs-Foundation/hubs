@@ -9,6 +9,7 @@
   font-size: theme.$font-size-xs;
   font-weight: theme.$font-weight-bold;
   cursor: pointer;
+  justify-content: end;
 
   svg {
     color: theme.$text1-color;
