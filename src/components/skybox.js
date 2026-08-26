@@ -475,8 +475,7 @@ AFRAME.registerComponent("skybox", {
       this.el.setObject3D("light-probe", this.sky.generateLightProbe(this.el.sceneEl.renderer));
     }
 
-    // TODO if we care about dynamic skybox changes we should also update the enviornment map here
-    //
+    this.el.sceneEl.object3D.environment = this.sky.generateEnvironmentMap(this.el.sceneEl.renderer);
   },
 
   remove() {
