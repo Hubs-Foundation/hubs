@@ -433,6 +433,10 @@ const preferenceLabels = defineMessages({
     id: "preferences-screen.preference.disable-teleporter",
     defaultMessage: "Disable teleporter"
   },
+  disableVRLookUpMenu: {
+    id: "preferences-screen.preference.disable-vr-look-up-menu",
+    defaultMessage: "Disable VR look-up menu"
+  },
   movementSpeedModifier: {
     id: "preferences-screen.preference.movement-speed-modifier",
     defaultMessage: "Movement speed modifier"
@@ -1081,6 +1085,10 @@ class PreferencesScreen extends Component {
           },
           {
             key: "disableTeleporter",
+            prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
+          },
+          {
+            key: "disableVRLookUpMenu",
             prefType: PREFERENCE_LIST_ITEM_TYPE.CHECK_BOX
           },
           {

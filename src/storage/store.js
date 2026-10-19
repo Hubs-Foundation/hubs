@@ -144,6 +144,7 @@ export const SCHEMA = {
         disableBackwardsMovement: { type: "bool", default: false },
         disableStrafing: { type: "bool", default: false },
         disableTeleporter: { type: "bool", default: false },
+        disableVRLookUpMenu: { type: "bool", default: false },
         disableAutoPixelRatio: { type: "bool", default: false },
         movementSpeedModifier: { type: "number", default: 1 },
         disableEchoCancellation: { type: "bool", default: isFirefoxReality },
