@@ -32,6 +32,13 @@ AFRAME.registerComponent("hud-controller", {
 
   tick() {
     const hud = this.el.object3D;
+
+    if (this.store.state.preferences.disableVRLookUpMenu) {
+      hud.visible = false;
+      hud.matrixNeedsUpdate = true;
+      return;
+    }
+
     const head = this.data.head.object3DMap.camera;
 
     const { offset, lookCutoff, animRange, yawCutoff } = this.data;
